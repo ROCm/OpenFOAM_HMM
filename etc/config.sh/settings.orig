@@ -209,10 +209,6 @@ Icc*)      # Intel compilers
     export WM_CC='icc'
     export WM_CXX='icpc'
     ;;
-Arm*)     # Arm system compilers
-    export WM_CC='armclang'
-    export WM_CXX='armclang++'
-    ;;
 esac
 
 # Clear prior to sourcing

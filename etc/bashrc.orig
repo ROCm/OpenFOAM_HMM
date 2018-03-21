@@ -3,21 +3,21 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
 #     <http://www.gnu.org/licenses/>.
 #
 # File
-#     etc/cshrc
+#     etc/bashrc
 #
 # Description
-#     Set OpenFOAM environment for C-shell (csh, tcsh).
-#     Source manually or from the ~/.login or ~/.cshrc files.
+#     Set OpenFOAM environment for POSIX shell (eg, bash,dash,zsh,...)
+#     Source manually or from the ~/.profile or ~/.bashrc files.
 #
 # Note
-#     Many environment variables can be overridden using a <prefs.csh> file
+#     Many environment variables can be overridden using a <prefs.sh> file
 #     from one of these locations:
 #     * user-specific:
 #         * ~/.OpenFOAM/$WM_PROJECT_VERSION
@@ -28,166 +28,123 @@
 #     * general:
 #         * $WM_PROJECT_DIR/etc
 #
-#     Any changes made to this cshrc file may be lost with the next upgrade.
+#     Any changes made to this bashrc file may be lost with the next upgrade.
 #
 #------------------------------------------------------------------------------
 
-setenv WM_PROJECT OpenFOAM
-setenv WM_PROJECT_VERSION plus
+export WM_PROJECT=OpenFOAM
+export WM_PROJECT_VERSION=plus.develop
 
 # [FOAM_INST_DIR] - parent directory containing the OpenFOAM installation.
-# \- When this file is located as $WM_PROJECT_DIR/etc/cshrc, the next lines
-#    should work when sourced by CSH or TCSH shells. If this however fails,
+# \- When this file is located as $WM_PROJECT_DIR/etc/bashrc, the next lines
+#    should work when sourced by BASH or ZSH shells. If this however fails,
 #    set one of the fallback values to an appropriate path.
 # --
-setenv FOAM_INST_DIR `lsof +p $$ |& \
-    sed -n -e 's@[^/]*@@' -e 's@/'$WM_PROJECT'[^/]*/etc/cshrc.*@@p'`
-# setenv FOAM_INST_DIR  $HOME/$WM_PROJECT
-# setenv FOAM_INST_DIR  /opt/$WM_PROJECT
-# setenv FOAM_INST_DIR  /usr/local/$WM_PROJECT
+rc="${BASH_SOURCE:-${ZSH_NAME:+$0}}"
+[ -n "$rc" ] && FOAM_INST_DIR=$(\cd $(dirname $rc)/../.. && \pwd -L) || \
+FOAM_INST_DIR=$HOME/$WM_PROJECT
+# FOAM_INST_DIR=/opt/$WM_PROJECT
+# FOAM_INST_DIR=/usr/local/$WM_PROJECT
 #
 # END OF (NORMAL) USER EDITABLE PART
 ################################################################################
+: # Extra safety - if the user commented out all fallback values
+export FOAM_INST_DIR
+unset rc
 
 # Default environment variables.
 # Can override with a <prefs.sh> file instead of editing below.
 
 # [WM_COMPILER_TYPE] - Compiler location:
 # = system | ThirdParty
-setenv WM_COMPILER_TYPE system
+export WM_COMPILER_TYPE=system
 
 # [WM_COMPILER] - Compiler:
 # = Gcc | Gcc4[8-9] | Gcc5[1-5] | Gcc6[1-4] | Gcc7[1-3] | GccKNL |
-#   Clang | Clang3[8-9] | Clang[45]0 | Icc | IccKNL | Cray | Arm
-setenv WM_COMPILER Gcc
+#   Clang | Clang3[8-9] | Clang[45]0 | Icc | IccKNL | Cray
+export WM_COMPILER=Gcc
 
 # [WM_ARCH_OPTION] - Memory addressing:
 # = 32 | 64
 #   * on a 64-bit OS this can be 32 or 64
 #   * on a 32-bit OS, it is always 32-bit and this option is ignored
-setenv WM_ARCH_OPTION 64
+export WM_ARCH_OPTION=64
 
 # [WM_PRECISION_OPTION] - Floating-point precision:
 # = DP | SP
-setenv WM_PRECISION_OPTION DP
+export WM_PRECISION_OPTION=DP
 
 # [WM_LABEL_SIZE] - Label size in bits:
 # = 32 | 64
-setenv WM_LABEL_SIZE 32
+export WM_LABEL_SIZE=32
 
 # [WM_COMPILE_OPTION] - Optimised, debug, profiling:
 # = Opt | Debug | Prof
-setenv WM_COMPILE_OPTION Opt
+export WM_COMPILE_OPTION=Opt
 
 # [WM_MPLIB] - MPI implementation:
 # = SYSTEMOPENMPI | OPENMPI | SYSTEMMPI | MPI | MPICH | MPICH-GM |
 #   HPMPI | CRAY-MPICH | FJMPI | QSMPI | SGIMPI | INTELMPI | USERMPI
-setenv WM_MPLIB SYSTEMOPENMPI
+export WM_MPLIB=SYSTEMOPENMPI
 
 
 # [FOAM_SIGFPE] - Trapping of floating-point exceptions.
 #               - overrides the 'trapFpe' controlDict entry
 # = true | false
-#setenv FOAM_SIGFPE true
+#export FOAM_SIGFPE=true
 
 # [FOAM_SETNAN] - Memory initialisation as NaN
 #               - overrides the 'setNaN' controlDict entry
 # = true | false
-#setenv FOAM_SETNAN false
+#export FOAM_SETNAN=false
 
 # [WM_OSTYPE] - Operating System Type:
 # = POSIX
-#setenv WM_OSTYPE POSIX
+#export WM_OSTYPE=POSIX
 
 ################################################################################
 
 # Old directories to be cleaned from PATH, LD_LIBRARY_PATH
-set foamOldDirs=
-if ( $?WM_PROJECT_DIR ) then
-   set foamOldDirs="$foamOldDirs $WM_PROJECT_DIR"
-endif
-if ( $?WM_THIRD_PARTY_DIR ) then
-   set foamOldDirs="$foamOldDirs $WM_THIRD_PARTY_DIR"
-endif
-if ( $?WM_PROJECT ) then
-   set foamOldDirs="$foamOldDirs $HOME/$WM_PROJECT/$LOGNAME"
-endif
-if ( $?FOAM_SITE_APPBIN ) then
-   set foamOldDirs="$foamOldDirs $FOAM_SITE_APPBIN"
-endif
-if ( $?FOAM_SITE_LIBBIN ) then
-   set foamOldDirs="$foamOldDirs $FOAM_SITE_LIBBIN"
-endif
+foamOldDirs="$WM_PROJECT_DIR $WM_THIRD_PARTY_DIR \
+    $HOME/$WM_PROJECT/$USER $FOAM_USER_APPBIN $FOAM_USER_LIBBIN \
+    $WM_PROJECT_SITE $FOAM_SITE_APPBIN $FOAM_SITE_LIBBIN"
 
 # Location of installation and third-party software
-setenv WM_PROJECT_INST_DIR $FOAM_INST_DIR
-setenv WM_PROJECT_DIR      $WM_PROJECT_INST_DIR/$WM_PROJECT-$WM_PROJECT_VERSION
-setenv WM_THIRD_PARTY_DIR  $WM_PROJECT_INST_DIR/ThirdParty-$WM_PROJECT_VERSION
+export WM_PROJECT_INST_DIR=$FOAM_INST_DIR
+export WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/$WM_PROJECT-$WM_PROJECT_VERSION
+export WM_THIRD_PARTY_DIR=$WM_PROJECT_INST_DIR/ThirdParty-$WM_PROJECT_VERSION
 
 # [WM_PROJECT_SITE] - Location of site-specific (group) files
 # default (unset) implies WM_PROJECT_INST_DIR/site
-if ( $?WM_PROJECT_SITE ) then
-    set foamOldDirs="$WM_PROJECT_SITE $foamOldDirs"
-    if ( ! -d "$WM_PROJECT_SITE" ) unsetenv WM_PROJECT_SITE
+if [ -d "$WM_PROJECT_SITE" ]
+then
+    export WM_PROJECT_SITE
 else
-    unsetenv WM_PROJECT_SITE
-endif
+    unset WM_PROJECT_SITE
+fi
 
 # [WM_PROJECT_USER_DIR] - Location of user files
-setenv WM_PROJECT_USER_DIR $HOME/$WM_PROJECT/$LOGNAME-$WM_PROJECT_VERSION
+export WM_PROJECT_USER_DIR=$HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION
 
-# Load shell "functions" (actually aliases)
-source $WM_PROJECT_DIR/etc/config.csh/functions
+# Load shell functions
+. $WM_PROJECT_DIR/etc/config.sh/functions
 
 # Override definitions via prefs, with 'other' first so the sys-admin
 # can provide base values independent of WM_PROJECT_SITE
-_foamEtc -mode=o  prefs.csh
-_foamEtc -mode=ug prefs.csh
+_foamEtc -mode=o  prefs.sh
+_foamEtc -mode=ug prefs.sh
 
 # Evaluate command-line parameters and record settings for later.
 # These can be used to set/unset values, specify additional files etc.
-setenv FOAM_SETTINGS "${*}"
-while ( $#argv > 0 )
-    switch ($argv[1])
-    case -*:
-        # Stray option (not meant for us here) -> get out
-        break
-        breaksw
-    case *=:
-        # name=       -> unsetenv name
-        if ($?FOAM_VERBOSE && $?prompt) echo "unsetenv $argv[1]:s/=//"
-        eval "unsetenv $argv[1]:s/=//"
-        breaksw
-    case *=*:
-        # name=value  -> setenv name value
-        if ($?FOAM_VERBOSE && $?prompt) echo "setenv $argv[1]:s/=/ /"
-        eval "setenv $argv[1]:s/=/ /"
-        breaksw
-    default:
-        # Filename: source it
-        if ( -f "$argv[1]" ) then
-            if ($?FOAM_VERBOSE && $?prompt) echo "Using: $argv[1]"
-            source "$argv[1]"
-        else
-            _foamEtc -silent "$argv[1]"
-        endif
-        breaksw
-    endsw
-    shift
-end
-
+export FOAM_SETTINGS="$@"
+_foamEval $@
 
 # Clean standard environment variables (PATH, MANPATH, LD_LIBRARY_PATH)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Prevent local variables from shadowing setenv variables
-unset PATH MANPATH LD_LIBRARY_PATH LD_PRELOAD
-if (! $?LD_LIBRARY_PATH ) setenv LD_LIBRARY_PATH
-if (! $?MANPATH ) setenv MANPATH
-
+export PATH MANPATH LD_LIBRARY_PATH
 _foamClean PATH "$foamOldDirs"
 _foamClean MANPATH "$foamOldDirs"
 _foamClean LD_LIBRARY_PATH "$foamOldDirs"
-
 
 # Setup for OpenFOAM compilation etc
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -196,47 +153,49 @@ _foamEtc -config  settings
 # Setup for third-party packages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 _foamEtc -config  mpi
-_foamEtc -config  paraview -- "$FOAM_SETTINGS"  # Pass through for evaluation
+_foamEtc -config  paraview -- $@        # Pass through for evaluation
 _foamEtc -config  vtk
 _foamEtc -config  ensight
+_foamEtc -config  gperftools
 ## _foamEtc -config  ADIOS
 _foamEtc -config  CGAL
+_foamEtc -config  scotch
 _foamEtc -config  FFTW
 
 # Interactive shell
-if ($?prompt) then
+if /usr/bin/tty -s 2>/dev/null
+then
     _foamEtc -config  aliases
-    _foamEtc -config  tcsh_completion
-endif
+    [ "${BASH_VERSINFO:-0}" -ge 4 ] && _foamEtc -config  bash_completion
+fi
 
 
 # Clean environment paths again. Only remove duplicates
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+export PATH MANPATH LD_LIBRARY_PATH
 
 _foamClean PATH
 _foamClean MANPATH
 _foamClean LD_LIBRARY_PATH
 
 # Add trailing ':' for system manpages
-if ( $?MANPATH ) then
-    setenv MANPATH "${MANPATH}:"
-endif
+if [ -n "$MANPATH" ]
+then
+    MANPATH="${MANPATH}:"
+fi
 
-if ( $?LD_PRELOAD ) then
+if [ -n "$LD_PRELOAD" ]
+then
+    export LD_PRELOAD
     _foamClean LD_PRELOAD
-endif
+fi
 
 
 # Cleanup temporary information
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# Unload shell "functions"
-unalias _foamClean
-unalias _foamEtc
-unalias _foamAddPath
-unalias _foamAddMan
-unalias _foamAddLib
-unalias _foamAddLibAuto
+# Unload shell functions
+. $WM_PROJECT_DIR/etc/config.sh/functions
 
 # Variables (done as the last statement for a clean exit code)
 unset cleaned foamOldDirs

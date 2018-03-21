@@ -212,6 +212,10 @@ case Icc*:    # Intel compilers
     setenv WM_CC 'icc'
     setenv WM_CXX 'icpc'
     breaksw
+case Arm*:    # Arm system compilers
+    setenv WM_CC 'armclang'
+    setenv WM_CXX 'armclang++'
+    breaksw
 endsw
 
 # Clear prior to sourcing
