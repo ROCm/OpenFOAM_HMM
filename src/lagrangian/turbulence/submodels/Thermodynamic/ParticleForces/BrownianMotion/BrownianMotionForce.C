@@ -76,7 +76,7 @@ Foam::BrownianMotionForce<CloudType>::kModel() const
         << "Database objects include: " << obr.sortedToc()
         << abort(FatalError);
 
-    return tmp<volScalarField>();
+    return nullptr;
 }
 
 

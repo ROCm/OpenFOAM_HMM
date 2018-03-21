@@ -148,7 +148,7 @@ public:
         virtual tmp<GeometricField<Type, faePatchField, edgeMesh>>
         correction(const GeometricField<Type, faPatchField, areaMesh>&) const
         {
-            return tmp<GeometricField<Type, faePatchField, edgeMesh>>();
+            return nullptr;
         }
 
         //- Return the lnGrad of the given cell field

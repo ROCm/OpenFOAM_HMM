@@ -97,7 +97,7 @@ Foam::LduMatrix<Type, DType, LUType>::preconditioner::New
            "no diagonal or off-diagonal coefficient"
         << exit(FatalIOError);
 
-    return autoPtr<typename LduMatrix<Type, DType, LUType>::preconditioner>();
+    return nullptr;
 }
 
 

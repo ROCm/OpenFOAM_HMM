@@ -116,7 +116,7 @@ Foam::fv::solidificationMeltingSource::Cp() const
         }
     }
 
-    return tmp<volScalarField>();
+    return nullptr;
 }
 
 
@@ -128,10 +128,8 @@ Foam::vector Foam::fv::solidificationMeltingSource::g() const
             mesh_.lookupObject<uniformDimensionedVectorField>("g");
         return value.value();
     }
-    else
-    {
-        return coeffs_.lookup("g");
-    }
+
+    return coeffs_.lookup("g");
 }
 
 

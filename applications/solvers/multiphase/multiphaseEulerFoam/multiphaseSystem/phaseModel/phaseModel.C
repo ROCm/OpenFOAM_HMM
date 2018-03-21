@@ -205,7 +205,7 @@ Foam::phaseModel::~phaseModel()
 Foam::autoPtr<Foam::phaseModel> Foam::phaseModel::clone() const
 {
     NotImplemented;
-    return autoPtr<phaseModel>();
+    return nullptr;
 }
 
 

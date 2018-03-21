@@ -423,7 +423,7 @@ public:
                 << "Unable to retrieve turbulence model from the mesh "
                 << "database" << exit(FatalError);
 
-            return tmp<surfaceScalarField>();
+            return nullptr;
         }
 
 
@@ -500,7 +500,7 @@ public:
                 return (bf*tScheme2_().correction(vf));
             }
 
-            return tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>();
+            return nullptr;
         }
 };
 

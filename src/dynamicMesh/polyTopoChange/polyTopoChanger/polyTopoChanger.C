@@ -283,11 +283,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh
         mesh_.updateMesh(topoChangeMap());
         return topoChangeMap;
     }
-    else
-    {
-        mesh_.topoChanging(false);
-        return autoPtr<mapPolyMesh>();
-    }
+
+    mesh_.topoChanging(false);
+    return nullptr;
 }
 
 

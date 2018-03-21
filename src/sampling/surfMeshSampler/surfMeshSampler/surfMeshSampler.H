@@ -181,7 +181,7 @@ public:
         autoPtr<surfMeshSampler> clone() const
         {
             NotImplemented;
-            return autoPtr<surfMeshSampler>();
+            return nullptr;
         }
 
 

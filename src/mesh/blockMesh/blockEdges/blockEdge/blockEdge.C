@@ -67,7 +67,7 @@ Foam::blockEdge::blockEdge
 Foam::autoPtr<Foam::blockEdge> Foam::blockEdge::clone() const
 {
     NotImplemented;
-    return autoPtr<blockEdge>();
+    return nullptr;
 }
 
 

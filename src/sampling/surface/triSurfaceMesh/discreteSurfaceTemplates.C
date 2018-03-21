@@ -120,10 +120,8 @@ Foam::discreteSurface::sampleType
         const VolFieldType& fld = mesh().lookupObject<VolFieldType>(fieldName);
         return sampleField(fld);
     }
-    else
-    {
-        return tmp<Field<Type>>();
-    }
+
+    return nullptr;
 }
 
 

@@ -103,7 +103,7 @@ public:
         ) const
         {
             NotImplemented;
-            return tmp<scalarField>();
+            return nullptr;
         }
 
         //- Sample field on surface
@@ -119,7 +119,7 @@ public:
         ) const
         {
             NotImplemented;
-            return tmp<sphericalTensorField>();
+            return nullptr;
         }
 
         //- Sample field on surface
@@ -129,7 +129,7 @@ public:
         ) const
         {
             NotImplemented;
-            return tmp<symmTensorField>();
+            return nullptr;
         }
 
         //- Sample field on surface
@@ -139,7 +139,7 @@ public:
         ) const
         {
             NotImplemented;
-            return tmp<tensorField>();
+            return nullptr;
         }
 
         //- Interpolate field on surface
@@ -149,7 +149,7 @@ public:
         ) const
         {
             NotImplemented;
-            return tmp<scalarField>();
+            return nullptr;
         }
 
         //- Interpolate field on surface
@@ -165,7 +165,7 @@ public:
         ) const
         {
             NotImplemented;
-            return tmp<sphericalTensorField>();
+            return nullptr;
         }
 
         //- Interpolate field on surface
@@ -175,7 +175,7 @@ public:
         ) const
         {
             NotImplemented;
-            return tmp<symmTensorField>();
+            return nullptr;
         }
 
         //- Interpolate field on surface
@@ -185,7 +185,7 @@ public:
         ) const
         {
             NotImplemented;
-            return tmp<tensorField>();
+            return nullptr;
         }
 };
 

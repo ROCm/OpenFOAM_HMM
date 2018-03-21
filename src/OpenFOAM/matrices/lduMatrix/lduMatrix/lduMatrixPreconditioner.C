@@ -138,7 +138,7 @@ Foam::lduMatrix::preconditioner::New
            "no diagonal or off-diagonal coefficient"
         << exit(FatalIOError);
 
-    return autoPtr<lduMatrix::preconditioner>();
+    return nullptr;
 }
 
 

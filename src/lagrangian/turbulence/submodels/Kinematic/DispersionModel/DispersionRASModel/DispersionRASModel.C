@@ -53,7 +53,7 @@ Foam::DispersionRASModel<CloudType>::kModel() const
         << "Database objects include: " << obr.sortedToc()
         << abort(FatalError);
 
-    return tmp<volScalarField>();
+    return nullptr;
 }
 
 
@@ -81,7 +81,7 @@ Foam::DispersionRASModel<CloudType>::epsilonModel() const
         << "Database objects include: " << obr.sortedToc()
         << abort(FatalError);
 
-    return tmp<volScalarField>();
+    return nullptr;
 }
 
 

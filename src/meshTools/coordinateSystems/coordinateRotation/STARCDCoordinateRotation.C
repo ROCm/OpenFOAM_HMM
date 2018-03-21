@@ -71,7 +71,7 @@ Foam::tmp<Foam::vectorField> Foam::STARCDCoordinateRotation::transform
 ) const
 {
     NotImplemented;
-    return tmp<vectorField>();
+    return nullptr;
 }
 
 
@@ -81,7 +81,7 @@ Foam::tmp<Foam::vectorField> Foam::STARCDCoordinateRotation::invTransform
 ) const
 {
     NotImplemented;
-    return tmp<vectorField>();
+    return nullptr;
 }
 
 
@@ -97,8 +97,8 @@ Foam::tmp<Foam::tensorField> Foam::STARCDCoordinateRotation::transformTensor
     const tensorField& st
 ) const
 {
-     NotImplemented;
-    return tmp<tensorField>();
+    NotImplemented;
+    return nullptr;
 }
 
 
@@ -118,7 +118,7 @@ Foam::tmp<Foam::tensorField> Foam::STARCDCoordinateRotation::transformTensor
 ) const
 {
     NotImplemented;
-    return tmp<tensorField>();
+    return nullptr;
 }
 
 

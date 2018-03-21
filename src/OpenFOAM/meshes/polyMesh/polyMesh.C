@@ -152,7 +152,7 @@ Foam::autoPtr<Foam::labelIOList> Foam::polyMesh::readTetBasePtIs() const
         return autoPtr<labelIOList>::New(io);
     }
 
-    return autoPtr<labelIOList>();
+    return nullptr;
 }
 
 

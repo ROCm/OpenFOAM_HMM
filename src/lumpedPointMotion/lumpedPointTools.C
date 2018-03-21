@@ -62,7 +62,7 @@ namespace Foam
             );
         }
 
-        return autoPtr<GeoFieldType>();
+        return nullptr;
     }
 }
 

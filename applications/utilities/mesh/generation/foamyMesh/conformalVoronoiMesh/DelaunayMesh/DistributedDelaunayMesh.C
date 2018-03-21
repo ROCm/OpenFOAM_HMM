@@ -794,14 +794,12 @@ Foam::DistributedDelaunayMesh<Triangulation>::distribute
 {
     if (!Pstream::parRun())
     {
-        return autoPtr<mapDistribute>();
+        return nullptr;
     }
 
     distributeBoundBoxes(decomposition.procBounds());
 
-    autoPtr<mapDistribute> mapDist = decomposition.distributePoints(points);
-
-    return mapDist;
+    return decomposition.distributePoints(points);
 }
 
 

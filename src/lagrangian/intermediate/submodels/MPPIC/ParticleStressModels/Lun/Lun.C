@@ -109,7 +109,7 @@ Foam::ParticleStressModels::Lun::dTaudTheta
 ) const
 {
     NotImplemented;
-    return tmp<Field<scalar>>();
+    return nullptr;
 }
 
 

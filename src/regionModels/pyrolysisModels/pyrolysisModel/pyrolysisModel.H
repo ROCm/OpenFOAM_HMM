@@ -156,7 +156,7 @@ public:
         autoPtr<pyrolysisModel> clone() const
         {
             NotImplemented;
-            return autoPtr<pyrolysisModel>();
+            return nullptr;
         }
 
 
