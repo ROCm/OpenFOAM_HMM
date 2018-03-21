@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2018 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,80 +22,63 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::ParRunControl
-
-Description
-    Helper class for initializing parallel jobs from the command arguments.
-
-    This class also handles cleanup of parallel or serial jobs in a
-    uniform manner.
+    Foam::unthreadedInitialise
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef parRun_H
-#define parRun_H
+#ifndef unthreadedInitialise_H
+#define unthreadedInitialise_H
 
-#include "Pstream.H"
-#include "IOstreams.H"
+#include "fileOperationInitialise.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace fileOperations
+{
 
 /*---------------------------------------------------------------------------*\
-                           Class ParRunControl Declaration
+                     Class unthreadedInitialise Declaration
 \*---------------------------------------------------------------------------*/
 
-class ParRunControl
+class unthreadedInitialise
+:
+    public fileOperationInitialise
 {
-    bool RunPar;
-
 public:
 
-    ParRunControl()
-    :
-        RunPar(false)
+    // Constructors
+
+        //- Construct from components
+        unthreadedInitialise(int& argc, char**& argv)
+        :
+            fileOperationInitialise(argc, argv)
+        {}
+
+
+    //- Destructor
+    virtual ~unthreadedInitialise()
     {}
 
-    ~ParRunControl()
-    {
-        if (RunPar)
+
+    // Member Functions
+
+        //- Needs threading
+        virtual bool needsThreading() const
         {
-            Info<< "Finalising parallel run" << endl;
+            return false;
         }
-
-        // Handles serial and parallel modes.
-        Pstream::exit(0);
-    }
-
-    //- Initialize Pstream for a parallel run
-    void runPar(int& argc, char**& argv, const bool needsThread)
-    {
-        RunPar = true;
-
-        if (!Pstream::init(argc, argv, needsThread))
-        {
-            Info<< "Failed to start parallel run" << endl;
-            Pstream::exit(1);
-        }
-    }
-
-
-    //- Is this a parallel run?
-    bool parRun() const
-    {
-        return RunPar;
-    }
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fileOperations
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ************************************************************************* //

@@ -67,7 +67,7 @@ class tmpNrc
         mutable T* ptr_;
 
         //- The type (managed pointer | const-reference object)
-        refType type_;
+        mutable refType type_;
 
 
 public:
@@ -159,6 +159,9 @@ public:
         //- If object pointer points to valid object:
         //- delete object and set pointer to nullptr
         inline void clear() const;
+
+        //- Swaps the managed object with other tmpNrc.
+        inline void swap(tmpNrc<T>& other) noexcept;
 
 
     // Member operators

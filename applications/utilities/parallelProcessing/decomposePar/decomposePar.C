@@ -356,6 +356,9 @@ int main(int argc, char *argv[])
             )
         );
 
+        // Give file handler a chance to determine the output directory
+        const_cast<fileOperation&>(fileHandler()).setNProcs(nDomains);
+
         if (decomposeFieldsOnly)
         {
             // Sanity check on previously decomposed case
@@ -395,22 +398,42 @@ int main(int argc, char *argv[])
                 Info<< "Removing " << nProcs
                     << " existing processor directories" << endl;
 
-                fileHandler().rmDir
+                // Remove existing processors directory
+                fileNameList dirs
                 (
-                    runTime.path()/word("processors"),
-                    true  // silent (may not have been collated)
-                );
-
-                // remove existing processor dirs
-                // reverse order to avoid gaps if someone interrupts the process
-                for (label proci = nProcs-1; proci >= 0; --proci)
-                {
-                    fileName procDir
+                    fileHandler().readDir
                     (
-                        runTime.path()/(word("processor") + name(proci))
-                    );
+                        runTime.path(),
+                        fileName::Type::DIRECTORY
+                    )
+                );
+                forAllReverse(dirs, diri)
+                {
+                    const fileName& d = dirs[diri];
 
-                    fileHandler().rmDir(procDir);
+                    // Starts with 'processors'
+                    if (d.find("processors") == 0)
+                    {
+                        if (fileHandler().exists(d))
+                        {
+                            fileHandler().rmDir(d);
+                        }
+                    }
+
+                    // Starts with 'processor'
+                    if (d.find("processor") == 0)
+                    {
+                        // Check that integer after processor
+                        fileName num(d.substr(9));
+                        label proci = -1;
+                        if (Foam::read(num.c_str(), proci))
+                        {
+                            if (fileHandler().exists(d))
+                            {
+                                fileHandler().rmDir(d);
+                            }
+                        }
+                    }
                 }
 
                 procDirsProblem = false;

@@ -489,6 +489,10 @@ mode_t Foam::mode(const fileName& name, const bool followLink)
     if (POSIX::debug)
     {
         Pout<< FUNCTION_NAME << " : name:" << name << endl;
+        if ((POSIX::debug & 2) && !Pstream::master())
+        {
+            error::printStack(Pout);
+        }
     }
 
     // Ignore an empty name => always 0
@@ -516,10 +520,6 @@ Foam::fileName::Type Foam::type(const fileName& name, const bool followLink)
     if (POSIX::debug)
     {
         Pout<< FUNCTION_NAME << " : name:" << name << endl;
-        if ((POSIX::debug & 2) && !Pstream::master())
-        {
-            error::printStack(Pout);
-        }
     }
 
     mode_t m = mode(name, followLink);
@@ -1675,144 +1675,6 @@ Foam::fileNameList Foam::dlLoaded()
             << " : determined loaded libraries :" << libs.size() << std::endl;
     }
     return libs;
-}
-
-
-static Foam::DynamicList<Foam::autoPtr<pthread_t>> threads_;
-static Foam::DynamicList<Foam::autoPtr<pthread_mutex_t>> mutexes_;
-
-Foam::label Foam::allocateThread()
-{
-    forAll(threads_, i)
-    {
-        if (!threads_[i].valid())
-        {
-            if (POSIX::debug)
-            {
-                Pout<< FUNCTION_NAME << " : reusing index:" << i << endl;
-            }
-            // Reuse entry
-            threads_[i].reset(new pthread_t());
-            return i;
-        }
-    }
-
-    const label index = threads_.size();
-    if (POSIX::debug)
-    {
-        Pout<< FUNCTION_NAME << " : new index:" << index << endl;
-    }
-    threads_.append(autoPtr<pthread_t>(new pthread_t()));
-
-    return index;
-}
-
-
-void Foam::createThread
-(
-    const label index,
-    void *(*start_routine) (void *),
-    void *arg
-)
-{
-    if (POSIX::debug)
-    {
-        Pout<< FUNCTION_NAME << " : index:" << index << endl;
-    }
-    if (pthread_create(&threads_[index](), nullptr, start_routine, arg))
-    {
-        FatalErrorInFunction
-            << "Failed starting thread " << index << exit(FatalError);
-    }
-}
-
-
-void Foam::joinThread(const label index)
-{
-    if (POSIX::debug)
-    {
-        Pout<< FUNCTION_NAME << " : index:" << index << endl;
-    }
-    if (pthread_join(threads_[index](), nullptr))
-    {
-        FatalErrorInFunction << "Failed joining thread " << index
-            << exit(FatalError);
-    }
-}
-
-
-void Foam::freeThread(const label index)
-{
-    if (POSIX::debug)
-    {
-        Pout<< FUNCTION_NAME << " : index:" << index << endl;
-    }
-    threads_[index].clear();
-}
-
-
-Foam::label Foam::allocateMutex()
-{
-    forAll(mutexes_, i)
-    {
-        if (!mutexes_[i].valid())
-        {
-            if (POSIX::debug)
-            {
-                Pout<< FUNCTION_NAME << " : reusing index:" << i << endl;
-            }
-            // Reuse entry
-            mutexes_[i].reset(new pthread_mutex_t());
-            return i;
-        }
-    }
-
-    const label index = mutexes_.size();
-
-    if (POSIX::debug)
-    {
-        Pout<< FUNCTION_NAME << " : new index:" << index << endl;
-    }
-    mutexes_.append(autoPtr<pthread_mutex_t>(new pthread_mutex_t()));
-    return index;
-}
-
-
-void Foam::lockMutex(const label index)
-{
-    if (POSIX::debug)
-    {
-        Pout<< FUNCTION_NAME << " : index:" << index << endl;
-    }
-    if (pthread_mutex_lock(&mutexes_[index]()))
-    {
-        FatalErrorInFunction << "Failed locking mutex " << index
-            << exit(FatalError);
-    }
-}
-
-
-void Foam::unlockMutex(const label index)
-{
-    if (POSIX::debug)
-    {
-        Pout<< FUNCTION_NAME << " : index:" << index << endl;
-    }
-    if (pthread_mutex_unlock(&mutexes_[index]()))
-    {
-        FatalErrorInFunction << "Failed unlocking mutex " << index
-            << exit(FatalError);
-    }
-}
-
-
-void Foam::freeMutex(const label index)
-{
-    if (POSIX::debug)
-    {
-        Pout<< FUNCTION_NAME << " : index:" << index << endl;
-    }
-    mutexes_[index].clear();
 }
 
 

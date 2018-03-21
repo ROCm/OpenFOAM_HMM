@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2018 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -42,7 +42,7 @@ bool Foam::UPstream::initNull()
 }
 
 
-bool Foam::UPstream::init(int& argc, char**& argv)
+bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
 {
     FatalErrorInFunction
         << "The dummy Pstream library cannot be used in parallel mode"
