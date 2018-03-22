@@ -29,13 +29,21 @@ graph calcEk
     const Kmesh& K
 )
 {
+    label ntot = 1;
+    forAll(K.nn(), idim)
+    {
+        ntot *= K.nn()[idim];
+    }
+
+    scalar recRootN = 1.0/sqrt(scalar(ntot));
+
     return kShellIntegration
     (
         fft::forwardTransform
         (
             ReComplexField(U.primitiveField()),
             K.nn()
-        ),
+        )*recRootN,
         K
     );
 }

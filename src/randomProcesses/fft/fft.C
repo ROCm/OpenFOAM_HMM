@@ -29,6 +29,91 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+void Foam::fft::fftRenumberRecurse
+(
+    List<complex>& data,
+    List<complex>& renumData,
+    const labelList& nn,
+    label nnprod,
+    label ii,
+    label l1,
+    label l2
+)
+{
+    if (ii == nn.size())
+    {
+        // We've worked out the renumbering scheme. Now copy
+        // the components across
+
+        data[l1] = complex(renumData[l2].Re(), renumData[l2].Im());
+    }
+    else
+    {
+        // Do another level of folding. First work out the
+        // multiplicative value of the index
+
+        nnprod /= nn[ii];
+        label i_1(0);
+
+        for (label i=0; i<nn[ii]; i++)
+        {
+            // Now evaluate the indices (both from array 1 and to
+            // array 2). These get multiplied by nnprod to (cumulatively)
+            // find the real position in the list corresponding to
+            // this set of indices
+
+            if (i < nn[ii]/2)
+            {
+                i_1 = i + nn[ii]/2;
+            }
+            else
+            {
+                i_1 = i - nn[ii]/2;
+            }
+
+
+            // Go to the next level of recursion
+
+            fftRenumberRecurse
+            (
+                data,
+                renumData,
+                nn,
+                nnprod,
+                ii+1,
+                l1+i*nnprod,
+                l2+i_1*nnprod
+            );
+        }
+    }
+}
+
+
+void Foam::fft::fftRenumber(List<complex>& data, const labelList& nn)
+{
+    List<complex> renumData(data);
+
+    label nnprod(1);
+    forAll(nn, i)
+    {
+        nnprod *= nn[i];
+    }
+
+    label ii(0), l1(0), l2(0);
+
+    fftRenumberRecurse
+    (
+        data,
+        renumData,
+        nn,
+        nnprod,
+        ii,
+        l1,
+        l2
+    );
+}
+
+
 Foam::tmp<Foam::complexField>
 Foam::fft::realTransform1D(const scalarField& field)
 {
@@ -105,6 +190,12 @@ void Foam::fft::transform
         in[i][1] = field[i].Im();
     }
 
+    // If backward transform : renumber before transform
+    if (dir == FFTW_BACKWARD)
+    {
+        fftRenumber(field, nn);
+    }
+
     // Create the plan
     // FFTW_FORWARD = -1
     // FFTW_BACKWARD = 1
@@ -129,21 +220,11 @@ void Foam::fft::transform
 
     fftw_destroy_plan(plan);
 
-/*
-    fftw_real in[N], out[N];
-    // Create a plan for real data input
-    // - generates 1-sided FFT
-    // - direction given by FFTW_R2HC or FFTW_HC2R.
-    // - in[N] is the array of real input val ues
-    // - out[N] is the array of N/2 real valuea followed by N/2 complex values
-    // - 0 component = DC component
-    fftw_plan plan = fftw_plan_r2r_2d(N, in, out, FFTW_R2HC, FFTW_ESTIMATE)
-
-    // Compute the FFT
-    fftw_execute(plan);
-
-    fftw_destroy_plan(plan);
-*/
+    // If forward transform : renumber after transform
+    if (dir == FORWARD_TRANSFORM)
+    {
+        fftRenumber(field, nn);
+    }
 }
 
 

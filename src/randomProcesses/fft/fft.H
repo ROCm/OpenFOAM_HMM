@@ -61,6 +61,20 @@ public:
         REVERSE_TRANSFORM = 1
     };
 
+    static void fftRenumberRecurse
+    (
+        List<complex>& data,
+        List<complex>& renumData,
+        const labelList& nn,
+        label nnprod,
+        label ii,
+        label l1,
+        label l2
+    );
+
+    //- fftRenumber: fold the n-d data array to get the fft components in
+    //- the right places.
+    static void fftRenumber(List<complex>& data, const labelList& nn);
 
     //- Transform real-value data
     //  - uses the fftw real to half-complex method
