@@ -275,8 +275,26 @@ processSameTypeValues
 
         case opAreaNormalAverage:
         case opAreaNormalIntegrate:
+        case opUniformity:
         {
             // Handled in specializations only
+            break;
+        }
+
+        case opWeightedUniformity:
+        case opAbsWeightedUniformity:
+        {
+            if (canWeight(weightField))
+            {
+                // Change weighting from vector -> scalar and dispatch again
+                return processValues<Type, scalar>
+                (
+                    values,
+                    Sf,
+                    weightingFactor(weightField)
+                );
+            }
+
             break;
         }
     }

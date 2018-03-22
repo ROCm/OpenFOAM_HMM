@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      alphat;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,17 +24,17 @@ boundaryField
     {
         type            compressible::alphatWallFunction;
         Prt             0.85;
-        value           uniform 0;
+        value           $internalField;
     }
     inlet
     {
         type            calculated;
-        value           uniform 0;
+        value           $internalField;
     }
     outlet
     {
         type            calculated;
-        value           uniform 0;
+        value           $internalField;
     }
 }
 

@@ -145,6 +145,21 @@ Note
         - take care when using isoSurfaces - these might have duplicate
           triangles and so integration might be wrong
 
+    Uniformity
+    \f[
+        UI(\phi) = 1 - \frac{1}{2 \overline{\phi} A}
+        \int{\left| W \phi \cdot \hat{n} - \bar{W} \bar{\phi}\right| d\vec{A}}
+        \,,\;
+        \bar{\phi} = \frac{\int{W \phi \cdot d\vec{A}}}{\int{W \cdot d\vec{A}}}
+    \f]
+
+    A velocity uniformity index is calculated with no weighting (W=1) and
+    \f$ \phi = \vec{U} \f$.
+
+    A scalar concentration uniformity index is calculated with either
+    \f$ \rho \vec{U} \f$ or \f$ \vec{U} \f$ for weighting and
+    \f$ \phi = conc \f$.
+
 See also
     Foam::fieldValues
     Foam::functionObject
@@ -232,6 +247,7 @@ public:
             opCoV,                  //!< Coefficient of variation
             opAreaNormalAverage,    //!< Area average in normal direction
             opAreaNormalIntegrate,  //!< Area integral in normal direction
+            opUniformity,           //!< Uniformity index
 
             // Weighted variants
 
@@ -247,6 +263,9 @@ public:
             //! Weighted area integral
             opWeightedAreaIntegrate = (opAreaIntegrate | typeWeighted),
 
+            //! Weighted uniformity index
+            opWeightedUniformity = (opUniformity | typeWeighted),
+
             // Variants using absolute weighting
 
             //! Sum using abs weighting
@@ -261,6 +280,10 @@ public:
             //! Area integral using abs weighting
             opAbsWeightedAreaIntegrate =
                 (opWeightedAreaIntegrate | typeAbsolute),
+
+            //! Uniformity index using abs weighting
+            opAbsWeightedUniformity =
+                (opWeightedUniformity | typeAbsolute),
         };
 
         //- Operation type names

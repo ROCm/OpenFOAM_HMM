@@ -1,0 +1,99 @@
+// -*- C++ -*-
+
+// ************************************************************************* //
+
+#include "fieldTransfer"
+
+massflow
+{
+    ${__surfaceFieldValue}
+
+    regionType      surface;
+    name            plane1;
+
+    operation       areaNormalIntegrate;
+
+    fields          ( rhoU );
+}
+
+areaIntegrate
+{
+    ${__surfaceFieldValue}
+
+    regionType      surface;
+    name            plane1;
+
+    operation       weightedAreaIntegrate;
+    weightField     rhoU;
+    fields          ( T );
+}
+
+// Inflow uniformity
+UI1
+{
+    ${__surfaceFieldValue}
+
+    regionType      surface;
+    name            plane1;
+
+    operation       uniformity;
+    fields          ( U T );
+}
+
+
+// Uniformity after the bend
+UI2
+{
+    ${__surfaceFieldValue}
+
+    regionType      surface;
+    name            plane2;
+
+    operation       uniformity;
+    fields          ( U T );
+}
+
+
+// Inflow uniformity, but use a scalar field for weighting
+// Since this field is quite uniform, there should be no difference
+T_UI1
+{
+    ${__surfaceFieldValue}
+
+    regionType      surface;
+    name            plane1;
+
+    operation       weightedUniformity;
+    weightField     T;
+    fields          ( U );
+}
+
+
+// rhoU-weighted uniformity, including weighting U too (weird but possible)
+rhoU_UI1
+{
+    ${__surfaceFieldValue}
+
+    regionType      surface;
+    name            plane1;
+
+    operation       weightedUniformity;
+    weightField     rhoU;
+    fields          ( p rho U rhoU );
+}
+
+
+// rhoU-weighted uniformity
+rhoU_UI2
+{
+    ${__surfaceFieldValue}
+
+    regionType      surface;
+    name            plane2;
+
+    operation       weightedUniformity;
+    weightField     rhoU;
+    fields          ( p rho U rhoU );
+}
+
+// ************************************************************************* //

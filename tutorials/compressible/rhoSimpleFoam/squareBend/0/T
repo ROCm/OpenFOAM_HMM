@@ -20,23 +20,22 @@ internalField   uniform 1000;
 
 boundaryField
 {
-    Default_Boundary_Region
-    {
-        type            zeroGradient;
-    }
-
     inlet
     {
         type            fixedValue;
-        value           uniform 1000;
+        value           $internalField;
     }
 
     outlet
     {
         type            inletOutlet;
-        //type            zeroGradient;
-        value           uniform 1000;
-        inletValue      uniform 1000;
+        value           $internalField;
+        inletValue      $internalField;;
+    }
+
+    ".*"
+    {
+        type            zeroGradient;
     }
 }
 
