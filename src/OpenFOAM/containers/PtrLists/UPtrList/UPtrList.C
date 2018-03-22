@@ -24,21 +24,16 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "UPtrList.H"
+#include "PtrList.H"
+#include "Ostream.H"
 
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
 template<class T>
-Foam::UPtrList<T>::UPtrList(UList<T>& lst)
+Foam::UPtrList<T>::UPtrList(PtrList<T>& list)
 :
-    ptrs_(lst.size())
-{
-    const label len = lst.size();
-
-    for (label i=0; i<len; ++i)
-    {
-        ptrs_[i] = &(lst[i]);
-    }
-}
+    ptrs_(list.ptrs_) // shallow copy (via const reference)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -57,8 +52,7 @@ void Foam::UPtrList<T>::reorder(const labelUList& oldToNew)
             << abort(FatalError);
     }
 
-    // New list of pointers
-    List<T*> ptrLst(len, reinterpret_cast<T*>(0));
+    Detail::PtrListDetail<T> newList(len);
 
     for (label i=0; i<len; ++i)
     {
@@ -68,25 +62,25 @@ void Foam::UPtrList<T>::reorder(const labelUList& oldToNew)
         {
             FatalErrorInFunction
                 << "Illegal index " << idx << nl
-                << "Valid indices are 0.." << len-1
-                << " for type " << typeid(T).name() << nl
+                << "Valid indices are [0," << len << ") for type "
+                << typeid(T).name() << nl
                 << abort(FatalError);
         }
 
-        if (ptrLst[idx])
+        if (newList[idx])
         {
             FatalErrorInFunction
                 << "reorder map is not unique; element " << idx
                 << " already set for type " << typeid(T).name()
                 << abort(FatalError);
         }
-        ptrLst[idx] = ptrs_[i];
+        newList[idx] = ptrs_[i];
     }
 
-    // Verify that all pointers were set
+    // Verify that all pointers were indeed set
     for (label i=0; i<len; ++i)
     {
-        if (!ptrLst[i])
+        if (!newList[i])
         {
             FatalErrorInFunction
                 << "Element " << i << " not set after reordering." << nl
@@ -94,7 +88,16 @@ void Foam::UPtrList<T>::reorder(const labelUList& oldToNew)
         }
     }
 
-    ptrs_.swap(ptrLst);
+    ptrs_.transfer(newList);
+}
+
+
+// * * * * * * * * * * * * * * * Ostream Operators * * * * * * * * * * * * * //
+
+template<class T>
+Foam::Ostream& Foam::operator<<(Ostream& os, const UPtrList<T>& list)
+{
+    return list.ptrs_.write(os);
 }
 
 

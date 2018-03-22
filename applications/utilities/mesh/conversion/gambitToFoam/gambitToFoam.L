@@ -57,8 +57,6 @@ using namespace Foam;
 #include "emptyPolyPatch.H"
 #include "preservePatchTypes.H"
 #include "cellShape.H"
-#include "SLList.H"
-#include "SLPtrList.H"
 
 label nPoints = 0;
 label nCells = 0;

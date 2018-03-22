@@ -29,21 +29,25 @@ Description
     management of the pointers - this is to be done elsewhere.
     The operator[] returns a reference to the object, not the pointer.
 
+Note
+    The class definition is such that it contains a list of pointers, but
+    itself does not inherit from a list of pointers since this would
+    wreak havoc later inheritance resolution.
+
 See Also
     Foam::PtrList
+    Foam::PtrDynList
 
 SourceFiles
     UPtrListI.H
     UPtrList.C
-    UPtrListIO.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef UPtrList_H
 #define UPtrList_H
 
-#include "List.H"
-#include "PtrList.H"
+#include "PtrListDetail.H"
 #include <iterator>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -68,9 +72,16 @@ class UPtrList
 {
 protected:
 
-    // Protected data
+    // Protected Member Data
 
-        List<T*> ptrs_;
+        //- The list of pointers
+        Detail::PtrListDetail<T> ptrs_;
+
+
+    // Constructors
+
+        //- Low-level move construct
+        inline UPtrList(Detail::PtrListDetail<T>&& ptrs);
 
 
 public:
@@ -101,32 +112,34 @@ public:
         //- Construct with specified size, each element initialized to nullptr
         explicit inline UPtrList(const label len);
 
-        //- Construct from PtrList, copying addresses of each list element.
-        //  The argument is non-const access since this UPtrList can be used
-        //  to change its values.
-        explicit inline UPtrList(PtrList<T>& list);
-
-        //- Construct from UList, taking addresses of each list element
-        explicit UPtrList(UList<T>& list);
-
-        //- Construct as copy or re-use as specified
-        inline UPtrList(UPtrList<T>& list, bool reuse);
-
-        //- Copy construct
-        inline UPtrList(const UPtrList<T>& list) = default;
+        //- Copy construct (shallow copies addresses)
+        inline UPtrList(const UPtrList<T>& list);
 
         //- Move construct
         inline UPtrList(UPtrList<T>&& list);
+
+        //- Construct as shallow copy or re-use as specified
+        inline UPtrList(UPtrList<T>& list, bool reuse);
+
+        //- Shallow copy from PtrList.
+        //  The argument is non-const to reflect that the UPtrList can change
+        //  the values (but not the addresses) of the original list.
+        explicit UPtrList(PtrList<T>& list);
+
+        //- Construct from UList, taking the address of each list element
+        //  The argument is non-const to reflect that the UPtrList can change
+        //  the values of the original list.
+        explicit inline UPtrList(UList<T>& list);
 
 
     // Member functions
 
     // Access
 
-        //- Return the number of elements in the UPtrList
+        //- Return the number of elements in the list
         inline label size() const;
 
-        //- Return true if the UPtrList is empty (ie, size() is zero)
+        //- Return true if the list is empty (ie, size() is zero)
         inline bool empty() const;
 
         //- Return reference to the first element of the list
@@ -147,11 +160,11 @@ public:
         //- Set list size to zero.
         inline void clear();
 
-        //- Reset size of UPtrList.
+        //- Reset size of list.
         //  New entries are initialized to nullptr.
         inline void resize(const label newLen);
 
-        //- Reset size of UPtrList.
+        //- Reset size of list.
         //  New entries are initialized to nullptr.
         inline void setSize(const label newLen);
 
@@ -164,10 +177,11 @@ public:
         //- Transfer contents into this list and annul the argument
         inline void transfer(UPtrList<T>& list);
 
-        //- Return true if element is set (ie, not a nullptr)
+        //- Return true if element is set (not a nullptr)
         inline bool set(const label i) const;
 
-        //- Set element to given pointer and return old element (can be null).
+        //- Set element to specified pointer and return the old list element,
+        //- which can be a nullptr.
         //  No checks on new element
         inline T* set(const label i, T* ptr);
 
@@ -175,19 +189,19 @@ public:
         void reorder(const labelUList& oldToNew);
 
 
-    // Member operators
+    // Member Operators
 
-        //- Return element const reference
+        //- Return const reference to the element
         inline const T& operator[](const label i) const;
 
-        //- Return element reference
+        //- Return reference to the element
         inline T& operator[](const label i);
 
-        //- Return element const pointer
+        //- Return const pointer to the element
         inline const T* operator()(const label i) const;
 
-        //- Copy assignment
-        UPtrList<T>& operator=(const UPtrList<T>& list) = default;
+        //- Copy assignment (shallow copies addresses)
+        inline void operator=(const UPtrList<T>& list);
 
         //- Move assignment
         inline void operator=(UPtrList<T>&& list);
@@ -217,7 +231,9 @@ public:
             inline bool operator==(const iterator& iter) const;
             inline bool operator!=(const iterator& iter) const;
 
+            inline pointer operator->() const;
             inline reference operator*() const;
+
             inline reference operator()() const;
 
             // Forward iteration
@@ -269,7 +285,9 @@ public:
             inline bool operator==(const const_iterator& iter) const;
             inline bool operator!=(const const_iterator& iter) const;
 
+            inline pointer operator->() const;
             inline reference operator*() const;
+
             inline reference operator()() const;
 
             // Forward iteration
@@ -319,7 +337,11 @@ public:
     // IOstream operator
 
         //- Write UPtrList to Ostream
-        friend Ostream& operator<< <T>(Ostream& os, const UPtrList<T>& list);
+        friend Ostream& operator<< <T>
+        (
+            Ostream& os,
+            const UPtrList<T>& list
+        );
 
 };
 
@@ -336,7 +358,6 @@ public:
 
 #ifdef NoRepository
     #include "UPtrList.C"
-    #include "UPtrListIO.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

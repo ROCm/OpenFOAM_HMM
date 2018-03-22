@@ -35,12 +35,19 @@ inline constexpr Foam::UPtrList<T>::UPtrList() noexcept
 template<class T>
 inline Foam::UPtrList<T>::UPtrList(const label len)
 :
-    ptrs_(len, reinterpret_cast<T*>(0))
+    ptrs_(len)
 {}
 
 
 template<class T>
-inline Foam::UPtrList<T>::UPtrList(PtrList<T>& list)
+inline Foam::UPtrList<T>::UPtrList(Detail::PtrListDetail<T>&& ptrs)
+:
+    ptrs_(std::move(ptrs))
+{}
+
+
+template<class T>
+inline Foam::UPtrList<T>::UPtrList(const UPtrList<T>& list)
 :
     ptrs_(list.ptrs_)
 {}
@@ -58,6 +65,20 @@ inline Foam::UPtrList<T>::UPtrList(UPtrList<T>& list, bool reuse)
 :
     ptrs_(list.ptrs_, reuse)
 {}
+
+
+template<class T>
+inline Foam::UPtrList<T>::UPtrList(UList<T>& list)
+:
+    ptrs_(list.size())
+{
+    const label len = ptrs_.size();
+
+    for (label i=0; i<len; ++i)
+    {
+        ptrs_[i] = &(list[i]);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -128,25 +149,14 @@ inline const T& Foam::UPtrList<T>::last() const
 template<class T>
 inline void Foam::UPtrList<T>::resize(const label newLen)
 {
-    if (newLen <= 0)
-    {
-        clear();
-        return;
-    }
-
-    const label oldLen = this->size();
-    if (newLen != oldLen)
-    {
-        // Truncate or extend. Any new elements are initialized to nullptr.
-        ptrs_.resize(newLen, reinterpret_cast<T*>(0));
-    }
+    ptrs_.resize(newLen);
 }
 
 
 template<class T>
 inline void Foam::UPtrList<T>::setSize(const label newLen)
 {
-    this->resize(newLen);
+    ptrs_.resize(newLen);
 }
 
 
@@ -180,30 +190,34 @@ inline T* Foam::UPtrList<T>::set(const label i, T* ptr)
 template<class T>
 inline const T& Foam::UPtrList<T>::operator[](const label i) const
 {
-    if (!ptrs_[i])
+    const T* ptr = ptrs_[i];
+
+    if (!ptr)
     {
         FatalErrorInFunction
             << "cannot dereference nullptr at index " << i
-            << " (size " << size() << ")"
+            << " in range [0," << size() << ")"
             << abort(FatalError);
     }
 
-    return *(ptrs_[i]);
+    return *ptr;
 }
 
 
 template<class T>
 inline T& Foam::UPtrList<T>::operator[](const label i)
 {
-    if (!ptrs_[i])
+    T* ptr = ptrs_[i];
+
+    if (!ptr)
     {
         FatalErrorInFunction
             << "cannot dereference nullptr at index " << i
-            << " (size " << size() << ")"
+            << " in range [0," << size() << ")"
             << abort(FatalError);
     }
 
-    return *(ptrs_[i]);
+    return *ptr;
 }
 
 
@@ -214,7 +228,7 @@ inline const T* Foam::UPtrList<T>::operator()(const label i) const
 }
 
 
-// * * * * * * * * * * * * * * * * STL iterator  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * iterator  * * * * * * * * * * * * * * * * //
 
 template<class T>
 inline Foam::UPtrList<T>::iterator::iterator(T** ptr)
@@ -234,6 +248,13 @@ template<class T>
 inline bool Foam::UPtrList<T>::iterator::operator!=(const iterator& iter) const
 {
     return ptr_ != iter.ptr_;
+}
+
+
+template<class T>
+inline T* Foam::UPtrList<T>::iterator::operator->() const
+{
+    return *ptr_;
 }
 
 
@@ -366,7 +387,7 @@ inline bool Foam::UPtrList<T>::iterator::operator>=(const iterator& iter) const
 }
 
 
-// * * * * * * * * * * * * * * * STL const_iterator  * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * const_iterator  * * * * * * * * * * * * * * //
 
 template<class T>
 inline Foam::UPtrList<T>::const_iterator::const_iterator(const T* const* ptr)
@@ -399,6 +420,13 @@ inline bool Foam::UPtrList<T>::const_iterator::operator!=
 ) const
 {
     return ptr_ != iter.ptr_;
+}
+
+
+template<class T>
+inline const T* Foam::UPtrList<T>::const_iterator::operator->() const
+{
+    return *ptr_;
 }
 
 
@@ -597,9 +625,16 @@ Foam::UPtrList<T>::end() const
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
+inline void Foam::UPtrList<T>::operator=(const UPtrList<T>& list)
+{
+    ptrs_ = list.ptrs_;  // shallow copy
+}
+
+
+template<class T>
 inline void Foam::UPtrList<T>::operator=(UPtrList<T>&& list)
 {
-    this->transfer(list);
+    ptrs_.transfer(list.ptrs_);
 }
 
 
