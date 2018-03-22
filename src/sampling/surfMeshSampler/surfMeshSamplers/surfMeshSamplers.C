@@ -308,12 +308,13 @@ bool Foam::surfMeshSamplers::read(const dictionary& dict)
         dict.lookup("fields") >> fieldSelection_;
         fieldSelection_.uniq();
 
-        Info<< type() << " fields: " << fieldSelection_ << nl;
+        Info<< type() << " fields:  " << flatOutput(fieldSelection_) << nl;
 
         if (dict.readIfPresent("derived", derivedNames_))
         {
-            Info<< type() << " derived: " << derivedNames_ << nl;
+            Info<< type() << " derived: " << flatOutput(derivedNames_) << nl;
         }
+        Info<< nl;
 
         PtrList<surfMeshSampler> newList
         (

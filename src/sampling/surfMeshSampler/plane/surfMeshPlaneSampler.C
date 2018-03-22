@@ -70,12 +70,13 @@ Foam::surfMeshPlaneSampler::surfMeshPlaneSampler
     surfMeshSampler(name, mesh),
     SurfaceSource(planeDesc),
     zoneKey_(zoneKey),
+    bounds_(),
     triangulate_(triangulate),
     needsUpdate_(true)
 {
     if (debug && zoneKey_.size() && mesh.cellZones().findIndex(zoneKey_) == -1)
     {
-        Info<< "cellZone " << zoneKey_
+        Info<< "cellZone(s) " << zoneKey_
             << " not found - using entire mesh" << endl;
     }
 }
@@ -90,7 +91,8 @@ Foam::surfMeshPlaneSampler::surfMeshPlaneSampler
 :
     surfMeshSampler(name, mesh, dict),
     SurfaceSource(plane(dict)),
-    zoneKey_(keyType::null),
+    zoneKey_(dict.lookupOrDefault<keyType>("zone", keyType::null)),
+    bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox)),
     triangulate_(dict.lookupOrDefault("triangulate", true)),
     needsUpdate_(true)
 {
@@ -100,27 +102,19 @@ Foam::surfMeshPlaneSampler::surfMeshPlaneSampler
     {
         coordinateSystem cs(mesh, dict.subDict("coordinateSystem"));
 
-        point  base = cs.globalPosition(planeDesc().refPoint());
-        vector norm = cs.globalVector(planeDesc().normal());
+        const point  base = cs.globalPosition(planeDesc().refPoint());
+        const vector norm = cs.globalVector(planeDesc().normal());
 
         // Assign the plane description
         static_cast<plane&>(*this) = plane(base, norm);
     }
 
-    dict.readIfPresent("zone", zoneKey_);
-
     if (debug && zoneKey_.size() && mesh.cellZones().findIndex(zoneKey_) == -1)
     {
-        Info<< "cellZone " << zoneKey_
+        Info<< "cellZone(s) " << zoneKey_
             << " not found - using entire mesh" << endl;
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::surfMeshPlaneSampler::~surfMeshPlaneSampler()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -151,14 +145,93 @@ bool Foam::surfMeshPlaneSampler::update()
         return false;
     }
 
+    const plane& pln = static_cast<const plane&>(*this);
+
+    // Verify specified bounding box
+    if (!bounds_.empty())
+    {
+        // Bounding box does not overlap with (global) mesh!
+        if (!bounds_.overlaps(mesh().bounds()))
+        {
+            WarningInFunction
+                << nl
+                << name() << " : "
+                << "Bounds " << bounds_
+                << " do not overlap the mesh bounding box " << mesh().bounds()
+                << nl << endl;
+        }
+
+        // Plane does not intersect the bounding box
+        if (!bounds_.intersects(pln))
+        {
+            WarningInFunction
+                << nl
+                << name() << " : "
+                << "Plane "<< pln << " does not intersect the bounds "
+                << bounds_
+                << nl << endl;
+        }
+    }
+
+    // Plane does not intersect the (global) mesh!
+    if (!mesh().bounds().intersects(pln))
+    {
+        WarningInFunction
+            << nl
+            << name() << " : "
+            << "Plane "<< pln << " does not intersect the mesh bounds "
+            << mesh().bounds()
+            << nl << endl;
+    }
+
+
     labelList selectedCells = mesh().cellZones().findMatching(zoneKey_).used();
-    if (selectedCells.empty())
+
+    bool fullMesh = returnReduce(selectedCells.empty(), andOp<bool>());
+    if (!bounds_.empty())
+    {
+        const auto& cellCentres = static_cast<const fvMesh&>(mesh()).C();
+
+        if (fullMesh)
+        {
+            const label len = mesh().nCells();
+
+            selectedCells.setSize(len);
+
+            label count = 0;
+            for (label celli=0; celli < len; ++celli)
+            {
+                if (bounds_.contains(cellCentres[celli]))
+                {
+                    selectedCells[count++] = celli;
+                }
+            }
+
+            selectedCells.setSize(count);
+        }
+        else
+        {
+            label count = 0;
+            for (const label celli : selectedCells)
+            {
+                if (bounds_.contains(cellCentres[celli]))
+                {
+                    selectedCells[count++] = celli;
+                }
+            }
+
+            selectedCells.setSize(count);
+        }
+
+        fullMesh = false;
+    }
+
+    if (fullMesh)
     {
         reCut(mesh(), triangulate_);
     }
     else
     {
-        Foam::sort(selectedCells);
         reCut(mesh(), triangulate_, selectedCells);
     }
 
