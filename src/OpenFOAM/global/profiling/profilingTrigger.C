@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2009-2016 Bernhard Gschaider
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,23 +24,26 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "profiling.H"
-#include "profilingInformation.H"
 #include "profilingTrigger.H"
-
+#include "profilingInformation.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::profilingTrigger::profilingTrigger()
+:
+    ptr_(nullptr)
+{}
+
+
 Foam::profilingTrigger::profilingTrigger(const char* name)
 :
-    clock_(),
-    ptr_(profiling::New(name, clock_))
+    ptr_(profiling::New(name))
 {}
 
 
 Foam::profilingTrigger::profilingTrigger(const string& name)
 :
-    clock_(),
-    ptr_(profiling::New(name, clock_))
+    ptr_(profiling::New(name))
 {}
 
 
@@ -64,10 +67,10 @@ void Foam::profilingTrigger::stop()
 {
     if (ptr_)
     {
-        ptr_->update(clock_.elapsedTime());
+        // profiling info pointer managed by pool storage, so no delete here
         profiling::unstack(ptr_);
-        // pointer is managed by pool storage -> thus no delete here
     }
+
     ptr_ = nullptr;
 }
 

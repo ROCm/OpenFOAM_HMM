@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2009-2016 Bernhard Gschaider
-     \\/     M anipulation  | Copyright (C) 2016-2107 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +35,6 @@ SourceFiles
 #ifndef profilingTrigger_H
 #define profilingTrigger_H
 
-#include "clockTime.H"
 #include "string.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -43,7 +42,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class profilingInformation;
 
 /*---------------------------------------------------------------------------*\
@@ -54,25 +53,25 @@ class profilingTrigger
 {
     // Private Data Members
 
-        //- The timer for the profiling information
-        clockTime clock_;
-
         //- The profiling information
         profilingInformation *ptr_;
 
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         profilingTrigger(const profilingTrigger&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const profilingTrigger&) = delete;
 
 
 public:
 
     // Constructors
+
+        //- Construct null, no profiling trigger
+        profilingTrigger();
 
         //- Construct profiling with given description.
         //  Descriptions beginning with 'application::' are reserved for
@@ -91,13 +90,8 @@ public:
 
     // Member Functions
 
-      // Access
-
         //- True if the triggered profiling is active
         bool running() const;
-
-
-      // Edit
 
         //- Stop triggered profiling
         void stop();
@@ -113,21 +107,13 @@ public:
 
 // Macros
 
-//- Define profiling with specified name and description string
-//  This is required if the description contains space, colons etc.
-//  \sa addProfiling0
+//- Define profiling trigger with specified name and description string
 //  \sa endProfiling
 #define addProfiling(name,descr)                                               \
     ::Foam::profilingTrigger  profilingTriggerFor##name(descr)
 
-//- Define profiling with specified name and description correspond to the name
-//  \sa addProfiling
-//  \sa endProfiling
-#define addProfiling0(name)                                                    \
-    ::Foam::profilingTrigger  profilingTriggerFor##name(#name)
-
-//- Define profiling with specified name and description correspond to the
-//  compiler-defined function name string:
+//- Define profiling trigger with specified name and description
+//- corresponding to the compiler-defined function name string
 //  \sa addProfiling
 //  \sa endProfiling
 #ifdef __GNUC__
@@ -140,7 +126,6 @@ public:
 
 //- Remove profiling with specified name
 //  \sa addProfiling
-//  \sa addProfiling0
 #define endProfiling(name)    profilingTriggerFor##name.stop()
 
 

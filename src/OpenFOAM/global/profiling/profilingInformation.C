@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2009-2016 Bernhard Gschaider
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,57 +27,36 @@ License
 #include "Switch.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-Foam::label Foam::profilingInformation::nextId_(0);
-
-
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-Foam::label Foam::profilingInformation::getNextId()
-{
-    return nextId_++;
-}
-
-
-void Foam::profilingInformation::raiseId(label maxVal)
-{
-    if (nextId_ < maxVal)
-    {
-        nextId_ = maxVal;
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::profilingInformation::profilingInformation()
 :
-    id_(getNextId()),
+    id_(0),
     description_("application::main"),
     parent_(this),
     calls_(0),
     totalTime_(0),
     childTime_(0),
     maxMem_(0),
-    onStack_(false)
+    active_(false)
 {}
 
 
 Foam::profilingInformation::profilingInformation
 (
+    profilingInformation *parent,
     const string& descr,
-    profilingInformation *parent
+    const label id
 )
 :
-    id_(getNextId()),
+    id_(id),
     description_(descr),
     parent_(parent),
     calls_(0),
     totalTime_(0),
     childTime_(0),
     maxMem_(0),
-    onStack_(false)
+    active_(false)
 {}
 
 
@@ -88,24 +67,18 @@ void Foam::profilingInformation::update(const scalar elapsed)
     ++calls_;
     totalTime_ += elapsed;
 
-    if (id_ != parent().id())
+    if (id_ != parent_->id())
     {
-        parent().childTime_ += elapsed;
+        parent_->childTime_ += elapsed;
     }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::profilingInformation::push() const
+void Foam::profilingInformation::setActive(bool state) const
 {
-    onStack_ = true;
-}
-
-
-void Foam::profilingInformation::pop() const
-{
-    onStack_ = false;
+    active_ = state;
 }
 
 
@@ -128,7 +101,7 @@ Foam::Ostream& Foam::profilingInformation::write
     os.writeEntry("totalTime",      totalTime() + elapsedTime);
     os.writeEntry("childTime",      childTime() + childTimes);
     os.writeEntryIfDifferent<int>("maxMem", 0, maxMem_);
-    os.writeEntry("onStack",        Switch(onStack()));
+    os.writeEntry("active",         Switch(active()));
 
     os.endBlock();
 

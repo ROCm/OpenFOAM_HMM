@@ -846,13 +846,14 @@ bool Foam::Time::run() const
         {
             // Ensure functionObjects execute on last time step
             // (and hence write uptodate functionObjectProperties)
-            addProfiling(foExec, "functionObjects.execute()");
-            functionObjects_.execute();
-            endProfiling(foExec);
-
-            addProfiling(foEnd, "functionObjects.end()");
-            functionObjects_.end();
-            endProfiling(foEnd);
+            {
+                addProfiling(fo, "functionObjects.execute()");
+                functionObjects_.execute();
+            }
+            {
+                addProfiling(fo, "functionObjects.end()");
+                functionObjects_.end();
+            }
         }
     }
 
