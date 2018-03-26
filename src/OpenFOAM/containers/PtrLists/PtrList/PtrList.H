@@ -30,7 +30,8 @@ Description
     The operator[] returns a reference to the object, not the pointer.
 
 See Also
-    Foam::PtrList
+    Foam::UPtrList
+    Foam::PtrDynList
 
 SourceFiles
     PtrListI.H
@@ -56,7 +57,7 @@ template<class T> class autoPtr;
 template<class T> class tmp;
 template<class T> class PtrList;
 
-template<class T> Istream& operator>>(Istream& is, PtrList<T>& lst);
+template<class T> Istream& operator>>(Istream& is, PtrList<T>& list);
 
 
 /*---------------------------------------------------------------------------*\
@@ -68,7 +69,6 @@ class PtrList
 :
     public UPtrList<T>
 {
-
 protected:
 
     // Protected Member Functions
@@ -77,6 +77,8 @@ protected:
         template<class INew>
         void read(Istream& is, const INew& inew);
 
+        //- Delete the allocated entries, but retain the list size.
+        inline void free();
 
 public:
 
@@ -86,22 +88,22 @@ public:
         inline constexpr PtrList() noexcept;
 
         //- Construct with specified size, each element initialized to nullptr
-        explicit inline PtrList(const label nElem);
+        explicit inline PtrList(const label len);
 
         //- Copy construct using 'clone()' method on each element
-        PtrList(const PtrList<T>& list);
+        inline PtrList(const PtrList<T>& list);
 
         //- Move construct
         inline PtrList(PtrList<T>&& list);
 
-        //- Copy construct with additional argument for 'clone()'
+        //- Copy construct using 'clone()' method on each element
         template<class CloneArg>
-        PtrList(const PtrList<T>& list, const CloneArg& cloneArg);
+        inline PtrList(const PtrList<T>& list, const CloneArg& cloneArgs);
 
         //- Construct as copy or re-use as specified
         PtrList(PtrList<T>& list, bool reuse);
 
-        //- Construct as copy of SLPtrList<T>
+        //- Copy construct using 'clone()' on each element of SLPtrList\<T\>
         explicit PtrList(const SLPtrList<T>& list);
 
         //- Construct from Istream using given Istream constructor class
@@ -118,24 +120,31 @@ public:
 
     // Member Functions
 
-        //- Clear the PtrList. Set size to zero and delete allocated entries
-        void clear();
+        //- Make a copy by cloning each of the list elements.
+        template<class... Args>
+        PtrList<T> clone(Args&&... args) const;
 
-        //- Reset size of PtrList.
+        //- Clear the PtrList. Delete allocated entries and set size to zero.
+        inline void clear();
+
+        //- Adjust size of PtrList.
         //  New entries are initialized to nullptr, removed entries are deleted
         void resize(const label newLen);
 
-        //- Reset size of PtrList.
+        //- Adjust size of PtrList.
         //  New entries are initialized to nullptr, removed entries are deleted
         inline void setSize(const label newLen);
 
-        //- Append an element at the end of the list
-        using UPtrList<T>::append;
+        //- Append an element to the end of the list
+        inline void append(T* ptr);
 
-        //- Append an element at the end of the list
-        inline void append(const autoPtr<T>& aptr);
+        //- Move append an element to the end of the list
+        inline void append(autoPtr<T>& aptr);
 
-        //- Append an element at the end of the list
+        //- Move append an element to the end of the list
+        inline void append(autoPtr<T>&& aptr);
+
+        //- Move or clone append a tmp to the end of the list
         inline void append(const tmp<T>& tptr);
 
         //- Transfer into this list and annul the argument list
@@ -145,16 +154,19 @@ public:
         inline bool set(const label i) const;
 
         //- Set element to given pointer and return old element (can be null)
-        inline autoPtr<T> set(const label i, T* ptr);
+        inline autoPtr<T> set(label i, T* ptr);
 
         //- Set element to given autoPtr and return old element
-        inline autoPtr<T> set(const label i, const autoPtr<T>& aptr);
+        inline autoPtr<T> set(label i, autoPtr<T>& aptr);
+
+        //- Set element to given autoPtr and return old element
+        inline autoPtr<T> set(label i, autoPtr<T>&& aptr);
 
         //- Set element to given tmp and return old element
-        inline autoPtr<T> set(const label i, const tmp<T>& tptr);
+        inline autoPtr<T> set(label i, const tmp<T>& tptr);
 
 
-    // Member operators
+    // Member Operators
 
         //- Copy assignment.
         //  For existing list entries, values are copied from the list.
@@ -167,7 +179,7 @@ public:
 
     // IOstream operator
 
-        //- Read PtrList from Istream, discarding contents of existing PtrList
+        //- Read from Istream, discarding contents of existing list
         friend Istream& operator>> <T>(Istream& is, PtrList<T>& list);
 
 };

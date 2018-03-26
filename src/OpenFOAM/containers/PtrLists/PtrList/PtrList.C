@@ -25,37 +25,9 @@ License
 
 #include "PtrList.H"
 #include "SLPtrList.H"
+#include <utility>
 
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
-
-template<class T>
-Foam::PtrList<T>::PtrList(const PtrList<T>& list)
-:
-    UPtrList<T>(list.size())
-{
-    const label len = this->size();
-
-    for (label i=0; i<len; ++i)
-    {
-        this->ptrs_[i] = (list[i]).clone().ptr();
-    }
-}
-
-
-template<class T>
-template<class CloneArg>
-Foam::PtrList<T>::PtrList(const PtrList<T>& list, const CloneArg& cloneArg)
-:
-    UPtrList<T>(list.size())
-{
-    const label len = this->size();
-
-    for (label i=0; i<len; ++i)
-    {
-        this->ptrs_[i] = (list[i]).clone(cloneArg).ptr();
-    }
-}
-
 
 template<class T>
 Foam::PtrList<T>::PtrList(PtrList<T>& list, bool reuse)
@@ -64,6 +36,7 @@ Foam::PtrList<T>::PtrList(PtrList<T>& list, bool reuse)
 {
     if (!reuse)
     {
+        // This works like an inplace clone method
         const label len = this->size();
 
         for (label i=0; i<len; ++i)
@@ -90,67 +63,63 @@ Foam::PtrList<T>::PtrList(const SLPtrList<T>& list)
 }
 
 
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class T>
 Foam::PtrList<T>::~PtrList()
 {
-    const label len = this->size();
-
-    // Free old pointers
-    for (label i=0; i<len; ++i)
-    {
-        if (this->ptrs_[i])
-        {
-            delete this->ptrs_[i];
-        }
-    }
+    (this->ptrs_).free();
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-void Foam::PtrList<T>::clear()
+template<class... Args>
+Foam::PtrList<T> Foam::PtrList<T>::clone(Args&&... args) const
 {
     const label len = this->size();
 
+    PtrList<T> cloned(len);
+
     for (label i=0; i<len; ++i)
     {
-        if (this->ptrs_[i])
+        const T* ptr = this->ptrs_[i];
+
+        if (ptr)
         {
-            delete this->ptrs_[i];
+            cloned.ptrs_[i] = ptr->clone(std::forward<Args>(args)...).ptr();
         }
     }
 
-    UPtrList<T>::clear();
+    return cloned;
 }
 
 
 template<class T>
 void Foam::PtrList<T>::resize(const label newLen)
 {
+    const label oldLen = this->size();
+
     if (newLen <= 0)
     {
         clear();
-        return;
     }
-
-    const label oldLen = this->size();
-
-    if (newLen != oldLen)
+    else if (newLen != oldLen)
     {
         // Truncation frees old pointers
         for (label i=newLen; i<oldLen; ++i)
         {
-            if (this->ptrs_[i])
+            T* ptr = this->ptrs_[i];
+
+            if (ptr)
             {
-                delete this->ptrs_[i];
+                delete ptr;
             }
         }
 
         // Any new elements are initialized to nullptr.
-        this->ptrs_.resize(newLen, reinterpret_cast<T*>(0));
+        (this->ptrs_).resize(newLen);
     }
 }
 

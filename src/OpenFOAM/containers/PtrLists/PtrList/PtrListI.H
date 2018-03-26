@@ -26,6 +26,15 @@ License
 #include "autoPtr.H"
 #include "tmp.H"
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class T>
+inline void Foam::PtrList<T>::free()
+{
+    (this->ptrs_).free();
+}
+
+
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
 template<class T>
@@ -36,9 +45,16 @@ inline constexpr Foam::PtrList<T>::PtrList() noexcept
 
 
 template<class T>
-inline Foam::PtrList<T>::PtrList(const label nElem)
+inline Foam::PtrList<T>::PtrList(const label len)
 :
-    UPtrList<T>(nElem)
+    UPtrList<T>(len)
+{}
+
+
+template<class T>
+inline Foam::PtrList<T>::PtrList(const PtrList<T>& list)
+:
+    UPtrList<T>(list.ptrs_.clone())
 {}
 
 
@@ -49,7 +65,27 @@ inline Foam::PtrList<T>::PtrList(PtrList<T>&& list)
 {}
 
 
+template<class T>
+template<class CloneArg>
+inline Foam::PtrList<T>::PtrList
+(
+    const PtrList<T>& list,
+    const CloneArg& cloneArg
+)
+:
+    UPtrList<T>(list.clone(cloneArg)())
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class T>
+inline void Foam::PtrList<T>::clear()
+{
+    (this->ptrs_).free();
+    UPtrList<T>::clear();
+}
+
 
 template<class T>
 inline void Foam::PtrList<T>::setSize(const label newLen)
@@ -59,16 +95,30 @@ inline void Foam::PtrList<T>::setSize(const label newLen)
 
 
 template<class T>
-inline void Foam::PtrList<T>::append(const autoPtr<T>& aptr)
+inline void Foam::PtrList<T>::append(T* ptr)
 {
-    return UPtrList<T>::append(const_cast<autoPtr<T>&>(aptr).ptr());
+    UPtrList<T>::append(ptr);
+}
+
+
+template<class T>
+inline void Foam::PtrList<T>::append(autoPtr<T>& aptr)
+{
+    return UPtrList<T>::append(aptr.release());
+}
+
+
+template<class T>
+inline void Foam::PtrList<T>::append(autoPtr<T>&& aptr)
+{
+    return UPtrList<T>::append(aptr.release());
 }
 
 
 template<class T>
 inline void Foam::PtrList<T>::append(const tmp<T>& tptr)
 {
-    return UPtrList<T>::append(const_cast<tmp<T>&>(tptr).ptr());
+    return UPtrList<T>::append(tptr.ptr());
 }
 
 
@@ -80,38 +130,37 @@ inline bool Foam::PtrList<T>::set(const label i) const
 
 
 template<class T>
-inline Foam::autoPtr<T> Foam::PtrList<T>::set(const label i, T* ptr)
+inline Foam::autoPtr<T> Foam::PtrList<T>::set(label i, T* ptr)
 {
     return autoPtr<T>(UPtrList<T>::set(i, ptr));
 }
 
 
 template<class T>
-inline Foam::autoPtr<T> Foam::PtrList<T>::set
-(
-    const label i,
-    const autoPtr<T>& aptr
-)
+inline Foam::autoPtr<T> Foam::PtrList<T>::set(label i, autoPtr<T>& aptr)
 {
-    return set(i, const_cast<autoPtr<T>&>(aptr).ptr());
+    return set(i, aptr.release());
 }
 
 
 template<class T>
-inline Foam::autoPtr<T> Foam::PtrList<T>::set
-(
-    const label i,
-    const tmp<T>& tptr
-)
+inline Foam::autoPtr<T> Foam::PtrList<T>::set(label i, autoPtr<T>&& aptr)
 {
-    return set(i, const_cast<tmp<T>&>(tptr).ptr());
+    return set(i, aptr.release());
+}
+
+
+template<class T>
+inline Foam::autoPtr<T> Foam::PtrList<T>::set(label i, const tmp<T>& tptr)
+{
+    return set(i, tptr.ptr());
 }
 
 
 template<class T>
 inline void Foam::PtrList<T>::transfer(PtrList<T>& list)
 {
-    this->clear();
+    this->free(); // free old pointers
     UPtrList<T>::transfer(list);
 }
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,6 @@ License
 #include "PtrList.H"
 #include "SLList.H"
 #include "Istream.H"
-#include "Ostream.H"
 #include "INew.H"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -35,6 +34,8 @@ template<class T>
 template<class INew>
 void Foam::PtrList<T>::read(Istream& is, const INew& inew)
 {
+    clear();  // Delete old pointers and reset the list size
+
     is.fatalCheck(FUNCTION_NAME);
 
     token firstToken(is);
@@ -53,7 +54,7 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inew)
         const label len = firstToken.labelToken();
 
         // Set list length to that read
-        setSize(len);
+        resize(len);
 
         // Read beginning of contents
         const char delimiter = is.readBeginList("PtrList");
@@ -100,6 +101,8 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inew)
 
 
     // "(...)" : read as SLList and transfer contents
+    // This would be more efficient (fewer allocations, lower overhead)
+    // using a DynamicList, but then we have circular dependencies
     if (firstToken.isPunctuation())
     {
         if (firstToken.pToken() != token::BEGIN_LIST)
@@ -111,7 +114,7 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inew)
                 << exit(FatalIOError);
         }
 
-        SLList<T*> sllPtrs;
+        SLList<T*> slList;
 
         token lastToken(is);
         while
@@ -133,15 +136,15 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inew)
                     << exit(FatalIOError);
             }
 
-            sllPtrs.append(inew(is).ptr());
+            slList.append(inew(is).ptr());
             is >> lastToken;
         }
 
-        setSize(sllPtrs.size());
+        resize(slList.size());
 
-        // A list of pointers - can simply copy
+        // A list of pointers - can simply shallow copy them
         label i = 0;
-        for (T* ptr : sllPtrs)
+        for (T* ptr : slList)
         {
             set(i++, ptr);
         }
@@ -178,11 +181,9 @@ Foam::PtrList<T>::PtrList(Istream& is)
 // * * * * * * * * * * * * * * * Istream Operator  * * * * * * * * * * * * * //
 
 template<class T>
-Foam::Istream& Foam::operator>>(Istream& is, PtrList<T>& lst)
+Foam::Istream& Foam::operator>>(Istream& is, PtrList<T>& list)
 {
-    lst.clear();
-    lst.read(is, INew<T>());
-
+    list.read(is, INew<T>());
     return is;
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,24 +23,40 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "UPtrList.H"
+#include "PtrListDetail.H"
+#include "error.H"
 #include "Ostream.H"
 
-// * * * * * * * * * * * * * * * Ostream Operators * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-Foam::Ostream& Foam::operator<<(Ostream& os, const UPtrList<T>& lst)
+Foam::Ostream& Foam::Detail::PtrListDetail<T>::write
+(
+    Ostream& os,
+    const bool trimNull
+) const
 {
-    const label len = lst.size();
+    const label len = this->size();
 
-    // Size and start delimiter
-    os  << nl << indent << len << nl
+    // The (output) size and start delimiter
+    os  << nl << indent << (trimNull ? this->count() : len) << nl
         << indent << token::BEGIN_LIST << incrIndent << nl;
 
     // Contents
     for (label i=0; i < len; ++i)
     {
-        os << lst[i] << nl;
+        const T* ptr = (*this)[i];
+        if (ptr)
+        {
+            os << *ptr << nl;
+        }
+        else if (!trimNull)
+        {
+            FatalErrorInFunction
+                << "cannot dereference nullptr at index " << i
+                << " in range [0," << len << ")"
+                << abort(FatalError);
+        }
     }
 
     // End delimiter
