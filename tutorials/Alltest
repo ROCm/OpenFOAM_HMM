@@ -7,20 +7,8 @@
 #    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # Script
 #     Alltest
@@ -101,9 +89,8 @@ done
 
 #------------------------------------------------------------------------------
 
-
 #
-# set up a default scheme on all schemes
+# Set up a default scheme on all schemes
 #
 setDefaultFvSchemes()
 {
@@ -178,6 +165,14 @@ if [ -d "$TEST_RUN_DIR" ]
 then
     echo "Removing old directory: $TEST_RUN_DIR" 1>&2
     rm -rf $TEST_RUN_DIR
+fi
+
+# Remove old build/ directory
+buildDir="$WM_PROJECT_DIR/build/${WM_OPTIONS}/${TEST_RUN_DIR##*/}"
+if [ -d "$buildDir" ]
+then
+    echo "Removing old build directory: $buildDir" 1>&2
+    rm -rf $buildDir
 fi
 
 echo "Modifying ${MAIN_CONTROL_DICT}" 1>&2
