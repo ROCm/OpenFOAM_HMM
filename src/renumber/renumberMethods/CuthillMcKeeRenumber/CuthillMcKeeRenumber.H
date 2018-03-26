@@ -51,7 +51,7 @@ class CuthillMcKeeRenumber
 {
     // Private data
 
-        const Switch reverse_;
+        const bool reverse_;
 
 
     // Private Member Functions

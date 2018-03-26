@@ -93,7 +93,7 @@ private:
 
         //- Allow a face to be collapsed to a point early, before the test
         //  to collapse to an edge
-        const Switch allowEarlyCollapseToPoint_;
+        const bool allowEarlyCollapseToPoint_;
 
         //- Fraction of maxCollapseFaceToPointSideLengthCoeff_ to use when
         //  allowEarlyCollapseToPoint_ is on

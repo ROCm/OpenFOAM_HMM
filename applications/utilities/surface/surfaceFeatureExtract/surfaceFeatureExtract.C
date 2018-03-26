@@ -463,7 +463,7 @@ int main(int argc, char *argv[])
             }
 
             // Suboption: "nonManifoldEdges" (false: remove non-manifold edges)
-            if (!subsetDict.lookupOrDefault<bool>("nonManifoldEdges", true))
+            if (!subsetDict.lookupOrDefault("nonManifoldEdges", true))
             {
                 Info<< "Removing all non-manifold edges"
                     << " (edges with > 2 connected faces) unless they"
@@ -478,7 +478,7 @@ int main(int argc, char *argv[])
             }
 
             // Suboption: "openEdges" (false: remove open edges)
-            if (!subsetDict.lookupOrDefault<bool>("openEdges", true))
+            if (!subsetDict.lookupOrDefault("openEdges", true))
             {
                 Info<< "Removing all open edges"
                     << " (edges with 1 connected face)" << endl;
@@ -650,7 +650,7 @@ int main(int argc, char *argv[])
         }
 
         // Option: "closeness"
-        if (surfaceDict.lookupOrDefault<bool>("closeness", false))
+        if (surfaceDict.lookupOrDefault("closeness", false))
         {
             Pair<tmp<scalarField>> tcloseness =
                 triSurfaceTools::writeCloseness
@@ -697,7 +697,7 @@ int main(int argc, char *argv[])
         }
 
         // Option: "curvature"
-        if (surfaceDict.lookupOrDefault<bool>("curvature", false))
+        if (surfaceDict.lookupOrDefault("curvature", false))
         {
             tmp<scalarField> tcurvatureField =
                 triSurfaceTools::writeCurvature
@@ -727,7 +727,7 @@ int main(int argc, char *argv[])
         }
 
         // Option: "featureProximity"
-        if (surfaceDict.lookupOrDefault<bool>("featureProximity", false))
+        if (surfaceDict.lookupOrDefault("featureProximity", false))
         {
             tmp<scalarField> tproximity =
                 edgeMeshTools::writeFeatureProximity

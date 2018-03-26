@@ -79,7 +79,7 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     TName_(dict.lookupOrDefault<word>("T", "T")),
-    solarLoad_(dict.lookupOrDefault<bool>("solarLoad", false))
+    solarLoad_(dict.lookupOrDefault("solarLoad", false))
 {
     if (dict.found("refValue"))
     {

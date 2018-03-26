@@ -1225,7 +1225,7 @@ Foam::edgeCollapser::edgeCollapser
     ),
     allowEarlyCollapseToPoint_
     (
-        dict.lookupOrDefault<Switch>("allowEarlyCollapseToPoint", true)
+        dict.lookupOrDefault("allowEarlyCollapseToPoint", true)
     ),
     allowEarlyCollapseCoeff_
     (

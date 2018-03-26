@@ -1,9 +1,9 @@
 #include "readTimeControls.H"
 
-correctPhi = pimple.dict().lookupOrDefault<Switch>("correctPhi", true);
+correctPhi = pimple.dict().lookupOrDefault("correctPhi", true);
 
 checkMeshCourantNo =
-    pimple.dict().lookupOrDefault<Switch>("checkMeshCourantNo", false);
+    pimple.dict().lookupOrDefault("checkMeshCourantNo", false);
 
 moveMeshOuterCorrectors =
-    pimple.dict().lookupOrDefault<Switch>("moveMeshOuterCorrectors", false);
+    pimple.dict().lookupOrDefault("moveMeshOuterCorrectors", false);

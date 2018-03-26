@@ -139,7 +139,7 @@ const Foam::dictionary& Foam::subModelBase::properties() const
 
 bool Foam::subModelBase::defaultCoeffs(const bool printMsg) const
 {
-    bool def = coeffDict_.lookupOrDefault<bool>("defaultCoeffs", false);
+    bool def = coeffDict_.lookupOrDefault("defaultCoeffs", false);
     if (printMsg && def)
     {
         Info<< incrIndent;

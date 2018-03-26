@@ -136,15 +136,15 @@ class fanFvPatchField
         bool uniformJump_;
 
         //- Swtich for using non-dimensional curve
-        Switch nonDimensional_;
+        bool nonDimensional_;
 
         // Parameters for non-dimensional table
 
-            //- Fan rpm
-            scalar rpm_;
+        //- Fan rpm
+        scalar rpm_;
 
-            //- Fan mean diameter
-            scalar dm_;
+        //- Fan mean diameter
+        scalar dm_;
 
 
     // Private Member Functions

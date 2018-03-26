@@ -153,7 +153,7 @@ bool Foam::externalFileCoupler::readDict(const dictionary& dict)
         dict.lookup("commsDir") >> commsDir_;
         commsDir_.expand();
         commsDir_.clean();
-        slaveFirst_ = dict.lookupOrDefault<bool>("initByExternal", false);
+        slaveFirst_ = dict.lookupOrDefault("initByExternal", false);
 
         Info<< type() << ": initialize" << nl
             << "    directory: " << commsDir_ << nl
@@ -169,7 +169,7 @@ bool Foam::externalFileCoupler::readDict(const dictionary& dict)
 
     timeOut_ = dict.lookupOrDefault("timeOut", 100*waitInterval_);
 
-    log = dict.lookupOrDefault<bool>("log", false);
+    log = dict.lookupOrDefault("log", false);
 
     return true;
 }

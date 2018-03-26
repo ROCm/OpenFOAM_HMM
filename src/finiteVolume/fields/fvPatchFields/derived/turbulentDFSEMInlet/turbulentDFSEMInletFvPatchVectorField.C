@@ -856,7 +856,7 @@ turbulentDFSEMInletFvPatchVectorField
     curTimeIndex_(-1),
     patchBounds_(boundBox::invertedBox),
     singleProc_(false),
-    writeEddies_(dict.lookupOrDefault<bool>("writeEddies", false))
+    writeEddies_(dict.lookupOrDefault("writeEddies", false))
 {
     eddy::debug = debug;
 

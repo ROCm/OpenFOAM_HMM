@@ -62,7 +62,7 @@ matchedFlowRateOutletVelocityFvPatchVectorField
     }
     else
     {
-        rhoName_ = word(dict.lookupOrDefault<word>("rho", "rho"));
+        rhoName_ = dict.lookupOrDefault<word>("rho", "rho");
     }
 
     // Value field require if mass based

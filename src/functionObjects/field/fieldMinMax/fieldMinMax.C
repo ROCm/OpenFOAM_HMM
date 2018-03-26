@@ -136,7 +136,7 @@ bool Foam::functionObjects::fieldMinMax::read(const dictionary& dict)
     fvMeshFunctionObject::read(dict);
     writeFile::read(dict);
 
-    location_ = dict.lookupOrDefault<Switch>("location", true);
+    location_ = dict.lookupOrDefault("location", true);
 
     mode_ = modeTypeNames_.lookupOrDefault("mode", dict, modeType::mdMag);
 

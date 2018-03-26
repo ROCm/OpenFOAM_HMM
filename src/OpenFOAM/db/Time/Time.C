@@ -269,7 +269,7 @@ void Foam::Time::setControls()
 
     // Read and set the deltaT only if time-step adjustment is active
     // otherwise use the deltaT from the controlDict
-    if (controlDict_.lookupOrDefault<Switch>("adjustTimeStep", false))
+    if (controlDict_.lookupOrDefault("adjustTimeStep", false))
     {
         if (timeDict.readIfPresent("deltaT", deltaT_))
         {
@@ -358,7 +358,7 @@ void Foam::Time::setMonitoring(const bool forceProfiling)
     else if
     (
         profilingDict
-     && profilingDict->lookupOrDefault<bool>("active", true)
+     && profilingDict->lookupOrDefault("active", true)
     )
     {
         profiling::initialize

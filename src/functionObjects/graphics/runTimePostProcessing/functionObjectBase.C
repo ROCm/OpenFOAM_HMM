@@ -89,7 +89,7 @@ Foam::functionObjects::runTimePostPro::functionObjectBase::functionObjectBase
     fieldVisualisationBase(dict, colours),
     state_(state),
     functionObjectName_(""),
-    clearObjects_(dict.lookupOrDefault<bool>("clearObjects", false))
+    clearObjects_(dict.lookupOrDefault("clearObjects", false))
 {
     dict.lookup("functionObject") >> functionObjectName_;
 }

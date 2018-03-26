@@ -121,14 +121,14 @@ IOdictionary additionalControlsDict
     )
 );
 
-Switch solvePrimaryRegion
+bool solvePrimaryRegion
 (
-    additionalControlsDict.lookup("solvePrimaryRegion")
+    additionalControlsDict.lookupOrDefault("solvePrimaryRegion", true)
 );
 
-Switch solvePyrolysisRegion
+bool solvePyrolysisRegion
 (
-    additionalControlsDict.lookupOrDefault<bool>("solvePyrolysisRegion", true)
+    additionalControlsDict.lookupOrDefault("solvePyrolysisRegion", true)
 );
 
 volScalarField Qdot

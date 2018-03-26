@@ -58,7 +58,7 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
     allowFreeStandingZoneFaces_(dict.lookup("allowFreeStandingZoneFaces")),
     useTopologicalSnapDetection_
     (
-        dict.lookupOrDefault<bool>("useTopologicalSnapDetection", true)
+        dict.lookupOrDefault("useTopologicalSnapDetection", true)
     ),
     maxLoadUnbalance_(dict.lookupOrDefault<scalar>("maxLoadUnbalance", 0)),
     handleSnapProblems_

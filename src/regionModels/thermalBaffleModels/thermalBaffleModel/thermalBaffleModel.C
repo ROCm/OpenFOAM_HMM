@@ -201,7 +201,7 @@ thermalBaffleModel::thermalBaffleModel
     thickness_(),
     delta_("delta", dimLength, 0.0),
     oneD_(false),
-    constantThickness_(dict.lookupOrDefault<bool>("constantThickness", true))
+    constantThickness_(dict.lookupOrDefault("constantThickness", true))
 {
     init();
 }
@@ -217,7 +217,7 @@ thermalBaffleModel::thermalBaffleModel
     thickness_(),
     delta_("delta", dimLength, 0.0),
     oneD_(false),
-    constantThickness_(lookupOrDefault<bool>("constantThickness", true))
+    constantThickness_(lookupOrDefault("constantThickness", true))
 {
     init();
 }

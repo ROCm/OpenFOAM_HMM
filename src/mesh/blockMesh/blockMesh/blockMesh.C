@@ -39,15 +39,15 @@ namespace Foam
 Foam::blockMesh::blockMesh(const IOdictionary& dict, const word& regionName)
 :
     meshDict_(dict),
-    verboseOutput(meshDict_.lookupOrDefault<Switch>("verbose", true)),
+    verboseOutput(meshDict_.lookupOrDefault("verbose", true)),
     geometry_
     (
         IOobject
         (
             "geometry",                 // dummy name
-            meshDict_.time().constant(),     // instance
+            meshDict_.time().constant(), // instance
             "geometry",                 // local
-            meshDict_.time(),                // registry
+            meshDict_.time(),           // registry
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         ),
@@ -65,9 +65,7 @@ Foam::blockMesh::blockMesh(const IOdictionary& dict, const word& regionName)
     vertices_(Foam::vertices(blockVertices_)),
     topologyPtr_(createTopology(meshDict_, regionName))
 {
-    Switch fastMerge(meshDict_.lookupOrDefault<Switch>("fastMerge", false));
-
-    if (fastMerge)
+    if (meshDict_.lookupOrDefault("fastMerge", false))
     {
         calcMergeInfoFast();
     }

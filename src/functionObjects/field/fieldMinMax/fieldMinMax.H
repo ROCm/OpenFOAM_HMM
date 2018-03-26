@@ -118,8 +118,8 @@ protected:
         //- Mode type names
         static const Enum<modeType> modeTypeNames_;
 
-        //- Switch to write location of min/max values
-        Switch location_;
+        //- Write location of min/max values?
+        bool location_;
 
         //- Mode for min/max - only applicable for ranks > 0
         modeType mode_;

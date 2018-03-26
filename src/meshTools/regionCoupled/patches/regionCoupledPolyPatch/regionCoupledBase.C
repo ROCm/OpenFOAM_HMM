@@ -151,7 +151,7 @@ Foam::regionCoupledBase::regionCoupledBase
     nbrRegionName_(dict.lookup("neighbourRegion")),
     sameRegion_(nbrRegionName_ == patch_.boundaryMesh().mesh().name()),
     AMIPtr_(nullptr),
-    AMIReverse_(dict.lookupOrDefault<bool>("flipNormals", false)),
+    AMIReverse_(dict.lookupOrDefault("flipNormals", false)),
     surfPtr_(nullptr),
     surfDict_(dict.subOrEmptyDict("surface"))
 {}

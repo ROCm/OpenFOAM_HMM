@@ -671,7 +671,7 @@ Foam::discreteSurface::discreteSurface
     interpolate_
     (
         allowInterpolate
-     && dict.lookupOrDefault<Switch>("interpolate", false)
+     && dict.lookupOrDefault("interpolate", false)
     ),
     surface_
     (
@@ -688,7 +688,7 @@ Foam::discreteSurface::discreteSurface
     ),
     sampleSource_(samplingSourceNames_.lookup("source", dict)),
     needsUpdate_(true),
-    keepIds_(dict.lookupOrDefault<Switch>("keepIds", false)),
+    keepIds_(dict.lookupOrDefault("keepIds", false)),
     originalIds_(),
     zoneIds_(),
     sampleElements_(0),

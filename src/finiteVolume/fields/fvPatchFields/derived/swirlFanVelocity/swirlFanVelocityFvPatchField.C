@@ -153,7 +153,7 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
     rpm_(dict.lookupOrDefault<scalar>("rpm", 0.0)),
     rEff_(dict.lookupOrDefault<scalar>("rEff", 0.0)),
     fanEff_(dict.lookupOrDefault<scalar>("fanEff", 1.0)),
-    useRealRadius_(dict.lookupOrDefault<Switch>("useRealRadius", false)),
+    useRealRadius_(dict.lookupOrDefault("useRealRadius", false)),
     rInner_(dict.lookupOrDefault<scalar>("rInner", 0.0)),
     rOuter_(dict.lookupOrDefault<scalar>("rOuter", 0.0))
 {}

@@ -96,8 +96,8 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
     uniformJumpFvPatchField<scalar>(p, iF),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    uniformJump_(dict.lookupOrDefault<bool>("uniformJump", false)),
-    nonDimensional_(dict.lookupOrDefault<Switch>("nonDimensional", false)),
+    uniformJump_(dict.lookupOrDefault("uniformJump", false)),
+    nonDimensional_(dict.lookupOrDefault("nonDimensional", false)),
     rpm_(dict.lookupOrDefault<scalar>("rpm", 0.0)),
     dm_(dict.lookupOrDefault<scalar>("dm", 0.0))
 {

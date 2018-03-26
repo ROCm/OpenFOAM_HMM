@@ -282,10 +282,10 @@ int main(int argc, char *argv[])
     const word viewFactorWall("viewFactorWall");
 
     const bool writeViewFactors =
-        viewFactorDict.lookupOrDefault<bool>("writeViewFactorMatrix", false);
+        viewFactorDict.lookupOrDefault("writeViewFactorMatrix", false);
 
     const bool dumpRays =
-        viewFactorDict.lookupOrDefault<bool>("dumpRays", false);
+        viewFactorDict.lookupOrDefault("dumpRays", false);
 
     const label debug = viewFactorDict.lookupOrDefault<label>("debug", 0);
 

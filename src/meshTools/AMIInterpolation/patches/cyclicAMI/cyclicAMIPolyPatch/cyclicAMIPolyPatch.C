@@ -538,7 +538,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
             )
         )
     ),
-    AMIReverse_(dict.lookupOrDefault<bool>("flipNormals", false)),
+    AMIReverse_(dict.lookupOrDefault("flipNormals", false)),
     AMIRequireMatch_(true),
     AMILowWeightCorrection_(dict.lookupOrDefault("lowWeightCorrection", -1.0)),
     surfPtr_(nullptr),

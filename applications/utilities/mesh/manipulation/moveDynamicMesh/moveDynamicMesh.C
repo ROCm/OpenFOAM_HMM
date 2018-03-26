@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
 
     bool moveMeshOuterCorrectors
     (
-        pimple.dict().lookupOrDefault<Switch>("moveMeshOuterCorrectors", false)
+        pimple.dict().lookupOrDefault("moveMeshOuterCorrectors", false)
     );
 
     while (runTime.loop())

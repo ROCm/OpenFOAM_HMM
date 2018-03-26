@@ -82,7 +82,7 @@ Foam::functionObjects::runTimeControls::runTimeCondition::runTimeCondition
     name_(name),
     obr_(obr),
     state_(state),
-    active_(dict.lookupOrDefault<bool>("active", true)),
+    active_(dict.lookupOrDefault("active", true)),
     conditionDict_(setConditionDict()),
     log_(dict.lookupOrDefault("log", true)),
     groupID_(dict.lookupOrDefault("groupID", -1))

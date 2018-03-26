@@ -92,14 +92,11 @@ private:
         //- The logic and enumerated text representation stored in a byte
         unsigned char switch_;
 
-        //- The set of names corresponding to the switchType enumeration.
-        //  Includes extra entries for "invalid".
-        static const char* names[9];
-
     // Static Member Functions
 
         //- Return enum value for input string
         static switchType parse(const std::string& str, bool allowBad);
+
 
 public:
 

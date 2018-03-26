@@ -270,17 +270,17 @@ Foam::profiling::profiling
     timers_(),
     sysInfo_
     (
-        dict.lookupOrDefault<bool>("sysInfo", false)
+        dict.lookupOrDefault("sysInfo", false)
       ? new profilingSysInfo() : nullptr
     ),
     cpuInfo_
     (
-        dict.lookupOrDefault<bool>("cpuInfo", false)
+        dict.lookupOrDefault("cpuInfo", false)
       ? new cpuInfo() : nullptr
     ),
     memInfo_
     (
-        dict.lookupOrDefault<bool>("memInfo", false)
+        dict.lookupOrDefault("memInfo", false)
       ? new memInfo() : nullptr
     )
 {}

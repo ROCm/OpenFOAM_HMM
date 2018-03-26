@@ -106,7 +106,7 @@ Foam::wallDist::wallDist
         dimensionedScalar("y" & patchTypeName_, dimLength, SMALL),
         patchDistMethod::patchTypes<scalar>(mesh, patchIDs_)
     ),
-    nRequired_(dict_.lookupOrDefault<Switch>("nRequired", false)),
+    nRequired_(dict_.lookupOrDefault("nRequired", false)),
     n_(volVectorField::null()),
     updateInterval_(dict_.lookupOrDefault<label>("updateInterval", 1)),
     requireUpdate_(true)
@@ -160,7 +160,7 @@ Foam::wallDist::wallDist
         dimensionedScalar("y" & patchTypeName_, dimLength, SMALL),
         patchDistMethod::patchTypes<scalar>(mesh, patchIDs_)
     ),
-    nRequired_(dict_.lookupOrDefault<Switch>("nRequired", false)),
+    nRequired_(dict_.lookupOrDefault("nRequired", false)),
     n_(volVectorField::null()),
     updateInterval_(dict_.lookupOrDefault<label>("updateInterval", 1)),
     requireUpdate_(true)

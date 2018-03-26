@@ -1037,7 +1037,7 @@ Foam::mappedPatchBase::mappedPatchBase
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(nullptr),
     AMIPtr_(nullptr),
-    AMIReverse_(dict.lookupOrDefault<bool>("flipNormals", false)),
+    AMIReverse_(dict.lookupOrDefault("flipNormals", false)),
     surfPtr_(nullptr),
     surfDict_(dict.subOrEmptyDict("surface"))
 {
@@ -1119,7 +1119,7 @@ Foam::mappedPatchBase::mappedPatchBase
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(nullptr),
     AMIPtr_(nullptr),
-    AMIReverse_(dict.lookupOrDefault<bool>("flipNormals", false)),
+    AMIReverse_(dict.lookupOrDefault("flipNormals", false)),
     surfPtr_(nullptr),
     surfDict_(dict.subOrEmptyDict("surface"))
 {

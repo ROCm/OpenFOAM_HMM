@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class SloanRenumber Declaration
+                        Class SloanRenumber Declaration
 \*---------------------------------------------------------------------------*/
 
 class SloanRenumber
@@ -53,7 +53,7 @@ class SloanRenumber
 {
     // Private data
 
-        const Switch reverse_;
+        const bool reverse_;
 
 
     // Private Member Functions
@@ -76,8 +76,7 @@ public:
 
 
     //- Destructor
-    virtual ~SloanRenumber()
-    {}
+    virtual ~SloanRenumber() = default;
 
 
     // Member Functions

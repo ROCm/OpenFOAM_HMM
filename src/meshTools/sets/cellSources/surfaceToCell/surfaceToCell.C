@@ -431,7 +431,7 @@ Foam::surfaceToCell::surfaceToCell
     includeOutside_(readBool(dict.lookup("includeOutside"))),
     useSurfaceOrientation_
     (
-        dict.lookupOrDefault<bool>("useSurfaceOrientation", false)
+        dict.lookupOrDefault("useSurfaceOrientation", false)
     ),
     nearDist_(readScalar(dict.lookup("nearDistance"))),
     curvature_(readScalar(dict.lookup("curvature"))),

@@ -62,14 +62,14 @@ int main(int argc, char *argv[])
         #include "setInitialDeltaT.H"
     }
 
-    // Switch faceMomentum
+    // bool faceMomentum
     // (
-    //     pimple.dict().lookupOrDefault<Switch>("faceMomentum", false)
+    //     pimple.dict().lookupOrDefault("faceMomentum", false)
     // );
 
-    // Switch implicitPhasePressure
+    // bool implicitPhasePressure
     // (
-    //     mesh.solverDict(alpha1.name()).lookupOrDefault<Switch>
+    //     mesh.solverDict(alpha1.name()).lookupOrDefault
     //     (
     //         "implicitPhasePressure", false
     //     )

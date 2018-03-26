@@ -69,7 +69,7 @@ greyDiffusiveViewFactorFixedValueFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF, dict, false),
     qro_("qro", dict, p.size()),
-    solarLoad_(dict.lookupOrDefault<bool>("solarLoad", false))
+    solarLoad_(dict.lookupOrDefault("solarLoad", false))
 {
     if (dict.found("value"))
     {

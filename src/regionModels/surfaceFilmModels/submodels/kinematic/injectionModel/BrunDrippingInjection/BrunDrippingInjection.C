@@ -50,9 +50,9 @@ BrunDrippingInjection::BrunDrippingInjection
 )
 :
     injectionModel(type(), film, dict),
-    ubarStar_(coeffDict_.lookupOrDefault("ubarStar", 1.62208)),
-    dCoeff_(coeffDict_.lookupOrDefault("dCoeff", 3.3)),
-    deltaStable_(coeffDict_.lookupOrDefault("deltaStable", scalar(0))),
+    ubarStar_(coeffDict_.lookupOrDefault<scalar>("ubarStar", 1.62208)),
+    dCoeff_(coeffDict_.lookupOrDefault<scalar>("dCoeff", 3.3)),
+    deltaStable_(coeffDict_.lookupOrDefault<scalar>("deltaStable", 0)),
     diameter_(film.regionMesh().nCells(), -1.0)
 {}
 

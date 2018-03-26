@@ -140,13 +140,13 @@ class swirlFanVelocityFvPatchField
         scalar fanEff_;
 
         //- Switch to use effective radius or inner and outer radius
-        Switch useRealRadius_;
+        bool useRealRadius_;
 
-            //- Inner radius
-            scalar rInner_;
+        //- Inner radius
+        scalar rInner_;
 
-            //- Outer radius
-            scalar rOuter_;
+        //- Outer radius
+        scalar rOuter_;
 
 
     // Private Member Functions

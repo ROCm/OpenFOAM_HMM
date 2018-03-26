@@ -1,4 +1,4 @@
-if (pimple.dict().lookupOrDefault<bool>("hydrostaticInitialization", false))
+if (pimple.dict().lookupOrDefault("hydrostaticInitialization", false))
 {
     volScalarField& ph_rgh = regIOobject::store
     (

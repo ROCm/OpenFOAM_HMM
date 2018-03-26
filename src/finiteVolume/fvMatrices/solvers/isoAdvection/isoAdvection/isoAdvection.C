@@ -82,14 +82,8 @@ Foam::isoAdvection::isoAdvection
     nAlphaBounds_(dict_.lookupOrDefault<label>("nAlphaBounds", 3)),
     isoFaceTol_(dict_.lookupOrDefault<scalar>("isoFaceTol", 1e-8)),
     surfCellTol_(dict_.lookupOrDefault<scalar>("surfCellTol", 1e-8)),
-    gradAlphaBasedNormal_
-    (
-        dict_.lookupOrDefault<bool>("gradAlphaNormal", false)
-    ),
-    writeIsoFacesToFile_
-    (
-        dict_.lookupOrDefault<bool>("writeIsoFaces", false)
-    ),
+    gradAlphaBasedNormal_(dict_.lookupOrDefault("gradAlphaNormal", false)),
+    writeIsoFacesToFile_(dict_.lookupOrDefault("writeIsoFaces", false)),
 
     // Cell cutting data
     surfCells_(label(0.2*mesh_.nCells())),
@@ -1021,8 +1015,7 @@ void Foam::isoAdvection::applyBruteForceBounding()
         alpha1Changed = true;
     }
 
-    bool clip = dict_.lookupOrDefault<bool>("clip", true);
-    if (clip)
+    if (dict_.lookupOrDefault("clip", true))
     {
         alpha1_ = min(scalar(1.0), max(scalar(0.0), alpha1_));
         alpha1Changed = true;
@@ -1037,7 +1030,7 @@ void Foam::isoAdvection::applyBruteForceBounding()
 
 void Foam::isoAdvection::writeSurfaceCells() const
 {
-    if (dict_.lookupOrDefault<bool>("writeSurfCells", false))
+    if (dict_.lookupOrDefault("writeSurfCells", false))
     {
         cellSet cSet
         (
@@ -1059,7 +1052,7 @@ void Foam::isoAdvection::writeSurfaceCells() const
 
 void Foam::isoAdvection::writeBoundedCells() const
 {
-    if (dict_.lookupOrDefault<bool>("writeBoundedCells", false))
+    if (dict_.lookupOrDefault("writeBoundedCells", false))
     {
         cellSet cSet
         (

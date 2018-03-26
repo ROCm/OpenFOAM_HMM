@@ -70,7 +70,7 @@ bool Foam::functionObjects::vtkWrite::read(const dictionary& dict)
     // writer options - default is xml base64
     //
     writeOpts_ = vtk::formatType::INLINE_BASE64;
-    if (dict.lookupOrDefault<bool>("legacy", false))
+    if (dict.lookupOrDefault("legacy", false))
     {
         writeOpts_.legacy(true);
     }
@@ -99,7 +99,7 @@ bool Foam::functionObjects::vtkWrite::read(const dictionary& dict)
     //
     dict.readIfPresent("directory", dirName_);
 
-    writeIds_ = dict.lookupOrDefault<bool>("writeIds", false);
+    writeIds_ = dict.lookupOrDefault("writeIds", false);
 
 
     //

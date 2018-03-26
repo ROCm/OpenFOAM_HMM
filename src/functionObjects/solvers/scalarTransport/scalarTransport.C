@@ -209,7 +209,7 @@ Foam::functionObjects::scalarTransport::scalarTransport
     resetOnStartUp_(false),
     schemesField_("unknown-schemesField"),
     fvOptions_(mesh_),
-    bounded01_(dict.lookupOrDefault<Switch>("bounded01", true))
+    bounded01_(dict.lookupOrDefault("bounded01", true))
 {
     read(dict);
 

@@ -49,7 +49,7 @@ Foam::functionObjects::runTimePostPro::text::text
     size_(readScalar(dict.lookup("size"))),
     colour_(nullptr),
     bold_(readBool(dict.lookup("bold"))),
-    timeStamp_(dict.lookupOrDefault<bool>("timeStamp", false))
+    timeStamp_(dict.lookupOrDefault("timeStamp", false))
 {
     if (dict.found("colour"))
     {

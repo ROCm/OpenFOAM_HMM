@@ -102,7 +102,7 @@ Foam::fv::interRegionOption::interRegionOption
         dict,
         mesh
     ),
-    master_(coeffs_.lookupOrDefault<bool>("master", true)),
+    master_(coeffs_.lookupOrDefault("master", true)),
     nbrRegionName_(coeffs_.lookup("nbrRegion")),
     meshInterpPtr_()
 {

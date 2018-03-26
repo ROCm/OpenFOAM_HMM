@@ -140,7 +140,7 @@ Foam::CloudToVTK<CloudType>::CloudToVTK
 )
 :
     CloudFunctionObject<CloudType>(dict, owner, modelName, typeName),
-    binary_(dict.lookupOrDefault<bool>("binary", true))
+    binary_(dict.lookupOrDefault("binary", true))
 {}
 
 

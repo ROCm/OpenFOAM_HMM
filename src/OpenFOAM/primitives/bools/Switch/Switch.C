@@ -30,7 +30,17 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* Foam::Switch::names[9] =
+namespace
+{
+static_assert
+(
+    Foam::Switch::INVALID+1 == 9,
+    "Switch::switchType does not have 9 entries"
+);
+
+//- The names corresponding to the Switch::switchType enumeration.
+//  Includes extra entries for "invalid".
+static const char* names[9] =
 {
     "false", "true",
     "no",    "yes",
@@ -39,6 +49,7 @@ const char* Foam::Switch::names[9] =
     "invalid"
 };
 
+} // End anonymous namespace
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 

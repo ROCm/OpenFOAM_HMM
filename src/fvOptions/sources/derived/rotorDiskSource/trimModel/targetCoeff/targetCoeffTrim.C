@@ -224,7 +224,7 @@ void Foam::targetCoeffTrim::read(const dictionary& dict)
     trimModel::read(dict);
 
     const dictionary& targetDict(coeffs_.subDict("target"));
-    useCoeffs_ = targetDict.lookupOrDefault<bool>("useCoeffs", true);
+    useCoeffs_ = targetDict.lookupOrDefault("useCoeffs", true);
     word ext = "";
     if (useCoeffs_)
     {

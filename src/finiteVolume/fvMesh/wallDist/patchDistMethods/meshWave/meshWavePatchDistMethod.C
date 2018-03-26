@@ -53,7 +53,7 @@ Foam::patchDistMethods::meshWave::meshWave
 )
 :
     patchDistMethod(mesh, patchIDs),
-    correctWalls_(dict.lookupOrDefault<Switch>("correctWalls", true)),
+    correctWalls_(dict.lookupOrDefault("correctWalls", true)),
     nUnset_(0)
 {}
 
