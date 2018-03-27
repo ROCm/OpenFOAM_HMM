@@ -125,6 +125,17 @@ class wallBoundedStreamLine
 {
     // Private Member Functions
 
+        //- Disallow default bitwise copy construct
+        wallBoundedStreamLine(const wallBoundedStreamLine&) = delete;
+
+        //- Disallow default bitwise assignment
+        void operator=(const wallBoundedStreamLine&) = delete;
+
+
+protected:
+
+    // Protected Member Functions
+
         //- Find wall tet on cell
         tetIndices findNearestTet
         (
@@ -132,12 +143,6 @@ class wallBoundedStreamLine
             const point& seedPt,
             const label celli
         ) const;
-
-        //- Disallow default bitwise copy construct
-        wallBoundedStreamLine(const wallBoundedStreamLine&) = delete;
-
-        //- Disallow default bitwise assignment
-        void operator=(const wallBoundedStreamLine&) = delete;
 
 
 public:
@@ -154,6 +159,15 @@ public:
             const word& name,
             const Time& runTime,
             const dictionary& dict
+        );
+
+        //- Construct from Time and dictionary and list of fields to sample
+        wallBoundedStreamLine
+        (
+            const word& name,
+            const Time& runTime,
+            const dictionary& dict,
+            const wordList& fieldNames
         );
 
 

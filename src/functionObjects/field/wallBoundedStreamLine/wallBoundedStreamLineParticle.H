@@ -121,12 +121,15 @@ public:
                 allScalars_(allScalars),
                 allVectors_(allVectors)
             {}
+
+            virtual ~trackingData()
+            {}
     };
 
 
-private:
+protected:
 
-    // Private data
+    // Protected data
 
         //- Lifetime of particle. Particle dies when reaches 0.
         label lifeTime_;
@@ -141,7 +144,7 @@ private:
         List<DynamicList<vector>> sampledVectors_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
         vector interpolateFields
         (

@@ -236,6 +236,20 @@ Foam::functionObjects::wallBoundedStreamLine::wallBoundedStreamLine
 }
 
 
+Foam::functionObjects::wallBoundedStreamLine::wallBoundedStreamLine
+(
+    const word& name,
+    const Time& runTime,
+    const dictionary& dict,
+    const wordList& fieldNames
+)
+:
+    streamLineBase(name, runTime, dict, fieldNames)
+{
+    read(dict_);
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::functionObjects::wallBoundedStreamLine::~wallBoundedStreamLine()

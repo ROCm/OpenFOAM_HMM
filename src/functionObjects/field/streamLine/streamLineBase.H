@@ -63,15 +63,13 @@ class streamLineBase
 :
     public fvMeshFunctionObject
 {
-    // Private data
+protected:
 
         //- Seed set engine
         mutable autoPtr<sampledSet> sampledSetPtr_;
 
         //- Axis of the sampled points to output
         mutable word sampledSetAxis_;
-
-protected:
 
         //- Input dictionary
         dictionary dict_;
@@ -184,6 +182,16 @@ protected:
         //- Do the actual tracking to fill the track data
         virtual void track() = 0;
 
+        //- Write tracks to file
+        virtual bool writeToFile();
+
+        //- Reset the field names
+        virtual void resetFieldNames
+        (
+            const word& newUName,
+            const wordList& newFieldNames
+        );
+
 
 public:
 
@@ -200,6 +208,15 @@ public:
             const word& name,
             const Time& runTime,
             const dictionary& dict
+        );
+
+        //- Construct from Time and dictionary and list of fields to sample
+        streamLineBase
+        (
+            const word& name,
+            const Time& runTime,
+            const dictionary& dict,
+            const wordList& fieldNames
         );
 
 

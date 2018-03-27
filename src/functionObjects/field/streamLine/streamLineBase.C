@@ -141,11 +141,11 @@ void Foam::functionObjects::streamLineBase::initInterpolations
     {
         if (foundObject<volScalarField>(fieldName))
         {
-            nScalar++;
+            ++nScalar;
         }
         else if (foundObject<volVectorField>(fieldName))
         {
-            nVector++;
+            ++nVector;
         }
         else
         {
@@ -509,114 +509,8 @@ void Foam::functionObjects::streamLineBase::trimToBox(const treeBoundBox& bb)
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::functionObjects::streamLineBase::streamLineBase
-(
-    const word& name,
-    const Time& runTime,
-    const dictionary& dict
-)
-:
-    fvMeshFunctionObject(name, runTime, dict),
-    dict_(dict)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::streamLineBase::~streamLineBase()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
+bool Foam::functionObjects::streamLineBase::writeToFile()
 {
-    if (&dict_ != &dict)
-    {
-        // Update local copy of dictionary:
-        dict_ = dict;
-    }
-
-    fvMeshFunctionObject::read(dict);
-
-    Info<< type() << " " << name() << ":" << nl;
-
-    dict.lookup("fields") >> fields_;
-    UName_ = dict.lookupOrDefault<word>("U", "U");
-
-    Info<< "    Employing velocity field " << UName_ << endl;
-
-    if (!fields_.found(UName_))
-    {
-        FatalIOErrorInFunction(dict)
-            << "Velocity field for tracking " << UName_
-            << " should be present in the list of fields " << fields_
-            << exit(FatalIOError);
-    }
-
-
-    dict.lookup("trackForward") >> trackForward_;
-    dict.lookup("lifeTime") >> lifeTime_;
-    if (lifeTime_ < 1)
-    {
-        FatalErrorInFunction
-            << "Illegal value " << lifeTime_ << " for lifeTime"
-            << exit(FatalError);
-    }
-
-
-    trackLength_ = VGREAT;
-    if (dict.readIfPresent("trackLength", trackLength_))
-    {
-        Info<< type() << " : fixed track length specified : "
-            << trackLength_ << nl << endl;
-    }
-
-
-    bounds_ = boundBox::invertedBox;
-    if (dict.readIfPresent("bounds", bounds_) && !bounds_.empty())
-    {
-        Info<< "    clipping all segments to " << bounds_ << nl << endl;
-    }
-
-
-    interpolationScheme_ = dict.lookupOrDefault
-    (
-        "interpolationScheme",
-        interpolationCellPoint<scalar>::typeName
-    );
-
-    //Info<< "    using interpolation " << interpolationScheme_ << endl;
-
-    cloudName_ = dict.lookupOrDefault<word>("cloud", type());
-
-    sampledSetPtr_.clear();
-    sampledSetAxis_.clear();
-
-    scalarFormatterPtr_ = writer<scalar>::New(dict.lookup("setFormat"));
-    vectorFormatterPtr_ = writer<vector>::New(dict.lookup("setFormat"));
-
-    return true;
-}
-
-
-bool Foam::functionObjects::streamLineBase::execute()
-{
-    return true;
-}
-
-
-bool Foam::functionObjects::streamLineBase::write()
-{
-    Log << type() << " " << name() << " write:" << nl;
-
-
-    // Do all injection and tracking
-    track();
-
-
     if (Pstream::parRun())
     {
         // Append slave tracks to master ones
@@ -892,6 +786,147 @@ bool Foam::functionObjects::streamLineBase::write()
         propsDict.add("file", vectorVtkFile);
         setProperty(fieldName, propsDict);
     }
+
+    return true;
+}
+
+
+void Foam::functionObjects::streamLineBase::resetFieldNames
+(
+    const word& newUName,
+    const wordList& newFieldNames
+)
+{
+    UName_ = newUName;
+    fields_ = newFieldNames;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::functionObjects::streamLineBase::streamLineBase
+(
+    const word& name,
+    const Time& runTime,
+    const dictionary& dict
+)
+:
+    fvMeshFunctionObject(name, runTime, dict),
+    dict_(dict),
+    fields_()
+{}
+
+
+Foam::functionObjects::streamLineBase::streamLineBase
+(
+    const word& name,
+    const Time& runTime,
+    const dictionary& dict,
+    const wordList& fieldNames
+)
+:
+    fvMeshFunctionObject(name, runTime, dict),
+    dict_(dict),
+    fields_(fieldNames)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::functionObjects::streamLineBase::~streamLineBase()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
+{
+    if (&dict_ != &dict)
+    {
+        // Update local copy of dictionary:
+        dict_ = dict;
+    }
+
+    fvMeshFunctionObject::read(dict);
+
+    Info<< type() << " " << name() << ":" << nl;
+
+    UName_ = dict.lookupOrDefault<word>("U", "U");
+
+    if (fields_.empty())
+    {
+        dict.lookup("fields") >> fields_;
+
+        if (!fields_.found(UName_))
+        {
+            FatalIOErrorInFunction(dict)
+                << "Velocity field for tracking " << UName_
+                << " should be present in the list of fields " << fields_
+                << exit(FatalIOError);
+        }
+    }
+
+    Info<< "    Employing velocity field " << UName_ << endl;
+
+    dict.lookup("trackForward") >> trackForward_;
+    dict.lookup("lifeTime") >> lifeTime_;
+    if (lifeTime_ < 1)
+    {
+        FatalErrorInFunction
+            << "Illegal value " << lifeTime_ << " for lifeTime"
+            << exit(FatalError);
+    }
+
+
+    trackLength_ = VGREAT;
+    if (dict.readIfPresent("trackLength", trackLength_))
+    {
+        Info<< type() << " : fixed track length specified : "
+            << trackLength_ << nl << endl;
+    }
+
+
+    bounds_ = boundBox::invertedBox;
+    if (dict.readIfPresent("bounds", bounds_) && !bounds_.empty())
+    {
+        Info<< "    clipping all segments to " << bounds_ << nl << endl;
+    }
+
+
+    interpolationScheme_ = dict.lookupOrDefault
+    (
+        "interpolationScheme",
+        interpolationCellPoint<scalar>::typeName
+    );
+
+    //Info<< "    using interpolation " << interpolationScheme_ << endl;
+
+    cloudName_ = dict.lookupOrDefault<word>("cloud", type());
+
+    sampledSetPtr_.clear();
+    sampledSetAxis_.clear();
+
+    scalarFormatterPtr_ = writer<scalar>::New(dict.lookup("setFormat"));
+    vectorFormatterPtr_ = writer<vector>::New(dict.lookup("setFormat"));
+
+    return true;
+}
+
+
+bool Foam::functionObjects::streamLineBase::execute()
+{
+    return true;
+}
+
+
+bool Foam::functionObjects::streamLineBase::write()
+{
+    Log << type() << " " << name() << " write:" << nl;
+
+    // Do all injection and tracking
+    track();
+
+    writeToFile();
 
     return true;
 }
