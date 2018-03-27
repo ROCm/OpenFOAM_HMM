@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -668,18 +668,28 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
         {
             if (allTracks_[tracki].size())
             {
+                List<point>& points = allTracks_[tracki];
+                scalarList dist(points.size());
+                dist[0] = 0;
+                for (label pointi = 1; pointi < points.size(); ++pointi)
+                {
+                    dist[pointi] =
+                        dist[pointi-1] + mag(points[pointi] - points[pointi-1]);
+                }
+
                 tracks.set
                 (
                     nTracks,
                     new coordSet
                     (
                         "track" + Foam::name(nTracks),
-                        sampledSetAxis()  // "xyz"
+                        sampledSetAxis(),  // "xyz"
+                        std::move(allTracks_[tracki]),
+                        std::move(dist)
                     )
                 );
                 oldToNewTrack[tracki] = nTracks;
-                tracks[nTracks].transfer(allTracks_[tracki]);
-                nTracks++;
+                ++nTracks;
             }
         }
 
