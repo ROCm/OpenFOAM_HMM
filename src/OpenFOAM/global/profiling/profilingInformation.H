@@ -58,18 +58,6 @@ Ostream& operator<<(Ostream& os, const profilingInformation& info);
 
 class profilingInformation
 {
-    // Private Static Data Members
-
-        //- Counter to generate the ids
-        static label nextId_;
-
-        //- Get a new ID and update the counter
-        static label getNextId();
-
-        //- Raise the next possible ID (to avoid ID-clashes during reading)
-        static void raiseId(label maxVal);
-
-
     // Private Data Members
 
         //- Unique id to identify it
@@ -81,7 +69,7 @@ class profilingInformation
         //- Pointer to the parent object (or self for top-level)
         profilingInformation* parent_;
 
-        //- Nr of times this was called
+        //- Number of times this was called
         long calls_;
 
         //- Total time spent
@@ -94,16 +82,16 @@ class profilingInformation
         //  Only valid when the calling profiling has memInfo active.
         mutable int maxMem_;
 
-        //- Is this information currently on the stack?
-        mutable bool onStack_;
+        //- Is this information active or passive (ie, on the stack)?
+        mutable bool active_;
 
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         profilingInformation(const profilingInformation&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const profilingInformation&) = delete;
 
 
@@ -122,12 +110,8 @@ protected:
 
     // Member Functions
 
-        //- Mark as being on the stack
-        void push() const;
-
-        //- Mark as being off the stack
-        void pop() const;
-
+        //- Mark as being active or passive)
+        void setActive(bool state) const;
 
         //- Write the profiling times, optionally with additional values
         //  Use dictionary format.
@@ -147,8 +131,9 @@ public:
         //- Construct from components
         profilingInformation
         (
+            profilingInformation* parent,
             const string& descr,
-            profilingInformation* parent
+            const label id
         );
 
 
@@ -158,7 +143,7 @@ public:
 
     // Member Functions
 
-      // Access
+    // Access
 
         inline label id() const
         {
@@ -202,13 +187,13 @@ public:
         }
 
 
-        inline bool onStack() const
+        inline bool active() const
         {
-            return onStack_;
+            return active_;
         }
 
 
-      // Edit
+    // Edit
 
         //- Update it with a new timing information
         void update(const scalar elapsedTime);

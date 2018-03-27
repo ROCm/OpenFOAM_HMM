@@ -40,7 +40,7 @@ inline static void printEnv
     const std::string& envName
 )
 {
-    const std::string value = Foam::getEnv(envName);
+    const std::string value(Foam::getEnv(envName));
     if (!value.empty())
     {
         os.writeEntry(key, value);

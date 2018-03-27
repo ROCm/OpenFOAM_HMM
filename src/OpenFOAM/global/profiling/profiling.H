@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2009-2016 Bernhard Gschaider
-     \\/     M anipulation  | Copyright (C) 2016-2107 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,10 +54,8 @@ SourceFiles
 
 #include "profilingTrigger.H"
 #include "IOdictionary.H"
-#include "HashPtrTable.H"
-#include "Tuple2.H"
-#include "LIFOStack.H"
-#include "Map.H"
+#include "DynamicList.H"
+#include "PtrDynList.H"
 #include "Time.H"
 #include "clockTime.H"
 
@@ -82,7 +80,7 @@ class profiling
 {
 public:
 
-    // Public typedefs
+    // Public Typedefs
 
         typedef profilingInformation Information;
         typedef profilingTrigger Trigger;
@@ -98,38 +96,11 @@ private:
 
         typedef profilingSysInfo sysInfo;
 
-        //- Profile information lookup is qualified by parent id
-        typedef Tuple2<string, label> Key;
-
-        //- Hashing for information lookup
-        class HashKey
-        :
-            public Hash<Key>
-        {
-        public:
-
-            HashKey()
-            {}
-
-            //- Hash qualified by the parent id to avoid collisions
-            unsigned operator()(const Key& key) const
-            {
-                return
-                (
-                    Hash<string>()(key.first())
-                  + Hash<label>()(key.second())
-                );
-            }
-        };
-
-        typedef HashPtrTable<Information, Key, HashKey> StorageContainer;
-        typedef LIFOStack<Information*> StackContainer;
-
 
     // Private Static Data Members
 
-        //- Only one global pool object is possible
-        static profiling* pool_;
+        //- Only one global object is possible
+        static profiling* singleton_;
 
 
     // Private Data Members
@@ -137,17 +108,17 @@ private:
         //- The owner of the profiling
         const Time& owner_;
 
-        //- A global timer for the profiling
-        clockTime clockTime_;
-
         //- Storage of profiling information
-        StorageContainer hash_;
+        PtrDynList<Information> pool_;
 
-        //- Local stack of profiling information
-        StackContainer stack_;
+        //- Parent/child relationships for lookup purposes
+        DynamicList<DynamicList<Information*,16>> children_;
 
-        //- Note the timers (by Id) for the correct stack-output
-        Map<clockTime*> timers_;
+        //- LIFO stack of profiling information
+        DynamicList<Information*> stack_;
+
+        //- LIFO stack of clock values
+        DynamicList<clockValue> times_;
 
         //- General system information (optional)
         sysInfo* sysInfo_;
@@ -161,10 +132,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- Disallow copy construct
         profiling(const profiling&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- Disallow copy assignment
         void operator=(const profiling&) = delete;
 
 
@@ -196,20 +167,25 @@ protected:
 
     // Protected Member Functions
 
-        //- Find named profiling information element with specified parent.
-        //  Return nullptr on failure.
-        profilingInformation* find(const string& descr, const label parentId);
+        //- Clear all profiling and restart with new profiling
+        //  \return pointer to stored information element
+        Information* create(const zero);
 
-        //- Add to hashed storage,
-        //  \return pointer to newly stored element for chaining
-        profilingInformation* store(profilingInformation* info);
+        //- Get or create named profiling information element with the
+        //- specified parent.
+        //  \return pointer to stored information element
+        Information* create
+        (
+            Information* parent,
+            const string& descr
+        );
 
-        //- Add to stack and set timer lookup (based on Id)
-        void push(profilingInformation* info, clockTime& timer);
+        //- Add to stack of active information and begin timer datum
+        void beginTimer(Information* info);
 
-        //- Remove from stack and remove timer lookup (based on Id).
-        //  \return pointer to profiling information element
-        profilingInformation* pop();
+        //- Remove from stack of active information and update elapsed time
+        //  \return pointer to profiling information element (for reference)
+        Information* endTimer();
 
 
     // Static control elements
@@ -233,12 +209,8 @@ protected:
         static void stop(const Time& owner);
 
         //- Existing or new element on pool, add to stack.
-        //  Returns null if profiling has not been initialized
-        static profilingInformation* New
-        (
-            const string& descr,
-            clockTime& timer
-        );
+        //  Returns nullptr if profiling has not been initialized
+        static profilingInformation* New(const string& descr);
 
         //- Remove the information from the top of the stack
         static void unstack(const profilingInformation* info);
