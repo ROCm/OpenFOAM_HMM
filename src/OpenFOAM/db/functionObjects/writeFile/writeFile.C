@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,6 +113,12 @@ Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::createFile
         }
 
         osPtr.reset(new OFstream(outputDir/(fName + ".dat")));
+
+        if (!osPtr->good())
+        {
+            FatalIOErrorInFunction(osPtr()) << "Cannot open file"
+                << exit(FatalIOError);
+        }
 
         initStream(osPtr());
     }
