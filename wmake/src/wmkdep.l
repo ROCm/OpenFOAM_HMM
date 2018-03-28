@@ -4,7 +4,7 @@
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
    \\  /     A nd            | Copyright (C) 2011-2016 OpenFOAM Foundation
-    \\/      M anipulation   | Copyright (C) 2017 OpenCFD Ltd.
+    \\/      M anipulation   | Copyright (C) 2017-2018 OpenCFD Ltd.
 ------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -471,6 +471,17 @@ static FILE* fopen_file(const char* dirName, const char* fileName)
 
         file = fopen(fullName, "r");
 
+        if (!file && errno == EMFILE)
+        {
+            fprintf
+            (
+                stderr,
+                EXENAME ": too many open files while opening '%s'\n"
+                "Please change your open descriptor limit\n",
+                fullName
+            );
+        }
+
         if (file)
         {
             print_fileName(fullName);
@@ -481,6 +492,17 @@ static FILE* fopen_file(const char* dirName, const char* fileName)
     else
     {
         file = fopen(fileName, "r");
+
+        if (!file && errno == EMFILE)
+        {
+            fprintf
+            (
+                stderr,
+                EXENAME ": too many open files while opening '%s'\n"
+                "Please change your open descriptor limit\n",
+                fileName
+            );
+        }
 
         if (file)
         {
