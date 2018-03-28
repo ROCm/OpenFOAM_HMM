@@ -280,7 +280,7 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> fvMeshSubset::interpolate
                 {
                     // Mapped from internal face. Do what? Leave up to
                     // patchField. This would require also to pass in
-                    // original internal field so for now do as postprocessing
+                    // original internal field so for now do as post-processing
                     directAddressing[i] = -1;
                 }
             }
@@ -298,7 +298,7 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> fvMeshSubset::interpolate
             );
 
 
-            // Postprocess patch field for exposed faces
+            // Post-process patch field for exposed faces
 
             fvsPatchField<Type>& pfld = bf[patchi];
             const labelUList& fc = bf[patchi].patch().faceCells();

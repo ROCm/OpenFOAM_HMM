@@ -148,7 +148,7 @@ public:
 
         // Access
 
-            //- Retirn local reference cast into the cyclic patch
+            //- Return local reference cast into the cyclic patch
             const cyclicFaPatch& cyclicPatch() const
             {
                 return cyclicPatch_;
@@ -197,7 +197,7 @@ public:
 
         //- Cyclic coupled interface functions
 
-            //- Does the patch field perform the transfromation
+            //- Does the patch field perform the transformation
             virtual bool doTransform() const
             {
                 return !(cyclicPatch_.parallel() || pTraits<Type>::rank == 0);

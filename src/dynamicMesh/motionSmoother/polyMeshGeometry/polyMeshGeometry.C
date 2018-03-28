@@ -374,7 +374,7 @@ bool Foam::polyMeshGeometry::checkFaceDotProduct
     labelHashSet* setPtr
 )
 {
-    // for all internal and coupled faces check theat the d dot S product
+    // for all internal and coupled faces check that the d dot S product
     // is positive
 
     const labelList& own = mesh.faceOwner();

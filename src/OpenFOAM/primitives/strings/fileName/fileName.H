@@ -213,7 +213,7 @@ public:
       // Decomposition
 
         //- Return basename (part beyond last /), including its extension
-        //  The result normally coresponds to a Foam::word
+        //  The result normally corresponds to a Foam::word
         //
         // Behaviour compared to /usr/bin/basename:
         // \verbatim
@@ -232,7 +232,7 @@ public:
         word name() const;
 
         //- Return basename, without extension
-        //  The result normally coresponds to a Foam::word
+        //  The result normally corresponds to a Foam::word
         static std::string nameLessExt(const std::string& str);
 
         //- Return basename, without extension

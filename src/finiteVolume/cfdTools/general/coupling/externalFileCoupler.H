@@ -146,7 +146,7 @@ private:
         //- Disallow default bitwise copy construct
         externalFileCoupler(const externalFileCoupler&) = delete;
 
-        //- Disallow default bitwise assignmen
+        //- Disallow default bitwise assignment
         void operator=(const externalFileCoupler&) = delete;
 
 

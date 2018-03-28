@@ -166,7 +166,7 @@ Usage
         Cp           | Heat capacity for single phase | no   | 0
         rhoInf       | Density for single phase | no         | 0
         kappa        | Thermal conductivity for single phase | no   | 0
-        Prt          | Turbulent Prandt number | no          | 1.0
+        Prt          | Turbulent Prandlt number | no         | 1.0
         phaseThermos | Dictionary for multi-phase thermo |no | null
         fvOptions    | Opotional extra sources | no          | null
     \endtable

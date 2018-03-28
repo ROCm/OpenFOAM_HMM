@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class alphaContactAngleFvPatch Declaration
+                  Class alphaContactAngleFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class alphaContactAngleFvPatchScalarField
@@ -65,7 +65,7 @@ public:
         //- Limiting advancing contact angle
         scalar thetaA_;
 
-        //- Limiting receeding contact angle
+        //- Limiting receding contact angle
         scalar thetaR_;
 
 
@@ -100,7 +100,7 @@ public:
                 else return 180.0 - thetaA_;
             }
 
-            //- Return the limiting receeding contact angle
+            //- Return the limiting receding contact angle
             scalar thetaR(bool matched=true) const
             {
                 if (matched) return thetaR_;

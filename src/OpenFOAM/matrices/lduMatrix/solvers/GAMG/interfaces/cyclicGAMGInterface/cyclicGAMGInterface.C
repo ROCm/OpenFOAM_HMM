@@ -159,7 +159,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
 {}
 
 
-// * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::cyclicGAMGInterface::~cyclicGAMGInterface()
 {}

@@ -228,7 +228,7 @@ public:
                 //- Return the cloud type
                 inline const word& cloudName() const;
 
-                //- Return refernce to the mesh
+                //- Return reference to the mesh
                 inline const fvMesh& mesh() const;
 
 
@@ -264,7 +264,7 @@ public:
                 inline const typename ParcelType::constantProperties&
                     constProps(label typeId) const;
 
-                //- Return refernce to the random object
+                //- Return reference to the random object
                 inline Random& rndGen();
 
 

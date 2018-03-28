@@ -950,7 +950,7 @@ void Foam::radiation::solarLoad::calculate()
         Ru_ = dimensionedScalar("Ru", dimMass/dimLength/pow3(dimTime), 0.0);
         qrBf = 0.0;
 
-        // Add direct hit radation
+        // Add direct hit radiation
         const labelList& hitFacesId = hitFaces_->rayStartFaces();
         updateDirectHitRadiation(hitFacesId, includeMappedPatchBasePatches);
 

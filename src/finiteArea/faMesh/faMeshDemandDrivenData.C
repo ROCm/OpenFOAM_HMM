@@ -1283,7 +1283,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
             W[i] = 1.0/magSqr(allPoints[i] - points[curPoint]);
         }
 
-        // Transforme points
+        // Transform points
         const vector& origin = points[curPoint];
         vector axis(result[curPoint]/mag(result[curPoint]));
         vector dir(allPoints[0] - points[curPoint]);

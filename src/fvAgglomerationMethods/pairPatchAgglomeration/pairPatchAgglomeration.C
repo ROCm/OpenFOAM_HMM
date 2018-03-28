@@ -141,7 +141,7 @@ void Foam::pairPatchAgglomeration::setEdgeWeights
         }
     }
 
-    // Clean old weitghs
+    // Clean old weights
     facePairWeight_.clear();
     facePairWeight_.resize(coarsePatch.nEdges());
 

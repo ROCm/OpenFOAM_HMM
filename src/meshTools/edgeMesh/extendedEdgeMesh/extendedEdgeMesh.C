@@ -1667,7 +1667,7 @@ void Foam::extendedEdgeMesh::trim
     labelList allEdgeMap;       // from all to original edge
 
     labelList pointsFromEdge;   // list of new points created by cutting
-    labelList oldEdge;          // for each of these points the orginal edge
+    labelList oldEdge;          // for each of these points the original edge
     labelList surfTri;          // for each of these points the surface triangle
     cut
     (

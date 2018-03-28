@@ -1319,7 +1319,7 @@ int main(int argc, char *argv[])
                 }
 
                 // For now: have single faceZone per surface. Use first
-                // region in surface for patch for zoneing
+                // region in surface for patch for zoning
                 if (regNames.size())
                 {
                     label globalRegioni = surfaces.globalRegion(surfi, 0);

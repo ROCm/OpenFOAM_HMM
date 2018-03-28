@@ -113,7 +113,7 @@ public:
 
     // Selectors
 
-        //- Return a reference to the selected heat transfer coefficicent model
+        //- Return a reference to the selected heat transfer coefficient model
         static autoPtr<heatTransferCoeffModel> New
         (
             const dictionary& dict,

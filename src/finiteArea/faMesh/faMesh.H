@@ -339,7 +339,7 @@ public:
             const Time& time() const;
 
             //- Return the current instance directory for points
-            //  Used in the consruction of gemometric mesh data dependent
+            //  Used in the construction of geometric mesh data dependent
             //  on points
             const fileName& pointsInstance() const;
 
@@ -381,7 +381,7 @@ public:
                 //- Return faces
                 const faceList& faces() const;
 
-                //- Edge owner addresing
+                //- Edge owner addressing
                 inline const labelList& edgeOwner() const
                 {
                     return edgeOwner_;
@@ -457,7 +457,7 @@ public:
             }
 
 
-        // Mesh motion and mophing
+        // Mesh motion and morphing
 
             //- Is mesh moving
             bool moving() const

@@ -244,7 +244,7 @@ labelList findBaffles(const polyMesh& mesh, const labelList& boundaryFaces)
     }
 
 
-    // Write to faceSet for ease of postprocessing.
+    // Write to faceSet for ease of post-processing.
     {
         faceSet duplicateSet
         (

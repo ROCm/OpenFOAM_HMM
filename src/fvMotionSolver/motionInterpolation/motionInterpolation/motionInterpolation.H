@@ -114,7 +114,7 @@ public:
 
     // Member Functions
 
-        //- Return const-refernce to the mesh
+        //- Return const-reference to the mesh
         const fvMesh& mesh() const
         {
             return mesh_;

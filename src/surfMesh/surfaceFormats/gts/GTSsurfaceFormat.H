@@ -61,7 +61,7 @@ class GTSsurfaceFormat
     // Private Member Functions
 
         //- Check and raise FatalError if output is not triangulated
-        //  Triangulatinng on-the-fly is otherwise too annoying
+        //  Triangulating on-the-fly is otherwise too annoying
         static bool checkIfTriangulated(const UList<Face>& faceLst);
 
         //- Disallow default bitwise copy construct

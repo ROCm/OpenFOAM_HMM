@@ -267,7 +267,7 @@ void Foam::cellCellStencils::cellVolumeWeight::findHoles
     // real patches
 
     //  0 : region not yet determined
-    //  1 : borders blockage so is not ok (but can be overriden by real
+    //  1 : borders blockage so is not ok (but can be overridden by real
     //      patch)
     //  2 : has real patch in it so is reachable
     labelList regionType(cellRegion.nRegions(), 0);

@@ -82,7 +82,7 @@ public:
 
     // Constructors
 
-        //- Construct from (base couped patch) components
+        //- Construct from (base coupled patch) components
         regionCoupledPolyPatch
         (
             const word& name,

@@ -130,7 +130,7 @@ public:
 
         // Access
 
-            //- const acess to direction
+            //- const access to direction
             const vector direction() const
             {
                 return direction_;

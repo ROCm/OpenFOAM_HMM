@@ -39,7 +39,7 @@ Foam::DSMCBaseCloud::DSMCBaseCloud()
 {}
 
 
-// * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * *  Destructor * * * * * * * * * * * * * * * //
 
 Foam::DSMCBaseCloud::~DSMCBaseCloud()
 {}

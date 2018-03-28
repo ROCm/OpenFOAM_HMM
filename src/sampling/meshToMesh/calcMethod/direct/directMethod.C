@@ -180,7 +180,7 @@ void Foam::directMethod::appendToDirectSeeds
         {
             // source cell srcI not yet mapped
 
-            // identfy if target cell exists for source cell srcI
+            // identify if target cell exists for source cell srcI
             bool found = false;
             forAll(tgtNbr, j)
             {

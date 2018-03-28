@@ -503,7 +503,7 @@ void Foam::FaceCellWave<Type, TrackingData>::offset
 template<class Type, class TrackingData>
 void Foam::FaceCellWave<Type, TrackingData>::handleProcPatches()
 {
-    // Tranfer all the information to/from neighbouring processors
+    // Transfer all the information to/from neighbouring processors
 
     const globalMeshData& pData = mesh_.globalData();
 

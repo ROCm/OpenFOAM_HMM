@@ -147,7 +147,7 @@ public:
 
 
         //- Return the face-interpolate of the given cell field
-        //  with the given owner and neighbour weigting factors
+        //  with the given owner and neighbour weighting factors
         static tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         interpolate
         (

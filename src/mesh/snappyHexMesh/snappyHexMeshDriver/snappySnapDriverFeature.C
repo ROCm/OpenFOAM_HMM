@@ -826,7 +826,7 @@ Foam::pointIndexHit Foam::snappySnapDriver::findMultiPatchPoint
                     label& patch = normalToPatch[faceToNormalBin[i]];
                     if (patch == -1)
                     {
-                        // First occurence
+                        // First occurrence
                         patch = patchIDs[i];
                     }
                     else if (patch == -2)

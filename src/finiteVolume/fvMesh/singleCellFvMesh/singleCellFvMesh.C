@@ -106,7 +106,7 @@ void Foam::singleCellFvMesh::agglomerateMesh
 
                     if (iter == localToNbr.end())
                     {
-                        // First occurence of this zone. Store correspondence
+                        // First occurrence of this zone. Store correspondence
                         // to remote zone number.
                         localToNbr.insert(myZone, nbrZone);
                     }

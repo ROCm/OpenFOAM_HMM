@@ -62,13 +62,13 @@ class randomise
 {
     // Private member data
 
-        //- The magnitude of the purturbation
+        //- The magnitude of the perturbation
         scalar magPerturbation_;
 
 
     // Private Member Functions
 
-        //- Calculate the randomisenitude of the field and register the result
+        //- Calculate the randomised field and register the result
         template<class Type>
         bool calcRandomised();
 

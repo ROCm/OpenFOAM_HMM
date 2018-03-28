@@ -218,7 +218,7 @@ public:
     // Member Functions
 
         //- Move mesh using current pointDisplacement boundary values.
-        //  Return true if succesful (errors on checkFaces less than
+        //  Return true if successful (errors on checkFaces less than
         //  allowable). Updates pointDisplacement.
         virtual bool move
         (

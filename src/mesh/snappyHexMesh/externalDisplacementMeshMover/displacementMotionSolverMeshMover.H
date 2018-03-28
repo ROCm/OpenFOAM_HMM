@@ -75,7 +75,7 @@ class displacementMotionSolverMeshMover
         //- Combined indirect fixedValue patches that we can modify
         autoPtr<indirectPrimitivePatch> adaptPatchPtr_;
 
-        //- Scale factor for displacemen
+        //- Scale factor for displacement
         pointScalarField scale_;
 
         //- Old point field
@@ -123,7 +123,7 @@ public:
     // Member Functions
 
         //- Move mesh using current pointDisplacement boundary values.
-        //  Return true if succesful (errors on checkFaces less than
+        //  Return true if successful (errors on checkFaces less than
         //  allowable). Updates pointDisplacement.
         virtual bool move
         (

@@ -128,10 +128,10 @@ private:
         //- Convective Scaling Factor (as determined by Prateep's tests)
         const scalar convectiveScaling_;
 
-        //- Minimum delta film to be consired dry
+        //- Minimum delta film to be considered dry
         const scalar filmDeltaDry_;
 
-        //- Maximum delta film to be consired wet
+        //- Maximum delta film to be considered wet
         const scalar filmDeltaWet_;
 
         //- Retrieve film model from the database

@@ -105,10 +105,10 @@ Description
         // Carrier molecular weight
         carrierMolWeight           28.9;
 
-        // Characteristic lenght of the wall
+        // Characteristic length of the wall
         L               0.1;
 
-        // Vaporasation temperature
+        // Vaporisation temperature
         Tvap            273;
 
         // Liquid properties for the condensed mass
@@ -211,7 +211,7 @@ private:
             //- Name of temperature field on the neighbour region
             const word TnbrName_;
 
-            //- Name of the radiative heat flux in the neighbout region
+            //- Name of the radiative heat flux in the neighbour region
             const word qrNbrName_;
 
             //- Name of the radiative heat flux field

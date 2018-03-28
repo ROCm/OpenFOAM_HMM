@@ -137,7 +137,7 @@ class kOmegaSST
 
 protected:
 
-    // Protecetd Member Functions
+    // Protected Member Functions
 
         virtual void correctNut(const volScalarField& S2);
         virtual void correctNut();

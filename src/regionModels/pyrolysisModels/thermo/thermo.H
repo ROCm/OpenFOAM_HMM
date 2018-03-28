@@ -97,7 +97,7 @@ protected:
             //- Number of non-orthogonal correctors
             label nNonOrthCorr_;
 
-            //- Maximum diffussivity
+            //- Maximum diffusivity
             scalar maxDiff_;
 
 

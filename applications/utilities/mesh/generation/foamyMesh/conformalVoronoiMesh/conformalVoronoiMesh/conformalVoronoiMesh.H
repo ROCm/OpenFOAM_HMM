@@ -439,7 +439,7 @@ private:
         ) const;
 
         //- Check to see if dual cell specified by given vertex iterator
-        //  intersects the boundary and hence reqires a point-pair
+        //  intersects the boundary and hence requires a point-pair
         bool dualCellSurfaceAnyIntersection
         (
             const Delaunay::Finite_vertices_iterator& vit
@@ -726,7 +726,7 @@ private:
 
         label classifyBoundaryPoint(Cell_handle cit) const;
 
-        //- Index all of the the Delaunay cells and calculate their dual points
+        //- Index all of the Delaunay cells and calculate their dual points
         void indexDualVertices
         (
             pointField& pts,

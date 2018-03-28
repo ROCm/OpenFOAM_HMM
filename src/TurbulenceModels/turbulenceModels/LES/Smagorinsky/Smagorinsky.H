@@ -158,7 +158,7 @@ public:
             return k(fvc::grad(this->U_));
         }
 
-        //- Return sub-grid disipation rate
+        //- Return sub-grid dissipation rate
         virtual tmp<volScalarField> epsilon() const;
 
         //- Correct Eddy-Viscosity and related properties

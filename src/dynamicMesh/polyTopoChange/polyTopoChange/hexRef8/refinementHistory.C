@@ -572,7 +572,7 @@ Foam::refinementHistory::refinementHistory(const IOobject& io)
         close();
     }
 
-    // When running in redistributPar + READ_IF_PRESENT it can happen
+    // When running in redistributePar + READ_IF_PRESENT it can happen
     // that some processors do have refinementHistory and some don't so
     // test for active has to be outside of above condition.
     active_ = (returnReduce(visibleCells_.size(), sumOp<label>()) > 0);

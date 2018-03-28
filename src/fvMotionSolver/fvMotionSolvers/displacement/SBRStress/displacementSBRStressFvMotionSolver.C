@@ -171,7 +171,7 @@ Foam::displacementSBRStressFvMotionSolver::curPoints() const
 void Foam::displacementSBRStressFvMotionSolver::solve()
 {
     // The points have moved so before interpolation update
-    // the mtionSolver accordingly
+    // the motionSolver accordingly
     movePoints(fvMesh_.points());
 
     diffusivityPtr_->correct();

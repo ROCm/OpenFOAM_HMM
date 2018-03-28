@@ -137,7 +137,7 @@ void Foam::searchableCone::findNearestAndNormal
         scalar magS = mag(b);
         b /= magS;
 
-        // Find the vector along sample pt and pt at one end of conde
+        // Find the vector along sample pt and pt at one end of cone
         vector a(sample - projPt1);
 
         if (mag(a) <= ROOTVSMALL)

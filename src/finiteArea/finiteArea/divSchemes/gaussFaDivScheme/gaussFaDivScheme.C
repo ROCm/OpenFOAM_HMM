@@ -62,7 +62,6 @@ gaussDivScheme<Type>::facDiv
         (
             this->mesh_.Le() & this->tinterpScheme_().interpolate(vf)
         )
-        // Removed for consistencty.  Matthias Rauter, 6/Dec/2016
     );
 
     tDiv.ref().rename("div(" + vf.name() + ')');

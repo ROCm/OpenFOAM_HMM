@@ -90,7 +90,7 @@ public:
         //- Construct null
         aC10H7CH3();
 
-        //- Constrcut from components
+        //- Construct from components
         aC10H7CH3
         (
             const liquidProperties& l,
@@ -157,10 +157,10 @@ public:
         //- Surface tension [N/m]
         inline scalar sigma(scalar p, scalar T) const;
 
-        //- Vapour diffussivity [m2/s]
+        //- Vapour diffusivity [m2/s]
         inline scalar D(scalar p, scalar T) const;
 
-        //- Vapour diffussivity [m2/s] with specified binary pair
+        //- Vapour diffusivity [m2/s] with specified binary pair
         inline scalar D(scalar p, scalar T, scalar Wb) const;
 
 

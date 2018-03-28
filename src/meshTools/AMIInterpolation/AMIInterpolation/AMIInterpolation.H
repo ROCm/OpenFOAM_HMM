@@ -345,10 +345,10 @@ public:
     //- Destructor
     ~AMIInterpolation();
 
-    // Typedef to SourcePatch type this AMIInterplation is instantiated on
+    // Typedef to SourcePatch type this AMIInterpolation is instantiated on
     typedef SourcePatch sourcePatchType;
 
-    // Typedef to TargetPatch type this AMIInterplation is instantiated on
+    // Typedef to TargetPatch type this AMIInterpolation is instantiated on
     typedef TargetPatch targetPatchType;
 
 

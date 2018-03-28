@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
         #include "setDeltaT.H"
 
         // Indicators for refinement. Note: before runTime++
-        // only for postprocessing reasons.
+        // only for post-processing reasons.
         tmp<volScalarField> tmagGradP = mag(fvc::grad(p));
         volScalarField normalisedGradP
         (

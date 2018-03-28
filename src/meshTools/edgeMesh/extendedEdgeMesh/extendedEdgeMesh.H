@@ -220,7 +220,7 @@ protected:
             labelList& pMap,
             labelList& eMap,
             labelList& pointsFromEdge,  // new points created by cutting
-            labelList& oldEdge,         // the orginal edge
+            labelList& oldEdge,         // the original edge
             labelList& surfTri          // the surface triangle index
         );
 

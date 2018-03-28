@@ -27,7 +27,7 @@ License
 #include "vtkTools.H"
 #include "floatScalar.H"
 
-// * * * * * * * * * * * * * Protectd Member Functions * * * * * * * * * * * //
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 template<class CloudType>
 void Foam::CloudToVTK<CloudType>::writeData

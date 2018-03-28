@@ -100,20 +100,20 @@ public:
     // Member Functions
 
 
-        //- Return access to the inernal energy field [J/Kg]
+        //- Return access to the internal energy field [J/Kg]
         virtual volScalarField& he()
         {
             return e_;
         }
 
-        //- Return access to the inernal energy field [J/Kg]
+        //- Return access to the internal energy field [J/Kg]
         virtual const volScalarField& he() const
         {
             return e_;
         }
 
         //- Enthalpy/Internal energy
-        //  for given pressure and temperature [J/kg]
+        //- for given pressure and temperature [J/kg]
         virtual tmp<volScalarField> he
         (
             const volScalarField& p,
@@ -159,14 +159,14 @@ public:
 
 
         //- Return true if the equation of state is incompressible
-        //  i.e. rho != f(p)
+        //- i.e. rho != f(p)
         bool incompressible() const
         {
             return (true);
         }
 
         //- Return true if the equation of state is isochoric
-        //  i.e. rho = const
+        //- i.e. rho = const
         bool isochoric() const
         {
             return (false);
@@ -189,7 +189,7 @@ public:
             const label patchi
         ) const;
 
-         //- Return Cv of the mixture
+        //- Return Cv of the mixture
         virtual tmp<volScalarField> Cv() const;
 
         //- Heat capacity at constant volume for patch [J/kg/K]
@@ -237,21 +237,21 @@ public:
         virtual tmp<volScalarField> kappa() const;
 
         //- Thermal diffusivity for temperature
-        //  of mixture for patch [J/m/s/K]
+        //- of mixture for patch [J/m/s/K]
         virtual tmp<scalarField> kappa
         (
             const label patchi
         ) const;
 
         //- Effective thermal diffusivity for temperature
-        //  of mixture [J/m/s/K]
+        //- of mixture [J/m/s/K]
         virtual tmp<volScalarField> kappaEff
         (
             const volScalarField&
         ) const;
 
         //- Effective thermal diffusivity for temperature
-        //  of mixture for patch [J/m/s/K]
+        //- of mixture for patch [J/m/s/K]
         virtual tmp<scalarField> kappaEff
         (
             const scalarField& alphat,
@@ -272,7 +272,7 @@ public:
         ) const;
 
 
-         //- Correct the thermo fields
+        //- Correct the thermo fields
         virtual void correct();
 
         //- Read properties
@@ -298,7 +298,6 @@ public:
             {
                 return pDivU_;
             }
-
 };
 
 

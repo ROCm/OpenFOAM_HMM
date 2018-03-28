@@ -191,7 +191,7 @@ public:
             //- Remove a file, returning true if successful otherwise false
             virtual bool rm(const fileName&) const;
 
-            //- Remove a dirctory and its contents
+            //- Remove a directory and its contents
             virtual bool rmDir
             (
                 const fileName& dir,
@@ -207,7 +207,7 @@ public:
 //            ) const;
 
 
-        // (reg)IOobject functinality
+        // (reg)IOobject functionality
 
             //- Search for an object. checkGlobal : also check undecomposed case
             virtual fileName filePath

@@ -73,7 +73,7 @@ Foam::dsmcParcel::dsmcParcel
 {}
 
 
-// * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * *  Destructor * * * * * * * * * * * * * * * //
 
 Foam::dsmcParcel::~dsmcParcel()
 {}

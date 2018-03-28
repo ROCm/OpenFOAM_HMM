@@ -60,19 +60,19 @@ class processorFaPatch
 {
     // Private data
 
-        //- My processro number
+        //- My processor number
         int myProcNo_;
 
         //- Neighbour processor number
         int neighbProcNo_;
 
-        //- Processor-neighbbour patch edge centres
+        //- Processor-neighbour patch edge centres
         vectorField neighbEdgeCentres_;
 
-        //- Processor-neighbbour patch edge lengths
+        //- Processor-neighbour patch edge lengths
         vectorField neighbEdgeLengths_;
 
-        //- Processor-neighbbour patch neighbour face centres
+        //- Processor-neighbour patch neighbour face centres
         vectorField neighbEdgeFaceCentres_;
 
         //- Corresponding neighbouring local point label for every local point
@@ -188,7 +188,7 @@ public:
             return myProcNo_;
         }
 
-        //- Return neigbour processor number
+        //- Return neighbour processor number
         int neighbProcNo() const
         {
             return neighbProcNo_;
@@ -233,19 +233,19 @@ public:
         virtual tmp<vectorField> delta() const;
 
 
-        //- Return processor-neighbbour patch edge centres
+        //- Return processor-neighbour patch edge centres
         const vectorField& neighbEdgeCentres() const
         {
             return neighbEdgeCentres_;
         }
 
-        //- Return processor-neighbbour patch edge lengths
+        //- Return processor-neighbour patch edge lengths
         const vectorField& neighbEdgeLengths() const
         {
             return neighbEdgeLengths_;
         }
 
-        //- Return processor-neighbbour patch neighbour face centres
+        //- Return processor-neighbour patch neighbour face centres
         const vectorField& neighbEdgeFaceCentres() const
         {
             return neighbEdgeFaceCentres_;

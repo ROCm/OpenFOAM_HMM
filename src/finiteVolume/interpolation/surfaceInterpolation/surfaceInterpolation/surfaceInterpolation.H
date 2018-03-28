@@ -128,7 +128,7 @@ public:
         //- Return reference to non-orthogonality correction vectors
         const surfaceVectorField& nonOrthCorrectionVectors() const;
 
-        //- Do what is neccessary if the mesh has moved
+        //- Do what is necessary if the mesh has moved
         bool movePoints();
 };
 

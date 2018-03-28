@@ -291,14 +291,14 @@ public:
 
       // Search
 
-        //- Find index of the first occurence of the value.
-        //  When start is specified, any occurences before start are ignored.
+        //- Find index of the first occurrence of the value.
+        //  When start is specified, any occurrences before start are ignored.
         //  Linear search.
         //  \return position in list or -1 if not found.
         label find(const T& val, const label start=0) const;
 
-        //- Find index of the last occurence of the value.
-        //  When pos is specified, any occurences after pos are ignored.
+        //- Find index of the last occurrence of the value.
+        //  When pos is specified, any occurrences after pos are ignored.
         //  Linear search.
         //  \return position in list or -1 if not found.
         label rfind(const T& val, const label pos=-1) const;

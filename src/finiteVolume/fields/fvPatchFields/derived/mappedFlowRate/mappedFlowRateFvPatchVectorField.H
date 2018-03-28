@@ -81,7 +81,7 @@ class mappedFlowRateFvPatchVectorField
 {
     // Private data
 
-        //- Name of the neighbor flux setting the inlet mass flux
+        //- Name of the neighbour flux setting the inlet mass flux
         word nbrPhiName_;
 
         //- Name of the local mass flux

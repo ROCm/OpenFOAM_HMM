@@ -307,7 +307,7 @@ Foam::surfacePatchList
 Foam::triSurface::calcPatches(labelList& faceMap) const
 {
     // Determine the sorted order:
-    // use sortedOrder directly (the intermediate list is discared anyhow)
+    // use sortedOrder directly (the intermediate list is discarded anyhow)
 
     List<label> regions(size());
     forAll(regions, facei)

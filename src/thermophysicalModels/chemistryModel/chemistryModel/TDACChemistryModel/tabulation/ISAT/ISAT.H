@@ -79,7 +79,7 @@ class ISAT
         label checkEntireTreeInterval_;
 
         //- Factor that multiply the ideal depth of a binary tree to decide
-        // wheter to try to balance of not
+        //- whether to try to balance of not
         scalar maxDepthFactor_;
 
         //- Minimal size before trying to balance the tree
@@ -139,8 +139,8 @@ class ISAT
         );
 
         //- Check if the composition of the query point phiq lies in the
-        //  ellipsoid of accuracy approximating the region of accuracy of the
-        //  stored chemPoint phi0
+        //- ellipsoid of accuracy approximating the region of accuracy of the
+        //- stored chemPoint phi0
         //  Input : phi0 the nearest chemPoint used in the linear interpolation
         //  phiq the composition of the query point for which we want to
         //  compute the mapping
@@ -156,7 +156,7 @@ class ISAT
         bool cleanAndBalance();
 
         //- Functions to construct the gradients matrix
-        //  When mecanism reduction is active, the A matrix is given by
+        //  When mechanism reduction is active, the A matrix is given by
         //        Aaa Aad
         //  A = ( Ada Add ), where the sub gradient matrices are:
         //  (Aaa) active species according to active species, (Aad) active
@@ -217,7 +217,7 @@ public:
         virtual void writePerformance();
 
         //- Find the closest stored leaf of phiQ and store the result in
-        // RphiQ or return false.
+        //- RphiQ or return false.
         virtual bool retrieve
         (
             const Foam::scalarField& phiq,

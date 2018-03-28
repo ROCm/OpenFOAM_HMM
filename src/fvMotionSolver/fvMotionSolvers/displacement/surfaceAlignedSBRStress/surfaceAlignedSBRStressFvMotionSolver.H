@@ -111,15 +111,15 @@ class surfaceAlignedSBRStressFvMotionSolver
         volVectorField cellRot_;
 
         //- Maximum angle (between surface and most aligned mesh face normal)
-        // to which rotation is applied
+        //- to which rotation is applied
         scalar maxAng_;
 
         //- Minimum angle (between surface and most aligned mesh face normal)
-        // to which rotation is applied
+        //- to which rotation is applied
         scalar minAng_;
 
-        //- Propotional constant applied to the source to accelerate
-        //  convergence
+        //- Proportional constant applied to the source to accelerate
+        //- convergence
         scalar accFactor_;
 
         //- Displacement smooth factor
@@ -134,7 +134,7 @@ class surfaceAlignedSBRStressFvMotionSolver
         //- Stress tensor
         volSymmTensorField sigmaD_;
 
-        //- Minimum magnitude difference between old and new magntides
+        //- Minimum magnitude difference between old and new magnitudes
         //  stress applied
         scalar minSigmaDiff_;
 
@@ -178,7 +178,6 @@ public:
 
         //- Solve for motion
         virtual void solve();
-
 };
 
 

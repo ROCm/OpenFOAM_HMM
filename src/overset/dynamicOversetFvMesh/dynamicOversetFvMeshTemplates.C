@@ -209,7 +209,7 @@ void Foam::dynamicOversetFvMesh::addInterpolation(fvMatrix<Type>& m) const
     // This unfortunately also triggers the overset interpolation which then
     // produces a non-zero source for interpolated cells.
     // The procedure below calculates this contribution 'correctionSource'
-    // and substracts it from the source later in order to compensate.
+    // and subtracts it from the source later in order to compensate.
     Field<Type> correctionSource(diag.size(), pTraits<Type>::zero);
 
     if (pTraits<Type>::nComponents > 1)

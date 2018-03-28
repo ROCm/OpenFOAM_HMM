@@ -197,7 +197,7 @@ public:
             const label cellBI
         ) const;
 
-        //- Return true if olverlap volume is greater than threshold
+        //- Return true if overlap volume is greater than threshold
         bool cellCellOverlapMinDecomp
         (
             const primitiveMesh& meshA,

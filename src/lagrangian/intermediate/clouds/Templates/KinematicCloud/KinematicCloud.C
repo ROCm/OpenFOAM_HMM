@@ -648,7 +648,7 @@ void Foam::KinematicCloud<CloudType>::scaleSources()
 template<class CloudType>
 void Foam::KinematicCloud<CloudType>::preEvolve()
 {
-    // force calculaion of mesh dimensions - needed for parallel runs
+    // force calculation of mesh dimensions - needed for parallel runs
     // with topology change due to lazy evaluation of valid mesh dimensions
     label nGeometricD = mesh_.nGeometricD();
 
@@ -712,7 +712,7 @@ void Foam::KinematicCloud<CloudType>::patchData
         const label patchi = pp.index();
         const label patchFacei = pp.whichFace(p.face());
 
-        // We only want to use the boundary condition value  onlyif it is set
+        // We only want to use the boundary condition value  only if it is set
         // by the boundary condition. If the boundary values are extrapolated
         // (e.g., slip conditions) then they represent the motion of the fluid
         // just inside the domain rather than that of the wall itself.

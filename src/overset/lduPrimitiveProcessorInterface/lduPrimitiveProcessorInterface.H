@@ -156,7 +156,7 @@ public:
                 return myProcNo_;
             }
 
-            //- Return neigbour processor number (rank in communicator)
+            //- Return neighbour processor number (rank in communicator)
             virtual int neighbProcNo() const
             {
                 return neighbProcNo_;

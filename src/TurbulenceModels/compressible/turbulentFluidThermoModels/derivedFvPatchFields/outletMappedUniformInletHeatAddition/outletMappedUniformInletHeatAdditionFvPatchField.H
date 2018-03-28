@@ -98,7 +98,7 @@ class outletMappedUniformInletHeatAdditionFvPatchField
         //- Minimum Temperature Limit
         scalar TMin_;
 
-        //- Maxmum Temperature Limit
+        //- Maximum Temperature Limit
         scalar TMax_;
 
 

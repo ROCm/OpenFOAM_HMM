@@ -128,7 +128,7 @@ private:
         //- Selected patches to apply solar load
         labelList includePatches_;
 
-        //- Chached coarse to fine mapping for coarse mesh
+        //- Cached coarse to fine mapping for coarse mesh
         List<labelListList> coarseToFine_;
 
         //-Number of bands

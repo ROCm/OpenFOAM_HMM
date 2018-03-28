@@ -137,7 +137,7 @@ public:
         );
 
 
-    // Destructors
+    // Destructor
 
         virtual ~MeshObject();
 

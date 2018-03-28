@@ -125,10 +125,10 @@ bool Foam::functionObjects::externalCoupled::readData
                     os
                 );
 
-                // Pass responsability for all reading over to bc
+                // Pass responsibility for all reading over to bc
                 pf.readData(IStringStream(os.str())());
 
-                // Update the value from the read coefficicient. Bypass any
+                // Update the value from the read coefficient. Bypass any
                 // additional processing by derived type.
                 pf.patchFieldType::evaluate();
             }
@@ -176,7 +176,7 @@ bool Foam::functionObjects::externalCoupled::readData
                 }
                 pf.valueFraction() = data[columni];
 
-                // Update the value from the read coefficicient. Bypass any
+                // Update the value from the read coefficient. Bypass any
                 // additional processing by derived type.
                 pf.mixedFvPatchField<Type>::evaluate();
             }
@@ -211,7 +211,7 @@ bool Foam::functionObjects::externalCoupled::readData
                     );
                 }
 
-                // Update the value from the read coefficicient. Bypass any
+                // Update the value from the read coefficient. Bypass any
                 // additional processing by derived type.
                 pf.fixedGradientFvPatchField<Type>::evaluate();
             }
@@ -244,7 +244,7 @@ bool Foam::functionObjects::externalCoupled::readData
 
                 pf == value;
 
-                // Update the value from the read coefficicient. Bypass any
+                // Update the value from the read coefficient. Bypass any
                 // additional processing by derived type.
                 pf.fixedValueFvPatchField<Type>::evaluate();
             }

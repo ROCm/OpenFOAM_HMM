@@ -204,7 +204,7 @@ Foam::fvMesh::readUpdateState Foam::processorMeshes::readUpdate()
      || stat == fvMesh::TOPO_PATCH_CHANGE
     )
     {
-        // Reread all meshes and addresssing
+        // Reread all meshes and addressing
         read();
     }
     return stat;

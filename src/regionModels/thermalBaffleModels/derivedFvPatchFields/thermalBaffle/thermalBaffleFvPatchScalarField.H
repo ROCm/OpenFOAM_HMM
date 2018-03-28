@@ -50,7 +50,7 @@ Usage
     {
         type                compressible::thermalBaffle;
 
-        // Underlaying coupled boundary condition
+        // Underlying coupled boundary condition
         Tnbr               T;
         kappaMethod        fluidThermo; // or solidThermo
         kappa              none;

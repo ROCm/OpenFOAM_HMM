@@ -259,7 +259,7 @@ public:
             //- Remove a file, returning true if successful otherwise false
             virtual bool rm(const fileName&) const = 0;
 
-            //- Remove a dirctory and its contents
+            //- Remove a directory and its contents
             //  \param silent do not report missing directory
             virtual bool rmDir
             (
@@ -276,7 +276,7 @@ public:
 //            ) const = 0;
 
 
-        // (reg)IOobject functinality
+        // (reg)IOobject functionality
 
             //- Generate disk file name for object. Opposite of filePath.
             //  Optional wanted typeName.

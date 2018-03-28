@@ -470,7 +470,7 @@ int main(int argc, char *argv[])
                 for (const word& name : sprayFields)
                 {
                     // Note: try the various field types. Make sure to
-                    //       exit once sucessful conversion to avoid re-read
+                    //       exit once successful conversion to avoid re-read
                     //       converted file.
 
                     if

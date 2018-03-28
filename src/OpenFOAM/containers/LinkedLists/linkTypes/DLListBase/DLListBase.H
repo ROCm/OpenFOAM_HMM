@@ -306,7 +306,7 @@ public:
 
         //- Iterator to last item in list with const access
         //  Note that this is not a const_reverse_iterator, this is the
-        //  responsibilty of any derived classes.
+        //  responsibility of any derived classes.
         inline const_iterator crbegin() const;
 
         //- End of list for iterators

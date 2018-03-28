@@ -621,7 +621,7 @@ void Foam::meshRefinement::markFeatureCellLevel
     //        {
     //            Pout<< "Feature went through cell:" << cellI
     //                << " coord:" << mesh_.cellCentres()[cellI]
-    //                << " leve:" << maxFeatureLevel[cellI]
+    //                << " level:" << maxFeatureLevel[cellI]
     //                << endl;
     //        }
     //    }

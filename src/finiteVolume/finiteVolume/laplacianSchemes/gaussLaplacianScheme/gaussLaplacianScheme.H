@@ -139,7 +139,7 @@ public:
 };
 
 
-// Use macros to emulate partial-specialisation of the the Laplacian functions
+// Use macros to emulate partial-specialisation of the Laplacian functions
 // for scalar diffusivity gamma
 
 #define defineFvmLaplacianScalarGamma(Type)                                    \

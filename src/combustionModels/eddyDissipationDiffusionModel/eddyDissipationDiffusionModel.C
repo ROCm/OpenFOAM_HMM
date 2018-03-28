@@ -52,7 +52,7 @@ eddyDissipationDiffusionModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CombThermoType, class ThermoType>
 eddyDissipationDiffusionModel<CombThermoType, ThermoType>::

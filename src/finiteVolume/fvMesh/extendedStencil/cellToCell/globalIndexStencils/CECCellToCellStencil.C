@@ -77,7 +77,7 @@ void Foam::CECCellToCellStencil::calcCellStencil
 
     //{
     //    OFstream str(mesh().time().path()/"boundaryEdges.obj");
-    //    Pout<< "DUmping boundary edges to " << str.name() << endl;
+    //    Pout<< "Dumping boundary edges to " << str.name() << endl;
     //
     //    label vertI = 0;
     //    forAll(boundaryEdges, i)

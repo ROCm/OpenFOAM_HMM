@@ -108,7 +108,7 @@ public:
         // Private data
 
             //- Parcel type id - used for post-processing to flag the type
-            //  of parcels issued by this cloud
+            //- of parcels issued by this cloud
             demandDrivenEntry<label> parcelTypeId_;
 
             //- Minimum density [kg/m3]
@@ -199,8 +199,8 @@ public:
             //- Local gravitational or other body-force acceleration
             const vector& g_;
 
-            // label specifying which part of the integration
-            // algorithm is taking place
+            //- label specifying which part of the integration
+            //- algorithm is taking place
             trackPart part_;
 
 
@@ -219,16 +219,16 @@ public:
 
         // Member functions
 
-            //- Return conat access to the interpolator for continuous
-            //  phase density field
+            //- Return const access to the interpolator for continuous
+            //- phase density field
             inline const interpolation<scalar>& rhoInterp() const;
 
-            //- Return conat access to the interpolator for continuous
-            //  phase velocity field
+            //- Return const access to the interpolator for continuous
+            //- phase velocity field
             inline const interpolation<vector>& UInterp() const;
 
-            //- Return conat access to the interpolator for continuous
-            //  phase dynamic viscosity field
+            //- Return const access to the interpolator for continuous
+            //- phase dynamic viscosity field
             inline const interpolation<scalar>& muInterp() const;
 
             //- Return the continuous phase density

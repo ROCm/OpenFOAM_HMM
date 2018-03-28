@@ -130,7 +130,7 @@ class GAMGSolver
         //- Hierarchy of interface internal coefficients
         PtrList<FieldField<Field, scalar>> interfaceLevelsIntCoeffs_;
 
-        //- LU decompsed coarsest matrix
+        //- LU decomposed coarsest matrix
         autoPtr<LUscalarMatrix> coarsestLUMatrixPtr_;
 
 

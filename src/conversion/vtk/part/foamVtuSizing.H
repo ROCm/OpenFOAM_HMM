@@ -281,7 +281,7 @@ public:
         inline label sizeInternal(const enum slotType slot) const;
 
 
-      // Utilty routines
+      // Utility routines
 
         //- Populate lists for Legacy output
         void populateLegacy

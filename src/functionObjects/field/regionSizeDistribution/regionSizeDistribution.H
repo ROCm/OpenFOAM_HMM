@@ -188,7 +188,7 @@ class regionSizeDistribution
         //- Minimum droplet diameter
         scalar minDiam_;
 
-        //- Mumber of bins
+        //- Number of bins
         label nBins_;
 
         //- Names of fields to sample on regions

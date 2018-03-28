@@ -51,7 +51,7 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
 
             if (nonDimensional_)
             {
-                // Create an adimensional velocity
+                // Create an non-dimensional velocity
                 Un =
                     120.0*Un/pow3(constant::mathematical::pi)
                   / dm_/rpm_;
@@ -67,7 +67,7 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
         {
             scalarField deltap(this->jumpTable_->value(Un));
 
-            // Convert adimensional deltap from curve into deltaP
+            // Convert non-dimensional deltap from curve into deltaP
             scalarField pdFan
             (
                 deltap*pow4(constant::mathematical::pi)*sqr(dm_*rpm_)/1800.0

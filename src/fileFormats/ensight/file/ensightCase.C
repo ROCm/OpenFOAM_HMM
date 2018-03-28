@@ -55,7 +55,7 @@ void Foam::ensightCase::initialize()
         // EnSight and EnSight/data directories must exist
 
         // We may wish to retain old data
-        // eg, convert new results or a particular time interva
+        // eg, convert new results or a particular time interval
         // OR remove everything
 
         if (isDir(ensightDir_))

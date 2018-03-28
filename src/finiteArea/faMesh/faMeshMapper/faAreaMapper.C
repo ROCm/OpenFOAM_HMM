@@ -320,7 +320,7 @@ Foam::faAreaMapper::faAreaMapper
         direct_ = false;
     }
 
-    // Inserted objects not suported: no master
+    // Inserted objects not supported: no master
 }
 
 

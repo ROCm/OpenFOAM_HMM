@@ -71,7 +71,7 @@ protected:
             //- Temperature [K]
             volScalarField T_;
 
-            //- Laminar thermal diffusuvity [kg/m/s]
+            //- Laminar thermal diffusivity [kg/m/s]
             volScalarField alpha_;
 
         //- Should the dpdt term be included in the enthalpy equation
@@ -83,7 +83,7 @@ protected:
         //- Construct as copy (not implemented)
         basicThermo(const basicThermo&);
 
-        //- Look up or contruct field
+        //- Look up or construct field
         volScalarField& lookupOrConstruct
         (
             const fvMesh& mesh,

@@ -121,22 +121,22 @@ class diffusionMulticomponent
         //- Stoichiometric oxygen-fuel mass ratio
         scalarList s_;
 
-        //- Oxydaser sream mass concentrations
+        //- Oxidizer stream mass concentrations
         scalarList YoxStream_;
 
         //- Fuel stream mass concentrations
         scalarList YfStream_;
 
-        //- Mean distribution for gaussian probabililty
+        //- Mean distribution for gaussian probability
         scalarList sigma_;
 
-        //- Residual oxydaser
+        //- Residual oxidizer
         scalarList oxidantRes_;
 
-        //- ft stochiometric correction
+        //- ft stoichiometric correction
         scalarList ftCorr_;
 
-        //- Relaxatnio factor on total source
+        //- Relaxation factor on total source
         scalar alpha_;
 
         //- Switch on to laminar combustion for ignition

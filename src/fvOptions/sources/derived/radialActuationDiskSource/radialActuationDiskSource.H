@@ -95,7 +95,7 @@ class radialActuationDiskSource
 {
     // Private data
 
-        //- Coeffcients for the radial distribution
+        //- Coefficients for the radial distribution
         FixedList<scalar, 3> radialCoeffs_;
 
 

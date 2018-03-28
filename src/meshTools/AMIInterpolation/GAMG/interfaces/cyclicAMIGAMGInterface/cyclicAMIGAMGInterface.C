@@ -164,7 +164,7 @@ Foam::cyclicAMIGAMGInterface::cyclicAMIGAMGInterface
 }
 
 
-// * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::cyclicAMIGAMGInterface::~cyclicAMIGAMGInterface()
 {}

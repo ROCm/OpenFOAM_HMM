@@ -58,7 +58,7 @@ Foam::label Foam::dynamicRefineFvMesh::count
             n++;
         }
 
-        // debug also serves to get-around Clang compiler trying to optimsie
+        // debug also serves to get-around Clang compiler trying to optimise
         // out this forAll loop under O3 optimisation
         if (debug)
         {
@@ -1382,7 +1382,7 @@ bool Foam::dynamicRefineFvMesh::update()
 
         if ((nRefinementIterations_ % 10) == 0)
         {
-            // Compact refinement history occassionally (how often?).
+            // Compact refinement history occasionally (how often?).
             // Unrefinement causes holes in the refinementHistory.
             const_cast<refinementHistory&>(meshCutter().history()).compact();
         }

@@ -96,7 +96,7 @@ public:
 
     // Constructors
 
-        //- Construct from (base couped patch) components
+        //- Construct from (base coupled patch) components
         cyclicPeriodicAMIPolyPatch
         (
             const word& name,

@@ -61,7 +61,7 @@ class filteredLinear3VLimiter
 {
     // Private data
 
-        // Scaling corefficient for the gradient ratio,
+        // Scaling coefficient for the gradient ratio,
         // 0 = linear
         // 1 = fully limited
         scalar k_;

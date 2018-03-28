@@ -175,7 +175,7 @@ public:
             //- Critical volume [m^3/kmol]
             inline scalar Vc() const;
 
-            //- Critical compressibilty factor
+            //- Critical compressibility factor
             inline scalar Zc() const;
 
             //- Triple point temperature [K]
@@ -190,7 +190,7 @@ public:
             //- Dipole moment []
             inline scalar dipm() const;
 
-            //- Pitzer's ascentric factor []
+            //- Pitzer's acentric factor []
             inline scalar omega() const;
 
             //- Solubility parameter [(J/m^3)^(1/2)]

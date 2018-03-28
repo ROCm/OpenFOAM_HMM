@@ -220,7 +220,7 @@ updateCoeffs()
                   * pow4(Tp[faceI])
                 )/pi;
 
-            // Emmited heat flux from this ray direction
+            // Emitted heat flux from this ray direction
             qem[faceI] = refValue()[faceI]*nAve[faceI];
         }
         else

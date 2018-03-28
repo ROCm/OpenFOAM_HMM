@@ -64,11 +64,11 @@ protected:
         //- Name of velocity field
         const word UName_;
 
-        //- Curk of carrier phase velocity interpolator
+        //- Curl of carrier phase velocity interpolator
         autoPtr<interpolation<vector>> curlUcInterpPtr_;
 
 
-    // Potected Member Functions
+    // Protected Member Functions
 
         //- Calculate the lift coefficient
         virtual scalar Cl

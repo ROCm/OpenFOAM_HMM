@@ -114,7 +114,7 @@ private:
 
         //- Couple-decouple operation.
         //  If the interface is coupled, decouple it and vice versa.
-        //  Used in conjuction with automatic mesh motion
+        //  Used in conjunction with automatic mesh motion
         mutable Switch coupleDecouple_;
 
         //- State of the modifier

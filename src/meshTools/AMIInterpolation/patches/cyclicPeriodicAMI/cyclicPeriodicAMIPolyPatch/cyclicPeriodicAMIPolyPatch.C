@@ -482,7 +482,7 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
 
 
 
-        // Average the number of transformstions
+        // Average the number of transformations
         nTransforms_ = (nTransforms_ + nTransformsOld)/2;
 
         // Check that the match is complete

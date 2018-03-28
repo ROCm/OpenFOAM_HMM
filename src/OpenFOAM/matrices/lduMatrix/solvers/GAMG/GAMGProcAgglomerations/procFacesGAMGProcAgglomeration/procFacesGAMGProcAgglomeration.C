@@ -303,7 +303,7 @@ bool Foam::procFacesGAMGProcAgglomeration::agglomerate()
                     );
 
 
-                    // Use procesor agglomeration maps to do the actual
+                    // Use processor agglomeration maps to do the actual
                     // collecting.
                     GAMGProcAgglomeration::agglomerate
                     (

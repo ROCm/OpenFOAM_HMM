@@ -68,7 +68,7 @@ HeatAndMassTransferPhaseSystem
             continue;
         }
 
-        // Initialy assume no mass transfer
+        // Initially assume no mass transfer
 
         dmdt_.insert
         (
@@ -228,7 +228,7 @@ Foam::HeatAndMassTransferPhaseSystem<BasePhaseSystem>::momentumTransfer() const
 
     phaseSystem::momentumTransferTable& eqns = eqnsPtr();
 
-    // Source term due to mass trasfer
+    // Source term due to mass transfer
     forAllConstIters(this->phasePairs_, phasePairIter)
     {
         const phasePair& pair = *(phasePairIter.object());

@@ -82,7 +82,7 @@ class fvMeshTools
     template<class GeoField>
     static void reorderPatchFields(fvMesh&, const labelList& oldToNew);
 
-    // Remove trialing patches
+    // Remove trailing patches
     static void trimPatches(fvMesh&, const label nPatches);
 
 

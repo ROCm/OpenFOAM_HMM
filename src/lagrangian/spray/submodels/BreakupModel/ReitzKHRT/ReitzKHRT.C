@@ -196,7 +196,7 @@ bool Foam::ReitzKHRT<CloudType>::update
             if (ms/averageParcelMass > msLimit_)
             {
                 // Correct evaluation of the number of child droplets and the
-                // diameter of parcel droplets after breaukp
+                // diameter of parcel droplets after breakup
                 // Solution of cubic equation for the diameter of the parent
                 // drops after breakup, see Eq. 18 in
                 // Patterson & Reitz, SAE 980131

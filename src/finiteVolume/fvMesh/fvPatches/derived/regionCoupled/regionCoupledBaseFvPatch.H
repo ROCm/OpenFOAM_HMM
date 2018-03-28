@@ -126,7 +126,7 @@ public:
                 return regionCoupledBase_.owner();
             }
 
-            //- Return regionCoupledBase neighb Patch
+            //- Return regionCoupledBase neighbour Patch
             virtual const regionCoupledBaseFvPatch& neighbPatch() const
             {
                 return refCast<const regionCoupledBaseFvPatch>
@@ -174,7 +174,7 @@ public:
                 return regionCoupledBase_;
             }
 
-            //- Return neighbor fvPatch
+            //- Return neighbour fvPatch
             const fvPatch& neighbFvPatch() const
             {
                 return refCast<const fvPatch>

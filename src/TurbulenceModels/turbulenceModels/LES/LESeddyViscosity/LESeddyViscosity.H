@@ -104,7 +104,7 @@ public:
         //- Read model coefficients if they have changed
         virtual bool read();
 
-        //- Return sub-grid disipation rate
+        //- Return sub-grid dissipation rate
         virtual tmp<volScalarField> epsilon() const;
 };
 

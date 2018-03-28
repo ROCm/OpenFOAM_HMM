@@ -517,7 +517,7 @@ Foam::multiDirRefinement::multiDirRefinement
 }
 
 
-// Construct from directionary and directions to refine.
+// Construct from dictionary and directions to refine.
 Foam::multiDirRefinement::multiDirRefinement
 (
     polyMesh& mesh,

@@ -146,7 +146,7 @@ public:
             return k_;
         }
 
-        //- Return sub-grid disipation rate
+        //- Return sub-grid dissipation rate
         virtual tmp<volScalarField> epsilon() const;
 
         //- Return the effective diffusivity for k

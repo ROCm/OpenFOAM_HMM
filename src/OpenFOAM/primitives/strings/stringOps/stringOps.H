@@ -55,10 +55,10 @@ namespace Foam
 
 namespace stringOps
 {
-    //- Count the number of occurences of the specified character
+    //- Count the number of occurrences of the specified character
     std::string::size_type count(const std::string& str, const char c);
 
-    //- Count the number of occurences of the specified character
+    //- Count the number of occurrences of the specified character
     //  Correctly handles nullptr.
     std::string::size_type count(const char* str, const char c);
 
@@ -68,7 +68,7 @@ namespace stringOps
         return wordRes::matcher(patterns)(text);
     }
 
-    //- Expand occurences of variables according to the mapping
+    //- Expand occurrences of variables according to the mapping
     //  Expansion includes:
     //  -# variables
     //    - "$VAR", "${VAR}"
@@ -98,7 +98,7 @@ namespace stringOps
     );
 
 
-    //- Inplace expand occurences of variables according to the mapping
+    //- Inplace expand occurrences of variables according to the mapping
     //  Expansion includes:
     //  -# variables
     //    - "$VAR", "${VAR}"
@@ -127,7 +127,7 @@ namespace stringOps
         const char sigil = '$'
     );
 
-    //- Expand occurences of variables according to the dictionary
+    //- Expand occurrences of variables according to the dictionary
     //  Expansion includes:
     //  -# variables
     //    - "$VAR", "${VAR}"
@@ -173,7 +173,7 @@ namespace stringOps
     );
 
 
-    //- Inplace expand occurences of variables according to the dictionary
+    //- Inplace expand occurrences of variables according to the dictionary
     //  and optionally environment variables
     //  Expansion includes:
     //  -# variables
@@ -194,7 +194,7 @@ namespace stringOps
     );
 
 
-    //- Inplace expand occurences of variables according to the dictionary
+    //- Inplace expand occurrences of variables according to the dictionary
     //  Expansion includes:
     //  -# variables
     //    - "$VAR", "${VAR}"
@@ -211,7 +211,7 @@ namespace stringOps
     );
 
 
-    //- Expand initial tildes and all occurences of environment variables
+    //- Expand initial tildes and all occurrences of environment variables
     //  Expansion includes:
     //  -# environment variables
     //    - "$VAR", "${VAR}"
@@ -251,7 +251,7 @@ namespace stringOps
     );
 
 
-    //- Expand initial tildes and all occurences of environment variables
+    //- Expand initial tildes and all occurrences of environment variables
     //  Expansion includes:
     //  -# environment variables
     //    - "$VAR", "${VAR}"

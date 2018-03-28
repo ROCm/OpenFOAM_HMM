@@ -174,7 +174,7 @@ Foam::doxygenXmlParser::doxygenXmlParser
                     }
                 }
 
-                // Skip remanining entries
+                // Skip remaining entries
                 skipBlock(is, blockName);
             }
             else

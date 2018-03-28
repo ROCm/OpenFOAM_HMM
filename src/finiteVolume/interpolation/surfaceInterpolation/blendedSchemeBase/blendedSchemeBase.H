@@ -66,7 +66,7 @@ public:
     {}
 
 
-    // Memeber Functions
+    // Member Functions
 
         //- Return the face-based blending factor
         virtual tmp<surfaceScalarField> blendingFactor

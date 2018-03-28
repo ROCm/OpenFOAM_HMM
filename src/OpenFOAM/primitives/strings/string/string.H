@@ -183,7 +183,7 @@ public:
 
     // Member Functions
 
-        //- Count the number of occurences of the specified character
+        //- Count the number of occurrences of the specified character
         //- in the string
         //  Partially deprecated (NOV-2017) in favour of stringOps::count
         size_type count(const char c) const;
@@ -220,7 +220,7 @@ public:
         //- Avoid masking the normal std::string replace
         using std::string::replace;
 
-        //- Replace first occurence of sub-string oldStr with newStr,
+        //- Replace first occurrence of sub-string oldStr with newStr,
         //- beginning at start
         string& replace
         (
@@ -229,7 +229,7 @@ public:
             const size_type start = 0
         );
 
-        //- Replace all occurences of sub-string oldStr with newStr,
+        //- Replace all occurrences of sub-string oldStr with newStr,
         //- beginning at start. This is a no-op if oldStr is empty.
         string& replaceAll
         (
@@ -238,7 +238,7 @@ public:
             const size_type start = 0
         );
 
-        //- Expand initial tildes and all occurences of environment variables
+        //- Expand initial tildes and all occurrences of environment variables
         //  Expansion includes:
         //  -# environment variables
         //    - "$VAR", "${VAR}"

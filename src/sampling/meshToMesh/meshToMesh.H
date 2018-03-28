@@ -104,7 +104,7 @@ private:
         //- Target to source cell addressing
         labelListList tgtToSrcCellAddr_;
 
-        //- Source to target cell interplation weights
+        //- Source to target cell interpolation weights
         scalarListList srcToTgtCellWght_;
 
         //- Target to source cell interpolation weights
@@ -229,7 +229,8 @@ private:
 
         // Parallel operations
 
-            //- Determine whether the meshes are split across multiple pocessors
+            //- Determine whether the meshes are split across multiple
+            //- processors
             label calcDistribution
             (
                 const polyMesh& src,
@@ -267,7 +268,7 @@ private:
                 List<labelList>& procLocalFaceIDs
             ) const;
 
-            //- Collect pieces of tgt mesh from other procssors and restructure
+            //- Collect pieces of tgt mesh from other processors and restructure
             void distributeAndMergeCells
             (
                 const mapDistribute& map,
@@ -526,7 +527,7 @@ public:
 
                 //- Interpolate a field with a defined operation.  Values
                 //  passed in via 'result' are used to initialise the return
-                //  value. Optionallly uses gradient correction (internal
+                //  value. Optionally uses gradient correction (internal
                 //  field only) if interpolationMethod supports it
                 template<class Type, class CombineOp>
                 void mapSrcToTgt
@@ -582,7 +583,7 @@ public:
 
                 //- Interpolate a field with a defined operation.  Values
                 //  passed in via 'result' are used to initialise the return
-                //  value. Optionallly uses gradient correction (internal
+                //  value. Optionally uses gradient correction (internal
                 //  field only) if interpolationMethod supports it
                 template<class Type, class CombineOp>
                 void mapTgtToSrc

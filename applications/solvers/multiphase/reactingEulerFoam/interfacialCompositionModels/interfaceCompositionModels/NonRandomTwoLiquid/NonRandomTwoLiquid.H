@@ -54,7 +54,7 @@ namespace interfaceCompositionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class NonRandomTwoLiquid Declaration
+                     Class NonRandomTwoLiquid Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Thermo, class OtherThermo>
@@ -76,10 +76,10 @@ class NonRandomTwoLiquid
         //- Name of species 2
         word species2Name_;
 
-        //- Indiex of species 1 within this thermo
+        //- Index of species 1 within this thermo
         label species1Index_;
 
-        //- Indiex of species 2 within this thermo
+        //- Index of species 2 within this thermo
         label species2Index_;
 
         //- Non-randomness constant parameter for species 1
@@ -88,10 +88,10 @@ class NonRandomTwoLiquid
         //- Non-randomness constant parameter for species 2
         dimensionedScalar alpha21_;
 
-        //- Non-randomness linear paramater for species 1
+        //- Non-randomness linear parameter for species 1
         dimensionedScalar beta12_;
 
-        //- Non-randomness linear paramater for species 2
+        //- Non-randomness linear parameter for species 2
         dimensionedScalar beta21_;
 
         //- Interaction parameter model for species 1

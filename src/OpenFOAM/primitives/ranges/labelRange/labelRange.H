@@ -251,7 +251,7 @@ public:
         // Constructors
 
             //- Construct from range at given local index.
-            //  If the local index is out of range (eg, negaative),
+            //  If the local index is out of range (eg, negative),
             //  this creates the 'end' iterator
             inline const_iterator(const labelRange* range, const label i=0);
 

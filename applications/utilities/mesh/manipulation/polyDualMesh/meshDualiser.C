@@ -278,7 +278,7 @@ Foam::label Foam::meshDualiser::addInternalFace
         //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)
         //    << " n:" << n
         //    << " between dualowner:" << dualCell0
-        //    << " dualneigbour:" << dualCell1
+        //    << " dualneighbour:" << dualCell1
         //    << endl;
     }
     else
@@ -305,7 +305,7 @@ Foam::label Foam::meshDualiser::addInternalFace
         //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)
         //    << " n:" << n
         //    << " between dualowner:" << dualCell1
-        //    << " dualneigbour:" << dualCell0
+        //    << " dualneighbour:" << dualCell0
         //    << endl;
     }
     return dualFacei;
@@ -1139,7 +1139,7 @@ void Foam::meshDualiser::setRefinement
         );
     }
     // Detect whether different dual cells on either side of a face. This
-    // would neccesitate having a dual face built from the face and thus a
+    // would necessitate having a dual face built from the face and thus a
     // dual point at the face centre.
     for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
     {

@@ -83,7 +83,7 @@ private:
 
     // Private data
 
-        //- Specifc heat capacity [J/kg/K]
+        //- Specific heat capacity [J/kg/K]
         scalar Cp_;
 
         //- Mass [kg]

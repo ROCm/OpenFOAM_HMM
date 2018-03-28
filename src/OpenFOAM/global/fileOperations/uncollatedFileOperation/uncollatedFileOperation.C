@@ -608,7 +608,7 @@ bool Foam::fileOperations::uncollatedFileOperation::read
         );
         const Pstream::commsStruct& myComm = comms[Pstream::myProcNo()];
 
-        // Reveive from up
+        // Receive from up
         if (myComm.above() != -1)
         {
             IPstream fromAbove

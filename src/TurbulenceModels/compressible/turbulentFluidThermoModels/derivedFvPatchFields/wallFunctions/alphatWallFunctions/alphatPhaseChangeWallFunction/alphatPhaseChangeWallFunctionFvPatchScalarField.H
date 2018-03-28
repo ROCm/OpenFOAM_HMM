@@ -126,7 +126,7 @@ public:
             return dmdt_;
         }
 
-        //- Return the enthelpy source due to phase-change
+        //- Return the enthalpy source due to phase-change
         const scalarField& mDotL() const
         {
             return mDotL_;

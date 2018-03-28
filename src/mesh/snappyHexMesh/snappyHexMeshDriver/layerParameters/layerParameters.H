@@ -80,7 +80,7 @@ private:
 
     // Static data members
 
-        //- Default angle for faces to be convcave
+        //- Default angle for faces to be concave
         static const scalar defaultConcaveAngle;
 
 

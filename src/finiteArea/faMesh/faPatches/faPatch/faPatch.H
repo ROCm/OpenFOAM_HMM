@@ -266,7 +266,7 @@ public:
         virtual void write(Ostream&) const;
 
 
-        // Acces functions for geometrical data
+        // Access functions for geometrical data
 
             //- Return patch point labels
             const labelList& pointLabels() const;

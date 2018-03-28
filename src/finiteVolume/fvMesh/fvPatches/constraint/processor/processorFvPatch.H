@@ -96,7 +96,7 @@ public:
             return procPolyPatch_.myProcNo();
         }
 
-        //- Return neigbour processor number
+        //- Return neighbour processor number
         virtual int neighbProcNo() const
         {
             return procPolyPatch_.neighbProcNo();

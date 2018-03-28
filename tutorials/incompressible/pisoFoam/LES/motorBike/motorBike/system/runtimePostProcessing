@@ -30,7 +30,7 @@ postPro1
 
     // Default colours
     // - If select to colourBy colour, these values are used unless
-    // they are locally overriden
+    // they are locally overridden
     colours
     {
         background      (1 1 1);

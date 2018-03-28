@@ -85,7 +85,7 @@ public:
         //- Enumeration defining the state of the mesh after a read update.
         //  Used for post-processing applications, where the mesh
         //  needs to update based on the files written in time
-        //  directores
+        //  directories
         enum readUpdateState
         {
             UNCHANGED,
@@ -391,7 +391,7 @@ public:
             fileName meshDir() const;
 
             //- Return the current instance directory for points
-            //  Used in the consruction of gemometric mesh data dependent
+            //  Used in the construction of geometric mesh data dependent
             //  on points
             const fileName& pointsInstance() const;
 

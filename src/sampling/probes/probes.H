@@ -138,7 +138,7 @@ protected:
         bool loadFromFiles_;
 
 
-      // Read from dictonary
+      // Read from dictionary
 
         //- Names of fields to probe
         wordRes fieldSelection_;

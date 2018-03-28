@@ -333,7 +333,7 @@ void Foam::faceShading::calculate()
         List<pointIndexHit> hitInfo(startIndex.size());
         surfacesMesh.findLine(start, end, hitInfo);
 
-        // Collect the rays which has 'only one not wall' obstacle bettween
+        // Collect the rays which has 'only one not wall' obstacle between
         // start and end.
         // If the ray hit itself get stored in dRayIs
         forAll(hitInfo, rayI)

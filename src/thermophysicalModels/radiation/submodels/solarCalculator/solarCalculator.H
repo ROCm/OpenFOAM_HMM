@@ -257,7 +257,7 @@ public:
                 return diffuseSolarRad_;
             }
 
-            //- Return C consntant
+            //- Return C constant
             scalar C()
             {
                 return C_;

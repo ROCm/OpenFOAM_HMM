@@ -78,7 +78,7 @@ Foam::regionCoupledWallGAMGInterfaceField::regionCoupledWallGAMGInterfaceField
 {}
 
 
-// * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::regionCoupledWallGAMGInterfaceField::~regionCoupledWallGAMGInterfaceField
 ()

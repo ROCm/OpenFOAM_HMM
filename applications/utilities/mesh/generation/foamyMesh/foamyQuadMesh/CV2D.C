@@ -590,7 +590,7 @@ void Foam::CV2D::newPoints()
                     0.5*(sizes[vA->index()] + sizes[vB->index()]);
 
                 // Test for changing aspect ratio on second alignment (first
-                // alignment is neartest surface normal)
+                // alignment is nearest surface normal)
                 // if (aD == 1)
                 // {
                 //     targetFaceSize *= 2.0;
@@ -773,7 +773,7 @@ void Foam::CV2D::newPoints()
                 if (!is_infinite(ec)) break;
             } while (++ec != ecStart);
 
-            // Store the start-end of the first non-infinte edge
+            // Store the start-end of the first non-infinite edge
             point2D de0 = toPoint2D(circumcenter(ec->first));
 
             // Keep track of the maximum edge length^2

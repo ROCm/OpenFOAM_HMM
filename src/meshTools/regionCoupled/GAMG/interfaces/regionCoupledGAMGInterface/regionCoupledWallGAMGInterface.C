@@ -66,7 +66,7 @@ Foam::regionCoupledWallGAMGInterface::regionCoupledWallGAMGInterface
 {}
 
 
-// * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::regionCoupledWallGAMGInterface::~regionCoupledWallGAMGInterface()
 {}

@@ -331,7 +331,7 @@ void Foam::particle::hitCyclicAMIPatch
     // Set the topology
     facei_ = tetFacei_ = receiveFacei + receiveCpp.start();
 
-    // Locate the particle on the recieving side
+    // Locate the particle on the receiving side
     vector directionT = direction;
     cpp.reverseTransformDirection(directionT, sendFacei);
     locate

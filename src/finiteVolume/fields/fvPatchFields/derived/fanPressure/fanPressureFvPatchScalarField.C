@@ -169,7 +169,7 @@ void Foam::fanPressureFvPatchScalarField::updateCoeffs()
 
     if (nonDimensional_)
     {
-        // Create an adimensional flow rate
+        // Create an non-dimensional flow rate
         volFlowRate =
             120.0*volFlowRate/pow3(constant::mathematical::pi)/pow3(dm_)/rpm_;
     }
@@ -179,7 +179,7 @@ void Foam::fanPressureFvPatchScalarField::updateCoeffs()
 
     if (nonDimensional_)
     {
-        // Convert the adimensional deltap from curve into deltaP
+        // Convert the non-dimensional deltap from curve into deltaP
         pdFan = pdFan*pow4(constant::mathematical::pi)*sqr(dm_*rpm_)/1800;
     }
 

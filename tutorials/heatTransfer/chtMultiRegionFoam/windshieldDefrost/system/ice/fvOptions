@@ -26,7 +26,7 @@ iceZone
 
         Tmelt           273;
         L               334000; // enthalpy of fusion for water [J/kg]
-        thermoMode      thermo; // retrieve thermo properties from themo model
+        thermoMode      thermo; // retrieve thermo properties from thermo model
         beta            50e-6;  // thermal expansion coeff [1/K]
 
         rhoRef          1000;

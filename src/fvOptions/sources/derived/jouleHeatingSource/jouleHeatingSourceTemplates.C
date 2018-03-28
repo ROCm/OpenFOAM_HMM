@@ -36,7 +36,7 @@ void Foam::fv::jouleHeatingSource::initialiseSigma
 
     if (dict.found("sigma"))
     {
-        // Sigma to be defined using a Funcion1 type
+        // Sigma to be defined using a Function1 type
         sigmaVsTPtr = Function1<Type>::New("sigma", dict);
 
         tmp<VolFieldType> tsigma

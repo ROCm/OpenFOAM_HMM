@@ -85,7 +85,7 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
 
     if (debug)
     {
-        Pout<< "dynamicOversetFvMesh::update() : extended addresssing from"
+        Pout<< "dynamicOversetFvMesh::update() : extended addressing from"
             << " nFaces:" << baseAddr.lowerAddr().size()
             << " to nFaces:" << lowerAddr.size()
             << " nExtraFaces:" << nExtraFaces << endl;

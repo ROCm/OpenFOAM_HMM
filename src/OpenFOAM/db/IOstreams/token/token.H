@@ -130,7 +130,7 @@ public:
         BEGIN_STRING   = '"',
         END_STRING     = BEGIN_STRING,
 
-        ASSIGN         = '=', //!< Assigment/equals [#isseparator]
+        ASSIGN         = '=', //!< Assignment/equals [#isseparator]
         ADD            = '+', //!< Addition [#isseparator]
         SUBTRACT       = '-', //!< Substract or start of negative number
         MULTIPLY       = '*', //!< Multiply [#isseparator]

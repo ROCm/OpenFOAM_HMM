@@ -206,7 +206,7 @@ Foam::triSurface Foam::triSurfaceTools::doRefine
             }
 
             // Now we have new mid edge vertices for all edges on face
-            // so create triangles for RED rerfinement.
+            // so create triangles for RED refinement.
 
             const edgeList& edges = surf.edges();
 
@@ -1231,7 +1231,7 @@ Foam::surfaceLocation Foam::triSurfaceTools::visitFaces
     if (nearest.triangle() == -1)
     {
         // Did not move from edge. Give warning? Return something special?
-        // For now responsability of caller to make sure that nothing has
+        // For now responsibility of caller to make sure that nothing has
         // moved.
     }
 
@@ -2922,7 +2922,7 @@ Foam::surfaceLocation Foam::triSurfaceTools::trackToEdge
             // Start point is inside triangle. Trivial cases already handled
             // above.
 
-            // end point is on edge or point so cross currrent triangle to
+            // end point is on edge or point so cross current triangle to
             // see which edge is cut.
 
             nearest = cutEdge

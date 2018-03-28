@@ -162,7 +162,7 @@ public:
         ) const;
 
         //- Return the reaction rate for reaction r and the reference
-        //  species and charateristic times
+        //  species and characteristic times
         virtual scalar omega
         (
             const Reaction<ThermoType>& r,
@@ -179,7 +179,7 @@ public:
 
 
         //- Return the reaction rate for iReaction and the reference
-        //  species and charateristic times
+        //  species and characteristic times
         virtual scalar omegaI
         (
             label iReaction,

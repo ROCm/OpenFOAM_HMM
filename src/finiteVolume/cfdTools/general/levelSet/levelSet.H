@@ -84,7 +84,7 @@ tmp<DimensionedField<scalar, volMesh>> levelSetFraction
     const bool above
 );
 
-//- As the above oveload, but on the faces of a patch
+//- As the above overload, but on the faces of a patch
 tmp<scalarField> levelSetFraction
 (
     const fvPatch& patch,

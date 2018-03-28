@@ -2412,7 +2412,7 @@ void Foam::ccm::reader::addPatches
     wordHashSet hashedNames(origBndId_.size());
 
     // lookup patch names/types from the problem description
-    // provide some fallback vlues
+    // provide some fallback values
     forAll(newPatches, patchI)
     {
         word fallbackName("patch" + Foam::name(patchI));

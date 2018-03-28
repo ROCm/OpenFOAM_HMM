@@ -193,14 +193,14 @@ public:
             //- Return a reference to the packing model
             inline PackingModel<MPPICCloud<CloudType>>& packingModel();
 
-            //- Return condt access to the damping model
+            //- Return const access to the damping model
             inline const DampingModel<MPPICCloud<CloudType>>&
                 dampingModel() const;
 
             //- Return a reference to the damping model
             inline DampingModel<MPPICCloud<CloudType>>& dampingModel();
 
-            //- Return condt access to the isotropy model
+            //- Return const access to the isotropy model
             inline const IsotropyModel<MPPICCloud<CloudType>>&
                 isotropyModel() const;
 

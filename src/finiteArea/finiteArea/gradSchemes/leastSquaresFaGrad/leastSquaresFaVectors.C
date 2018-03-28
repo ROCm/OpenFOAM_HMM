@@ -133,7 +133,7 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
 
         // Build the d-vectors
         // HJ, reconsider deltas at the boundary, consistent with FVM
-        // Current implementation is good for fixedValue boudaries, but may
+        // Current implementation is good for fixedValue boundaries, but may
         // cause problems with fixedGradient.  HJ, 4/Oct/2010
         const vectorField pd(p.delta());
 

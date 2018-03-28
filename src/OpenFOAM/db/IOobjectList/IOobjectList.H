@@ -106,7 +106,7 @@ public:
         //- Lookup a given name and return IOobject ptr if found else nullptr
         IOobject* lookup(const word& name) const;
 
-        //- The list of all IOobects with matching names
+        //- The list of all IOobjects with matching names
         IOobjectList lookup(const wordRe& matcher) const;
 
         //- The list of all IOobjects with matching names

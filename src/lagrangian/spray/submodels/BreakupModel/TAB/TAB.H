@@ -67,7 +67,7 @@ class TAB
 {
 public:
 
-    //- Enumeration for the SMD brekup calculation
+    //- Enumeration for the SMD breakup calculation
     enum SMDMethods
     {
         method1,

@@ -55,7 +55,7 @@ Author
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class Type>
 class faMatrix;
@@ -298,7 +298,7 @@ public:
             //  alpha = 0 : do nothing
             void relax(const scalar alpha);
 
-            //- Relax matrix (for steadty-state solution).
+            //- Relax matrix (for steady-state solution).
             //  alpha is read from controlDict
             void relax();
 

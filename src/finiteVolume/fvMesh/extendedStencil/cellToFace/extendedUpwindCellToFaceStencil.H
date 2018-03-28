@@ -66,7 +66,7 @@ class extendedUpwindCellToFaceStencil
         //- Does stencil contain upwind points only
         const bool pureUpwind_;
 
-        //- Swap map for getting neigbouring data
+        //- Swap map for getting neighbouring data
         autoPtr<mapDistribute> ownMapPtr_;
         autoPtr<mapDistribute> neiMapPtr_;
 

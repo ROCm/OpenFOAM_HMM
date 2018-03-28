@@ -204,7 +204,7 @@ void Foam::multiLevelDecomp::setMethods()
     forAllConstIters(methodsDict_, iter)
     {
         // Dictionary entries only
-        // - these method dictioaries are non-regional
+        // - these method dictionaries are non-regional
         if (iter().isDict())
         {
             methods_.set

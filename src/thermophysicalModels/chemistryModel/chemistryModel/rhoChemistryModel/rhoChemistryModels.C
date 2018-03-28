@@ -40,7 +40,7 @@ Description
 
 namespace Foam
 {
-    // Chemistry moldels based on sensibleEnthalpy
+    // Chemistry models based on sensibleEnthalpy
     makeChemistryModel
     (
         chemistryModel,
@@ -113,7 +113,7 @@ namespace Foam
     );
 
 
-    // Chemistry moldels based on sensibleInternalEnergy
+    // Chemistry models based on sensibleInternalEnergy
     makeChemistryModel
     (
         chemistryModel,

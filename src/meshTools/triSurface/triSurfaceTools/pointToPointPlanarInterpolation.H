@@ -173,7 +173,7 @@ public:
         //- Helper: extract words of times
         static wordList timeNames(const instantList&);
 
-        //- Helper: find time. Return true if succesful.
+        //- Helper: find time. Return true if successful.
         static bool findTime
         (
             const instantList& times,

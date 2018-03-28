@@ -238,7 +238,7 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
 
             const labelField& agglom = finalAgglomPtr();
 
-            // Global nubmering
+            // Global numbering
             const globalIndex globalNumbering(nCoarseCells);
 
             labelField globalAgglom(addr.size());

@@ -56,7 +56,7 @@ class tabulatedWallFunction
 {
 protected:
 
-    // Proteced data
+    // Protected data
 
         //- Main dictionary
         const dictionary dict_;

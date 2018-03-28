@@ -193,7 +193,7 @@ void pqFoamReaderControls::fireCommand
 {
     vtkSMProxy* pxy = this->proxy();
 
-    prop->SetElement(0, val); // Set int value, toogle bool, etc
+    prop->SetElement(0, val); // Set int value, toggle bool, etc
 
     // Fire off command
     prop->Modified();

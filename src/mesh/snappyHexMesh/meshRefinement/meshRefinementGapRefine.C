@@ -657,7 +657,7 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
 //    nearNormal = UIndirectList<vector>(nearNormal, map)();
 //
 //    // Exclude hits which aren't opposite enough. E.g. you might find
-//    // a point on a perpendicular wall - but this does not consistute a gap.
+//    // a point on a perpendicular wall - but this does not constitute a gap.
 //    vectorField oppositeNormal;
 //    geom.getNormal(oppositeInfo, oppositeNormal);
 //

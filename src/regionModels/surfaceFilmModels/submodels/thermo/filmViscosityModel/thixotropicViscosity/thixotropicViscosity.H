@@ -120,7 +120,7 @@ protected:
         //- Limiting viscosity when lambda = 0
         dimensionedScalar muInf_;
 
-        //- Model coeffiicient
+        //- Model coefficient
         dimensionedScalar K_;
 
         //- Structural parameter

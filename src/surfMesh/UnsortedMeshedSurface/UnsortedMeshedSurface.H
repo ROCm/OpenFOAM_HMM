@@ -392,10 +392,10 @@ public:
 
     // Member Operators
 
-        //- Copy assigment
+        //- Copy assignment
         void operator=(const UnsortedMeshedSurface<Face>& surf);
 
-        //- Move assigment
+        //- Move assignment
         void operator=(UnsortedMeshedSurface<Face>&& surf);
 
         //- Conversion operator to MeshedSurfaceProxy

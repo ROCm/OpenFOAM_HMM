@@ -131,7 +131,7 @@ public:
         }
 
 
-    //- Desctructor
+    //- Destructor
     virtual ~cyclicFaePatchField()
     {}
 };

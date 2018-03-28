@@ -311,7 +311,7 @@ mtype                 {space}"MTYPE:"{space}
         scalar y = readScalar(nodeStream);
         scalar z = readScalar(nodeStream);
 
-        // add mapping and scalced node to the list
+        // add mapping and scaled node to the list
         pointMap[curNumberOfNodes] = nodeI;
         points[curNumberOfNodes] = point(x, y, z);
         curNumberOfNodes++;

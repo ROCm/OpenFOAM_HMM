@@ -96,7 +96,7 @@ class FSD
         //- Fuel mass concentration on the fuel stream
         dimensionedScalar YFuelFuelStream_;
 
-        //- Oxygen mass concentration on the oxydizer stream
+        //- Oxygen mass concentration on the oxidizer stream
         dimensionedScalar YO2OxiStream_;
 
         //- Similarity constant for the sub-grid ft fluctuations
@@ -114,7 +114,7 @@ class FSD
         //- Dimension of the ft space. Used to integrate the beta-pdf
         scalar ftDim_;
 
-        //- Minimum mixture freaction variance to calculate pdf
+        //- Minimum mixture fraction variance to calculate pdf
         scalar ftVarMin_;
 
 

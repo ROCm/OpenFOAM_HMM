@@ -13,7 +13,7 @@ scalarListList weightCellCells(mesh.nInternalFaces());
 // Interpolated HbyA faces
 vectorField UIntFaces(mesh.nInternalFaces(), vector::zero);
 
-// Determine receptor neighbourd cells
+// Determine receptor neighbour cells
 labelList receptorNeigCell(mesh.nInternalFaces(), -1);
 
 {

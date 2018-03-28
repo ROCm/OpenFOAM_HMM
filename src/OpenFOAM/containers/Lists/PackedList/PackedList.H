@@ -39,7 +39,7 @@ Note
     In a non-const context, the '[]' operator returns a reference to an
     existing value. Some caution with out-of-range elements to ensure
     that the const version of the [] operator is being called.
-    The get() method is functionally identical the the '[]' operator, but
+    The get() method is functionally identical to the '[]' operator, but
     is always const access.
 
     The set() and unset() methods return a bool if the value changed.

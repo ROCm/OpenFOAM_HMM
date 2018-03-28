@@ -138,7 +138,7 @@ public:
 
         //- Interpolate field to the given coordinates in the tetrahedron
         //  defined by the given indices.  Calls interpolate function
-        //  above here execpt where overridden by derived
+        //  above here except where overridden by derived
         //  interpolation types.
         virtual Type interpolate
         (

@@ -114,7 +114,7 @@ protected:
 
     // Protected functions
 
-        //- Initialse actor
+        //- Initialise actor
         void initialiseActor(vtkActor* actor) const;
 
 

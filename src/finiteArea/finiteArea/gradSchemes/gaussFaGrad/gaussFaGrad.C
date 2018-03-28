@@ -68,7 +68,6 @@ gaussGrad<Type>::grad
 
     GeometricField<GradType, faPatchField, areaMesh>& gGrad = tgGrad.ref();
 
-    // Removed for consistencty.  Matthias Rauter, 6/Dec/2016
     gGrad.correctBoundaryConditions();
 
     gGrad.rename("grad(" + vsf.name() + ')');

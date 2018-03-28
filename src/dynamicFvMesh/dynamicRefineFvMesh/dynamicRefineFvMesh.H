@@ -91,7 +91,7 @@ protected:
         //- Mesh cutting engine
         hexRef8 meshCutter_;
 
-        //- Dump cellLevel for postprocessing
+        //- Dump cellLevel for post-processing
         Switch dumpLevel_;
 
         //- Fluxes to map

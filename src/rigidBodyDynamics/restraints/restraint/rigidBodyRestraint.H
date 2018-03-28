@@ -157,7 +157,7 @@ public:
             return bodyID_;
         }
 
-        //- Accumulate the retraint internal joint forces into the tau field and
+        //- Accumulate the restraint internal joint forces into the tau field and
         //  external forces into the fx field
         virtual void restrain
         (

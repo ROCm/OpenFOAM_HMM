@@ -4056,7 +4056,7 @@ void Foam::snappyLayerDriver::addLayers
 
 
             // With the stored topo changes we create a new mesh so we can
-            // undo if neccesary.
+            // undo if necessary.
 
             autoPtr<fvMesh> newMeshPtr;
             autoPtr<mapPolyMesh> mapPtr = meshMod.makeMesh

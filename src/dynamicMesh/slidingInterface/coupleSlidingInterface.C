@@ -363,7 +363,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
     // slave edge.
     // For the edge selection algorithm, see, comment in
     // slidingInterfaceProjectPoints.C.
-    // Edge cutting algoritm:
+    // Edge cutting algorithm:
     // As the master patch defines the cutting surface, the newly
     // inserted point needs to be on the master edge.  Also, in 3-D
     // the pair of edges generally misses each other rather than
@@ -382,7 +382,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
     // cutPointEdgePairMap
 
     // Note.  "Processing slave edges" code is repeated twice in the
-    // sliding intergace coupling in order to allow the point
+    // sliding interface coupling in order to allow the point
     // projection to be done separately from the actual cutting.
     // Please change consistently with slidingInterfaceProjectPoints.C
     //

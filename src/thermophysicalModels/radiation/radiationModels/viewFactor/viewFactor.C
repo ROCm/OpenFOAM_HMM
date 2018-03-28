@@ -556,7 +556,7 @@ void Foam::radiation::viewFactor::calculate()
         }
         else //Constant emissivity
         {
-            // Initial iter calculates CLU and chaches it
+            // Initial iter calculates CLU and caches it
             if (iterCounter_ == 0)
             {
                 for (label i=0; i<totalNCoarseFaces_; i++)

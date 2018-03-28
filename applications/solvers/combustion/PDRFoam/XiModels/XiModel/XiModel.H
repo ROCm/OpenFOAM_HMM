@@ -122,7 +122,7 @@ protected:
         const volScalarField& b_;
         const surfaceScalarField& phi_;
 
-        //- Flame wrinking field
+        //- Flame wrinkling field
         volScalarField Xi_;
 
 
@@ -207,7 +207,7 @@ public:
 
     // Member Functions
 
-        //- Return the flame-wrinking Xi
+        //- Return the flame-wrinkling Xi
         virtual const volScalarField& Xi() const
         {
             return Xi_;
@@ -227,10 +227,10 @@ public:
         )
         {}
 
-        //- Correct the flame-wrinking Xi
+        //- Correct the flame-wrinkling Xi
         virtual void correct() = 0;
 
-        //- Correct the flame-wrinking Xi using the given convection scheme
+        //- Correct the flame-wrinkling Xi using the given convection scheme
         virtual void correct(const fv::convectionScheme<scalar>&)
         {
             correct();

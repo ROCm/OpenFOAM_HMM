@@ -287,7 +287,7 @@ Foam::solverTemplate::solverTemplate
         fieldTypes_.setSize(nRegion);
         fieldDimensions_.setSize(nRegion);
 
-        // read templates for solver lists of avaliable
+        // read templates for solver lists of available
         // - fields and dimensions required for the solver
         // - models
         label regionI = 0;
@@ -328,7 +328,7 @@ Foam::solverTemplate::solverTemplate
         fieldTypes_.setSize(1);
         fieldDimensions_.setSize(1);
 
-        // read templates for solver lists of avaliable
+        // read templates for solver lists of available
         // - fields and dimensions required for the solver
         // - models
         const dictionary fieldDict

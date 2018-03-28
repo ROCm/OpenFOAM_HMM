@@ -243,7 +243,7 @@ void Foam::plenumPressureFvPatchScalarField::updateCoeffs()
             << exit(FatalError);
     }
 
-    // Calcaulate the specific heats
+    // Calculate the specific heats
     const scalar cv = R_/(gamma_ - 1), cp = R_*gamma_/(gamma_ - 1);
 
     // Calculate the new plenum properties

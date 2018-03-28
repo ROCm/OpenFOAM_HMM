@@ -373,7 +373,7 @@ public:
             //- Return sub-cycle cell volumes
             tmp<DimensionedField<scalar, volMesh>> Vsc() const;
 
-            //- Return sub-cycl old-time cell volumes
+            //- Return sub-cycle old-time cell volumes
             tmp<DimensionedField<scalar, volMesh>> Vsc0() const;
 
             //- Return cell face area vectors

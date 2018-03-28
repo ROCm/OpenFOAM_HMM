@@ -113,7 +113,7 @@ public:
 
       // Access
 
-        //- Explicity close the file and terminate ccmio access.
+        //- Explicitly close the file and terminate ccmio access.
         //  Return false if it was already closed.
         bool close();
 

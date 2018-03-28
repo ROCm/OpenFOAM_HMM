@@ -103,7 +103,7 @@ class edgeIntersections
             boolList& affectedEdges
         ) const;
 
-        //- Perturb single endpoint of edge if edge is algigned with face.
+        //- Perturb single endpoint of edge if edge is aligned with face.
         //  See inlinePerturb. Return true if anything changed.
         bool rotatePerturb
         (

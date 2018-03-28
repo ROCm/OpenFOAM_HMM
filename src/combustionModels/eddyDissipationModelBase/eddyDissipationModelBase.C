@@ -52,7 +52,7 @@ eddyDissipationModelBase<CombThermoType, ThermoType>::eddyDissipationModelBase
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CombThermoType, class ThermoType>
 eddyDissipationModelBase<CombThermoType, ThermoType>::

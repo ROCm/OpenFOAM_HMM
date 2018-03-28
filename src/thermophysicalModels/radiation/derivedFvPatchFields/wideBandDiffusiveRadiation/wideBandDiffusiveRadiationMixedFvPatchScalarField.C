@@ -226,7 +226,7 @@ updateCoeffs()
                   + emissivity[facei]*Eb[facei]
                 )/pi;
 
-            // Emmited heat flux from this ray direction (sum over lambdaId)
+            // Emitted heat flux from this ray direction (sum over lambdaId)
             qem[facei] += refValue()[facei]*nAve[facei];
         }
         else

@@ -1621,7 +1621,7 @@ void Foam::polyTopoChange::resetZones
             }
         }
 
-        // Reset the addresing on the zone
+        // Reset the addressing on the zone
         newMesh.pointZones().clearAddressing();
         forAll(newMesh.pointZones(), zonei)
         {
@@ -1732,7 +1732,7 @@ void Foam::polyTopoChange::resetZones
         }
 
 
-        // Reset the addresing on the zone
+        // Reset the addressing on the zone
         newMesh.faceZones().clearAddressing();
         forAll(newMesh.faceZones(), zonei)
         {
@@ -1826,7 +1826,7 @@ void Foam::polyTopoChange::resetZones
             }
         }
 
-        // Reset the addresing on the zone
+        // Reset the addressing on the zone
         newMesh.cellZones().clearAddressing();
         forAll(newMesh.cellZones(), zonei)
         {

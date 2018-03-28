@@ -82,7 +82,7 @@ protected:
         Switch log_;
 
         //- Group index - if applied, all conditions in a group must be
-        //  satisfield before condition is met
+        //  satisfied before condition is met
         label groupID_;
 
 

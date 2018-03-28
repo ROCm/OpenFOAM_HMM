@@ -130,7 +130,7 @@ public:
             //- Return the relaxation factor for the given field
             scalar fieldRelaxationFactor(const word& name) const;
 
-            //- Return the relaxation factor for the given eqation
+            //- Return the relaxation factor for the given equation
             scalar equationRelaxationFactor(const word& name) const;
 
             //- Return the selected sub-dictionary of solvers if the "select"

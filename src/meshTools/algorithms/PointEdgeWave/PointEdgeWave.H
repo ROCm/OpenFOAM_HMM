@@ -90,7 +90,7 @@ class PointEdgeWave
   // Private static data
 
         //- Relative tolerance. Stop propagation if relative changes
-        //  less than this tolerance (responsability for checking this is
+        //  less than this tolerance (responsibility for checking this is
         //  up to Type implementation)
         static scalar propagationTol_;
 

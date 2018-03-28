@@ -161,7 +161,7 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
     else
     {
         // Determine the sorted order:
-        // use sortedOrder directly (the intermediate list is discared anyhow)
+        // use sortedOrder directly (the intermediate list is discarded anyhow)
         labelList faceMap;
         sortedOrder(zoneIds, faceMap);
 

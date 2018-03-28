@@ -446,7 +446,7 @@ class cellCuts
             //- Set orientation of loops
             void orientPlanesAndLoops();
 
-            //- Top level driver: adressing calculation and loop detection
+            //- Top level driver: addressing calculation and loop detection
             //  (loops splitting cells).
             void calcLoopsAndAddressing(const labelList& cutCells);
 

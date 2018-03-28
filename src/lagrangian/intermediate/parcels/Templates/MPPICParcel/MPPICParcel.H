@@ -50,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of clases
+// Forward declaration of classes
 
 template<class ParcelType>
 class MPPICParcel;
@@ -116,7 +116,7 @@ public:
                 //- Velocity average
                 autoPtr<AveragingMethod<vector>> uAverage_;
 
-                //- Magnitude velocity sqyuared average
+                //- Magnitude velocity squared average
                 autoPtr<AveragingMethod<scalar>> uSqrAverage_;
 
                 //- Frequency average

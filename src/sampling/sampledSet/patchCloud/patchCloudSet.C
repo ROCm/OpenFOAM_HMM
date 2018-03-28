@@ -90,7 +90,7 @@ void Foam::patchCloudSet::calcSamples
 
     // Not very random
     Random rndGen(123456);
-    // Make bb asymetric just to avoid problems on symmetric meshes
+    // Make bb asymmetric just to avoid problems on symmetric meshes
     bb = bb.extend(rndGen, 1e-4);
 
     // Make sure bb is 3D.

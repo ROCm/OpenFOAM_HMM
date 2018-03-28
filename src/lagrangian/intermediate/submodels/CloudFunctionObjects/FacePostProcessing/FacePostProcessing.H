@@ -31,7 +31,7 @@ Description
     Records particle face quantities on used-specified face zone
 
     Currently supports:
-        accummulated mass
+        accumulated mass
         average mass flux
 
 SourceFiles

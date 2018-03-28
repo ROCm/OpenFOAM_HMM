@@ -81,15 +81,15 @@ public:
 
         // Controls
 
-            //- Minimum cell size below which protusions through the surface are
-            //  not split
+            //- Minimum cell size below which protrusions through the surface
+            //- are not split
             scalar minCellSize_;
 
             //- Square of minCellSize
             scalar minCellSize2_;
 
             //- Maximum quadrant angle allowed at a concave corner before
-            //  additional "mitering" lines are added
+            //- additional "mitering" lines are added
             scalar maxQuadAngle_;
 
             //- Near-wall region where cells are aligned with the wall
@@ -126,22 +126,22 @@ public:
             //- Square of span
             scalar span2_;
 
-            //- Minumum edge-length of the cell size below which protusions
-            //  through the surface are not split
+            //- Minimum edge-length of the cell size below which protrusions
+            //- through the surface are not split
             scalar minEdgeLen_;
 
             //- Square of minEdgeLen
             scalar minEdgeLen2_;
 
             //- Maximum notch size below which protusions into the surface are
-            //  not filled
+            //- not filled
             scalar maxNotchLen_;
 
             //- Square of maxNotchLen
             scalar maxNotchLen2_;
 
-            //- The minimum distance alowed between a dual-cell vertex
-            // and the surface before a point-pair is introduced
+            //- The minimum distance allowed between a dual-cell vertex
+            //- and the surface before a point-pair is introduced
             scalar minNearPointDist_;
 
             //- Square of minNearPoint

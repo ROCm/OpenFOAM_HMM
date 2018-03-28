@@ -68,10 +68,10 @@ class edgeInterpolation
 
         // Demand-driven data
 
-            //- Geodesic distance between centroides of neighbour finite areas
+            //- Geodesic distance between centroids of neighbour finite areas
             mutable edgeScalarField* lPN_;
 
-            //- Cenral-differencing weighting factors
+            //- Central-differencing weighting factors
             mutable edgeScalarField* weightingFactors_;
 
             //- Face-gradient difference factors
@@ -167,7 +167,7 @@ public:
         const edgeVectorField& skewCorrectionVectors() const;
 
 
-        //- Do what is neccessary if the mesh has moved
+        //- Do what is necessary if the mesh has moved
         bool movePoints() const;
 };
 

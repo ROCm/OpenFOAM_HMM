@@ -174,7 +174,7 @@ public:
         // Mesh mover
 
             //- Move mesh using current pointDisplacement boundary values
-            //  and current dictionary settings. Return true if succesful
+            //  and current dictionary settings. Return true if successful
             //  (errors  on checkFaces less than allowable). Updates
             //  pointDisplacement.
             virtual bool move

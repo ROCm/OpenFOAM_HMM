@@ -75,7 +75,7 @@ public:
     static const std::size_t sizeofFields;
 
 
-    // IDs of phases in ReacingParcel phase list (Y)
+    // IDs of phases in ReactingParcel phase list (Y)
 
         static const label GAS;
         static const label LIQ;

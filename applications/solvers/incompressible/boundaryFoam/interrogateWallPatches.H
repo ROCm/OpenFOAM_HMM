@@ -63,7 +63,7 @@ else
         << endl;
 }
 
-// store local id of near-walll cell to process
+// store local id of near-wall cell to process
 label cellId = patches[patchId].faceCells()[faceId];
 
 // create position array for graph generation

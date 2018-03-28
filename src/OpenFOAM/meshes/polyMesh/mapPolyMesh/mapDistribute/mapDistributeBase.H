@@ -464,10 +464,10 @@ public:
 
     // Member Operators
 
-        //- Copy assigment
+        //- Copy assignment
         void operator=(const mapDistributeBase& rhs);
 
-        //- Move assigment
+        //- Move assignment
         void operator=(mapDistributeBase&& rhs);
 
 

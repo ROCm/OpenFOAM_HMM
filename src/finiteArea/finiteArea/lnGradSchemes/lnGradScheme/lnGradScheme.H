@@ -122,7 +122,7 @@ public:
         }
 
         //- Return the lnGrad of the given cell field
-        //  with the given weigting factors
+        //  with the given weighting factors
         static tmp<GeometricField<Type, faePatchField, edgeMesh>>
         lnGrad
         (

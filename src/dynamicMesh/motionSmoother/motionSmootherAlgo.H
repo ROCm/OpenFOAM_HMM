@@ -178,7 +178,7 @@ class motionSmootherAlgo
             const scalarField& edgeWeight
         ) const;
 
-        //- Average postion of connected points.
+        //- Average position of connected points.
         template<class Type>
         tmp<GeometricField<Type, pointPatchField, pointMesh>> avgPositions
         (

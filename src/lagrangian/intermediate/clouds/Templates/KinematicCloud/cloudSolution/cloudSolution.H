@@ -174,7 +174,7 @@ public:
             //- Return the particle track time
             inline scalar trackTime() const;
 
-            //- Return the maximum integation time step
+            //- Return the maximum integration time step
             inline scalar deltaTMax() const;
 
             //- Return const access to the coupled flag

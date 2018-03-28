@@ -67,7 +67,7 @@ int Foam::processorFaPatch::tag() const
 
 void Foam::processorFaPatch::makeNonGlobalPatchPoints() const
 {
-    // If it is not runing parallel or there are no global points
+    // If it is not running parallel or there are no global points
     // create a 1->1 map
 
     // Can not use faGlobalMeshData at this point yet

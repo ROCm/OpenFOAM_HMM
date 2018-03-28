@@ -25,7 +25,7 @@ License
 
 #include "VoidFraction.H"
 
-// * * * * * * * * * * * * * Protectd Member Functions * * * * * * * * * * * //
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 template<class CloudType>
 void Foam::VoidFraction<CloudType>::write()

@@ -115,7 +115,7 @@ class setFlow
 
    // Private Data
 
-        //- Name of vecloity field, default = "U"
+        //- Name of velocity field, default = "U"
         word UName_;
 
         //- Name of density field, default = "none"

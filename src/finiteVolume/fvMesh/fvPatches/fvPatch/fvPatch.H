@@ -217,8 +217,8 @@ public:
             tmp<vectorField> nf() const;
 
             //- Return cell-centre to face-centre vector
-            //  except for coupled patches for which the cell-centre
-            //  to coupled-cell-centre vector is returned
+            //- except for coupled patches for which the cell-centre
+            //- to coupled-cell-centre vector is returned
             virtual tmp<vectorField> delta() const;
 
 
@@ -227,9 +227,9 @@ public:
             //- Return patch weighting factors
             const scalarField& weights() const;
 
-            //- Return the face - cell distance coeffient
-            //  except for coupled patches for which the cell-centre
-            //  to coupled-cell-centre distance coeffient is returned
+            //- Return the face - cell distance coefficient
+            //- except for coupled patches for which the cell-centre
+            //- to coupled-cell-centre distance coefficient is returned
             const scalarField& deltaCoeffs() const;
 
 
@@ -251,7 +251,7 @@ public:
             ) const;
 
             //- Lookup and return the patchField of the named field from the
-            //  local objectRegistry.
+            //- local objectRegistry.
             //  N.B.  The dummy pointer arguments are used if this function is
             //  instantiated within a templated function to avoid a bug in gcc.
             //  See inletOutletFvPatchField.C and outletInletFvPatchField.C

@@ -82,8 +82,8 @@ Foam::laminarFlameSpeedModels::SCOPE::SCOPE
           )()
         ).optionalSubDict(typeName + "Coeffs")
     ),
-    LFL_(readScalar(coeffsDict_.lookup("lowerFlamabilityLimit"))),
-    UFL_(readScalar(coeffsDict_.lookup("upperFlamabilityLimit"))),
+    LFL_(readScalar(coeffsDict_.lookup("lowerFlammabilityLimit"))),
+    UFL_(readScalar(coeffsDict_.lookup("upperFlammabilityLimit"))),
     SuPolyL_(coeffsDict_.subDict("lowerSuPolynomial")),
     SuPolyU_(coeffsDict_.subDict("upperSuPolynomial")),
     Texp_(readScalar(coeffsDict_.lookup("Texp"))),
@@ -145,19 +145,19 @@ inline Foam::scalar Foam::laminarFlameSpeedModels::SCOPE::SuRef
 {
     if (phi < LFL_ || phi > UFL_)
     {
-        // Return 0 beyond the flamibility limits
+        // Return 0 beyond the flammability limits
         return scalar(0);
     }
     else if (phi < SuPolyL_.ll)
     {
         // Use linear interpolation between the low end of the
-        // lower polynomial and the lower flamibility limit
+        // lower polynomial and the lower flammability limit
         return SuPolyL_.llv*(phi - LFL_)/(SuPolyL_.ll - LFL_);
     }
     else if (phi > SuPolyU_.ul)
     {
         // Use linear interpolation between the upper end of the
-        // upper polynomial and the upper flamibility limit
+        // upper polynomial and the upper flammability limit
         return SuPolyU_.ulv*(UFL_ - phi)/(UFL_ - SuPolyU_.ul);
     }
     else if (phi < SuPolyL_.lu)

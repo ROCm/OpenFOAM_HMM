@@ -114,7 +114,7 @@ class Curle
             //- Area-averaged centre of patch faces
             dimensionedVector x0_;
 
-            //- Reference speed of souund
+            //- Reference speed of sound
             dimensionedScalar c0_;
 
 

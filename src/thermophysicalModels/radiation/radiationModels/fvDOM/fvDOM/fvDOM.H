@@ -47,7 +47,7 @@ Usage
             convergence 1e-3;       // convergence criteria for radiation
                                     //iteration
             maxIter     4;          // maximum number of iterations
-             meshOrientation    (1 1 1); //Mesh ortientation used for 2D and 1D
+            meshOrientation    (1 1 1); //Mesh orientation used for 2D and 1D
         }
 
         solverFreq   1; // Number of flow iterations per radiation iteration
@@ -106,10 +106,10 @@ class fvDOM
         //- Total radiative heat flux [W/m2]
         volScalarField qr_;
 
-         //- Emmited radiative heat flux [W/m2]
+         //- Emmitted radiative heat flux [W/m2]
         volScalarField qem_;
 
-        //- Incidet radiative heat flux [W/m2]
+        //- Incident radiative heat flux [W/m2]
         volScalarField qin_;
 
         //- Total absorption coefficient [1/m]
@@ -166,7 +166,7 @@ class fvDOM
         //- Disallow default bitwise assignment
         void operator=(const fvDOM&);
 
-        //- Update nlack body emission
+        //- Update black body emission
         void updateBlackBodyEmission();
 
 

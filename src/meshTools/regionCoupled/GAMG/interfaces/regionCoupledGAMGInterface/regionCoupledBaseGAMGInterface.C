@@ -202,7 +202,7 @@ Foam::regionCoupledBaseGAMGInterface::regionCoupledBaseGAMGInterface
 }
 
 
-// * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::regionCoupledBaseGAMGInterface::~regionCoupledBaseGAMGInterface()
 {}

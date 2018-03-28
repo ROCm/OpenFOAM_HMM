@@ -83,7 +83,7 @@ Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
 }
 
 
-// * * * * * * * * * * * * * * * Member fucntions * * * * * * * * * * * * *  //
+// * * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * *  //
 
 Foam::tmp<Foam::scalarField>
 Foam::radiation::boundaryRadiationProperties::emissivity

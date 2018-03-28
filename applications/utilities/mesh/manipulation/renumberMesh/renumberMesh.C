@@ -63,7 +63,7 @@ Description
 using namespace Foam;
 
 
-// Create named field from labelList for postprocessing
+// Create named field from labelList for post-processing
 tmp<volScalarField> createScalarField
 (
     const fvMesh& mesh,

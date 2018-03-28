@@ -92,7 +92,7 @@ protected:
             const label tgtCellI
         );
 
-        //- Append target cell neihgbour cells to cellIDs list
+        //- Append target cell neighbour cells to cellIDs list
         virtual void appendNbrCells
         (
             const label tgtCelli,

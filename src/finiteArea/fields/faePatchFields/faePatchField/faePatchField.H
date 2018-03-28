@@ -63,7 +63,7 @@ class faPatchFieldMapper;
 class edgeMesh;
 
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class Type>
 class faePatchField;

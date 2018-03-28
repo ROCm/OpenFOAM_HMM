@@ -98,7 +98,7 @@ Foam::cyclicGAMGInterfaceField::cyclicGAMGInterfaceField
 {}
 
 
-// * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::cyclicGAMGInterfaceField::~cyclicGAMGInterfaceField()
 {}

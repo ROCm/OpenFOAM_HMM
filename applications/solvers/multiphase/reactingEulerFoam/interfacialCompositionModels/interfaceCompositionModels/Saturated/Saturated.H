@@ -74,8 +74,8 @@ protected:
 
     // Private Member Functions
 
-        //- Constant of propotionality between partial pressure and mass
-        //  fraction
+        //- Constant of proportionality between partial pressure and mass
+        //- fraction
         tmp<volScalarField> wRatioByP() const;
 
 

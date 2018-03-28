@@ -291,7 +291,7 @@ void Foam::faceCollapser::setRefinement
                 near.setPoint(newPoint);
             }
 
-            // Responsability of caller to make sure polyModifyPoint is only
+            // Responsibility of caller to make sure polyModifyPoint is only
             // called once per point. (so max only one collapse face per
             // edge)
             meshMod.setAction
@@ -344,7 +344,7 @@ void Foam::faceCollapser::setRefinement
                 near.setPoint(newPoint);
             }
 
-            // Responsability of caller to make sure polyModifyPoint is only
+            // Responsibility of caller to make sure polyModifyPoint is only
             // called once per point. (so max only one collapse face per
             // edge)
             meshMod.setAction

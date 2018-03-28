@@ -150,7 +150,6 @@ void Foam::cellToFace::combine(topoSet& set, const bool add) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from componenta
 Foam::cellToFace::cellToFace
 (
     const polyMesh& mesh,
@@ -164,7 +163,6 @@ Foam::cellToFace::cellToFace
 {}
 
 
-// Construct from dictionary
 Foam::cellToFace::cellToFace
 (
     const polyMesh& mesh,
@@ -177,7 +175,6 @@ Foam::cellToFace::cellToFace
 {}
 
 
-// Construct from Istream
 Foam::cellToFace::cellToFace
 (
     const polyMesh& mesh,

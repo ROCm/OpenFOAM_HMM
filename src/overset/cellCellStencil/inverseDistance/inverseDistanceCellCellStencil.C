@@ -1001,7 +1001,7 @@ void Foam::cellCellStencils::inverseDistance::findHoles
     // real patches
 
     //  0 : region not yet determined
-    //  1 : borders blockage so is not ok (but can be overriden by real
+    //  1 : borders blockage so is not ok (but can be overridden by real
     //      patch)
     //  2 : has real patch in it so is reachable
     labelList regionType(nRegions, 0);
@@ -1423,7 +1423,7 @@ void Foam::cellCellStencils::inverseDistance::createStencil
     // (but with different weights obviously)
     // So we do multi-pass:
     // - send over cc of acceptor for which we want stencil.
-    //   Consistenly choose the acceptor with smallest magSqr in case of
+    //   Consistently choose the acceptor with smallest magSqr in case of
     //   multiple acceptors for the containing cell/donor.
     // - find the cell-cells and weights for the donor
     // - send back together with the acceptor cc

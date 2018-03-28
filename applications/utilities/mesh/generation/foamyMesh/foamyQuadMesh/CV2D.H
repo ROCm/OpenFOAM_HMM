@@ -33,10 +33,10 @@ Description
 
     // Min cell size used in tolerances when inserting points for
     // boundary conforming.
-    // Also used to as the grid spacing usind in insertGrid.
+    // Also used to as the grid spacing using in insertGrid.
     minCellSize  0.05;
 
-    // Feature angle used to inser feature points
+    // Feature angle used to insert feature points
     // 0 = all features, 180 = no features
     featureAngle 45;
 
@@ -185,7 +185,7 @@ private:
         //- Keep track of the boundary conform point-pairs
         //  stored after the insertion of the surface point-pairs in case
         //  the boundary conform function is called more than once without
-        //  removing and insertin the surface point-pairs
+        //  removing and inserting the surface point-pairs
         label startOfBoundaryConformPointPairs_;
 
         //- Store the feature points
@@ -268,7 +268,7 @@ private:
         );
 
         //- Check to see if dual cell specified by given vertex iterator
-        //  intersects the boundary and hence reqires a point-pair.
+        //  intersects the boundary and hence requires a point-pair.
         bool dualCellSurfaceIntersection
         (
             const Triangulation::Finite_vertices_iterator& vit
@@ -311,7 +311,7 @@ private:
 
         void markNearBoundaryPoints();
 
-        //- Restore the Delaunay contraint
+        //- Restore the Delaunay constraint
         void fast_restore_Delaunay(Vertex_handle vh);
 
         // Flip operations used by fast_restore_Delaunay

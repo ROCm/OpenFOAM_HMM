@@ -268,7 +268,7 @@ public:
             return myProcNo_;
         }
 
-        //- Return neigbour processor number
+        //- Return neighbour processor number
         int neighbProcNo() const
         {
             return neighbProcNo_;
@@ -294,7 +294,7 @@ public:
             const label neighbProcNo
         );
 
-        //- Return processor-neighbbour patch face centres
+        //- Return processor-neighbour patch face centres
         const vectorField& neighbFaceCentres() const
         {
             return neighbFaceCentres_;

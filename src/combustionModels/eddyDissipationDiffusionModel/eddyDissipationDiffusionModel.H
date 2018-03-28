@@ -62,11 +62,11 @@ class eddyDissipationDiffusionModel
 {
     // Private data
 
-        //- Diffussivity constant
+        //- Diffusivity constant
         scalar Cd_;
 
 
-    // Private memeber functions
+    // Private member functions
 
         //- Disallow copy construct
         eddyDissipationDiffusionModel(const eddyDissipationDiffusionModel&);

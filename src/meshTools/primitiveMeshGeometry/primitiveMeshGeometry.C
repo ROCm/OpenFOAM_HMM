@@ -263,7 +263,7 @@ bool Foam::primitiveMeshGeometry::checkFaceDotProduct
     labelHashSet* setPtr
 )
 {
-    // for all internal faces check theat the d dot S product is positive
+    // for all internal faces check that the d dot S product is positive
 
     const labelList& own = mesh.faceOwner();
     const labelList& nei = mesh.faceNeighbour();

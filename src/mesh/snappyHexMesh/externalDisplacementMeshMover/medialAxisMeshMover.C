@@ -1519,7 +1519,7 @@ void Foam::medialAxisMeshMover::calculateDisplacement
         patchDisp
     );
 
-    // Update thickess for changed extrusion
+    // Update thickness for changed extrusion
     forAll(thickness, patchPointI)
     {
         if (extrudeStatus[patchPointI] == snappyLayerDriver::NOEXTRUDE)
@@ -1768,7 +1768,7 @@ void Foam::medialAxisMeshMover::movePoints(const pointField& p)
     // Update motionSmoother for new geometry (moves adaptPatchPtr_)
     meshMover_.movePoints();
 
-    // Assume corrent mesh location is correct (reset oldPoints, scale)
+    // Assume current mesh location is correct (reset oldPoints, scale)
     meshMover_.correct();
 }
 

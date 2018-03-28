@@ -374,7 +374,7 @@ void Foam::functionObjects::fieldVisualisationBase::addGlyphs
             //     data->GetPointData()->GetScalars(scaleFieldNameChar);
             // values->GetRange(range);
 
-            // Set range accoding to user-supplied limits
+            // Set range according to user-supplied limits
             range[0] = range_.first();
             range[1] = range_.second();
             glyph->ClampingOn();

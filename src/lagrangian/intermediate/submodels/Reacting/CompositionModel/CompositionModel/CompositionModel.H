@@ -246,7 +246,7 @@ public:
                 const scalar T
             ) const;
 
-            //- Return specific heat caoacity for the phase phaseI
+            //- Return specific heat capacity for the phase phaseI
             virtual scalar Cp
             (
                 const label phaseI,

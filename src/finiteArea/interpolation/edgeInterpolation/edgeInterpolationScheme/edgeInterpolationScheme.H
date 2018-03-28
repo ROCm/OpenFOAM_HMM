@@ -143,7 +143,7 @@ public:
 
 
         //- Return the face-interpolate of the given cell field
-        //  with the given owner and neighbour weigting factors
+        //  with the given owner and neighbour weighting factors
         static tmp<GeometricField<Type, faePatchField, edgeMesh>>
         interpolate
         (
@@ -153,7 +153,7 @@ public:
         );
 
         //- Return the face-interpolate of the given cell field
-        //  with the given weigting factors
+        //  with the given weighting factors
         static tmp<GeometricField<Type, faePatchField, edgeMesh>>
         interpolate
         (
@@ -163,7 +163,7 @@ public:
 
 
         //- Return the euclidian edge-interpolate of the given area field
-        //  with the given weigting factors
+        //  with the given weighting factors
         static tmp<GeometricField<Type, faePatchField, edgeMesh>>
         euclidianInterpolate
         (

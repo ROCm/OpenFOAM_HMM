@@ -338,7 +338,7 @@ Foam::label Foam::snappyRefineDriver::surfaceOnlyRefine
     const fvMesh& mesh = meshRefiner_.mesh();
 
     // Determine the maximum refinement level over all surfaces. This
-    // determines the minumum number of surface refinement iterations.
+    // determines the minimum number of surface refinement iterations.
     label overallMaxLevel = max(meshRefiner_.surfaces().maxLevel());
 
     label iter;
@@ -468,7 +468,7 @@ Foam::label Foam::snappyRefineDriver::gapOnlyRefine
     const fvMesh& mesh = meshRefiner_.mesh();
 
     // Determine the maximum refinement level over all surfaces. This
-    // determines the minumum number of surface refinement iterations.
+    // determines the minimum number of surface refinement iterations.
 
     label maxIncrement = 0;
     const labelList& maxLevel = meshRefiner_.surfaces().maxLevel();
@@ -1422,7 +1422,7 @@ Foam::label Foam::snappyRefineDriver::shellRefine
     );
 
     // Determine the maximum refinement level over all volume refinement
-    // regions. This determines the minumum number of shell refinement
+    // regions. This determines the minimum number of shell refinement
     // iterations.
     label overallMaxShellLevel = meshRefiner_.shells().maxLevel();
 
@@ -1595,7 +1595,7 @@ void Foam::snappyRefineDriver::baffleAndSplitMesh
     }
 
     // Introduce baffles at surface intersections. Note:
-    // meshRefiment::surfaceIndex() will
+    // meshRefinement::surfaceIndex() will
     // be like boundary face from now on so not coupled anymore.
     meshRefiner_.baffleAndSplitMesh
     (

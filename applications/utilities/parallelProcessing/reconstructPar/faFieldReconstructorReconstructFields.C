@@ -75,7 +75,7 @@ Foam::faFieldReconstructor::reconstructFaAreaField
     PtrList<faPatchField<Type> > patchFields(mesh_.boundary().size());
 
 
-    // Create global mesh patchs starts
+    // Create global mesh patches starts
 
     labelList gStarts(mesh_.boundary().size(), -1);
 

@@ -155,7 +155,7 @@ private:
 
 protected:
 
-    // Proteced Data
+    // Protected Data
 
         //-
         scalar lambda_;

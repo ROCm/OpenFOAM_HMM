@@ -83,7 +83,7 @@ public:
 
         // Enquiry
 
-            //- Return the sream prefix
+            //- Return the stream prefix
             const string& prefix() const
             {
                 return prefix_;

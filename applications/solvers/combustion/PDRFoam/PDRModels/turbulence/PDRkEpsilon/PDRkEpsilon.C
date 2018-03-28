@@ -129,7 +129,7 @@ void PDRkEpsilon::correct()
     volScalarField G(GName(), rho_*nut_*(tgradU() && dev(twoSymm(tgradU()))));
     tgradU.clear();
 
-    // Update espsilon and G at the wall
+    // Update epsilon and G at the wall
     epsilon_.boundaryFieldRef().updateCoeffs();
 
     // Add the blockage generation term so that it is included consistently

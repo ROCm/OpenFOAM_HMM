@@ -629,7 +629,7 @@ Foam::List<Foam::labelPair> Foam::localPointRegion::findDuplicateFacePairs
         identity(mesh.nFaces()-mesh.nInternalFaces(), mesh.nInternalFaces())
     );
 
-    // Find correspondencing baffle face (or -1)
+    // Find corresponding baffle face (or -1)
     const labelList duplicateFace(findDuplicateFaces(mesh, testFaces));
 
     // Convert into list of coupled face pairs (mesh face labels).

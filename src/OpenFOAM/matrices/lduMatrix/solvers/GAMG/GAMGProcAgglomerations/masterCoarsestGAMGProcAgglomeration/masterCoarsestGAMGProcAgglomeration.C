@@ -42,9 +42,6 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::masterCoarsestGAMGProcAgglomeration::masterCoarsestGAMGProcAgglomeration
@@ -123,7 +120,7 @@ bool Foam::masterCoarsestGAMGProcAgglomeration::agglomerate()
                     )
                 );
 
-                // Use procesor agglomeration maps to do the actual collecting.
+                // Use processor agglomeration maps to do the actual collecting.
                 if (Pstream::myProcNo(levelComm) != -1)
                 {
                     GAMGProcAgglomeration::agglomerate

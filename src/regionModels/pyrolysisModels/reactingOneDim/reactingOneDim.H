@@ -104,7 +104,7 @@ protected:
             //- Number of non-orthogonal correctors
             label nNonOrthCorr_;
 
-            //- Maximum diffussivity
+            //- Maximum diffusivity
             scalar maxDiff_;
 
             //- Minimum delta for combustion

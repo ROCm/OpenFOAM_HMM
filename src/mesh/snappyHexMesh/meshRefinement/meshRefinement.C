@@ -954,7 +954,7 @@ Foam::label Foam::meshRefinement::splitFacesUndo
         }
 
 
-        // Update insersections
+        // Update intersections
         // ~~~~~~~~~~~~~~~~~~~~
 
         {
@@ -2165,7 +2165,7 @@ void Foam::meshRefinement::selectSeparatedCoupledFaces(boolList& selected) const
 
     forAll(patches, patchi)
     {
-        // Check all coupled. Avoid using .coupled() so we also pick up AMi.
+        // Check all coupled. Avoid using .coupled() so we also pick up AMI.
         if (isA<coupledPolyPatch>(patches[patchi]))
         {
             const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>

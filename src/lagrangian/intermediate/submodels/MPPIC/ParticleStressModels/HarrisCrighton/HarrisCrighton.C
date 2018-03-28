@@ -76,7 +76,7 @@ Foam::ParticleStressModels::HarrisCrighton::~HarrisCrighton()
 {}
 
 
-// * * * * * * * * * * * * * Privare Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::tmp<Foam::Field<Foam::scalar>>
 Foam::ParticleStressModels::HarrisCrighton::denominator

@@ -109,10 +109,10 @@ class SCOPE
 
         dictionary coeffsDict_;
 
-        //- Lower flamability limit
+        //- Lower flammability limit
         scalar LFL_;
 
-        //- Upper flamability limit
+        //- Upper flammability limit
         scalar UFL_;
 
         //- Lower Su polynomial

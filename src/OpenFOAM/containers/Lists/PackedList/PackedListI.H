@@ -605,7 +605,7 @@ inline bool Foam::PackedList<nBits>::set
             return false;
         }
 
-        // Lazy evaluation - increase size on assigment
+        // Lazy evaluation - increase size on assignment
         resize(i + 1);
     }
 

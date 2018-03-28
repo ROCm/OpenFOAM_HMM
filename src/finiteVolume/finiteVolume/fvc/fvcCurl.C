@@ -48,7 +48,7 @@ curl
 {
     word nameCurlVf = "curl(" + vf.name() + ')';
 
-    // Gausses theorem curl
+    // Gauss's theorem curl
     // tmp<GeometricField<Type, fvPatchField, volMesh>> tcurlVf =
     //     fvc::surfaceIntegrate(vf.mesh().Sf() ^ fvc::interpolate(vf));
 

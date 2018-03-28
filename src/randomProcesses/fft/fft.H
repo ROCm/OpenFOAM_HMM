@@ -88,7 +88,7 @@ public:
     static tmp<complexField> realTransform1D(const tmp<scalarField>& field);
 
 
-    //- Transform compex-value data
+    //- Transform complex-value data
     static void transform
     (
         complexField& field,

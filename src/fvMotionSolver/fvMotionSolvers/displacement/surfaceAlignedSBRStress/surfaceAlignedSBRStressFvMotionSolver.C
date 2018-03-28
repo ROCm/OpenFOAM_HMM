@@ -208,7 +208,7 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::calculateCellRot()
                     }
                 }
 
-                // Note: faces on boundaries that get hit are noy included as
+                // Note: faces on boundaries that get hit are not included as
                 // the pointDisplacement on boundaries is usually zero for
                 // this solver.
 
@@ -287,7 +287,7 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::calculateCellRot()
 void Foam::surfaceAlignedSBRStressFvMotionSolver::solve()
 {
     // The points have moved so before interpolation update
-    // the mtionSolver accordingly
+    // the motionSolver accordingly
     this->movePoints(fvMesh_.points());
 
     volVectorField& cellDisp = cellDisplacement();

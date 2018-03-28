@@ -102,7 +102,7 @@ class turbulentTemperatureRadCoupledMixedFvPatchScalarField
         //- Name of field on the neighbour region
         const word TnbrName_;
 
-         //- Name of the radiative heat flux in the neighbout region
+         //- Name of the radiative heat flux in the neighbour region
         const word qrNbrName_;
 
         //- Name of the radiative heat flux in local region

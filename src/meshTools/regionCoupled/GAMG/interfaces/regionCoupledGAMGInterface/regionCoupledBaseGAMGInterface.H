@@ -109,7 +109,7 @@ public:
 
         //- Cyclic interface functions
 
-            //- Return neigbour processor number
+            //- Return neighbour processor number
             virtual label neighbPatchID() const
             {
                 return fineRegionCoupledLduInterface_.neighbPatchID();

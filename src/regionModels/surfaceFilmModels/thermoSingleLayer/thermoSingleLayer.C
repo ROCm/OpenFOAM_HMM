@@ -177,7 +177,7 @@ void thermoSingleLayer::transferPrimaryRegionSourceFields()
     volScalarField::Boundary& hsSpPrimaryBf =
         hsSpPrimary_.boundaryFieldRef();
 
-    // Convert accummulated source terms into per unit area per unit time
+    // Convert accumulated source terms into per unit area per unit time
     const scalar deltaT = time_.deltaTValue();
     forAll(hsSpPrimaryBf, patchi)
     {

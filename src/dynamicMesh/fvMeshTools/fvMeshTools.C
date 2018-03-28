@@ -402,7 +402,7 @@ Foam::labelList Foam::fvMeshTools::removeEmptyPatches
 
     newToOld.setSize(newI);
 
-    // Move all deleteable patches to the end
+    // Move all deletable patches to the end
     forAll(oldToNew, patchI)
     {
         if (oldToNew[patchI] == -1)

@@ -137,7 +137,7 @@ private:
         //- Direction of flow through the fan relative to patch
         fanFlowDirection direction_;
 
-        //- Swtich for using non-dimensional curve
+        //- Switch for using non-dimensional curve
         Switch nonDimensional_;
 
         // Parameters for non-dimensional table

@@ -356,7 +356,7 @@ private:
         //  The value "a.b.c.d" could be a first-level entry, a second-level
         //  entry (eg, "a" with "b.c.d", "a.b" with "c.d" etc),
         //  or just about any other combination.
-        //  The heuristic tries sucessively longer top-level entries
+        //  The heuristic tries successively longer top-level entries
         //  until there is a suitable match.
         //
         //  \param recursive search parent dictionaries

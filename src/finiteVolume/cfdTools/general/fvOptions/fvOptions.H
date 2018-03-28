@@ -78,7 +78,7 @@ public:
         //- Construct from components with list of field names
         options(const fvMesh& mesh);
 
-        //- Construct fvOptions and register to datbase if not present
+        //- Construct fvOptions and register to database if not present
         //  otherwise lookup and return
         static options& New(const fvMesh& mesh);
 

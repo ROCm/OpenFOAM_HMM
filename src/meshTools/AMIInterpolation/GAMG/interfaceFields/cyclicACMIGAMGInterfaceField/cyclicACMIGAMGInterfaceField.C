@@ -82,7 +82,7 @@ Foam::cyclicACMIGAMGInterfaceField::cyclicACMIGAMGInterfaceField
 {}
 
 
-// * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::cyclicACMIGAMGInterfaceField::~cyclicACMIGAMGInterfaceField()
 {}

@@ -468,7 +468,7 @@ bool Foam::cellFeatures::isFeaturePoint(const label edge0, const label edge1)
 
     if (cosAngle < minCos_)
     {
-        // Angle larger than criterium
+        // Angle larger than criterion
         return true;
     }
     else

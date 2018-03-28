@@ -263,7 +263,7 @@ void Foam::fv::rotorDiskSource::setFaceArea(vector& axis, const bool correct)
 
 void Foam::fv::rotorDiskSource::createCoordinateSystem()
 {
-    // Construct the local rotor co-prdinate system
+    // Construct the local rotor co-ordinate system
     vector origin(Zero);
     vector axis(Zero);
     vector refDir(Zero);
@@ -601,7 +601,7 @@ bool Foam::fv::rotorDiskSource::read(const dictionary& dict)
         // Create co-ordinate system
         createCoordinateSystem();
 
-        // Read co-odinate system dependent properties
+        // Read co-ordinate system dependent properties
         checkData();
 
         constructGeometry();
