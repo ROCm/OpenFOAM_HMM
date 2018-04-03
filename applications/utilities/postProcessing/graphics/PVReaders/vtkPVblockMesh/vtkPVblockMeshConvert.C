@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 // OpenFOAM includes
 #include "blockMesh.H"
 #include "Time.H"
+#include "foamVtkTools.H"
 
 // VTK includes
 #include "vtkCellArray.h"
@@ -255,7 +256,7 @@ void Foam::vtkPVblockMesh::convertMeshCorners
         auto vtkmesh = vtkSmartPointer<vtkPolyData>::New();
 
         vtkmesh->SetPoints(vtkpoints);
-        vtkmesh->SetVerts(foamPvCore::identityVertices(blkPoints.size()));
+        vtkmesh->SetVerts(vtk::Tools::identityVertices(blkPoints.size()));
 
         addToBlock(output, vtkmesh, range, datasetNo, range.name());
         ++datasetNo;

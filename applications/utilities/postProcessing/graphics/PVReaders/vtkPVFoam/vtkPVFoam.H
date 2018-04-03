@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,6 +72,7 @@ SourceFiles
 #include "PrimitivePatchInterpolation.H"
 #include "volPointInterpolation.H"
 #include "foamPvCore.H"
+#include "foamVtkTools.H"
 #include "foamVtkMeshMaps.H"
 
 #include "vtkPoints.h"
@@ -115,112 +116,53 @@ template<class Type> class List;
 
 class vtkPVFoam
 :
-    private foamPvCore
+    private foamPvCore,
+    protected vtk::Tools
 {
     // Convenience typedefs
     typedef PrimitivePatchInterpolation<primitivePatch> patchInterpolator;
 
-
-    // Private classes
-
-        //- Bookkeeping for internal caching.
-        //  Retain an original copy of the geometry as well as a shallow copy
-        //  with the output fields.
-        //  The original copy is reused for different timestep
-        template<class DataType>
-        struct foamVtkCaching
-        {
-            typedef DataType dataType;
-
-            //- The geometry, without any cell/point data
-            vtkSmartPointer<dataType> vtkgeom;
-
-            //- The shallow-copy of geometry, plus additional data
-            vtkSmartPointer<dataType> dataset;
-
-            //- Number of points associated with geometry
-            inline uint64_t nPoints() const
-            {
-                return vtkgeom ? vtkgeom->GetNumberOfPoints() : 0;
-            }
-
-            //- Clear geometry and dataset
-            void clearGeom()
-            {
-                vtkgeom = nullptr;
-                dataset = nullptr;
-            }
-
-            //- Return a shallow copy of vtkgeom for manipulation
-            vtkSmartPointer<dataType> getCopy() const
-            {
-                auto copy = vtkSmartPointer<dataType>::New();
-                if (vtkgeom)
-                {
-                    copy->ShallowCopy(vtkgeom);
-                }
-                return copy;
-            }
-
-            //- Make a shallow copy of vtkgeom into dataset
-            void reuse()
-            {
-                dataset = vtkSmartPointer<dataType>::New();
-                if (vtkgeom)
-                {
-                    dataset->ShallowCopy(vtkgeom);
-                }
-            }
-
-            //- Set the geometry and make a shallow copy to dataset
-            void set(vtkSmartPointer<dataType> geom)
-            {
-                vtkgeom = geom;
-                reuse();
-            }
-
-            //- Report basic information to output
-            void PrintSelf(std::ostream& os) const
-            {
-                os << "geom" << nl;
-                if (vtkgeom)
-                {
-                    vtkgeom->PrintSelf(std::cout, vtkIndent(2));
-                }
-                else
-                {
-                    os << "nullptr";
-                }
-                os << nl;
-
-                os << "copy" << nl;
-                if (dataset)
-                {
-                    dataset->PrintSelf(std::cout, vtkIndent(2));
-                }
-                else
-                {
-                    os << "nullptr";
-                }
-                os << nl;
-            }
-        };
-
-
         //- Bookkeeping for vtkPolyData
         struct foamVtpData
         :
-            public foamVtkCaching<vtkPolyData>,
+            public vtk::Caching<vtkPolyData>,
             public foamVtkMeshMaps
         {};
-
 
         //- Bookkeeping for vtkUnstructuredGrid
         struct foamVtuData
         :
-            public foamVtkCaching<vtkUnstructuredGrid>,
+            public vtk::Caching<vtkUnstructuredGrid>,
             public foamVtkMeshMaps
-        {};
+        {
+            //- The vtk points for the mesh (and decomposition)
+            vtkSmartPointer<vtkPoints> points
+            (
+                const fvMesh& mesh
+            ) const;
+
+            //- The vtk points for the mesh (and decomposition),
+            //- using the provided pointMap
+            vtkSmartPointer<vtkPoints> points
+            (
+                const fvMesh& mesh,
+                const labelUList& pointMap
+            ) const;
+
+            //- Internal mesh as vtkUnstructuredGrid
+            vtkSmartPointer<vtkUnstructuredGrid> internal
+            (
+                const fvMesh& mesh,
+                const bool decompPoly
+            );
+
+            //- Subsetted mesh as vtkUnstructuredGrid
+            vtkSmartPointer<vtkUnstructuredGrid> subset
+            (
+                const fvMeshSubset& subsetter,
+                const bool decompPoly
+            );
+        };
 
 
     // Private Data
@@ -294,7 +236,7 @@ class vtkPVFoam
         //- Reset data counters
         void resetCounters();
 
-      // Update information helper functions
+    // Update information helper functions
 
         //- Internal mesh info
         void updateInfoInternalMesh(vtkDataArraySelection* select);
@@ -347,7 +289,7 @@ class vtkPVFoam
         void updateInfoLagrangianFields(vtkDataArraySelection* select);
 
 
-      // Mesh conversion functions
+    // Mesh conversion functions
 
         //- Convert internalMesh
         void convertMeshVolume();
@@ -385,53 +327,7 @@ class vtkPVFoam
         void convertMeshPointSets();
 
 
-      // Add mesh functions
-
-        //- Generate vtk points for the current mesh points/decomposition
-        static vtkSmartPointer<vtkPoints> movePoints
-        (
-            const fvMesh& mesh,
-            const foamVtuData& vtuData
-        );
-
-        //- Generate vtk points for the current mesh points/decomposition,
-        //  using the provided pointMap
-        static vtkSmartPointer<vtkPoints> movePoints
-        (
-            const fvMesh& mesh,
-            const foamVtuData& vtuData,
-            const labelUList& pointMap
-        );
-
-        //- Volume mesh as vtkUnstructuredGrid
-        static vtkSmartPointer<vtkUnstructuredGrid> volumeVTKMesh
-        (
-            const fvMesh& mesh,
-            foamVtuData& vtuData,
-            const bool decompPoly
-        );
-
-        //- Subsetted mesh as vtkUnstructuredGrid
-        static vtkSmartPointer<vtkUnstructuredGrid> volumeVTKSubsetMesh
-        (
-            const fvMeshSubset& subsetter,
-            foamVtuData& vtuData,
-            const bool decompPoly
-        );
-
-        //- Volume mesh as vtkUnstructuredGrid
-        vtkSmartPointer<vtkUnstructuredGrid> volumeVTKMesh
-        (
-            const fvMesh& mesh,
-            foamVtuData& vtuData
-        ) const;
-
-        //- Subsetted mesh as vtkUnstructuredGrid
-        vtkSmartPointer<vtkUnstructuredGrid> volumeVTKSubsetMesh
-        (
-            const fvMeshSubset& subsetter,
-            foamVtuData& vtuData
-        ) const;
+    // Add mesh functions
 
         //- Lagrangian positions as vtkPolyData
         vtkSmartPointer<vtkPolyData> lagrangianVTKMesh
@@ -440,55 +336,8 @@ class vtkPVFoam
             const word& cloudName
         ) const;
 
-        //- Patch points
-        template<class PatchType>
-        static vtkSmartPointer<vtkPoints> movePatchPoints
-        (
-            const PatchType& p
-        );
 
-        //- Patch faces as vtk-cells
-        template<class PatchType>
-        static vtkSmartPointer<vtkCellArray> patchFacesVTKCells
-        (
-            const PatchType& p
-        );
-
-        //- Patches (mesh or primitive) as vtkPolyData
-        template<class PatchType>
-        static vtkSmartPointer<vtkPolyData> patchVTKMesh
-        (
-            const PatchType& p
-        );
-
-
-      // Field conversion functions
-
-        //- Copy list to pre-allocated vtk array.
-        //  \return number of input items copied
-        template<class Type>
-        static label transcribeFloatData
-        (
-            vtkFloatArray* array,
-            const UList<Type>& input,
-            const label start = 0
-        );
-
-        //- Create named field initialized to zero
-        template<class Type>
-        static vtkSmartPointer<vtkFloatArray> zeroVTKField
-        (
-            const word& name,
-            const label size
-        );
-
-        //- Convert float data to VTK field
-        template<class Type>
-        vtkSmartPointer<vtkFloatArray> convertFieldToVTK
-        (
-            const word& name,
-            const UList<Type>& fld
-        ) const;
+    // Field conversion functions
 
         //- Face set/zone field
         template<class Type>
@@ -520,7 +369,7 @@ class vtkPVFoam
         void convertLagrangianFields();
 
 
-      // Convert OpenFOAM fields
+    // Convert OpenFOAM fields
 
         //- Volume field - all types
         template<class Type>
@@ -599,7 +448,7 @@ class vtkPVFoam
         );
 
 
-      // GUI selection helper functions
+    // GUI selection helper functions
 
         //- Get the first word from the reader 'parts' selection
         word getReaderPartName(const int partId) const;
@@ -607,10 +456,10 @@ class vtkPVFoam
 
     // Constructors
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         vtkPVFoam(const vtkPVFoam&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const vtkPVFoam&) = delete;
 
 
@@ -681,12 +530,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "vtkPVFoamTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
