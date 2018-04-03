@@ -654,8 +654,8 @@ Foam::label Foam::checkTopology
         {
             Info<< "    "
                 << setw(20) << "CellZone"
-                << setw(9) << "Cells"
-                << setw(9) << "Points"
+                << setw(13) << "Cells"
+                << setw(13) << "Points"
                 << ' ' << "BoundingBox" <<endl;
 
             const cellList& cells = mesh.cells();
@@ -686,8 +686,9 @@ Foam::label Foam::checkTopology
 
                 Info<< "    "
                     << setw(20) << cZone.name()
-                    << setw(9) << returnReduce(cZone.size(), sumOp<label>())
-                    << setw(9)
+                    << ' ' << setw(12)
+                    << returnReduce(cZone.size(), sumOp<label>())
+                    << ' ' << setw(12)
                     << returnReduce(isZonePoint.count(), sumOp<label>())
                     << ' ' << bb << endl;
             }
