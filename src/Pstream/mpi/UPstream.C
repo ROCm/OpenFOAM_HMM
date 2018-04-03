@@ -216,10 +216,11 @@ void Foam::UPstream::exit(int errnum)
     MPI_Finalized(&flag);
     if (flag)
     {
-        // Already finalized
-        FatalErrorInFunction
-            << "MPI was already finalized" << endl
-            << Foam::abort(FatalError);
+        // Already finalized - warn and exit
+        WarningInFunction
+            << "MPI was already finalized (perhaps by a connected program)"
+            << endl;
+        ::exit(1);
         return;
     }
 
