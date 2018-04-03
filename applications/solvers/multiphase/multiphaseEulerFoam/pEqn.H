@@ -55,7 +55,7 @@
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("phiHbyA", dimArea*dimVelocity, 0)
+        dimensionedScalar(dimArea*dimVelocity, Zero)
     );
 
     volScalarField rho("rho", fluid.rho());
@@ -173,7 +173,7 @@
             mesh
         ),
         mesh,
-        dimensionedScalar("rAUf", dimensionSet(-1, 3, 1, 0, 0), 0)
+        dimensionedScalar(dimensionSet(-1, 3, 1, 0, 0), Zero)
     );
 
     phasei = 0;

@@ -1432,7 +1432,7 @@ bool Foam::dynamicRefineFvMesh::writeObject
                 false
             ),
             *this,
-            dimensionedScalar("level", dimless, 0)
+            dimensionedScalar(dimless, Zero)
         );
 
         const labelList& cellLevel = meshCutter_.cellLevel();

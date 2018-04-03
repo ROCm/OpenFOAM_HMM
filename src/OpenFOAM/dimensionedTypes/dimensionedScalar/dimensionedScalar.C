@@ -68,7 +68,6 @@ dimensionedScalar operator/(const scalar s1, const dimensionedScalar& ds2)
 }
 
 
-
 dimensionedScalar pow
 (
     const dimensionedScalar& ds,

@@ -80,7 +80,7 @@ Foam::functionObjects::heatTransferCoeff::heatTransferCoeff
                 IOobject::NO_WRITE
             ),
             mesh_,
-            dimensionedScalar("0", dimPower/dimArea/dimTemperature, 0.0)
+            dimensionedScalar(dimPower/dimArea/dimTemperature, Zero)
         )
     );
 

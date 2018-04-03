@@ -75,12 +75,7 @@ reconstruct
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensioned<GradType>
-            (
-                "0",
-                ssf.dimensions()/dimArea,
-                Zero
-            ),
+            dimensioned<GradType>(ssf.dimensions()/dimArea, Zero),
             extrapolatedCalculatedFvPatchField<GradType>::typeName
         )
     );

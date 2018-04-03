@@ -260,7 +260,7 @@ Foam::functionObjects::energyTransport::energyTransport
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("rhoCp", dimEnergy/dimTemperature/dimVolume, 0.0)
+        dimensionedScalar(dimEnergy/dimTemperature/dimVolume, Zero)
     )
 {
     read(dict);

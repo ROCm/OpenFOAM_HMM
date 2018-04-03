@@ -277,7 +277,7 @@ bool Foam::functionObjects::forceCoeffs::read(const dictionary& dict)
                     IOobject::NO_WRITE
                 ),
                 mesh_,
-                dimensionedVector("0", dimless, Zero)
+                dimensionedVector(dimless, Zero)
             )
         );
 
@@ -296,7 +296,7 @@ bool Foam::functionObjects::forceCoeffs::read(const dictionary& dict)
                     IOobject::NO_WRITE
                 ),
                 mesh_,
-                dimensionedVector("0", dimless, Zero)
+                dimensionedVector(dimless, Zero)
             )
         );
 

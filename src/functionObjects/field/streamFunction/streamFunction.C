@@ -82,7 +82,7 @@ Foam::tmp<Foam::pointScalarField> Foam::functionObjects::streamFunction::calc
                 mesh_
             ),
             pMesh,
-            dimensionedScalar("zero", phi.dimensions(), 0.0)
+            dimensionedScalar(phi.dimensions(), Zero)
         )
     );
     pointScalarField& streamFunction = tstreamFunction.ref();

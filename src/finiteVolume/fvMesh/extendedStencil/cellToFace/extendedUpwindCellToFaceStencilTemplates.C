@@ -59,12 +59,7 @@ Foam::extendedUpwindCellToFaceStencil::weightedSum
                 false
             ),
             mesh,
-            dimensioned<Type>
-            (
-                fld.name(),
-                fld.dimensions(),
-                Zero
-            )
+            dimensioned<Type>(fld.dimensions(), Zero)
         )
     );
     GeometricField<Type, fvsPatchField, surfaceMesh>& sf = tsfCorr.ref();

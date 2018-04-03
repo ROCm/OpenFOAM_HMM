@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
             IOobject::NO_WRITE
         ),
         fMesh,
-        dimensionedScalar("zero", dimless/dimTime, 0)
+        dimensionedScalar(dimless/dimTime, Zero)
     );
 
     // Set cell values

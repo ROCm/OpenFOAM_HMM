@@ -61,12 +61,7 @@ edgeIntegrate
                 ssf.db()
             ),
             mesh,
-            dimensioned<Type>
-            (
-                "0",
-                ssf.dimensions()/dimArea,
-                pTraits<Type>::zero
-            ),
+            dimensioned<Type>(ssf.dimensions()/dimArea, Zero),
             zeroGradientFaPatchField<Type>::typeName
         )
     );
@@ -138,7 +133,7 @@ edgeSum
                 ssf.db()
             ),
             mesh,
-            dimensioned<Type>("0", ssf.dimensions(), pTraits<Type>::zero),
+            dimensioned<Type>(ssf.dimensions(), Zero),
             zeroGradientFaPatchField<Type>::typeName
         )
     );

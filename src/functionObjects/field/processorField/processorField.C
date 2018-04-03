@@ -65,7 +65,7 @@ Foam::functionObjects::processorField::processorField
                 IOobject::NO_WRITE
             ),
             mesh_,
-            dimensionedScalar("0", dimless, 0.0)
+            dimensionedScalar(dimless, Zero)
         )
     );
 

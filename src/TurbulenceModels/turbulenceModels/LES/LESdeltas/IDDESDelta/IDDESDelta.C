@@ -63,7 +63,7 @@ void Foam::LESModels::IDDESDelta::calcDelta()
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensionedScalar("zero", dimLength, 0.0)
+            dimensionedScalar(dimLength, Zero)
         )
     );
 

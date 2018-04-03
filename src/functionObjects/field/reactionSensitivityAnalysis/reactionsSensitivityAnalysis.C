@@ -91,7 +91,7 @@ calculateSpeciesRR
                 IOobject::NO_WRITE
             ),
             mesh_,
-            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+            dimensionedScalar(dimMass/dimVolume/dimTime, Zero)
         )
     );
 

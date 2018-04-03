@@ -44,7 +44,7 @@ volScalarField interpolatedCells
         IOobject::NO_WRITE
     ),
     mesh,
-    dimensionedScalar("interpolatedCells", dimless, 1.0),
+    dimensionedScalar("one", dimless, 1.0),
     zeroGradientFvPatchScalarField::typeName
 );
 

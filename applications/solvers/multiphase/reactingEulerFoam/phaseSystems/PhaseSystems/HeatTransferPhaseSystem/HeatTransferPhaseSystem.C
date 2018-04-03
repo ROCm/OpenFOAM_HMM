@@ -74,23 +74,20 @@ Foam::HeatTransferPhaseSystem<BasePhaseSystem>::dmdt
     const phasePairKey& key
 ) const
 {
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
+            IOobject::groupName
             (
-                IOobject::groupName
-                (
-                    "dmdt",
-                    this->phasePairs_[key]->name()
+                "dmdt",
+                this->phasePairs_[key]->name()
                 ),
-                this->mesh().time().timeName(),
-                this->mesh().time()
-            ),
-            this->mesh(),
-            dimensionedScalar("zero", dimDensity/dimTime, 0)
-        )
+            this->mesh().time().timeName(),
+            this->mesh().time()
+        ),
+        this->mesh(),
+        dimensionedScalar(dimDensity/dimTime, Zero)
     );
 }
 

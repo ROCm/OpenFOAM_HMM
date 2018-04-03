@@ -105,7 +105,7 @@ Foam::tmp<Foam::volScalarField> Foam::XiEqModels::SCOPEXiEq::XiEq() const
                 IOobject::NO_WRITE
             ),
             epsilon.mesh(),
-            dimensionedScalar("XiEq", dimless, 0.0)
+            dimensionedScalar(dimless, Zero)
         )
     );
     volScalarField& xieq = tXiEq.ref();

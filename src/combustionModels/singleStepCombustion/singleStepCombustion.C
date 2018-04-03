@@ -55,7 +55,7 @@ singleStepCombustion<CombThermoType, ThermoType>::singleStepCombustion
             IOobject::NO_WRITE
         ),
         this->mesh(),
-        dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+        dimensionedScalar(dimMass/dimVolume/dimTime, Zero)
     ),
     semiImplicit_(readBool(this->coeffs_.lookup("semiImplicit")))
 {

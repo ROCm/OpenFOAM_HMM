@@ -313,7 +313,7 @@ bool Foam::dynamicOversetFvMesh::writeObject
                 false
             ),
             *this,
-            dimensionedScalar("zero", dimless, 0.0),
+            dimensionedScalar(dimless, Zero),
             zeroGradientFvPatchScalarField::typeName
         );
 
@@ -337,7 +337,7 @@ bool Foam::dynamicOversetFvMesh::writeObject
                 false
             ),
             *this,
-            dimensionedScalar("zero", dimless, 0.0),
+            dimensionedScalar(dimless, Zero),
             zeroGradientFvPatchScalarField::typeName
         );
 

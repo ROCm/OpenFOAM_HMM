@@ -88,7 +88,7 @@ eddyDissipationDiffusionModel<CombThermoType, ThermoType>::rtDiff() const
                 IOobject::NO_WRITE
             ),
             this->mesh(),
-            dimensionedScalar("delta", dimLength, 0),
+            dimensionedScalar(dimLength, Zero),
             zeroGradientFvPatchScalarField::typeName
         )
     );

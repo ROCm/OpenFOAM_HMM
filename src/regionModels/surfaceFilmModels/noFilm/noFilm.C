@@ -72,66 +72,57 @@ Foam::scalar noFilm::CourantNumber() const
 
 tmp<volScalarField::Internal> noFilm::Srho() const
 {
-    return tmp<volScalarField::Internal>
+    return tmp<volScalarField::Internal>::New
     (
-        new volScalarField::Internal
+        IOobject
         (
-            IOobject
-            (
-                "noFilm::Srho",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            "noFilm::Srho",
+            mesh_.time().timeName(),
             mesh_,
-            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh_,
+        dimensionedScalar(dimMass/dimVolume/dimTime, Zero)
     );
 }
 
 
 tmp<volScalarField::Internal> noFilm::Srho(const label i) const
 {
-    return tmp<volScalarField::Internal>
+    return tmp<volScalarField::Internal>::New
     (
-        new volScalarField::Internal
+        IOobject
         (
-            IOobject
-            (
-                "noFilm::Srho(" + Foam::name(i) + ")",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            "noFilm::Srho(" + Foam::name(i) + ")",
+            mesh_.time().timeName(),
             mesh_,
-            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh_,
+        dimensionedScalar(dimMass/dimVolume/dimTime, Zero)
     );
 }
 
 
 tmp<volScalarField::Internal> noFilm::Sh() const
 {
-    return tmp<volScalarField::Internal>
+    return tmp<volScalarField::Internal>::New
     (
-        new volScalarField::Internal
+        IOobject
         (
-            IOobject
-            (
-                "noFilm::Sh",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            "noFilm::Sh",
+            mesh_.time().timeName(),
             mesh_,
-            dimensionedScalar("zero", dimEnergy/dimVolume/dimTime, 0.0)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh_,
+        dimensionedScalar(dimEnergy/dimVolume/dimTime, Zero)
     );
 }
 

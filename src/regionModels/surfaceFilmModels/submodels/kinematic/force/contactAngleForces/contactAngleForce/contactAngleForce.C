@@ -142,7 +142,7 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
                 IOobject::NO_WRITE
             ),
             filmModel_.regionMesh(),
-            dimensionedVector("zero", dimForce/dimArea, Zero)
+            dimensionedVector(dimForce/dimArea, Zero)
         )
     );
 

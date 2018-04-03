@@ -89,7 +89,7 @@ bool Foam::patchDistMethods::Poisson::correct
                     mesh_
                 ),
                 mesh_,
-                dimensionedScalar("yPsi", sqr(dimLength), 0.0),
+                dimensionedScalar(sqr(dimLength), Zero),
                 y.boundaryFieldRef().types()
             )
         );

@@ -243,7 +243,7 @@ if (ign.ignited())
                 rho*max
                 (
                     sigmat - sigmas,
-                    dimensionedScalar("0", sigmat.dimensions(), 0)
+                    dimensionedScalar(sigmat.dimensions(), Zero)
                 ),
                 Xi
             )

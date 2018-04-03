@@ -134,12 +134,7 @@ Foam::fv::interRegionHeatTransferModel::interRegionHeatTransferModel
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedScalar
-        (
-            "htc",
-            dimEnergy/dimTime/dimTemperature/dimVolume,
-            0.0
-        ),
+        dimensionedScalar(dimEnergy/dimTime/dimTemperature/dimVolume, Zero),
         zeroGradientFvPatchScalarField::typeName
     ),
     semiImplicit_(false),

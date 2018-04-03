@@ -71,7 +71,7 @@ Foam::isoAdvection::isoAdvection
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("zero", dimVol, 0)
+        dimensionedScalar(dimVol, Zero)
     ),
     advectionTime_(0),
 

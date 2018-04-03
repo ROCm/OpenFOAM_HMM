@@ -12,7 +12,7 @@
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("0", dimless/dimLength, 0)
+        dimensionedScalar(dimless/dimLength, Zero)
     );
 
     vsm.mapToVolume(Cs, Cvf.boundaryFieldRef());
@@ -29,7 +29,7 @@
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedVector("zero", dimVelocity, vector::zero)
+        dimensionedVector(dimVelocity, Zero)
     );
 
     vsm.mapToVolume(Us, U.boundaryFieldRef());

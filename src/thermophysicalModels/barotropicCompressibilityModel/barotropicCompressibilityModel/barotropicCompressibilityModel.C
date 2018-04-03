@@ -55,7 +55,7 @@ Foam::barotropicCompressibilityModel::barotropicCompressibilityModel
             gamma.mesh()
         ),
         gamma.mesh(),
-        dimensionedScalar(psiName, dimensionSet(0, -2, 2, 0, 0), 0)
+        dimensionedScalar(dimensionSet(0, -2, 2, 0, 0), Zero)
     ),
     gamma_(gamma)
 {}

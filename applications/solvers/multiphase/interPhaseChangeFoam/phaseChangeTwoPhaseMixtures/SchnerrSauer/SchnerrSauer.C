@@ -59,7 +59,7 @@ Foam::phaseChangeTwoPhaseMixtures::SchnerrSauer::SchnerrSauer
     Cc_("Cc", dimless, phaseChangeTwoPhaseMixtureCoeffs_),
     Cv_("Cv", dimless, phaseChangeTwoPhaseMixtureCoeffs_),
 
-    p0_("0", pSat().dimensions(), 0.0)
+    p0_(pSat().dimensions(), Zero)
 {
     correct();
 }

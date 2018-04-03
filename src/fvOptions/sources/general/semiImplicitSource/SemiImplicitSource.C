@@ -152,12 +152,7 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensioned<Type>
-        (
-            "zero",
-            eqn.dimensions()/dimVolume,
-            Zero
-        ),
+        dimensioned<Type>(eqn.dimensions()/dimVolume, Zero),
         false
     );
 
@@ -174,12 +169,7 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensioned<scalar>
-        (
-            "zero",
-            Su.dimensions()/psi.dimensions(),
-            0.0
-        ),
+        dimensioned<scalar>(Su.dimensions()/psi.dimensions(), Zero),
         false
     );
 

@@ -67,7 +67,7 @@ bool Foam::discreteSurface::sampleType
                     IOobject::NO_WRITE
                 ),
                 surf,
-                dimensioned<Type>("0", fld.dimensions(), Zero)
+                dimensioned<Type>(fld.dimensions(), Zero)
             );
             ptr->writeOpt() = IOobject::NO_WRITE;
 

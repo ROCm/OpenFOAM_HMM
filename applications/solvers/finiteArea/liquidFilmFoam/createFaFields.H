@@ -72,7 +72,7 @@
             IOobject::NO_WRITE
         ),
         aMesh,
-        dimensionedScalar("Sm", dimLength/dimTime, 0)
+        dimensionedScalar(dimLength/dimTime, Zero)
     );
 
     // Mass sink
@@ -87,7 +87,7 @@
             IOobject::NO_WRITE
         ),
         aMesh,
-        dimensionedScalar("Sd", dimLength/dimTime, 0)
+        dimensionedScalar(dimLength/dimTime, Zero)
     );
 
     areaVectorField Ug
@@ -101,7 +101,7 @@
             IOobject::NO_WRITE
         ),
         aMesh,
-        dimensionedVector("Ug", dimVelocity, vector::zero)
+        dimensionedVector(dimVelocity, Zero)
     );
 
 

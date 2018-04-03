@@ -93,7 +93,7 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel>::correctThermo()
             this->fluid().mesh()
         ),
         this->fluid().mesh(),
-        dimensionedScalar("zero", dimless, 0)
+        dimensionedScalar(dimless, Zero)
     );
 
     PtrList<volScalarField>& Yi = Y();

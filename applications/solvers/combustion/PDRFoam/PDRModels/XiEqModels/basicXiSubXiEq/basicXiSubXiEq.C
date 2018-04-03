@@ -103,7 +103,7 @@ Foam::tmp<Foam::volScalarField> Foam::XiEqModels::basicSubGrid::XiEq() const
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedScalar("zero", Nv.dimensions(), 0.0)
+        dimensionedScalar(Nv.dimensions(), Zero)
     );
     N.primitiveFieldRef() = Nv.primitiveField()*Cw;
 
@@ -118,12 +118,7 @@ Foam::tmp<Foam::volScalarField> Foam::XiEqModels::basicSubGrid::XiEq() const
             IOobject::NO_WRITE
         ),
         U.mesh(),
-        dimensionedSymmTensor
-        (
-            "zero",
-            nsv.dimensions(),
-            Zero
-        )
+        dimensionedSymmTensor(nsv.dimensions(), Zero)
     );
     ns.primitiveFieldRef() = nsv.primitiveField()*Cw;
 

@@ -55,12 +55,7 @@
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar
-        (
-            "zero",
-            dimensionSet(dimEnergy/dimMass/dimTemperature),
-            0.0
-        )
+        dimensionedScalar(dimEnergy/dimMass/dimTemperature, Zero)
     );
 
     volVectorField U
@@ -74,7 +69,7 @@
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedVector("zero", dimVelocity, Zero)
+        dimensionedVector(dimVelocity, Zero)
     );
 
     #include "createPhi.H"

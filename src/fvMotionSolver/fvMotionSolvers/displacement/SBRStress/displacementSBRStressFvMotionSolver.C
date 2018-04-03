@@ -78,12 +78,7 @@ Foam::displacementSBRStressFvMotionSolver::displacementSBRStressFvMotionSolver
             IOobject::AUTO_WRITE
         ),
         fvMesh_,
-        dimensionedVector
-        (
-            "cellDisplacement",
-            pointDisplacement().dimensions(),
-            Zero
-        ),
+        dimensionedVector(pointDisplacement().dimensions(), Zero),
         cellMotionBoundaryTypes<vector>(pointDisplacement().boundaryField())
     ),
     interpolationPtr_
@@ -123,7 +118,6 @@ displacementSBRStressFvMotionSolver
         fvMesh_,
         dimensionedVector
         (
-            "cellDisplacement",
             displacementMotionSolver::pointDisplacement().dimensions(),
             Zero
         ),

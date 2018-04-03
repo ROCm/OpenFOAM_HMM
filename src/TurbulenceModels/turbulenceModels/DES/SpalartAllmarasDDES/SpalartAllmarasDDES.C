@@ -92,7 +92,7 @@ tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::dTilda
        *max
         (
             lRAS - lLES,
-            dimensionedScalar("zero", dimLength, 0)
+            dimensionedScalar(dimLength, Zero)
         ),
         dimensionedScalar("small", dimLength, SMALL)
     );

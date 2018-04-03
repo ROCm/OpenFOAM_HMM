@@ -430,7 +430,7 @@ void Foam::displacementLayeredMotionMotionSolver::cellZoneSolve
                 false
             ),
             pointMesh::New(mesh()),
-            dimensionedScalar("zero", dimLength, 0.0)
+            dimensionedScalar(dimLength, Zero)
         );
 
         forAll(distance, pointi)

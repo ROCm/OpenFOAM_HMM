@@ -75,7 +75,7 @@ surfaceAlignedSBRStressFvMotionSolver
             IOobject::NO_WRITE
         ),
         fvMesh_,
-        dimensionedVector("zero", dimless, Zero)
+        dimensionedVector(dimless, Zero)
     ),
     maxAng_(coeffDict().lookupOrDefault<scalar>("maxAng", 80.0)),
     minAng_(coeffDict().lookupOrDefault<scalar>("minAng", 20.0)),
@@ -94,7 +94,7 @@ surfaceAlignedSBRStressFvMotionSolver
             IOobject::NO_WRITE
         ),
         fvMesh_,
-        dimensionedSymmTensor("zero", dimless, Zero)
+        dimensionedSymmTensor(dimless, Zero)
     ),
     minSigmaDiff_(coeffDict().lookupOrDefault<scalar>("minSigmaDiff", 1e-4))
 {
@@ -310,7 +310,7 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::solve()
                 IOobject::NO_WRITE
             ),
             fvMesh_,
-            dimensionedVector("zero", dimLength, Zero),
+            dimensionedVector(dimLength, Zero),
             cellMotionBoundaryTypes<vector>
             (
                 pointDisplacement().boundaryField()
@@ -355,7 +355,7 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::solve()
                 IOobject::NO_WRITE
             ),
             fvMesh_,
-            dimensionedScalar("zero", dimless, 0.0)
+            dimensionedScalar(dimless, Zero)
         )
     );
     volScalarField& mu =  tmu.ref();

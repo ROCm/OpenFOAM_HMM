@@ -115,7 +115,7 @@ void Foam::writeFields
                 IOobject::AUTO_WRITE
             ),
             mesh,
-            dimensionedScalar("angle", dimless, 0),
+            dimensionedScalar(dimless, Zero),
             calculatedFvPatchScalarField::typeName
         );
         //- Take max
@@ -149,7 +149,7 @@ void Foam::writeFields
                 IOobject::AUTO_WRITE
             ),
             mesh,
-            dimensionedScalar("weight", dimless, 0),
+            dimensionedScalar(dimless, Zero),
             calculatedFvPatchScalarField::typeName
         );
         //- Take min
@@ -190,7 +190,7 @@ void Foam::writeFields
                 IOobject::AUTO_WRITE
             ),
             mesh,
-            dimensionedScalar("skewness", dimless, 0),
+            dimensionedScalar(dimless, Zero),
             calculatedFvPatchScalarField::typeName
         );
         //- Take max
@@ -217,7 +217,7 @@ void Foam::writeFields
                 false
             ),
             mesh,
-            dimensionedScalar("cellDeterminant", dimless, 0),
+            dimensionedScalar(dimless, Zero),
             zeroGradientFvPatchScalarField::typeName
         );
         cellDeterminant.primitiveFieldRef() =
@@ -251,7 +251,7 @@ void Foam::writeFields
                 false
             ),
             mesh,
-            dimensionedScalar("aspectRatio", dimless, 0),
+            dimensionedScalar(dimless, Zero),
             zeroGradientFvPatchScalarField::typeName
         );
 
@@ -290,7 +290,7 @@ void Foam::writeFields
                 false
             ),
             mesh,
-            dimensionedScalar("cellShapes", dimless, 0),
+            dimensionedScalar(dimless, Zero),
             zeroGradientFvPatchScalarField::typeName
         );
         const cellShapeList& cellShapes = mesh.cellShapes();
@@ -319,7 +319,7 @@ void Foam::writeFields
                 false
             ),
             mesh,
-            dimensionedScalar("cellVolume", dimVolume, 0),
+            dimensionedScalar(dimVolume, Zero),
             calculatedFvPatchScalarField::typeName
         );
         V.ref() = mesh.V();
@@ -349,7 +349,7 @@ void Foam::writeFields
                 IOobject::AUTO_WRITE
             ),
             mesh,
-            dimensionedScalar("cellVolumeRatio", dimless, 0),
+            dimensionedScalar(dimless, Zero),
             calculatedFvPatchScalarField::typeName
         );
         //- Take min
@@ -438,7 +438,7 @@ void Foam::writeFields
                 IOobject::AUTO_WRITE
             ),
             mesh,
-            dimensionedScalar("cellRegion", dimless, 0),
+            dimensionedScalar(dimless, Zero),
             calculatedFvPatchScalarField::typeName
         );
 

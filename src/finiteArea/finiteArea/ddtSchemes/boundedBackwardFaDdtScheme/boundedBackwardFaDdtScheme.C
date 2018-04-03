@@ -88,12 +88,7 @@ tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt
             (
                 ddtIOobject,
                 mesh(),
-                dimensionedScalar
-                (
-                    "0",
-                    dt.dimensions()/dimTime,
-                    0.0
-                )
+                dimensionedScalar(dt.dimensions()/dimTime, Zero)
             )
         );
 
@@ -104,24 +99,14 @@ tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt
 
         return tdtdt;
     }
-    else
-    {
-        return tmp<areaScalarField>
-        (
-            new areaScalarField
-            (
-                ddtIOobject,
-                mesh(),
-                dimensionedScalar
-                (
-                    "0",
-                    dt.dimensions()/dimTime,
-                    0.0
-                ),
-                calculatedFaPatchScalarField::typeName
-            )
-        );
-    }
+
+    return tmp<areaScalarField>::New
+    (
+        ddtIOobject,
+        mesh(),
+        dimensionedScalar(dt.dimensions()/dimTime, Zero),
+        calculatedFaPatchScalarField::typeName
+    );
 }
 
 

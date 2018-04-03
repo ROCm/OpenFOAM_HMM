@@ -80,25 +80,20 @@ void Foam::radiation::noRadiation::calculate()
 
 Foam::tmp<Foam::volScalarField> Foam::radiation::noRadiation::Rp() const
 {
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "Rp",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "Rp",
+            mesh_.time().timeName(),
             mesh_,
-            dimensionedScalar
-            (
-                "Rp",
-                constant::physicoChemical::sigma.dimensions()/dimLength,
-                0.0
-            )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar
+        (
+            constant::physicoChemical::sigma.dimensions()/dimLength, Zero
         )
     );
 }
@@ -107,24 +102,18 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::noRadiation::Rp() const
 Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh>>
 Foam::radiation::noRadiation::Ru() const
 {
-    return tmp<volScalarField::Internal>
+    return tmp<volScalarField::Internal>::New
     (
-        new volScalarField::Internal
+        IOobject
         (
-            IOobject
-            (
-                "Ru",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "Ru",
+            mesh_.time().timeName(),
             mesh_,
-            dimensionedScalar
-            (
-                "Ru", dimMass/dimLength/pow3(dimTime), 0.0
-            )
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)
     );
 }
 

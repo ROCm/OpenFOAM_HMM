@@ -65,28 +65,24 @@ Foam::virtualMassModels::noVirtualMass::Cvm() const
 {
     const fvMesh& mesh(this->pair_.phase1().mesh());
 
-    return
-        tmp<volScalarField>
+    return tmp<volScalarField>::New
+    (
+        IOobject
         (
-            new volScalarField
-            (
-                IOobject
-                (
-                    "zero",
-                    mesh.time().timeName(),
-                    mesh
-                ),
-                mesh,
-                dimensionedScalar("zero", dimless, 0)
-            )
-        );
+            "zero",
+            mesh.time().timeName(),
+            mesh
+        ),
+        mesh,
+        dimensionedScalar(dimless, Zero)
+    );
 }
 
 
 Foam::tmp<Foam::volScalarField>
 Foam::virtualMassModels::noVirtualMass::K() const
 {
-    return Cvm()*dimensionedScalar("zero", dimDensity, 0);
+    return Cvm()*dimensionedScalar("zero", dimDensity, Zero);
 }
 
 

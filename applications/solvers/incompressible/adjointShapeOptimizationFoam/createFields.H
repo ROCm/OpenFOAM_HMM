@@ -86,8 +86,8 @@ autoPtr<incompressible::turbulenceModel> turbulence
 );
 
 
-dimensionedScalar zeroSensitivity("0", dimVelocity*dimVelocity, 0.0);
-dimensionedScalar zeroAlpha("0", dimless/dimTime, 0.0);
+dimensionedScalar zeroSensitivity(dimVelocity*dimVelocity, Zero);
+dimensionedScalar zeroAlpha(dimless/dimTime, Zero);
 
 dimensionedScalar lambda
 (

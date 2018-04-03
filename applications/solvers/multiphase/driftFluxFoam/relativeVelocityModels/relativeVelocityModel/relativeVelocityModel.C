@@ -90,7 +90,7 @@ Foam::relativeVelocityModel::relativeVelocityModel
             IOobject::AUTO_WRITE
         ),
         alphac_.mesh(),
-        dimensionedVector("Udm", dimVelocity, Zero),
+        dimensionedVector(dimVelocity, Zero),
         UdmPatchFieldTypes()
     )
 {}

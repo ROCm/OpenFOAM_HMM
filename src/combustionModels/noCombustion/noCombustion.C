@@ -75,25 +75,20 @@ template<class CombThermoType>
 Foam::tmp<Foam::volScalarField>
 Foam::combustionModels::noCombustion<CombThermoType>::Qdot() const
 {
-    tmp<volScalarField> tQdot
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                IOobject::groupName(typeName + ":Qdot", this->phaseName_),
-                this->mesh().time().timeName(),
-                this->mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            IOobject::groupName(typeName + ":Qdot", this->phaseName_),
+            this->mesh().time().timeName(),
             this->mesh(),
-            dimensionedScalar("Qdot", dimEnergy/dimVolume/dimTime, 0.0)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        this->mesh(),
+        dimensionedScalar(dimEnergy/dimVolume/dimTime, Zero)
     );
-
-    return tQdot;
 }
 
 

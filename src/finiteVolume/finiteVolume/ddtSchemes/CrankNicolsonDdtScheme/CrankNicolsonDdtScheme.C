@@ -161,7 +161,6 @@ CrankNicolsonDdtScheme<Type>::ddt0_
                     mesh(),
                     dimensioned<typename GeoField::value_type>
                     (
-                        "0",
                         dims/dimTime,
                         Zero
                     )
@@ -370,12 +369,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
         (
             ddtIOobject,
             mesh(),
-            dimensioned<Type>
-            (
-                "0",
-                dt.dimensions()/dimTime,
-                Zero
-            )
+            dimensioned<Type>(dt.dimensions()/dimTime, Zero)
         )
     );
 

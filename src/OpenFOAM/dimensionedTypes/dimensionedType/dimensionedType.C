@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,16 +72,29 @@ void Foam::dimensioned<Type>::initialize(Istream& is)
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::dimensioned<Type>::dimensioned
-(
-    const word& name,
-    const dimensionSet& dimSet,
-    const Type t
-)
+Foam::dimensioned<Type>::dimensioned()
 :
-    name_(name),
-    dimensions_(dimSet),
-    value_(t)
+    name_("0"),
+    dimensions_(dimless),
+    value_(Zero)
+{}
+
+
+template<class Type>
+Foam::dimensioned<Type>::dimensioned(const dimensionSet& dims)
+:
+    name_("0"),
+    dimensions_(dims),
+    value_(Zero)
+{}
+
+
+template<class Type>
+Foam::dimensioned<Type>::dimensioned(const dimensionSet& dims, const zero)
+:
+    name_("0"),
+    dimensions_(dims),
+    value_(Zero)
 {}
 
 
@@ -95,6 +108,20 @@ Foam::dimensioned<Type>::dimensioned
     name_(name),
     dimensions_(dt.dimensions_),
     value_(dt.value_)
+{}
+
+
+template<class Type>
+Foam::dimensioned<Type>::dimensioned
+(
+    const word& name,
+    const dimensionSet& dims,
+    const Type& val
+)
+:
+    name_(name),
+    dimensions_(dims),
+    value_(val)
 {}
 
 
@@ -131,12 +158,12 @@ template<class Type>
 Foam::dimensioned<Type>::dimensioned
 (
     const word& name,
-    const dimensionSet& dimSet,
+    const dimensionSet& dims,
     Istream& is
 )
 :
     name_(name),
-    dimensions_(dimSet),
+    dimensions_(dims),
     value_(Zero)
 {
     initialize(is);
@@ -147,38 +174,16 @@ template<class Type>
 Foam::dimensioned<Type>::dimensioned
 (
     const word& name,
-    const dimensionSet& dimSet,
+    const dimensionSet& dims,
     const dictionary& dict
 )
 :
     name_(name),
-    dimensions_(dimSet),
+    dimensions_(dims),
     value_(Zero)
 {
     initialize(dict.lookup(name));
 }
-
-
-template<class Type>
-Foam::dimensioned<Type>::dimensioned
-()
-:
-    name_("undefined"),
-    dimensions_(dimless),
-    value_(Zero)
-{}
-
-
-template<class Type>
-Foam::dimensioned<Type>::dimensioned
-(
-    const dimensionSet& dimSet
-)
-:
-    name_("0"),
-    dimensions_(dimSet),
-    value_(Zero)
-{}
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -196,10 +201,8 @@ Foam::dimensioned<Type> Foam::dimensioned<Type>::lookupOrDefault
     {
         return dimensioned<Type>(name, dims, dict.lookup(name));
     }
-    else
-    {
-        return dimensioned<Type>(name, dims, defaultValue);
-    }
+
+    return dimensioned<Type>(name, dims, defaultValue);
 }
 
 

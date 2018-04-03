@@ -52,12 +52,7 @@ void Foam::fv::jouleHeatingSource::initialiseSigma
                     IOobject::AUTO_WRITE
                 ),
                 mesh_,
-                dimensioned<Type>
-                (
-                    "0",
-                    sqr(dimCurrent)/dimPower/dimLength,
-                    Zero
-                )
+                dimensioned<Type>(sqr(dimCurrent)/dimPower/dimLength, Zero)
             )
         );
 

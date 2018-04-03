@@ -1224,7 +1224,7 @@ Foam::medialAxisMeshMover::medialAxisMeshMover
             false
         ),
         pMesh(),
-        dimensionedVector("dispVec", dimLength, Zero)
+        dimensionedVector(dimLength, Zero)
     ),
     medialRatio_
     (
@@ -1238,7 +1238,7 @@ Foam::medialAxisMeshMover::medialAxisMeshMover
             false
         ),
         pMesh(),
-        dimensionedScalar("medialRatio", dimless, 0.0)
+        dimensionedScalar(dimless, Zero)
     ),
     medialDist_
     (
@@ -1252,7 +1252,7 @@ Foam::medialAxisMeshMover::medialAxisMeshMover
             false
         ),
         pMesh(),
-        dimensionedScalar("pointMedialDist", dimLength, 0.0)
+        dimensionedScalar(dimLength, Zero)
     ),
     medialVec_
     (
@@ -1266,7 +1266,7 @@ Foam::medialAxisMeshMover::medialAxisMeshMover
             false
         ),
         pMesh(),
-        dimensionedVector("medialVec", dimLength, Zero)
+        dimensionedVector(dimLength, Zero)
     )
 {
     update(dict);

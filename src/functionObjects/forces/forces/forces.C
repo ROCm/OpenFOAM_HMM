@@ -299,7 +299,7 @@ void Foam::functionObjects::forces::resetFields()
                 lookupObject<volVectorField>(fieldName("force"))
             );
 
-        force == dimensionedVector("0", force.dimensions(), Zero);
+        force == dimensionedVector(force.dimensions(), Zero);
 
         volVectorField& moment =
             const_cast<volVectorField&>
@@ -307,7 +307,7 @@ void Foam::functionObjects::forces::resetFields()
                 lookupObject<volVectorField>(fieldName("moment"))
             );
 
-        moment == dimensionedVector("0", moment.dimensions(), Zero);
+        moment == dimensionedVector(moment.dimensions(), Zero);
     }
 }
 
@@ -940,7 +940,7 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
                     IOobject::NO_WRITE
                 ),
                 mesh_,
-                dimensionedVector("0", dimForce, Zero)
+                dimensionedVector(dimForce, Zero)
             )
         );
 
@@ -959,7 +959,7 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
                     IOobject::NO_WRITE
                 ),
                 mesh_,
-                dimensionedVector("0", dimForce*dimLength, Zero)
+                dimensionedVector(dimForce*dimLength, Zero)
             )
         );
 

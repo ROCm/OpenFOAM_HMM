@@ -104,12 +104,7 @@ Foam::tmp<Foam::volSymmTensorField> Foam::PDRDragModels::basic::Dcu() const
                 IOobject::NO_WRITE
             ),
             U_.mesh(),
-            dimensionedSymmTensor
-            (
-                "zero",
-                dimMass/dimTime/pow(dimLength, 3),
-                Zero
-            )
+            dimensionedSymmTensor(dimMass/dimTime/dimVolume, Zero)
         )
     );
 
@@ -143,7 +138,7 @@ Foam::tmp<Foam::volScalarField> Foam::PDRDragModels::basic::Gk() const
                 IOobject::NO_WRITE
             ),
             U_.mesh(),
-            dimensionedScalar("zero", dimMass/dimLength/pow(dimTime, 3), 0.0)
+            dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)
         )
     );
 

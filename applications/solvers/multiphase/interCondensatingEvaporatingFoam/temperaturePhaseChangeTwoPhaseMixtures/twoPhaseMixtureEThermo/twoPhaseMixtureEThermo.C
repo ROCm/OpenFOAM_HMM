@@ -100,7 +100,7 @@ Foam::twoPhaseMixtureEThermo::twoPhaseMixtureEThermo
                 IOobject::NO_WRITE
             ),
             U.mesh(),
-            dimensionedScalar("zero", dimEnergy/dimMass, 0.0),
+            dimensionedScalar(dimEnergy/dimMass, Zero),
             heBoundaryTypes()
         )
     ),
@@ -234,21 +234,18 @@ Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::hc() const
 {
     const fvMesh& mesh = this->T_.mesh();
 
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "hc",
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
+            "hc",
+            mesh.time().timeName(),
             mesh,
-            dimensionedScalar("hc",Hf2() - Hf1())
-        )
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedScalar("hc", Hf2() - Hf1())
     );
 }
 

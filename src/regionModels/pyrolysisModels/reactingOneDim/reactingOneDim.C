@@ -93,7 +93,7 @@ bool reactingOneDim::read(const dictionary& dict)
 void reactingOneDim::updateqr()
 {
     // Update local qr from coupled qr field
-    qr_ == dimensionedScalar("zero", qr_.dimensions(), 0.0);
+    qr_ == dimensionedScalar(qr_.dimensions(), Zero);
 
     // Retrieve field from coupled region using mapped boundary conditions
     qr_.correctBoundaryConditions();
@@ -144,8 +144,8 @@ void reactingOneDim::updateqr()
 
 void reactingOneDim::updatePhiGas()
 {
-    phiHsGas_ ==  dimensionedScalar("zero", phiHsGas_.dimensions(), 0.0);
-    phiGas_ == dimensionedScalar("zero", phiGas_.dimensions(), 0.0);
+    phiHsGas_ == dimensionedScalar(phiHsGas_.dimensions(), Zero);
+    phiGas_ == dimensionedScalar(phiGas_.dimensions(), Zero);
 
     const speciesTable& gasTable = solidChemistry_->gasTable();
 
@@ -414,7 +414,7 @@ reactingOneDim::reactingOneDim
             IOobject::AUTO_WRITE
         ),
         regionMesh(),
-        dimensionedScalar("zero", dimMass/dimTime, 0.0)
+        dimensionedScalar(dimMass/dimTime, Zero)
     ),
 
     phiHsGas_
@@ -428,7 +428,7 @@ reactingOneDim::reactingOneDim
             IOobject::NO_WRITE
         ),
         regionMesh(),
-        dimensionedScalar("zero", dimEnergy/dimTime, 0.0)
+        dimensionedScalar(dimEnergy/dimTime, Zero)
     ),
 
     chemistryQdot_
@@ -442,7 +442,7 @@ reactingOneDim::reactingOneDim
             IOobject::AUTO_WRITE
         ),
         regionMesh(),
-        dimensionedScalar("zero", dimEnergy/dimTime/dimVolume, 0.0)
+        dimensionedScalar(dimEnergy/dimTime/dimVolume, Zero)
     ),
 
     qr_
@@ -458,10 +458,10 @@ reactingOneDim::reactingOneDim
         regionMesh()
     ),
 
-    lostSolidMass_(dimensionedScalar("zero", dimMass, 0.0)),
-    addedGasMass_(dimensionedScalar("zero", dimMass, 0.0)),
+    lostSolidMass_(dimensionedScalar(dimMass, Zero)),
+    addedGasMass_(dimensionedScalar(dimMass, Zero)),
     totalGasMassFlux_(0.0),
-    totalHeatRR_(dimensionedScalar("zero", dimEnergy/dimTime, 0.0)),
+    totalHeatRR_(dimensionedScalar(dimEnergy/dimTime, Zero)),
     gasHSource_(false),
     qrHSource_(false),
     useChemistrySolvers_(true)
@@ -514,7 +514,7 @@ reactingOneDim::reactingOneDim
             IOobject::AUTO_WRITE
         ),
         regionMesh(),
-        dimensionedScalar("zero", dimMass/dimTime, 0.0)
+        dimensionedScalar(dimMass/dimTime, Zero)
     ),
 
     phiHsGas_
@@ -528,7 +528,7 @@ reactingOneDim::reactingOneDim
             IOobject::NO_WRITE
         ),
         regionMesh(),
-        dimensionedScalar("zero", dimEnergy/dimTime, 0.0)
+        dimensionedScalar(dimEnergy/dimTime, Zero)
     ),
 
     chemistryQdot_
@@ -542,7 +542,7 @@ reactingOneDim::reactingOneDim
             IOobject::AUTO_WRITE
         ),
         regionMesh(),
-        dimensionedScalar("zero", dimEnergy/dimTime/dimVolume, 0.0)
+        dimensionedScalar(dimEnergy/dimTime/dimVolume, Zero)
     ),
 
     qr_
@@ -558,10 +558,10 @@ reactingOneDim::reactingOneDim
         regionMesh()
     ),
 
-    lostSolidMass_(dimensionedScalar("zero", dimMass, 0.0)),
-    addedGasMass_(dimensionedScalar("zero", dimMass, 0.0)),
+    lostSolidMass_(dimensionedScalar(dimMass, Zero)),
+    addedGasMass_(dimensionedScalar(dimMass, Zero)),
     totalGasMassFlux_(0.0),
-    totalHeatRR_(dimensionedScalar("zero", dimEnergy/dimTime, 0.0)),
+    totalHeatRR_(dimensionedScalar(dimEnergy/dimTime, Zero)),
     gasHSource_(false),
     qrHSource_(false),
     useChemistrySolvers_(true)

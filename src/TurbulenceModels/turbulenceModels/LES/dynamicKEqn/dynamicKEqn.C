@@ -53,7 +53,7 @@ volScalarField dynamicKEqn<BasicTurbulenceModel>::Ck
         (
             -2.0*this->delta()*sqrt
             (
-                max(KK, dimensionedScalar("zero", KK.dimensions(), 0.0))
+                max(KK, dimensionedScalar(KK.dimensions(), Zero))
             )*filter_(D)
         )
     );

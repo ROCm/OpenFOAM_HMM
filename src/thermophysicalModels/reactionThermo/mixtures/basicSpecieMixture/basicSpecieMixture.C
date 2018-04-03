@@ -64,7 +64,7 @@ Foam::tmp<Foam::volScalarField> Foam::basicSpecieMixture::W() const
                 Y[0].mesh()
             ),
             Y[0].mesh(),
-            dimensionedScalar("zero", dimless, 0)
+            dimensionedScalar(dimless, Zero)
         )
     );
 

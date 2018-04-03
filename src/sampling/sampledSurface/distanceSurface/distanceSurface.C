@@ -74,7 +74,7 @@ void Foam::distanceSurface::createGeometry()
                 false
             ),
             fvm,
-            dimensionedScalar("zero", dimLength, 0)
+            dimensionedScalar(dimLength, Zero)
         )
     );
     volScalarField& cellDistance = cellDistancePtr_();
@@ -254,7 +254,7 @@ void Foam::distanceSurface::createGeometry()
                 false
             ),
             pointMesh::New(fvm),
-            dimensionedScalar("zero", dimLength, 0)
+            dimensionedScalar(dimLength, Zero)
         );
         pDist.primitiveFieldRef() = pointDistance_;
 

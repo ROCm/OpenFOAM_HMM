@@ -44,7 +44,7 @@ volScalarField cellMask
         IOobject::NO_WRITE
     ),
     mesh,
-    dimensionedScalar("cellMask", dimless, 1.0),
+    dimensionedScalar("one", dimless, 1.0),
     zeroGradientFvPatchScalarField::typeName
 );
 

@@ -1153,25 +1153,22 @@ Foam::snappyLayerDriver::makeLayerDisplacementField
 
     // Note: time().timeName() instead of meshRefinement::timeName() since
     // postprocessable field.
-    tmp<pointVectorField> tfld
+
+    return tmp<pointVectorField>::New
     (
-        new pointVectorField
+        IOobject
         (
-            IOobject
-            (
-                "pointDisplacement",
-                mesh.time().timeName(),
-                mesh,
+            "pointDisplacement",
+            mesh.time().timeName(),
+            mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            pMesh,
-            dimensionedVector("displacement", dimLength, Zero),
-            patchFieldTypes,
-            actualPatchTypes
-        )
+            IOobject::AUTO_WRITE
+        ),
+        pMesh,
+        dimensionedVector(dimLength, Zero),
+        patchFieldTypes,
+        actualPatchTypes
     );
-    return tfld;
 }
 
 
@@ -3038,7 +3035,7 @@ bool Foam::snappyLayerDriver::writeLayerData
                     false
                 ),
                 mesh,
-                dimensionedScalar("zero", dimless, 0),
+                dimensionedScalar(dimless, Zero),
                 fixedValueFvPatchScalarField::typeName
             );
             forAll(fld, celli)
@@ -3078,7 +3075,7 @@ bool Foam::snappyLayerDriver::writeLayerData
                     false
                 ),
                 mesh,
-                dimensionedScalar("zero", dimless, 0),
+                dimensionedScalar(dimless, Zero),
                 fixedValueFvPatchScalarField::typeName
             );
             volScalarField::Boundary& fldBf = fld.boundaryFieldRef();
@@ -3106,7 +3103,7 @@ bool Foam::snappyLayerDriver::writeLayerData
                     false
                 ),
                 mesh,
-                dimensionedScalar("zero", dimless, 0),
+                dimensionedScalar(dimless, Zero),
                 fixedValueFvPatchScalarField::typeName
             );
             volScalarField::Boundary& fldBf = fld.boundaryFieldRef();

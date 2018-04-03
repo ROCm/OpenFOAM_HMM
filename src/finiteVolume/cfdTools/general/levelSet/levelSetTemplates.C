@@ -53,7 +53,7 @@ Foam::tmp<Foam::DimensionedField<Type, Foam::volMesh>> Foam::levelSetAverage
                 mesh
             ),
             mesh,
-            dimensioned<Type>("0", positiveC.dimensions(), Zero)
+            dimensioned<Type>(positiveC.dimensions(), Zero)
         )
     );
     DimensionedField<Type, volMesh>& result = tResult.ref();

@@ -130,12 +130,7 @@ int main(int argc, char *argv[])
                 mesh
             ),
             mesh,
-            dimensionedVector
-            (
-                "0",
-                cloudSU.dimensions()/dimVolume,
-                vector::zero
-            ),
+            dimensionedVector(cloudSU.dimensions()/dimVolume, Zero),
             zeroGradientFvPatchVectorField::typeName
         );
 

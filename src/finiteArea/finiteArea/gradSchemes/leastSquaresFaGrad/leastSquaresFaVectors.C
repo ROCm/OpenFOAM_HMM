@@ -80,7 +80,7 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
             false
         ),
         mesh(),
-        dimensionedVector("zero", dimless/dimLength, vector::zero)
+        dimensionedVector(dimless/dimLength, Zero)
     );
     edgeVectorField& lsP = *pVectorsPtr_;
 
@@ -96,7 +96,7 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
             false
         ),
         mesh(),
-        dimensionedVector("zero", dimless/dimLength, vector::zero)
+        dimensionedVector(dimless/dimLength, Zero)
     );
     edgeVectorField& lsN = *nVectorsPtr_;
 

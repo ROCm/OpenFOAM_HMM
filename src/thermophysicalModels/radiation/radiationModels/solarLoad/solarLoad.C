@@ -641,7 +641,7 @@ Foam::radiation::solarLoad::solarLoad(const volScalarField& T)
             IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedScalar("qr", dimMass/pow3(dimTime), 0.0)
+        dimensionedScalar(dimMass/pow3(dimTime), Zero)
     ),
     qsecondRad_
     (
@@ -654,7 +654,7 @@ Foam::radiation::solarLoad::solarLoad(const volScalarField& T)
             IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedScalar("qsecondRad", dimMass/pow3(dimTime), 0.0)
+        dimensionedScalar(dimMass/pow3(dimTime), Zero)
     ),
     hitFaces_(),
     Ru_
@@ -668,7 +668,7 @@ Foam::radiation::solarLoad::solarLoad(const volScalarField& T)
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("Ru", dimMass/dimLength/pow3(dimTime), 0.0)
+        dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)
     ),
     solarCalc_(this->subDict(typeName + "Coeffs"), mesh_),
     verticalDir_(Zero),
@@ -731,7 +731,7 @@ Foam::radiation::solarLoad::solarLoad
             IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedScalar("qr", dimMass/pow3(dimTime), 0.0)
+        dimensionedScalar(dimMass/pow3(dimTime), Zero)
     ),
     qsecondRad_
     (
@@ -744,7 +744,7 @@ Foam::radiation::solarLoad::solarLoad
             IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedScalar("qsecondRad", dimMass/pow3(dimTime), 0.0)
+        dimensionedScalar(dimMass/pow3(dimTime), Zero)
     ),
     hitFaces_(),
     Ru_
@@ -758,7 +758,7 @@ Foam::radiation::solarLoad::solarLoad
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("Ru", dimMass/dimLength/pow3(dimTime), 0.0)
+        dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)
     ),
     solarCalc_(coeffs_, mesh_),
     verticalDir_(Zero),
@@ -823,7 +823,7 @@ Foam::radiation::solarLoad::solarLoad
             IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedScalar("qr", dimMass/pow3(dimTime), 0.0)
+        dimensionedScalar(dimMass/pow3(dimTime), Zero)
     ),
     qsecondRad_
     (
@@ -836,7 +836,7 @@ Foam::radiation::solarLoad::solarLoad
             IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedScalar("qsecondRad", dimMass/pow3(dimTime), 0.0)
+        dimensionedScalar(dimMass/pow3(dimTime), Zero)
     ),
     hitFaces_(),
     Ru_
@@ -850,7 +850,7 @@ Foam::radiation::solarLoad::solarLoad
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("Ru", dimMass/dimLength/pow3(dimTime), 0.0)
+        dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)
     ),
     solarCalc_(dict, mesh_),
     verticalDir_(Zero),
@@ -982,26 +982,22 @@ void Foam::radiation::solarLoad::calculate()
 
 Foam::tmp<Foam::volScalarField> Foam::radiation::solarLoad::Rp() const
 {
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "Rp",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            "Rp",
+            mesh_.time().timeName(),
             mesh_,
-            dimensionedScalar
-            (
-                "zero",
-                dimMass/pow3(dimTime)/dimLength/pow4(dimTemperature),
-                0.0
-            )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh_,
+        dimensionedScalar
+        (
+            dimMass/pow3(dimTime)/dimLength/pow4(dimTemperature),
+            Zero
         )
     );
 }

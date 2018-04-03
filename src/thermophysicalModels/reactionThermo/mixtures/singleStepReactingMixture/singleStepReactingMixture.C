@@ -196,11 +196,11 @@ Foam::singleStepReactingMixture<ThermoType>::singleStepReactingMixture
 )
 :
     reactingMixture<ThermoType>(thermoDict, mesh, phaseName),
-    stoicRatio_(dimensionedScalar("stoicRatio", dimless, 0.0)),
-    s_(dimensionedScalar("s", dimless, 0.0)),
-    qFuel_(dimensionedScalar("qFuel", sqr(dimVelocity), 0.0)),
-    specieStoichCoeffs_(this->species_.size(), 0.0),
-    Yprod0_(this->species_.size(), 0.0),
+    stoicRatio_(dimensionedScalar("stoicRatio", dimless, Zero)),
+    s_(dimensionedScalar("s", dimless, Zero),
+    qFuel_(dimensionedScalar("qFuel", sqr(dimVelocity), Zero)),
+    specieStoichCoeffs_(this->species_.size(), Zero),
+    Yprod0_(this->species_.size(), Zero),
     fres_(Yprod0_.size()),
     inertIndex_(this->species()[thermoDict.lookup("inertSpecie")]),
     fuelIndex_(this->species()[thermoDict.lookup("fuel")]),
@@ -226,7 +226,7 @@ Foam::singleStepReactingMixture<ThermoType>::singleStepReactingMixture
                 (
                     header,
                     mesh,
-                    dimensionedScalar("fres" + name(fresI), dimless, 0.0)
+                    dimensionedScalar(dimless, Zero)
                 )
             );
         }

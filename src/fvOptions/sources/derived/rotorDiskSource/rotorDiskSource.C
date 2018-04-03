@@ -249,7 +249,7 @@ void Foam::fv::rotorDiskSource::setFaceArea(vector& axis, const bool correct)
                 IOobject::NO_WRITE
             ),
             mesh_,
-            dimensionedScalar("0", dimArea, 0)
+            dimensionedScalar(dimArea, Zero)
         );
         UIndirectList<scalar>(area.primitiveField(), cells_) = area_;
 
@@ -519,12 +519,7 @@ void Foam::fv::rotorDiskSource::addSup
             mesh_
         ),
         mesh_,
-        dimensionedVector
-        (
-            "zero",
-            eqn.dimensions()/dimVolume,
-            Zero
-        )
+        dimensionedVector(eqn.dimensions()/dimVolume, Zero)
     );
 
     // Read the reference density for incompressible flow
@@ -560,12 +555,7 @@ void Foam::fv::rotorDiskSource::addSup
             mesh_
         ),
         mesh_,
-        dimensionedVector
-        (
-            "zero",
-            eqn.dimensions()/dimVolume,
-            Zero
-        )
+        dimensionedVector(eqn.dimensions()/dimVolume, Zero)
     );
 
     const vectorField Uin(inflowVelocity(eqn.psi()));

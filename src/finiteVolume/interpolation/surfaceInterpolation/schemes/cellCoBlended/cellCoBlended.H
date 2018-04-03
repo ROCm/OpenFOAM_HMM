@@ -232,7 +232,7 @@ public:
                     mesh
                 ),
                 mesh,
-                dimensionedScalar("Co", dimless, 0),
+                dimensionedScalar(dimless, Zero),
                 extrapolatedCalculatedFvPatchScalarField::typeName
             );
 

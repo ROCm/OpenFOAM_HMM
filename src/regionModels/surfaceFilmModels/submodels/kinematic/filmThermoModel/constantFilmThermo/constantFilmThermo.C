@@ -270,7 +270,7 @@ tmp<volScalarField> constantFilmThermo::rho() const
                 IOobject::NO_WRITE
             ),
             film().regionMesh(),
-            dimensionedScalar("0", dimDensity, 0.0),
+            dimensionedScalar(dimDensity, Zero),
             extrapolatedCalculatedFvPatchScalarField::typeName
         )
     );
@@ -297,7 +297,7 @@ tmp<volScalarField> constantFilmThermo::mu() const
                 IOobject::NO_WRITE
             ),
             film().regionMesh(),
-            dimensionedScalar("0", dimPressure*dimTime, 0.0),
+            dimensionedScalar(dimPressure*dimTime, Zero),
             extrapolatedCalculatedFvPatchScalarField::typeName
         )
     );
@@ -324,7 +324,7 @@ tmp<volScalarField> constantFilmThermo::sigma() const
                 IOobject::NO_WRITE
             ),
             film().regionMesh(),
-            dimensionedScalar("0", dimMass/sqr(dimTime), 0.0),
+            dimensionedScalar(dimMass/sqr(dimTime), Zero),
             extrapolatedCalculatedFvPatchScalarField::typeName
         )
     );
@@ -351,7 +351,7 @@ tmp<volScalarField> constantFilmThermo::Cp() const
                 IOobject::NO_WRITE
             ),
             film().regionMesh(),
-            dimensionedScalar("0", dimEnergy/dimMass/dimTemperature, 0.0),
+            dimensionedScalar(dimEnergy/dimMass/dimTemperature, Zero),
             extrapolatedCalculatedFvPatchScalarField::typeName
         )
     );
@@ -378,7 +378,7 @@ tmp<volScalarField> constantFilmThermo::kappa() const
                 IOobject::NO_WRITE
             ),
             film().regionMesh(),
-            dimensionedScalar("0", dimPower/dimLength/dimTemperature, 0.0),
+            dimensionedScalar(dimPower/dimLength/dimTemperature, Zero),
             extrapolatedCalculatedFvPatchScalarField::typeName
         )
     );

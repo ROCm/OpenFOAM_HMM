@@ -45,7 +45,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
+class zero;
+class dictionary;
 
 template<class Type> class dimensioned;
 
@@ -55,7 +57,6 @@ Istream& operator>>(Istream&, dimensioned<Type>&);
 template<class Type>
 Ostream& operator<<(Ostream&, const dimensioned<Type>&);
 
-class dictionary;
 
 /*---------------------------------------------------------------------------*\
                            Class dimensioned Declaration
@@ -91,37 +92,50 @@ public:
 
     // Constructors
 
-        //- Construct given a name, a value and its dimensionSet.
-        dimensioned(const word&, const dimensionSet&, const Type);
-
-        //- Construct from a dimensioned<Type> changing the name.
-        dimensioned(const word&, const dimensioned<Type>&);
-
-        //- Construct given a value (creates dimensionless value).
-        dimensioned(const Type& t)
-        :
-            name_(::Foam::name(t)),
-            dimensions_(dimless),
-            value_(t)
-        {}
-
-        //- Construct from Istream.
-        dimensioned(Istream&);
-
-        //- Construct from an Istream with a given name
-        dimensioned(const word&, Istream&);
-
-        //- Construct from an Istream with a given name and dimensions
-        dimensioned(const word&, const dimensionSet&, Istream&);
-
-        //- Construct from dictionary lookup with a given name and dimensions
-        dimensioned(const word&, const dimensionSet&, const dictionary&);
-
-        //- Null constructor - a dimensionless Zero, named "undefined"
+        //- Null constructor: a dimensionless Zero, named "0"
         dimensioned();
 
         //- A dimensioned Zero, named "0"
-        explicit dimensioned(const dimensionSet&);
+        explicit dimensioned(const dimensionSet& dims);
+
+        //- A dimensioned Zero, named "0"
+        explicit dimensioned(const dimensionSet& dims, const zero);
+
+        //- Construct dimensionless from given value.
+        dimensioned(const Type& val)
+        :
+            name_(::Foam::name(val)),
+            dimensions_(dimless),
+            value_(val)
+        {}
+
+        //- Copy construct a dimensioned Type with a new name
+        dimensioned(const word& name, const dimensioned<Type>& dt);
+
+        //- Construct from components: name, dimensionSet and a value.
+        dimensioned
+        (
+            const word& name,
+            const dimensionSet& dims,
+            const Type& val
+        );
+
+        //- Construct from Istream.
+        dimensioned(Istream& is);
+
+        //- Construct from Istream with a given name
+        dimensioned(const word& name, Istream& is);
+
+        //- Construct from Istream with a given name and dimensions
+        dimensioned(const word& name, const dimensionSet& dims, Istream& is);
+
+        //- Construct from dictionary lookup with a given name and dimensions
+        dimensioned
+        (
+            const word& name,
+            const dimensionSet& dims,
+            const dictionary& dict
+        );
 
 
     // Static member functions
@@ -129,8 +143,8 @@ public:
         //- Construct from dictionary, with default dimensions and value.
         static dimensioned<Type> lookupOrDefault
         (
-            const word&,
-            const dictionary&,
+            const word& name,
+            const dictionary& dict,
             const dimensionSet& dims = dimless,
             const Type& defaultValue = Type(Zero)
         );
@@ -138,8 +152,8 @@ public:
         //- Construct from dictionary dimensionless with value.
         static dimensioned<Type> lookupOrDefault
         (
-            const word&,
-            const dictionary&,
+            const word& name,
+            const dictionary& dict,
             const Type& defaultValue = Type(Zero)
         );
 
@@ -147,8 +161,8 @@ public:
         //  If the value is not found, it is added into the dictionary.
         static dimensioned<Type> lookupOrAddToDict
         (
-            const word&,
-            dictionary&,
+            const word& name,
+            dictionary& dict,
             const dimensionSet& dims = dimless,
             const Type& defaultValue = Type(Zero)
         );
@@ -157,8 +171,8 @@ public:
         //  If the value is not found, it is added into the dictionary.
         static dimensioned<Type> lookupOrAddToDict
         (
-            const word&,
-            dictionary&,
+            const word& name,
+            dictionary& dict,
             const Type& defaultValue = Type(Zero)
         );
 
@@ -184,28 +198,28 @@ public:
         Type& value();
 
         //- Return a component as a dimensioned<cmptType>
-        dimensioned<cmptType> component(const direction) const;
+        dimensioned<cmptType> component(const direction d) const;
 
         //- Return a component with a dimensioned<cmptType>
-        void replace(const direction, const dimensioned<cmptType>&);
+        void replace(const direction d, const dimensioned<cmptType>& dc);
 
         //- Return transpose.
         dimensioned<Type> T() const;
 
         //- Update the value of dimensioned<Type>
-        void read(const dictionary&);
+        void read(const dictionary& dict);
 
         //- Update the value of dimensioned<Type> if found in the dictionary.
-        bool readIfPresent(const dictionary&);
+        bool readIfPresent(const dictionary& dict);
 
 
     // I/O
 
         //- Read value from stream and units from dictionary
-        Istream& read(Istream& is, const dictionary&);
+        Istream& read(Istream& is, const dictionary& readSet);
 
         //- Read value from stream and units from table
-        Istream& read(Istream& is, const HashTable<dimensionedScalar>&);
+        Istream& read(Istream& is, const HashTable<dimensionedScalar>& readSet);
 
         //- Read value from stream and units from system table
         Istream& read(Istream& is);
@@ -214,21 +228,27 @@ public:
     // Member operators
 
         //- Return a component as a dimensioned<cmptType>
-        dimensioned<cmptType> operator[](const direction) const;
+        dimensioned<cmptType> operator[](const direction d) const;
 
-        void operator+=(const dimensioned<Type>&);
-        void operator-=(const dimensioned<Type>&);
-        void operator*=(const scalar);
-        void operator/=(const scalar);
+        void operator+=(const dimensioned<Type>& dt);
+        void operator-=(const dimensioned<Type>& dt);
+        void operator*=(const scalar s);
+        void operator/=(const scalar s);
 
 
     // IOstream operators
 
         friend Istream& operator>> <Type>
-        (Istream&, dimensioned<Type>&);
+        (
+            Istream& is,
+            dimensioned<Type>& dt
+        );
 
         friend Ostream& operator<< <Type>
-        (Ostream&, const dimensioned<Type>&);
+        (
+            Ostream& os,
+            const dimensioned<Type>& dt
+        );
 };
 
 

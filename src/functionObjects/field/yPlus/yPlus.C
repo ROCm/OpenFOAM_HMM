@@ -92,7 +92,7 @@ Foam::functionObjects::yPlus::yPlus
                 IOobject::AUTO_WRITE
             ),
             mesh_,
-            dimensionedScalar("0", dimless, 0.0)
+            dimensionedScalar(dimless, Zero)
         )
     );
 

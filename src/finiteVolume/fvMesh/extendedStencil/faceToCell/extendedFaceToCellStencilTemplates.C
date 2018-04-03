@@ -104,12 +104,7 @@ Foam::extendedFaceToCellStencil::weightedSum
                 mesh
             ),
             mesh,
-            dimensioned<Type>
-            (
-                fld.name(),
-                fld.dimensions(),
-                Zero
-            )
+            dimensioned<Type>(fld.dimensions(), Zero)
         )
     );
     GeometricField<Type, fvPatchField, volMesh>& sf = tsfCorr.ref();

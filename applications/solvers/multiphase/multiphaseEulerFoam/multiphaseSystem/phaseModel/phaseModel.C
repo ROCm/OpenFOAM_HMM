@@ -99,7 +99,7 @@ Foam::phaseModel::phaseModel
             mesh
         ),
         mesh,
-        dimensionedVector("0", dimVelocity/dimTime, Zero)
+        dimensionedVector(dimVelocity/dimTime, Zero)
     ),
     alphaPhi_
     (
@@ -110,7 +110,7 @@ Foam::phaseModel::phaseModel
             mesh
         ),
         mesh,
-        dimensionedScalar("0", dimensionSet(0, 3, -1, 0, 0), 0)
+        dimensionedScalar(dimensionSet(0, 3, -1, 0, 0), Zero)
     )
 {
     alphaPhi_.setOriented();

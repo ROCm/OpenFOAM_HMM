@@ -114,7 +114,7 @@ volScalarField Qdot
         IOobject::AUTO_WRITE
     ),
     mesh,
-    dimensionedScalar("Qdot", dimEnergy/dimVolume/dimTime, 0.0)
+    dimensionedScalar(dimEnergy/dimVolume/dimTime, Zero)
 );
 
 #include "createMRF.H"

@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedVector("zero", dimLength, Zero),
+        dimensionedVector(dimLength, Zero),
         patchFieldTypes
     );
 

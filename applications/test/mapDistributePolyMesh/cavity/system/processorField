@@ -49,7 +49,7 @@ functions
                     IOobject::NO_READ
                 ),
                 mesh(),
-                dimensionedScalar("cellID", dimless, 0)
+                dimensionedScalar(dimless, Zero)
             );
             forAll(cellID, celli)
             {

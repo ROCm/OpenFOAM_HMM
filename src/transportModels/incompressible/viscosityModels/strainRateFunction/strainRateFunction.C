@@ -75,7 +75,7 @@ Foam::viscosityModels::strainRateFunction::strainRateFunction
             IOobject::AUTO_WRITE
         ),
         U_.mesh(),
-        dimensionedScalar(name, dimViscosity, 0)
+        dimensionedScalar(dimViscosity, Zero)
     )
 {
     correct();

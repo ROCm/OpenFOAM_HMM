@@ -123,7 +123,7 @@ inline Foam::tmp<Foam::fvScalarMatrix> Foam::ReactingCloud<CloudType>::SYi
                         false
                     ),
                     this->mesh(),
-                    dimensionedScalar("zero", dimMass/dimTime/dimVolume, 0.0)
+                    dimensionedScalar(dimMass/dimTime/dimVolume, Zero)
                 )
             );
 
@@ -173,9 +173,7 @@ Foam::ReactingCloud<CloudType>::Srho(const label i) const
             this->mesh(),
             dimensionedScalar
             (
-                "zero",
-                rhoTrans_[0].dimensions()/dimTime/dimVolume,
-                0.0
+                rhoTrans_[0].dimensions()/dimTime/dimVolume, Zero
             )
         )
     );
@@ -210,9 +208,7 @@ Foam::ReactingCloud<CloudType>::Srho() const
             this->mesh(),
             dimensionedScalar
             (
-                "zero",
-                rhoTrans_[0].dimensions()/dimTime/dimVolume,
-                0.0
+                rhoTrans_[0].dimensions()/dimTime/dimVolume, Zero
             )
         )
     );
@@ -252,7 +248,7 @@ Foam::ReactingCloud<CloudType>::Srho(volScalarField& rho) const
                     false
                 ),
                 this->mesh(),
-                dimensionedScalar("zero", dimMass/dimTime/dimVolume, 0.0)
+                dimensionedScalar(dimMass/dimTime/dimVolume, Zero)
             )
         );
 

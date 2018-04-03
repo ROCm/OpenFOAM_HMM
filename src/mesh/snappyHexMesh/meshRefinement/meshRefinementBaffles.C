@@ -2725,7 +2725,7 @@ void Foam::meshRefinement::zonify
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", dimless, 0),
+            dimensionedScalar(dimless, Zero),
             zeroGradientFvPatchScalarField::typeName
         );
 

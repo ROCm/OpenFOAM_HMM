@@ -779,7 +779,7 @@ int main(int argc, char *argv[])
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensionedScalar("viewFactorField", dimless, 0)
+            dimensionedScalar(dimless, Zero)
         );
 
         label compactI = 0;

@@ -181,7 +181,7 @@ Foam::threePhaseInterfaceProperties::threePhaseInterfaceProperties
             mixture.alpha1().mesh()
         ),
         mixture.alpha1().mesh(),
-        dimensionedScalar("nHatf", dimArea, 0.0)
+        dimensionedScalar(dimArea, Zero)
     ),
 
     K_
@@ -193,7 +193,7 @@ Foam::threePhaseInterfaceProperties::threePhaseInterfaceProperties
             mixture.alpha1().mesh()
         ),
         mixture.alpha1().mesh(),
-        dimensionedScalar("K", dimless/dimLength, 0.0)
+        dimensionedScalar(dimless/dimLength, Zero)
     )
 {
     calculateK();

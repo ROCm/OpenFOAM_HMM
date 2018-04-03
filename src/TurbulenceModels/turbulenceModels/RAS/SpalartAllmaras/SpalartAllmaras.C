@@ -307,20 +307,17 @@ tmp<volScalarField> SpalartAllmaras<BasicTurbulenceModel>::k() const
         << "Spalart-Allmaras model. Returning zero field"
         << endl;
 
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "k",
-                this->runTime_.timeName(),
-                this->mesh_
-            ),
-            this->mesh_,
-            dimensionedScalar("0", dimensionSet(0, 2, -2, 0, 0), 0),
-            zeroGradientFvPatchField<vector>::typeName
-        )
+            "k",
+            this->runTime_.timeName(),
+            this->mesh_
+        ),
+        this->mesh_,
+        dimensionedScalar(dimensionSet(0, 2, -2, 0, 0), Zero),
+        zeroGradientFvPatchField<scalar>::typeName
     );
 }
 
@@ -333,20 +330,17 @@ tmp<volScalarField> SpalartAllmaras<BasicTurbulenceModel>::epsilon() const
         << "Spalart-Allmaras model. Returning zero field"
         << endl;
 
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "epsilon",
-                this->runTime_.timeName(),
-                this->mesh_
-            ),
-            this->mesh_,
-            dimensionedScalar("0", dimensionSet(0, 2, -3, 0, 0), 0),
-            zeroGradientFvPatchField<vector>::typeName
-        )
+            "epsilon",
+            this->runTime_.timeName(),
+            this->mesh_
+        ),
+        this->mesh_,
+        dimensionedScalar(dimensionSet(0, 2, -3, 0, 0), Zero),
+        zeroGradientFvPatchField<scalar>::typeName
     );
 }
 
@@ -388,7 +382,7 @@ void SpalartAllmaras<BasicTurbulenceModel>::correct()
     fvOptions.constrain(nuTildaEqn.ref());
     solve(nuTildaEqn);
     fvOptions.correct(nuTilda_);
-    bound(nuTilda_, dimensionedScalar("0", nuTilda_.dimensions(), 0.0));
+    bound(nuTilda_, dimensionedScalar(nuTilda_.dimensions(), Zero));
     nuTilda_.correctBoundaryConditions();
 
     correctNut(fv1);

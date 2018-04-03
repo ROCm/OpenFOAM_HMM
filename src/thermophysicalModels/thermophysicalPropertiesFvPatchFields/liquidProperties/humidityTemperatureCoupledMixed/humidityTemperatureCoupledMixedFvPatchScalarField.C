@@ -108,7 +108,7 @@ Foam::humidityTemperatureCoupledMixedFvPatchScalarField::thicknessField
                     IOobject::AUTO_WRITE
                 ),
                 mesh,
-                dimensionedScalar("zero", dimLength, 0.0)
+                dimensionedScalar(dimLength, Zero)
             )
         );
 

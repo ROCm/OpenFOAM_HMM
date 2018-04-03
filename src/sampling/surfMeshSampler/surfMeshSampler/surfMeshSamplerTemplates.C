@@ -54,7 +54,7 @@ Foam::surfMeshSampler::getOrCreateSurfField
                 IOobject::NO_WRITE
             ),
             surf,
-            dimensioned<Type>("0", vField.dimensions(), Zero)
+            dimensioned<Type>(vField.dimensions(), Zero)
         );
         ptr->writeOpt() = IOobject::NO_WRITE;
 

@@ -147,7 +147,7 @@ Foam::radiation::multiBandSolidAbsorptionEmission::ECont
                 IOobject::NO_WRITE
             ),
             mesh(),
-            dimensionedScalar("E", dimMass/dimLength/pow3(dimTime), 0.0)
+            dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)
         )
     );
 

@@ -68,7 +68,7 @@ diffusionMulticomponent<CombThermoType, ThermoType>::init()
                     false
                 ),
                 this->mesh_,
-                dimensionedScalar("Rij", dimMass/dimTime/dimVolume, 0.0),
+                dimensionedScalar(dimMass/dimTime/dimVolume, Zero),
                 zeroGradientFvPatchScalarField::typeName
             )
         );
@@ -200,7 +200,7 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
                         false
                     ),
                     this->mesh_,
-                    dimensionedScalar("Rijl", dimMass/dimTime/dimVolume, 0.0),
+                    dimensionedScalar(dimMass/dimTime/dimVolume, Zero),
                     zeroGradientFvPatchScalarField::typeName
                 )
             );
@@ -225,14 +225,14 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
             {
                 const label lIndex = lhs[l].index;
                 this->chemistryPtr_->RR(lIndex) =
-                    dimensionedScalar("zero", dimMass/dimTime/dimVolume, 0.0);
+                    dimensionedScalar(dimMass/dimTime/dimVolume, Zero);
             }
 
             forAll(rhs, l)
             {
                 const label rIndex = rhs[l].index;
                 this->chemistryPtr_->RR(rIndex) =
-                    dimensionedScalar("zero", dimMass/dimTime/dimVolume, 0.0);
+                    dimensionedScalar(dimMass/dimTime/dimVolume, Zero);
             }
         }
 
@@ -401,7 +401,7 @@ Qdot() const
                 false
             ),
             this->mesh(),
-            dimensionedScalar("dQ", dimEnergy/dimTime, 0.0),
+            dimensionedScalar(dimEnergy/dimTime, Zero),
             zeroGradientFvPatchScalarField::typeName
         )
     );

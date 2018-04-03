@@ -66,12 +66,7 @@ tmp<volScalarField> reconstructMag(const surfaceScalarField& ssf)
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensionedScalar
-            (
-                "0",
-                ssf.dimensions()/dimArea,
-                scalar(0)
-            ),
+            dimensionedScalar(ssf.dimensions()/dimArea, Zero),
             extrapolatedCalculatedFvPatchScalarField::typeName
         )
     );

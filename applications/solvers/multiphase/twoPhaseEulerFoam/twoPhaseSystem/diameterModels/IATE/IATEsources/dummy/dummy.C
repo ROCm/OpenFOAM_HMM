@@ -46,19 +46,16 @@ namespace IATEsources
 Foam::tmp<Foam::volScalarField>
 Foam::diameterModels::IATEsources::dummy::R() const
 {
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "R",
-                iate_.phase().U().time().timeName(),
-                iate_.phase().mesh()
-            ),
-            iate_.phase().U().mesh(),
-            dimensionedScalar("R", dimless/dimTime, 0)
-        )
+            "R",
+            iate_.phase().U().time().timeName(),
+            iate_.phase().mesh()
+        ),
+        iate_.phase().U().mesh(),
+        dimensionedScalar(dimless/dimTime, Zero)
     );
 }
 

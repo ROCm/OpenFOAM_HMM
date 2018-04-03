@@ -96,7 +96,7 @@ void Foam::rawTopoChangerFvMesh::zeroUnmappedValues
                     false
                 ),
                 *this,
-                dimensioned<Type>("0", fld.dimensions(), Zero)
+                dimensioned<Type>(fld.dimensions(), Zero)
             )
         );
     }

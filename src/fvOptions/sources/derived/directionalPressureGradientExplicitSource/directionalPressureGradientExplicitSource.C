@@ -474,7 +474,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::addSup
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedVector("zero", eqn.dimensions()/dimVolume, Zero)
+        dimensionedVector(eqn.dimensions()/dimVolume, Zero)
     );
 
     UIndirectList<vector>(Su, cells_) = gradP0_ + dGradP_ + gradPporous_;

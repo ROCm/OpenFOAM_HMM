@@ -152,7 +152,7 @@ Foam::combustionModels::laminar<Type>::Qdot() const
                 false
             ),
             this->mesh(),
-            dimensionedScalar("Qdot", dimEnergy/dimVolume/dimTime, 0.0)
+            dimensionedScalar(dimEnergy/dimVolume/dimTime, Zero)
         )
     );
 

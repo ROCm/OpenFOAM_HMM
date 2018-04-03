@@ -118,21 +118,18 @@ template<class BasicTurbulenceModel>
 Foam::tmp<Foam::volScalarField>
 Foam::ThermalDiffusivity<BasicTurbulenceModel>::alphat() const
 {
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                IOobject::groupName("alphat", this->U_.group()),
-                this->runTime_.timeName(),
-                this->mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            IOobject::groupName("alphat", this->U_.group()),
+            this->runTime_.timeName(),
             this->mesh_,
-            dimensionedScalar("alphat", dimDensity*dimViscosity, 0.0)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        this->mesh_,
+        dimensionedScalar(dimDensity*dimViscosity, Zero)
     );
 }
 

@@ -166,12 +166,7 @@ Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::Kd
                 this->mesh_
             ),
             this->mesh_,
-            dimensionedScalar
-            (
-                IOobject::groupName("Kd", phase.name()),
-                dimensionSet(1, -3, -1, 0, 0),
-                0
-            )
+            dimensionedScalar(dimensionSet(1, -3, -1, 0, 0), Zero)
         )
     );
 
@@ -210,26 +205,21 @@ Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::Vm
     {
         return virtualMassModels_[key]->K();
     }
-    else
-    {
-        return tmp<volScalarField>
+
+    return tmp<volScalarField>::New
+    (
+        IOobject
         (
-            new volScalarField
-            (
-                IOobject
-                (
-                    virtualMassModel::typeName + ":K",
-                    this->mesh_.time().timeName(),
-                    this->mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                this->mesh_,
-                dimensionedScalar("zero", virtualMassModel::dimK, 0)
-            )
-        );
-    }
+            virtualMassModel::typeName + ":K",
+            this->mesh_.time().timeName(),
+            this->mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        this->mesh_,
+        dimensionedScalar(virtualMassModel::dimK, Zero)
+    );
 }
 
 
@@ -244,26 +234,21 @@ Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::Vmf
     {
         return virtualMassModels_[key]->Kf();
     }
-    else
-    {
-        return tmp<surfaceScalarField>
+
+    return tmp<surfaceScalarField>::New
+    (
+        IOobject
         (
-            new surfaceScalarField
-            (
-                IOobject
-                (
-                    virtualMassModel::typeName + ":Kf",
-                    this->mesh_.time().timeName(),
-                    this->mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                this->mesh_,
-                dimensionedScalar("zero", virtualMassModel::dimK, 0)
-            )
-        );
-    }
+            virtualMassModel::typeName + ":Kf",
+            this->mesh_.time().timeName(),
+            this->mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        this->mesh_,
+        dimensionedScalar(virtualMassModel::dimK, Zero)
+    );
 }
 
 
@@ -288,26 +273,21 @@ Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::F
     {
         return wallLubricationModels_[key]->template F<vector>();
     }
-    else
-    {
-        return tmp<volVectorField>
+
+    return tmp<volVectorField>::New
+    (
+        IOobject
         (
-            new volVectorField
-            (
-                IOobject
-                (
-                    liftModel::typeName + ":F",
-                    this->mesh_.time().timeName(),
-                    this->mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                this->mesh_,
-                dimensionedVector("zero", liftModel::dimF, Zero)
-            )
-        );
-    }
+            liftModel::typeName + ":F",
+            this->mesh_.time().timeName(),
+            this->mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        this->mesh_,
+        dimensionedVector(liftModel::dimF, Zero)
+    );
 }
 
 
@@ -348,7 +328,7 @@ Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::Ff
                     false
                 ),
                 this->mesh_,
-                dimensionedScalar("zero", liftModel::dimF*dimArea, 0)
+                dimensionedScalar(liftModel::dimF*dimArea, Zero)
             )
         );
 
@@ -370,26 +350,21 @@ Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::D
     {
         return turbulentDispersionModels_[key]->D();
     }
-    else
-    {
-        return tmp<volScalarField>
+
+    return tmp<volScalarField>::New
+    (
+        IOobject
         (
-            new volScalarField
-            (
-                IOobject
-                (
-                    turbulentDispersionModel::typeName + ":D",
-                    this->mesh_.time().timeName(),
-                    this->mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                this->mesh_,
-                dimensionedScalar("zero", turbulentDispersionModel::dimD, 0)
-            )
-        );
-    }
+            turbulentDispersionModel::typeName + ":D",
+            this->mesh_.time().timeName(),
+            this->mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        this->mesh_,
+        dimensionedScalar(turbulentDispersionModel::dimD, Zero)
+    );
 }
 
 
@@ -504,7 +479,7 @@ Foam::volVectorField& Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::setF
                     false
                 ),
                 this->mesh_,
-                dimensionedVector("zero", liftModel::dimF, Zero)
+                dimensionedVector(liftModel::dimF, Zero)
             )
         );
     }
@@ -575,9 +550,8 @@ Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::setPhiD
                 this->mesh_,
                 dimensionedScalar
                 (
-                    "zero",
                     dimTime*dimArea*turbulentDispersionModel::dimF/dimDensity,
-                    0
+                    Zero
                 )
             )
         );

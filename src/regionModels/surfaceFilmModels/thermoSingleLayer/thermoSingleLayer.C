@@ -96,7 +96,7 @@ void thermoSingleLayer::resetPrimaryRegionSourceTerms()
 
     kinematicSingleLayer::resetPrimaryRegionSourceTerms();
 
-    hsSpPrimary_ == dimensionedScalar("zero", hsSp_.dimensions(), 0.0);
+    hsSpPrimary_ == dimensionedScalar(hsSp_.dimensions(), Zero);
 }
 
 
@@ -341,7 +341,7 @@ thermoSingleLayer::thermoSingleLayer
             IOobject::AUTO_WRITE
         ),
         regionMesh(),
-        dimensionedScalar("Cp", dimEnergy/dimMass/dimTemperature, 0.0),
+        dimensionedScalar(dimEnergy/dimMass/dimTemperature, Zero),
         zeroGradientFvPatchScalarField::typeName
     ),
     kappa_
@@ -355,12 +355,7 @@ thermoSingleLayer::thermoSingleLayer
             IOobject::AUTO_WRITE
         ),
         regionMesh(),
-        dimensionedScalar
-        (
-            "kappa",
-            dimEnergy/dimTime/dimLength/dimTemperature,
-            0.0
-        ),
+        dimensionedScalar(dimEnergy/dimTime/dimLength/dimTemperature, Zero),
         zeroGradientFvPatchScalarField::typeName
     ),
 
@@ -413,7 +408,7 @@ thermoSingleLayer::thermoSingleLayer
             IOobject::NO_WRITE
         ),
         regionMesh(),
-        dimensionedScalar("zero", dimEnergy/dimMass, 0.0),
+        dimensionedScalar(dimEnergy/dimMass, Zero),
         hsBoundaryTypes()
     ),
 
@@ -428,7 +423,7 @@ thermoSingleLayer::thermoSingleLayer
             IOobject::NO_WRITE
         ),
         regionMesh(),
-        dimensionedScalar("zero", dimEnergy, 0),
+        dimensionedScalar(dimEnergy, Zero),
         zeroGradientFvPatchScalarField::typeName
     ),
 
@@ -448,7 +443,7 @@ thermoSingleLayer::thermoSingleLayer
             IOobject::NO_WRITE
         ),
         regionMesh(),
-        dimensionedScalar("zero", dimEnergy/dimArea/dimTime, 0.0),
+        dimensionedScalar(dimEnergy/dimArea/dimTime, Zero),
         this->mappedPushedFieldPatchTypes<scalar>()
     ),
 
@@ -463,7 +458,7 @@ thermoSingleLayer::thermoSingleLayer
             IOobject::NO_WRITE
         ),
         primaryMesh(),
-        dimensionedScalar("zero", hsSp_.dimensions(), 0.0)
+        dimensionedScalar(hsSp_.dimensions(), Zero)
     ),
 
     TPrimary_
@@ -477,7 +472,7 @@ thermoSingleLayer::thermoSingleLayer
             IOobject::NO_WRITE
         ),
         regionMesh(),
-        dimensionedScalar("zero", dimTemperature, 0.0),
+        dimensionedScalar(dimTemperature, Zero),
         this->mappedFieldAndInternalPatchTypes<scalar>()
     ),
 
@@ -527,7 +522,7 @@ thermoSingleLayer::thermoSingleLayer
                         IOobject::NO_WRITE
                     ),
                     regionMesh(),
-                    dimensionedScalar("zero", dimless, 0.0),
+                    dimensionedScalar(dimless, Zero),
                     pSp_.boundaryField().types()
                 )
             );
@@ -620,7 +615,7 @@ void thermoSingleLayer::preEvolveRegion()
     }
 
     kinematicSingleLayer::preEvolveRegion();
-    primaryEnergyTrans_ == dimensionedScalar("zero", dimEnergy, 0.0);
+    primaryEnergyTrans_ == dimensionedScalar(dimEnergy, Zero);
 }
 
 
@@ -734,7 +729,7 @@ tmp<volScalarField::Internal> thermoSingleLayer::Srho() const
                 false
             ),
             primaryMesh(),
-            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+            dimensionedScalar(dimMass/dimVolume/dimTime, Zero)
         )
     );
 
@@ -786,7 +781,7 @@ tmp<volScalarField::Internal> thermoSingleLayer::Srho
                 false
             ),
             primaryMesh(),
-            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+            dimensionedScalar(dimMass/dimVolume/dimTime, Zero)
         )
     );
 
@@ -836,7 +831,7 @@ tmp<volScalarField::Internal> thermoSingleLayer::Sh() const
                 false
             ),
             primaryMesh(),
-            dimensionedScalar("zero", dimEnergy/dimVolume/dimTime, 0.0)
+            dimensionedScalar(dimEnergy/dimVolume/dimTime, Zero)
         )
     );
 

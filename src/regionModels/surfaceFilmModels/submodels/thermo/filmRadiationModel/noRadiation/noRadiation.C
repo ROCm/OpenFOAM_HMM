@@ -73,21 +73,18 @@ void noRadiation::correct()
 
 tmp<volScalarField> noRadiation::Shs()
 {
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                typeName + ":Shs",
-                film().time().timeName(),
-                film().regionMesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            typeName + ":Shs",
+            film().time().timeName(),
             film().regionMesh(),
-            dimensionedScalar("zero", dimMass/pow3(dimTime), 0.0)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        film().regionMesh(),
+        dimensionedScalar(dimMass/pow3(dimTime), Zero)
     );
 }
 

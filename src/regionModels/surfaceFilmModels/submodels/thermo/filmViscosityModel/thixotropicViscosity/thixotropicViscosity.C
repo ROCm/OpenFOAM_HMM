@@ -141,7 +141,7 @@ void thixotropicViscosity::correct
     const volScalarField deltaMass
     (
         "thixotropicViscosity:deltaMass",
-        max(dimensionedScalar("zero", dimMass, 0), film.deltaMass())
+        max(dimensionedScalar(dimMass, Zero), film.deltaMass())
     );
 
     fvScalarMatrix lambdaEqn

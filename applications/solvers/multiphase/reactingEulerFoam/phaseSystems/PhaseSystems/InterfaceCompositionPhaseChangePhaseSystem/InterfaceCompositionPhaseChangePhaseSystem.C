@@ -99,7 +99,7 @@ massTransfer() const
             *this->dmdtExplicit_[pair];
 
         *this->dmdtExplicit_[pair] =
-            dimensionedScalar("zero", dimDensity/dimTime, 0);
+            dimensionedScalar(dimDensity/dimTime, Zero);
     }
 
     // Sum up the contribution from each interface composition model
@@ -225,7 +225,7 @@ correctThermo()
                 this->mesh()
             ),
             this->mesh(),
-            dimensionedScalar("zero", dimEnergy/dimVolume/dimTime, 0)
+            dimensionedScalar(dimEnergy/dimVolume/dimTime, Zero)
         );
         volScalarField mDotLPrime
         (
@@ -236,7 +236,7 @@ correctThermo()
                 this->mesh()
             ),
             this->mesh(),
-            dimensionedScalar("zero", mDotL.dimensions()/dimTemperature, 0)
+            dimensionedScalar(mDotL.dimensions()/dimTemperature, Zero)
         );
 
         volScalarField& Tf = *this->Tf_[pair];

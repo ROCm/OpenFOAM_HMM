@@ -61,7 +61,7 @@ Foam::TDACChemistryModel<CompType, ThermoType>::TDACChemistryModel
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("0", dimless, 0)
+        dimensionedScalar(dimless, Zero)
     )
 {
     basicMultiComponentMixture& composition = this->thermo().composition();

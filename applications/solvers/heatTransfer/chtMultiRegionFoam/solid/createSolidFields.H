@@ -51,12 +51,7 @@
                         IOobject::NO_WRITE
                     ),
                     solidRegions[i],
-                    dimensionedSymmTensor
-                    (
-                        "zero",
-                        tkappaByCp().dimensions(),
-                        Zero
-                    ),
+                    dimensionedSymmTensor(tkappaByCp().dimensions(), Zero),
                     zeroGradientFvPatchSymmTensorField::typeName
                 )
             );

@@ -136,6 +136,6 @@ volScalarField pDivU
         mesh
     ),
     mesh,
-    dimensionedScalar("pDivU", p.dimensions()/dimTime, 0)
+    dimensionedScalar(p.dimensions()/dimTime, Zero)
 );
 

@@ -61,12 +61,7 @@ Foam::fv::gaussGrad<Type>::gradf
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensioned<GradType>
-            (
-                "0",
-                ssf.dimensions()/dimLength,
-                Zero
-            ),
+            dimensioned<GradType>(ssf.dimensions()/dimLength, Zero),
             extrapolatedCalculatedFvPatchField<GradType>::typeName
         )
     );

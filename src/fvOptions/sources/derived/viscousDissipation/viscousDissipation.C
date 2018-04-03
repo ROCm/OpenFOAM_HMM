@@ -195,7 +195,7 @@ void Foam::fv::viscousDissipation::addSup
                 IOobject::NO_WRITE
             ),
             mesh_,
-            dimensionedTensor("zero", inv(dimTime) , tensor::zero)
+            dimensionedTensor(inv(dimTime), Zero)
         )
     );
 

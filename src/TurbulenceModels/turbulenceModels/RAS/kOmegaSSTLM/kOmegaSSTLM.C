@@ -481,7 +481,7 @@ kOmegaSSTLM<BasicTurbulenceModel>::kOmegaSSTLM
             this->mesh_
         ),
         this->mesh_,
-        dimensionedScalar("0", dimless, 0)
+        dimensionedScalar(dimless, Zero)
     )
 {
     if (type == typeName)

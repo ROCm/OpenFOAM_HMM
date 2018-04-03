@@ -81,27 +81,24 @@ Foam::fv::solidificationMeltingSource::Cp() const
             {
                 scalar CpRef = readScalar(coeffs_.lookup("CpRef"));
 
-                return tmp<volScalarField>
+                return tmp<volScalarField>::New
                 (
-                    new volScalarField
+                    IOobject
                     (
-                        IOobject
-                        (
-                            name_ + ":Cp",
-                            mesh_.time().timeName(),
-                            mesh_,
-                            IOobject::NO_READ,
-                            IOobject::NO_WRITE
-                        ),
+                        name_ + ":Cp",
+                        mesh_.time().timeName(),
                         mesh_,
-                        dimensionedScalar
-                        (
-                            "Cp",
-                            dimEnergy/dimMass/dimTemperature,
-                            CpRef
-                        ),
-                        extrapolatedCalculatedFvPatchScalarField::typeName
-                    )
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE
+                    ),
+                    mesh_,
+                    dimensionedScalar
+                    (
+                        "Cp",
+                        dimEnergy/dimMass/dimTemperature,
+                        CpRef
+                    ),
+                    extrapolatedCalculatedFvPatchScalarField::typeName
                 );
             }
             else
@@ -207,7 +204,7 @@ Foam::fv::solidificationMeltingSource::solidificationMeltingSource
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("alpha1", dimless, 0.0),
+        dimensionedScalar(dimless, Zero),
         zeroGradientFvPatchScalarField::typeName
     ),
     curTimeIndex_(-1),

@@ -58,7 +58,7 @@ Foam::phaseModel::phaseModel
             IOobject::AUTO_WRITE
         ),
         fluid.mesh(),
-        dimensionedScalar("alpha", dimless, 0)
+        dimensionedScalar(dimless, Zero)
     ),
     fluid_(fluid),
     name_(phaseName),
@@ -95,7 +95,7 @@ Foam::phaseModel::phaseModel
             fluid.mesh()
         ),
         fluid.mesh(),
-        dimensionedScalar("0", dimensionSet(0, 3, -1, 0, 0), 0)
+        dimensionedScalar(dimensionSet(0, 3, -1, 0, 0), Zero)
     ),
     alphaRhoPhi_
     (
@@ -106,7 +106,7 @@ Foam::phaseModel::phaseModel
             fluid.mesh()
         ),
         fluid.mesh(),
-        dimensionedScalar("0", dimensionSet(1, 0, -1, 0, 0), 0)
+        dimensionedScalar(dimensionSet(1, 0, -1, 0, 0), Zero)
     )
 {
     alphaPhi_.setOriented();

@@ -631,7 +631,6 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const GeometricField<Type, PatchField, GeoMesh>& gf,
     const wordList& patchFieldTypes,
     const wordList& actualPatchTypes
-
 )
 :
     Internal(io, gf),

@@ -13,7 +13,7 @@ volVectorField U
 );
 
 // Initialise the velocity internal field to zero
-U = dimensionedVector("0", U.dimensions(), Zero);
+U = dimensionedVector(U.dimensions(), Zero);
 
 surfaceScalarField phi
 (
@@ -74,7 +74,7 @@ volScalarField p
         false
     ),
     mesh,
-    dimensionedScalar(pName, sqr(dimVelocity), 0),
+    dimensionedScalar(sqr(dimVelocity), Zero),
     pBCTypes
 );
 
@@ -105,7 +105,7 @@ volScalarField Phi
         IOobject::NO_WRITE
     ),
     mesh,
-    dimensionedScalar("Phi", dimLength*dimVelocity, 0),
+    dimensionedScalar(dimLength*dimVelocity, Zero),
     PhiBCTypes
 );
 
