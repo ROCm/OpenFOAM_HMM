@@ -71,7 +71,7 @@ autoPtr<GeoFieldType> loadField
         );
     }
 
-    return autoPtr<GeoFieldType>();
+    return nullptr;
 }
 
 

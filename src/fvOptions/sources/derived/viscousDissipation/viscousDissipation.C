@@ -82,7 +82,7 @@ Foam::tmp<Foam::volScalarField> Foam::fv::viscousDissipation::rho() const
         << "Neither rhoName nor rho are specified."
         << exit(FatalError);
 
-    return tmp<volScalarField>();
+    return nullptr;
 }
 
 
@@ -133,8 +133,8 @@ Foam::fv::viscousDissipation::viscousDissipation
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volSymmTensorField> Foam::fv::viscousDissipation::
-devRhoReff() const
+Foam::tmp<Foam::volSymmTensorField>
+Foam::fv::viscousDissipation::devRhoReff() const
 {
     // Incompressible
     {
@@ -166,7 +166,7 @@ devRhoReff() const
         << " The turbulence model is not found in the database."
         << exit(FatalError);
 
-    return tmp<volSymmTensorField>();
+    return nullptr;
 }
 
 

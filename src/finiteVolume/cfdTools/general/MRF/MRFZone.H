@@ -174,7 +174,7 @@ public:
         autoPtr<MRFZone> clone() const
         {
             NotImplemented;
-            return autoPtr<MRFZone>();
+            return nullptr;
         }
 
 

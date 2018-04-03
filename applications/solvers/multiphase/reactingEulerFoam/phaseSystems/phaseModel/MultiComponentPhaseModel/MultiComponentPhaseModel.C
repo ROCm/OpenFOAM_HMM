@@ -152,7 +152,7 @@ Foam::MultiComponentPhaseModel<BasePhaseModel>::YiEqn
         )
     )
     {
-        return tmp<fvScalarMatrix>();
+        return nullptr;
     }
 
     const volScalarField& alpha = *this;

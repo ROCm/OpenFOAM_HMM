@@ -104,7 +104,7 @@ Foam::lduMatrix::faceH(const Field<Type>& psi) const
            " the matrix does not have any off-diagonal coefficients."
         << exit(FatalError);
 
-    return tmp<Field<Type>>();
+    return nullptr;
 }
 
 

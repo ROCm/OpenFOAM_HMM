@@ -142,7 +142,7 @@ Foam::autoPtr<Foam::lduMatrix::smoother> Foam::lduMatrix::smoother::New
         "no diagonal or off-diagonal coefficient"
         << exit(FatalIOError);
 
-    return autoPtr<lduMatrix::smoother>();
+    return nullptr;
 }
 
 

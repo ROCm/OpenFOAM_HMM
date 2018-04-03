@@ -89,7 +89,7 @@ Foam::LduMatrix<Type, DType, LUType>::smoother::New
         << "cannot solve incomplete matrix, no off-diagonal coefficients"
         << exit(FatalIOError);
 
-    return autoPtr<typename LduMatrix<Type, DType, LUType>::smoother>();
+    return nullptr;
 }
 
 

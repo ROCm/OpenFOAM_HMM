@@ -70,7 +70,7 @@ Foam::tmp<Foam::vectorField> Foam::EulerCoordinateRotation::transform
 ) const
 {
     NotImplemented;
-    return tmp<vectorField>();
+    return nullptr;
 }
 
 
@@ -80,7 +80,7 @@ Foam::tmp<Foam::vectorField> Foam::EulerCoordinateRotation::invTransform
 ) const
 {
     NotImplemented;
-    return tmp<vectorField>();
+    return nullptr;
 }
 
 
@@ -96,8 +96,8 @@ Foam::tmp<Foam::tensorField> Foam::EulerCoordinateRotation::transformTensor
     const tensorField& st
 ) const
 {
-     NotImplemented;
-    return tmp<tensorField>();
+    NotImplemented;
+    return nullptr;
 }
 
 
@@ -117,7 +117,7 @@ Foam::tmp<Foam::tensorField> Foam::EulerCoordinateRotation::transformTensor
 ) const
 {
     NotImplemented;
-    return tmp<tensorField>();
+    return nullptr;
 }
 
 

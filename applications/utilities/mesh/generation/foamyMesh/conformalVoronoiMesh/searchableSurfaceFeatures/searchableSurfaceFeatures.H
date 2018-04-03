@@ -101,7 +101,7 @@ public:
         virtual autoPtr<searchableSurfaceFeatures> clone() const
         {
             NotImplemented;
-            return autoPtr<searchableSurfaceFeatures>();
+            return nullptr;
         }
 
 
@@ -139,7 +139,7 @@ public:
         //- Return an extendedFeatureEdgeMesh containing the features
         virtual autoPtr<extendedFeatureEdgeMesh> features() const
         {
-            return autoPtr<extendedFeatureEdgeMesh>();
+            return nullptr;
         }
 };
 

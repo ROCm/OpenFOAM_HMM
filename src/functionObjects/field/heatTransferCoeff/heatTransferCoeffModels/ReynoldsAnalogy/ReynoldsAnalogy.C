@@ -67,7 +67,7 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::rho(const label patchi) const
         << "Unable to set rho for patch " << patchi
         << exit(FatalError);
 
-    return tmp<Field<scalar>>();
+    return nullptr;
 }
 
 
@@ -94,7 +94,7 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::Cp(const label patchi) const
         << "Unable to set Cp for patch " << patchi
         << exit(FatalError);
 
-    return tmp<Field<scalar>>();
+    return nullptr;
 }
 
 

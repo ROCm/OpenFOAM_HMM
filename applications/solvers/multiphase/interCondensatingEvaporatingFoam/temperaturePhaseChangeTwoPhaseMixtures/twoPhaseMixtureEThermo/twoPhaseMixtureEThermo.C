@@ -259,7 +259,7 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::THE
 ) const
 {
     NotImplemented;
-    return tmp<Foam::scalarField>();
+    return nullptr;
 }
 
 
@@ -272,7 +272,7 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::THE
 ) const
 {
     NotImplemented;
-    return tmp<Foam::scalarField>();
+    return nullptr;
 }
 
 
@@ -436,8 +436,8 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::Cpv
 
 Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::CpByCpv() const
 {
-     NotImplemented;
-     return tmp<Foam::volScalarField>();
+    NotImplemented;
+    return nullptr;
 }
 
 
@@ -448,8 +448,8 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::CpByCpv
     const label patchi
 ) const
 {
-     NotImplemented;
-     return tmp<Foam::scalarField>();
+    NotImplemented;
+    return nullptr;
 }
 
 

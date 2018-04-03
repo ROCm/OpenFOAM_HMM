@@ -57,8 +57,7 @@ Foam::PurePhaseModel<BasePhaseModel>::YiEqn
 )
 {
     NotImplemented;
-
-    return tmp<fvScalarMatrix>();
+    return nullptr;
 }
 
 

@@ -65,7 +65,7 @@ template<class BasePhaseModel>
 Foam::tmp<Foam::fvScalarMatrix>
 Foam::IsothermalPhaseModel<BasePhaseModel>::heEqn()
 {
-    return tmp<fvScalarMatrix>();
+    return nullptr;
 }
 
 

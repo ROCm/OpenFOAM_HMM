@@ -197,7 +197,7 @@ public:
         autoPtr<functionObject> clone() const
         {
             NotImplemented;
-            return autoPtr<functionObject>();
+            return nullptr;
         }
 
 

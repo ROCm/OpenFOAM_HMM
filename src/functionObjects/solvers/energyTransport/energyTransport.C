@@ -105,7 +105,8 @@ Foam::functionObjects::energyTransport::kappaEff() const
 
     FatalErrorInFunction
         << "Turbulence model not found" << exit(FatalError);
-    return tmp<volScalarField>();
+
+    return nullptr;
 }
 
 

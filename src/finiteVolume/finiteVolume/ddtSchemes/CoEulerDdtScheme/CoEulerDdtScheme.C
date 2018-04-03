@@ -140,7 +140,7 @@ tmp<surfaceScalarField> CoEulerDdtScheme<Type>::CofrDeltaT() const
         << "Incorrect dimensions of phi: " << phi.dimensions()
         << abort(FatalError);
 
-    return tmp<surfaceScalarField>();
+    return nullptr;
 }
 
 

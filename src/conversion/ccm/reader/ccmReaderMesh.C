@@ -2591,7 +2591,7 @@ Foam::autoPtr<Foam::polyMesh> Foam::ccm::reader::mesh
 {
     if (!readGeometry())
     {
-        return autoPtr<polyMesh>();
+        return nullptr;
     }
 
     // merge cellTable and rename boundaryRegion

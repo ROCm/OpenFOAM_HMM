@@ -109,7 +109,7 @@ public:
         autoPtr<faceSelection> clone() const
         {
             NotImplemented;
-            return autoPtr<faceSelection>();
+            return nullptr;
         }
 
 
