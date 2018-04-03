@@ -140,28 +140,28 @@ inline bool Foam::keyType::operator()(const std::string& text) const
 
 inline void Foam::keyType::operator=(const keyType& s)
 {
-    string::operator=(s); // Bypass char checking
+    assign(s); // Bypasses char checking
     isPattern_ = s.isPattern_;
 }
 
 
 inline void Foam::keyType::operator=(const word& s)
 {
-    string::operator=(s); // Bypass char checking
+    assign(s); // Bypasses char checking
     isPattern_ = false;
 }
 
 
 inline void Foam::keyType::operator=(const string& s)
 {
-    string::operator=(s); // Bypass char checking
+    assign(s); // Bypasses char checking
     isPattern_ = true;
 }
 
 
 inline void Foam::keyType::operator=(const char* s)
 {
-    string::operator=(s); // Bypass char checking
+    assign(s); // Bypasses char checking
     isPattern_ = false;
 }
 

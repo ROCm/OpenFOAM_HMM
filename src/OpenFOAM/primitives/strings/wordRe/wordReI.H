@@ -242,14 +242,14 @@ inline Foam::string Foam::wordRe::quotemeta() const
 
 inline void Foam::wordRe::set(const std::string& str, const compOption opt)
 {
-    string::operator=(str);
+    assign(str);
     compile(opt);
 }
 
 
 inline void Foam::wordRe::set(const char* str, const compOption opt)
 {
-    string::operator=(str);
+    assign(str);
     compile(opt);
 }
 
@@ -271,7 +271,7 @@ inline bool Foam::wordRe::operator()(const std::string& text) const
 
 inline void Foam::wordRe::operator=(const wordRe& str)
 {
-    string::operator=(str);
+    assign(str);
     if (str.isPattern())
     {
         compile();
@@ -285,14 +285,14 @@ inline void Foam::wordRe::operator=(const wordRe& str)
 
 inline void Foam::wordRe::operator=(const word& str)
 {
-    string::operator=(str);
+    assign(str);
     re_.clear();
 }
 
 
 inline void Foam::wordRe::operator=(const keyType& str)
 {
-    string::operator=(str);
+    assign(str);
     if (str.isPattern())
     {
         compile();
@@ -306,21 +306,21 @@ inline void Foam::wordRe::operator=(const keyType& str)
 
 inline void Foam::wordRe::operator=(const string& str)
 {
-    string::operator=(str);
+    assign(str);
     compile(wordRe::DETECT);  // Auto-detect regex
 }
 
 
 inline void Foam::wordRe::operator=(const std::string& str)
 {
-    string::operator=(str);
+    assign(str);
     compile(wordRe::DETECT);  // Auto-detect regex
 }
 
 
 inline void Foam::wordRe::operator=(const char* str)
 {
-    string::operator=(str);
+    assign(str);
     compile(wordRe::DETECT);  // Auto-detect regex
 }
 

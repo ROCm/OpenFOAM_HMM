@@ -200,47 +200,47 @@ inline bool Foam::word::removeExt()
 
 inline void Foam::word::operator=(const word& w)
 {
-    string::operator=(w);
+    assign(w);
 }
 
 
 inline void Foam::word::operator=(word&& w)
 {
-    string::operator=(std::move(w));
+    assign(std::move(w));
 }
 
 
 inline void Foam::word::operator=(const string& s)
 {
-    string::operator=(s);
+    assign(s);
     stripInvalid();
 }
 
 
 inline void Foam::word::operator=(string&& s)
 {
-    string::operator=(std::move(s));
+    assign(std::move(s));
     stripInvalid();
 }
 
 
 inline void Foam::word::operator=(const std::string& s)
 {
-    string::operator=(s);
+    assign(s);
     stripInvalid();
 }
 
 
 inline void Foam::word::operator=(std::string&& s)
 {
-    string::operator=(std::move(s));
+    assign(std::move(s));
     stripInvalid();
 }
 
 
 inline void Foam::word::operator=(const char* s)
 {
-    string::operator=(s);
+    assign(s);
     stripInvalid();
 }
 

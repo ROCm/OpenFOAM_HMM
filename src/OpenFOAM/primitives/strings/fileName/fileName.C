@@ -502,33 +502,33 @@ Foam::word Foam::fileName::component
 
 void Foam::fileName::operator=(const fileName& str)
 {
-    string::operator=(str);
+    assign(str);
 }
 
 
 void Foam::fileName::operator=(const word& str)
 {
-    string::operator=(str);
+    assign(str);
 }
 
 
 void Foam::fileName::operator=(const string& str)
 {
-    string::operator=(str);
+    assign(str);
     stripInvalid();
 }
 
 
 void Foam::fileName::operator=(const std::string& str)
 {
-    string::operator=(str);
+    assign(str);
     stripInvalid();
 }
 
 
 void Foam::fileName::operator=(const char* str)
 {
-    string::operator=(str);
+    assign(str);
     stripInvalid();
 }
 
