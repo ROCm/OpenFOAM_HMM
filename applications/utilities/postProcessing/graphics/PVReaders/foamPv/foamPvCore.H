@@ -26,13 +26,13 @@ Description
 
 SourceFiles
     foamPvCore.C
+    foamPvCoreTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef foamPvCore_H
 #define foamPvCore_H
 
-#include "className.H"
 #include "fileName.H"
 #include "stringList.H"
 #include "boolList.H"
@@ -167,25 +167,10 @@ public:
     }; // End class arrayRange
 
 
-private:
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        foamPvCore(const foamPvCore&) = delete;
-
-        //- Disallow default bitwise assignment
-        void operator=(const foamPvCore&) = delete;
-
-
 public:
 
-    //- Static data members
-    ClassName("foamPvCore");
-
-
     //- Construct null
-    foamPvCore() = default;
+    constexpr foamPvCore() noexcept {}
 
 
     //- Print information about vtkDataArraySelection
@@ -306,13 +291,6 @@ public:
 
     //- Simple memory used debugging information
     static void printMemory();
-
-
-    //- Return an identity list of VTK_VERTEX
-    static vtkSmartPointer<vtkCellArray> identityVertices
-    (
-        const label size
-    );
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

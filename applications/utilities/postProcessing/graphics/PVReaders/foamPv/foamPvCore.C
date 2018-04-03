@@ -34,16 +34,6 @@ License
 #include "vtkInformation.h"
 #include "vtkSmartPointer.h"
 
-#include "foamVtkAdaptors.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    defineTypeNameAndDebug(foamPvCore, 0);
-}
-
-
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::foamPvCore::printDataArraySelection
@@ -103,13 +93,14 @@ void Foam::foamPvCore::addToBlock
         output->SetBlock(blockNo, block);
     }
 
-    if (debug)
+    #ifdef FULLDEBUG
     {
         Info<< "block[" << blockNo << "] has "
             << block->GetNumberOfBlocks()
             <<  " datasets prior to adding set " << datasetNo
             <<  " with name: " << datasetName << endl;
     }
+    #endif
 
     block->SetBlock(datasetNo, dataset);
 
@@ -192,9 +183,8 @@ Foam::foamPvCore::getSelectedArraySet
         }
     }
 
-    if (debug > 1)
+    #ifdef FULLDEBUG
     {
-        const int n = select->GetNumberOfArrays();
         Info<< "available(";
         for (int i=0; i < n; ++i)
         {
@@ -208,6 +198,7 @@ Foam::foamPvCore::getSelectedArraySet
         }
         Info<< " )\n";
     }
+    #endif
 
     return enabled;
 }
@@ -238,7 +229,7 @@ Foam::word Foam::foamPvCore::getFoamName(const std::string& str)
 {
     if (str.size())
     {
-        std::string::size_type beg = str.rfind('/');
+        auto beg = str.rfind('/');
         if (beg == std::string::npos)
         {
             beg = 0;
@@ -248,7 +239,7 @@ Foam::word Foam::foamPvCore::getFoamName(const std::string& str)
             ++beg;
         }
 
-        std::string::size_type end = beg;
+        auto end = beg;
 
         while (str[end] && word::valid(str[end]))
         {
@@ -271,31 +262,6 @@ void Foam::foamPvCore::printMemory()
     {
         Info<< "mem peak/size/rss: " << mem << endl;
     }
-}
-
-
-vtkSmartPointer<vtkCellArray> Foam::foamPvCore::identityVertices
-(
-    const label size
-)
-{
-    // VTK_VERTEX
-    auto cells = vtkSmartPointer<vtkCellArray>::New();
-
-    UList<vtkIdType> cellsUL = vtkUList(cells, size, 2*size);
-
-    // Cell connectivity for vertex
-    // [size, ids.., size, ids...]
-    // which means
-    // [1, id, 1, id, ...]
-    label idx = 0;
-    for (label id=0; id < size; ++id)
-    {
-        cellsUL[idx++] = 1;
-        cellsUL[idx++] = id;
-    }
-
-    return cells;
 }
 
 

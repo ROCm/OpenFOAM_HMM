@@ -86,7 +86,7 @@ vtkSmartPointer<vtkPolyData> Foam::vtkPVFoam::lagrangianVTKMesh
 
         vtkmesh = vtkSmartPointer<vtkPolyData>::New();
         vtkmesh->SetPoints(vtkpoints);
-        vtkmesh->SetVerts(foamPvCore::identityVertices(parcels.size()));
+        vtkmesh->SetVerts(vtk::Tools::identityVertices(parcels.size()));
     }
 
     if (debug)

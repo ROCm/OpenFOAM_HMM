@@ -37,7 +37,6 @@ InClass
 #include "volPointInterpolation.H"
 #include "zeroGradientFvPatchField.H"
 #include "interpolatePointToCell.H"
-#include "foamPvFields.H"
 #include "areaFaMesh.H"
 #include "areaFields.H"
 
@@ -119,7 +118,7 @@ void Foam::vtkPVFoam::convertVolField
         // To improve code reuse, we allocate the CellData as a zeroed-field
         // ahead of time.
 
-        vtkSmartPointer<vtkFloatArray> cdata = zeroVTKField<Type>
+        vtkSmartPointer<vtkFloatArray> cdata = zeroField<Type>
         (
             fld.name(),
             dataset->GetNumberOfPolys()
@@ -662,7 +661,7 @@ vtkSmartPointer<vtkFloatArray> Foam::vtkPVFoam::convertPointField
             {
                 vec[d] = component(t, d);
             }
-            foamPvFields::remapTuple<Type>(vec);
+            remapTuple<Type>(vec);
 
             data->SetTuple(pointi++, vec);
         }
@@ -676,7 +675,7 @@ vtkSmartPointer<vtkFloatArray> Foam::vtkPVFoam::convertPointField
             {
                 vec[d] = component(t, d);
             }
-            foamPvFields::remapTuple<Type>(vec);
+            remapTuple<Type>(vec);
 
             data->SetTuple(pointi++, vec);
         }
@@ -693,7 +692,7 @@ vtkSmartPointer<vtkFloatArray> Foam::vtkPVFoam::convertPointField
             {
                 vec[d] = component(t, d);
             }
-            foamPvFields::remapTuple<Type>(vec);
+            remapTuple<Type>(vec);
 
             data->SetTuple(pointi++, vec);
         }
@@ -707,7 +706,7 @@ vtkSmartPointer<vtkFloatArray> Foam::vtkPVFoam::convertPointField
             {
                 vec[d] = component(t, d);
             }
-            foamPvFields::remapTuple<Type>(vec);
+            remapTuple<Type>(vec);
 
             data->SetTuple(pointi++, vec);
         }
@@ -757,119 +756,6 @@ void Foam::vtkPVFoam::convertLagrangianFields
 //
 // low-level conversions
 //
-
-template<class Type>
-vtkSmartPointer<vtkFloatArray>
-Foam::vtkPVFoam::zeroVTKField
-(
-    const word& name,
-    const label size
-)
-{
-    auto data = vtkSmartPointer<vtkFloatArray>::New();
-
-    data->SetName(name.c_str());
-    data->SetNumberOfComponents(int(pTraits<Type>::nComponents));
-    data->SetNumberOfTuples(size);
-
-    data->Fill(0);
-
-    return data;
-}
-
-
-template<class Type>
-Foam::label Foam::vtkPVFoam::transcribeFloatData
-(
-    vtkFloatArray* array,
-    const UList<Type>& input,
-    const label start
-)
-{
-    const int nComp(pTraits<Type>::nComponents);
-
-    if (array->GetNumberOfComponents() != nComp)
-    {
-        FatalErrorInFunction
-            << "vtk array '" << array->GetName()
-            << "' has mismatch in number of components for type '"
-            << pTraits<Type>::typeName
-            << "' : target array has " << array->GetNumberOfComponents()
-            << " components instead of " << nComp
-            << nl;
-    }
-
-    const vtkIdType maxSize = array->GetNumberOfTuples();
-    const vtkIdType endPos = vtkIdType(start) + vtkIdType(input.size());
-
-    if (start < 0 || vtkIdType(start) >= maxSize)
-    {
-        WarningInFunction
-            << "vtk array '" << array->GetName()
-            << "' copy with out-of-range (0-" << long(maxSize-1) << ")"
-            << " starting location"
-            << nl;
-
-        return 0;
-    }
-    else if (endPos > maxSize)
-    {
-        WarningInFunction
-            << "vtk array '" << array->GetName()
-            << "' copy ends out-of-range (" << long(maxSize) << ")"
-            << " using sizing (start,size) = ("
-            << start << "," << input.size() << ")"
-            << nl;
-
-        return 0;
-    }
-
-    float scratch[nComp];
-    forAll(input, idx)
-    {
-        const Type& t = input[idx];
-        for (direction d=0; d<nComp; ++d)
-        {
-            scratch[d] = component(t, d);
-        }
-        foamPvFields::remapTuple<Type>(scratch);
-
-        array->SetTuple(start+idx, scratch);
-    }
-
-    return input.size();
-}
-
-
-template<class Type>
-vtkSmartPointer<vtkFloatArray>
-Foam::vtkPVFoam::convertFieldToVTK
-(
-    const word& name,
-    const UList<Type>& fld
-) const
-{
-    const int nComp(pTraits<Type>::nComponents);
-
-    if (debug)
-    {
-        Info<< "convert UList<" << pTraits<Type>::typeName << "> "
-            << name
-            << " size="  << fld.size()
-            << " nComp=" << nComp << nl;
-    }
-
-    auto data = vtkSmartPointer<vtkFloatArray>::New();
-
-    data->SetName(name.c_str());
-    data->SetNumberOfComponents(nComp);
-    data->SetNumberOfTuples(fld.size());
-
-    transcribeFloatData(data, fld);
-
-    return data;
-}
-
 
 template<class Type>
 vtkSmartPointer<vtkFloatArray>
@@ -923,7 +809,7 @@ Foam::vtkPVFoam::convertFaceFieldToVTK
                 scratch[d] = component(t, d);
             }
         }
-        foamPvFields::remapTuple<Type>(scratch);
+        remapTuple<Type>(scratch);
 
         data->SetTuple(idx, scratch);
     }
@@ -966,7 +852,7 @@ Foam::vtkPVFoam::convertVolFieldToVTK
         {
             scratch[d] = component(t, d);
         }
-        foamPvFields::remapTuple<Type>(scratch);
+        remapTuple<Type>(scratch);
 
         data->SetTuple(idx, scratch);
     }
