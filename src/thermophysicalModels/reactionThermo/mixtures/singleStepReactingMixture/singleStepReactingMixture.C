@@ -197,7 +197,7 @@ Foam::singleStepReactingMixture<ThermoType>::singleStepReactingMixture
 :
     reactingMixture<ThermoType>(thermoDict, mesh, phaseName),
     stoicRatio_(dimensionedScalar("stoicRatio", dimless, Zero)),
-    s_(dimensionedScalar("s", dimless, Zero),
+    s_(dimensionedScalar("s", dimless, Zero)),
     qFuel_(dimensionedScalar("qFuel", sqr(dimVelocity), Zero)),
     specieStoichCoeffs_(this->species_.size(), Zero),
     Yprod0_(this->species_.size(), Zero),
