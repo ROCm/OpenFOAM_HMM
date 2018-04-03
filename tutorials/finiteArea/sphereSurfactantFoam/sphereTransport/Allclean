@@ -6,4 +6,6 @@ cleanTimeDirectories
 
 cleanFaMesh
 
+rm -rf processor*
+
 #------------------------------------------------------------------------------
