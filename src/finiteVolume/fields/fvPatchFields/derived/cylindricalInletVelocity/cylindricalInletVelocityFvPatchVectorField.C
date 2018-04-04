@@ -75,7 +75,7 @@ cylindricalInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF, dict),
-    origin_(dict.lookup("origin")),
+    origin_(dict.lookupCompat("origin", {{"centre", 1712}})),
     axis_(dict.lookup("axis")),
     axialVelocity_(Function1<scalar>::New("axialVelocity", dict)),
     radialVelocity_(Function1<scalar>::New("radialVelocity", dict)),

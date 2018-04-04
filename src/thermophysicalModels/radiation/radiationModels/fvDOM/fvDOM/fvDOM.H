@@ -44,8 +44,8 @@ Usage
             nPhi        4;          // azimuthal angles in PI/2 on X-Y.
                                     //(from Y to X)
             nTheta      0;          // polar angles in PI (from Z to X-Y plane)
-            convergence 1e-3;       // convergence criteria for radiation
-                                    //iteration
+            tolerance   1e-3;       // convergence tolerance for radiation
+                                    // iteration
             maxIter     4;          // maximum number of iterations
             meshOrientation    (1 1 1); //Mesh orientation used for 2D and 1D
         }
@@ -136,8 +136,8 @@ class fvDOM
         //- List of pointers to radiative intensity rays
         PtrList<radiativeIntensityRay> IRay_;
 
-        //- Convergence criterion
-        scalar convergence_;
+        //- Convergence tolerance
+        scalar tolerance_;
 
         //- Maximum number of iterations
         label maxIter_;

@@ -289,7 +289,10 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
     aLambda_(nLambda_),
     blackBody_(nLambda_, T),
     IRay_(0),
-    convergence_(coeffs_.lookupOrDefault<scalar>("convergence", 0.0)),
+    tolerance_
+    (
+        coeffs_.lookupOrDefaultCompat("tolerance", {{"convergence", 1712}}, 0.0)
+    ),
     maxIter_(coeffs_.lookupOrDefault<label>("maxIter", 50)),
     omegaMax_(0),
     useSolarLoad_(false),
@@ -382,7 +385,10 @@ Foam::radiation::fvDOM::fvDOM
     aLambda_(nLambda_),
     blackBody_(nLambda_, T),
     IRay_(0),
-    convergence_(coeffs_.lookupOrDefault<scalar>("convergence", 0.0)),
+    tolerance_
+    (
+        coeffs_.lookupOrDefaultCompat("tolerance", {{"convergence", 1712}}, 0.0)
+    ),
     maxIter_(coeffs_.lookupOrDefault<label>("maxIter", 50)),
     omegaMax_(0),
     useSolarLoad_(false),
@@ -409,7 +415,10 @@ bool Foam::radiation::fvDOM::read()
     if (radiationModel::read())
     {
         // Only reading solution parameters - not changing ray geometry
-        coeffs_.readIfPresent("convergence", convergence_);
+        coeffs_.readIfPresentCompat
+        (
+            "tolerance", {{"convergence", 1712}}, tolerance_
+        );
         coeffs_.readIfPresent("maxIter", maxIter_);
 
         return true;
@@ -450,14 +459,14 @@ void Foam::radiation::fvDOM::calculate()
                 scalar maxBandResidual = IRay_[rayI].correct();
                 maxResidual = max(maxBandResidual, maxResidual);
 
-                if (maxBandResidual < convergence_)
+                if (maxBandResidual < tolerance_)
                 {
                     rayIdConv[rayI] = true;
                 }
             }
         }
 
-    } while (maxResidual > convergence_ && radIter < maxIter_);
+    } while (maxResidual > tolerance_ && radIter < maxIter_);
 
     updateG();
 }
