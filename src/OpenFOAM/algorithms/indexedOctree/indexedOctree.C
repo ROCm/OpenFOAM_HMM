@@ -710,13 +710,19 @@ Foam::point Foam::indexedOctree<Type>::pushPoint
     {
         if (pushInside != bb.contains(perturbedPt))
         {
-            FatalErrorInFunction
+            auto fatal = FatalErrorInFunction;
+
+            fatal
                 << "pushed point:" << pt
                 << " to:" << perturbedPt
                 << " wanted side:" << pushInside
                 << " obtained side:" << bb.contains(perturbedPt)
-                << " of bb:" << bb
-                << abort(FatalError);
+                << " of bb:" << bb << nl;
+
+            if (debug > 1)
+            {
+                fatal << abort(FatalError);
+            }
         }
     }
 
@@ -820,13 +826,19 @@ Foam::point Foam::indexedOctree<Type>::pushPoint
     {
         if (pushInside != bb.contains(perturbedPt))
         {
-            FatalErrorInFunction
+            auto fatal = FatalErrorInFunction;
+
+            fatal
                 << "pushed point:" << pt << " on face:" << faceString(faceID)
                 << " to:" << perturbedPt
                 << " wanted side:" << pushInside
                 << " obtained side:" << bb.contains(perturbedPt)
-                << " of bb:" << bb
-                << abort(FatalError);
+                << " of bb:" << bb << nl;
+
+            if (debug > 1)
+            {
+                fatal << abort(FatalError);
+            }
         }
     }
 
@@ -846,9 +858,16 @@ Foam::point Foam::indexedOctree<Type>::pushPointIntoFace
     {
         if (bb.posBits(pt) != 0)
         {
-            FatalErrorInFunction
+            auto fatal = FatalErrorInFunction;
+
+            fatal
                 << " bb:" << bb << endl
-                << "does not contain point " << pt << abort(FatalError);
+                << "does not contain point " << pt << nl;
+
+            if (debug > 1)
+            {
+                fatal << abort(FatalError);
+            }
         }
     }
 
@@ -968,21 +987,34 @@ Foam::point Foam::indexedOctree<Type>::pushPointIntoFace
     {
         if (faceID != bb.faceBits(facePoint))
         {
-            FatalErrorInFunction
+            auto fatal = FatalErrorInFunction;
+
+            fatal
                 << "Pushed point from " << pt
-                << " on face:" << ptFaceID << " of bb:" << bb << endl
+                << " on face:" << ptFaceID << " of bb:" << bb << nl
                 << "onto " << facePoint
                 << " on face:" << faceID
                 << " which is not consistent with geometric face "
-                << bb.faceBits(facePoint)
-                << abort(FatalError);
+                << bb.faceBits(facePoint) << nl;
+
+            if (debug > 1)
+            {
+                fatal << abort(FatalError);
+            }
         }
         if (bb.posBits(facePoint) != 0)
         {
-            FatalErrorInFunction
-                << " bb:" << bb << endl
+            auto fatal = FatalErrorInFunction;
+
+            fatal
+                << " bb:" << bb << nl
                 << "does not contain perturbed point "
-                << facePoint << abort(FatalError);
+                << facePoint << nl;
+
+            if (debug > 1)
+            {
+                fatal << abort(FatalError);
+            }
         }
     }
 
@@ -1224,12 +1256,18 @@ bool Foam::indexedOctree<Type>::walkToNeighbour
 
         if (!subBb.contains(facePoint))
         {
-            FatalErrorInFunction
+            auto fatal = FatalErrorInFunction;
+
+            fatal
                 << "When searching for " << facePoint
                 << " ended up in node:" << nodeI
                 << " octant:" << octant
-                << " with bb:" << subBb
-                << abort(FatalError);
+                << " with bb:" << subBb << nl;
+
+            if (debug > 1)
+            {
+                fatal << abort(FatalError);
+            }
         }
     }
 
@@ -1253,24 +1291,36 @@ bool Foam::indexedOctree<Type>::walkToNeighbour
 
         if (nodeI == oldNodeI && octant == oldOctant)
         {
-            FatalErrorInFunction
+            auto fatal = FatalErrorInFunction;
+
+            fatal
                 << "Did not go to neighbour when searching for " << facePoint
-                << endl
+                << nl
                 << "    starting from face:" << faceString(faceID)
                 << " node:" << nodeI
                 << " octant:" << octant
-                << " bb:" << subBb
-                << abort(FatalError);
+                << " bb:" << subBb << nl;
+
+            if (debug > 1)
+            {
+                fatal << abort(FatalError);
+            }
         }
 
         if (!subBb.contains(facePoint))
         {
-            FatalErrorInFunction
+            auto fatal = FatalErrorInFunction;
+
+            fatal
                 << "When searching for " << facePoint
                 << " ended up in node:" << nodeI
                 << " octant:" << octant
-                << " bb:" << subBb
-                << abort(FatalError);
+                << " bb:" << subBb << nl;
+
+            if (debug > 1)
+            {
+                fatal << abort(FatalError);
+            }
         }
     }
 
@@ -1358,10 +1408,17 @@ void Foam::indexedOctree<Type>::traverseNode
 
         if (octantBb.posBits(start) != 0)
         {
-            FatalErrorInFunction
+            auto fatal = FatalErrorInFunction;
+
+            fatal
                 << "Node:" << nodeI << " octant:" << octant
-                << " bb:" << octantBb << endl
-                << "does not contain point " << start << abort(FatalError);
+                << " bb:" << octantBb << nl
+                << "does not contain point " << start << nl;
+
+            if (debug > 1)
+            {
+                fatal << abort(FatalError);
+            }
         }
     }
 
@@ -2489,13 +2546,15 @@ Foam::labelList Foam::indexedOctree<Type>::findBox
     const treeBoundBox& searchBox
 ) const
 {
+    if (nodes_.empty())
+    {
+        return labelList();
+    }
+
     // Storage for labels of shapes inside bb. Size estimate.
     labelHashSet elements(shapes_.size() / 100);
 
-    if (nodes_.size())
-    {
-        findBox(0, searchBox, elements);
-    }
+    findBox(0, searchBox, elements);
 
     return elements.toc();
 }
@@ -2508,13 +2567,15 @@ Foam::labelList Foam::indexedOctree<Type>::findSphere
     const scalar radiusSqr
 ) const
 {
+    if (nodes_.empty())
+    {
+        return labelList();
+    }
+
     // Storage for labels of shapes inside bb. Size estimate.
     labelHashSet elements(shapes_.size() / 100);
 
-    if (nodes_.size())
-    {
-        findSphere(0, centre, radiusSqr, elements);
-    }
+    findSphere(0, centre, radiusSqr, elements);
 
     return elements.toc();
 }
