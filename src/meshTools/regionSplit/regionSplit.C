@@ -35,9 +35,7 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(regionSplit, 0);
-
+    defineTypeNameAndDebug(regionSplit, 0);
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -66,21 +64,20 @@ void Foam::regionSplit::calcNonCompactRegionSplit
         }
     }
 
-    // Seed all faces on (real) boundaries and faces on cells next to blockFace
-    // (since regions can only occur because of boundaries (or blocked faces))
+    // Seed all faces on (real) boundaries and cell faces next to blockFace,
+    // since regions can only occur because of boundaries (or blocked faces)
 
     PackedBoolList isSeed(mesh().nFaces());
 
     // Get internal or coupled faces
     PackedBoolList isConnection(syncTools::getInternalOrCoupledFaces(mesh()));
 
-
     // 1. Seed (real) boundaries
     for
     (
         label facei = mesh().nInternalFaces();
         facei < mesh().nFaces();
-        facei++
+        ++facei
     )
     {
         if (!isConnection[facei])
@@ -94,6 +91,10 @@ void Foam::regionSplit::calcNonCompactRegionSplit
 
     if (blockedFace.size())
     {
+        label nBlockedCells = 0;
+
+        label celli = 0;
+
         for (const cell& cFaces : mesh().cells())
         {
             bool blockedCell = false;
@@ -113,8 +114,34 @@ void Foam::regionSplit::calcNonCompactRegionSplit
 
             if (blockedCell)
             {
-                isSeed.set(connectedFacei);  // silently ignores -1
+                if (connectedFacei < 0)
+                {
+                    ++nBlockedCells;
+
+                    if (debug && nBlockedCells <= 10)
+                    {
+                        // Report a few, but not all
+                        WarningInFunction
+                            << "Cell " << celli << " has all faces blocked."
+                            << endl;
+                    }
+                }
+                else
+                {
+                    isSeed.set(connectedFacei);
+                }
             }
+
+            ++celli;
+        }
+
+        reduce(nBlockedCells, sumOp<label>());
+
+        if (nBlockedCells)
+        {
+            Info<< "Detected " << nBlockedCells << " from "
+                << returnReduce(mesh().nCells(), sumOp<label>())
+                << " cells with all faces blocked." << nl;
         }
     }
 
@@ -246,15 +273,15 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
 
             label globalRegion;
 
-            Map<label>::const_iterator fnd = globalToCompact.find(region);
-            if (fnd == globalToCompact.end())
+            const auto fnd = globalToCompact.cfind(region);
+            if (fnd.found())
             {
-                globalRegion = globalRegions.toGlobal(globalToCompact.size());
-                globalToCompact.insert(region, globalRegion);
+                globalRegion = *fnd;
             }
             else
             {
-                globalRegion = fnd();
+                globalRegion = globalRegions.toGlobal(globalToCompact.size());
+                globalToCompact.insert(region, globalRegion);
             }
             cellRegion[celli] = globalRegion;
         }
@@ -454,9 +481,9 @@ Foam::regionSplit::regionSplit(const polyMesh& mesh, const bool doGlobalRegions)
 {
     globalNumberingPtr_ = calcRegionSplit
     (
-        doGlobalRegions,    //do global regions
-        boolList(0, false), //blockedFaces
-        List<labelPair>(0), //explicitConnections,
+        doGlobalRegions,
+        boolList(),         // No blockedFace
+        List<labelPair>(),  // No explicitConnections
         *this
     );
 }
@@ -475,8 +502,8 @@ Foam::regionSplit::regionSplit
     globalNumberingPtr_ = calcRegionSplit
     (
         doGlobalRegions,
-        blockedFace,        //blockedFaces
-        List<labelPair>(0), //explicitConnections,
+        blockedFace,
+        List<labelPair>(),  // No explicitConnections
         *this
     );
 }
@@ -496,8 +523,8 @@ Foam::regionSplit::regionSplit
     globalNumberingPtr_ = calcRegionSplit
     (
         doGlobalRegions,
-        blockedFace,            //blockedFaces
-        explicitConnections,    //explicitConnections,
+        blockedFace,
+        explicitConnections,
         *this
     );
 }

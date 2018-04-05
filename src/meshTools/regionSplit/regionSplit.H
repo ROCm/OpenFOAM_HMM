@@ -31,6 +31,7 @@ Description
 
     Say 6 cells, 3 processors, with single baffle on proc1.
 
+    \verbatim
               baffle
                 |
     +---+---+---+---+---+---+
@@ -38,7 +39,10 @@ Description
     +---+---+---+---+---+---+
       proc0 | proc1 | proc2
 
+    \endverbatim
 
+
+    \verbatim
 
     1: determine local regions (uncoupled)
 
@@ -47,44 +51,57 @@ Description
     +---+---+---+---+---+---+
       proc0 | proc1 | proc2
 
+    \endverbatim
 
 
     2: make global
+
+    \verbatim
 
     +---+---+---+---+---+---+
     | 0 | 0 | 1 | 2 | 3 | 3 |
     +---+---+---+---+---+---+
       proc0 | proc1 | proc2
 
+    \endverbatim
 
 
     3: merge connected across procs
+
+    \verbatim
 
     +---+---+---+---+---+---+
     | 0 | 0 | 0 | 2 | 2 | 2 |
     +---+---+---+---+---+---+
       proc0 | proc1 | proc2
 
+    \endverbatim
 
 
-    4. determine locally owner regions. determine compact numbering for the
-    local regions and send these to all processors that need them:
+    4. determine locally owner regions.
 
-    proc0 uses regions:
-        - 0 which is local to it.
-    proc1 uses regions
-        - 0 which originates from proc0
-        - 2 which is local to it
-    proc2 uses regions
-        - 2 which originates from proc1
+    Determine compact numbering for the local regions and send these to
+    all processors that need them:
+
+    - proc0 uses regions:
+      - 0 which is local to it.
+    - proc1 uses regions
+      - 0 which originates from proc0
+      - 2 which is local to it
+    - proc2 uses regions
+      - 2 which originates from proc1
 
     So proc1 needs to get the compact number for region 0 from proc0 and proc2
     needs to get the compact number for region 2 from proc1:
+
+    \verbatim
 
     +---+---+---+---+---+---+
     | 0 | 0 | 0 | 1 | 1 | 1 |
     +---+---+---+---+---+---+
       proc0 | proc1 | proc2
+
+    \endverbatim
 
 
     Can optionally keep all regions local to the processor.
@@ -164,7 +181,7 @@ public:
         );
 
         //- Construct from mesh and whether face is blocked
-        //  NOTE: blockedFace has to be consistent across coupled faces!
+        //  \note blockedFace has to be consistent across coupled faces!
         regionSplit
         (
             const polyMesh&,
@@ -172,9 +189,9 @@ public:
             const bool doGlobalRegions = Pstream::parRun()
         );
 
-        //- Construct from mesh and whether face is blocked. Additional explicit
-        //  connections between normal boundary faces.
-        //  NOTE: blockedFace has to be consistent across coupled faces!
+        //- Construct from mesh and whether face is blocked.
+        //  Additional explicit connections between normal boundary faces.
+        //  \note blockedFace has to be consistent across coupled faces!
         regionSplit
         (
             const polyMesh&,
