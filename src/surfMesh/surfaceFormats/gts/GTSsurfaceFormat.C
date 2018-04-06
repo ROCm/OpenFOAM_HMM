@@ -253,7 +253,7 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
     const UList<point>& pointLst = surf.points();
     const UList<Face>& faceLst  = surf.surfFaces();
 
-    const UList<surfZone>& zones =
+    const surfZoneList zones =
     (
         surf.surfZones().size()
       ? surf.surfZones()

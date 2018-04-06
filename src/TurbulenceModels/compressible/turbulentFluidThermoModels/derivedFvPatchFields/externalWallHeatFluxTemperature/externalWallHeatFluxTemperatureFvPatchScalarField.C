@@ -58,6 +58,8 @@ externalWallHeatFluxTemperatureFvPatchScalarField
     temperatureCoupledBase(patch(), "undefined", "undefined", "undefined-K"),
     mode_(fixedHeatFlux),
     Q_(0),
+    q_(),
+    h_(),
     Ta_(),
     relaxation_(1),
     emissivity_(0),
@@ -84,7 +86,9 @@ externalWallHeatFluxTemperatureFvPatchScalarField
     temperatureCoupledBase(patch(), dict),
     mode_(operationModeNames.lookup("mode", dict)),
     Q_(0),
-    Ta_(Function1<scalar>::New("Ta", dict)),
+    q_(),
+    h_(),
+    Ta_(),
     relaxation_(dict.lookupOrDefault<scalar>("relaxation", 1)),
     emissivity_(dict.lookupOrDefault<scalar>("emissivity", 0)),
     qrRelaxation_(dict.lookupOrDefault<scalar>("qrRelaxation", 1)),
@@ -109,6 +113,7 @@ externalWallHeatFluxTemperatureFvPatchScalarField
         case fixedHeatTransferCoeff:
         {
             h_ = scalarField("h", dict, p.size());
+            Ta_ = Function1<scalar>::New("Ta", dict);
 
             if (dict.found("thicknessLayers"))
             {
@@ -175,12 +180,12 @@ externalWallHeatFluxTemperatureFvPatchScalarField
     temperatureCoupledBase(patch(), ptf),
     mode_(ptf.mode_),
     Q_(ptf.Q_),
-    q_(ptf.q_, mapper),
-    h_(ptf.h_, mapper),
+    q_(),
+    h_(),
     Ta_(ptf.Ta_, false),
     relaxation_(ptf.relaxation_),
     emissivity_(ptf.emissivity_),
-    qrPrevious_(ptf.qrPrevious_, mapper),
+    qrPrevious_(),
     qrRelaxation_(ptf.qrRelaxation_),
     qrName_(ptf.qrName_),
     thicknessLayers_(ptf.thicknessLayers_),
@@ -194,12 +199,14 @@ externalWallHeatFluxTemperatureFvPatchScalarField
         }
         case fixedHeatFlux:
         {
+            q_.setSize(mapper.size());
             q_.map(ptf.q_, mapper);
 
             break;
         }
         case fixedHeatTransferCoeff:
         {
+            h_.setSize(mapper.size());
             h_.map(ptf.h_, mapper);
 
             break;

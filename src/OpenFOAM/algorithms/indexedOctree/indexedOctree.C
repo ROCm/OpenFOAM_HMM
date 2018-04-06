@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -2560,6 +2560,11 @@ Foam::labelBits Foam::indexedOctree<Type>::findNode
 template<class Type>
 Foam::label Foam::indexedOctree<Type>::findInside(const point& sample) const
 {
+    if (nodes_.empty())
+    {
+        return -1;
+    }
+
     labelBits index = findNode(0, sample);
 
     const node& nod = nodes_[getNode(index)];
@@ -2592,6 +2597,11 @@ const Foam::labelList& Foam::indexedOctree<Type>::findIndices
     const point& sample
 ) const
 {
+    if (nodes_.empty())
+    {
+        return emptyList<label>();
+    }
+
     labelBits index = findNode(0, sample);
 
     const node& nod = nodes_[getNode(index)];
@@ -2603,10 +2613,8 @@ const Foam::labelList& Foam::indexedOctree<Type>::findIndices
     {
         return contents_[getContent(contentIndex)];
     }
-    else
-    {
-        return emptyList<label>();
-    }
+
+    return emptyList<label>();
 }
 
 
@@ -2688,18 +2696,21 @@ void Foam::indexedOctree<Type>::findNear
     CompareOp& cop
 ) const
 {
-    findNear
-    (
-        nearDist,
-        true,
-        *this,
-        nodePlusOctant(0, 0),
-        bb(),
-        tree2,
-        nodePlusOctant(0, 0),
-        tree2.bb(),
-        cop
-    );
+    if (!nodes_.empty())
+    {
+        findNear
+        (
+            nearDist,
+            true,
+            *this,
+            nodePlusOctant(0, 0),
+            bb(),
+            tree2,
+            nodePlusOctant(0, 0),
+            tree2.bb(),
+            cop
+        );
+    }
 }
 
 
@@ -2711,6 +2722,11 @@ void Foam::indexedOctree<Type>::print
     const label nodeI
 ) const
 {
+    if (nodes_.empty())
+    {
+        return;
+    }
+
     const node& nod = nodes_[nodeI];
     const treeBoundBox& bb = nod.bb_;
 
