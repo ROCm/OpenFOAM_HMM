@@ -3,23 +3,11 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # File
 #     wmake/makefiles/files
@@ -56,20 +44,19 @@ all : $(OPTIONS) $(SFILES) $(VARS)
 $(OPTIONS) : $(MAKE_DIR)/options
 	@$(CPP) $(GFLAGS) $(MAKE_DIR)/options | sed -e 's@   *@ @g' > $(OPTIONS)
 
+
 $(SFILES): $(MAKE_DIR)/files
 	@$(CPP) $(GFLAGS) $(MAKE_DIR)/files | sed -e 's@   *@ @g' > $(FILES)
-	# Find all macro definitions in the files
-	@grep "=" $(FILES) > $(VARS)
-	echo "SOURCE = " > $(SFILES)
-	# Remove all macro definitions from the files list
-	@grep -v "=" $(FILES) >> $(SFILES)
+	# Extracted macro definitions.
+	@sed -n -e '/=/p' $(FILES) > $(VARS)
+	@echo "SOURCE = \\" > $(SFILES)
+	# Remove macros, comments, blank lines, trailing space. Add backslash continuation
+	@sed -e '/=/d; /^#/d; /^[ \t]*$$/d' -e 's@[ \t]*$$@ \\@' $(FILES) >> $(SFILES)
 	@rm -f $(FILES)
-	# Add a newline to files to ensure the last line is followed by a newline
+	# Ensure final line is followed by newline. Extra comment for safety.
 	@echo "" >> $(SFILES)
-	# Remove commented lines, blank lines, and trailing blanks from files
-	@sed -i -e '/^#/ d' -e '/^[ \t]*$$/ d' -e 's,[ \t]*$$,,' $(SFILES)
-	# Add backslashes
-	@sed -i -e 's,$$, \\,' -e '$$s,\\,,' $(SFILES)
+	@echo "# sources" >> $(SFILES)
+
 
 $(VARS): $(SFILES)
 

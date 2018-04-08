@@ -6,20 +6,8 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # File
 #     wmake/makefiles/general
@@ -30,10 +18,14 @@
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
-# The Makefile uses a POSIX shell
+# Use POSIX shell. Default to POSIX for the OS.
 #------------------------------------------------------------------------------
 
 SHELL           = /bin/sh
+
+ifeq ("$(WM_OSTYPE)","")
+    WM_OSTYPE   = POSIX
+endif
 
 
 #------------------------------------------------------------------------------
@@ -61,14 +53,14 @@ OBJECTS_DIR     = $(MAKE_DIR)/$(WM_OPTIONS)
 SYS_INC         =
 SYS_LIBS        =
 
-PROJECT_INC     = -I$(LIB_SRC)/$(WM_PROJECT)/lnInclude \
-		     -I$(LIB_SRC)/OSspecific/$(WM_OSTYPE)/lnInclude
+PROJECT_INC     = \
+    -I$(LIB_SRC)/$(WM_PROJECT)/lnInclude \
+    -I$(LIB_SRC)/OSspecific/$(WM_OSTYPE)/lnInclude
 
 PROJECT_LIBS    = -l$(WM_PROJECT)
 
 EXE_INC         =
 EXE_LIBS        =
-
 LIB_LIBS        =
 
 
@@ -80,7 +72,11 @@ LIB_LIBS        =
 LIB             = libNULL
 
 # Shared library extension
+ifneq (,$(findstring darwin,$(WM_ARCH)))
+SO              = dylib
+else
 SO              = so
+endif
 
 # Project executable
 EXE             = $(WM_PROJECT).out
@@ -116,12 +112,12 @@ OBJECTS=$(BASENAMES:%=$(OBJECTS_DIR)/%.o)
 #------------------------------------------------------------------------------
 
 LIB_HEADER_DIRS = \
-        $(EXE_INC) \
-        -IlnInclude \
-        -I. \
-        $(PROJECT_INC) \
-        $(GINC) \
-        $(SYS_INC)
+    $(EXE_INC) \
+    -IlnInclude \
+    -I. \
+    $(PROJECT_INC) \
+    $(GINC) \
+    $(SYS_INC)
 
 
 #------------------------------------------------------------------------------
