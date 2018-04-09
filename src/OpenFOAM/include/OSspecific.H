@@ -256,30 +256,6 @@ bool dlSymFound(void* handle, const std::string& symbol);
 fileNameList dlLoaded();
 
 
-// Low level random numbers. Use Random class instead.
-
-//- Seed random number generator.
-void osRandomSeed(const label seed);
-
-//- Return random integer (uniform distribution between 0 and 2^31)
-label osRandomInteger();
-
-//- Return random double precision (uniform distribution between 0 and 1)
-scalar osRandomDouble();
-
-//- Return the size of the buffer for re-entrant random number generator
-label osRandomBufferSize();
-
-//- Seed random number generator.
-void osRandomSeed(const label seed, List<char>& buffer);
-
-//- Return random integer (uniform distribution between 0 and 2^31)
-label osRandomInteger(List<char>& buffer);
-
-//- Return random double precision (uniform distribution between 0 and 1)
-scalar osRandomDouble(List<char>& buffer);
-
-
 // Thread handling
 
 //- Allocate a thread

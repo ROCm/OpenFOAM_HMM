@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,13 +23,33 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Random.H"
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+inline Foam::scalar Foam::Random::scalar01()
+{
+    return uniform01_(generator_);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline int Foam::Random::bit()
+{
+    return generator_() & 0x1;
+}
+
 
 inline Foam::label Foam::Random::seed() const
 {
     return seed_;
+}
+
+
+inline void Foam::Random::reset(const label seedValue)
+{
+    seed_ = seedValue;
+    generator_.seed(seed_);
+    uniform01_.reset();   // A no-op, but for completeness
 }
 
 

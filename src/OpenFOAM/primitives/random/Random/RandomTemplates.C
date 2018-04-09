@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "Random.H"
+#include "Swap.H"
 #include "Pstream.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -32,7 +33,7 @@ template<class Type>
 Type Foam::Random::sample01()
 {
     Type value;
-    for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+    for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; ++cmpt)
     {
         value.component(cmpt) = scalar01();
     }
@@ -45,7 +46,7 @@ template<class Type>
 Type Foam::Random::GaussNormal()
 {
     Type value;
-    for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+    for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; ++cmpt)
     {
         value.component(cmpt) = GaussNormal<scalar>();
     }
@@ -58,7 +59,7 @@ template<class Type>
 Type Foam::Random::position(const Type& start, const Type& end)
 {
     Type value(start);
-    for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+    for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; ++cmpt)
     {
         value.component(cmpt) +=
             scalar01()*(end.component(cmpt) - start.component(cmpt));
@@ -78,16 +79,10 @@ void Foam::Random::randomise01(Type& value)
 template<class Type>
 void Foam::Random::shuffle(UList<Type>& values)
 {
-    const label nSample = values.size();
-    label posI = nSample - 1;
-
-    for (label i = 1; i < nSample; i++)
+    for (label posi = values.size()-1; posi > 0; --posi)
     {
-        label j = position<label>(0, posI);
-        Type t = values[j];
-        values[j] = values[posI];
-        values[posI] = t;
-        posI--;
+        const label i = position<label>(0, posi);
+        Foam::Swap(values[i], values[posi]);
     }
 }
 

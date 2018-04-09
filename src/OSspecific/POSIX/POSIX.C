@@ -66,14 +66,6 @@ Description
     #include <link.h>
 #endif
 
-#ifdef USE_RANDOM
-    #include <climits>
-    #if INT_MAX    != 2147483647
-        #error "INT_MAX    != 2147483647"
-        #error "The random number generator may not work!"
-    #endif
-#endif
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -1664,84 +1656,6 @@ Foam::fileNameList Foam::dlLoaded()
             << " : determined loaded libraries :" << libs.size() << std::endl;
     }
     return libs;
-}
-
-Foam::label Foam::osRandomBufferSize()
-{
-    #ifdef USE_RANDOM
-    return sizeof(random_data);
-    #else
-    return sizeof(drand48_data);
-    #endif
-}
-
-
-void Foam::osRandomSeed(const label seed)
-{
-    #ifdef USE_RANDOM
-    srandom((unsigned int)seed);
-    #else
-    srand48(seed);
-    #endif
-}
-
-
-Foam::label Foam::osRandomInteger()
-{
-    #ifdef USE_RANDOM
-    return random();
-    #else
-    return lrand48();
-    #endif
-}
-
-
-Foam::scalar Foam::osRandomDouble()
-{
-    #ifdef USE_RANDOM
-    return (scalar)random()/INT_MAX;
-    #else
-    return drand48();
-    #endif
-}
-
-
-void Foam::osRandomSeed(const label seed, List<char>& buffer)
-{
-    #ifdef USE_RANDOM
-    srandom_r((unsigned int)seed, reinterpret_cast<random_data*>(buffer.begin()));
-    #else
-    srand48_r(seed, reinterpret_cast<drand48_data*>(buffer.begin()));
-    #endif
-}
-
-
-Foam::label Foam::osRandomInteger(List<char>& buffer)
-{
-    #ifdef USE_RANDOM
-    int32_t result;
-    random_r(reinterpret_cast<random_data*>(buffer.begin()), &result);
-    return result;
-    #else
-    long result;
-    lrand48_r(reinterpret_cast<drand48_data*>(buffer.begin()), &result);
-    return result;
-    #endif
-}
-
-
-Foam::scalar Foam::osRandomDouble(List<char>& buffer)
-{
-    #ifdef USE_RANDOM
-    int32_t result;
-    random_r(reinterpret_cast<random_data*>(buffer.begin()), &result);
-    return (scalar)result/INT_MAX;
-    #else
-    double result;
-    drand48_r(reinterpret_cast<drand48_data*>(buffer.begin()), &result);
-    return result;
-    #endif
-
 }
 
 
