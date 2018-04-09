@@ -100,6 +100,15 @@ inline Scalar func(const Scalar s) \
     return ::func(s);              \
 }
 
+
+// Double-precision bessel functions
+#define besselFunc(func)           \
+inline Scalar func(const Scalar s) \
+{                                  \
+    return ::func(s);              \
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
@@ -115,6 +124,7 @@ inline Scalar func(const Scalar s) \
 #undef ScalarROOTVSMALL
 #undef ScalarRead
 #undef transFunc
+#undef besselFunc
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

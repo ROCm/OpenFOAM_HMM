@@ -1547,6 +1547,15 @@ void* Foam::dlOpen(const fileName& lib, const bool check)
     }
     void* handle = ::dlopen(lib.c_str(), RTLD_LAZY|RTLD_GLOBAL);
 
+    #ifdef darwin
+    // Re-try "libXX.so" as "libXX.dylib"
+    if (!handle && lib.hasExt("so"))
+    {
+        const fileName dylib(lib.lessExt().ext("dylib"));
+        handle = ::dlopen(dylib.c_str(), RTLD_LAZY|RTLD_GLOBAL);
+    }
+    #endif
+
     if (!handle && check)
     {
         WarningInFunction
@@ -1631,6 +1640,7 @@ bool Foam::dlSymFound(void* handle, const std::string& symbol)
 }
 
 
+#ifndef darwin
 static int collectLibsCallback
 (
     struct dl_phdr_info *info,
@@ -1643,12 +1653,21 @@ static int collectLibsCallback
     ptr->append(info->dlpi_name);
     return 0;
 }
+#endif
 
 
 Foam::fileNameList Foam::dlLoaded()
 {
     DynamicList<fileName> libs;
+    #ifdef darwin
+    for (uint32_t i=0; i < _dyld_image_count(); ++i)
+    {
+       libs.append(_dyld_get_image_name(i));
+    }
+    #else
     dl_iterate_phdr(collectLibsCallback, &libs);
+    #endif
+
     if (POSIX::debug)
     {
         std::cout

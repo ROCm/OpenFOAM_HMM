@@ -87,7 +87,11 @@ string pOpen(const string& cmd, label line=0)
 inline word addressToWord(const uintptr_t addr)
 {
     OStringStream os;
+    #ifdef darwin
+    os << "0x" << hex << uint64_t(addr);
+    #else
     os << "0x" << hex << addr;
+    #endif
     return os.str();
 }
 

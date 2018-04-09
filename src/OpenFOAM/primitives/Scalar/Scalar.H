@@ -166,11 +166,10 @@ transFunc(erfc)
 transFunc(lgamma)
 transFunc(tgamma)
 
-transFunc(j0)
-transFunc(j1)
-
-transFunc(y0)
-transFunc(y1)
+besselFunc(j0)
+besselFunc(j1)
+besselFunc(y0)
+besselFunc(y1)
 
 
 inline Scalar& setComponent(Scalar& s, const direction)

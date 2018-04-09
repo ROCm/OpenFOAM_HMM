@@ -97,6 +97,11 @@ Linux)
     esac
     ;;
 
+Darwin)     # Presumably x86_64
+    : ${WM_ARCH_OPTION:=64}; export WM_ARCH_OPTION  # Default to 64-bit
+    WM_ARCH=darwin64
+    ;;
+
 SunOS)
     WM_ARCH=SunOS64
     WM_MPLIB=FJMPI

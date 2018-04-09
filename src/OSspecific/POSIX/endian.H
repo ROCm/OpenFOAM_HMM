@@ -40,7 +40,9 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#ifdef __GNUC__
+#ifdef darwin
+    #include <machine/endian.h>
+#elif defined __GNUC__
     #include <endian.h>
 #elif defined __mips
     #include <standards.h>

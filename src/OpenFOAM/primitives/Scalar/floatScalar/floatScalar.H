@@ -83,6 +83,41 @@ inline Scalar atan2(const Scalar y, const Scalar x)
     return ::atan2f(y, x);
 }
 
+// Single-precision transcendental functions (with 'f' appended to the name)
+#define transFunc(func)            \
+inline Scalar func(const Scalar s) \
+{                                  \
+    return ::func##f(s);           \
+}
+
+
+#ifdef darwin
+// Single-precision bessel functions. (No float version for darwin).
+#define besselFunc(func)           \
+inline Scalar func(const Scalar s) \
+{                                  \
+    return ::func(s);              \
+}
+
+inline Scalar jn(const int n, const Scalar s)
+{
+    return Scalar(::jn(n, double(s)));
+}
+
+inline Scalar yn(const int n, const Scalar s)
+{
+    return Scalar(::yn(n, double(s)));
+}
+
+#else
+
+// Single-precision bessel functions (with 'f' appended to the name)
+#define besselFunc(func)           \
+inline Scalar func(const Scalar s) \
+{                                  \
+    return ::func##f(s);           \
+}
+
 inline Scalar jn(const int n, const Scalar s)
 {
     return ::jnf(n, s);
@@ -93,12 +128,8 @@ inline Scalar yn(const int n, const Scalar s)
     return ::ynf(n, s);
 }
 
-// Single-precision transcendental functions (with 'f' appended to the name)
-#define transFunc(func)            \
-inline Scalar func(const Scalar s) \
-{                                  \
-    return ::func##f(s);           \
-}
+#endif
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -115,6 +146,7 @@ inline Scalar func(const Scalar s) \
 #undef ScalarROOTVSMALL
 #undef ScalarRead
 #undef transFunc
+#undef besselFunc
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

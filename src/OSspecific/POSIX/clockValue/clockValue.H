@@ -37,6 +37,9 @@ SourceFiles
 #define clockValue_H
 
 #include <sys/types.h>
+#ifdef darwin
+    #include <sys/time.h>
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -110,7 +110,9 @@ make="make"
 nCores=0
 allCores()
 {
-    nCores=$(egrep -c "^processor" /proc/cpuinfo 2>/dev/null) || nCores=1
+    nCores=$(egrep -c "^processor" /proc/cpuinfo 2>/dev/null) || \
+    nCores=$(getconf _NPROCESSORS_ONLN 2>/dev/null) || \
+    nCores=1
     : ${nCores:=1}
 }
 

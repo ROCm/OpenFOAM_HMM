@@ -103,6 +103,11 @@ case Linux:
     endsw
     breaksw
 
+case Darwin:    # Presumably x86_64
+    if (! $?WM_ARCH_OPTION ) setenv WM_ARCH_OPTION 64  # Default to 64-bit
+    setenv WM_ARCH darwin64
+    breaksw
+
 case SunOS:
     setenv WM_ARCH SunOS64
     setenv WM_MPLIB FJMPI
