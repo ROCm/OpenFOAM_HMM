@@ -32,9 +32,9 @@ fuel        C3H8;
 
 chemistryReader foamChemistryReader;
 
-foamChemistryFile "$FOAM_CASE/constant/reactions";
+foamChemistryFile "<constant>/reactions";
 
-foamChemistryThermoFile "$FOAM_CASE/constant/thermo.compressibleGas";
+foamChemistryThermoFile "<constant>/thermo.compressibleGas";
 
 
 // ************************************************************************* //

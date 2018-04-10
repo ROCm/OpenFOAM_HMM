@@ -34,15 +34,93 @@ License
 
 namespace Foam
 {
-// Standard handling of "~/", "./" etc.
-static void standardExpansions(std::string& s)
+
+// Expand a leading <tag>/
+// Convenient for frequently used directories
+//
+//   <etc>/        => user/group/other OpenFOAM directory
+//   <case>/       => FOAM_CASE directory
+//   <constant>/   => FOAM_CASE/constant directory
+//   <system>/     => FOAM_CASE/system directory
+static void expandLeadingTag(std::string& s, const char b, const char e)
+{
+    if (s[0] != b)
+    {
+        return;
+    }
+
+    auto delim = s.find(e);
+    if (delim == std::string::npos || s[++delim] != '/')
+    {
+        return;   // Ignore if there is no '/' after <tag>
+    }
+
+    const std::string tag(s, 1, delim-2);
+    fileName file(s.substr(delim + 1));
+
+    if (tag == "etc")
+    {
+        s = findEtcFile(file);
+    }
+    else if (tag == "case")
+    {
+        s = fileName(getEnv("FOAM_CASE"))/file;
+    }
+    else if (tag == "constant" || tag == "system")
+    {
+        s = fileName(Foam::getEnv("FOAM_CASE"))/tag/file;
+    }
+}
+
+
+// Expand a leading tilde
+//   ~/        => home directory
+//   ~OpenFOAM => user/group/other OpenFOAM directory
+//   ~user     => home directory for specified user
+static void expandLeadingTilde(std::string& s)
+{
+    if (s[0] != '~')
+    {
+        return;
+    }
+
+    std::string user;
+    fileName file;
+
+    const auto slash = s.find('/');
+    if (slash == std::string::npos)
+    {
+        user = s.substr(1);
+    }
+    else
+    {
+        user = s.substr(1, slash - 1);
+        file = s.substr(slash + 1);
+    }
+
+    // NB: be a bit lazy and expand ~unknownUser as an
+    // empty string rather than leaving it untouched.
+    // otherwise add extra test
+
+    if (user == "OpenFOAM")
+    {
+        s = findEtcFile(file);
+    }
+    else
+    {
+        s = home(user)/file;
+    }
+}
+
+
+// Expand leading contents:  "./", "~..", "<tag>/"
+static void expandLeading(std::string& s)
 {
     if (s.empty())
     {
         return;
     }
-
-    if (s[0] == '.')
+    else if (s[0] == '.')
     {
         // Expand a lone '.' and an initial './' into cwd
         if (s.size() == 1)
@@ -54,42 +132,17 @@ static void standardExpansions(std::string& s)
             s.std::string::replace(0, 1, cwd());
         }
     }
+    else if (s[0] == '<')
+    {
+        expandLeadingTag(s, '<', '>');
+    }
     else if (s[0] == '~')
     {
-        // Expand initial ~
-        //   ~/        => home directory
-        //   ~OpenFOAM => site/user OpenFOAM configuration directory
-        //   ~user     => home directory for specified user
-
-        string user;
-        fileName file;
-
-        const auto slash = s.find('/');
-        if (slash == std::string::npos)
-        {
-            user = s.substr(1);
-        }
-        else
-        {
-            user = s.substr(1, slash - 1);
-            file = s.substr(slash + 1);
-        }
-
-        // NB: be a bit lazy and expand ~unknownUser as an
-        // empty string rather than leaving it untouched.
-        // otherwise add extra test
-
-        if (user == "OpenFOAM")
-        {
-            s = findEtcFile(file);
-        }
-        else
-        {
-            s = home(user)/file;
-        }
+        expandLeadingTilde(s);
     }
 }
-}
+
+} // end of namespace Foam
 
 
 //! \cond fileScope
@@ -571,8 +624,7 @@ void Foam::stringOps::inplaceExpand
         }
     }
 
-    // Standard handling of "~/", "./" etc.
-    standardExpansions(s);
+    expandLeading(s);
 }
 
 
@@ -869,8 +921,7 @@ void Foam::stringOps::inplaceExpand
         }
     }
 
-    // Standard handling of "~/", "./" etc.
-    standardExpansions(s);
+    expandLeading(s);
 }
 
 

@@ -217,10 +217,15 @@ namespace stringOps
     //    - "$VAR", "${VAR}"
     //  -# current directory
     //    - leading "./" : the current directory
+    //  -# leading tag expansion for commonly used directories
+    //    - <etc>/        : user/group/other OpenFOAM directory
+    //    - <case>/       : FOAM_CASE directory
+    //    - <constant>/   : FOAM_CASE/constant directory
+    //    - <system>/     : FOAM_CASE/system directory
     //  -# tilde expansion
     //    - leading "~/" : home directory
     //    - leading "~user" : home directory for specified user
-    //    - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
+    //    - leading "~OpenFOAM" : user/group/other OpenFOAM directory
     //
     //  Supports default and alternative values as per the POSIX shell.
     //  \code
@@ -252,10 +257,15 @@ namespace stringOps
     //    - "$VAR", "${VAR}"
     //  -# current directory
     //    - leading "./" : the current directory
+    //  -# leading tag expansion for commonly used directories
+    //    - <etc>/        : user/group/other OpenFOAM directory
+    //    - <case>/       : FOAM_CASE directory
+    //    - <constant>/   : FOAM_CASE/constant directory
+    //    - <system>/     : FOAM_CASE/system directory
     //  -# tilde expansion
     //    - leading "~/" : home directory
     //    - leading "~user" : home directory for specified user
-    //    - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
+    //    - leading "~OpenFOAM" : user/group/other OpenFOAM directory
     //
     //  Supports default and alternative values as per the POSIX shell.
     //  \code

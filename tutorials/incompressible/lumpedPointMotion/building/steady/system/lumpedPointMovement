@@ -69,7 +69,7 @@ communication
     inputFormat     dictionary;
     outputFormat    dictionary;
 
-    debugTable      "$FOAM_CASE/output.txt";
+    debugTable      "<case>/output.txt";
 }
 
 // ************************************************************************* //

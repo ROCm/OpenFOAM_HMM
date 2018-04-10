@@ -73,7 +73,7 @@ postPro1
         surface1
         {
             type            geometry;
-            files           ("$FOAM_CASE/constant/triSurface/motorBike.obj.gz");
+            files           ("<constant>/triSurface/motorBike.obj.gz");
             renderMode      phong;
             representation  surface;
             edgeColour      (0 0 0);

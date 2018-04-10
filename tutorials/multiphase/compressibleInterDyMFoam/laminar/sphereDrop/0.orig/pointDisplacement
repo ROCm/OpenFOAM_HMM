@@ -15,8 +15,8 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "$FOAM_CASE/constant/dynamicMeshDict"
-#include "$FOAM_CASE/system/blockMeshDict"
+#include "<constant>/dynamicMeshDict"
+#include "<system>/blockMeshDict"
 
 dimensions      [0 1 0 0 0 0 0];
 

@@ -27,7 +27,7 @@ thermoType
 }
 
 chemistryReader foamChemistryReader;
-foamChemistryFile "$FOAM_CASE/constant/reactions";
-foamChemistryThermoFile "$FOAM_CASE/constant/thermo";
+foamChemistryFile "<constant>/reactions";
+foamChemistryThermoFile "<constant>/thermo";
 
 // ************************************************************************* //

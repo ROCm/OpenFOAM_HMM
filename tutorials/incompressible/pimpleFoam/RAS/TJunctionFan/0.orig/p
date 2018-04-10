@@ -28,7 +28,7 @@ boundaryField
         direction       in;
         readerType      openFoam;
         hasHeaderLine   true;
-        file            "$FOAM_CASE/constant/FluxVsdP.dat";
+        file            "<constant>/FluxVsdP.dat";
         //nonDimensional  true;
         //rpm             300;
         //dm              2e-2;

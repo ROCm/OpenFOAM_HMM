@@ -33,9 +33,9 @@ fuel    C7H16;
 
 chemistryReader foamChemistryReader;
 
-foamChemistryFile "$FOAM_CASE/constant/reactions";
+foamChemistryFile "<constant>/reactions";
 
-foamChemistryThermoFile "$FOAM_CASE/constant/thermo.compressibleGas";
+foamChemistryThermoFile "<constant>/thermo.compressibleGas";
 
 dpdt no;
 

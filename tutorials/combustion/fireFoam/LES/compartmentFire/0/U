@@ -27,7 +27,7 @@ boundaryField
         massFlowRate    tableFile;
         massFlowRateCoeffs
         {
-            file            "$FOAM_CASE/constant/massLossRate";
+            file            "<constant>/massLossRate";
         }
         value           uniform (0 0 0);
     }

@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "${FOAM_CASE}/constant/caseSettings"
+#include "<constant>/caseSettings"
 
 dimensions      [0 0 0 1 0 0 0];
 

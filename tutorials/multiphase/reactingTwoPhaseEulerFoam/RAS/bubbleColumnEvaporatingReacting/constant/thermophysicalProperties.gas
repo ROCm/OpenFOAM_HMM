@@ -30,9 +30,9 @@ inertSpecie AIR;
 
 chemistryReader foamChemistryReader;
 
-foamChemistryFile "$FOAM_CASE/constant/reactions.gas";
+foamChemistryFile "<constant>/reactions.gas";
 
-foamChemistryThermoFile "$FOAM_CASE/constant/thermo.gas";
+foamChemistryThermoFile "<constant>/thermo.gas";
 
 
 // ************************************************************************* //

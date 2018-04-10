@@ -73,14 +73,14 @@ functions
         writeControl        timeStep;
         writeInterval       1;
         region              cabin;
-        fileToUpdate        "$FOAM_CASE/system/solverControls";
+        fileToUpdate        "<system>/solverControls";
 
         timeVsFile
         (
-            ( 1     "$FOAM_CASE/system/solverControls.0" )
-            ( 5     "$FOAM_CASE/system/solverControls.5")
-            ( 20    "$FOAM_CASE/system/solverControls.20")
-            ( 60    "$FOAM_CASE/system/solverControls.60")
+            ( 1     "<system>/solverControls.0" )
+            ( 5     "<system>/solverControls.5" )
+            ( 20    "<system>/solverControls.20")
+            ( 60    "<system>/solverControls.60")
         );
     }
 }

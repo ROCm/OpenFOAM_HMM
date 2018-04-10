@@ -30,7 +30,7 @@ boundaryField
         componentColumns ( 1 );
         separator       ",";
         mergeSeparators no;
-        file             "$FOAM_CASE/constant/inlet.csv";
+        file             "<constant>/inlet.csv";
 
 
     }

@@ -1,23 +1,20 @@
 // -*- C++ -*-
 
-// control for external coupled simulation
+// Control for external coupled simulation
 externalCoupled
 {
-    libs    ("libfieldFunctionObjects.so");
-
     type    externalCoupled;
+    libs    ("libfieldFunctionObjects.so");
+    log     true;
 
     // Directory to use for communication
-    commsDir        "${FOAM_CASE}/comms";
+    commsDir        "<case>/comms";
 
     // Does external process start first
     initByExternal  true;
 
     // Frequency of coupling
     calcFrequency   4;
-
-    // Additional output
-    log             true;
 
     regions
     {

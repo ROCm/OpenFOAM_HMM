@@ -22,7 +22,7 @@ motionSolver    solidBody;
 solidBodyMotionFunction tabulated6DoFMotion;
 
 CofG            (0 0 0);
-timeDataFileName "$FOAM_CASE/constant/6DoF.dat";
+timeDataFileName "<constant>/6DoF.dat";
 
 
 // ************************************************************************* //

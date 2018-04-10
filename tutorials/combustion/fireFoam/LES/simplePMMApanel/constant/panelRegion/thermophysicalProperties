@@ -28,9 +28,9 @@ thermoType
 
 chemistryReader foamChemistryReader;
 
-foamChemistryFile "$FOAM_CASE/constant/panelRegion/reactions";
+foamChemistryFile "<constant>/panelRegion/reactions";
 
-foamChemistryThermoFile "$FOAM_CASE/constant/panelRegion/thermo.solid";
+foamChemistryThermoFile "<constant>/panelRegion/thermo.solid";
 
 gasThermoType
 {

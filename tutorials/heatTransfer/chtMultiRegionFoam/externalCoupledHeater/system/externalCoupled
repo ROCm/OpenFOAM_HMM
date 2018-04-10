@@ -1,21 +1,17 @@
 // -*- C++ -*-
 
-// control for external coupled simulation
+// Control for external coupled simulation
 externalCoupled
 {
-    // Where to load it from (if not already in solver)
-    libs            ("libfieldFunctionObjects.so");
-
-    type            externalCoupled;
+    type    externalCoupled;
+    libs    ("libfieldFunctionObjects.so");
+    log     true;
 
     // Directory to use for communication
-    commsDir        "${FOAM_CASE}/comms";
+    commsDir        "<case>/comms";
 
     // Does external process start first
     initByExternal  true;
-
-    // Additional output
-    log             true;
 
     regions
     {

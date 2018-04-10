@@ -20,7 +20,7 @@ FoamFile
 pointSync false;
 
 // Patches to create. An empty patch list just removes patches with zero
-// faces from $FOAM_CASE/constant/polyMesh/boundary.
+// faces from <constant>/polyMesh/boundary.
 patches
 (
 );

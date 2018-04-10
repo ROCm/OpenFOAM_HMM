@@ -28,9 +28,9 @@ thermoType
 
 chemistryReader foamChemistryReader;
 
-foamChemistryFile "$FOAM_CASE/constant/reactions";
+foamChemistryFile "<constant>/reactions";
 
-foamChemistryThermoFile "$FOAM_CASE/constant/thermo.incompressiblePoly";
+foamChemistryThermoFile "<constant>/thermo.incompressiblePoly";
 
 inertSpecie     air;
 

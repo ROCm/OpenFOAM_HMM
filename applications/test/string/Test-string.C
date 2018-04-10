@@ -30,6 +30,7 @@ Description
 #include "stringOps.H"
 #include "dictionary.H"
 #include "IOstreams.H"
+#include "OSspecific.H"
 
 #include "int.H"
 #include "uint.H"
@@ -53,6 +54,8 @@ int main(int argc, char *argv[])
         " or with '${__UNKNOWN:+unknown}' empty"
     );
 
+    setEnv("FOAM_CASE", cwd(), true);
+
     dictionary dict;
     dict.add("HOME", "myHome");
 
@@ -60,6 +63,38 @@ int main(int argc, char *argv[])
     subDict.add("value1", "test1");
     subDict.add("value2", "test2");
     dict.add("FOAM_RUN", subDict);
+
+
+    // basic expansions
+    {
+        for
+        (
+            const auto& cstr
+          :
+            {
+                "~OpenFOAM/controlDict",
+                "<etc>/controlDict",
+
+                "$FOAM_CASE/test",
+                "<case>/test",
+
+                "$FOAM_CASE/constant/test",
+                "<case>/constant/test",
+                "<constant>/test",
+
+                "$FOAM_CASE/system/test",
+                "<case>/system/test",
+                "<system>/test",
+            }
+        )
+        {
+            string input(cstr);
+            string output(stringOps::expand(input));
+
+            Info<<"input:   " << input << nl
+                << "expand: " << output << nl << nl;
+        }
+    }
 
 
     // Test Foam::name with formatting string

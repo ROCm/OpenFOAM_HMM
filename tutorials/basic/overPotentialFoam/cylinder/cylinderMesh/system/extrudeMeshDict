@@ -118,10 +118,10 @@ sigmaRadialCoeffs
 offsetSurfaceCoeffs
 {
     // Surface that mesh has been meshed to
-    baseSurface "$FOAM_CASE/constant/triSurface/DTC-scaled-inflated.obj";
+    baseSurface "<constant>/triSurface/DTC-scaled-inflated.obj";
 
     // Surface to fill in to
-    offsetSurface "$FOAM_CASE/constant/triSurface/DTC-scaled.obj";
+    offsetSurface "<constant>/triSurface/DTC-scaled.obj";
 }
 
 

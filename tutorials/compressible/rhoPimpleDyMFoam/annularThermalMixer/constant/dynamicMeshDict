@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "${FOAM_CASE}/constant/caseSettings"
+#include "<constant>/caseSettings"
 
 dynamicFvMesh   dynamicMotionSolverFvMesh;
 
