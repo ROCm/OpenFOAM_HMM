@@ -19,7 +19,7 @@
 #------------------------------------------------------------------------------
 
 # Load the standard versions
-eval $($WM_PROJECT_DIR/bin/foamEtcFile -mode=o -sh -config compiler)
+eval $($WM_PROJECT_DIR/bin/foamEtcFile -sh -config -mode=o compiler)
 
 # Modify/override compiler settings
 case "$WM_COMPILER" in

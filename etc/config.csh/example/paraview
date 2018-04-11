@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -23,9 +23,7 @@
 #------------------------------------------------------------------------------
 
 # Use standard paraview config file (-mode=o) with a different ParaView_VERSION
-set foamFile=`$WM_PROJECT_DIR/bin/foamEtcFile -mode=o config.csh/paraview`
-if ( $status == 0 ) source $foamFile ParaView_VERSION=5.4.0
 
-unset foamFile
+eval `foamEtcFile -csh -config -mode=o paraview -- ParaView_VERSION=5.5.0-mpipy`
 
 #------------------------------------------------------------------------------
