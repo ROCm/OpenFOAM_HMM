@@ -86,9 +86,9 @@ string pOpen(const string& cmd, label line=0)
 
 inline word addressToWord(const uintptr_t addr)
 {
-    OStringStream nStream;
-    nStream << "0x" << hex << addr;
-    return nStream.str();
+    OStringStream os;
+    os << "0x" << hex << addr;
+    return os.str();
 }
 
 
@@ -122,7 +122,7 @@ void printSourceFileAndLine
             1
         );
 
-        if (line == "")
+        if (line.empty())
         {
             os  << " addr2line failed";
         }
@@ -161,7 +161,6 @@ fileName absolutePath(const char* fn)
 
 word demangleSymbol(const char* sn)
 {
-    word res;
     int st;
     char* cxx_sname = abi::__cxa_demangle
     (
@@ -173,15 +172,13 @@ word demangleSymbol(const char* sn)
 
     if (st == 0 && cxx_sname)
     {
-        res = word(cxx_sname);
+        word demangled(cxx_sname);
         free(cxx_sname);
-    }
-    else
-    {
-        res = word(sn);
+
+        return demangled;
     }
 
-    return res;
+    return sn;
 }
 
 
@@ -189,8 +186,8 @@ word demangleSymbol(const char* sn)
 
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::error::safePrintStack(std::ostream& os)
 {

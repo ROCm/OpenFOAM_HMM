@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,9 @@ License
 
 #include <signal.h>
 #include <unistd.h>
-#include <sys/sysmacros.h>
+#ifndef darwin
+    #include <sys/sysmacros.h>
+#endif
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -48,6 +50,11 @@ Foam::fileStat::fileStat
 :
     isValid_(false)
 {
+    if (fName.empty())
+    {
+        return;
+    }
+
     // Work on volatile
     volatile bool locIsValid = false;
 
@@ -84,20 +91,42 @@ Foam::label Foam::fileStat::size() const
 }
 
 
-bool Foam::fileStat::sameDevice(const fileStat& stat2) const
+time_t Foam::fileStat::modTime() const
+{
+    return isValid_ ? status_.st_mtime : 0;
+}
+
+
+double Foam::fileStat::dmodTime() const
+{
+    return
+    (
+        isValid_
+      ?
+        #ifdef darwin
+        (status_.st_mtime + 1e-9*status_.st_mtimespec.tv_nsec)
+        #else
+        (status_.st_mtime + 1e-9*status_.st_mtim.tv_nsec)
+        #endif
+      : 0
+    );
+}
+
+
+bool Foam::fileStat::sameDevice(const fileStat& other) const
 {
     return
         isValid_
      && (
-            major(status_.st_dev) == major(stat2.status().st_dev)
-         && minor(status_.st_dev) == minor(stat2.status().st_dev)
+            major(status_.st_dev) == major(other.status_.st_dev)
+         && minor(status_.st_dev) == minor(other.status_.st_dev)
         );
 }
 
 
-bool Foam::fileStat::sameINode(const fileStat& stat2) const
+bool Foam::fileStat::sameINode(const fileStat& other) const
 {
-    return isValid_ && (status_.st_ino == stat2.status().st_ino);
+    return isValid_ && (status_.st_ino == other.status_.st_ino);
 }
 
 

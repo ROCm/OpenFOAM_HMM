@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,8 +51,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward declarations
 class fileStat;
 
 Istream& operator>>(Istream& is, fileStat& fStat);
@@ -88,6 +87,8 @@ public:
         //
         // \param maxTime \n
         // The timeout value.
+        //
+        // \note an empty filename is a no-op.
         fileStat
         (
             const fileName& fName,
@@ -101,34 +102,42 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Raw status
-            const struct stat& status() const
-            {
-                return status_;
-            }
+        //- Raw status
+        const struct stat& status() const
+        {
+            return status_;
+        }
 
-            //- Was file-stat successful?
-            bool isValid() const
-            {
-                return isValid_;
-            }
+        //- Was file-stat successful?
+        bool isValid() const
+        {
+            return isValid_;
+        }
 
-            //- Size in bytes. Zero for invalid file-stat.
-            label size() const;
+        //- Size in bytes. Zero for an invalid file-stat.
+        label size() const;
+
+        //- Return the modification time in seconds.
+        //  Zero for an invalid file-stat.
+        time_t modTime() const;
+
+        //- Return the modification time in seconds (nanosecond resolution)
+        //  Zero for an invalid file-stat.
+        double dmodTime() const;
 
 
-        // Check
+    // Check
 
-            //- Compare two fileStats for same device
-            bool sameDevice(const fileStat& stat2) const;
+        //- Compare two fileStats for same device
+        bool sameDevice(const fileStat& other) const;
 
-            //- Compare two fileStats for same Inode
-            bool sameINode(const fileStat& stat2) const;
+        //- Compare two fileStats for same Inode
+        bool sameINode(const fileStat& other) const;
 
-            //- Compare state against inode
-            bool sameINode(const label iNode) const;
+        //- Compare state against inode
+        bool sameINode(const label iNode) const;
 
 
     // IOstream Operators

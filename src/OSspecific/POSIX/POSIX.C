@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,12 @@ Description
 #include <netdb.h>
 #include <netinet/in.h>
 #include <dlfcn.h>
-#include <link.h>
+
+#ifdef darwin
+    #include <mach-o/dyld.h>
+#else
+    #include <link.h>
+#endif
 
 #ifdef USE_RANDOM
     #include <climits>
@@ -652,16 +657,7 @@ time_t Foam::lastModified(const fileName& name, const bool followLink)
     }
 
     // Ignore an empty name
-    if (!name.empty())
-    {
-        fileStat fileStatus(name, followLink);
-        if (fileStatus.isValid())
-        {
-            return fileStatus.status().st_mtime;
-        }
-    }
-
-    return 0;
+    return name.empty() ? 0 : fileStat(name, followLink).modTime();
 }
 
 
@@ -677,18 +673,7 @@ double Foam::highResLastModified(const fileName& name, const bool followLink)
     }
 
     // Ignore an empty name
-    if (!name.empty())
-    {
-        fileStat fileStatus(name, followLink);
-        if (fileStatus.isValid())
-        {
-            return
-                fileStatus.status().st_mtime
-              + 1e-9*fileStatus.status().st_mtim.tv_nsec;
-        }
-    }
-
-    return 0;
+    return name.empty() ? 0 : fileStat(name, followLink).dmodTime();
 }
 
 
