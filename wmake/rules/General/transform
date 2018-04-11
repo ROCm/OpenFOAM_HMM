@@ -28,9 +28,10 @@ endef
 $(foreach s,$(SUFFIXES),$(eval $(call DEFINE_TRANSFORM,$(s))))
 
 $(OBJECTS_DIR)/%.dep : %
-	$(call QUIET_MESSAGE,wmkdep,$(<F))
+	$(call QUIET_MESSAGE,dep,$(<F))
 	$(call VERBOSE_MESSAGE,Making dependency list for source file,$(<F))
 	@$(WM_SCRIPTS)/makeTargetDir $@
-	@$(WMAKE_BIN)/wmkdep $(WMKDEP_FLAGS) -o$@ -I$(*D) $(LIB_HEADER_DIRS) $<
+	@$(WMAKE_BIN)/wmkdepend $(WMKDEP_FLAGS) -o$@ -I$(*D) $(LIB_HEADER_DIRS) $<
+#flex	@$(WMAKE_BIN)/wmkdep $(WMKDEP_FLAGS) -o$@ -I$(*D) $(LIB_HEADER_DIRS) $<
 
 #------------------------------------------------------------------------------
