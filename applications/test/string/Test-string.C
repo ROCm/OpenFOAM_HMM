@@ -72,26 +72,28 @@ int main(int argc, char *argv[])
             const auto& cstr
           :
             {
-                "~OpenFOAM/controlDict",
-                "<etc>/controlDict",
+                "~OpenFOAM/controlDict",    "<etc>/controlDict",
+                "$FOAM_CASE/xyz",           "<case>/xyz",
+                "$FOAM_CASE/constant/xyz",  "<constant>/xyz",
+                "$FOAM_CASE/system/xyz",    "<system>/xyz",
 
-                "$FOAM_CASE/test",
-                "<case>/test",
+                // corner cases
+                "~OpenFOAM",                "<etc>",
+                "~OpenFOAM/",               "<etc>/",
+                "$FOAM_CASE",               "<case>",
+                "$FOAM_CASE/constant",      "<constant>",
+                "$FOAM_CASE/system",        "<system>",
 
-                "$FOAM_CASE/constant/test",
-                "<case>/constant/test",
-                "<constant>/test",
-
-                "$FOAM_CASE/system/test",
-                "<case>/system/test",
-                "<system>/test",
+                "$FOAM_CASE/",              "<case>/",
+                "$FOAM_CASE/constant/",     "<constant>/",
+                "$FOAM_CASE/system/",       "<system>/",
             }
         )
         {
             string input(cstr);
             string output(stringOps::expand(input));
 
-            Info<<"input:   " << input << nl
+            Info<< "input:  " << input  << nl
                 << "expand: " << output << nl << nl;
         }
     }

@@ -80,7 +80,7 @@ Usage
             componentColumns 1(1);
             separator       ",";
             mergeSeparators no;
-            file            "$FOAM_CASE/constant/pressureVsU";
+            file            "<constant>/pressureVsU";
         }
         value           uniform 0;
     }

@@ -14,13 +14,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-constructFrom patch;
-sourceCase "$FOAM_CASE";
+constructFrom   patch;
+sourceCase      "<case>";
 
-sourcePatches (front);
+sourcePatches   (front);
 exposedPatchName back;
 
-extrudeModel        wedge;
+extrudeModel    wedge;
 
 sectorCoeffs
 {
@@ -29,7 +29,8 @@ sectorCoeffs
     angle           1;
 }
 
-flipNormals false;
-mergeFaces false;
+flipNormals     false;
+
+mergeFaces      false;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

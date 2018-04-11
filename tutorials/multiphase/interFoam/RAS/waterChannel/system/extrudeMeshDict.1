@@ -14,13 +14,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-constructFrom mesh;
-sourceCase "$FOAM_CASE";
-sourcePatches (outlet);
+constructFrom   mesh;
+sourceCase      "<case>";
+sourcePatches   (outlet);
 
-flipNormals false;
+flipNormals     false;
 
-extrudeModel        linearDirection;
+extrudeModel    linearDirection;
 
 nLayers             60;
 expansionRatio      1.0;
@@ -32,6 +32,6 @@ linearDirectionCoeffs
     thickness       60;
 }
 
-mergeFaces false;
+mergeFaces      false;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

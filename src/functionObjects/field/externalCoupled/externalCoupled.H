@@ -86,7 +86,7 @@ Usage
         type            externalCoupled;
         ...
         log             yes;
-        commsDir        "${FOAM_CASE}/comms";
+        commsDir        "<case>/comms";
         initByExternal  yes;
         stateEnd        remove;  // (remove | done)
 

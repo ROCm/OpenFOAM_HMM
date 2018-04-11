@@ -35,7 +35,7 @@ Description
     inlet
     {
         type            timeVaryingUniformFixedValue;
-        fileName        "$FOAM_CASE/time-series";
+        fileName        "<case>/time-series";
         outOfBounds     clamp;           // (error|warn|clamp|repeat)
     }
     \endverbatim

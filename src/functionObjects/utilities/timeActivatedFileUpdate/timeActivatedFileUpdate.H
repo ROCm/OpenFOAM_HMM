@@ -40,13 +40,13 @@ Usage
         libs              ("libutilityFunctionObjects.so");
         writeControl      timeStep;
         writeInterval     1;
-        fileToUpdate      "$FOAM_CASE/system/fvSolution";
+        fileToUpdate      "<system>/fvSolution";
         timeVsFile
         (
-            (-1 "$FOAM_CASE/system/fvSolution.0")
-            (0.10 "$FOAM_CASE/system/fvSolution.10")
-            (0.20 "$FOAM_CASE/system/fvSolution.20")
-            (0.35 "$FOAM_CASE/system/fvSolution.35")
+            (-1   "<system>/fvSolution.0")
+            (0.10 "<system>/fvSolution.10")
+            (0.20 "<system>/fvSolution.20")
+            (0.35 "<system>/fvSolution.35")
         );
         ...
     }

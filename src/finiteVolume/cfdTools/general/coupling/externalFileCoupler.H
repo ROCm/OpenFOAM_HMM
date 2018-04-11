@@ -50,7 +50,7 @@ Description
     \verbatim
     communication
     {
-        commsDir        "${FOAM_CASE}/comms";
+        commsDir        "<case>/comms";
         waitInterval    1;
         timeOut         100;
         initByExternal  no;

@@ -50,13 +50,29 @@ static void expandLeadingTag(std::string& s, const char b, const char e)
     }
 
     auto delim = s.find(e);
-    if (delim == std::string::npos || s[++delim] != '/')
+    if (delim == std::string::npos)
     {
-        return;   // Ignore if there is no '/' after <tag>
+        return;  // Error: no closing delim - ignore expansion
+    }
+
+    fileName file;
+
+    const char nextC = s[++delim];
+
+    // Require the following character to be '/' or the end of string.
+    if (nextC)
+    {
+        if (nextC != '/')
+        {
+            return;
+        }
+
+        file.assign(s.substr(delim + 1));
     }
 
     const std::string tag(s, 1, delim-2);
-    fileName file(s.substr(delim + 1));
+
+    // Note that file is also allowed to be an empty string.
 
     if (tag == "etc")
     {
@@ -120,25 +136,32 @@ static void expandLeading(std::string& s)
     {
         return;
     }
-    else if (s[0] == '.')
+
+    switch (s[0])
     {
-        // Expand a lone '.' and an initial './' into cwd
-        if (s.size() == 1)
+        case '.':
         {
-            s = cwd();
+            // Expand a lone '.' and an initial './' into cwd
+            if (s.size() == 1)
+            {
+                s = cwd();
+            }
+            else if (s[1] == '/')
+            {
+                s.std::string::replace(0, 1, cwd());
+            }
+            break;
         }
-        else if (s[1] == '/')
+        case '<':
         {
-            s.std::string::replace(0, 1, cwd());
+            expandLeadingTag(s, '<', '>');
+            break;
         }
-    }
-    else if (s[0] == '<')
-    {
-        expandLeadingTag(s, '<', '>');
-    }
-    else if (s[0] == '~')
-    {
-        expandLeadingTilde(s);
+        case '~':
+        {
+            expandLeadingTilde(s);
+            break;
+        }
     }
 }
 
