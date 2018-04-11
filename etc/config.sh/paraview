@@ -36,13 +36,18 @@
 #         export LD_LIBRARY_PATH=$ParaView_DIR/lib/paraview-5.4:$LD_LIBRARY_PATH
 #         unset ParaView_VERSION        # avoid using ThirdParty settings
 #
+#     In newer versions (paraview 5.5), the contents of the lib/ changed
+#     and now need to include that as well:
+#
+#         export LD_LIBRARY_PATH=$ParaView_DIR/lib:$ParaView_DIR/lib/paraview-5.5:$LD_LIBRARY_PATH
+#
 # Note
 #     When _foamAddLib is unset (eg, called from makeParaView or from foamPV):
 #       - the ParaView_VERSION variable is retained.
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-ParaView_VERSION=5.4.1
+ParaView_VERSION=5.5.0
 ParaView_QT=qt-system
 cmake_version=cmake-system
 
@@ -132,8 +137,10 @@ then
             done
         fi
 
-        # Prepend paraview libraries
-        export LD_LIBRARY_PATH=$pvLibDir:$LD_LIBRARY_PATH
+        # Prepend paraview libraries.
+        # ParaView 5.4 and earlier - requires lib/paraview-X.X only
+        # ParaView 5.5 - requires lib/
+        export LD_LIBRARY_PATH=$ParaView_DIR/lib:$pvLibDir:$LD_LIBRARY_PATH
 
         # Add in python libraries if required
         if [ -r $pvPython ]

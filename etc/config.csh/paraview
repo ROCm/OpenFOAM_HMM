@@ -36,10 +36,15 @@
 #         setenv LD_LIBRARY_PATH ${ParaView_DIR}/lib/paraview-5.4:${LD_LIBRARY_PATH}
 #         unsetenv ParaView_VERSION     # avoid using ThirdParty settings
 #
+#     In newer versions (paraview 5.5), the contents of the lib/ changed
+#     and now need to include that as well:
+#
+#         setenv LD_LIBRARY_PATH ${ParaView_DIR}/lib:${ParaView_DIR}/lib/paraview-5.5:${LD_LIBRARY_PATH}
+#
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-setenv ParaView_VERSION 5.4.1
+setenv ParaView_VERSION 5.5.0
 set    ParaView_QT=qt-system
 set cmake_version=cmake-system
 
@@ -127,8 +132,10 @@ if ( $?ParaView_VERSION ) then
             endif
         endif
 
-        # Prepend paraview libraries
-        setenv LD_LIBRARY_PATH "${pvLibDir}:${LD_LIBRARY_PATH}"
+        # Prepend paraview libraries.
+        # ParaView 5.4 and earlier - requires lib/paraview-X.X only
+        # ParaView 5.5 - requires lib/
+        setenv LD_LIBRARY_PATH "${ParaView_DIR}/lib:${pvLibDir}:${LD_LIBRARY_PATH}"
 
         if ($?FOAM_VERBOSE && $?prompt) then
             echo "Using paraview"
