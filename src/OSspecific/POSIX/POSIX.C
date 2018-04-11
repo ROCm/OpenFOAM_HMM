@@ -57,10 +57,10 @@ Description
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <netinet/in.h>
 #include <dlfcn.h>
 #include <link.h>
 
-#include <netinet/in.h>
 #ifdef USE_RANDOM
     #include <climits>
     #if INT_MAX    != 2147483647
@@ -708,12 +708,12 @@ double Foam::highResLastModified(const fileName& name, const bool followLink)
     // Ignore an empty name
     if (!name.empty())
     {
-        fileStat fileStatus(name);
+        fileStat fileStatus(name, followLink);
         if (fileStatus.isValid())
         {
             return
                 fileStatus.status().st_mtime
-              + 1e-9*fileStatus.status().st_atim.tv_nsec;
+              + 1e-9*fileStatus.status().st_mtim.tv_nsec;
         }
     }
 
