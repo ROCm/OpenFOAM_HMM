@@ -59,7 +59,7 @@ include $(GENERAL_RULES)/general
 
 .PHONY: all clean
 
-all:  $(WMAKE_BIN)/dirToString $(WMAKE_BIN)/wmkdep
+all:  $(WMAKE_BIN)/dirToString $(WMAKE_BIN)/wmkdep $(WMAKE_BIN)/wmkdepend
 	@echo built wmake-bin for $(WM_ARCH)$(WM_COMPILER)
 
 clean:
@@ -77,5 +77,16 @@ $(WMAKE_BIN)/wmkdep: wmkdep.l
 	$(call QUIET_MESSAGE,flex,$(<F))
 	$E flex -o $@.c $(<F) && $(cc) $(cFLAGS) $@.c -o $@
 	@rm -f $@.c 2>/dev/null
+
+$(WMAKE_BIN)/wmkdepend: wmkdepend.cpp
+	@mkdir -p $(WMAKE_BIN)
+	$(call QUIET_MESSAGE,wmkdepend,$(<F))
+	$E $(CC) $(c++FLAGS) $(c++LESSWARN) $(<F) -o $@
+
+# $(WMAKE_BIN)/wmkdepend: wmkdepend.rl
+# 	@mkdir -p $(WMAKE_BIN)
+# 	$(call QUIET_MESSAGE,ragel,$(<F))
+# 	$E ragel -o $@.cpp $(<F) && $(CC) $(c++FLAGS) $(c++LESSWARN) $@.cpp -o $@
+# 	@rm -f $@.cpp 2>/dev/null
 
 #------------------------------------------------------------------------------
