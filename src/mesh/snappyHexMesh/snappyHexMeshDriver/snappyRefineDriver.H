@@ -38,6 +38,8 @@ SourceFiles
 #include "labelList.H"
 #include "PackedBoolList.H"
 #include "labelVector.H"
+#include "vector.H"
+#include "scalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -144,13 +146,28 @@ class snappyRefineDriver
             const label maxIter
         );
 
-        // Directional refinement
+        // Directional refinement and smoothing
 
             //- Refine (directional) all cells inside/outside shell
             label directionalShellRefine
             (
                 const refinementParameters& refineParams,
                 const label maxIter
+            );
+
+            //- Calculate local edge length from cell volumes
+            void getVirtualEdgeLength
+            (
+                const vector& userDirection,
+                const labelList& pointLabels,
+                const PackedBoolList& isXFace,
+                scalarField& maxUserSize
+            ) const;
+
+            //- Smooth the directional expansion ratio
+            label directionalSmooth
+            (
+                const refinementParameters& refineParams
             );
 
         //- Add baffles and remove unreachable cells

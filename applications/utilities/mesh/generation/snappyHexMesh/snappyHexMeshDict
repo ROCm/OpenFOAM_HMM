@@ -299,6 +299,12 @@ castellatedMeshControls
         //    //   with e.g. dynamic refinement/unrefinement.
         //    // - cellLevel will include any directional refinement
         //    //   (i.e. it will be the maximum of all three directions)
+        //
+        //    // Optional directional expansion-ratio smoothing (after all
+        //    // refinement). This will try to smooth out edge/cell size jumps
+        //    // Specify smoothing direction and number of iterations
+        //    nSmoothExpansion    100;
+        //    smoothDirection     (1 0 0);
         //}
     }
 

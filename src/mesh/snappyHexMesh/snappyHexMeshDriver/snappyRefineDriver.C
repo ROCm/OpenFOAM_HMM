@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,6 +41,9 @@ License
 #include "labelVector.H"
 #include "profiling.H"
 #include "searchableSurfaces.H"
+#include "PointIntegrateData.H"
+#include "PointEdgeWave.H"
+#include "OBJstream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1627,7 +1630,6 @@ Foam::label Foam::snappyRefineDriver::directionalShellRefine
         for (direction dir = 0; dir < vector::nComponents; dir++)
         {
             // Select the cells that need to be refined in certain direction:
-            // 
             // - cell inside/outside shell
             // - original cellLevel (using mapping) mentioned in levelIncrement
             // - dirCellLevel not yet up to cellLevel+levelIncrement
@@ -1782,6 +1784,576 @@ Foam::label Foam::snappyRefineDriver::directionalShellRefine
         cellLevel[celli] = cmptMax(dirCellLevel[celli]);
     }
 
+    return iter;
+}
+
+
+void Foam::snappyRefineDriver::getVirtualEdgeLength
+(
+    const vector& userDirection,
+    const labelList& pointLabels,
+    const PackedBoolList& isXFace,
+    scalarField& maxUserSize
+) const
+{
+    const fvMesh& mesh = meshRefiner_.mesh();
+    const labelList& own = mesh.faceOwner();
+    const labelList& nei = mesh.faceNeighbour();
+    const vectorField& fA = mesh.faceAreas();
+    const pointField& faceCentres = mesh.faceCentres();
+    const pointField& cellCentres = mesh.cellCentres();
+
+    scalarField sumWeights(mesh.nCells(), 0.0);
+    scalarField sumArea(mesh.nCells(), 0.0);
+
+    forAll(own, facei)
+    {
+        const scalar fc = (faceCentres[facei]&userDirection);
+        const scalar cc = (cellCentres[own[facei]]&userDirection);
+        // Calculate 'pyramid volume'
+        scalar pyr3Vol = (fA[facei]&userDirection)*(fc-cc);
+        sumWeights[own[facei]] += pyr3Vol;
+        sumArea[own[facei]] += mag(fA[facei]&userDirection);
+    }
+
+    forAll(nei, facei)
+    {
+        const scalar fc = (faceCentres[facei]&userDirection);
+        const scalar cc = (cellCentres[nei[facei]]&userDirection);
+        // Calculate 'pyramid volume'
+        scalar pyr3Vol = (fA[facei]&userDirection)*(cc-fc);
+        sumWeights[nei[facei]] += pyr3Vol;
+        sumArea[nei[facei]] += mag(fA[facei]&userDirection);
+    }
+
+    const scalarField cellSize(2*sumWeights/sumArea);
+
+    maxUserSize.setSize(mesh.nPoints());
+    maxUserSize = -GREAT;
+
+    forAll(pointLabels, i)
+    {
+        label pointi = pointLabels[i];
+        const labelList& pFaces = mesh.pointFaces()[pointi];
+        scalar& maxSz = maxUserSize[pointi];
+        forAll(pFaces, pFacei)
+        {
+            label facei = pFaces[pFacei];
+            if (isXFace[facei])
+            {
+                const point& fc = faceCentres[facei];
+                if (((cellCentres[own[facei]]-fc)&userDirection) > 0.0)
+                {
+                    maxSz = max(maxSz, cellSize[own[facei]]);
+                }
+                if (mesh.isInternalFace(facei))
+                {
+                    if (((cellCentres[nei[facei]]-fc)&userDirection) > 0.0)
+                    {
+                        maxSz = max(maxSz, cellSize[nei[facei]]);
+                    }
+                }
+            }
+        }
+    }
+    syncTools::syncPointList
+    (
+        mesh,
+        maxUserSize,
+        maxEqOp<scalar>(),
+        -GREAT
+    );
+}
+
+
+Foam::label Foam::snappyRefineDriver::directionalSmooth
+(
+    const refinementParameters& refineParams
+)
+{
+    addProfiling(split, "snappyHexMesh::refine::smooth");
+    Info<< nl
+        << "Directional expansion ratio smoothing" << nl
+        << "-------------------------------------" << nl
+        << endl;
+
+    fvMesh& mesh = meshRefiner_.mesh();
+    const pointField& points = mesh.points();
+    const searchableSurfaces& geometry = meshRefiner_.surfaces().geometry();
+    const shellSurfaces& shells = meshRefiner_.shells();
+
+    label iter = 0;
+
+    forAll(shells.nSmoothExpansion(), shellI)
+    {
+        if (shells.nSmoothExpansion()[shellI] > 0)
+        {
+            label surfi = shells.shells()[shellI];
+            const vector& userDirection = shells.smoothDirection()[shellI];
+
+
+            // Extract inside points
+            labelList pointLabels;
+            PackedBoolList isInsidePoint(mesh.nPoints());
+            {
+                // Get inside points
+                List<volumeType> volType;
+                geometry[surfi].getVolumeType(points, volType);
+
+                forAll(volType, pointi)
+                {
+                    if (volType[pointi] == volumeType::INSIDE)
+                    {
+                        isInsidePoint.set(pointi);
+                    }
+                }
+                pointLabels = isInsidePoint.used();
+            }
+
+
+            const edgeList& edges = mesh.edges();
+            const labelListList& pointEdges = mesh.pointEdges();
+
+            // Mark all directed edges
+            PackedBoolList isXEdge(edges.size());
+            {
+                forAll(edges, edgei)
+                {
+                    const edge& e = edges[edgei];
+                    vector eVec(e.vec(points));
+                    eVec /= mag(eVec);
+                    if (mag(eVec&userDirection) > 0.9)
+                    {
+                        isXEdge.set(edgei);
+                    }
+                }
+            }
+
+
+            // Mark all directed faces (with all points inside the region)
+            PackedBoolList isXFace(mesh.nFaces());
+            {
+                const vectorField& faceAreas = mesh.faceAreas();
+                const faceList& faces = mesh.faces();
+
+                forAll(faces, facei)
+                {
+                    const face& f = faces[facei];
+
+                    bool allInRegion = true;
+                    for (label pointi : f)
+                    {
+                        if (!isInsidePoint[pointi])
+                        {
+                            allInRegion = false;
+                            break;
+                        }
+                    }
+
+                    if (allInRegion)
+                    {
+                        vector n(faceAreas[facei]);
+                        n /= mag(n);
+                        if (mag(n&userDirection) > 0.9)
+                        {
+                            isXFace[facei] = true;
+                        }
+                    }
+                }
+            }
+
+
+            // Get left and right local edge
+            labelList leftEdge(points.size(), -1);
+            labelList rightEdge(points.size(), -1);
+
+            forAll(pointLabels, i)
+            {
+                label pointi = pointLabels[i];
+                const labelList& pEdges = pointEdges[pointi];
+                forAll(pEdges, pEdgei)
+                {
+                    label edgei = pEdges[pEdgei];
+                    const edge& e = edges[edgei];
+                    label otherPointi = e.otherVertex(pointi);
+                    vector eVec(points[otherPointi]-points[pointi]);
+                    eVec /= mag(eVec);
+                    scalar cosAngle = (eVec&userDirection);
+
+                    if (cosAngle < -0.9)
+                    {
+                        leftEdge[pointi] = edgei;
+                    }
+                    else if (cosAngle > 0.9)
+                    {
+                        rightEdge[pointi] = edgei;
+                    }
+                }
+            }
+
+
+            pointField newPoints(points);
+
+            Info<< "Smoothing " << geometry[surfi].name() << ':' << nl
+                << "    Direction                   : " << userDirection << nl
+                << "    Number of points            : "
+                << returnReduce(pointLabels.size(), sumOp<label>())
+                << " (out of " << mesh.globalData().nTotalPoints()
+                << ")" << nl
+                << "    Number of directed edges    : "
+                << returnReduce(isXEdge.count(), sumOp<label>())
+                << " (out of " << returnReduce(edges.size(), sumOp<label>())
+                << ")" << nl
+                << "    Number of directed faces    : "
+                << returnReduce(isXFace.count(), sumOp<label>())
+                << " (out of " << mesh.globalData().nTotalFaces()
+                << ")" << nl
+                << "    Iterations                  : "
+                << shells.nSmoothExpansion()[shellI] << nl
+                << endl;
+
+            for (iter = 0; iter < shells.nSmoothExpansion()[shellI]; iter++)
+            {
+                if (debug)
+                {
+                    const_cast<Time&>(mesh.time())++;
+                }
+
+                // Determine size of connected edge
+                scalarField leftEdgeMag(points.size(), -GREAT);
+                scalarField rightEdgeMag(points.size(), -GREAT);
+                {
+                    forAll(edges, edgei)
+                    {
+                        if (isXEdge[edgei])
+                        {
+                            const edge& e = edges[edgei];
+                            forAll(e, fp)
+                            {
+                                label pointi = e[fp];
+                                if (leftEdge[pointi] == edgei)
+                                {
+                                    leftEdgeMag[pointi] = e.mag(points);
+                                }
+                                else if (rightEdge[pointi] == edgei)
+                                {
+                                    rightEdgeMag[pointi] = e.mag(points);
+                                }
+                            }
+                        }
+                    }
+                    syncTools::syncPointList
+                    (
+                        mesh,
+                        leftEdgeMag,
+                        maxEqOp<scalar>(),
+                        -GREAT
+                    );
+                    syncTools::syncPointList
+                    (
+                        mesh,
+                        rightEdgeMag,
+                        maxEqOp<scalar>(),
+                        -GREAT
+                    );
+                }
+
+
+                // Get local characteristic size (in provided direction) on all
+                // points
+                scalarField maxUserSize;
+                getVirtualEdgeLength
+                (
+                    userDirection,
+                    pointLabels,
+                    isXFace,
+                    maxUserSize
+                );
+
+
+                // Determine average edge
+                scalarField avgEdgeMag(edges.size(), 0.0);
+                forAll(edges, edgei)
+                {
+                    if (isXEdge[edgei])
+                    {
+                        const edge& e = edges[edgei];
+
+                        label nSum = 0;
+
+                        // Add both contributions from e[0]. One will be the
+                        // edge itself.
+                        if (leftEdgeMag[e[0]] > 0.0)
+                        {
+                            avgEdgeMag[edgei] += leftEdgeMag[e[0]];
+                            nSum++;
+                        }
+                        if (rightEdgeMag[e[0]] > 0.0)
+                        {
+                            avgEdgeMag[edgei] += rightEdgeMag[e[0]];
+                            nSum++;
+                        }
+                        else if (maxUserSize[e[0]] > 0.0)
+                        {
+                            // Dangling point. Characteristic length from cell
+                            // size
+                            avgEdgeMag[edgei] += maxUserSize[e[0]];
+                            nSum++;
+                        }
+
+                        // Make sure we don't add the edge itself from e[1]
+                        if (leftEdge[e[1]] == edgei)
+                        {
+                            // leftEdge is edgei. Use right contribtion
+                            if (rightEdgeMag[e[1]] > 0.0)
+                            {
+                                avgEdgeMag[edgei] += rightEdgeMag[e[1]];
+                                nSum++;
+                            }
+                            else if (maxUserSize[e[1]] > 0.0)
+                            {
+                                avgEdgeMag[edgei] += maxUserSize[e[1]];
+                                nSum++;
+                            }
+                        }
+                        else if (leftEdgeMag[e[1]] > 0.0)
+                        {
+                            avgEdgeMag[edgei] += leftEdgeMag[e[1]];
+                            nSum++;
+                        }
+
+                        if (nSum > 0)
+                        {
+                            avgEdgeMag[edgei] /= nSum;
+                        }
+                    }
+                }
+
+
+                // Edge integration
+                // ~~~~~~~~~~~~~~~~
+
+                // Using edge mag
+                List<PointIntegrateData<scalar>> pointData(mesh.nPoints());
+                List<PointIntegrateData<scalar>> edgeData(mesh.nEdges());
+
+                // Using average edge mag
+                List<PointIntegrateData<scalar>> avgPointData(mesh.nPoints());
+                List<PointIntegrateData<scalar>> avgEdgeData(mesh.nEdges());
+
+                {
+                    DynamicList<label> seedPoints;
+                    DynamicList<PointIntegrateData<scalar>> seedData;
+                    DynamicList<PointIntegrateData<scalar>> avgSeedData;
+                    {
+                        forAll(pointLabels, i)
+                        {
+                            label pointi = pointLabels[i];
+                            label leftEdgei = leftEdge[pointi];
+                            if (leftEdgeMag[pointi] <= 0.0)
+                            {
+                                // Boundary to the left.
+                                seedPoints.append(pointi);
+                                seedData.append(0.0);
+                                avgSeedData.append(0.0);
+                            }
+                            else if (leftEdgei != -1)
+                            {
+                                const edge& leftE = edges[leftEdgei];
+                                label otherPointi = leftE.otherVertex(pointi);
+                                if (!isInsidePoint[otherPointi])
+                                {
+                                    seedPoints.append(pointi);
+                                    seedData.append(leftEdgeMag[pointi]);
+                                    avgSeedData.append(avgEdgeMag[leftEdgei]);
+                                }
+                            }
+                        }
+                    }
+
+                    // Prevent walking on all non-isXEdge edges by setting valid
+                    // flag.
+                    const PointIntegrateData<scalar> dummyData(-123);
+                    forAll(edges, edgei)
+                    {
+                        const edge& e = edges[edgei];
+                        if (!isXEdge[edgei])
+                        {
+                            edgeData[edgei] = dummyData;
+                            avgEdgeData[edgei] = dummyData;
+                        }
+                        else if (!isInsidePoint[e[0]] || !isInsidePoint[e[1]])
+                        {
+                            edgeData[edgei] = dummyData;
+                            avgEdgeData[edgei] = dummyData;
+                        }
+                    }
+                    forAll(isInsidePoint, pointi)
+                    {
+                        if (!isInsidePoint[pointi])
+                        {
+                            pointData[pointi] = dummyData;
+                            avgPointData[pointi] = dummyData;
+                        }
+                    }
+
+                    // Integrate edgeMag
+                    {
+                        scalarField edgeMag(edges.size());
+                        forAll(edges, edgei)
+                        {
+                            edgeMag[edgei] = edges[edgei].mag(points);
+                        }
+                        PointIntegrateData<scalar>::trackingData td(edgeMag);
+
+                        // Do all calculations
+                        PointEdgeWave
+                        <
+                            PointIntegrateData<scalar>,
+                            PointIntegrateData<scalar>::trackingData
+                        > calc
+                        (
+                            mesh,
+                            seedPoints,
+                            seedData,
+                            pointData,
+                            edgeData,
+                            returnReduce(edges.size(), sumOp<label>()),
+                            td
+                        );
+                    }
+                    // Integrate avgEdgeMag
+                    {
+                        PointIntegrateData<scalar>::trackingData td(avgEdgeMag);
+
+                        // Do all calculations
+                        PointEdgeWave
+                        <
+                            PointIntegrateData<scalar>,
+                            PointIntegrateData<scalar>::trackingData
+                        > calc
+                        (
+                            mesh,
+                            seedPoints,
+                            avgSeedData,
+                            avgPointData,
+                            avgEdgeData,
+                            returnReduce(edges.size(), sumOp<label>()),
+                            td
+                        );
+                    }
+                }
+
+
+                // Update position
+                forAll(pointLabels, zonePointi)
+                {
+                    label meshPointi = pointLabels[zonePointi];
+                    if (pointData[meshPointi].data() >= 0.0)
+                    {
+                        newPoints[meshPointi] +=
+                            userDirection
+                          * (
+                                avgPointData[meshPointi].data()
+                              - pointData[meshPointi].data()
+                            );
+                    }
+                }
+
+
+                // Smooth new position with average of non-moving points
+                {
+                    pointField unsmoothedPoints(newPoints);
+                    scalarField sumOther(mesh.nPoints(), 0.0);
+                    labelList nSumOther(mesh.nPoints(), 0);
+                    forAll(edges, edgei)
+                    {
+                        const edge& e = edges[edgei];
+                        sumOther[e[0]] +=
+                            (unsmoothedPoints[e[1]]&userDirection);
+                        nSumOther[e[0]]++;
+                        sumOther[e[1]] +=
+                            (unsmoothedPoints[e[0]]&userDirection);
+                        nSumOther[e[1]]++;
+                    }
+                    syncTools::syncPointList
+                    (
+                        mesh,
+                        sumOther,
+                        plusEqOp<scalar>(),
+                        0.0
+                    );
+                    syncTools::syncPointList
+                    (
+                        mesh,
+                        nSumOther,
+                        plusEqOp<label>(),
+                        0
+                    );
+                    for (auto pointi : pointLabels)
+                    {
+                        label leftEdgei = leftEdge[pointi];
+                        bool isSeedPoint = false;
+                        if (leftEdgeMag[pointi] <= 0.0)
+                        {
+                            isSeedPoint = true;
+                        }
+                        else if (leftEdgei != -1)
+                        {
+                            const edge& e = edges[leftEdgei];
+                            label otherPointi = e.otherVertex(pointi);
+                            if (!isInsidePoint[otherPointi])
+                            {
+                                isSeedPoint = true;
+                            }
+                        }
+
+                        if (!isSeedPoint)
+                        {
+                            scalar smoothPos =
+                                0.5
+                               *(
+                                    (unsmoothedPoints[pointi]&userDirection)
+                                   +sumOther[pointi]/nSumOther[pointi]
+                                );
+
+                            vector& v = newPoints[pointi];
+                            v += (smoothPos-(v&userDirection))*userDirection;
+                        }
+                    }
+                }
+
+
+                // Move mesh to new location
+                vectorField disp(newPoints-mesh.points());
+                syncTools::syncPointList
+                (
+                    mesh,
+                    disp,
+                    maxMagSqrEqOp<vector>(),
+                    point::zero
+                );
+                mesh.movePoints(mesh.points()+disp);
+
+                if (debug&meshRefinement::MESH)
+                {
+                    Pout<< "Writing directional smooting iteration "
+                        << iter << " mesh to time " << meshRefiner_.timeName()
+                        << endl;
+                    meshRefiner_.write
+                    (
+                        meshRefinement::debugType(debug),
+                        meshRefinement::writeType
+                        (
+                            meshRefinement::writeLevel()
+                          | meshRefinement::WRITEMESH
+                        ),
+                        mesh.time().path()/meshRefiner_.timeName()
+                    );
+                }
+            }
+        }
+    }
     return iter;
 }
 
@@ -2284,6 +2856,12 @@ void Foam::snappyRefineDriver::doRefine
         refineParams,
         100    // maxIter
     );
+
+    if (max(meshRefiner_.shells().nSmoothExpansion()) > 0)
+    {
+        directionalSmooth(refineParams);
+    }
+
 
     // Introduce baffles at surface intersections. Remove sections unreachable
     // from keepPoint.
