@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -260,6 +260,14 @@ makeReactionMixtureThermo
     icoPoly8EThermoPhysics
 );
 
+makeReactionMixtureThermo
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoThermo,
+    multiComponentMixture,
+    icoPoly8TranspJanafEThermoPhysics
+);
 
 // Multi-component reaction thermo
 
@@ -365,6 +373,14 @@ makeReactionMixtureThermo
     icoPoly8HThermoPhysics
 );
 
+makeReactionMixtureThermo
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoThermo,
+    multiComponentMixture,
+    icoPoly8TranspJanafHThermoPhysics
+);
 
 // Multi-component reaction thermo
 

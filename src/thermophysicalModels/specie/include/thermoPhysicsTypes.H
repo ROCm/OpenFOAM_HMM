@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -120,6 +120,20 @@ namespace Foam
         8
     > icoPoly8HThermoPhysics;
 
+    typedef
+    polynomialTransport
+    <
+        species::thermo
+        <
+            janafThermo
+            <
+                perfectGas<specie>
+            >,
+            sensibleEnthalpy
+        >,
+        8
+    > icoPoly8TranspJanafHThermoPhysics;
+
 
     // thermo physics types based on sensibleInternalEnergy
     typedef
@@ -188,6 +202,20 @@ namespace Foam
         >,
         8
     > icoPoly8EThermoPhysics;
+
+    typedef
+    polynomialTransport
+    <
+        species::thermo
+        <
+            janafThermo
+            <
+                perfectGas<specie>
+            >,
+            sensibleInternalEnergy
+        >,
+        8
+    > icoPoly8TranspJanafEThermoPhysics;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
