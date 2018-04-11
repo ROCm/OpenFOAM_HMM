@@ -31,15 +31,19 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // Signal number to catch
-int sigStopAtWriteNow::signal_
+int Foam::sigStopAtWriteNow::signal_
 (
-    debug::optimisationSwitch("stopAtWriteNowSignal", -1)
+    Foam::debug::optimisationSwitch("stopAtWriteNowSignal", -1)
 );
 
+Foam::Time const* Foam::sigStopAtWriteNow::runTimePtr_ = nullptr;
+
+struct sigaction Foam::sigStopAtWriteNow::oldAction_;
+
+
+namespace Foam
+{
 // Register re-reader
 class addstopAtWriteNowSignalToOpt
 :
@@ -53,8 +57,7 @@ public:
         ::Foam::simpleRegIOobject(Foam::debug::addOptimisationObject, name)
     {}
 
-    virtual ~addstopAtWriteNowSignalToOpt()
-    {}
+    virtual ~addstopAtWriteNowSignalToOpt() = default;
 
     virtual void readData(Foam::Istream& is)
     {
@@ -73,12 +76,7 @@ addstopAtWriteNowSignalToOpt addstopAtWriteNowSignalToOpt_
     "stopAtWriteNowSignal"
 );
 
-}
-
-
-Foam::Time const* Foam::sigStopAtWriteNow::runTimePtr_ = nullptr;
-
-struct sigaction Foam::sigStopAtWriteNow::oldAction_;
+} // end of namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -93,16 +91,15 @@ void Foam::sigStopAtWriteNow::sigHandler(int)
             << abort(FatalError);
     }
 
-    // Update jobInfo file
-    jobInfo.signalEnd();
+    jobInfo.signalEnd();        // Update jobInfo file
 
-    Info<< "sigStopAtWriteNow :"
-        << " setting up write and stop at end of the next iteration"
-        << nl << endl;
-    runTimePtr_->stopAt(Time::saWriteNow);
-
-    //// Throw signal (to old handler)
-    //raise(signal_);
+    if (runTimePtr_)
+    {
+        Info<< "sigStopAtWriteNow :"
+            << " setting up write and stop at end of the next iteration"
+            << nl << endl;
+        runTimePtr_->stopAt(Time::saWriteNow);
+    }
 }
 
 
@@ -112,15 +109,9 @@ Foam::sigStopAtWriteNow::sigStopAtWriteNow()
 {}
 
 
-Foam::sigStopAtWriteNow::sigStopAtWriteNow
-(
-    const bool verbose,
-    const Time& runTime
-)
+Foam::sigStopAtWriteNow::sigStopAtWriteNow(const Time& runTime, bool verbose)
 {
-    // Store runTime
-    runTimePtr_ = &runTime;
-
+    runTimePtr_ = &runTime;      // Store runTime
     set(verbose);
 }
 
@@ -144,7 +135,7 @@ Foam::sigStopAtWriteNow::~sigStopAtWriteNow()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::sigStopAtWriteNow::set(const bool verbose)
+void Foam::sigStopAtWriteNow::set(bool verbose)
 {
     if (signal_ > 0)
     {

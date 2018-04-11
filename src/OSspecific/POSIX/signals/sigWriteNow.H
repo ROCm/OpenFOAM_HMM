@@ -83,7 +83,7 @@ public:
         sigWriteNow();
 
         //- Construct from components
-        sigWriteNow(const bool verbose, Time& runTime);
+        sigWriteNow(Time& runTime, bool verbose=false);
 
 
     //- Destructor
@@ -92,11 +92,12 @@ public:
 
     // Member functions
 
-        //- (re)set signal catcher
-        static void set(const bool verbose);
-
         //- Is active?
         bool active() const;
+
+        //- (re)set signal catcher
+        static void set(bool verbose=false);
+
 };
 
 

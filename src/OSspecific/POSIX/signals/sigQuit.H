@@ -87,10 +87,10 @@ public:
     // Member functions
 
         //- Activate SIGQUIT signal handler
-        static void set(const bool verbose);
+        static void set(bool verbose=false);
 
         //- Deactivate SIGQUIT signal handler
-        static void unset(const bool verbose);
+        static void unset(bool verbose=false);
 };
 
 

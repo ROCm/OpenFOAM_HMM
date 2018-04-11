@@ -47,13 +47,9 @@ void Foam::sigQuit::sigHandler(int)
             << abort(FatalError);
     }
 
-    // Update jobInfo file
-    jobInfo.signalEnd();
-
+    jobInfo.signalEnd();        // Update jobInfo file
     error::printStack(Perr);
-
-    // Throw signal (to old handler)
-    raise(SIGQUIT);
+    raise(SIGQUIT);             // Throw signal (to old handler)
 }
 
 
@@ -75,7 +71,7 @@ Foam::sigQuit::~sigQuit()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::sigQuit::set(const bool verbose)
+void Foam::sigQuit::set(bool)
 {
     if (!sigActive_)
     {
@@ -94,7 +90,7 @@ void Foam::sigQuit::set(const bool verbose)
 }
 
 
-void Foam::sigQuit::unset(const bool)
+void Foam::sigQuit::unset(bool)
 {
     if (sigActive_)
     {

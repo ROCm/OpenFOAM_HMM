@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,10 +29,11 @@ License
 #include "OSspecific.H"
 #include "IOstreams.H"
 #include "Switch.H"
+#include "UList.H"
 
-#ifdef LINUX_GNUC
+#if defined(__linux__) && defined(__GNUC__)
     #ifndef __USE_GNU
-        #define __USE_GNU
+        #define __USE_GNU      // To use feenableexcept()
     #endif
     #include <fenv.h>
     #include <malloc.h>
@@ -48,21 +49,23 @@ bool Foam::sigFpe::switchFpe_(Foam::debug::optimisationSwitch("trapFpe", 0));
 bool Foam::sigFpe::switchNan_(Foam::debug::optimisationSwitch("setNaN", 0));
 
 bool Foam::sigFpe::sigActive_ = false;
-bool Foam::sigFpe::mallocNanActive_ = false;
+bool Foam::sigFpe::nanActive_ = false;
 
 struct sigaction Foam::sigFpe::oldAction_;
 
 
-// File-scope function.
-// Controlled by env variable containing a bool (true|false|on|off ...)
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+// Can turn on/off via env variable containing a bool (true|false|on|off ...)
 // or by the specified flag
-static bool isTrue(const char* envName, const bool flag)
+static bool isTrue(const char* envName, bool deflt)
 {
-    const std::string str = Foam::getEnv(envName);
+    const auto str(Foam::getEnv(envName));
 
     if (str.size())
     {
-        Foam::Switch sw(str, true); // silently ignore bad input
+        Foam::Switch sw(str, true);  // Silently ignores bad input
+
         if (sw.valid())
         {
             return sw;
@@ -70,17 +73,11 @@ static bool isTrue(const char* envName, const bool flag)
     }
 
     // Env was not set or did not contain a valid bool value
-    return flag;
+    return deflt;
 }
 
 
-void Foam::sigFpe::fillNan(UList<scalar>& lst)
-{
-    lst = std::numeric_limits<scalar>::signaling_NaN();
-}
-
-
-#ifdef LINUX
+#ifdef __linux__
 extern "C"
 {
     extern void* __libc_malloc(size_t size);
@@ -88,7 +85,7 @@ extern "C"
     // Override the GLIBC malloc to support mallocNan
     void* malloc(size_t size)
     {
-        if (Foam::sigFpe::mallocNanActive_)
+        if (Foam::sigFpe::nanActive())
         {
             return Foam::sigFpe::mallocNan(size);
         }
@@ -99,21 +96,21 @@ extern "C"
     }
 }
 
+
 void* Foam::sigFpe::mallocNan(size_t size)
 {
     // Call the low-level GLIBC malloc function
-    void * result = __libc_malloc(size);
+    void* result = __libc_malloc(size);
 
     // Initialize to signalling NaN
-    UList<scalar> lst(reinterpret_cast<scalar*>(result), size/sizeof(scalar));
-    sigFpe::fillNan(lst);
+    UList<scalar> list(reinterpret_cast<scalar*>(result), size/sizeof(scalar));
+    sigFpe::fillNan(list);
 
     return result;
 }
-#endif
 
 
-#ifdef LINUX_GNUC
+#ifdef __GNUC__
 void Foam::sigFpe::sigHandler(int)
 {
     // Reset old handling
@@ -124,15 +121,12 @@ void Foam::sigFpe::sigHandler(int)
             << abort(FatalError);
     }
 
-    // Update jobInfo file
-    jobInfo.signalEnd();
-
+    jobInfo.signalEnd();        // Update jobInfo file
     error::printStack(Perr);
-
-    // Throw signal (to old handler)
-    raise(SIGFPE);
+    raise(SIGFPE);              // Throw signal (to old handler)
 }
-#endif
+#endif  // __GNUC__
+#endif  // __linux__
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -159,14 +153,11 @@ bool Foam::sigFpe::requested()
 }
 
 
-void Foam::sigFpe::set(const bool verbose)
+void Foam::sigFpe::set(bool verbose)
 {
     if (!sigActive_ && requested())
     {
-        bool supported = false;
-
-        #ifdef LINUX_GNUC
-        supported = true;
+        #if defined(__linux__) && defined(__GNUC__)
 
         feenableexcept
         (
@@ -179,6 +170,7 @@ void Foam::sigFpe::set(const bool verbose)
         newAction.sa_handler = sigHandler;
         newAction.sa_flags = SA_NODEFER;
         sigemptyset(&newAction.sa_mask);
+
         if (sigaction(SIGFPE, &newAction, &oldAction_) < 0)
         {
             FatalErrorInFunction
@@ -189,7 +181,6 @@ void Foam::sigFpe::set(const bool verbose)
         sigActive_ = true;
 
         #elif defined(sgiN32) || defined(sgiN32Gcc)
-        supported = true;
 
         sigfpe_[_DIVZERO].abort=1;
         sigfpe_[_OVERFL].abort=1;
@@ -211,7 +202,6 @@ void Foam::sigFpe::set(const bool verbose)
         );
 
         sigActive_ = true;
-
         #endif
 
 
@@ -219,7 +209,7 @@ void Foam::sigFpe::set(const bool verbose)
         {
             Info<< "trapFpe: Floating point exception trapping ";
 
-            if (supported)
+            if (sigActive_)
             {
                 Info<< "enabled (FOAM_SIGFPE)." << endl;
             }
@@ -231,17 +221,18 @@ void Foam::sigFpe::set(const bool verbose)
     }
 
 
+    nanActive_ = false;
     if (isTrue("FOAM_SETNAN", switchNan_))
     {
-        #ifdef LINUX
-        mallocNanActive_ = true;
+        #ifdef __linux__
+        nanActive_ = true;
         #endif
 
         if (verbose)
         {
             Info<< "setNaN : Initialise allocated memory to NaN ";
 
-            if (mallocNanActive_)
+            if (nanActive_)
             {
                 Info<< "enabled (FOAM_SETNAN)." << endl;
             }
@@ -254,10 +245,9 @@ void Foam::sigFpe::set(const bool verbose)
 }
 
 
-void Foam::sigFpe::unset(const bool verbose)
+void Foam::sigFpe::unset(bool verbose)
 {
-    #ifdef LINUX_GNUC
-    // Reset signal
+    #if defined(__linux__) && defined(__GNUC__)
     if (sigActive_)
     {
         if (verbose)
@@ -274,7 +264,7 @@ void Foam::sigFpe::unset(const bool verbose)
         }
 
         // Reset exception raising
-        int oldExcept = fedisableexcept
+        const int oldExcept = fedisableexcept
         (
             FE_DIVBYZERO
           | FE_INVALID
@@ -287,14 +277,18 @@ void Foam::sigFpe::unset(const bool verbose)
                 << "Cannot reset SIGFPE trapping"
                 << abort(FatalError);
         }
+
         sigActive_ = false;
     }
     #endif
 
-    #ifdef LINUX
-    // Disable initialization to NaN
-    mallocNanActive_ = false;
-    #endif
+    nanActive_ = false;
+}
+
+
+void Foam::sigFpe::fillNan(UList<scalar>& list)
+{
+    list = std::numeric_limits<scalar>::signaling_NaN();
 }
 
 

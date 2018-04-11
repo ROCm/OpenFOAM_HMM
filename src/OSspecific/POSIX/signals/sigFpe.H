@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,22 +55,15 @@ SourceFiles
 #define sigFpe_H
 
 #include <signal.h>
-
-#if defined(linux) || defined(linux64) || defined(linuxIA64) || \
-    defined(linuxARM7) || defined(linuxPPC64) || defined(linuxPPC64le)
-    #define LINUX
-#endif
-
-#if defined(LINUX) && defined(__GNUC__)
-    #define LINUX_GNUC
-#endif
-
-#include "UList.H"
+#include "scalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward declarations
+template<class T> class UList;
 
 /*---------------------------------------------------------------------------*\
                            Class sigFpe Declaration
@@ -91,25 +84,22 @@ class sigFpe
         //- Flag to indicate floating point trapping is currently active
         static bool sigActive_;
 
+        //- Flag to indicate mallocNan is currently active
+        static bool nanActive_;
+
         //- Saved old signal trapping setting
         static struct sigaction oldAction_;
 
 
     // Static data members
 
-        #ifdef LINUX_GNUC
+        #if defined(__linux__) && defined(__GNUC__)
         //- Handler for caught signals
         static void sigHandler(int);
         #endif
 
 
 public:
-
-    // Public data
-
-        //- Flag to indicate mallocNan is enabled
-        static bool mallocNanActive_;
-
 
     // Constructors
 
@@ -128,20 +118,32 @@ public:
         //  environment variable
         static bool requested();
 
+        //- True if SIGFPE handling is currently active.
+        static inline bool active()
+        {
+            return sigActive_;
+        }
+
+        //- True if NaN memory initialisation is currently active.
+        static inline bool nanActive()
+        {
+            return nanActive_;
+        }
+
         //- Activate SIGFPE signal handler when FOAM_SIGFPE is %set
         //  Fill memory with NaN when FOAM_SETNAN is %set
-        static void set(const bool verbose);
+        static void set(bool verbose=false);
 
         //- Deactivate SIGFPE signal handler and NaN memory initialisation
-        static void unset(const bool verbose);
+        static void unset(bool verbose=false);
 
-        #ifdef LINUX
+        #ifdef __linux__
         //- Malloc function which initializes to NaN
         static void* mallocNan(size_t size);
         #endif
 
-        //- Fill block of data with NaN
-        static void fillNan(UList<scalar>& lst);
+        //- Fill data block with NaN values
+        static void fillNan(UList<scalar>& list);
 };
 
 

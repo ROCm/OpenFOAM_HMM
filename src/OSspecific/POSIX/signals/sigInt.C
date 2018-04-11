@@ -47,11 +47,8 @@ void Foam::sigInt::sigHandler(int)
             << abort(FatalError);
     }
 
-    // Update jobInfo file
-    jobInfo.signalEnd();
-
-    // Throw signal (to old handler)
-    raise(SIGINT);
+    jobInfo.signalEnd();        // Update jobInfo file
+    raise(SIGINT);              // Throw signal (to old handler)
 }
 
 
@@ -73,7 +70,7 @@ Foam::sigInt::~sigInt()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::sigInt::set(const bool)
+void Foam::sigInt::set(bool)
 {
     if (!sigActive_)
     {
@@ -92,7 +89,7 @@ void Foam::sigInt::set(const bool)
 }
 
 
-void Foam::sigInt::unset(const bool)
+void Foam::sigInt::unset(bool)
 {
     if (sigActive_)
     {

@@ -87,10 +87,10 @@ public:
     // Member functions
 
         //- Activate SIGSEGV signal handler
-        static void set(const bool verbose);
+        static void set(bool verbose=false);
 
         //- Deactivate SIGSEGV signal handler
-        static void unset(const bool verbose);
+        static void unset(bool verbose=false);
 };
 
 

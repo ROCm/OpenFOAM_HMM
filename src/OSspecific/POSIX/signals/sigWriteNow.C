@@ -31,14 +31,19 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
 // Signal number to catch
-int sigWriteNow::signal_
+int Foam::sigWriteNow::signal_
 (
-    debug::optimisationSwitch("writeNowSignal", -1)
+    Foam::debug::optimisationSwitch("writeNowSignal", -1)
 );
 
+Foam::Time* Foam::sigWriteNow::runTimePtr_ = nullptr;
+
+struct sigaction Foam::sigWriteNow::oldAction_;
+
+
+namespace Foam
+{
 
 // Register re-reader
 class addwriteNowSignalToOpt
@@ -53,8 +58,7 @@ public:
         ::Foam::simpleRegIOobject(Foam::debug::addOptimisationObject, name)
     {}
 
-    virtual ~addwriteNowSignalToOpt()
-    {}
+    virtual ~addwriteNowSignalToOpt() = default;
 
     virtual void readData(Foam::Istream& is)
     {
@@ -70,24 +74,19 @@ public:
 
 addwriteNowSignalToOpt addwriteNowSignalToOpt_("writeNowSignal");
 
-}
-
-
-Foam::Time* Foam::sigWriteNow::runTimePtr_ = nullptr;
-
-struct sigaction Foam::sigWriteNow::oldAction_;
+} // end of namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::sigWriteNow::sigHandler(int)
 {
-    Info<< "sigWriteNow :"
-        << " setting up write at end of the next iteration" << nl << endl;
-    runTimePtr_->writeOnce();
-
-    //// Throw signal (to old handler)
-    //raise(signal_);
+    if (runTimePtr_)
+    {
+        Info<< "sigWriteNow :"
+            << " setting up write at end of the next iteration" << nl << endl;
+        runTimePtr_->writeOnce();
+    }
 }
 
 
@@ -97,11 +96,9 @@ Foam::sigWriteNow::sigWriteNow()
 {}
 
 
-Foam::sigWriteNow::sigWriteNow(const bool verbose, Time& runTime)
+Foam::sigWriteNow::sigWriteNow(Time& runTime, bool verbose)
 {
-    // Store runTime
-    runTimePtr_ = &runTime;
-
+    runTimePtr_ = &runTime;     // Store runTime
     set(verbose);
 }
 
@@ -125,7 +122,7 @@ Foam::sigWriteNow::~sigWriteNow()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::sigWriteNow::set(const bool verbose)
+void Foam::sigWriteNow::set(bool verbose)
 {
     if (signal_ >= 0)
     {

@@ -47,13 +47,9 @@ void Foam::sigSegv::sigHandler(int)
             << abort(FatalError);
     }
 
-    // Update jobInfo file
-    jobInfo.signalEnd();
-
+    jobInfo.signalEnd();        // Update jobInfo file
     error::printStack(Perr);
-
-    // Throw signal (to old handler)
-    raise(SIGSEGV);
+    raise(SIGSEGV);             // Throw signal (to old handler)
 }
 
 
@@ -75,7 +71,7 @@ Foam::sigSegv::~sigSegv()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::sigSegv::set(const bool)
+void Foam::sigSegv::set(bool)
 {
     if (!sigActive_)
     {
@@ -94,7 +90,7 @@ void Foam::sigSegv::set(const bool)
 }
 
 
-void Foam::sigSegv::unset(const bool)
+void Foam::sigSegv::unset(bool)
 {
     if (sigActive_)
     {
