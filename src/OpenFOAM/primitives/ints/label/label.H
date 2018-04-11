@@ -122,15 +122,16 @@ inline label component(const label l, const direction)
 
 
 /*---------------------------------------------------------------------------*\
-                          Struct toLabel Declaration
+                          Struct labelOp Declaration
 \*---------------------------------------------------------------------------*/
 
-//- Conversion to label structure
-template<class Type> struct toLabel {};
+//- Conversion/extraction to label operation
+//  Specialization of this shall provide a corresponding \c operator().
+template<class> struct labelOp;
 
 //- Convert (likely promote) from int32_t to label
 template<>
-struct toLabel<int32_t>
+struct labelOp<int32_t>
 {
     constexpr label operator()(const int32_t& val) const noexcept
     {
@@ -141,7 +142,7 @@ struct toLabel<int32_t>
 
 //- Convert (possibly truncate) from int64_t to label
 template<>
-struct toLabel<int64_t>
+struct labelOp<int64_t>
 {
     constexpr label operator()(const int64_t& val) const noexcept
     {

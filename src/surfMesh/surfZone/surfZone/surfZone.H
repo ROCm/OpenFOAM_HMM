@@ -183,9 +183,9 @@ public:
 
 // Global Functions
 
-//- Get the labelRange for a surfZone
+//- The labelRange of a surfZone
 template<>
-struct toLabelRange<surfZone>
+struct labelRangeOp<surfZone>
 {
     labelRange operator()(const surfZone& zone) const
     {

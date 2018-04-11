@@ -25,7 +25,7 @@ Class
     Foam::labelRange
 
 Description
-    A range of labels defined by a start and a size.
+    An range or interval of labels defined by a start and a size.
 
 SourceFiles
     labelRange.C
@@ -248,14 +248,14 @@ public:
 
         public:
 
-          // Constructors
+        // Constructors
 
             //- Construct from range at given local index.
             //  If the local index is out of range (eg, negaative),
             //  this creates the 'end' iterator
             inline const_iterator(const labelRange* range, const label i=0);
 
-          // Member operators
+        // Member Operators
 
             //- Return the current (global) value
             inline label operator*() const;
@@ -293,8 +293,20 @@ public:
 
 // Global Functions
 
-//- Conversion to labelRange operations
-template<class Type> struct toLabelRange {};
+//- Conversion/extraction to labelRange operation (functor).
+//  Specializations shall provide a corresponding \c operator().
+//  For example,
+//  \code
+//  template<>
+//  struct labelRangeOp<polyPatch>
+//  {
+//      labelRange operator()(const polyPatch& pp) const
+//      {
+//          return labelRange(pp.start(), pp.size());
+//      }
+//  };
+//  \endcode
+template<class> struct labelRangeOp;
 
 
 // Global Operators

@@ -426,9 +426,9 @@ public:
 
 // Global Functions
 
-//- Get the labelRange for a polyPatch
+//- The labelRange of a polyPatch
 template<>
-struct toLabelRange<polyPatch>
+struct labelRangeOp<polyPatch>
 {
     labelRange operator()(const polyPatch& pp) const
     {

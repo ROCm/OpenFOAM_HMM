@@ -1010,7 +1010,7 @@ Foam::label Foam::checkGeometry
                             ListOps::create<label>
                             (
                                 UPstream::procID(UPstream::worldComm),
-                                toLabel<int>()  // int -> label
+                                labelOp<int>()  // int -> label
                             ),
                             ami.srcWeightsSum(),
                             mergedWeights
@@ -1064,7 +1064,7 @@ Foam::label Foam::checkGeometry
                             ListOps::create<label>
                             (
                                 UPstream::procID(UPstream::worldComm),
-                                toLabel<int>()  // int -> label
+                                labelOp<int>()  // int -> label
                             ),
                             ami.tgtWeightsSum(),
                             mergedWeights

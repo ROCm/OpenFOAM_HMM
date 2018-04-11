@@ -478,7 +478,7 @@ void setValue
 //  auto labels = ListOps::create<label>
 //  (
 //      ints,
-//      toLabel<int>()
+//      labelOp<int>()
 //  );
 //
 //  auto vectors = ListOps::create<vector>

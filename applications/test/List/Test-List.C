@@ -426,7 +426,7 @@ int main(int argc, char *argv[])
             auto output = ListOps::create<label>
             (
                 input,
-                toLabel<int64_t>()
+                labelOp<int64_t>()
             );
             Info<< "label (from int64): " << flatOutput(output) << endl;
         }
@@ -438,7 +438,7 @@ int main(int argc, char *argv[])
             auto output = ListOps::create<label>
             (
                 input,
-                toLabel<int32_t>()
+                labelOp<int32_t>()
             );
             Info<< "label (from int32): " << flatOutput(output) << endl;
         }
