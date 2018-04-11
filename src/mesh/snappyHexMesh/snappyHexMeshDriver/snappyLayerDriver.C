@@ -697,7 +697,7 @@ void Foam::snappyLayerDriver::handleFeatureAngle
     Info<< nl << "Handling feature edges (angle < " << minAngle
         << ") ..." << endl;
 
-    if (minCos < 1-SMALL)
+    if (minCos < 1-SMALL && minCos > -1+SMALL)
     {
         // Normal component of normals of connected faces.
         vectorField edgeNormal(mesh.nEdges(), point::max);
