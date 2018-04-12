@@ -53,7 +53,7 @@ cmake_version=cmake-system
 
 # END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
-pv_api=auto             # Normally auto or pair of digits (eg, '5.4' etc)
+pv_api=auto             # Either auto or pair of digits (eg, '5.4' etc)
 
 # Compiler-specific location for ThirdParty installations
 archDir="$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER"
@@ -111,19 +111,24 @@ then
     esac
 
     export ParaView_DIR=$archDir/ParaView-$ParaView_VERSION
-    pvSubDir=paraview-$pv_api
 
     # Set paths if binaries are present
     if [ -r $ParaView_DIR ]
     then
-        pvLibDir=$ParaView_DIR/lib/$pvSubDir
-        pvPython=$ParaView_DIR/Utilities/VTKPythonWrapping
-
         export PATH=$ParaView_DIR/bin:$PATH
-        export ParaView_INCLUDE_DIR=$ParaView_DIR/include/$pvSubDir
-        export PV_PLUGIN_PATH=$FOAM_LIBBIN/$pvSubDir
+        export ParaView_INCLUDE_DIR=$ParaView_DIR/include/paraview-$pv_api
+        export PV_PLUGIN_PATH=$FOAM_LIBBIN/paraview-$pv_api
 
-        # Add in qt libraries as required
+        pvLibDir=$ParaView_DIR/lib/paraview-$pv_api
+        #OBSOLETE? pvPython=$ParaView_DIR/Utilities/VTKPythonWrapping
+
+        #OBSOLETE? # Python libraries as required
+        #OBSOLETE? if [ -r $pvPython ]
+        #OBSOLETE? then
+        #OBSOLETE?    export PYTHONPATH=$PYTHONPATH:${PYTHONPATH:+:}$pvPython:$pvLibDir
+        #OBSOLETE? fi
+
+        # QT libraries as required
         qtDir="$archDir/$ParaView_QT"
         if [ -d "$qtDir" ]
         then
@@ -137,21 +142,17 @@ then
             done
         fi
 
-        # Prepend paraview libraries.
-        # ParaView 5.4 and earlier - requires lib/paraview-X.X only
-        # ParaView 5.5 - requires lib/
-        export LD_LIBRARY_PATH=$ParaView_DIR/lib:$pvLibDir:$LD_LIBRARY_PATH
-
-        # Add in python libraries if required
-        if [ -r $pvPython ]
-        then
-            if [ "$PYTHONPATH" ]
-            then
-                export PYTHONPATH=$PYTHONPATH:$pvPython:$pvLibDir
-            else
-                export PYTHONPATH=$pvPython:$pvLibDir
-            fi
-        fi
+        # ParaView libraries
+        # - 5.4 and earlier: lib/paraview-X.X
+        # - 5.5 and later:   lib/
+        case "$pv_api" in
+        5.[0-4]*)
+            export LD_LIBRARY_PATH=$pvLibDir:$LD_LIBRARY_PATH
+            ;;
+        *)
+            export LD_LIBRARY_PATH=$ParaView_DIR/lib:$LD_LIBRARY_PATH
+            ;;
+        esac
 
         if [ "$FOAM_VERBOSE" -a "$PS1" ]
         then
@@ -176,7 +177,7 @@ fi
 unset -f _foamParaviewEval 2> /dev/null
 unset cleaned archDir
 unset cmake cmake_version
-unset pv_api pvSubDir pvLibDir pvPython qtDir qtLibDir
+unset pv_api pvLibDir pvPython qtDir qtLibDir
 
 if command -v _foamAddLib > /dev/null 2>&1  # normal sourcing
 then

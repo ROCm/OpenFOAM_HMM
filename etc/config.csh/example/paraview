@@ -13,17 +13,19 @@
 #     config.csh/example/paraview
 #
 # Description
-#     Example of chaining to the standard config.csh/paraview with a
-#     different ParaView_VERSION
+#     Example of defining a different ParaView_VERSION but retaining
+#     the standard config.csh/paraview mechanism
 #
 # Note
 #     This file could be copied to a user or site location, but should never
 #     replace the default shipped version as this will cause an infinite loop
 #
 #------------------------------------------------------------------------------
-
 # Use standard paraview config file (-mode=o) with a different ParaView_VERSION
 
-eval `foamEtcFile -csh -config -mode=o paraview -- ParaView_VERSION=5.5.0-mpipy`
+set pv=5.5.0
+set pv=5.5.0-mpipy
+
+eval `foamEtcFile -csh -config -mode=o paraview -- ParaView_VERSION=$pv`
 
 #------------------------------------------------------------------------------

@@ -50,7 +50,7 @@ set cmake_version=cmake-system
 
 # END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
-set pv_api=auto         # Normally auto or pair of digits (eg, '5.4' etc)
+set pv_api=auto         # Either auto or pair of digits (eg, '5.4' etc)
 
 if (! $?ParaView_DIR ) setenv ParaView_DIR
 if (! $?WM_COMPILER_LIB_ARCH ) setenv WM_COMPILER_LIB_ARCH
@@ -101,18 +101,26 @@ if ( $?ParaView_VERSION ) then
     endsw
 
     setenv ParaView_DIR $archDir/ParaView-$ParaView_VERSION
-    set pvSubDir=paraview-$pv_api
 
     # Set paths if binaries are present
     if ( -r $ParaView_DIR ) then
-        set pvLibDir=${ParaView_DIR}/lib/$pvSubDir
-        set pvPython=$ParaView_DIR/Utilities/VTKPythonWrapping
-
         setenv PATH ${ParaView_DIR}/bin:${PATH}
-        setenv ParaView_INCLUDE_DIR $ParaView_DIR/include/$pvSubDir
-        setenv PV_PLUGIN_PATH $FOAM_LIBBIN/$pvSubDir
+        setenv ParaView_INCLUDE_DIR $ParaView_DIR/include/paraview-$pv_api
+        setenv PV_PLUGIN_PATH $FOAM_LIBBIN/paraview-$pv_api
 
-        # Add in qt libraries as required
+        set pvLibDir=${ParaView_DIR}/lib/paraview-$pv_api
+        #OBSOLETE? set pvPython=$ParaView_DIR/Utilities/VTKPythonWrapping
+
+        #OBSOLETE? # Python libraries as required
+        #OBSOLETE? if ( -r $pvPython ) then
+        #OBSOLETE?     if ($?PYTHONPATH) then
+        #OBSOLETE?         setenv PYTHONPATH ${PYTHONPATH}:${pvPython}:$pvLibDir
+        #OBSOLETE?     else
+        #OBSOLETE?         setenv PYTHONPATH ${pvPython}:$pvLibDir
+        #OBSOLETE?     endif
+        #OBSOLETE? endif
+
+        # QT libraries as required
         set qtDir="$archDir/$ParaView_QT"
         if ( -d "$qtDir" ) then
             foreach qtLibDir ("$qtDir/lib$WM_COMPILER_LIB_ARCH" "$qtDir/lib")
@@ -123,19 +131,17 @@ if ( $?ParaView_VERSION ) then
             end
         endif
 
-        # Add in python libraries if required
-        if ( -r $pvPython ) then
-            if ($?PYTHONPATH) then
-                setenv PYTHONPATH ${PYTHONPATH}:${pvPython}:$pvLibDir
-            else
-                setenv PYTHONPATH ${pvPython}:$pvLibDir
-            endif
-        endif
-
-        # Prepend paraview libraries.
-        # ParaView 5.4 and earlier - requires lib/paraview-X.X only
-        # ParaView 5.5 - requires lib/
-        setenv LD_LIBRARY_PATH "${ParaView_DIR}/lib:${pvLibDir}:${LD_LIBRARY_PATH}"
+        # ParaView libraries
+        # - 5.4 and earlier: lib/paraview-X.X
+        # - 5.5 and later:   lib/
+        switch ("$pv_api")
+        case 5.[0-4]*:
+            setenv LD_LIBRARY_PATH $pvLibDir:${LD_LIBRARY_PATH}
+            breaksw
+        default:
+            setenv LD_LIBRARY_PATH ${ParaView_DIR}/lib:${LD_LIBRARY_PATH}
+            breaksw
+        endsw
 
         if ($?FOAM_VERBOSE && $?prompt) then
             echo "Using paraview"
@@ -158,7 +164,7 @@ endif
 
 unset cleaned archDir
 unset cmake cmake_version
-unset pv_api pvSubDir pvLibDir pvPython qtDir qtLibDir
+unset pv_api pvLibDir pvPython qtDir qtLibDir
 unsetenv ParaView_VERSION ParaView_QT
 
 #------------------------------------------------------------------------------
