@@ -35,13 +35,12 @@ Description
     In general, the flow in a choked nozzle can be non-trivial and expensive
     to simulate.
 
-
     This formulation is derived from a simple model of the gas flow through
     a nozzle with fixed geometry. The nozzle flow is assumed to be quasi-steady,
     1D, isentropic and compressible.
 
-    This gives the following general relationship between pressure ratio and Mach
-    number in any cross section inside the nozzle:
+    This gives the following general relationship between pressure ratio and
+    Mach number in any cross section inside the nozzle:
 
     \f[
         \frac{p_{tot}}{p}=\left[ 1+ \frac{k-1}{2}\;M^2 \right]^{\frac{k}{k-1}}
@@ -62,18 +61,19 @@ Description
     when \f$ r>=1 \f$ where backflow would occur.
 
     The nozzle model assumption locks the relationship between nozzle cross
-    sectional areas and Mach numbers. For a choked flow it is only the Mach number
-    on the outlet patch, \f$M_{outlet}\f$, that needs to be stated in the
+    sectional areas and Mach numbers. For a choked flow it is only the Mach
+    number on the outlet patch, \f$M_{outlet}\f$, that needs to be stated in the
     boundary dictionary.
 
-    Care should be taken however to ensure that the entries in the input dictionary
-    and the CFD geometry satisfy the following equation
+    Care should be taken however to ensure that the entries in the input
+    dictionary and the CFD geometry satisfy the following equation
     \f[
         c1\frac{A_{outlet}}{A_1}=\frac{1}{M_{outlet}}\left[\frac{1+\frac{k-1}{2}
         M_{outlet}^2}{1+\frac{k-1}{2}}\right]^{\frac{k+1}{2(k-1)}}
     \f]
     where \f$c1\f$ compensate for non-uniform outlet profiles, \f$A_{outlet}\f$
-    is geometrical outlet patch area and \f$A_1\f$ is assumed nozzle throat area.
+    is geometrical outlet patch area and \f$A_1\f$ is assumed nozzle throat
+    area.
 
     In the non-choked case the outlet patch Mach number is calculated as
     \f[
@@ -83,7 +83,7 @@ Description
             \sqrt{\frac{2}{k-1}\left[r^\frac{2}{k}-r^\frac{k+1}{k} \right]}
     \f]
 
-    The accompaning boundary conditions for velocit should be
+    The accompanying boundary conditions for velocity should be
     pressureInletOutletVelocity.
 
     Author: Jens Dahl Kunoy
@@ -100,9 +100,9 @@ Usage
     \table
         Property        | Description              | Required | Default value
         choked          | Defines nozzle conditions| Yes          | None
-        relax           | underrelaxation of static pressure| Yes | 0.0
+        relax           | underrelaxation of static pressure| Yes | 0
         M               | outlet Mach number        | Yes (choked) | None
-        A1              | Nozzle throat area [m2]   | Yes (non-choked) | 0.0
+        A1              | Nozzle throat area [m2]   | Yes (non-choked) | 0
         pBack           | Pressure downstream of nozzle| Yes (non-choked) | None
         c1              | Correction factor for non-uniform profiles
                         | No (non-choked) | 0.0
@@ -138,7 +138,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class plenumPressureFvPatch Declaration
+         Class outletMachNumberPressureFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class outletMachNumberPressureFvPatchScalarField
@@ -186,32 +186,32 @@ public:
         //- Construct from patch and internal field
         outletMachNumberPressureFvPatchScalarField
         (
-            const fvPatch&,
-            const DimensionedField<scalar, volMesh>&
+            const fvPatch& p,
+            const DimensionedField<scalar, volMesh>& iF
         );
 
         //- Construct from patch, internal field and dictionary
         outletMachNumberPressureFvPatchScalarField
         (
-            const fvPatch&,
-            const DimensionedField<scalar, volMesh>&,
-            const dictionary&
+            const fvPatch& p,
+            const DimensionedField<scalar, volMesh>& iF,
+            const dictionary& dict
         );
 
-        //- Construct by mapping given outletMachNumberPressureFvPatchScalarField
-        //  onto a new patch
+        //- Construct by mapping given
+        //- outletMachNumberPressureFvPatchScalarField onto a new patch
         outletMachNumberPressureFvPatchScalarField
         (
-            const outletMachNumberPressureFvPatchScalarField&,
-            const fvPatch&,
-            const DimensionedField<scalar, volMesh>&,
-            const fvPatchFieldMapper&
+            const outletMachNumberPressureFvPatchScalarField& ptf,
+            const fvPatch& p,
+            const DimensionedField<scalar, volMesh>& iF,
+            const fvPatchFieldMapper& mapper
         );
 
         //- Construct as copy
         outletMachNumberPressureFvPatchScalarField
         (
-            const outletMachNumberPressureFvPatchScalarField&
+            const outletMachNumberPressureFvPatchScalarField& tppsf
         );
 
         //- Construct and return a clone
@@ -226,8 +226,8 @@ public:
         //- Construct as copy setting internal field reference
         outletMachNumberPressureFvPatchScalarField
         (
-            const outletMachNumberPressureFvPatchScalarField&,
-            const DimensionedField<scalar, volMesh>&
+            const outletMachNumberPressureFvPatchScalarField& tppsf,
+            const DimensionedField<scalar, volMesh>& iF
         );
 
         //- Construct and return a clone setting internal field reference
@@ -243,16 +243,13 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Evaluation functions
-
-            //- Update the coefficients associated with the patch field
-            virtual void updateCoeffs();
-
+        //- Update the coefficients associated with the patch field
+        virtual void updateCoeffs();
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 };
 
 
