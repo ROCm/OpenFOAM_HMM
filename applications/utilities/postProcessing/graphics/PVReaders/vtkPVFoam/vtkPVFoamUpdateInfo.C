@@ -587,8 +587,8 @@ void Foam::vtkPVFoam::updateInfoContinuumFields
     HashSet<string> enabled;
     if (!select->GetNumberOfArrays() && !volMeshPtr_)
     {
-        // First call: automatically enable 'p' and 'U'
-        enabled = { "p", "U" };
+        // First call: automatically enable pressure, temperature, velocity
+        enabled = { "p", "T", "U" };
     }
     else
     {
