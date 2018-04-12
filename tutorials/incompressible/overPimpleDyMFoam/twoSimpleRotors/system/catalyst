@@ -1,0 +1,23 @@
+// ParaView Catalyst function object for OpenFOAM (-*- C++ -*-)
+
+functions
+{
+    catalyst
+    {
+        #includeEtc "caseDicts/postProcessing/catalyst/default.cfg"
+
+        mkdir "<case>/insitu";
+
+        // Selected fields (words or regex). Must have cellMask for overset!
+        fields      ( cellMask U p );
+
+        scripts
+        (
+            "<system>/scripts/overset.py"
+            "<system>/scripts/writeOverset.py"
+        );
+
+    }
+}
+
+// ************************************************************************* //

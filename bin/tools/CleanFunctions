@@ -86,7 +86,7 @@ cleanCase()
     rm -rf surfaceSampling > /dev/null 2>&1
     rm -rf cuttingPlane > /dev/null 2>&1
     rm -rf system/machines > /dev/null 2>&1
-    rm -rf Ensight EnSight ensightWrite VTK > /dev/null 2>&1
+    rm -rf Ensight EnSight ensightWrite insitu VTK > /dev/null 2>&1
 
     # From mpirunDebug
     rm -f gdbCommands  mpirun.schema
