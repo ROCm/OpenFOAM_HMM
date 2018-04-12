@@ -27,24 +27,32 @@ Application
     wmkdepend
 
 Description
-    A fast dependency list generator that emulates the behaviour and output
-    of cpp -M. However, the output contains no duplicates and is thus
-    approx. 40% faster than cpp.
-    It also handles missing files somewhat more gracefully.
+    A fast dependency list generator that emulates the behaviour and
+    output of cpp -M.
 
-    The algorithm uses a Ragel-generated lexer to scan for includes and
-    searches the files found.
-    The files are only visited once (their names are hashed),
-    which helps make this faster than cpp.
+    The lexer for include statements uses a Ragel-generated lexer and
+    then searches the files found. Each file is visited only once,
+    which helps make this faster than cpp. It also handles missing
+    files somewhat more gracefully.
+
+    The goto-based finite state machine (FSM) is generated with
+
+        ragel -G2 -o wmkdepend.cpp wmkdepend.rl
 
 Usage
     wmkdepend [-Idir..] [-iheader...] [-eENV...] [-oFile] [-q] filename
+
+Note
+    May not capture all possible corner cases or line continuations such as
+
+        #include \
+            "file.H"
 
 \*---------------------------------------------------------------------------*/
 /*
  * With cpp:
  *
- * cpp -x c++ -std=c++11 -nostdinc -nostdinc++
+ * cpp -x c++ -std=c++11
  *     -M -DWM_$(WM_PRECISION_OPTION) -DWM_LABEL_SIZE=$(WM_LABEL_SIZE) |
  * sed -e 's,^$(WM_PROJECT_DIR)/,$$(WM_PROJECT_DIR)/,' \
  *     -e 's,^$(WM_THIRD_PARTY_DIR)/,$$(WM_THIRD_PARTY_DIR)/,'
@@ -59,7 +67,7 @@ Usage
 #include <unordered_set>
 #include <vector>
 
-// Sizing for read buffer
+// Length of the input read buffer
 #define READ_BUFLEN 16384
 
 // The executable name (for messages), without requiring access to argv[]
@@ -80,7 +88,6 @@ void usage()
         "  -eENV     Environment variable path substitutions.\n"
         "  -oFile    Write output to File.\n"
         "  -q        Suppress 'No such file' warnings.\n"
-        "  -v        Some verbosity.\n"
         "\nDependency list generator, similar to 'cpp -M'\n\n";
 }
 
@@ -162,7 +169,7 @@ namespace Files
     //     /openfoam/project/path/directory/xyz
     //  -> $(WM_PROJECT_DIR)/directory/xyz
     //
-    FILE* fopen_file(std::string fileName)
+    FILE* fopen_file(const std::string& fileName)
     {
         const auto len = fileName.size();
         const char *fname = fileName.c_str();
@@ -264,7 +271,7 @@ namespace Files
                 std::cerr << ": " << strerror(errno);
             }
 
-            std::cerr << "\n" << std::flush;
+            std::cerr << '\n' << std::flush;
         }
 
         return filePtr;
@@ -275,145 +282,19 @@ namespace Files
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// Ragel machine requirements: text start/end, action, code state
+// Ragel machine requirements: token start/end, action, code state
 // are defined later (prior to use)
 
 
-#line 283 "wmkdepend.cpp"
-static const char _scanInclude_actions[] = {
-	0, 1, 0, 1, 2, 1, 3, 1, 
-	5, 1, 6, 1, 11, 1, 12, 1, 
-	14, 1, 15, 1, 16, 1, 17, 1, 
-	18, 2, 1, 13, 2, 3, 4, 2, 
-	6, 0, 2, 6, 7, 2, 6, 8, 
-	2, 6, 10, 3, 6, 1, 9
-};
+#line 290 "wmkdepend.cpp"
+static const int wmkdep_start = 37;
+static const int wmkdep_error = 0;
 
-static const char _scanInclude_key_offsets[] = {
-	0, 0, 1, 4, 5, 8, 8, 13, 
-	17, 18, 19, 20, 21, 22, 23, 27, 
-	28, 29, 31, 33, 35, 37, 39, 41, 
-	46, 48, 50, 53, 54, 57, 57, 60, 
-	61, 64, 65, 67, 73, 74, 77, 81, 
-	85, 86, 89
-};
-
-static const char _scanInclude_trans_keys[] = {
-	10, 10, 34, 92, 10, 10, 34, 92, 
-	10, 32, 105, 9, 13, 32, 105, 9, 
-	13, 110, 99, 108, 117, 100, 101, 32, 
-	34, 9, 13, 34, 34, 10, 110, 10, 
-	99, 10, 108, 10, 117, 10, 100, 10, 
-	101, 10, 32, 34, 9, 13, 10, 34, 
-	10, 34, 10, 39, 92, 10, 10, 39, 
-	92, 10, 42, 47, 10, 10, 34, 39, 
-	42, 42, 47, 10, 34, 35, 39, 47, 
-	76, 10, 10, 34, 92, 32, 105, 9, 
-	13, 32, 34, 9, 13, 34, 10, 39, 
-	92, 0
-};
-
-static const char _scanInclude_single_lengths[] = {
-	0, 1, 3, 1, 3, 0, 3, 2, 
-	1, 1, 1, 1, 1, 1, 2, 1, 
-	1, 2, 2, 2, 2, 2, 2, 3, 
-	2, 2, 3, 1, 3, 0, 3, 1, 
-	3, 1, 2, 6, 1, 3, 2, 2, 
-	1, 3, 0
-};
-
-static const char _scanInclude_range_lengths[] = {
-	0, 0, 0, 0, 0, 0, 1, 1, 
-	0, 0, 0, 0, 0, 0, 1, 0, 
-	0, 0, 0, 0, 0, 0, 0, 1, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 1, 1, 
-	0, 0, 0
-};
-
-static const unsigned char _scanInclude_index_offsets[] = {
-	0, 0, 2, 6, 8, 12, 13, 18, 
-	22, 24, 26, 28, 30, 32, 34, 38, 
-	40, 42, 45, 48, 51, 54, 57, 60, 
-	65, 68, 71, 75, 77, 81, 82, 86, 
-	88, 92, 94, 97, 104, 106, 110, 114, 
-	118, 120, 124
-};
-
-static const char _scanInclude_indicies[] = {
-	2, 1, 2, 4, 5, 3, 6, 3, 
-	7, 9, 10, 8, 8, 12, 11, 13, 
-	11, 1, 14, 15, 14, 7, 16, 7, 
-	17, 7, 18, 7, 19, 7, 20, 7, 
-	21, 7, 21, 22, 21, 7, 7, 23, 
-	25, 24, 2, 26, 1, 2, 27, 1, 
-	2, 28, 1, 2, 29, 1, 2, 30, 
-	1, 2, 31, 1, 32, 31, 33, 31, 
-	1, 35, 1, 34, 37, 38, 36, 2, 
-	40, 41, 39, 42, 39, 7, 44, 45, 
-	43, 43, 2, 46, 47, 1, 48, 47, 
-	2, 3, 39, 1, 50, 49, 50, 51, 
-	49, 2, 3, 11, 39, 52, 53, 1, 
-	2, 1, 54, 9, 10, 8, 14, 15, 
-	14, 54, 21, 22, 21, 54, 25, 24, 
-	54, 44, 45, 43, 55, 0
-};
-
-static const char _scanInclude_trans_targs[] = {
-	35, 1, 35, 2, 36, 3, 37, 35, 
-	4, 35, 5, 6, 38, 17, 7, 8, 
-	9, 10, 11, 12, 13, 14, 15, 16, 
-	16, 35, 18, 19, 20, 21, 22, 23, 
-	39, 24, 25, 40, 25, 40, 36, 26, 
-	36, 27, 41, 28, 35, 29, 36, 31, 
-	35, 33, 34, 42, 30, 32, 35, 0
-};
-
-static const char _scanInclude_trans_actions[] = {
-	23, 0, 17, 0, 37, 0, 9, 21, 
-	0, 13, 0, 0, 9, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 1, 
-	0, 25, 0, 0, 0, 0, 0, 0, 
-	9, 0, 1, 31, 0, 9, 43, 0, 
-	34, 0, 9, 0, 11, 0, 40, 0, 
-	15, 0, 0, 3, 0, 0, 19, 0
-};
-
-static const char _scanInclude_to_state_actions[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 5, 0, 28, 0, 0, 0, 0, 
-	0, 0, 0
-};
-
-static const char _scanInclude_from_state_actions[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 7, 0, 0, 0, 0, 
-	0, 0, 0
-};
-
-static const unsigned char _scanInclude_eof_trans[] = {
-	0, 1, 0, 0, 8, 8, 0, 8, 
-	8, 8, 8, 8, 8, 8, 8, 8, 
-	8, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 8, 8, 0, 0, 
-	0, 0, 0, 0, 1, 55, 55, 55, 
-	55, 55, 0
-};
-
-static const int scanInclude_start = 35;
-static const int scanInclude_error = 0;
-
-static const int scanInclude_en_consume_comment = 33;
-static const int scanInclude_en_main = 35;
+static const int wmkdep_en_consume_comment = 35;
+static const int wmkdep_en_main = 37;
 
 
-#line 313 "wmkdepend.rl"
+#line 317 "wmkdepend.rl"
 
 
 
@@ -427,284 +308,720 @@ void processFile(const std::string& fileName)
     FILE* infile = Files::open(fileName);
     if (!infile) return;
 
-
-    // Ragel text start/end, action, code state
-    char *ts = nullptr, *te = nullptr;
+    // ts, te  = Ragel token start/end points (required naming)
+    // act, cs = Ragel action, code state, respectively (required naming)
+    char *ts, *te;
     unsigned act, cs;
 
-    // For the include action:
-    char *include_start = nullptr;
-
     
-#line 440 "wmkdepend.cpp"
+#line 318 "wmkdepend.cpp"
 	{
-	cs = scanInclude_start;
+	cs = wmkdep_start;
 	ts = 0;
 	te = 0;
 	act = 0;
 	}
 
-#line 334 "wmkdepend.rl"
-
+#line 337 "wmkdepend.rl"
+    // Token start of include filename (for begInclude, endInclude actions)
+    char *ts_inclName = nullptr;
 
     // Buffering
-    char buf[READ_BUFLEN];
-    size_t bytesPending = 0;
+    char inbuf[READ_BUFLEN];
+    size_t pending = 0;
 
-    // Do the first read
+    // Processing loop (as per Ragel pdf example)
     for (bool good = true; good; /*nil*/)
     {
-        const size_t avail = READ_BUFLEN - bytesPending;
+        const size_t avail = READ_BUFLEN - pending;
 
         if (!avail)
         {
             // We overfilled the buffer while trying to scan a token...
             std::cerr
-                << "OUT OF BUFFER SPACE while scanning " << fileName << '\n';
+                << EXENAME ": buffer full while scanning '"
+                << fileName << "'\n";
             break;
         }
 
-        char *p = buf + bytesPending;
-        const size_t bytesRead = ::fread(p, 1, avail, infile);
+        // p, pe  = Ragel parsing point and parsing end (required naming)
+        // eof    = Ragel EOF point (required naming)
 
-        char *pe = p + bytesRead;
+        char *p = inbuf + pending;
+        const size_t gcount = ::fread(p, 1, avail, infile);
+
+        char *pe = p + gcount;
         char *eof = nullptr;
 
-        // If we see eof then append the EOF char.
-        if (feof(infile))
+        if (!gcount)    // Could also use feof(infile)
         {
+            // Tag 'pe' as being the EOF for the FSM as well
             eof = pe;
             good = false;
         }
 
         
-#line 482 "wmkdepend.cpp"
+#line 365 "wmkdepend.cpp"
 	{
-	int _klen;
-	unsigned int _trans;
-	const char *_acts;
-	unsigned int _nacts;
-	const char *_keys;
-
 	if ( p == pe )
 		goto _test_eof;
-	if ( cs == 0 )
-		goto _out;
-_resume:
-	_acts = _scanInclude_actions + _scanInclude_from_state_actions[cs];
-	_nacts = (unsigned int) *_acts++;
-	while ( _nacts-- > 0 ) {
-		switch ( *_acts++ ) {
-	case 5:
-#line 1 "NONE"
-	{ts = p;}
-	break;
-#line 503 "wmkdepend.cpp"
-		}
-	}
-
-	_keys = _scanInclude_trans_keys + _scanInclude_key_offsets[cs];
-	_trans = _scanInclude_index_offsets[cs];
-
-	_klen = _scanInclude_single_lengths[cs];
-	if ( _klen > 0 ) {
-		const char *_lower = _keys;
-		const char *_mid;
-		const char *_upper = _keys + _klen - 1;
-		while (1) {
-			if ( _upper < _lower )
-				break;
-
-			_mid = _lower + ((_upper-_lower) >> 1);
-			if ( (*p) < *_mid )
-				_upper = _mid - 1;
-			else if ( (*p) > *_mid )
-				_lower = _mid + 1;
-			else {
-				_trans += (unsigned int)(_mid - _keys);
-				goto _match;
-			}
-		}
-		_keys += _klen;
-		_trans += _klen;
-	}
-
-	_klen = _scanInclude_range_lengths[cs];
-	if ( _klen > 0 ) {
-		const char *_lower = _keys;
-		const char *_mid;
-		const char *_upper = _keys + (_klen<<1) - 2;
-		while (1) {
-			if ( _upper < _lower )
-				break;
-
-			_mid = _lower + (((_upper-_lower) >> 1) & ~1);
-			if ( (*p) < _mid[0] )
-				_upper = _mid - 2;
-			else if ( (*p) > _mid[1] )
-				_lower = _mid + 2;
-			else {
-				_trans += (unsigned int)((_mid - _keys)>>1);
-				goto _match;
-			}
-		}
-		_trans += _klen;
-	}
-
-_match:
-	_trans = _scanInclude_indicies[_trans];
-_eof_trans:
-	cs = _scanInclude_trans_targs[_trans];
-
-	if ( _scanInclude_trans_actions[_trans] == 0 )
-		goto _again;
-
-	_acts = _scanInclude_actions + _scanInclude_trans_actions[_trans];
-	_nacts = (unsigned int) *_acts++;
-	while ( _nacts-- > 0 )
+	switch ( cs )
 	{
-		switch ( *_acts++ )
-		{
-	case 0:
-#line 283 "wmkdepend.rl"
-	{ include_start = p; }
-	break;
-	case 1:
-#line 286 "wmkdepend.rl"
-	{
-        if (include_start)
-        {
-            processFile(std::string(include_start, (p - include_start)));
-        }
-        include_start = nullptr;
-    }
-	break;
-	case 2:
-#line 295 "wmkdepend.rl"
-	{ {cs = 35; goto _again;} }
-	break;
-	case 6:
-#line 1 "NONE"
-	{te = p+1;}
-	break;
-	case 7:
-#line 303 "wmkdepend.rl"
-	{act = 1;}
-	break;
-	case 8:
-#line 304 "wmkdepend.rl"
-	{act = 2;}
-	break;
-	case 9:
-#line 306 "wmkdepend.rl"
-	{act = 3;}
-	break;
-	case 10:
-#line 308 "wmkdepend.rl"
-	{act = 4;}
-	break;
-	case 11:
-#line 303 "wmkdepend.rl"
-	{te = p+1;}
-	break;
-	case 12:
-#line 304 "wmkdepend.rl"
-	{te = p+1;}
-	break;
-	case 13:
-#line 306 "wmkdepend.rl"
-	{te = p+1;}
-	break;
-	case 14:
-#line 309 "wmkdepend.rl"
-	{te = p+1;}
-	break;
-	case 15:
-#line 310 "wmkdepend.rl"
-	{te = p+1;}
-	break;
-	case 16:
-#line 310 "wmkdepend.rl"
-	{te = p;p--;}
-	break;
-	case 17:
-#line 310 "wmkdepend.rl"
-	{{p = ((te))-1;}}
-	break;
-	case 18:
+tr0:
 #line 1 "NONE"
 	{	switch( act ) {
 	case 0:
-	{{cs = 0; goto _again;}}
+	{{goto st0;}}
 	break;
 	case 4:
-	{{p = ((te))-1;} {cs = 33; goto _again;} }
+	{{p = ((te))-1;} {goto st35;} }
 	break;
 	default:
 	{{p = ((te))-1;}}
 	break;
 	}
 	}
-	break;
-#line 650 "wmkdepend.cpp"
-		}
-	}
-
-_again:
-	_acts = _scanInclude_actions + _scanInclude_to_state_actions[cs];
-	_nacts = (unsigned int) *_acts++;
-	while ( _nacts-- > 0 ) {
-		switch ( *_acts++ ) {
-	case 3:
+	goto st37;
+tr2:
+#line 314 "wmkdepend.rl"
+	{te = p+1;}
+	goto st37;
+tr6:
+#line 314 "wmkdepend.rl"
+	{{p = ((te))-1;}}
+	goto st37;
+tr19:
+#line 297 "wmkdepend.rl"
+	{
+        // std::cerr << std::string(ts, (te-ts)) << '\n';
+        processFile(std::string(ts_inclName, (p - ts_inclName)));
+    }
+#line 310 "wmkdepend.rl"
+	{te = p+1;}
+	goto st37;
+tr40:
+#line 308 "wmkdepend.rl"
+	{te = p+1;}
+	goto st37;
+tr47:
+#line 307 "wmkdepend.rl"
+	{te = p+1;}
+	goto st37;
+tr51:
+#line 313 "wmkdepend.rl"
+	{te = p+1;}
+	goto st37;
+tr57:
+#line 314 "wmkdepend.rl"
+	{te = p;p--;}
+	goto st37;
+st37:
 #line 1 "NONE"
 	{ts = 0;}
-	break;
-	case 4:
 #line 1 "NONE"
 	{act = 0;}
-	break;
-#line 667 "wmkdepend.cpp"
-		}
+	if ( ++p == pe )
+		goto _test_eof37;
+case 37:
+#line 1 "NONE"
+	{ts = p;}
+#line 429 "wmkdepend.cpp"
+	switch( (*p) ) {
+		case 10: goto tr4;
+		case 32: goto st2;
+		case 34: goto st24;
+		case 35: goto st14;
+		case 39: goto st28;
+		case 47: goto st32;
+		case 76: goto st34;
 	}
+	if ( 9 <= (*p) && (*p) <= 13 )
+		goto st2;
+	goto st1;
+st1:
+	if ( ++p == pe )
+		goto _test_eof1;
+case 1:
+	if ( (*p) == 10 )
+		goto tr2;
+	goto st1;
+st2:
+	if ( ++p == pe )
+		goto _test_eof2;
+case 2:
+	switch( (*p) ) {
+		case 10: goto tr4;
+		case 32: goto st2;
+		case 35: goto st14;
+	}
+	if ( 9 <= (*p) && (*p) <= 13 )
+		goto st2;
+	goto st1;
+tr4:
+#line 1 "NONE"
+	{te = p+1;}
+	goto st38;
+st38:
+	if ( ++p == pe )
+		goto _test_eof38;
+case 38:
+#line 469 "wmkdepend.cpp"
+	switch( (*p) ) {
+		case 32: goto st3;
+		case 35: goto st4;
+	}
+	if ( 9 <= (*p) && (*p) <= 13 )
+		goto st3;
+	goto tr57;
+st3:
+	if ( ++p == pe )
+		goto _test_eof3;
+case 3:
+	switch( (*p) ) {
+		case 32: goto st3;
+		case 35: goto st4;
+	}
+	if ( 9 <= (*p) && (*p) <= 13 )
+		goto st3;
+	goto tr6;
+st4:
+	if ( ++p == pe )
+		goto _test_eof4;
+case 4:
+	switch( (*p) ) {
+		case 32: goto st4;
+		case 105: goto st5;
+	}
+	if ( 9 <= (*p) && (*p) <= 13 )
+		goto st4;
+	goto tr6;
+st5:
+	if ( ++p == pe )
+		goto _test_eof5;
+case 5:
+	if ( (*p) == 110 )
+		goto st6;
+	goto tr6;
+st6:
+	if ( ++p == pe )
+		goto _test_eof6;
+case 6:
+	if ( (*p) == 99 )
+		goto st7;
+	goto tr6;
+st7:
+	if ( ++p == pe )
+		goto _test_eof7;
+case 7:
+	if ( (*p) == 108 )
+		goto st8;
+	goto tr6;
+st8:
+	if ( ++p == pe )
+		goto _test_eof8;
+case 8:
+	if ( (*p) == 117 )
+		goto st9;
+	goto tr6;
+st9:
+	if ( ++p == pe )
+		goto _test_eof9;
+case 9:
+	if ( (*p) == 100 )
+		goto st10;
+	goto tr6;
+st10:
+	if ( ++p == pe )
+		goto _test_eof10;
+case 10:
+	if ( (*p) == 101 )
+		goto st11;
+	goto tr6;
+st11:
+	if ( ++p == pe )
+		goto _test_eof11;
+case 11:
+	switch( (*p) ) {
+		case 32: goto st11;
+		case 34: goto st12;
+	}
+	if ( 9 <= (*p) && (*p) <= 13 )
+		goto st11;
+	goto tr6;
+st12:
+	if ( ++p == pe )
+		goto _test_eof12;
+case 12:
+	switch( (*p) ) {
+		case 34: goto tr6;
+		case 60: goto tr6;
+		case 62: goto tr6;
+	}
+	goto tr17;
+tr17:
+#line 293 "wmkdepend.rl"
+	{ ts_inclName = p; }
+	goto st13;
+st13:
+	if ( ++p == pe )
+		goto _test_eof13;
+case 13:
+#line 570 "wmkdepend.cpp"
+	switch( (*p) ) {
+		case 34: goto tr19;
+		case 60: goto tr6;
+		case 62: goto tr6;
+	}
+	goto st13;
+st14:
+	if ( ++p == pe )
+		goto _test_eof14;
+case 14:
+	switch( (*p) ) {
+		case 10: goto tr20;
+		case 32: goto st14;
+		case 105: goto st15;
+	}
+	if ( 9 <= (*p) && (*p) <= 13 )
+		goto st14;
+	goto st1;
+tr20:
+#line 1 "NONE"
+	{te = p+1;}
+	goto st39;
+st39:
+	if ( ++p == pe )
+		goto _test_eof39;
+case 39:
+#line 597 "wmkdepend.cpp"
+	switch( (*p) ) {
+		case 32: goto st4;
+		case 105: goto st5;
+	}
+	if ( 9 <= (*p) && (*p) <= 13 )
+		goto st4;
+	goto tr57;
+st15:
+	if ( ++p == pe )
+		goto _test_eof15;
+case 15:
+	switch( (*p) ) {
+		case 10: goto tr2;
+		case 110: goto st16;
+	}
+	goto st1;
+st16:
+	if ( ++p == pe )
+		goto _test_eof16;
+case 16:
+	switch( (*p) ) {
+		case 10: goto tr2;
+		case 99: goto st17;
+	}
+	goto st1;
+st17:
+	if ( ++p == pe )
+		goto _test_eof17;
+case 17:
+	switch( (*p) ) {
+		case 10: goto tr2;
+		case 108: goto st18;
+	}
+	goto st1;
+st18:
+	if ( ++p == pe )
+		goto _test_eof18;
+case 18:
+	switch( (*p) ) {
+		case 10: goto tr2;
+		case 117: goto st19;
+	}
+	goto st1;
+st19:
+	if ( ++p == pe )
+		goto _test_eof19;
+case 19:
+	switch( (*p) ) {
+		case 10: goto tr2;
+		case 100: goto st20;
+	}
+	goto st1;
+st20:
+	if ( ++p == pe )
+		goto _test_eof20;
+case 20:
+	switch( (*p) ) {
+		case 10: goto tr2;
+		case 101: goto st21;
+	}
+	goto st1;
+st21:
+	if ( ++p == pe )
+		goto _test_eof21;
+case 21:
+	switch( (*p) ) {
+		case 10: goto tr28;
+		case 32: goto st21;
+		case 34: goto st22;
+	}
+	if ( 9 <= (*p) && (*p) <= 13 )
+		goto st21;
+	goto st1;
+tr28:
+#line 1 "NONE"
+	{te = p+1;}
+	goto st40;
+st40:
+	if ( ++p == pe )
+		goto _test_eof40;
+case 40:
+#line 679 "wmkdepend.cpp"
+	switch( (*p) ) {
+		case 32: goto st11;
+		case 34: goto st12;
+	}
+	if ( 9 <= (*p) && (*p) <= 13 )
+		goto st11;
+	goto tr57;
+st22:
+	if ( ++p == pe )
+		goto _test_eof22;
+case 22:
+	switch( (*p) ) {
+		case 10: goto tr31;
+		case 34: goto st1;
+		case 60: goto st1;
+		case 62: goto st1;
+	}
+	goto tr30;
+tr30:
+#line 293 "wmkdepend.rl"
+	{ ts_inclName = p; }
+	goto st23;
+st23:
+	if ( ++p == pe )
+		goto _test_eof23;
+case 23:
+#line 706 "wmkdepend.cpp"
+	switch( (*p) ) {
+		case 10: goto tr33;
+		case 34: goto tr34;
+		case 60: goto st1;
+		case 62: goto st1;
+	}
+	goto st23;
+tr33:
+#line 1 "NONE"
+	{te = p+1;}
+	goto st41;
+tr31:
+#line 1 "NONE"
+	{te = p+1;}
+#line 293 "wmkdepend.rl"
+	{ ts_inclName = p; }
+	goto st41;
+st41:
+	if ( ++p == pe )
+		goto _test_eof41;
+case 41:
+#line 728 "wmkdepend.cpp"
+	switch( (*p) ) {
+		case 34: goto tr19;
+		case 60: goto tr57;
+		case 62: goto tr57;
+	}
+	goto st13;
+tr34:
+#line 1 "NONE"
+	{te = p+1;}
+#line 297 "wmkdepend.rl"
+	{
+        // std::cerr << std::string(ts, (te-ts)) << '\n';
+        processFile(std::string(ts_inclName, (p - ts_inclName)));
+    }
+#line 310 "wmkdepend.rl"
+	{act = 3;}
+	goto st42;
+tr36:
+#line 1 "NONE"
+	{te = p+1;}
+#line 308 "wmkdepend.rl"
+	{act = 2;}
+	goto st42;
+tr43:
+#line 1 "NONE"
+	{te = p+1;}
+#line 307 "wmkdepend.rl"
+	{act = 1;}
+	goto st42;
+tr49:
+#line 1 "NONE"
+	{te = p+1;}
+#line 312 "wmkdepend.rl"
+	{act = 4;}
+	goto st42;
+st42:
+	if ( ++p == pe )
+		goto _test_eof42;
+case 42:
+#line 768 "wmkdepend.cpp"
+	if ( (*p) == 10 )
+		goto tr2;
+	goto st1;
+st24:
+	if ( ++p == pe )
+		goto _test_eof24;
+case 24:
+	switch( (*p) ) {
+		case 10: goto tr2;
+		case 34: goto tr36;
+		case 92: goto st25;
+	}
+	goto st24;
+st25:
+	if ( ++p == pe )
+		goto _test_eof25;
+case 25:
+	if ( (*p) == 10 )
+		goto tr38;
+	goto st24;
+tr38:
+#line 1 "NONE"
+	{te = p+1;}
+	goto st43;
+st43:
+	if ( ++p == pe )
+		goto _test_eof43;
+case 43:
+#line 797 "wmkdepend.cpp"
+	switch( (*p) ) {
+		case 10: goto tr57;
+		case 34: goto tr40;
+		case 92: goto st27;
+	}
+	goto st26;
+st26:
+	if ( ++p == pe )
+		goto _test_eof26;
+case 26:
+	switch( (*p) ) {
+		case 10: goto tr6;
+		case 34: goto tr40;
+		case 92: goto st27;
+	}
+	goto st26;
+st27:
+	if ( ++p == pe )
+		goto _test_eof27;
+case 27:
+	goto st26;
+st28:
+	if ( ++p == pe )
+		goto _test_eof28;
+case 28:
+	switch( (*p) ) {
+		case 10: goto tr2;
+		case 39: goto tr43;
+		case 92: goto st29;
+	}
+	goto st28;
+st29:
+	if ( ++p == pe )
+		goto _test_eof29;
+case 29:
+	if ( (*p) == 10 )
+		goto tr45;
+	goto st28;
+tr45:
+#line 1 "NONE"
+	{te = p+1;}
+	goto st44;
+st44:
+	if ( ++p == pe )
+		goto _test_eof44;
+case 44:
+#line 844 "wmkdepend.cpp"
+	switch( (*p) ) {
+		case 10: goto tr57;
+		case 39: goto tr47;
+		case 92: goto st31;
+	}
+	goto st30;
+st30:
+	if ( ++p == pe )
+		goto _test_eof30;
+case 30:
+	switch( (*p) ) {
+		case 10: goto tr6;
+		case 39: goto tr47;
+		case 92: goto st31;
+	}
+	goto st30;
+st31:
+	if ( ++p == pe )
+		goto _test_eof31;
+case 31:
+	goto st30;
+st32:
+	if ( ++p == pe )
+		goto _test_eof32;
+case 32:
+	switch( (*p) ) {
+		case 10: goto tr2;
+		case 42: goto tr49;
+		case 47: goto st33;
+	}
+	goto st1;
+st33:
+	if ( ++p == pe )
+		goto _test_eof33;
+case 33:
+	if ( (*p) == 10 )
+		goto tr51;
+	goto st33;
+st34:
+	if ( ++p == pe )
+		goto _test_eof34;
+case 34:
+	switch( (*p) ) {
+		case 10: goto tr2;
+		case 34: goto st24;
+		case 39: goto st28;
+	}
+	goto st1;
+st35:
+#line 1 "NONE"
+	{ts = 0;}
+	if ( ++p == pe )
+		goto _test_eof35;
+case 35:
+#line 899 "wmkdepend.cpp"
+	if ( (*p) == 42 )
+		goto st36;
+	goto st35;
+st36:
+	if ( ++p == pe )
+		goto _test_eof36;
+case 36:
+	switch( (*p) ) {
+		case 42: goto st36;
+		case 47: goto tr54;
+	}
+	goto st35;
+tr54:
+#line 302 "wmkdepend.rl"
+	{ {goto st37;} }
+	goto st45;
+st45:
+	if ( ++p == pe )
+		goto _test_eof45;
+case 45:
+#line 920 "wmkdepend.cpp"
+	goto st0;
+st0:
+cs = 0;
+	goto _out;
+	}
+	_test_eof37: cs = 37; goto _test_eof; 
+	_test_eof1: cs = 1; goto _test_eof; 
+	_test_eof2: cs = 2; goto _test_eof; 
+	_test_eof38: cs = 38; goto _test_eof; 
+	_test_eof3: cs = 3; goto _test_eof; 
+	_test_eof4: cs = 4; goto _test_eof; 
+	_test_eof5: cs = 5; goto _test_eof; 
+	_test_eof6: cs = 6; goto _test_eof; 
+	_test_eof7: cs = 7; goto _test_eof; 
+	_test_eof8: cs = 8; goto _test_eof; 
+	_test_eof9: cs = 9; goto _test_eof; 
+	_test_eof10: cs = 10; goto _test_eof; 
+	_test_eof11: cs = 11; goto _test_eof; 
+	_test_eof12: cs = 12; goto _test_eof; 
+	_test_eof13: cs = 13; goto _test_eof; 
+	_test_eof14: cs = 14; goto _test_eof; 
+	_test_eof39: cs = 39; goto _test_eof; 
+	_test_eof15: cs = 15; goto _test_eof; 
+	_test_eof16: cs = 16; goto _test_eof; 
+	_test_eof17: cs = 17; goto _test_eof; 
+	_test_eof18: cs = 18; goto _test_eof; 
+	_test_eof19: cs = 19; goto _test_eof; 
+	_test_eof20: cs = 20; goto _test_eof; 
+	_test_eof21: cs = 21; goto _test_eof; 
+	_test_eof40: cs = 40; goto _test_eof; 
+	_test_eof22: cs = 22; goto _test_eof; 
+	_test_eof23: cs = 23; goto _test_eof; 
+	_test_eof41: cs = 41; goto _test_eof; 
+	_test_eof42: cs = 42; goto _test_eof; 
+	_test_eof24: cs = 24; goto _test_eof; 
+	_test_eof25: cs = 25; goto _test_eof; 
+	_test_eof43: cs = 43; goto _test_eof; 
+	_test_eof26: cs = 26; goto _test_eof; 
+	_test_eof27: cs = 27; goto _test_eof; 
+	_test_eof28: cs = 28; goto _test_eof; 
+	_test_eof29: cs = 29; goto _test_eof; 
+	_test_eof44: cs = 44; goto _test_eof; 
+	_test_eof30: cs = 30; goto _test_eof; 
+	_test_eof31: cs = 31; goto _test_eof; 
+	_test_eof32: cs = 32; goto _test_eof; 
+	_test_eof33: cs = 33; goto _test_eof; 
+	_test_eof34: cs = 34; goto _test_eof; 
+	_test_eof35: cs = 35; goto _test_eof; 
+	_test_eof36: cs = 36; goto _test_eof; 
+	_test_eof45: cs = 45; goto _test_eof; 
 
-	if ( cs == 0 )
-		goto _out;
-	if ( ++p != pe )
-		goto _resume;
 	_test_eof: {}
 	if ( p == eof )
 	{
-	if ( _scanInclude_eof_trans[cs] > 0 ) {
-		_trans = _scanInclude_eof_trans[cs] - 1;
-		goto _eof_trans;
+	switch ( cs ) {
+	case 1: goto tr0;
+	case 38: goto tr57;
+	case 3: goto tr6;
+	case 4: goto tr6;
+	case 5: goto tr6;
+	case 6: goto tr6;
+	case 7: goto tr6;
+	case 8: goto tr6;
+	case 9: goto tr6;
+	case 10: goto tr6;
+	case 11: goto tr6;
+	case 12: goto tr6;
+	case 13: goto tr6;
+	case 39: goto tr57;
+	case 40: goto tr57;
+	case 41: goto tr57;
+	case 42: goto tr0;
+	case 43: goto tr57;
+	case 26: goto tr6;
+	case 27: goto tr6;
+	case 44: goto tr57;
+	case 30: goto tr6;
+	case 31: goto tr6;
 	}
 	}
 
 	_out: {}
 	}
 
-#line 366 "wmkdepend.rl"
-
-
-        if (cs == scanInclude_error)
+#line 376 "wmkdepend.rl"
+        if (cs == wmkdep_error)
         {
-            // Machine failed before finding a token
-            std::cerr << "PARSE ERROR while scanning " << fileName << '\n';
+            // FSM failed before finding a token
+            std::cerr
+                << EXENAME ": parse error while scanning '"
+                << fileName << "'\n";
             break;
         }
 
-        // Now set up the prefix.
-        if (ts == nullptr)
+        if (ts)
         {
-            bytesPending = 0;
+            // Preserve incomplete token
+            pending = pe - ts;
+            ::memmove(inbuf, ts, pending);
+            te = inbuf + (te - ts);   // token end (after memmove)
+            ts = inbuf;               // token start
         }
         else
         {
-            // There are data that needs to be shifted over.
-            bytesPending = pe - ts;
-            ::memmove(buf, ts, bytesPending);
-            te -= (ts-buf);
-            ts = buf;
+            pending = 0;
         }
     }
     fclose(infile);

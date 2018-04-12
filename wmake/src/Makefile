@@ -86,7 +86,7 @@ $(WMAKE_BIN)/wmkdepend: wmkdepend.cpp
 # $(WMAKE_BIN)/wmkdepend: wmkdepend.rl
 # 	@mkdir -p $(WMAKE_BIN)
 # 	$(call QUIET_MESSAGE,ragel,$(<F))
-# 	$E ragel -o $@.cpp $(<F) && $(CC) $(c++FLAGS) $(c++LESSWARN) $@.cpp -o $@
+# 	$E ragel -G2 -o $@.cpp $(<F) && $(CC) $(c++FLAGS) $(c++LESSWARN) $@.cpp -o $@
 # 	@rm -f $@.cpp 2>/dev/null
 
 #------------------------------------------------------------------------------

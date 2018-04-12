@@ -1,5 +1,11 @@
 #----------------------------*- makefile-gmake -*------------------------------
 
+# The dependency generation program
+
+WMKDEP  := $(WMAKE_BIN)/wmkdepend    # 1. Ragel-based
+# WMKDEP  := $(WMAKE_BIN)/wmkdep       # 2. Flex-based (slower, ulimit problem)
+# WMKDEP  := $(WM_SCRIPTS)/makeDepend  # 3. cpp -M (for testing only)
+
 WMKDEP_FLAGS := -eWM_PROJECT_DIR -eWM_THIRD_PARTY_DIR
 
 ifneq ("$(WM_QUIET)","")
@@ -31,7 +37,6 @@ $(OBJECTS_DIR)/%.dep : %
 	$(call QUIET_MESSAGE,dep,$(<F))
 	$(call VERBOSE_MESSAGE,Making dependency list for source file,$(<F))
 	@$(WM_SCRIPTS)/makeTargetDir $@
-	@$(WMAKE_BIN)/wmkdepend $(WMKDEP_FLAGS) -o$@ -I$(*D) $(LIB_HEADER_DIRS) $<
-#flex	@$(WMAKE_BIN)/wmkdep $(WMKDEP_FLAGS) -o$@ -I$(*D) $(LIB_HEADER_DIRS) $<
+	@$(WMKDEP) $(WMKDEP_FLAGS) -o$@ -I$(*D) $(LIB_HEADER_DIRS) $<
 
 #------------------------------------------------------------------------------

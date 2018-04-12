@@ -25,24 +25,32 @@ Application
     wmkdepend
 
 Description
-    A fast dependency list generator that emulates the behaviour and output
-    of cpp -M. However, the output contains no duplicates and is thus
-    approx. 40% faster than cpp.
-    It also handles missing files somewhat more gracefully.
+    A fast dependency list generator that emulates the behaviour and
+    output of cpp -M.
 
-    The algorithm uses a Ragel-generated lexer to scan for includes and
-    searches the files found.
-    The files are only visited once (their names are hashed),
-    which helps make this faster than cpp.
+    The lexer for include statements uses a Ragel-generated lexer and
+    then searches the files found. Each file is visited only once,
+    which helps make this faster than cpp. It also handles missing
+    files somewhat more gracefully.
+
+    The goto-based finite state machine (FSM) is generated with
+
+        ragel -G2 -o wmkdepend.cpp wmkdepend.rl
 
 Usage
     wmkdepend [-Idir..] [-iheader...] [-eENV...] [-oFile] [-q] filename
+
+Note
+    May not capture all possible corner cases or line continuations such as
+
+        #include \
+            "file.H"
 
 \*---------------------------------------------------------------------------*/
 /*
  * With cpp:
  *
- * cpp -x c++ -std=c++11 -nostdinc -nostdinc++
+ * cpp -x c++ -std=c++11
  *     -M -DWM_$(WM_PRECISION_OPTION) -DWM_LABEL_SIZE=$(WM_LABEL_SIZE) |
  * sed -e 's,^$(WM_PROJECT_DIR)/,$$(WM_PROJECT_DIR)/,' \
  *     -e 's,^$(WM_THIRD_PARTY_DIR)/,$$(WM_THIRD_PARTY_DIR)/,'
@@ -57,7 +65,7 @@ Usage
 #include <unordered_set>
 #include <vector>
 
-// Sizing for read buffer
+// Length of the input read buffer
 #define READ_BUFLEN 16384
 
 // The executable name (for messages), without requiring access to argv[]
@@ -78,7 +86,6 @@ void usage()
         "  -eENV     Environment variable path substitutions.\n"
         "  -oFile    Write output to File.\n"
         "  -q        Suppress 'No such file' warnings.\n"
-        "  -v        Some verbosity.\n"
         "\nDependency list generator, similar to 'cpp -M'\n\n";
 }
 
@@ -160,7 +167,7 @@ namespace Files
     //     /openfoam/project/path/directory/xyz
     //  -> $(WM_PROJECT_DIR)/directory/xyz
     //
-    FILE* fopen_file(std::string fileName)
+    FILE* fopen_file(const std::string& fileName)
     {
         const auto len = fileName.size();
         const char *fname = fileName.c_str();
@@ -262,7 +269,7 @@ namespace Files
                 std::cerr << ": " << strerror(errno);
             }
 
-            std::cerr << "\n" << std::flush;
+            std::cerr << '\n' << std::flush;
         }
 
         return filePtr;
@@ -273,37 +280,34 @@ namespace Files
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// Ragel machine requirements: text start/end, action, code state
+// Ragel machine requirements: token start/end, action, code state
 // are defined later (prior to use)
 
 %%{
-    machine scanInclude;
+    machine wmkdep;
     write   data nofinal;
 
-    action  start_incl { include_start = fpc; }
+    hashInclude = space* '#' space* 'include' space* ; ## include directive
+    includeName = [^\"<>]+ ;                    ## Text between "" or <>
 
-    action  end_incl
+    action  begInclude { ts_inclName = fpc; }   ## Remember start position
+
+    ## No 'if (ts_inclName) ...' guard needed (implicit via the FSM)
+    action  endInclude
     {
-        if (include_start)
-        {
-            processFile(std::string(include_start, (fpc - include_start)));
-        }
-        include_start = nullptr;
+        // std::cerr << std::string(ts, (te-ts)) << '\n';
+        processFile(std::string(ts_inclName, (fpc - ts_inclName)));
     }
 
-    consume_comment :=
-        any* :>> '*/' @{ fgoto main; };
-
-    user_include =
-        '#' space* 'include' space* '"' %start_incl [^\"]+ %end_incl '"' ;
+    consume_comment := any* :>> '*/' @{ fgoto main; };
 
     main := |*
 
-    # Single and double strings
+    # Single and double quoted strings
     ( 'L'? "'" ( [^'\\\n] | /\\./ )* "'") ;     # " swallow
     ( 'L'? '"' ( [^"\\\n] | /\\./ )* '"') ;     # ' swallow
 
-    user_include ;
+    hashInclude '"' %begInclude includeName %endInclude '"' ;
 
     '/*' { fgoto consume_comment; };
     '//' [^\n]* '\n' ;
@@ -323,67 +327,72 @@ void processFile(const std::string& fileName)
     FILE* infile = Files::open(fileName);
     if (!infile) return;
 
-
-    // Ragel text start/end, action, code state
-    char *ts = nullptr, *te = nullptr;
+    // ts, te  = Ragel token start/end points (required naming)
+    // act, cs = Ragel action, code state, respectively (required naming)
+    char *ts, *te;
     unsigned act, cs;
 
-    // For the include action:
-    char *include_start = nullptr;
+    %% write init ;             ## /* FSM initialization here */;
 
-    %%{ write init; }%%
+    // Token start of include filename (for begInclude, endInclude actions)
+    char *ts_inclName = nullptr;
 
     // Buffering
-    char buf[READ_BUFLEN];
-    size_t bytesPending = 0;
+    char inbuf[READ_BUFLEN];
+    size_t pending = 0;
 
-    // Do the first read
+    // Processing loop (as per Ragel pdf example)
     for (bool good = true; good; /*nil*/)
     {
-        const size_t avail = READ_BUFLEN - bytesPending;
+        const size_t avail = READ_BUFLEN - pending;
 
         if (!avail)
         {
             // We overfilled the buffer while trying to scan a token...
             std::cerr
-                << "OUT OF BUFFER SPACE while scanning " << fileName << '\n';
+                << EXENAME ": buffer full while scanning '"
+                << fileName << "'\n";
             break;
         }
 
-        char *p = buf + bytesPending;
-        const size_t bytesRead = ::fread(p, 1, avail, infile);
+        // p, pe  = Ragel parsing point and parsing end (required naming)
+        // eof    = Ragel EOF point (required naming)
 
-        char *pe = p + bytesRead;
+        char *p = inbuf + pending;
+        const size_t gcount = ::fread(p, 1, avail, infile);
+
+        char *pe = p + gcount;
         char *eof = nullptr;
 
-        // If we see eof then append the EOF char.
-        if (feof(infile))
+        if (!gcount)    // Could also use feof(infile)
         {
+            // Tag 'pe' as being the EOF for the FSM as well
             eof = pe;
             good = false;
         }
 
-        %%{ write exec; }%%
+        %% write exec ;         ## /* FSM execution here */;
 
-        if (cs == scanInclude_error)
+        if (cs == wmkdep_error)
         {
-            // Machine failed before finding a token
-            std::cerr << "PARSE ERROR while scanning " << fileName << '\n';
+            // FSM failed before finding a token
+            std::cerr
+                << EXENAME ": parse error while scanning '"
+                << fileName << "'\n";
             break;
         }
 
-        // Now set up the prefix.
-        if (ts == nullptr)
+        if (ts)
         {
-            bytesPending = 0;
+            // Preserve incomplete token
+            pending = pe - ts;
+            ::memmove(inbuf, ts, pending);
+            te = inbuf + (te - ts);   // token end (after memmove)
+            ts = inbuf;               // token start
         }
         else
         {
-            // There are data that needs to be shifted over.
-            bytesPending = pe - ts;
-            ::memmove(buf, ts, bytesPending);
-            te -= (ts-buf);
-            ts = buf;
+            pending = 0;
         }
     }
     fclose(infile);
