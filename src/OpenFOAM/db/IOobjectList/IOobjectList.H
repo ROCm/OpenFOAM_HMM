@@ -60,7 +60,7 @@ class IOobjectList
 {
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const IOobjectList&) = delete;
 
 
@@ -92,7 +92,7 @@ public:
 
     // Member functions
 
-      // Basic methods
+    // Basic methods
 
         //- Add an IOobject to the list
         bool add(IOobject& io);
@@ -101,7 +101,7 @@ public:
         bool remove(IOobject& io);
 
 
-      // Lookup
+    // Lookup
 
         //- Lookup a given name and return IOobject ptr if found else nullptr
         IOobject* lookup(const word& name) const;
@@ -116,7 +116,7 @@ public:
         IOobjectList lookupClass(const word& clsName) const;
 
 
-      // Summary of classes
+    // Summary of classes
 
         //- A summary hash of classes used and their associated object names.
         //  The HashTable representation allows us to leverage various
@@ -196,7 +196,7 @@ public:
         HashTable<wordHashSet> classes(const wordRes& matcher) const;
 
 
-      // Summary of names
+    // Summary of names
 
         //- A list of names of the IOobjects
         wordList names() const;
@@ -213,7 +213,7 @@ public:
         wordList names(const word& clsName, const wordRes& matcher) const;
 
 
-      // Summary of names (sorted)
+    // Summary of names (sorted)
 
         //- A sorted list of names of the IOobjects
         wordList sortedNames() const;

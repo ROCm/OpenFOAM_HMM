@@ -432,8 +432,7 @@ namespace Foam
             ::Foam::simpleRegIOobject(Foam::debug::addOptimisationObject, name)
         {}
 
-        virtual ~addcommsTypeToOpt()
-        {}
+        virtual ~addcommsTypeToOpt() = default;
 
         virtual void readData(Foam::Istream& is)
         {

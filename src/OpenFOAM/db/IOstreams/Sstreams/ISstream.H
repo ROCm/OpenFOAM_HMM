@@ -77,7 +77,7 @@ class ISstream
         //  Handles both "$var" and "${var}" forms.
         Istream& readVariable(string& str);
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const ISstream&) = delete;
 
 
@@ -97,8 +97,7 @@ public:
 
 
     //- Destructor
-    virtual ~ISstream()
-    {}
+    virtual ~ISstream() = default;
 
 
     // Member functions

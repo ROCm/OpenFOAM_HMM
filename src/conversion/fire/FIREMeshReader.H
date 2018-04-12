@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ SourceFiles
 
 namespace Foam
 {
-// forward declarations
+// Forward declarations
 class polyMesh;
 
 namespace fileFormats
@@ -76,10 +76,10 @@ protected:
 
     // Protected Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         FIREMeshReader(const FIREMeshReader&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const FIREMeshReader&) = delete;
 
 
@@ -113,7 +113,7 @@ public:
 
 
     //- Destructor
-    virtual ~FIREMeshReader();
+    virtual ~FIREMeshReader() = default;
 
 
     // Member Functions

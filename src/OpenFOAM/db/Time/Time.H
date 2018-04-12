@@ -193,14 +193,8 @@ protected:
 
 private:
 
-        //- Default write option
-        IOstream::streamFormat writeFormat_;
-
-        //- Default output file format version number
-        IOstream::versionNumber writeVersion_;
-
-        //- Default output compression
-        IOstream::compressionType writeCompression_;
+        //- Default write stream option (format, version, compression)
+        IOstreamOption writeStreamOption_;
 
         //- Default graph format
         word graphFormat_;
@@ -309,19 +303,19 @@ public:
             //- Default write format
             IOstream::streamFormat writeFormat() const
             {
-                return writeFormat_;
+                return writeStreamOption_.format();
             }
 
             //- Default write version number
             IOstream::versionNumber writeVersion() const
             {
-                return writeVersion_;
+                return writeStreamOption_.version();
             }
 
             //- Default write compression
             IOstream::compressionType writeCompression() const
             {
-                return writeCompression_;
+                return writeStreamOption_.compression();
             }
 
             //- Default graph format

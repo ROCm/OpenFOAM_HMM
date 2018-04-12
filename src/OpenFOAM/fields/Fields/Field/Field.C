@@ -224,31 +224,23 @@ Foam::Field<Type>::Field
                     << exit(FatalIOError);
             }
         }
+        else if (is.version() == IOstream::versionNumber(2,0))
+        {
+            IOWarningInFunction(dict)
+                << "expected keyword 'uniform' or 'nonuniform', "
+                "assuming deprecated Field format from "
+                "Foam version 2.0." << endl;
+
+            this->setSize(len);
+
+            is.putBack(firstToken);
+            operator=(pTraits<Type>(is));
+        }
         else
         {
-            if (is.version() == 2.0)
-            {
-                IOWarningInFunction
-                (
-                    dict
-                )   << "expected keyword 'uniform' or 'nonuniform', "
-                       "assuming deprecated Field format from "
-                       "Foam version 2.0." << endl;
-
-                this->setSize(len);
-
-                is.putBack(firstToken);
-                operator=(pTraits<Type>(is));
-            }
-            else
-            {
-                FatalIOErrorInFunction
-                (
-                    dict
-                )   << "expected keyword 'uniform' or 'nonuniform', found "
-                    << firstToken.info()
-                    << exit(FatalIOError);
-            }
+            FatalIOErrorInFunction(dict)
+                << "expected keyword 'uniform' or 'nonuniform', found "
+                << firstToken.info() << exit(FatalIOError);
         }
     }
 }

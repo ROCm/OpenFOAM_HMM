@@ -160,8 +160,7 @@ public:
 
 
         //- Destructor
-        virtual ~ITstream()
-        {}
+        virtual ~ITstream() = default;
 
 
     // Static Functions

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -405,7 +405,7 @@ bool Foam::fileFormats::FIREMeshReader::readGeometry(const scalar scaleFactor)
             << abort(FatalError);
     }
 
-    IFstream is(geometryFile_, fmt, false);
+    IFstream is(geometryFile_, fmt);
 
     readPoints(is, scaleFactor);
     readFaces(is);
@@ -459,16 +459,10 @@ Foam::fileFormats::FIREMeshReader::FIREMeshReader
 )
 :
     meshReader(name, scaleFactor),
-    owner_(0),
-    neigh_(0),
-    faceZoneId_(0),
+    owner_(),
+    neigh_(),
+    faceZoneId_(),
     faceNames_()
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fileFormats::FIREMeshReader::~FIREMeshReader()
 {}
 
 

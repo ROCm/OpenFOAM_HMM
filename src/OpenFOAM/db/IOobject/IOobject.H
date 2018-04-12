@@ -295,7 +295,7 @@ public:
 
     // Member Functions
 
-      // General access
+    // General access
 
         //- Return the local objectRegistry
         const objectRegistry& db() const;
@@ -337,7 +337,7 @@ public:
         inline bool& globalObject();
 
 
-      // Read/write options
+    // Read/write options
 
         //- The read option
         inline readOption readOpt() const;
@@ -352,7 +352,7 @@ public:
         inline writeOption& writeOpt();
 
 
-     // Path components
+    // Path components
 
         //- Return group (extension part of name)
         word group() const;
@@ -402,7 +402,7 @@ public:
         ) const;
 
 
-      // Reading
+    // Reading
 
         //- Read header
         bool readHeader(Istream& is);
@@ -424,7 +424,7 @@ public:
         void warnNoRereading() const;
 
 
-      // Writing
+    // Writing
 
         //- Write the standard OpenFOAM file/dictionary banner
         //  Optionally without -*- C++ -*- editor hint (eg, for logs)
@@ -443,14 +443,14 @@ public:
         bool writeHeader(Ostream& os, const word& objectType) const;
 
 
-      // Error Handling
+    // Error Handling
 
         inline bool good() const;
 
         inline bool bad() const;
 
 
-      // Info
+    // Info
 
         //- Return info proxy.
         //  Used to print token information to a stream

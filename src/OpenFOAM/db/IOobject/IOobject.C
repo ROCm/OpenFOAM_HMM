@@ -72,8 +72,7 @@ namespace Foam
             ::Foam::simpleRegIOobject(Foam::debug::addOptimisationObject, name)
         {}
 
-        virtual ~addfileModificationCheckingToOpt()
-        {}
+        virtual ~addfileModificationCheckingToOpt() = default;
 
         virtual void readData(Foam::Istream& is)
         {

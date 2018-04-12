@@ -165,7 +165,7 @@ inline bool Foam::operator!=(const face& a, const face& b)
 
 inline Foam::Istream& Foam::operator>>(Istream& is, face& f)
 {
-    if (is.version() == IOstream::originalVersion)
+    if (is.version() == IOstreamOption::originalVersion)
     {
         // Read starting (
         is.readBegin("face");

@@ -88,8 +88,7 @@ public:
 
 
     //- Destructor
-    virtual ~Ostream()
-    {}
+    virtual ~Ostream() = default;
 
 
     // Member functions

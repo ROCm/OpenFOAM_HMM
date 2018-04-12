@@ -73,9 +73,12 @@ Foam::functionObjects::ensightWrite::ensightWrite
     fvMeshFunctionObject(name, runTime, dict),
     writeOpts_
     (
-        dict.found("format")
-      ? IOstream::formatEnum(dict.lookup("format"))
-      : runTime.writeFormat()
+        IOstreamOption::formatNames.lookupOrFailsafe
+        (
+            "format",
+            dict,
+            runTime.writeFormat()
+        )
     ),
     caseOpts_(writeOpts_.format()),
     selectFields_(),

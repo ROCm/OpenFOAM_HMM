@@ -61,7 +61,7 @@ class OSstream
 
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const OSstream&) = delete;
 
 
@@ -70,7 +70,7 @@ public:
     // Constructors
 
         //- Construct as wrapper around std::ostream and set stream status
-        OSstream
+        inline OSstream
         (
             std::ostream& os,
             const string& name,

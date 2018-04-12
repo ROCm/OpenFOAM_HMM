@@ -442,18 +442,18 @@ void Foam::Time::readDict()
 
     if (controlDict_.found("writeVersion"))
     {
-        writeVersion_ = IOstream::versionNumber
+        writeStreamOption_.version
         (
-            controlDict_.lookup("writeVersion")
+            IOstreamOption::versionNumber
+            (
+                controlDict_.lookup("writeVersion")
+            )
         );
     }
 
     if (controlDict_.found("writeFormat"))
     {
-        writeFormat_ = IOstream::formatEnum
-        (
-            controlDict_.lookup("writeFormat")
-        );
+        writeStreamOption_.format(word(controlDict_.lookup("writeFormat")));
     }
 
     if (controlDict_.found("writePrecision"))
@@ -478,23 +478,23 @@ void Foam::Time::readDict()
 
     if (controlDict_.found("writeCompression"))
     {
-        writeCompression_ = IOstream::compressionEnum
+        writeStreamOption_.compression
         (
-            controlDict_.lookup("writeCompression")
+            word(controlDict_.lookup("writeCompression"))
         );
 
         if
         (
-            writeFormat_ == IOstream::BINARY
-         && writeCompression_ == IOstream::COMPRESSED
+            writeStreamOption_.compression() == IOstream::COMPRESSED
+         && writeStreamOption_.format() == IOstream::BINARY
         )
         {
             IOWarningInFunction(controlDict_)
-                << "Selecting compressed binary is inefficient and ineffective"
-                   ", resetting to uncompressed binary"
+                << "Disabled binary format compression"
+                << " (inefficient/ineffective)"
                 << endl;
 
-            writeCompression_ = IOstream::UNCOMPRESSED;
+            writeStreamOption_.compression(IOstream::UNCOMPRESSED);
         }
     }
 

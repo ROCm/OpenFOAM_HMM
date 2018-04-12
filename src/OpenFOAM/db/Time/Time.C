@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -439,10 +439,7 @@ Foam::Time::Time
     writeOnce_(false),
     sigWriteNow_(*this, true),
     sigStopAtWriteNow_(*this, true),
-
-    writeFormat_(IOstream::ASCII),
-    writeVersion_(IOstream::currentVersion),
-    writeCompression_(IOstream::UNCOMPRESSED),
+    writeStreamOption_(IOstream::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
 
@@ -508,10 +505,7 @@ Foam::Time::Time
     writeOnce_(false),
     sigWriteNow_(*this, true),
     sigStopAtWriteNow_(*this, true),
-
-    writeFormat_(IOstream::ASCII),
-    writeVersion_(IOstream::currentVersion),
-    writeCompression_(IOstream::UNCOMPRESSED),
+    writeStreamOption_(IOstream::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
 
@@ -587,10 +581,7 @@ Foam::Time::Time
     writeOnce_(false),
     sigWriteNow_(*this, true),
     sigStopAtWriteNow_(*this, true),
-
-    writeFormat_(IOstream::ASCII),
-    writeVersion_(IOstream::currentVersion),
-    writeCompression_(IOstream::UNCOMPRESSED),
+    writeStreamOption_(IOstream::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
 
@@ -655,9 +646,7 @@ Foam::Time::Time
     purgeWrite_(0),
     subCycling_(0),
     writeOnce_(false),
-    writeFormat_(IOstream::ASCII),
-    writeVersion_(IOstream::currentVersion),
-    writeCompression_(IOstream::UNCOMPRESSED),
+    writeStreamOption_(IOstream::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
 

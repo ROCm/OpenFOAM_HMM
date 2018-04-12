@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,35 +23,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "IOstreamOption.H"
 #include "IOstreams.H"
 #include "OFstream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Define the default IOstream versions and precision
-
-const IOstream::versionNumber IOstream::originalVersion(0.5);
-const IOstream::versionNumber IOstream::currentVersion(2.0);
-unsigned int IOstream::precision_(debug::infoSwitch("writePrecision", 6));
+// Default output precision
+unsigned int Foam::IOstream::precision_
+(
+    Foam::debug::infoSwitch("writePrecision", 6)
+);
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Global Variables  * * * * * * * * * * * * * * //
+
 // Global IO streams
 
-ISstream Sin(cin, "Sin");
-OSstream Sout(cout, "Sout");
-OSstream Serr(cerr, "Serr");
-OFstream Snull("/dev/null");
+Foam::ISstream Foam::Sin(std::cin, "Sin");
+Foam::OSstream Foam::Sout(std::cout, "Sout");
+Foam::OSstream Foam::Serr(std::cerr, "Serr");
+Foam::OFstream Foam::Snull("/dev/null");
 
-prefixOSstream Pout(cout, "Pout");
-prefixOSstream Perr(cerr, "Perr");
+Foam::prefixOSstream Foam::Pout(std::cout, "Pout");
+Foam::prefixOSstream Foam::Perr(std::cerr, "Perr");
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

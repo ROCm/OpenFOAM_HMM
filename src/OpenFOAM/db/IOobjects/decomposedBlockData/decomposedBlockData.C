@@ -644,7 +644,7 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
     // version
     string versionString(realIsPtr().version().str());
     Pstream::scatter(versionString,  Pstream::msgType(), comm);
-    realIsPtr().version(IStringStream(versionString)());
+    realIsPtr().version(IOstream::versionNumber(versionString));
 
     // stream
     {
@@ -1071,7 +1071,7 @@ bool Foam::decomposedBlockData::writeData(Ostream& os) const
         writeHeader
         (
             os,
-            IOstream::versionNumber(IStringStream(versionString)()),
+            IOstream::versionNumber(versionString),
             IOstream::formatEnum(formatString),
             io.headerClassName(),
             io.note(),

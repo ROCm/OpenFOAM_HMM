@@ -49,7 +49,6 @@ class dummyISstream
 :
     public IStringStream
 {
-
 public:
 
     // Constructors
@@ -62,8 +61,7 @@ public:
 
 
     //- Destructor
-    virtual ~dummyISstream()
-    {}
+    virtual ~dummyISstream() = default;
 
 
     // Member functions
