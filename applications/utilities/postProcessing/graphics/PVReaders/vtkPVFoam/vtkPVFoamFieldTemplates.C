@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -276,11 +276,33 @@ void Foam::vtkPVFoam::convertVolFields
 
         if (ioobj.headerClassName() == FieldType::typeName)
         {
-            // Load field
-            FieldType fld(ioobj, mesh);
+            // Throw FatalError, FatalIOError as exceptions
+            const bool throwingError = FatalError.throwExceptions();
+            const bool throwingIOerr = FatalIOError.throwExceptions();
 
-            // Convert
-            convertVolField(patchInterpList, fld);
+            try
+            {
+                // Load field
+                FieldType fld(ioobj, mesh);
+
+                // Convert
+                convertVolField(patchInterpList, fld);
+            }
+            catch (Foam::IOerror& ioErr)
+            {
+                ioErr.write(Warning, false);
+                Info << nl << endl;
+            }
+            catch (Foam::error& err)
+            {
+                // Bit of trickery to get the original message
+                err.write(Warning, false);
+                Info << nl << endl;
+            }
+
+            // Restore previous exception throwing state
+            FatalError.throwExceptions(throwingError);
+            FatalIOError.throwExceptions(throwingIOerr);
         }
     }
 }
@@ -307,40 +329,62 @@ void Foam::vtkPVFoam::convertDimFields
             continue;
         }
 
-        // Load field
-        FieldType dimFld(ioobj, mesh);
+        // Throw FatalError, FatalIOError as exceptions
+        const bool throwingError = FatalError.throwExceptions();
+        const bool throwingIOerr = FatalIOError.throwExceptions();
 
-        // Construct volField with zero-gradient patch fields
-
-        IOobject io(dimFld);
-        io.readOpt() = IOobject::NO_READ;
-
-        PtrList<fvPatchField<Type>> patchFields(mesh.boundary().size());
-        forAll(patchFields, patchI)
+        try
         {
-            patchFields.set
-            (
-                patchI,
-                fvPatchField<Type>::New
+            // Load field
+            FieldType dimFld(ioobj, mesh);
+
+            // Construct volField with zero-gradient patch fields
+
+            IOobject io(dimFld);
+            io.readOpt() = IOobject::NO_READ;
+
+            PtrList<fvPatchField<Type>> patchFields(mesh.boundary().size());
+            forAll(patchFields, patchI)
+            {
+                patchFields.set
                 (
-                    zeroGradientFvPatchField<Type>::typeName,
-                    mesh.boundary()[patchI],
-                    dimFld
-                )
+                    patchI,
+                    fvPatchField<Type>::New
+                    (
+                        zeroGradientFvPatchField<Type>::typeName,
+                        mesh.boundary()[patchI],
+                        dimFld
+                    )
+                );
+            }
+
+            VolFieldType volFld
+            (
+                io,
+                dimFld.mesh(),
+                dimFld.dimensions(),
+                dimFld,
+                patchFields
             );
+            volFld.correctBoundaryConditions();
+
+            convertVolField(patchInterpList, volFld);
+        }
+        catch (Foam::IOerror& ioErr)
+        {
+            ioErr.write(Warning, false);
+            Info << nl << endl;
+        }
+        catch (Foam::error& err)
+        {
+            // Bit of trickery to get the original message
+            err.write(Warning, false);
+            Info << nl << endl;
         }
 
-        VolFieldType volFld
-        (
-            io,
-            dimFld.mesh(),
-            dimFld.dimensions(),
-            dimFld,
-            patchFields
-        );
-        volFld.correctBoundaryConditions();
-
-        convertVolField(patchInterpList, volFld);
+        // Restore previous exception throwing state
+        FatalError.throwExceptions(throwingError);
+        FatalIOError.throwExceptions(throwingIOerr);
     }
 }
 
@@ -421,31 +465,54 @@ void Foam::vtkPVFoam::convertAreaFields
 
         if (ioobj.headerClassName() == FieldType::typeName)
         {
-            // Load field
-            FieldType fld(ioobj, mesh);
+            // Throw FatalError, FatalIOError as exceptions
+            const bool throwingError = FatalError.throwExceptions();
+            const bool throwingIOerr = FatalIOError.throwExceptions();
 
-            // Convert
-            for (const auto partId : partIds)
+            try
             {
-                const auto& longName = selectedPartIds_[partId];
+                // Load field
+                FieldType fld(ioobj, mesh);
 
-                auto iter = cachedVtp_.find(longName);
-                if (!iter.found() || !iter.object().dataset)
+                // Convert
+                for (const auto partId : partIds)
                 {
-                    // Should not happen, but for safety require a vtk geometry
-                    continue;
+                    const auto& longName = selectedPartIds_[partId];
+
+                    auto iter = cachedVtp_.find(longName);
+                    if (!iter.found() || !iter.object().dataset)
+                    {
+                        // Should not happen, but for safety require a vtk
+                        // geometry
+                        continue;
+                    }
+
+                    foamVtpData& vtpData = iter.object();
+                    auto dataset = vtpData.dataset;
+
+                    vtkSmartPointer<vtkFloatArray> cdata = convertFieldToVTK
+                    (
+                        fld.name(),
+                        fld
+                    );
+                    dataset->GetCellData()->AddArray(cdata);
                 }
-
-                foamVtpData& vtpData = iter.object();
-                auto dataset = vtpData.dataset;
-
-                vtkSmartPointer<vtkFloatArray> cdata = convertFieldToVTK
-                (
-                    fld.name(),
-                    fld
-                );
-                dataset->GetCellData()->AddArray(cdata);
             }
+            catch (Foam::IOerror& ioErr)
+            {
+                ioErr.write(Warning, false);
+                Info << nl << endl;
+            }
+            catch (Foam::error& err)
+            {
+                // Bit of trickery to get the original message
+                err.write(Warning, false);
+                Info << nl << endl;
+            }
+
+            // Restore previous exception throwing state
+            FatalError.throwExceptions(throwingError);
+            FatalIOError.throwExceptions(throwingIOerr);
         }
     }
 }
@@ -483,91 +550,113 @@ void Foam::vtkPVFoam::convertPointFields
             Info<< "convertPointFields : " << fieldName << nl;
         }
 
-        FieldType pfld(ioobj, pMesh);
+        // Throw FatalError, FatalIOError as exceptions
+        const bool throwingError = FatalError.throwExceptions();
+        const bool throwingIOerr = FatalIOError.throwExceptions();
 
-        convertPointFieldBlock(pfld, rangeVolume_);     // internalMesh
-        convertPointFieldBlock(pfld, rangeCellZones_);  // cellZones
-        convertPointFieldBlock(pfld, rangeCellSets_);   // cellSets
-
-        // Patches - currently skip field conversion for groups
-        for
-        (
-            const auto partId
-          : rangePatches_.intersection(selectedPartIds_)
-        )
+        try
         {
-            const auto& longName = selectedPartIds_[partId];
+            FieldType pfld(ioobj, pMesh);
 
-            auto iter = cachedVtp_.find(longName);
-            if (!iter.found() || !iter.object().dataset)
-            {
-                // Should not happen, but for safety require a vtk geometry
-                continue;
-            }
+            convertPointFieldBlock(pfld, rangeVolume_);     // internalMesh
+            convertPointFieldBlock(pfld, rangeCellZones_);  // cellZones
+            convertPointFieldBlock(pfld, rangeCellSets_);   // cellSets
 
-            foamVtpData& vtpData = iter.object();
-            auto dataset = vtpData.dataset;
-
-            const labelList& patchIds = vtpData.additionalIds();
-            if (patchIds.size() != 1)
-            {
-                continue;
-            }
-
-            const label patchId = patchIds[0];
-
-            vtkSmartPointer<vtkFloatArray> pdata = convertFieldToVTK
+            // Patches - currently skip field conversion for groups
+            for
             (
-                fieldName,
-                pfld.boundaryField()[patchId].patchInternalField()()
-            );
-
-            dataset->GetPointData()->AddArray(pdata);
-        }
-
-        // Face Zones
-        for
-        (
-            const auto partId
-          : rangeFaceZones_.intersection(selectedPartIds_)
-        )
-        {
-            const auto& longName = selectedPartIds_[partId];
-            const word zoneName = getFoamName(longName);
-
-            auto iter = cachedVtp_.find(longName);
-            if (!iter.found() || !iter.object().dataset)
+                const auto partId
+              : rangePatches_.intersection(selectedPartIds_)
+            )
             {
-                // Should not happen, but for safety require a vtk geometry
-                continue;
-            }
+                const auto& longName = selectedPartIds_[partId];
 
-            foamVtpData& vtpData = iter.object();
-            auto dataset = vtpData.dataset;
+                auto iter = cachedVtp_.find(longName);
+                if (!iter.found() || !iter.object().dataset)
+                {
+                    // Should not happen, but for safety require a vtk geometry
+                    continue;
+                }
 
-            const label zoneId = mesh.faceZones().findZoneID(zoneName);
+                foamVtpData& vtpData = iter.object();
+                auto dataset = vtpData.dataset;
 
-            if (zoneId < 0)
-            {
-                continue;
-            }
+                const labelList& patchIds = vtpData.additionalIds();
+                if (patchIds.size() != 1)
+                {
+                    continue;
+                }
 
-            // Extract the field on the zone
-            Field<Type> znfld
-            (
-                pfld.primitiveField(),
-                mesh.faceZones()[zoneId]().meshPoints()
-            );
+                const label patchId = patchIds[0];
 
-            vtkSmartPointer<vtkFloatArray> pdata =
-                convertFieldToVTK
+                vtkSmartPointer<vtkFloatArray> pdata = convertFieldToVTK
                 (
                     fieldName,
-                    znfld
+                    pfld.boundaryField()[patchId].patchInternalField()()
                 );
 
-            dataset->GetPointData()->AddArray(pdata);
+                dataset->GetPointData()->AddArray(pdata);
+            }
+
+            // Face Zones
+            for
+            (
+                const auto partId
+              : rangeFaceZones_.intersection(selectedPartIds_)
+            )
+            {
+                const auto& longName = selectedPartIds_[partId];
+                const word zoneName = getFoamName(longName);
+
+                auto iter = cachedVtp_.find(longName);
+                if (!iter.found() || !iter.object().dataset)
+                {
+                    // Should not happen, but for safety require a vtk geometry
+                    continue;
+                }
+
+                foamVtpData& vtpData = iter.object();
+                auto dataset = vtpData.dataset;
+
+                const label zoneId = mesh.faceZones().findZoneID(zoneName);
+
+                if (zoneId < 0)
+                {
+                    continue;
+                }
+
+                // Extract the field on the zone
+                Field<Type> znfld
+                (
+                    pfld.primitiveField(),
+                    mesh.faceZones()[zoneId]().meshPoints()
+                );
+
+                vtkSmartPointer<vtkFloatArray> pdata =
+                    convertFieldToVTK
+                    (
+                        fieldName,
+                        znfld
+                    );
+
+                dataset->GetPointData()->AddArray(pdata);
+            }
         }
+        catch (Foam::IOerror& ioErr)
+        {
+            ioErr.write(Warning, false);
+            Info << nl << endl;
+        }
+        catch (Foam::error& err)
+        {
+            // Bit of trickery to get the original message
+            err.write(Warning, false);
+            Info << nl << endl;
+        }
+
+        // Restore previous exception throwing state
+        FatalError.throwExceptions(throwingError);
+        FatalIOError.throwExceptions(throwingIOerr);
     }
 }
 
@@ -735,18 +824,40 @@ void Foam::vtkPVFoam::convertLagrangianFields
 
         if (ioobj.headerClassName() == IOField<Type>::typeName)
         {
-            IOField<Type> fld(ioobj);
+            // Throw FatalError, FatalIOError as exceptions
+            const bool throwingError = FatalError.throwExceptions();
+            const bool throwingIOerr = FatalIOError.throwExceptions();
 
-            vtkSmartPointer<vtkFloatArray> data =
-                convertFieldToVTK
-                (
-                    ioobj.name(),
-                    fld
-                );
+            try
+            {
+                IOField<Type> fld(ioobj);
 
-            // Provide identical data as cell and as point data
-            vtkmesh->GetCellData()->AddArray(data);
-            vtkmesh->GetPointData()->AddArray(data);
+                vtkSmartPointer<vtkFloatArray> data =
+                    convertFieldToVTK
+                    (
+                        ioobj.name(),
+                        fld
+                    );
+
+                // Provide identical data as cell and as point data
+                vtkmesh->GetCellData()->AddArray(data);
+                vtkmesh->GetPointData()->AddArray(data);
+            }
+            catch (Foam::IOerror& ioErr)
+            {
+                ioErr.write(Warning, false);
+                Info << nl << endl;
+            }
+            catch (Foam::error& err)
+            {
+                // Bit of trickery to get the original message
+                err.write(Warning, false);
+                Info << nl << endl;
+            }
+
+            // Restore previous exception throwing state
+            FatalError.throwExceptions(throwingError);
+            FatalIOError.throwExceptions(throwingIOerr);
         }
     }
 }

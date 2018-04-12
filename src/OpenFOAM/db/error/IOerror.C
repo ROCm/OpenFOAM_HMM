@@ -260,34 +260,43 @@ void Foam::IOerror::abort()
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const IOerror& err)
+void Foam::IOerror::write(Ostream& os, const bool includeTitle) const
 {
     if (!os.bad())
     {
-        os  << nl
-            << err.title().c_str() << nl
-            << err.message().c_str() << nl << endl;
-
-        os  << "file: " << err.ioFileName().c_str();
-
-        if (err.ioStartLineNumber() >= 0 && err.ioEndLineNumber() >= 0)
+        os  << nl;
+        if (includeTitle)
         {
-            os  << " from line " << err.ioStartLineNumber()
-                << " to line " << err.ioEndLineNumber() << '.';
+            os  << title().c_str() << nl;
         }
-        else if (err.ioStartLineNumber() >= 0)
+        os  << message().c_str() << nl << endl;
+
+        os  << "file: " << ioFileName().c_str();
+
+        if (ioStartLineNumber() >= 0 && ioEndLineNumber() >= 0)
         {
-            os  << " at line " << err.ioStartLineNumber() << '.';
+            os  << " from line " << ioStartLineNumber()
+                << " to line " << ioEndLineNumber() << '.';
+        }
+        else if (ioStartLineNumber() >= 0)
+        {
+            os  << " at line " << ioStartLineNumber() << '.';
         }
 
-        if (IOerror::level >= 2 && err.sourceFileLineNumber())
+        if (IOerror::level >= 2 && sourceFileLineNumber())
         {
             os  << nl << nl
-                << "    From function " << err.functionName().c_str() << endl
-                << "    in file " << err.sourceFileName().c_str()
-                << " at line " << err.sourceFileLineNumber() << '.';
+                << "    From function " << functionName().c_str() << endl
+                << "    in file " << sourceFileName().c_str()
+                << " at line " << sourceFileLineNumber() << '.';
         }
     }
+}
+
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const IOerror& err)
+{
+    err.write(os);
 
     return os;
 }
