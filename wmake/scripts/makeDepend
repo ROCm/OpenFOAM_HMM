@@ -30,6 +30,7 @@
 #         -eENV     Environment variable path substitutions.
 #         -oFile    Write output to File.
 #         -q        Suppress 'No such file' warnings.
+#         -v        Verbose
 #
 #------------------------------------------------------------------------------
 unset envChanges output
@@ -37,10 +38,10 @@ unset envChanges output
 while [ "$#" -gt 1 ]
 do
     case "$1" in
-    -q*)   # quiet - ignore
+    -q* | -v*)   # quiet/verbose- ignore
     ;;
 
-    -e*)  # -eENV - ignore for now
+    -e*)  # -eENV - Not working
         envChanges="$envChanges ${1#-e}"
         ;;
 

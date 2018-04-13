@@ -86,11 +86,15 @@ void usage()
         "  -eENV     Environment variable path substitutions.\n"
         "  -oFile    Write output to File.\n"
         "  -q        Suppress 'No such file' warnings.\n"
+        "  -v        Report each include file to stderr.\n"
         "\nDependency list generator, similar to 'cpp -M'\n\n";
 }
 
-// Suppress some error messages
+//- Suppress some error messages
 bool optQuiet = false;
+
+//- Verbose progress
+bool optVerbose = false;
 
 //- The top-level source file being processed
 std::string sourceFile;
@@ -136,45 +140,55 @@ namespace Files
     }
 
 
-    //- Add environ replacements
+    //- Add environ replacement
     //
-    // Eg,
-    //     /openfoam/project/path/directory/xyz
-    //  -> $(WM_PROJECT_DIR)/directory/xyz
-    void addEnv(std::string key)
+    // Eg for 'WM_PROJECT_DIR' stores the pair
+    //     '$(WM_PROJECT_DIR)/'
+    //     '/path/openfoam/project/'
+    //
+    // No-op if the environment does not exists or is empty
+    void addEnv(const char* key)
     {
-        const char *val = ::getenv(key.c_str());
+        const size_t keylen = key ? strlen(key) : 0;
+        if (!keylen) return;
 
-        if (val && *val)
+        const char *val = ::getenv(key);
+
+        if (!val || !*val) return;
+
+        // The "$(ENV)/" portion
+        std::string oldText;
+        oldText.reserve(keylen+4);
+        oldText.append("$(").append(key,keylen).append(")/");
+
+        // The "/env/value/" portion
+        std::string newText(val);
+        if (newText.back() != '/')
         {
-            // "$(ENV)/"  -> "/env/value/"
-            std::string orig(val);
-            if (orig.back() != '/')
-            {
-                orig.append("/");
-            }
-
-            envlist.emplace_front("$(" + key + ")/", std::move(orig));
+            newText.append(1, '/');
         }
+
+        envlist.emplace_front(std::move(oldText), std::move(newText));
     }
 
 
+    //- Open a file for reading and emit its qualified name to stdout.
     //
-    // Open a file for reading and emit its qualified name to stdout.
-    // Uses env substitutions at the beginning of the path
+    //  Uses env substitutions at the beginning of the path
     //
-    // Eg,
-    //     /openfoam/project/path/directory/xyz
-    //  -> $(WM_PROJECT_DIR)/directory/xyz
+    //  Eg,
+    //      /path/openfoam/project/directory/name
+    //   -> $(WM_PROJECT_DIR)/directory/name
     //
-    FILE* fopen_file(const std::string& fileName)
+    //  \return nullptr on failure
+    FILE* openAndEmit(const std::string& fileName)
     {
         const auto len = fileName.size();
         const char *fname = fileName.c_str();
 
-        FILE *filePtr = ::fopen(fname, "r");
+        FILE *infile = ::fopen(fname, "r");
 
-        if (filePtr)
+        if (infile)
         {
             // Mark as having been visited
             visited.insert(fileName);
@@ -187,14 +201,14 @@ namespace Files
                  && !fileName.compare(0, entry.len, entry.value)
                 )
                 {
-                    fname += entry.len;
-                    ::fputs(entry.name.c_str(), stdout);
+                    fname += entry.len;  // Now positioned after the '/'
+                    fputs(entry.name.c_str(), stdout);
                     break;
                 }
             }
 
-            ::fputs(fname, stdout);
-            ::fputs(" \\\n", stdout);
+            fputs(fname, stdout);
+            fputs(" \\\n", stdout);
         }
         else if (errno == EMFILE)
         {
@@ -204,15 +218,16 @@ namespace Files
                 << "Please change your open descriptor limit\n";
         }
 
-        return filePtr;
+        return infile;
     }
 
 
-    // Open a not previously visited file for reading, using the include dirs
-    // as required.
+    //- Open a not previously visited file for reading,
+    //  using the include dirs as required.
     //
-    // On success, emits the resolved name on stdout
+    //  On success, emits the resolved name on stdout
     //
+    //  \return nullptr on failure
     FILE* open(const std::string& fileName)
     {
         // Bad file name, or already visited
@@ -221,8 +236,8 @@ namespace Files
             return nullptr;
         }
 
-        FILE* filePtr = fopen_file(fileName);
-        if (!filePtr)
+        FILE* infile = openAndEmit(fileName);
+        if (!infile)
         {
             std::string fullName;
 
@@ -243,9 +258,9 @@ namespace Files
                 }
                 fullName.append(fileName);
 
-                filePtr = fopen_file(fullName);
+                infile = openAndEmit(fullName);
 
-                if (filePtr)
+                if (infile)
                 {
                     break;
                 }
@@ -257,10 +272,10 @@ namespace Files
         visited.insert(fileName);
 
         // Report failues
-        if (!filePtr && !optQuiet)
+        if (!infile && !optQuiet)
         {
             std::cerr
-                << EXENAME ": could not open file '"
+                << EXENAME ": could not open '"
                 << fileName << "' for source file '"
                 << sourceFile << "'";
 
@@ -272,7 +287,7 @@ namespace Files
             std::cerr << '\n' << std::flush;
         }
 
-        return filePtr;
+        return infile;
     }
 
 } // end of namespace Files
@@ -280,41 +295,40 @@ namespace Files
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// Ragel machine requirements: token start/end, action, code state
-// are defined later (prior to use)
+// Ragel machine definition
+// Ragel variables (p, pe, eof, cs, top, stack, ts, te, act) defined later...
+//
+// Can use 'variable p xxx;' etc to change these names
 
 %%{
     machine wmkdep;
-    write   data nofinal;
 
-    hashInclude = space* '#' space* 'include' space* ; ## include directive
-    includeName = [^\"<>]+ ;                    ## Text between "" or <>
+    action  buffer  { tok = p; /* Local token start */ }
+    action  process { processFile(std::string(tok, (p - tok))); }
 
-    action  begInclude { ts_inclName = fpc; }   ## Remember start position
-
-    ## No 'if (ts_inclName) ...' guard needed (implicit via the FSM)
-    action  endInclude
-    {
-        // std::cerr << std::string(ts, (te-ts)) << '\n';
-        processFile(std::string(ts_inclName, (fpc - ts_inclName)));
-    }
-
-    consume_comment := any* :>> '*/' @{ fgoto main; };
+    comment := any* :>> '*/' @{ fgoto main; };
 
     main := |*
+
+    ^space* '#' space* 'include' space* ('"' [^\"]+ >buffer %process '"');
 
     # Single and double quoted strings
     ( 'L'? "'" ( [^'\\\n] | /\\./ )* "'") ;     # " swallow
     ( 'L'? '"' ( [^"\\\n] | /\\./ )* '"') ;     # ' swallow
 
-    hashInclude '"' %begInclude includeName %endInclude '"' ;
-
-    '/*' { fgoto consume_comment; };
-    '//' [^\n]* '\n' ;
-    [^\n]* '\n' ;              # Swallow all other lines
+    '/*' { fgoto comment; };
+    '//' [^\n]* '\n';
+    [^\n]* '\n';        # Swallow all other lines
 
     *|;
 }%%
+
+
+//
+// FSM globals
+//
+
+%% write data nofinal;
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -325,17 +339,21 @@ namespace Files
 void processFile(const std::string& fileName)
 {
     FILE* infile = Files::open(fileName);
+    if (optVerbose)
+    {
+        std::cerr << fileName << '\n';
+    }
     if (!infile) return;
 
-    // ts, te  = Ragel token start/end points (required naming)
-    // act, cs = Ragel action, code state, respectively (required naming)
+    // ts, te  = Ragel token start/end points (default naming)
+    // act, cs = Ragel action, code state, respectively (default naming)
     char *ts, *te;
-    unsigned act, cs;
+    int act, cs;
 
-    %% write init ;             ## /* FSM initialization here */;
+    %%{write init;}%%   /* ^^^ FSM initialization here ^^^ */;
 
-    // Token start of include filename (for begInclude, endInclude actions)
-    char *ts_inclName = nullptr;
+    // Local token start
+    char *tok = nullptr;
 
     // Buffering
     char inbuf[READ_BUFLEN];
@@ -344,9 +362,10 @@ void processFile(const std::string& fileName)
     // Processing loop (as per Ragel pdf example)
     for (bool good = true; good; /*nil*/)
     {
-        const size_t avail = READ_BUFLEN - pending;
+        char *data = inbuf + pending;                // current data buffer
+        const size_t buflen = READ_BUFLEN - pending; // space left in buffer
 
-        if (!avail)
+        if (!buflen)
         {
             // We overfilled the buffer while trying to scan a token...
             std::cerr
@@ -355,25 +374,29 @@ void processFile(const std::string& fileName)
             break;
         }
 
-        // p, pe  = Ragel parsing point and parsing end (required naming)
-        // eof    = Ragel EOF point (required naming)
+        // p,pe = Ragel parsing point and parsing end (default naming)
+        // eof  = Ragel EOF point (default naming)
 
-        char *p = inbuf + pending;
-        const size_t gcount = ::fread(p, 1, avail, infile);
+        const size_t gcount = ::fread(data, 1, buflen, infile);
 
+        char *p = data;
         char *pe = p + gcount;
         char *eof = nullptr;
 
-        if (!gcount)    // Could also use feof(infile)
+        if (::feof(infile))
         {
             // Tag 'pe' as being the EOF for the FSM as well
             eof = pe;
             good = false;
         }
+        else if (!gcount)
+        {
+            break;
+        }
 
-        %% write exec ;         ## /* FSM execution here */;
+        %%{write exec;}%%       /* ^^^ FSM execution here ^^^ */;
 
-        if (cs == wmkdep_error)
+        if (%%{write error;}%% == cs)
         {
             // FSM failed before finding a token
             std::cerr
@@ -386,7 +409,7 @@ void processFile(const std::string& fileName)
         {
             // Preserve incomplete token
             pending = pe - ts;
-            ::memmove(inbuf, ts, pending);
+            memmove(inbuf, ts, pending);
             te = inbuf + (te - ts);   // token end (after memmove)
             ts = inbuf;               // token start
         }
@@ -428,6 +451,10 @@ int main(int argc, char* argv[])
                 optQuiet = true;
                 break;
 
+            case 'v':           // Option: -v (verbose)
+                optVerbose = true;
+                break;
+
             case 'I':           // Option: -Idir
                 ++nIncDirs;
                 break;
@@ -445,7 +472,7 @@ int main(int argc, char* argv[])
         if (dot == std::string::npos || sourceFile[dot] != '.')
         {
             std::cerr
-                << EXENAME ": cannot find extension in source file name '"
+                << EXENAME ": no file extension in source file name '"
                 << sourceFile << "'\n";
 
             return 1;
@@ -493,29 +520,22 @@ int main(int argc, char* argv[])
         }
     }
 
-
-    // Start of output
-    if (outputFile.size())
+    if (outputFile.size() && !freopen(outputFile.c_str(), "w", stdout))
     {
-        FILE *reopened = freopen(outputFile.c_str(), "w", stdout);
-        if (!reopened)
-        {
-            std::cerr
-                << EXENAME ": could not open file '"
-                << outputFile << "' for output: " << strerror(errno)
-                << "\n";
-            return 1;
-        }
+        std::cerr
+            << EXENAME ": could not open file '"
+            << outputFile << "' for output: " << strerror(errno) << "\n";
+        return 1;
     }
 
-    ::fputs("$(OBJECTS_DIR)/", stdout);
-    ::fputs(sourceFile.c_str(), stdout);
-    ::fputs(".dep: \\\n", stdout);
+    fputs("$(OBJECTS_DIR)/", stdout);
+    fputs(sourceFile.c_str(), stdout);
+    fputs(".dep: \\\n", stdout);
 
     processFile(sourceFile);
 
-    ::fputs("\n\n", stdout);
-    ::fflush(stdout);
+    fputs("\n\n", stdout);
+    fflush(stdout);
 
     return 0;
 }
