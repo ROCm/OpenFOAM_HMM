@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,10 +34,9 @@ namespace Foam
     defineTypeNameAndDebug(OFstream, 0);
 }
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::OFstreamAllocator::OFstreamAllocator
+Foam::Detail::OFstreamAllocator::OFstreamAllocator
 (
     const fileName& pathname,
     IOstream::compressionType compression,
@@ -100,13 +99,13 @@ Foam::OFstreamAllocator::OFstreamAllocator
 }
 
 
-Foam::OFstreamAllocator::~OFstreamAllocator()
+Foam::Detail::OFstreamAllocator::~OFstreamAllocator()
 {
     deallocate();
 }
 
 
-void Foam::OFstreamAllocator::deallocate()
+void Foam::Detail::OFstreamAllocator::deallocate()
 {
     if (allocatedPtr_)
     {
@@ -127,7 +126,7 @@ Foam::OFstream::OFstream
     const bool append
 )
 :
-    OFstreamAllocator(pathname, compression, append),
+    Detail::OFstreamAllocator(pathname, compression, append),
     OSstream
     (
         *allocatedPtr_,
@@ -158,12 +157,6 @@ Foam::OFstream::OFstream
 
     lineNumber_ = 1;
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::OFstream::~OFstream()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

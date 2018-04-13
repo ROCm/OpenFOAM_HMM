@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::OFstream
 
 Description
-    Output to file stream, using a OSstream
+    Output to file stream, using an OSstream
 
 SourceFiles
     OFstream.C
@@ -47,8 +47,11 @@ using std::ofstream;
 namespace Foam
 {
 
+namespace Detail
+{
+
 /*---------------------------------------------------------------------------*\
-                      Class OFstreamAllocator Declaration
+                  Class Detail::OFstreamAllocator Declaration
 \*---------------------------------------------------------------------------*/
 
 //- A std::ostream with the ability to handle compressed files
@@ -84,6 +87,8 @@ protected:
 
 };
 
+} // end namespace Detail
+
 
 /*---------------------------------------------------------------------------*\
                           Class OFstream Declaration
@@ -91,7 +96,7 @@ protected:
 
 class OFstream
 :
-    public OFstreamAllocator,
+    public Detail::OFstreamAllocator,
     public OSstream
 {
 public:
@@ -114,18 +119,18 @@ public:
 
 
     //- Destructor
-    ~OFstream();
+    ~OFstream() = default;
 
 
     // Member functions
 
-      // Access
+    // Access
 
         //- Read/write access to the name of the stream
         using OSstream::name;
 
 
-      // STL stream
+    // STL stream
 
         //- Access to underlying std::ostream
         virtual std::ostream& stdStream();
@@ -134,7 +139,7 @@ public:
         virtual const std::ostream& stdStream() const;
 
 
-      // Print
+    // Print
 
         //- Print description of IOstream to Ostream
         void print(Ostream& os) const;

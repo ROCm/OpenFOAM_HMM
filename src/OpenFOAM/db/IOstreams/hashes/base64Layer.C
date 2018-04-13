@@ -110,6 +110,7 @@ Foam::base64Layer::base64Layer(std::ostream& os)
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
 Foam::base64Layer::~base64Layer()
 {
     close();

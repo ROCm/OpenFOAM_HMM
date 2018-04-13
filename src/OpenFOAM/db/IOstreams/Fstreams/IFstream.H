@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::IFstream
 
 Description
-    Input from file stream, using a ISstream
+    Input from file stream, using an ISstream
 
 SourceFiles
     IFstream.C
@@ -47,8 +47,11 @@ using std::ifstream;
 namespace Foam
 {
 
+namespace Detail
+{
+
 /*---------------------------------------------------------------------------*\
-                      Class IFstreamAllocator Declaration
+                  Class Detail::IFstreamAllocator Declaration
 \*---------------------------------------------------------------------------*/
 
 //- A std::istream with the ability to handle compressed files
@@ -82,6 +85,8 @@ protected:
 
 };
 
+} // end namespace Detail
+
 
 /*---------------------------------------------------------------------------*\
                           Class IFstream Declaration
@@ -89,7 +94,7 @@ protected:
 
 class IFstream
 :
-    public IFstreamAllocator,
+    public Detail::IFstreamAllocator,
     public ISstream
 {
 public:
@@ -110,18 +115,18 @@ public:
 
 
     //- Destructor
-    ~IFstream();
+    ~IFstream() = default;
 
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- Read/write access to the name of the stream
         using ISstream::name;
 
 
-      // STL stream
+    // STL stream
 
         //- Access to underlying std::istream
         virtual std::istream& stdStream();
@@ -133,17 +138,17 @@ public:
         virtual void rewind();
 
 
-      // Print
+    // Print
 
         //- Print description of IOstream to Ostream
         virtual void print(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
         //- Return a non-const reference to const IFstream
         //  Needed for read-constructors where the stream argument is temporary:
-        //  e.g. thing thisThing(IFstream("thingFileName")());
+        //  e.g. thing thisThing(IFstream("fileName")());
         IFstream& operator()() const;
 };
 

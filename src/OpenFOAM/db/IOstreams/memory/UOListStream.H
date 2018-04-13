@@ -90,8 +90,11 @@ See Also
 namespace Foam
 {
 
+namespace Detail
+{
+
 /*---------------------------------------------------------------------------*\
-                    Class UOListStreamAllocator Declaration
+                Class Detail::UOListStreamAllocator Declaration
 \*---------------------------------------------------------------------------*/
 
 //- An stream/stream-buffer allocator for external buffers
@@ -161,6 +164,8 @@ public:
         }
 };
 
+} // end of namespace Detail
+
 
 /*---------------------------------------------------------------------------*\
                          Class UOListStream Declaration
@@ -169,10 +174,10 @@ public:
 //- An OSstream attached to an unallocated external buffer
 class UOListStream
 :
-    public UOListStreamAllocator,
+    public Detail::UOListStreamAllocator,
     public OSstream
 {
-    typedef UOListStreamAllocator allocator_type;
+    typedef Detail::UOListStreamAllocator allocator_type;
 
 public:
 
@@ -241,7 +246,7 @@ public:
         {}
 
 
-    // Member functions
+    // Member Functions
 
         //- Rewind the stream, clearing any old errors
         virtual void rewind()
