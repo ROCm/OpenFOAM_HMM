@@ -139,10 +139,10 @@ int main(int argc, char *argv[])
     wre.info(Info) << " uncompiled" << endl;
     wre.compile(wordRe::DETECT);
     wre.info(Info) << " after DETECT" << endl;
-    wre.compile(wordRe::NOCASE);
-    wre.info(Info) << " after NOCASE" << endl;
-    wre.compile(wordRe::DETECT_NOCASE);
-    wre.info(Info) << " after DETECT_NOCASE" << endl;
+    wre.compile(wordRe::ICASE);
+    wre.info(Info) << " after ICASE" << endl;
+    wre.compile(wordRe::DETECT_ICASE);
+    wre.info(Info) << " after DETECT_ICASE" << endl;
 
     wre = "something .* value";
     wre.info(Info) << " before" << endl;
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
             << endl;
 
         wordRe wre2;
-        wre2.set(wre, wordRe::NOCASE);
+        wre2.set(wre, wordRe::ICASE);
 
         wre2.info(Info)
             << " match:" << wre2.match(str)

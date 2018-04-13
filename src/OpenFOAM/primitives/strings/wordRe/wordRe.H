@@ -92,15 +92,16 @@ public:
     // Public data types
 
         //- Enumeration with compile options
-        //  Note that 'REGEX' is implicit if 'NOCASE' is specified alone.
+        //  Note that 'REGEX' is implicit if 'ICASE' is specified alone.
         enum compOption
         {
             LITERAL = 0, //!< Treat as a string literal
             DETECT  = 1, //!< Detect if the string contains meta-characters
             REGEX   = 2, //!< Treat as regular expression
-            NOCASE  = 4, //!< Ignore case in regular expression
-            DETECT_NOCASE = DETECT|NOCASE,  //!< Combined DETECT and NOCASE
-            REGEX_NOCASE  = REGEX|NOCASE    //!< Combined REGEX and NOCASE
+            ICASE   = 4, //!< Ignore case in regular expression
+            NOCASE  = 4, //!< \deprecated Alias for ICASE (deprecated APR-2018)
+            DETECT_ICASE = (DETECT|ICASE),  //!< Combined DETECT and ICASE
+            REGEX_ICASE  = (REGEX|ICASE)    //!< Combined REGEX and ICASE
         };
 
 
@@ -140,19 +141,19 @@ public:
         inline explicit wordRe(const word& str);
 
         //- Construct from keyType, use specified compile option
-        inline wordRe(const keyType& str, const compOption);
+        inline wordRe(const keyType& str, const compOption opt);
 
         //- Construct as copy of character array, use specified compile option
-        inline wordRe(const char* str, const compOption);
+        inline wordRe(const char* str, const compOption opt);
 
         //- Construct as copy of std::string, use specified compile option
-        inline wordRe(const std::string& str, const compOption);
+        inline wordRe(const std::string& str, const compOption opt);
 
         //- Construct as copy of string, use specified compile option
-        inline wordRe(const string& str, const compOption);
+        inline wordRe(const string& str, const compOption opt);
 
         //- Construct as copy of word, use specified compile option
-        inline wordRe(const word& str, const compOption);
+        inline wordRe(const word& str, const compOption opt);
 
         //- Move construct
         inline wordRe(wordRe&& str);
@@ -164,32 +165,32 @@ public:
 
     // Member functions
 
-      // Access
+    // Access
 
         //- Treat as a pattern rather than a literal string?
         inline bool isPattern() const;
 
 
-      // Infrastructure
+    // Infrastructure
 
         //- Compile the regular expression
         inline bool compile() const;
 
         //- Possibly compile the regular expression, with greater control
-        inline bool compile(const compOption) const;
+        inline bool compile(const compOption opt) const;
 
         //- Make wordRe a literal again, instead of a regular expression.
         //  Optionally strip invalid word characters.
         inline void uncompile(const bool doStripInvalid = false) const;
 
 
-      // Editing
+    // Editing
 
         //- Copy string, auto-test for regular expression or other options
-        inline void set(const std::string& str, const compOption = DETECT);
+        inline void set(const std::string& str, const compOption opt = DETECT);
 
         //- Copy string, auto-test for regular expression or other options
-        inline void set(const char* str, const compOption = DETECT);
+        inline void set(const char* str, const compOption opt = DETECT);
 
         //- Clear string and regular expression
         inline void clear();
@@ -198,14 +199,14 @@ public:
         inline void swap(wordRe& str);
 
 
-     // Matching/Searching
+    // Matching/Searching
 
         //- Smart match as regular expression or as a string.
         //  Optionally force a literal match only
         inline bool match(const std::string& text, bool literal=false) const;
 
 
-      // Miscellaneous
+    // Miscellaneous
 
         //- Return a string with quoted meta-characters
         inline string quotemeta() const;
@@ -214,7 +215,7 @@ public:
         Ostream& info(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
         //- Perform smart match on text, as per match()
         //  Allows use as a predicate.

@@ -177,14 +177,14 @@ inline bool Foam::wordRe::compile(const compOption opt) const
         {
             comp = string::meta<regExp>(*this) || !string::valid<word>(*this);
         }
-        else if (opt & wordRe::NOCASE)
+        else if (opt & wordRe::ICASE)
         {
             comp = true;
         }
 
         if (comp)
         {
-            return re_.set(*this, (opt & wordRe::NOCASE));
+            return re_.set(*this, (opt & wordRe::ICASE));
         }
     }
 
