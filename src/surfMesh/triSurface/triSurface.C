@@ -491,19 +491,30 @@ Foam::triSurface::triSurface
 }
 
 
-Foam::triSurface::triSurface(const fileName& name, const scalar scaleFactor)
+Foam::triSurface::triSurface
+(
+    const fileName& name,
+    const scalar scaleFactor
+)
+:
+    triSurface(name, name.ext(), scaleFactor)
+{}
+
+
+Foam::triSurface::triSurface
+(
+    const fileName& name,
+    const word& ext,
+    const scalar scaleFactor
+)
 :
     ParentType(List<Face>(), pointField()),
     patches_(),
     sortedEdgeFacesPtr_(nullptr),
     edgeOwnerPtr_(nullptr)
 {
-    const word ext = name.ext();
-
     read(name, ext);
-
     scalePoints(scaleFactor);
-
     setDefaultPatches();
 }
 

@@ -222,17 +222,18 @@ inline String Foam::string::validate(const std::string& str)
     String out;
     out.resize(str.size());
 
-    size_type count = 0;
+    size_type len = 0;
     for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
     {
         const char c = *iter;
         if (String::valid(c))
         {
-            out[count++] = c;
+            out[len] = c;
+            ++len;
         }
     }
 
-    out.resize(count);
+    out.resize(len);
 
     return out;
 }

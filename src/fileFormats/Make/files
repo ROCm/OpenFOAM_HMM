@@ -12,7 +12,9 @@ fire/FIRECore.C
 starcd/STARCDCore.C
 stl/STLCore.C
 stl/STLReader.C
-stl/STLReaderASCII.L
+stl/STLAsciiParseFlex.L
+stl/STLAsciiParseManual.C
+stl/STLAsciiParseRagel.C
 
 vtk/core/foamVtkCore.C
 vtk/core/foamVtkPTraits.C

@@ -191,7 +191,12 @@ int main(int argc, char *argv[])
     Info<<"camel-case => " << (word("camel") & "case") << nl;
     for (const auto& s : { " text with \"spaces'", "08/15 value" })
     {
-        Info<<"validated \"" << s << "\" => "
+        // Character sequence
+
+        Info<<"validated 5 chars from \" => "
+            << word::validate(s, s+5, true) << nl;
+
+        Info<<"validated (via string convert) \"" << s << "\" => "
             << word::validate(s, true) << nl;
     }
     Info<< nl;

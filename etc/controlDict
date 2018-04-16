@@ -121,7 +121,11 @@ OptimisationSwitches
 
     // Force dumping (at next timestep) upon signal (-1 to disable) and exit
     stopAtWriteNowSignal    -1;
+
+    //- Choose STL ASCII parser:  0=Flex, 1=Ragel, 2=Manual
+    fileFormats::stl 0;
 }
+
 
 /* Can specify fallback profiling settings
 profiling

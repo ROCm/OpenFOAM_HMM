@@ -148,6 +148,16 @@ public:
         //  that work nicely as dictionary keywords.
         static word validate(const std::string& s, const bool prefix=false);
 
+        //- Construct validated word (no invalid characters) from a sequence
+        //- of characters in the range [first,last),
+        //  Optionally prefix any leading digit with '_'.
+        static word validate
+        (
+            const char* first,
+            const char* last,
+            const bool prefix=false
+        );
+
 
     // File-like Functions
 

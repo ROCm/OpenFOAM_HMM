@@ -50,7 +50,7 @@ Foam::fileName Foam::fileName::validate
     out.resize(s.size());
 
     char prev = 0;
-    std::string::size_type count = 0;
+    std::string::size_type len = 0;
 
     // Largely as per stripInvalid
     for (auto iter = s.cbegin(); iter != s.cend(); ++iter)
@@ -66,17 +66,17 @@ Foam::fileName Foam::fileName::validate
             }
 
             // Only track valid chars
-            out[count++] = prev = c;
+            out[len++] = prev = c;
         }
     }
 
-    if (doClean && prev == '/' && count > 1)
+    if (doClean && prev == '/' && len > 1)
     {
         // Avoid trailing '/'
-        --count;
+        --len;
     }
 
-    out.resize(count);
+    out.resize(len);
 
     return out;
 }

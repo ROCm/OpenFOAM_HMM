@@ -285,6 +285,14 @@ public:
         //  Optional (positive, non-zero) point scaling is possible.
         triSurface(const fileName& name, const scalar scaleFactor = -1);
 
+        //- Construct from file name (uses extension to determine type)
+        triSurface
+        (
+            const fileName& name,
+            const word& ext,
+            const scalar scaleFactor = -1
+        );
+
         //- Construct from Istream
         triSurface(Istream& is);
 

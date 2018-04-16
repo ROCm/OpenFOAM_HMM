@@ -24,13 +24,59 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "STLReader.H"
+#include "STLAsciiParse.H"
 #include "Map.H"
 #include "IFstream.H"
 #include "mergePoints.H"
 
 #undef DEBUG_STLBINARY
 
+/* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
+
+int Foam::fileFormats::STLReader::parserType
+(
+    Foam::debug::optimisationSwitch("fileFormats::stl", 0)
+);
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::fileFormats::STLReader::transfer
+(
+    Detail::STLAsciiParse& parsed
+)
+{
+    sorted_ = parsed.sorted();
+
+    points_.transfer(parsed.points());
+    zoneIds_.transfer(parsed.facets());
+    names_.transfer(parsed.names());
+    sizes_.transfer(parsed.sizes());
+
+    format_ = STLFormat::ASCII;
+
+    parsed.clear();
+}
+
+
+bool Foam::fileFormats::STLReader::readASCII
+(
+    const fileName& filename
+)
+{
+    // No runtime selection of parser (only via optimisationSwitch)
+    // this is something that is infrequently changed.
+    if (parserType == 1)
+    {
+        return readAsciiRagel(filename);
+    }
+    else if (parserType == 2)
+    {
+        return readAsciiManual(filename);
+    }
+    return readAsciiFlex(filename);
+}
+
 
 bool Foam::fileFormats::STLReader::readBINARY
 (
@@ -187,12 +233,6 @@ Foam::fileFormats::STLReader::STLReader
     // Manually specified ASCII/BINARY format
     readFile(filename, format);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fileFormats::STLReader::~STLReader()
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

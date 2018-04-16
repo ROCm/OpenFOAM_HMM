@@ -45,6 +45,15 @@ SourceFiles
 
 namespace Foam
 {
+
+namespace Detail
+{
+
+// Forward Declarations
+class STLAsciiParse;
+
+}
+
 namespace fileFormats
 {
 
@@ -78,7 +87,19 @@ class STLReader
 
     // Private Member Functions
 
-        //- Read ASCII
+        //- Transfer parsed information to normal lists
+        void transfer(Detail::STLAsciiParse& parsed);
+
+        //- Parse/read ASCII using Flex-based parser
+        bool readAsciiFlex(const fileName& filename);
+
+        //- Parse/read ASCII using Ragel-based parser
+        bool readAsciiRagel(const fileName& filename);
+
+        //- Parse/read ASCII using simple handwritten parser
+        bool readAsciiManual(const fileName& filename);
+
+        //- Parse/read ASCII
         bool readASCII(const fileName& filename);
 
         //- Read BINARY
@@ -88,14 +109,20 @@ class STLReader
         bool readFile(const fileName& filename, const STLFormat format);
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         STLReader(const STLReader&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const STLReader&) = delete;
 
 
 public:
+
+    // Static Data
+
+        //- ASCII parser types (0=Flex, 1=Ragel, 2=Manual)
+        static int parserType;
+
 
     // Constructors
 
@@ -109,7 +136,7 @@ public:
 
 
     //- Destructor
-    ~STLReader();
+    ~STLReader() = default;
 
 
     // Member Functions
