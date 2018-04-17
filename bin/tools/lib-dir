@@ -136,7 +136,7 @@ then
         resolved=$dir/$alt
         ;;
     esac
-    return 0
+    exit 0
 fi
 
 
