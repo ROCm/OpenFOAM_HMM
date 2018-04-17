@@ -25,20 +25,22 @@ Application
     wmkdepend
 
 Description
-    A fast dependency list generator that emulates the behaviour and
-    output of cpp -M.
+    A faster dependency list generator that emulates the behaviour and
+    output of 'cpp -M'.
 
-    The lexer for include statements uses a Ragel-generated lexer and
-    then searches the files found. Each file is visited only once,
-    which helps make this faster than cpp. It also handles missing
-    files somewhat more gracefully.
+    For each (quoted) include directive detected, the specified include
+    directories are searched and that file (if found) is also scanned.
 
+    Each include file is visited only once, which helps make this faster
+    than cpp. It also handles missing files somewhat more gracefully.
+
+    The scanner is built with Ragel.
     The goto-based finite state machine (FSM) is generated with
 
         ragel -G2 -o wmkdepend.cpp wmkdepend.rl
 
 Usage
-    wmkdepend [-Idir..] [-iheader...] [-eENV...] [-oFile] [-q] filename
+    wmkdepend [-Idir..] [-iheader...] [-eENV...] [-oFile] filename
 
 Note
     May not capture all possible corner cases or line continuations such as
@@ -66,7 +68,7 @@ Note
 #include <vector>
 
 // Length of the input read buffer
-#define READ_BUFLEN 16384
+#define INBUFLEN 16384
 
 // The executable name (for messages), without requiring access to argv[]
 #define EXENAME  "wmkdepend"
@@ -79,7 +81,7 @@ void usage()
     std::cerr
         <<
         "\nUsage: " EXENAME
-        " [-Idir...] [-iheader...] [-eENV...] [-oFile] [-q]"
+        " [-Idir...] [-iheader...] [-eENV...] [-oFile]"
         " filename\n\n"
         "  -Idir     Directories to be searched for headers.\n"
         "  -iheader  Headers to be ignored.\n"
@@ -271,7 +273,7 @@ namespace Files
         // This also avoids re-testing and multiple messages.
         visited.insert(fileName);
 
-        // Report failues
+        // Report failures
         if (!infile && !optQuiet)
         {
             std::cerr
@@ -306,19 +308,27 @@ namespace Files
     action  buffer  { tok = p; /* Local token start */ }
     action  process { processFile(std::string(tok, (p - tok))); }
 
+    white   = [ \t\f\r];        # Horizontal whitespace
+    nl      = white* '\n';      # Newline
+    dnl     = [^\n]* '\n';      # Discard up to and including newline
+
     comment := any* :>> '*/' @{ fgoto main; };
 
     main := |*
 
-    ^space* '#' space* 'include' space* ('"' [^\"]+ >buffer %process '"');
+        space*;                         # Discard whitespace, empty lines
 
-    # Single and double quoted strings
-    ( 'L'? "'" ( [^'\\\n] | /\\./ )* "'") ;     # " swallow
-    ( 'L'? '"' ( [^"\\\n] | /\\./ )* '"') ;     # ' swallow
+        white* '#' white* 'include' white*
+            ('"' [^\"]+ >buffer %process '"') dnl;
 
-    '/*' { fgoto comment; };
-    '//' [^\n]* '\n';
-    [^\n]* '\n';        # Swallow all other lines
+        # Single and double quoted strings
+        ( 'L'? "'" ( [^'\\\n] | /\\./ )* "'") ;     # " swallow
+        ( 'L'? '"' ( [^"\\\n] | /\\./ )* '"') ;     # ' swallow
+
+        '//' dnl;                # 1-line comment
+        '/*' { fgoto comment; }; # Multi-line comment
+
+        dnl;                            # Discard all other lines
 
     *|;
 }%%
@@ -356,16 +366,13 @@ void processFile(const std::string& fileName)
     char *tok = nullptr;
 
     // Buffering
-    char inbuf[READ_BUFLEN];
+    char inbuf[INBUFLEN];
     size_t pending = 0;
 
     // Processing loop (as per Ragel pdf example)
     for (bool good = true; good; /*nil*/)
     {
-        char *data = inbuf + pending;                // current data buffer
-        const size_t buflen = READ_BUFLEN - pending; // space left in buffer
-
-        if (!buflen)
+        if (pending >= INBUFLEN)
         {
             // We overfilled the buffer while trying to scan a token...
             std::cerr
@@ -373,6 +380,9 @@ void processFile(const std::string& fileName)
                 << fileName << "'\n";
             break;
         }
+
+        char *data = inbuf + pending;   // current data buffer
+        const size_t buflen = INBUFLEN - pending; // space in buffer
 
         // p,pe = Ragel parsing point and parsing end (default naming)
         // eof  = Ragel EOF point (default naming)
@@ -385,8 +395,7 @@ void processFile(const std::string& fileName)
 
         if (::feof(infile))
         {
-            // Tag 'pe' as being the EOF for the FSM as well
-            eof = pe;
+            eof = pe;   // Tag 'pe' as being the EOF for the FSM as well
             good = false;
         }
         else if (!gcount)
