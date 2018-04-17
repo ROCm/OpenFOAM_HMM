@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -679,45 +679,68 @@ void surfaceNoise::calculate()
                 }
             }
 
-            graph Prmsfg
-            (
-                "Average Prms(f)",
-                "f [Hz]",
-                "P(f) [Pa]",
-                fOut,
-                PrmsfAve
-            );
-            Prmsfg.write(outDir, graph::wordify(Prmsfg.title()), graphFormat_);
+            if (Pstream::master())
+            {
+                graph Prmsfg
+                (
+                    "Average Prms(f)",
+                    "f [Hz]",
+                    "P(f) [Pa]",
+                    fOut,
+                    PrmsfAve
+                );
+                Prmsfg.write
+                (
+                    outDir,
+                    graph::wordify(Prmsfg.title()),
+                    graphFormat_
+                );
 
-            graph PSDfg
-            (
-                "Average PSD_f(f)",
-                "f [Hz]",
-                "PSD(f) [PaPa_Hz]",
-                fOut,
-                PSDfAve
-            );
-            PSDfg.write(outDir, graph::wordify(PSDfg.title()), graphFormat_);
+                graph PSDfg
+                (
+                    "Average PSD_f(f)",
+                    "f [Hz]",
+                    "PSD(f) [PaPa_Hz]",
+                    fOut,
+                    PSDfAve
+                );
+                PSDfg.write
+                (
+                    outDir,
+                    graph::wordify(PSDfg.title()),
+                    graphFormat_
+                );
 
-            graph PSDg
-            (
-                "Average PSD_dB_Hz(f)",
-                "f [Hz]",
-                "PSD(f) [dB_Hz]",
-                fOut,
-                noiseFFT::PSD(PSDfAve)
-            );
-            PSDg.write(outDir, graph::wordify(PSDg.title()), graphFormat_);
+                graph PSDg
+                (
+                    "Average PSD_dB_Hz(f)",
+                    "f [Hz]",
+                    "PSD(f) [dB_Hz]",
+                    fOut,
+                    noiseFFT::PSD(PSDfAve)
+                );
+                PSDg.write
+                (
+                    outDir,
+                    graph::wordify(PSDg.title()),
+                    graphFormat_
+                );
 
-            graph SPLg
-            (
-                "Average SPL_dB(f)",
-                "f [Hz]",
-                "SPL(f) [dB]",
-                fOut,
-                noiseFFT::SPL(PSDfAve*deltaf)
-            );
-            SPLg.write(outDir, graph::wordify(SPLg.title()), graphFormat_);
+                graph SPLg
+                (
+                    "Average SPL_dB(f)",
+                    "f [Hz]",
+                    "SPL(f) [dB]",
+                    fOut,
+                    noiseFFT::SPL(PSDfAve*deltaf)
+                );
+                SPLg.write
+                (
+                    outDir,
+                    graph::wordify(SPLg.title()),
+                    graphFormat_
+                );
+            }
         }
 
 
@@ -765,25 +788,38 @@ void surfaceNoise::calculate()
                     surfaceAverage(surfPrms13f2[i], procFaceOffset);
             }
 
-            graph PSD13g
-            (
-                "Average PSD13_dB_Hz(fm)",
-                "fm [Hz]",
-                "PSD(fm) [dB_Hz]",
-                octave13FreqCentre,
-                noiseFFT::PSD(PSDfAve)
-            );
-            PSD13g.write(outDir, graph::wordify(PSD13g.title()), graphFormat_);
+            if (Pstream::master())
+            {
+                graph PSD13g
+                (
+                    "Average PSD13_dB_Hz(fm)",
+                    "fm [Hz]",
+                    "PSD(fm) [dB_Hz]",
+                    octave13FreqCentre,
+                    noiseFFT::PSD(PSDfAve)
+                );
+                PSD13g.write
+                (
+                    outDir,
+                    graph::wordify(PSD13g.title()),
+                    graphFormat_
+                );
 
-            graph SPL13g
-            (
-                "Average SPL13_dB(fm)",
-                "fm [Hz]",
-                "SPL(fm) [dB]",
-                octave13FreqCentre,
-                noiseFFT::SPL(Prms13f2Ave)
-            );
-            SPL13g.write(outDir, graph::wordify(SPL13g.title()), graphFormat_);
+                graph SPL13g
+                (
+                    "Average SPL13_dB(fm)",
+                    "fm [Hz]",
+                    "SPL(fm) [dB]",
+                    octave13FreqCentre,
+                    noiseFFT::SPL(Prms13f2Ave)
+                );
+                SPL13g.write
+                (
+                    outDir,
+                    graph::wordify(SPL13g.title()),
+                    graphFormat_
+                );
+            }
         }
     }
 }

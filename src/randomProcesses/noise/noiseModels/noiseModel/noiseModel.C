@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,9 @@ void Foam::noiseModel::readWriteOption
 ) const
 {
     dict.readIfPresent(lookup, option);
+
+    // Only writing on the master process
+    option = option && Pstream::master();
 
     if (option)
     {
