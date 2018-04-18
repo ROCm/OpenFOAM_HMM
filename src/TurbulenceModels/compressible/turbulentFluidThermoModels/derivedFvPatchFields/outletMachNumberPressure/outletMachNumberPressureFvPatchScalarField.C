@@ -176,7 +176,7 @@ void Foam::outletMachNumberPressureFvPatchScalarField::updateCoeffs()
     const vectorField UbOld(U.oldTime().boundaryField()[patchi]);
 
     // relax U
-    Ub = relax_*UbOld + (1 -relax_)*Ub;
+    Ub = relax_*UbOld + (1 - relax_)*Ub;
 
     const scalarField gamma(thermoPtr->gamma()().boundaryField()[patchi]);
 
@@ -214,7 +214,7 @@ void Foam::outletMachNumberPressureFvPatchScalarField::updateCoeffs()
                 << exit(FatalError);
         }
 
-        const scalarField r = pBack_/ptot;
+        const scalarField r(pBack_/ptot);
         const scalar area = gSum(mag(patch().Sf()));
         M =
             A1_/(c1_*area)
