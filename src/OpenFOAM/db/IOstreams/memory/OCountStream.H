@@ -134,8 +134,11 @@ public:
 };
 
 
+namespace Detail
+{
+
 /*---------------------------------------------------------------------------*\
-                    Class OCountStreamAllocator Declaration
+                Class Detail::OCountStreamAllocator Declaration
 \*---------------------------------------------------------------------------*/
 
 //- An stream/stream-buffer allocator for counting
@@ -189,6 +192,8 @@ public:
         }
 };
 
+} // end of namespace Detail
+
 
 /*---------------------------------------------------------------------------*\
                         Class OCountStream Declaration
@@ -197,10 +202,10 @@ public:
 //- An output stream for calculating byte counts
 class OCountStream
 :
-    public OCountStreamAllocator,
+    public Detail::OCountStreamAllocator,
     public OSstream
 {
-    typedef OCountStreamAllocator allocator_type;
+    typedef Detail::OCountStreamAllocator allocator_type;
 
 public:
 
@@ -225,7 +230,7 @@ public:
         {}
 
 
-    // Member functions
+    // Member Functions
 
         //- Rewind the stream, reset the count, clearing any old errors
         virtual void rewind()

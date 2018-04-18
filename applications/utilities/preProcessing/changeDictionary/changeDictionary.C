@@ -646,7 +646,7 @@ int main(int argc, char *argv[])
                 dictList.writeObject
                 (
                     runTime.writeFormat(),
-                    runTime.writeFormat(),
+                    IOstream::currentVersion,
                     IOstream::UNCOMPRESSED,
                     true
                 );

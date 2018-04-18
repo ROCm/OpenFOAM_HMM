@@ -47,8 +47,11 @@ See Also
 namespace Foam
 {
 
+namespace Detail
+{
+
 /*---------------------------------------------------------------------------*\
-                    Class IListStreamAllocator Declaration
+                Class Detail::IListStreamAllocator Declaration
 \*---------------------------------------------------------------------------*/
 
 //- An stream/stream-buffer input allocator with List storage
@@ -118,6 +121,8 @@ public:
         }
 };
 
+} // end namespace Detail
+
 
 /*---------------------------------------------------------------------------*\
                          Class IListStream Declaration
@@ -126,10 +131,10 @@ public:
 //- An ISstream with internal List storage
 class IListStream
 :
-    public IListStreamAllocator,
+    public Detail::IListStreamAllocator,
     public ISstream
 {
-    typedef IListStreamAllocator allocator_type;
+    typedef Detail::IListStreamAllocator allocator_type;
 
 public:
 

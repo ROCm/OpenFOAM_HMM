@@ -53,8 +53,11 @@ See Also
 namespace Foam
 {
 
+namespace Detail
+{
+
 /*---------------------------------------------------------------------------*\
-                    Class OListStreamAllocator Declaration
+                Class Detail::OListStreamAllocator Declaration
 \*---------------------------------------------------------------------------*/
 
 //- An stream/stream-buffer output allocator with DynamicList-like storage
@@ -358,6 +361,8 @@ public:
         }
 };
 
+} // end of namespace Detail
+
 
 /*---------------------------------------------------------------------------*\
                          Class OListStream Declaration
@@ -366,10 +371,10 @@ public:
 //- An OSstream attached to a List
 class OListStream
 :
-    public OListStreamAllocator,
+    public Detail::OListStreamAllocator,
     public OSstream
 {
-    typedef OListStreamAllocator allocator_type;
+    typedef Detail::OListStreamAllocator allocator_type;
 
 public:
 

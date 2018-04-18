@@ -44,8 +44,11 @@ SourceFiles
 namespace Foam
 {
 
+namespace Detail
+{
+
 /*---------------------------------------------------------------------------*\
-                    Class StringStreamAllocator Declaration
+                Class Detail::StringStreamAllocator Declaration
 \*---------------------------------------------------------------------------*/
 
 //- Allocator for variants of a std stringstream
@@ -96,6 +99,8 @@ public:
         }
 };
 
+} // end of namespace Detail
+
 
 /*---------------------------------------------------------------------------*\
                         Class IStringStream Declaration
@@ -104,10 +109,10 @@ public:
 //- Input from string buffer, using a ISstream
 class IStringStream
 :
-    public StringStreamAllocator<std::istringstream>,
+    public Detail::StringStreamAllocator<std::istringstream>,
     public ISstream
 {
-    typedef StringStreamAllocator<std::istringstream> allocator_type;
+    typedef Detail::StringStreamAllocator<std::istringstream> allocator_type;
 
 public:
 
@@ -181,10 +186,10 @@ public:
 //- Output to string buffer, using a OSstream
 class OStringStream
 :
-    public StringStreamAllocator<std::ostringstream>,
+    public Detail::StringStreamAllocator<std::ostringstream>,
     public OSstream
 {
-    typedef StringStreamAllocator<std::ostringstream> allocator_type;
+    typedef Detail::StringStreamAllocator<std::ostringstream> allocator_type;
 
 public:
 

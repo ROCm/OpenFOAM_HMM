@@ -109,8 +109,11 @@ public:
 };
 
 
+namespace Detail
+{
+
 /*---------------------------------------------------------------------------*\
-                    Class UIListStreamAllocator Declaration
+                Class Detail::UIListStreamAllocator Declaration
 \*---------------------------------------------------------------------------*/
 
 //- An stream/stream-buffer input allocator for a externally allocated list
@@ -188,6 +191,8 @@ public:
         }
 };
 
+} // end of namespace Detail
+
 
 /*---------------------------------------------------------------------------*\
                          Class UIListStream Declaration
@@ -195,10 +200,10 @@ public:
 
 class UIListStream
 :
-    public UIListStreamAllocator,
+    public Detail::UIListStreamAllocator,
     public ISstream
 {
-    typedef UIListStreamAllocator allocator_type;
+    typedef Detail::UIListStreamAllocator allocator_type;
 
 public:
 
@@ -260,7 +265,7 @@ public:
         {}
 
 
-    // Member functions
+    // Member Functions
 
         //- Return the current get position in the buffer
         std::streampos pos() const
@@ -279,7 +284,7 @@ public:
         virtual void print(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
         //- A non-const reference to const Istream
         //  Needed for read-constructors where the stream argument is temporary

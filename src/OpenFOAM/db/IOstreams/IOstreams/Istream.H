@@ -86,8 +86,7 @@ public:
 
 
     //- Destructor
-    virtual ~Istream()
-    {}
+    virtual ~Istream() = default;
 
 
     // Member functions

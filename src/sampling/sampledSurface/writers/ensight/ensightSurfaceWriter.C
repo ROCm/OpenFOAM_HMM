@@ -49,16 +49,17 @@ Foam::ensightSurfaceWriter::ensightSurfaceWriter()
 Foam::ensightSurfaceWriter::ensightSurfaceWriter(const dictionary& options)
 :
     surfaceWriter(),
-    writeFormat_(IOstream::ASCII),
-    collateTimes_(true)
-{
-    // choose ascii or binary format
-    if (options.found("format"))
-    {
-        writeFormat_ = IOstream::formatEnum(options.lookup("format"));
-    }
-    options.readIfPresent("collateTimes", collateTimes_);
-}
+    writeFormat_
+    (
+        IOstreamOption::formatNames.lookupOrFailsafe
+        (
+            "format",
+            options,
+            IOstreamOption::ASCII
+        )
+    ),
+    collateTimes_(options.lookupOrDefault("collateTimes", true))
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

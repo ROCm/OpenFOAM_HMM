@@ -27,9 +27,6 @@ Class
 Description
     An output stream for calculating SHA1 digests.
 
-SourceFiles
-    OSHA1stream.C
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef OSHA1stream_H
@@ -42,9 +39,6 @@ SourceFiles
 
 namespace Foam
 {
-
-class osha1stream;
-class OSHA1stream;
 
 /*---------------------------------------------------------------------------*\
                          Class osha1stream Declaration
@@ -65,36 +59,30 @@ class osha1stream
         SHA1 sha1_;
 
     protected:
-        // Protected members
 
-            //- Put sequence of characters
-            virtual std::streamsize xsputn(const char* str, std::streamsize n)
-            {
-                sha1_.append(str, n);
-                return n;
-            }
-
+        //- Put sequence of characters
+        virtual std::streamsize xsputn(const char* s, std::streamsize n)
+        {
+            sha1_.append(s, n);
+            return n;
+        }
 
     public:
 
-        // Constructors
-
-            //- Construct null
-            sha1buf()
-            {}
+        //- Construct null
+        sha1buf()
+        {}
 
 
-        // Public member functions
-
-            //- Full access to the sha1
-            inline SHA1& sha1()
-            {
-                return sha1_;
-            }
+        //- Full access to the sha1
+        inline SHA1& sha1()
+        {
+            return sha1_;
+        }
     };
 
 
-    // Private data
+    // Private Data
 
         //- Reference to the underlying buffer
         sha1buf buf_;
@@ -127,8 +115,11 @@ public:
 };
 
 
+namespace Detail
+{
+
 /*---------------------------------------------------------------------------*\
-                    Class OSHA1streamAllocator Declaration
+                Class Detail::OSHA1streamAllocator Declaration
 \*---------------------------------------------------------------------------*/
 
 //- Allocator for an osha1stream
@@ -136,7 +127,7 @@ class OSHA1streamAllocator
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         typedef osha1stream stream_type;
 
@@ -179,6 +170,8 @@ public:
 
 };
 
+} // end of namespace Detail
+
 
 /*---------------------------------------------------------------------------*\
                          Class OSHA1stream Declaration
@@ -187,17 +180,17 @@ public:
 //- The output stream for calculating SHA1 digests
 class OSHA1stream
 :
-    public OSHA1streamAllocator,
+    public Detail::OSHA1streamAllocator,
     public OSstream
 {
-    typedef OSHA1streamAllocator allocator_type;
+    typedef Detail::OSHA1streamAllocator allocator_type;
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         OSHA1stream(const OSHA1stream&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const OSHA1stream&) = delete;
 
 public:

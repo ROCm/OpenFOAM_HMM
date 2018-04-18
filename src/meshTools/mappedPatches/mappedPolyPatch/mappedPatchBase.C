@@ -875,38 +875,29 @@ Foam::tmp<Foam::pointField> Foam::mappedPatchBase::readListOrField
                 is >> static_cast<List<vector>&>(fld);
                 if (fld.size() != size)
                 {
-                    FatalIOErrorInFunction
-                    (
-                        dict
-                    )   << "size " << fld.size()
+                    FatalIOErrorInFunction(dict)
+                        << "size " << fld.size()
                         << " is not equal to the given value of " << size
                         << exit(FatalIOError);
                 }
             }
             else
             {
-                FatalIOErrorInFunction
-                (
-                    dict
-                )   << "expected keyword 'uniform' or 'nonuniform', found "
+                FatalIOErrorInFunction(dict)
+                    << "expected keyword 'uniform' or 'nonuniform', found "
                     << firstToken.wordToken()
                     << exit(FatalIOError);
             }
         }
-        else
+        else if (is.version() == IOstream::versionNumber(2,0))
         {
-            if (is.version() == 2.0)
-            {
-                IOWarningInFunction
-                (
-                    dict
-                )   << "expected keyword 'uniform' or 'nonuniform', "
-                       "assuming List format for backwards compatibility."
-                       "Foam version 2.0." << endl;
+            IOWarningInFunction(dict)
+                << "expected keyword 'uniform' or 'nonuniform', "
+                   "assuming List format for backwards compatibility."
+                   "Foam version 2.0." << endl;
 
-                is.putBack(firstToken);
-                is >> static_cast<List<vector>&>(fld);
-            }
+            is.putBack(firstToken);
+            is >> static_cast<List<vector>&>(fld);
         }
     }
     return tfld;
@@ -1090,10 +1081,8 @@ Foam::mappedPatchBase::mappedPatchBase
     }
     else if (mode_ != NEARESTPATCHFACE && mode_ != NEARESTPATCHFACEAMI)
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Please supply the offsetMode as one of "
+        FatalIOErrorInFunction(dict)
+            << "Please supply the offsetMode as one of "
             << offsetModeNames_
             << exit(FatalIOError);
     }
@@ -1125,10 +1114,8 @@ Foam::mappedPatchBase::mappedPatchBase
 {
     if (mode != NEARESTPATCHFACE && mode != NEARESTPATCHFACEAMI)
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Construct from sampleMode and dictionary only applicable for "
+        FatalIOErrorInFunction(dict)
+            << "Construct from sampleMode and dictionary only applicable for "
             << " collocated patches in modes "
             << sampleModeNames_[NEARESTPATCHFACE] << ','
             << sampleModeNames_[NEARESTPATCHFACEAMI]

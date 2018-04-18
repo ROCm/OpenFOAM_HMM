@@ -37,7 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
+Foam::Detail::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
 :
     allocatedPtr_(nullptr),
     compression_(IOstream::UNCOMPRESSED)
@@ -61,7 +61,6 @@ Foam::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
         }
 
         delete allocatedPtr_;
-
         allocatedPtr_ = new igzstream((pathname + ".gz").c_str());
 
         if (allocatedPtr_->good())
@@ -74,7 +73,7 @@ Foam::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::IFstreamAllocator::~IFstreamAllocator()
+Foam::Detail::IFstreamAllocator::~IFstreamAllocator()
 {
     deallocate();
 }
@@ -82,7 +81,7 @@ Foam::IFstreamAllocator::~IFstreamAllocator()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::IFstreamAllocator::deallocate()
+void Foam::Detail::IFstreamAllocator::deallocate()
 {
     if (allocatedPtr_)
     {
@@ -101,7 +100,7 @@ Foam::IFstream::IFstream
     versionNumber version
 )
 :
-    IFstreamAllocator(pathname),
+    Detail::IFstreamAllocator(pathname),
     ISstream
     (
         *allocatedPtr_,
@@ -133,12 +132,6 @@ Foam::IFstream::IFstream
 
     lineNumber_ = 1;
 }
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::IFstream::~IFstream()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

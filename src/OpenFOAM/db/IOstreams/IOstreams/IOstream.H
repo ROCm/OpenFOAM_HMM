@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +49,7 @@ SourceFiles
 #include "scalar.H"
 #include "fileName.H"
 #include "InfoProxy.H"
+#include "IOstreamOption.H"
 
 #include <iostream>
 
@@ -70,200 +71,84 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class IOstream
+:
+    public IOstreamOption
 {
-
 public:
 
-    // Public data types
+    // Public Data Types
 
         //- Enumeration for whether the stream open or closed
-        enum streamAccess
+        enum streamAccess : char
         {
-            OPENED,
-            CLOSED
-        };
-
-        //- Enumeration for the format of data in the stream
-        enum streamFormat
-        {
-            ASCII,
-            BINARY
-        };
-
-        //- Ostream operator
-        friend Ostream& operator<<(Ostream& os, const streamFormat& sf);
-
-        //- Version number type
-        class versionNumber
-        {
-            //- The version number
-            scalar versionNumber_;
-
-            //- The version number as an integer
-            int index_;
-
-
-        public:
-
-            // Constructors
-
-                //- Construct from number
-                versionNumber(const scalar num)
-                :
-                    versionNumber_(num),
-                    index_(numberToIndex(num))
-                {}
-
-                //- Construct from Istream
-                versionNumber(Istream& is)
-                :
-                    versionNumber_(readScalar(is)),
-                    index_(numberToIndex(versionNumber_))
-                {}
-
-
-            // Member functions
-
-                //- Convert a version number into an index
-                int numberToIndex(const scalar num) const
-                {
-                    return int(10*num + SMALL);
-                }
-
-                //- Return major version
-                int majorVersion() const
-                {
-                    return int(versionNumber_);
-                }
-
-                //- Return minor version
-                int minorVersion() const
-                {
-                    return int(10.0*(versionNumber_ - majorVersion()));
-                }
-
-                //- Return the versionNumber as a character string
-                string str() const;
-
-
-            // Member operators
-
-                //- Are these versionNumbers the same?
-                bool operator==(const versionNumber& vn)
-                {
-                    return index_ == vn.index_;
-                }
-
-                //- Are these versionNumbers different?
-                bool operator!=(const versionNumber& vn)
-                {
-                    return index_ != vn.index_;
-                }
-
-                //- Is this version older than the one given
-                bool operator<(const versionNumber& vn)
-                {
-                    return index_ < vn.index_;
-                }
-
-                //- Is this version the same as or older than the one given
-                bool operator<=(const versionNumber& vn)
-                {
-                    return index_ <= vn.index_;
-                }
-
-                //- Is this version newer than the one given
-                bool operator>(const versionNumber& vn)
-                {
-                    return index_ > vn.index_;
-                }
-
-                //- This version the same as or newer than the one given
-                bool operator>=(const versionNumber& vn)
-                {
-                    return index_ >= vn.index_;
-                }
-
-
-            //- Ostream operator
-            friend Ostream& operator<<(Ostream& os, const versionNumber& vn);
+            CLOSED = 0,         //!< stream not open
+            OPENED              //!< stream is open
         };
 
 
-        //- Enumeration for the format of data in the stream
-        enum compressionType
-        {
-            UNCOMPRESSED,
-            COMPRESSED
-        };
-
-
-    // Public static data
-
-        //- Original version number
-        static const versionNumber originalVersion;
-
-        //- Current version number
-        static const versionNumber currentVersion;
+    // Public Static Data
 
         //- Default precision
         static unsigned int precision_;
 
 
-private:
+protected:
 
-    // Private data
+    // Protected Data
 
         //- Name for any generic stream - normally treat as readonly
         static fileName staticName_;
 
-        streamFormat format_;
-        versionNumber version_;
-        compressionType compression_;
-
         streamAccess openClosed_;
+
         ios_base::iostate ioState_;
-
-
-protected:
-
-    // Protected data
 
         label lineNumber_;
 
 
     // Protected Member Functions
 
-        // Access
+    // Access
 
-            //- Set stream opened
-            void setOpened()
-            {
-                openClosed_ = OPENED;
-            }
+        //- Set stream opened
+        void setOpened()
+        {
+            openClosed_ = OPENED;
+        }
 
-            //- Set stream closed
-            void setClosed()
-            {
-                openClosed_ = CLOSED;
-            }
+        //- Set stream closed
+        void setClosed()
+        {
+            openClosed_ = CLOSED;
+        }
 
-            //- Set stream state
-            void setState(ios_base::iostate state)
-            {
-                ioState_ = state;
-            }
+        //- Set stream state
+        void setState(ios_base::iostate state)
+        {
+            ioState_ = state;
+        }
 
-            //- Set stream to be good
-            void setGood()
-            {
-                ioState_ = ios_base::iostate(0);
-            }
+        //- Set stream to be good
+        void setGood()
+        {
+            ioState_ = ios_base::iostate(0);
+        }
 
 
 public:
 
     // Constructors
+
+        //- Construct with specified stream option
+        explicit IOstream(const IOstreamOption option)
+        :
+            IOstreamOption(option),
+            openClosed_(CLOSED),
+            ioState_(ios_base::iostate(0)),
+            lineNumber_(0)
+        {
+            setBad();
+        }
 
         //- Construct setting format and version
         IOstream
@@ -273,265 +158,194 @@ public:
             compressionType compression=UNCOMPRESSED
         )
         :
-            format_(format),
-            version_(version),
-            compression_(compression),
-            openClosed_(CLOSED),
-            ioState_(ios_base::iostate(0)),
-            lineNumber_(0)
-        {
-            setBad();
-        }
+            IOstream(IOstreamOption(format, version, compression))
+        {}
 
 
     //- Destructor
-    virtual ~IOstream()
-    {}
+    virtual ~IOstream() = default;
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
+    // Access
 
-            //- Return the name of the stream
-            //  Useful for Fstream to return the filename
-            virtual const fileName& name() const;
+        //- Return the name of the stream
+        //  Useful for Fstream to return the filename
+        virtual const fileName& name() const;
 
-            //- Return non-const access to the name of the stream
-            //  Useful to alter the stream name
-            virtual fileName& name();
-
-
-        // Check
-
-            //- Check IOstream status for given operation
-            //  print IOstream state if error has occured
-            virtual bool check(const char* operation) const;
-
-            //- Check IOstream status for given operation
-            //  print IOstream state if error has occured and exit
-            void fatalCheck(const char* operation) const;
-
-            //- Return true if stream has been opened
-            bool opened() const
-            {
-                return openClosed_ == OPENED;
-            }
-
-            //- Return true if stream is closed
-            bool closed() const
-            {
-                return openClosed_ == CLOSED;
-            }
-
-            //- Return true if next operation might succeed
-            bool good() const
-            {
-                return ioState_ == 0;
-            }
-
-            //- Return true if end of input seen
-            bool eof() const
-            {
-                return ioState_ & ios_base::eofbit;
-            }
-
-            //- Return true if next operation will fail
-            bool fail() const
-            {
-                return ioState_ & (ios_base::badbit | ios_base::failbit);
-            }
-
-            //- Return true if stream is corrupted
-            bool bad() const
-            {
-                return ioState_ & ios_base::badbit;
-            }
-
-            //- Return non-zero if the stream has not failed
-            operator void*() const
-            {
-                return fail()
-                    ? reinterpret_cast<void*>(0)
-                    : reinterpret_cast<void*>(-1);
-            }
-
-            //- Return true if the stream has failed
-            bool operator!() const
-            {
-                return fail();
-            }
+        //- Return non-const access to the name of the stream
+        //  Useful to alter the stream name
+        virtual fileName& name();
 
 
-        // Stream state functions
+    // Check
 
-            //- Return stream format of given format name
-            static streamFormat formatEnum(const word&);
+        //- Check IOstream status for given operation
+        //  print IOstream state if error has occured
+        virtual bool check(const char* operation) const;
 
-            //- Return current stream format
-            streamFormat format() const
-            {
-                return format_;
-            }
+        //- Check IOstream status for given operation
+        //  print IOstream state if error has occured and exit
+        void fatalCheck(const char* operation) const;
 
-            //- Set the stream format
-            streamFormat format(const streamFormat fmt)
-            {
-                streamFormat fmt0 = format_;
-                format_ = fmt;
-                return fmt0;
-            }
+        //- Return true if stream has been opened
+        bool opened() const
+        {
+            return openClosed_ == OPENED;
+        }
 
-            //- Set the stream format from word
-            streamFormat format(const word& fmt)
-            {
-                streamFormat fmt0 = format_;
-                format_ = formatEnum(fmt);
-                return fmt0;
-            }
+        //- Return true if stream is closed
+        bool closed() const
+        {
+            return openClosed_ == CLOSED;
+        }
 
-            //- Return the stream version
-            versionNumber version() const
-            {
-                return version_;
-            }
+        //- Return true if next operation might succeed
+        bool good() const
+        {
+            return ioState_ == 0;
+        }
 
-            //- Set the stream version
-            versionNumber version(const versionNumber ver)
-            {
-                versionNumber ver0 = version_;
-                version_ = ver;
-                return ver0;
-            }
+        //- Return true if end of input seen
+        bool eof() const
+        {
+            return ioState_ & ios_base::eofbit;
+        }
 
-            //- Return compression of given compression name
-            static compressionType compressionEnum(const word&);
+        //- Return true if next operation will fail
+        bool fail() const
+        {
+            return ioState_ & (ios_base::badbit | ios_base::failbit);
+        }
 
-            //- Return the stream compression
-            compressionType compression() const
-            {
-                return compression_;
-            }
+        //- Return true if stream is corrupted
+        bool bad() const
+        {
+            return ioState_ & ios_base::badbit;
+        }
 
-            //- Set the stream compression
-            compressionType compression(const compressionType cmp)
-            {
-                compressionType cmp0 = compression_;
-                compression_ = cmp;
-                return cmp0;
-            }
+        //- Return non-zero if the stream has not failed
+        operator void*() const
+        {
+            return fail()
+                ? reinterpret_cast<void*>(0)
+                : reinterpret_cast<void*>(-1);
+        }
 
-            //- Set the stream compression from word
-            compressionType compression(const word& cmp)
-            {
-                compressionType cmp0 = compression_;
-                compression_ = compressionEnum(cmp);
-                return cmp0;
-            }
-
-            //- Return current stream line number
-            label lineNumber() const
-            {
-                return lineNumber_;
-            }
-
-            //- Return current stream line number
-            label& lineNumber()
-            {
-                return lineNumber_;
-            }
-
-            //- Set the stream line number
-            label lineNumber(const label ln)
-            {
-                label ln0 = lineNumber_;
-                lineNumber_ = ln;
-                return ln0;
-            }
-
-            //- Return flags of stream
-            virtual ios_base::fmtflags flags() const = 0;
-
-            //- Return the default precision
-            static unsigned int defaultPrecision()
-            {
-                return precision_;
-            }
-
-            //- Reset the default precision (and return old precision)
-            static unsigned int defaultPrecision(unsigned int p)
-            {
-                unsigned int precision0 = precision_;
-                precision_ = p;
-                return precision0;
-            }
-
-            //- Set stream to have reached eof
-            void setEof()
-            {
-                ioState_ |= ios_base::eofbit;
-            }
-
-            //- Set stream to have failed
-            void setFail()
-            {
-                ioState_ |= ios_base::failbit;
-            }
-
-            //- Set stream to be bad
-            void setBad()
-            {
-                ioState_ |= ios_base::badbit;
-            }
-
-            //- Set flags of stream
-            virtual ios_base::fmtflags flags(const ios_base::fmtflags f) = 0;
-
-            //- Set flags of stream
-            ios_base::fmtflags setf(const ios_base::fmtflags f)
-            {
-                return flags(flags() | f);
-            }
-
-            //- Set flags of given field of stream
-            ios_base::fmtflags setf
-            (
-                const ios_base::fmtflags f,
-                const ios_base::fmtflags mask
-            )
-            {
-                return flags((flags() & ~mask) | (f & mask));
-            }
-
-            //- Unset flags of stream
-            void unsetf(const ios_base::fmtflags uf)
-            {
-                flags(flags()&~uf);
-            }
+        //- Return true if the stream has failed
+        bool operator!() const
+        {
+            return fail();
+        }
 
 
-        // Print
+    // Stream State Functions
 
-            //- Print description of IOstream to Ostream
-            virtual void print(Ostream&) const;
+        //- Const access to the current stream line number
+        label lineNumber() const
+        {
+            return lineNumber_;
+        }
 
-            //- Check given stream state bits
-            void print(Ostream&, const int streamState) const;
+        //- Non-const access to the current stream line number
+        label& lineNumber()
+        {
+            return lineNumber_;
+        }
+
+        //- Set the stream line number
+        //  \return the previous value
+        label lineNumber(const label num)
+        {
+            label old(lineNumber_);
+            lineNumber_ = num;
+            return old;
+        }
+
+        //- Return flags of stream
+        virtual ios_base::fmtflags flags() const = 0;
+
+        //- Return the default precision
+        static unsigned int defaultPrecision()
+        {
+            return precision_;
+        }
+
+        //- Reset the default precision
+        //  \return the previous value
+        static unsigned int defaultPrecision(unsigned int prec)
+        {
+            unsigned int old(precision_);
+            precision_ = prec;
+            return old;
+        }
+
+        //- Set stream to have reached eof
+        void setEof()
+        {
+            ioState_ |= ios_base::eofbit;
+        }
+
+        //- Set stream to have failed
+        void setFail()
+        {
+            ioState_ |= ios_base::failbit;
+        }
+
+        //- Set stream to be bad
+        void setBad()
+        {
+            ioState_ |= ios_base::badbit;
+        }
+
+        //- Set flags of stream
+        virtual ios_base::fmtflags flags(const ios_base::fmtflags f) = 0;
+
+        //- Set flags of stream
+        ios_base::fmtflags setf(const ios_base::fmtflags f)
+        {
+            return flags(flags() | f);
+        }
+
+        //- Set flags of given field of stream
+        ios_base::fmtflags setf
+        (
+            const ios_base::fmtflags f,
+            const ios_base::fmtflags mask
+        )
+        {
+            return flags((flags() & ~mask) | (f & mask));
+        }
+
+        //- Unset flags of stream
+        void unsetf(const ios_base::fmtflags f)
+        {
+            flags(flags() & ~f);
+        }
 
 
-        // Info
+    // Print
 
-            //- Return info proxy.
-            //  Used to print IOstream information to a stream
-            InfoProxy<IOstream> info() const
-            {
-                return *this;
-            }
+        //- Print description of IOstream to Ostream
+        virtual void print(Ostream& os) const;
+
+        //- Print information about the stream state bits
+        void print(Ostream& os, const int streamState) const;
+
+
+    // Info
+
+        //- Return info proxy.
+        //  Used to print IOstream information to a stream
+        InfoProxy<IOstream> info() const
+        {
+            return *this;
+        }
 };
 
 
-Ostream& operator<<(Ostream& os, const IOstream::streamFormat& sf);
-Ostream& operator<<(Ostream& os, const IOstream::versionNumber& vn);
+// Ostream operator
 
 template<>
 Ostream& operator<<(Ostream& os, const InfoProxy<IOstream>& ip);
