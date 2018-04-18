@@ -73,17 +73,37 @@ Foam::laminarFlameSpeedModels::SCOPE::SCOPE
     (
         dictionary
         (
-          IFstream
-          (
-              fileName
-              (
-                  dict.lookup("fuelFile")
-              )
-          )()
+            IFstream
+            (
+                fileName
+                (
+                    dict.lookup("fuelFile")
+                )
+            )()
         ).optionalSubDict(typeName + "Coeffs")
     ),
-    LFL_(readScalar(coeffsDict_.lookup("lowerFlammabilityLimit"))),
-    UFL_(readScalar(coeffsDict_.lookup("upperFlammabilityLimit"))),
+    LFL_
+    (
+        readScalar
+        (
+            coeffsDict_.lookupCompat
+            (
+                "lowerFlammabilityLimit",
+                {{"lowerFlamabilityLimit", 1712}}
+            )
+        )
+    ),
+    UFL_
+    (
+        readScalar
+        (
+            coeffsDict_.lookupCompat
+            (
+                "upperFlammabilityLimit",
+                {{"upperFlamabilityLimit", 1712}}
+            )
+        )
+    ),
     SuPolyL_(coeffsDict_.subDict("lowerSuPolynomial")),
     SuPolyU_(coeffsDict_.subDict("upperSuPolynomial")),
     Texp_(readScalar(coeffsDict_.lookup("Texp"))),
