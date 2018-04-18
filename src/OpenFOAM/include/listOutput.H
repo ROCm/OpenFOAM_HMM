@@ -30,7 +30,8 @@ if (args.found("listScalarBCs"))
 if (args.found("listVectorBCs"))
 {
     Info<< "vectorBCs"
-        << fvPatchField<vector>::dictionaryConstructorTablePtr_->sortedToc()
+        <<  fvPatchField<Foam::vector>::
+            dictionaryConstructorTablePtr_->sortedToc()
         << endl;
     listOptions = true;
 }
