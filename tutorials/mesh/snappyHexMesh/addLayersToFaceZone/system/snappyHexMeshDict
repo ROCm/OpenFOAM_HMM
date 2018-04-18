@@ -154,7 +154,7 @@ snapControls
 
     // Maximum relative distance for points to be attracted by surface.
     // True distance is this factor times local maximum edge length.
-    // Note: changed(corrected) w.r.t 17x! (17x used 2* tolerance)
+    // Note: changed(corrected) w.r.t 1.7.x! (1.7.x used 2* tolerance)
     tolerance 2.0;
 
     // Number of mesh displacement relaxation iterations.
@@ -210,7 +210,7 @@ addLayersControls
     // If points get not extruded do nGrow layers of connected faces that are
     // also not grown. This helps convergence of the layer addition process
     // close to features.
-    // Note: changed(corrected) w.r.t 17x! (didn't do anything in 17x)
+    // Note: changed(corrected) w.r.t 1.7.x! (didn't do anything in 1.7.x)
     nGrow 0;
 
     // Advanced settings
@@ -246,8 +246,8 @@ addLayersControls
     // Medial axis analysis
 
         // Angle used to pick up medial axis points
-        // Note: changed(corrected) w.r.t 17x! 90 degrees corresponds to 130
-        // in 17x.
+        // Note: changed(corrected) w.r.t 1.7.x! 90 degrees corresponds to 130
+        // in 1.7.x.
         minMedialAxisAngle 90;
 
         // Reduce layer growth where ratio thickness to medial

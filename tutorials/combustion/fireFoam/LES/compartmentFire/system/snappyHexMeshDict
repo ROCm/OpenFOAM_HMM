@@ -94,8 +94,8 @@ castellatedMeshControls
     {
         box1
         {
-            mode	inside;
-            levels	((1.0 1));
+            mode    inside;
+            levels  ((1.0 1));
         }
     }
 
@@ -193,12 +193,12 @@ addLayersControls
     layers
     {
     }
-        // If points get not extruded do nGrow layers of connected faces that are
+
+    // If points get not extruded do nGrow layers of connected faces that are
     // also not grown. This helps convergence of the layer addition process
     // close to features.
-    // Note: changed(corrected) w.r.t 17x! (didn't do anything in 17x)
+    // Note: changed(corrected) w.r.t 1.7.x! (didn't do anything in 1.7.x)
     nGrow 0;
-        // Advanced settings
 
 
     // Static analysis of starting mesh
