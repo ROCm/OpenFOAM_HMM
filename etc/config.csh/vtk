@@ -30,7 +30,7 @@
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-set vtk_version=VTK-8.1.0
+set vtk_version=VTK-9.0.0
 set mesa_version=mesa-17.1.1
 
 setenv VTK_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$vtk_version
