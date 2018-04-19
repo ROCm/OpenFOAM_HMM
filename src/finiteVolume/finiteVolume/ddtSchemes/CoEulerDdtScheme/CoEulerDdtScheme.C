@@ -767,19 +767,27 @@ tmp<surfaceScalarField> CoEulerDdtScheme<Type>::meshPhi
     const GeometricField<Type, fvPatchField, volMesh>&
 )
 {
-    return tmp<surfaceScalarField>::New
+    tmp<surfaceScalarField> tmeshPhi
     (
-        IOobject
+        new surfaceScalarField
         (
-            "meshPhi",
-            mesh().time().timeName(),
+            IOobject
+            (
+                "meshPhi",
+                mesh().time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
             mesh(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh(),
-        dimensionedScalar(dimVolume/dimTime, Zero)
+            dimensionedScalar(dimVolume/dimTime, Zero)
+        )
     );
+
+    tmeshPhi.ref().setOriented();
+
+    return tmeshPhi;
 }
 
 
