@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -154,7 +154,7 @@ void Foam::hierarchGeomDecomp::calculateSortedWeightedSizes
     sortedWeightedSizes[0] = 0;
     forAll(current, i)
     {
-        label pointi = current[indices[i]];
+        const label pointi = current[indices[i]];
         sortedWeightedSizes[i + 1] = sortedWeightedSizes[i] + weights[pointi];
     }
     // Non-dimensionalise and multiply by size.
@@ -332,7 +332,7 @@ void Foam::hierarchGeomDecomp::sortComponent
     const direction componentIndex, // index in decompOrder_
     const label mult,               // multiplication factor for finalDecomp
     labelList& finalDecomp
-)
+) const
 {
     // Current component
     label compI = decompOrder_[componentIndex];
@@ -348,7 +348,7 @@ void Foam::hierarchGeomDecomp::sortComponent
 
     forAll(current, i)
     {
-        label pointi = current[i];
+        const label pointi = current[i];
 
         sortedCoord[i] = points[pointi][compI];
     }
@@ -514,7 +514,7 @@ void Foam::hierarchGeomDecomp::sortComponent
     const direction componentIndex, // index in decompOrder_
     const label mult,               // multiplication factor for finalDecomp
     labelList& finalDecomp
-)
+) const
 {
     // Current component
     label compI = decompOrder_[componentIndex];
@@ -688,10 +688,39 @@ void Foam::hierarchGeomDecomp::sortComponent
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::hierarchGeomDecomp::hierarchGeomDecomp
+(
+    const dictionary& decompDict
+)
+:
+    geomDecomp(typeName, decompDict),
+    decompOrder_({0,1,2})
+{
+    setDecompOrder();
+}
+
+
+Foam::hierarchGeomDecomp::hierarchGeomDecomp
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+:
+    geomDecomp(typeName, decompDict, regionName),
+    decompOrder_({0,1,2})
+{
+    setDecompOrder();
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 Foam::labelList Foam::hierarchGeomDecomp::decompose
 (
     const pointField& points
-)
+) const
 {
     // construct a list for the final result
     labelList finalDecomp(points.size(), 0);
@@ -732,7 +761,7 @@ Foam::labelList Foam::hierarchGeomDecomp::decompose
 (
     const pointField& points,
     const scalarField& weights
-)
+) const
 {
     // construct a list for the final result
     labelList finalDecomp(points.size(), 0);
@@ -767,33 +796,6 @@ Foam::labelList Foam::hierarchGeomDecomp::decompose
     );
 
     return finalDecomp;
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::hierarchGeomDecomp::hierarchGeomDecomp
-(
-    const dictionary& decompDict
-)
-:
-    geomDecomp(typeName, decompDict),
-    decompOrder_({0,1,2})
-{
-    setDecompOrder();
-}
-
-
-Foam::hierarchGeomDecomp::hierarchGeomDecomp
-(
-    const dictionary& decompDict,
-    const word& regionName
-)
-:
-    geomDecomp(typeName, decompDict, regionName),
-    decompOrder_({0,1,2})
-{
-    setDecompOrder();
 }
 
 

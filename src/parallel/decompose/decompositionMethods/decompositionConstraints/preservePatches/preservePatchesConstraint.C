@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,16 +103,18 @@ void Foam::decompositionConstraints::preservePatchesConstraint::add
 
     label nUnblocked = 0;
 
-    forAll(patchIDs, i)
+    for (const label patchi : patchIDs)
     {
-        const polyPatch& pp = pbm[patchIDs[i]];
+        const polyPatch& pp = pbm[patchi];
 
         forAll(pp, i)
         {
-            if (blockedFace[pp.start() + i])
+            const label meshFacei = pp.start() + i;
+
+            if (blockedFace[meshFacei])
             {
-                blockedFace[pp.start() + i] = false;
-                nUnblocked++;
+                blockedFace[meshFacei] = false;
+                ++nUnblocked;
             }
         }
     }
@@ -137,8 +139,7 @@ void Foam::decompositionConstraints::preservePatchesConstraint::apply
     labelList& decomposition
 ) const
 {
-    // If the decomposition has not enforced the constraint do it over
-    // here.
+    // If the decomposition has not enforced the constraint, do it over here.
 
     // Synchronise decomposition on patchIDs
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -147,10 +148,8 @@ void Foam::decompositionConstraints::preservePatchesConstraint::apply
 
     labelList destProc(mesh.nFaces()-mesh.nInternalFaces(), labelMax);
 
-    forAll(pbm, patchi)
+    for (const polyPatch& pp : pbm)
     {
-        const polyPatch& pp = pbm[patchi];
-
         const labelUList& faceCells = pp.faceCells();
 
         forAll(faceCells, i)
@@ -170,9 +169,9 @@ void Foam::decompositionConstraints::preservePatchesConstraint::apply
 
     label nChanged = 0;
 
-    forAll(patchIDs, i)
+    for (const label patchi : patchIDs)
     {
-        const polyPatch& pp = pbm[patchIDs[i]];
+        const polyPatch& pp = pbm[patchi];
 
         const labelUList& faceCells = pp.faceCells();
 
@@ -183,7 +182,7 @@ void Foam::decompositionConstraints::preservePatchesConstraint::apply
             if (decomposition[faceCells[i]] != destProc[bFaceI])
             {
                 decomposition[faceCells[i]] = destProc[bFaceI];
-                nChanged++;
+                ++nChanged;
             }
         }
     }

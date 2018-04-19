@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -166,7 +166,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::scotchDecomp::graphPath(const polyMesh& mesh)
+void Foam::scotchDecomp::graphPath(const polyMesh& mesh) const
 {
     graphPath_ = mesh.time().path()/mesh.name() + ".grf";
 }
@@ -189,7 +189,7 @@ Foam::label Foam::scotchDecomp::decomposeSerial
     const labelUList& xadj,
     const UList<scalar>& cWeights,
     List<label>& decomp
-)
+) const
 {
     // Dump graph
     if (coeffsDict_.lookupOrDefault("writeGraph", false))
@@ -476,7 +476,7 @@ Foam::labelList Foam::scotchDecomp::decompose
     const polyMesh& mesh,
     const pointField& points,
     const scalarField& pointWeights
-)
+) const
 {
     // Where to write graph
     graphPath(mesh);
@@ -496,7 +496,7 @@ Foam::labelList Foam::scotchDecomp::decompose
     const labelList& agglom,
     const pointField& agglomPoints,
     const scalarField& pointWeights
-)
+) const
 {
     // Where to write graph
     graphPath(mesh);
@@ -516,7 +516,7 @@ Foam::labelList Foam::scotchDecomp::decompose
     const labelListList& globalCellCells,
     const pointField& cellCentres,
     const scalarField& cWeights
-)
+) const
 {
     // Where to write graph
     graphPath_ = "scotch.grf";

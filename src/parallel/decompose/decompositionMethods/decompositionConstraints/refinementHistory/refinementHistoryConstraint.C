@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +55,7 @@ Foam::refinementHistoryConstraint::refinementHistoryConstraint
 {
     if (decompositionConstraint::debug)
     {
-        Info<< type() << " : setting constraints to preserve refinement history"
+        Info<< type() << " : setting constraints to refinement history"
             << endl;
     }
 }
@@ -123,7 +123,7 @@ void Foam::refinementHistoryConstraint::add
     const refinementHistory& history =
     (
         storagePtr.valid()
-      ? storagePtr()
+      ? *storagePtr
       : *refPtr
     );
 
@@ -190,7 +190,7 @@ void Foam::refinementHistoryConstraint::apply
     const refinementHistory& history =
     (
         storagePtr.valid()
-      ? storagePtr()
+      ? *storagePtr
       : *refPtr
     );
 

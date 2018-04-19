@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,6 @@ SourceFiles
 namespace Foam
 {
 
-
 /*---------------------------------------------------------------------------*\
                 Class refinementHistoryConstraint Declaration
 \*---------------------------------------------------------------------------*/
@@ -52,8 +51,6 @@ class refinementHistoryConstraint
 :
     public decompositionConstraint
 {
-    // Private data
-
 public:
 
     //- Runtime type information
@@ -74,8 +71,7 @@ public:
 
 
     //- Destructor
-    virtual ~refinementHistoryConstraint()
-    {}
+    virtual ~refinementHistoryConstraint() = default;
 
 
     // Member Functions

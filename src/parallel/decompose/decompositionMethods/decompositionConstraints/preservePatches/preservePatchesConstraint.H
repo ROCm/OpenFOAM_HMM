@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +48,7 @@ namespace decompositionConstraints
 {
 
 /*---------------------------------------------------------------------------*\
-                Class preservePatchesConstraint Declaration
+                  Class preservePatchesConstraint Declaration
 \*---------------------------------------------------------------------------*/
 
 class preservePatchesConstraint
@@ -78,7 +78,6 @@ public:
 
         //- Construct from components
         preservePatchesConstraint(const UList<wordRe>& patches);
-
 
 
     //- Destructor

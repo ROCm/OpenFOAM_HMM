@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,9 +53,11 @@ class noDecomp
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        void operator=(const noDecomp&) = delete;
+        //- No copy construct
         noDecomp(const noDecomp&) = delete;
+
+        //- No copy assignment
+        void operator=(const noDecomp&) = delete;
 
 
 public:
@@ -78,14 +80,12 @@ public:
 
 
     //- Destructor
-    virtual ~noDecomp()
-    {}
+    virtual ~noDecomp() = default;
 
 
     // Member Functions
 
-        //- Manual decompose does not care about proc boundaries - it is all
-        //- up to the user.
+        //- Does not care about proc boundaries, it is all up to the user.
         virtual bool parallelAware() const
         {
             return true;
@@ -98,7 +98,7 @@ public:
             const polyMesh& mesh,
             const pointField& cc,
             const scalarField& cWeights
-        )
+        ) const
         {
             return labelList(cc.size(), Pstream::myProcNo());
         }
@@ -115,7 +115,7 @@ public:
             const labelListList& globalCellCells,
             const pointField& cc,
             const scalarField& cWeights
-        )
+        ) const
         {
             return labelList(globalCellCells.size(), Pstream::myProcNo());
         }

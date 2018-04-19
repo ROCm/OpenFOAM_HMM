@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,8 +53,6 @@ class preserveBafflesConstraint
 :
     public decompositionConstraint
 {
-    // Private data
-
 public:
 
     //- Runtime type information
@@ -75,8 +73,7 @@ public:
 
 
     //- Destructor
-    virtual ~preserveBafflesConstraint()
-    {}
+    virtual ~preserveBafflesConstraint() = default;
 
 
     // Member Functions

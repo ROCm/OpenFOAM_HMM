@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,11 +83,15 @@ class metisDecomp
             const labelUList& xadj,
             const UList<scalar>& cellWeights,
             List<label>& decomp
-        );
+        ) const;
 
-        //- Disallow default bitwise copy construct and assignment
-        void operator=(const metisDecomp&) = delete;
+
+        //- No copy construct
         metisDecomp(const metisDecomp&) = delete;
+
+        //- No copy assignment
+        void operator=(const metisDecomp&) = delete;
+
 
 
 public:
@@ -110,8 +114,7 @@ public:
 
 
     //- Destructor
-    virtual ~metisDecomp()
-    {}
+    virtual ~metisDecomp() = default;
 
 
     // Member Functions

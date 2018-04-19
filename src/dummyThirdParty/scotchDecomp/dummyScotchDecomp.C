@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::scotchDecomp::graphPath(const polyMesh& unused)
+void Foam::scotchDecomp::graphPath(const polyMesh& unused) const
 {}
 
 
@@ -67,7 +67,7 @@ Foam::label Foam::scotchDecomp::decomposeSerial
     const labelUList& xadj,
     const UList<scalar>& cWeights,
     List<label>& decomp
-)
+) const
 {
     FatalErrorInFunction
         << notImplementedMessage << exit(FatalError);
@@ -104,7 +104,7 @@ Foam::labelList Foam::scotchDecomp::decompose
     const polyMesh& mesh,
     const pointField& points,
     const scalarField& pointWeights
-)
+) const
 {
     FatalErrorInFunction
         << notImplementedMessage << exit(FatalError);
@@ -119,7 +119,7 @@ Foam::labelList Foam::scotchDecomp::decompose
     const labelList& agglom,
     const pointField& agglomPoints,
     const scalarField& pointWeights
-)
+) const
 {
     FatalErrorInFunction
         << notImplementedMessage << exit(FatalError);
@@ -133,7 +133,7 @@ Foam::labelList Foam::scotchDecomp::decompose
     const labelListList& globalCellCells,
     const pointField& cellCentres,
     const scalarField& cWeights
-)
+) const
 {
     FatalErrorInFunction
         << notImplementedMessage << exit(FatalError);

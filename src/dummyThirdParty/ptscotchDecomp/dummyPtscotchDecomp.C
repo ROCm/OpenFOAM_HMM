@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::ptscotchDecomp::graphPath(const polyMesh& unused)
+void Foam::ptscotchDecomp::graphPath(const polyMesh& unused) const
 {}
 
 
@@ -124,7 +124,7 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     const polyMesh& mesh,
     const pointField& points,
     const scalarField& pointWeights
-)
+) const
 {
     FatalErrorInFunction
         << notImplementedMessage << exit(FatalError);
@@ -139,7 +139,7 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     const labelList& agglom,
     const pointField& agglomPoints,
     const scalarField& pointWeights
-)
+) const
 {
     FatalErrorInFunction
         << notImplementedMessage << exit(FatalError);
@@ -153,7 +153,7 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     const labelListList& globalCellCells,
     const pointField& cellCentres,
     const scalarField& cWeights
-)
+) const
 {
     FatalErrorInFunction
         << notImplementedMessage << exit(FatalError);

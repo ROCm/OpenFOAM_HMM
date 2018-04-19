@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,9 +53,11 @@ class metisLikeDecomp
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        void operator=(const metisLikeDecomp&) = delete;
+        //- No copy construct
         metisLikeDecomp(const metisLikeDecomp&) = delete;
+
+        //- No copy assignment
+        void operator=(const metisLikeDecomp&) = delete;
 
 
 protected:
@@ -75,7 +77,7 @@ protected:
             const labelUList& xadj,
             const UList<scalar>& cellWeights,
             List<label>& decomp
-        );
+        ) const;
 
         //- Decomposition with metis-like parameters
         virtual label decomposeSerial
@@ -84,7 +86,7 @@ protected:
             const labelUList& xadj,
             const UList<scalar>& cellWeights,
             List<label>& decomp
-        ) = 0;
+        ) const = 0;
 
 public:
 
@@ -116,8 +118,7 @@ public:
 
 
     //- Destructor
-    virtual ~metisLikeDecomp()
-    {}
+    virtual ~metisLikeDecomp() = default;
 
 
     // Member Functions
@@ -135,7 +136,7 @@ public:
             const polyMesh& mesh,
             const pointField& points,
             const scalarField& pointWeights
-        );
+        ) const;
 
         //- Return for every coordinate the wanted processor number.
         //  Gets passed agglomeration map (from fine to coarse cells) and coarse
@@ -148,7 +149,7 @@ public:
             const labelList& agglom,
             const pointField& regionPoints,
             const scalarField& regionWeights
-        );
+        ) const;
 
         //- Return for every coordinate the wanted processor number.
         //  Explicitly provided mesh connectivity.
@@ -163,7 +164,7 @@ public:
             const labelListList& globalCellCells,
             const pointField& cellCentres,
             const scalarField& cellWeights
-        );
+        ) const;
 };
 
 

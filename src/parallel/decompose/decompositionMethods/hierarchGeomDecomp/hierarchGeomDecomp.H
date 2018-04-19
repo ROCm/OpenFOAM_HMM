@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -148,7 +148,7 @@ class hierarchGeomDecomp
             const direction componentIndex, // index in decompOrder_
             const label prevMult,           // multiplication factor
             labelList& finalDecomp          // overall decomposition
-        );
+        ) const;
 
         //- Recursively sort in x,y,z (or rather acc. to decompOrder_)
         //- Using weighted points.
@@ -161,11 +161,14 @@ class hierarchGeomDecomp
             const direction componentIndex, // index in decompOrder_
             const label prevMult,           // multiplication factor
             labelList& finalDecomp          // overall decomposition
-        );
+        ) const;
 
-        //- Disallow default bitwise copy construct and assignment
-        void operator=(const hierarchGeomDecomp&) = delete;
+
+        //- No copy construct
         hierarchGeomDecomp(const hierarchGeomDecomp&) = delete;
+
+        //- No copy assignment
+        void operator=(const hierarchGeomDecomp&) = delete;
 
 
 public:
@@ -188,13 +191,12 @@ public:
 
 
     //- Destructor
-    virtual ~hierarchGeomDecomp()
-    {}
+    virtual ~hierarchGeomDecomp() = default;
 
 
     // Member Functions
 
-        //- Hierarchgeom is aware of processor boundaries
+        //- Hierarchical is aware of processor boundaries
         virtual bool parallelAware() const
         {
             return true;
@@ -205,34 +207,40 @@ public:
         (
             const pointField&,
             const scalarField& weights
-        );
+        ) const;
 
-        //- Without weights. Code for weighted decomposition is a bit complex
+        //- Decompose with uniform weights.
+        //  Code for weighted decomposition is a bit complex,
         //  so kept separate for now.
-        virtual labelList decompose(const pointField&);
+        virtual labelList decompose(const pointField&) const;
 
 
-        //- Return for every coordinate the wanted processor number. Use the
-        //  mesh connectivity (if needed)
+        //- Return for every coordinate the wanted processor number.
+        //  Use the mesh connectivity (if needed).
         virtual labelList decompose
         (
             const polyMesh& mesh,
             const pointField& cc,
             const scalarField& cWeights
-        )
+        ) const
         {
             return decompose(cc, cWeights);
         }
 
-        //- Without weights. Code for weighted decomposition is a bit complex
+        //- Decompose with uniform weights.
+        //  Code for weighted decomposition is a bit complex,
         //  so kept separate for now.
-        virtual labelList decompose(const polyMesh& mesh, const pointField& cc)
+        virtual labelList decompose
+        (
+            const polyMesh& mesh,
+            const pointField& cc
+        ) const
         {
             return decompose(cc);
         }
 
-        //- Return for every coordinate the wanted processor number. Explicitly
-        //  provided connectivity - does not use mesh_.
+        //- Return for every coordinate the wanted processor number.
+        //  Explicitly provided connectivity - does not use mesh_.
         //  The connectivity is equal to mesh.cellCells() except for
         //  - in parallel the cell numbers are global cell numbers (starting
         //    from 0 at processor0 and then incrementing all through the
@@ -243,7 +251,7 @@ public:
             const labelListList& globalCellCells,
             const pointField& cc,
             const scalarField& cWeights
-        )
+        ) const
         {
             return decompose(cc, cWeights);
         }
@@ -252,7 +260,7 @@ public:
         (
             const labelListList& globalCellCells,
             const pointField& cc
-        )
+        ) const
         {
             return decompose(cc);
         }

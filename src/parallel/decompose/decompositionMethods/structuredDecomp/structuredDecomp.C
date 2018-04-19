@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +70,7 @@ Foam::labelList Foam::structuredDecomp::decompose
     const polyMesh& mesh,
     const pointField& cc,
     const scalarField& cWeights
-)
+) const
 {
     const polyBoundaryMesh& pbm = mesh.boundaryMesh();
     const labelHashSet patchIDs(pbm.patchSet(patches_));
@@ -165,14 +165,14 @@ Foam::labelList Foam::structuredDecomp::decompose
 
 Foam::labelList Foam::structuredDecomp::decompose
 (
-    const labelListList& globalPointPoints,
-    const pointField& points,
-    const scalarField& pointWeights
-)
+    const labelListList& globalCellCells,
+    const pointField& cc,
+    const scalarField& cWeights
+) const
 {
     NotImplemented;
 
-    return labelList::null();
+    return labelList(0);
 }
 
 

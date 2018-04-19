@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,18 +108,15 @@ void Foam::decompositionConstraints::preserveBafflesConstraint::add
     {
         // Convert into face-to-face addressing
         labelList faceToFace(mesh.nFaces(), -1);
-        forAll(explicitConnections, i)
+        for (const labelPair& p : explicitConnections)
         {
-            const labelPair& p = explicitConnections[i];
             faceToFace[p[0]] = p[1];
             faceToFace[p[1]] = p[0];
         }
 
         // Merge in bafflePairs
-        forAll(bafflePairs, i)
+        for (const labelPair& p : bafflePairs)
         {
-            const labelPair& p = bafflePairs[i];
-
             if (faceToFace[p[0]] == -1 && faceToFace[p[1]] == -1)
             {
                 faceToFace[p[0]] = p[1];
@@ -131,8 +128,8 @@ void Foam::decompositionConstraints::preserveBafflesConstraint::add
             }
             else
             {
-                label p0Slave = faceToFace[p[0]];
-                label p1Slave = faceToFace[p[1]];
+                const label p0Slave = faceToFace[p[0]];
+                const label p1Slave = faceToFace[p[1]];
                 IOWarningInFunction(coeffDict_)
                     << "When adding baffle between faces "
                     << p[0] << " at " << mesh.faceCentres()[p[0]]
@@ -171,10 +168,10 @@ void Foam::decompositionConstraints::preserveBafflesConstraint::add
 
     // Make sure blockedFace is uptodate
     blockedFace.setSize(mesh.nFaces(), true);
-    forAll(explicitConnections, i)
+    for (const labelPair& p : explicitConnections)
     {
-        blockedFace[explicitConnections[i].first()] = false;
-        blockedFace[explicitConnections[i].second()] = false;
+        blockedFace[p.first()] = false;
+        blockedFace[p.second()] = false;
     }
     syncTools::syncFaceList(mesh, blockedFace, andEqOp<bool>());
 }
@@ -197,33 +194,32 @@ void Foam::decompositionConstraints::preserveBafflesConstraint::apply
 
     label nChanged = 0;
 
-    forAll(bafflePairs, i)
+    for (const labelPair& baffle : bafflePairs)
     {
-        const labelPair& baffle = bafflePairs[i];
-        label f0 = baffle.first();
-        label f1 = baffle.second();
+        const label f0 = baffle.first();
+        const label f1 = baffle.second();
 
         const label procI = decomposition[mesh.faceOwner()[f0]];
 
         if (mesh.isInternalFace(f0))
         {
-            label nei0 = mesh.faceNeighbour()[f0];
+            const label nei0 = mesh.faceNeighbour()[f0];
             if (decomposition[nei0] != procI)
             {
                 decomposition[nei0] = procI;
-                nChanged++;
+                ++nChanged;
             }
         }
 
-        label own1 = mesh.faceOwner()[f1];
+        const label own1 = mesh.faceOwner()[f1];
         if (decomposition[own1] != procI)
         {
             decomposition[own1] = procI;
-            nChanged++;
+            ++nChanged;
         }
         if (mesh.isInternalFace(f1))
         {
-            label nei1 = mesh.faceNeighbour()[f1];
+            const label nei1 = mesh.faceNeighbour()[f1];
             if (decomposition[nei1] != procI)
             {
                 decomposition[nei1] = procI;

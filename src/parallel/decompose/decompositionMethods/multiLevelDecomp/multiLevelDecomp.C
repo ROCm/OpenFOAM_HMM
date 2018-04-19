@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -330,7 +330,7 @@ void Foam::multiLevelDecomp::decompose
     const label leafOffset,
 
     labelList& finalDecomp
-)
+) const
 {
     labelList dist
     (
@@ -611,9 +611,9 @@ Foam::multiLevelDecomp::multiLevelDecomp
 
 bool Foam::multiLevelDecomp::parallelAware() const
 {
-    forAll(methods_, i)
+    for (const decompositionMethod& meth : methods_)
     {
-        if (!methods_[i].parallelAware())
+        if (!meth.parallelAware())
         {
             return false;
         }
@@ -628,7 +628,7 @@ Foam::labelList Foam::multiLevelDecomp::decompose
     const polyMesh& mesh,
     const pointField& cc,
     const scalarField& cWeights
-)
+) const
 {
     CompactListList<label> cellCells;
     calcCellCells(mesh, identity(cc.size()), cc.size(), true, cellCells);
@@ -657,7 +657,7 @@ Foam::labelList Foam::multiLevelDecomp::decompose
     const labelListList& globalPointPoints,
     const pointField& points,
     const scalarField& pointWeights
-)
+) const
 {
     labelList finalDecomp(points.size(), 0);
     labelList pointMap(identity(points.size()));

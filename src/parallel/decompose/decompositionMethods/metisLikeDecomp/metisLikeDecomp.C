@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,7 @@ Foam::label Foam::metisLikeDecomp::decomposeGeneral
     const labelUList& xadj,
     const UList<scalar>& cWeights,
     List<label>& decomp
-)
+) const
 {
     if (!Pstream::parRun())
     {
@@ -182,7 +182,7 @@ Foam::labelList Foam::metisLikeDecomp::decompose
     const polyMesh& mesh,
     const pointField& points,
     const scalarField& pointWeights
-)
+) const
 {
     if (points.size() != mesh.nCells())
     {
@@ -218,7 +218,7 @@ Foam::labelList Foam::metisLikeDecomp::decompose
     const labelList& agglom,
     const pointField& agglomPoints,
     const scalarField& agglomWeights
-)
+) const
 {
     if (agglom.size() != mesh.nCells())
     {
@@ -264,7 +264,7 @@ Foam::labelList Foam::metisLikeDecomp::decompose
     const labelListList& globalCellCells,
     const pointField& cellCentres,
     const scalarField& cellWeights
-)
+) const
 {
     if (cellCentres.size() != globalCellCells.size())
     {

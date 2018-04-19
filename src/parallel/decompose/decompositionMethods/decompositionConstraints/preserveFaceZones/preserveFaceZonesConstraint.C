@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -99,20 +99,20 @@ void Foam::decompositionConstraints::preserveFaceZonesConstraint::add
 
     const faceZoneMesh& fZones = mesh.faceZones();
 
-    const labelList zoneIDs = findStrings(zones_, fZones.names());
+    const labelList zoneIDs(findStrings(zones_, fZones.names()));
 
     label nUnblocked = 0;
 
-    forAll(zoneIDs, i)
+    for (const label zonei : zoneIDs)
     {
-        const faceZone& fz = fZones[zoneIDs[i]];
+        const faceZone& fz = fZones[zonei];
 
-        forAll(fz, i)
+        for (const label meshFacei : fz)
         {
-            if (blockedFace[fz[i]])
+            if (blockedFace[meshFacei])
             {
-                blockedFace[fz[i]] = false;
-                nUnblocked++;
+                blockedFace[meshFacei] = false;
+                ++nUnblocked;
             }
         }
     }
@@ -148,16 +148,17 @@ void Foam::decompositionConstraints::preserveFaceZonesConstraint::apply
 
     labelList destProc(mesh.nFaces()-mesh.nInternalFaces(), labelMax);
 
-    forAll(pbm, patchi)
+    for (const polyPatch& pp : pbm)
     {
-        const polyPatch& pp = pbm[patchi];
+        label bFacei = pp.start() - mesh.nInternalFaces();
 
         const labelUList& faceCells = pp.faceCells();
 
-        forAll(faceCells, i)
+        for (const label celli : faceCells)
         {
-            label bFaceI = pp.start()+i-mesh.nInternalFaces();
-            destProc[bFaceI] = decomposition[faceCells[i]];
+            destProc[bFacei] = decomposition[celli];
+
+            ++bFacei;
         }
     }
 
@@ -169,36 +170,34 @@ void Foam::decompositionConstraints::preserveFaceZonesConstraint::apply
 
     const faceZoneMesh& fZones = mesh.faceZones();
 
-    const labelList zoneIDs = findStrings(zones_, fZones.names());
+    const labelList zoneIDs(findStrings(zones_, fZones.names()));
 
     label nChanged = 0;
 
-    forAll(zoneIDs, i)
+    for (const label zonei : zoneIDs)
     {
-        const faceZone& fz = fZones[zoneIDs[i]];
+        const faceZone& fz = fZones[zonei];
 
-        forAll(fz, i)
+        for (const label facei : fz)
         {
-            label faceI = fz[i];
+            const label own = mesh.faceOwner()[facei];
 
-            label own = mesh.faceOwner()[faceI];
-
-            if (mesh.isInternalFace(faceI))
+            if (mesh.isInternalFace(facei))
             {
-                label nei = mesh.faceNeighbour()[faceI];
+                const label nei = mesh.faceNeighbour()[facei];
                 if (decomposition[own] != decomposition[nei])
                 {
                     decomposition[nei] = decomposition[own];
-                    nChanged++;
+                    ++nChanged;
                 }
             }
             else
             {
-                label bFaceI = faceI-mesh.nInternalFaces();
+                const label bFaceI = facei-mesh.nInternalFaces();
                 if (decomposition[own] != destProc[bFaceI])
                 {
                     decomposition[own] = destProc[bFaceI];
-                    nChanged++;
+                    ++nChanged;
                 }
             }
         }

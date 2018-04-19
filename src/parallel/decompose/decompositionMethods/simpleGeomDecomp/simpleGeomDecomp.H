@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,16 +57,16 @@ class simpleGeomDecomp
 {
     // Private Member Functions
 
-        void assignToProcessorGroup(labelList&, const label) const;
+        static void assignToProcessorGroup(labelList&, const label);
 
-        void assignToProcessorGroup
+        static void assignToProcessorGroup
         (
             labelList& processorGroup,
             const label nProcGroup,
             const labelList& indices,
             const scalarField& weights,
             const scalar summedWeights
-        ) const;
+        );
 
         labelList decomposeOneProc(const pointField& points) const;
 
@@ -76,8 +76,11 @@ class simpleGeomDecomp
             const scalarField& weights
         ) const;
 
-        //- Disallow default bitwise copy construct and assignment
+
+        //- No copy construct
         void operator=(const simpleGeomDecomp&) = delete;
+
+        //- No copy assignment
         simpleGeomDecomp(const simpleGeomDecomp&) = delete;
 
 
@@ -101,36 +104,46 @@ public:
 
 
     //- Destructor
-    virtual ~simpleGeomDecomp()
-    {}
+    virtual ~simpleGeomDecomp() = default;
 
 
     // Member Functions
 
+        //- Simple sends all points to the master for decomposition.
         virtual bool parallelAware() const
         {
-            // simpleDecomp sends all points to the master which does
-            // the decomposition.
             return true;
         }
 
-        virtual labelList decompose(const pointField&);
+        //- Decompose with uniform weights.
+        virtual labelList decompose(const pointField& points) const;
 
-        virtual labelList decompose(const pointField&, const scalarField&);
+        //- Return for every coordinate the wanted processor number.
+        virtual labelList decompose
+        (
+            const pointField& points,
+            const scalarField& weights
+        ) const;
 
-        virtual labelList decompose(const polyMesh&, const pointField& points)
+        //- Decompose with uniform weights.
+        virtual labelList decompose
+        (
+            const polyMesh&,
+            const pointField& points
+        ) const
         {
             return decompose(points);
         }
 
+        //- Return for every coordinate the wanted processor number.
         virtual labelList decompose
         (
             const polyMesh&,
             const pointField& points,
-            const scalarField& pointWeights
-        )
+            const scalarField& weights
+        ) const
         {
-            return decompose(points, pointWeights);
+            return decompose(points, weights);
         }
 
         //- Explicitly provided connectivity
@@ -139,7 +152,7 @@ public:
             const labelListList& globalCellCells,
             const pointField& cc,
             const scalarField& cWeights
-        )
+        ) const
         {
             return decompose(cc, cWeights);
         }

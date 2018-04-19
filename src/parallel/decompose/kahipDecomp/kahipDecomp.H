@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,11 +84,14 @@ class kahipDecomp
             const labelUList& xadj,
             const UList<scalar>& cellWeights,
             List<label>& decomp
-        );
+        ) const;
 
-        //- Disallow default bitwise copy construct and assignment
-        void operator=(const kahipDecomp&) = delete;
+
+        //- No copy construct
         kahipDecomp(const kahipDecomp&) = delete;
+
+        //- No copy assignment
+        void operator=(const kahipDecomp&) = delete;
 
 
 public:
@@ -127,8 +130,7 @@ public:
 
 
     //- Destructor
-    virtual ~kahipDecomp()
-    {}
+    virtual ~kahipDecomp() = default;
 
 
     // Member Functions

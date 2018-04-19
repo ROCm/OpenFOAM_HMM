@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -213,7 +213,7 @@ License
 #include <mpi.h>
 #include "ptscotch.h"
 
-// Hack: scotch generates floating point errors so need to switch of error
+// Hack: scotch generates floating point errors so need to switch off error
 //       trapping!
 #ifdef __GLIBC__
     #ifndef _GNU_SOURCE
@@ -244,9 +244,10 @@ namespace Foam
     );
 }
 
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::ptscotchDecomp::graphPath(const polyMesh& mesh)
+void Foam::ptscotchDecomp::graphPath(const polyMesh& mesh) const
 {
     graphPath_ = mesh.time().path()/mesh.name();
 }
@@ -460,8 +461,8 @@ Foam::label Foam::ptscotchDecomp::decompose
     List<label>& finalDecomp
 ) const
 {
-    List<label> dummyAdjncy { 0 };
-    List<label> dummyXadj { 0 };
+    List<label> dummyAdjncy;
+    List<label> dummyXadj;
 
     return decompose
     (
@@ -822,7 +823,7 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     const polyMesh& mesh,
     const pointField& points,
     const scalarField& pointWeights
-)
+) const
 {
     // Where to write graph
     graphPath(mesh);
@@ -873,7 +874,7 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     const labelList& agglom,
     const pointField& agglomPoints,
     const scalarField& pointWeights
-)
+) const
 {
     // Where to write graph
     graphPath(mesh);
@@ -927,7 +928,7 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     const labelListList& globalCellCells,
     const pointField& cellCentres,
     const scalarField& cWeights
-)
+) const
 {
     // Where to write graph
     graphPath_ = "ptscotch";

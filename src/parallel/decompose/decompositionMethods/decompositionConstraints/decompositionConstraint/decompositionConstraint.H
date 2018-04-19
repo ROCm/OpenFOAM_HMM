@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,11 +45,11 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
-                Class decompositionConstraint Declaration
+                   Class decompositionConstraint Declaration
 \*---------------------------------------------------------------------------*/
 
 class decompositionConstraint
@@ -65,11 +65,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        decompositionConstraint(const decompositionConstraint&);
+        //- No copy construct
+        decompositionConstraint(const decompositionConstraint&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const decompositionConstraint&);
+        //- No copy assignment
+        void operator=(const decompositionConstraint&) = delete;
 
 
 public:
@@ -102,6 +102,7 @@ public:
             const word& type
         );
 
+
     // Selectors
 
         //- Return a reference to the selected decompositionConstraint
@@ -113,7 +114,7 @@ public:
 
 
     //- Destructor
-    virtual ~decompositionConstraint();
+    virtual ~decompositionConstraint() = default;
 
 
     // Member Functions
@@ -128,9 +129,9 @@ public:
             List<labelPair>& explicitConnections
         ) const = 0;
 
-        //- Apply any additional post-decomposition constraints. Usually no
-        //  need to do anything since decomposition method should have already
-        //  obeyed the constraints
+        //- Apply any additional post-decomposition constraints.
+        //  Usually no need to do anything since decomposition method
+        //  should have already obeyed the constraints
         virtual void apply
         (
             const polyMesh& mesh,

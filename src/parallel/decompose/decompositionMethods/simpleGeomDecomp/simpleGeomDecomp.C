@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +63,7 @@ void Foam::simpleGeomDecomp::assignToProcessorGroup
 (
     labelList& processorGroup,
     const label nProcGroup
-) const
+)
 {
     label jump = processorGroup.size()/nProcGroup;
     label jumpb = jump + 1;
@@ -100,7 +100,7 @@ void Foam::simpleGeomDecomp::assignToProcessorGroup
     const labelList& indices,
     const scalarField& weights,
     const scalar summedWeights
-) const
+)
 {
     // This routine gets the sorted points.
     // Easiest to explain with an example.
@@ -326,7 +326,7 @@ Foam::simpleGeomDecomp::simpleGeomDecomp
 Foam::labelList Foam::simpleGeomDecomp::decompose
 (
     const pointField& points
-)
+) const
 {
     if (!Pstream::parRun())
     {
@@ -347,7 +347,7 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
             nTotalPoints += points.size();
 
             // Add slaves
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            for (int slave=1; slave<Pstream::nProcs(); ++slave)
             {
                 IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
                 pointField nbrPoints(fromSlave);
@@ -364,7 +364,7 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
             labelList finalDecomp(decomposeOneProc(allPoints));
 
             // Send back
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            for (int slave=1; slave<Pstream::nProcs(); ++slave)
             {
                 OPstream toSlave(Pstream::commsTypes::scheduled, slave);
                 toSlave << SubField<label>
@@ -409,7 +409,7 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
 (
     const pointField& points,
     const scalarField& weights
-)
+) const
 {
     if (!Pstream::parRun())
     {
@@ -432,7 +432,7 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
             nTotalPoints += points.size();
 
             // Add slaves
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            for (int slave=1; slave<Pstream::nProcs(); ++slave)
             {
                 IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
                 pointField nbrPoints(fromSlave);
@@ -456,7 +456,7 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
             labelList finalDecomp(decomposeOneProc(allPoints, allWeights));
 
             // Send back
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            for (int slave=1; slave<Pstream::nProcs(); ++slave)
             {
                 OPstream toSlave(Pstream::commsTypes::scheduled, slave);
                 toSlave << SubField<label>

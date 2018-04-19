@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,9 +60,11 @@ class structuredDecomp
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        void operator=(const structuredDecomp&) = delete;
+        //- No copy construct
         structuredDecomp(const structuredDecomp&) = delete;
+
+        //- No copy assignment
+        void operator=(const structuredDecomp&) = delete;
 
 
 public:
@@ -83,27 +85,27 @@ public:
 
     // Member Functions
 
-        //- Is method parallel aware (i.e. does it synchronize domains across
-        //  proc boundaries)
+        //- Is method parallel aware
+        //  (i.e. does it synchronize domains across proc boundaries)
         virtual bool parallelAware() const;
 
-        //- Return for every coordinate the wanted processor number. Use the
-        //  mesh connectivity (if needed)
+        //- Return for every coordinate the wanted processor number.
+        //  Use the mesh connectivity (if needed)
         virtual labelList decompose
         (
             const polyMesh& mesh,
             const pointField& points,
             const scalarField& pointWeights
-        );
+        ) const;
 
-        //- Return for every coordinate the wanted processor number. Explicitly
-        //  provided connectivity - does not use mesh_.
+        //- Return for every coordinate the wanted processor number.
+        //  Explicitly provided connectivity - does not use mesh_.
         virtual labelList decompose
         (
             const labelListList& globalCellCells,
             const pointField& cc,
             const scalarField& cWeights
-        );
+        ) const;
 };
 
 

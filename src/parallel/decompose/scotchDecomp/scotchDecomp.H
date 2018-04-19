@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -232,13 +232,13 @@ class scotchDecomp
     // Private data
 
         //- Output path and name for optional grf file.
-        fileName graphPath_;
+        mutable fileName graphPath_;
 
 
     // Private Member Functions
 
-        //- Set graph path and name
-        void graphPath(const polyMesh& mesh);
+        //- Set graph path and name (mutable)
+        void graphPath(const polyMesh& mesh) const;
 
         //- Check and print error message
         static void check(const int, const char*);
@@ -250,11 +250,14 @@ class scotchDecomp
             const labelUList& xadj,
             const UList<scalar>& cWeights,
             List<label>& decomp
-        );
+        ) const;
 
-        //- Disallow default bitwise copy construct and assignment
-        void operator=(const scotchDecomp&) = delete;
+
+        //- No copy construct
         scotchDecomp(const scotchDecomp&) = delete;
+
+        //- No copy assignment
+        void operator=(const scotchDecomp&) = delete;
 
 
 public:
@@ -277,15 +280,14 @@ public:
 
 
     //- Destructor
-    virtual ~scotchDecomp()
-    {}
+    virtual ~scotchDecomp() = default;
 
 
     // Member Functions
 
+        //- Knows about coupled boundaries
         virtual bool parallelAware() const
         {
-            // Knows about coupled boundaries
             return true;
         }
 
@@ -298,7 +300,7 @@ public:
             const polyMesh& mesh,
             const pointField& points,
             const scalarField& pointWeights
-        );
+        ) const;
 
         //- Return for every coordinate the wanted processor number.
         virtual labelList decompose
@@ -307,7 +309,7 @@ public:
             const labelList& agglom,
             const pointField& regionPoints,
             const scalarField& regionWeights
-        );
+        ) const;
 
         //- Return for every coordinate the wanted processor number.
         virtual labelList decompose
@@ -315,7 +317,7 @@ public:
             const labelListList& globalCellCells,
             const pointField& cc,
             const scalarField& cWeights
-        );
+        ) const;
 };
 
 
