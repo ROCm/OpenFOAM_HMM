@@ -42,9 +42,9 @@ void Foam::RBD::rigidBodyMotion::initialize()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::RBD::rigidBodyMotion::rigidBodyMotion()
+Foam::RBD::rigidBodyMotion::rigidBodyMotion(const Time& time)
 :
-    rigidBodyModel(),
+    rigidBodyModel(time),
     motionState_(*this),
     motionState0_(*this),
     aRelax_(1.0),
@@ -55,10 +55,11 @@ Foam::RBD::rigidBodyMotion::rigidBodyMotion()
 
 Foam::RBD::rigidBodyMotion::rigidBodyMotion
 (
+    const Time& time,
     const dictionary& dict
 )
 :
-    rigidBodyModel(dict),
+    rigidBodyModel(time, dict),
     motionState_(*this, dict),
     motionState0_(motionState_),
     X00_(X0_.size()),
@@ -78,11 +79,12 @@ Foam::RBD::rigidBodyMotion::rigidBodyMotion
 
 Foam::RBD::rigidBodyMotion::rigidBodyMotion
 (
+    const Time& time,
     const dictionary& dict,
     const dictionary& stateDict
 )
 :
-    rigidBodyModel(dict),
+    rigidBodyModel(time, dict),
     motionState_(*this, stateDict),
     motionState0_(motionState_),
     X00_(X0_.size()),
