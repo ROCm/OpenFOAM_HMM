@@ -43,11 +43,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class someClass;
-
-
-// Forward declaration of friend functions and operators
 
 template<TemplateClassArgument>
 class CLASSNAME;
@@ -75,11 +72,11 @@ class CLASSNAME
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        CLASSNAME(const CLASSNAME<TemplateArgument>&);
+        //- No copy construct
+        CLASSNAME(const CLASSNAME<TemplateArgument>&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const CLASSNAME<TemplateArgument>&);
+        //- No copy assignment
+        void operator=(const CLASSNAME<TemplateArgument>&) = delete;
 
 
 public:
@@ -99,7 +96,7 @@ public:
         CLASSNAME(const dataType& data);
 
         //- Construct from Istream
-        CLASSNAME(Istream&);
+        CLASSNAME(Istream& is);
 
         //- Construct as copy
         CLASSNAME(const CLASSNAME<TemplateArgument>&);

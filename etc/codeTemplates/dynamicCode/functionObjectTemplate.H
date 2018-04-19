@@ -44,7 +44,7 @@ ${codeInclude}
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -66,11 +66,11 @@ class ${typeName}FunctionObject
 
         const fvMesh& mesh() const;
 
-        //- Disallow default bitwise copy construct
-        ${typeName}FunctionObject(const ${typeName}FunctionObject&);
+        //- No copy construct
+        ${typeName}FunctionObject(const ${typeName}FunctionObject&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const ${typeName}FunctionObject&);
+        //- No copy assignment
+        void operator=(const ${typeName}FunctionObject&) = delete;
 
 
 public:
@@ -97,7 +97,7 @@ public:
     // Member Functions
 
         //- Read the system calls
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Execute the "executeCalls" at each time-step
         virtual bool execute();

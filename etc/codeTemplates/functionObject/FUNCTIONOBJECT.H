@@ -91,10 +91,10 @@ class FUNCTIONOBJECT
     // Private Member Functions
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         FUNCTIONOBJECT(const FUNCTIONOBJECT&);
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const FUNCTIONOBJECT&);
 
 
@@ -122,7 +122,7 @@ public:
     // Member Functions
 
         //- Read the FUNCTIONOBJECT data
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Execute, currently does nothing
         virtual bool execute();
