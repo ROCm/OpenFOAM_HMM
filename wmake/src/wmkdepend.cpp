@@ -41,6 +41,10 @@ Description
 
         ragel -G2 -o wmkdepend.cpp wmkdepend.rl
 
+    The FSM can be visualized (eg, in a browser) with the following command
+
+        ragel -V wmkdepend.cpp | dot -Tsvg -owmkdepend.svg
+
 Usage
     wmkdepend [-Idir..] [-iheader...] [-eENV...] [-oFile] filename
 
@@ -305,7 +309,7 @@ namespace Files
 // Can use 'variable p xxx;' etc to change these names
 
 
-#line 334 "wmkdepend.rl"
+#line 340 "wmkdepend.rl"
 
 
 
@@ -314,15 +318,14 @@ namespace Files
 //
 
 
-#line 318 "wmkdepend.cpp"
-static const int wmkdep_start = 28;
+#line 322 "wmkdepend.cpp"
+static const int wmkdep_start = 21;
 static const int wmkdep_error = 0;
 
-static const int wmkdep_en_comment = 26;
-static const int wmkdep_en_main = 28;
+static const int wmkdep_en_main = 21;
 
 
-#line 342 "wmkdepend.rl"
+#line 348 "wmkdepend.rl"
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -345,7 +348,7 @@ void processFile(const std::string& fileName)
     int act, cs;
 
     
-#line 349 "wmkdepend.cpp"
+#line 352 "wmkdepend.cpp"
 	{
 	cs = wmkdep_start;
 	ts = 0;
@@ -353,7 +356,7 @@ void processFile(const std::string& fileName)
 	act = 0;
 	}
 
-#line 363 "wmkdepend.rl"
+#line 369 "wmkdepend.rl"
    /* ^^^ FSM initialization here ^^^ */;
 
     // Local token start
@@ -398,7 +401,7 @@ void processFile(const std::string& fileName)
         }
 
         
-#line 402 "wmkdepend.cpp"
+#line 405 "wmkdepend.cpp"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -410,70 +413,64 @@ tr0:
 	case 0:
 	{{goto st0;}}
 	break;
-	case 6:
-	{{p = ((te))-1;} {goto st26;} }
-	break;
 	default:
 	{{p = ((te))-1;}}
 	break;
 	}
 	}
-	goto st28;
+	goto st21;
 tr2:
-#line 331 "wmkdepend.rl"
+#line 337 "wmkdepend.rl"
 	{te = p+1;}
-	goto st28;
+	goto st21;
 tr17:
-#line 331 "wmkdepend.rl"
+#line 337 "wmkdepend.rl"
 	{{p = ((te))-1;}}
-	goto st28;
+	goto st21;
 tr21:
-#line 322 "wmkdepend.rl"
+#line 327 "wmkdepend.rl"
 	{te = p+1;}
-	goto st28;
-tr28:
-#line 326 "wmkdepend.rl"
+	goto st21;
+tr29:
+#line 330 "wmkdepend.rl"
 	{te = p+1;}
-	goto st28;
-tr35:
-#line 325 "wmkdepend.rl"
+	goto st21;
+tr31:
+#line 329 "wmkdepend.rl"
 	{te = p+1;}
-	goto st28;
-tr39:
-#line 328 "wmkdepend.rl"
-	{te = p+1;}
-	goto st28;
-tr48:
-#line 319 "wmkdepend.rl"
+	goto st21;
+tr36:
+#line 324 "wmkdepend.rl"
 	{te = p;p--;}
-	goto st28;
-tr49:
-#line 331 "wmkdepend.rl"
+	goto st21;
+tr37:
+#line 337 "wmkdepend.rl"
 	{te = p;p--;}
-	goto st28;
-st28:
+	goto st21;
+tr38:
+#line 330 "wmkdepend.rl"
+	{te = p;p--;}
+	goto st21;
+st21:
 #line 1 "NONE"
 	{ts = 0;}
 #line 1 "NONE"
 	{act = 0;}
 	if ( ++p == pe )
-		goto _test_eof28;
-case 28:
+		goto _test_eof21;
+case 21:
 #line 1 "NONE"
 	{ts = p;}
 #line 465 "wmkdepend.cpp"
 	switch( (*p) ) {
-		case 10: goto st30;
-		case 11: goto tr45;
-		case 32: goto tr43;
-		case 34: goto st15;
+		case 10: goto st23;
+		case 11: goto tr34;
+		case 32: goto tr32;
 		case 35: goto st2;
-		case 39: goto st19;
-		case 47: goto st23;
-		case 76: goto st25;
+		case 47: goto st15;
 	}
 	if ( 9 <= (*p) && (*p) <= 13 )
-		goto tr43;
+		goto tr32;
 	goto st1;
 st1:
 	if ( ++p == pe )
@@ -482,52 +479,52 @@ case 1:
 	if ( (*p) == 10 )
 		goto tr2;
 	goto st1;
-tr43:
+tr32:
 #line 1 "NONE"
 	{te = p+1;}
-#line 319 "wmkdepend.rl"
+#line 324 "wmkdepend.rl"
 	{act = 1;}
-	goto st29;
-st29:
+	goto st22;
+st22:
 	if ( ++p == pe )
-		goto _test_eof29;
-case 29:
-#line 496 "wmkdepend.cpp"
+		goto _test_eof22;
+case 22:
+#line 493 "wmkdepend.cpp"
 	switch( (*p) ) {
-		case 10: goto st30;
-		case 11: goto tr45;
-		case 32: goto tr43;
+		case 10: goto st23;
+		case 11: goto tr34;
+		case 32: goto tr32;
 		case 35: goto st2;
 	}
 	if ( 9 <= (*p) && (*p) <= 13 )
-		goto tr43;
+		goto tr32;
 	goto st1;
-st30:
+st23:
 	if ( ++p == pe )
-		goto _test_eof30;
-case 30:
+		goto _test_eof23;
+case 23:
 	if ( (*p) == 32 )
-		goto st30;
+		goto st23;
 	if ( 9 <= (*p) && (*p) <= 13 )
-		goto st30;
-	goto tr48;
-tr45:
+		goto st23;
+	goto tr36;
+tr34:
 #line 1 "NONE"
 	{te = p+1;}
-#line 319 "wmkdepend.rl"
+#line 324 "wmkdepend.rl"
 	{act = 1;}
-	goto st31;
-st31:
+	goto st24;
+st24:
 	if ( ++p == pe )
-		goto _test_eof31;
-case 31:
-#line 525 "wmkdepend.cpp"
+		goto _test_eof24;
+case 24:
+#line 522 "wmkdepend.cpp"
 	switch( (*p) ) {
-		case 10: goto st30;
-		case 32: goto tr45;
+		case 10: goto st23;
+		case 32: goto tr34;
 	}
 	if ( 9 <= (*p) && (*p) <= 13 )
-		goto tr45;
+		goto tr34;
 	goto st1;
 st2:
 	if ( ++p == pe )
@@ -619,14 +616,14 @@ case 10:
 	}
 	goto tr12;
 tr12:
-#line 308 "wmkdepend.rl"
+#line 312 "wmkdepend.rl"
 	{ tok = p; /* Local token start */ }
 	goto st11;
 st11:
 	if ( ++p == pe )
 		goto _test_eof11;
 case 11:
-#line 630 "wmkdepend.cpp"
+#line 627 "wmkdepend.cpp"
 	switch( (*p) ) {
 		case 10: goto tr15;
 		case 34: goto tr16;
@@ -635,18 +632,18 @@ case 11:
 tr13:
 #line 1 "NONE"
 	{te = p+1;}
-#line 308 "wmkdepend.rl"
+#line 312 "wmkdepend.rl"
 	{ tok = p; /* Local token start */ }
-	goto st32;
+	goto st25;
 tr15:
 #line 1 "NONE"
 	{te = p+1;}
-	goto st32;
-st32:
+	goto st25;
+st25:
 	if ( ++p == pe )
-		goto _test_eof32;
-case 32:
-#line 650 "wmkdepend.cpp"
+		goto _test_eof25;
+case 25:
+#line 647 "wmkdepend.cpp"
 	if ( (*p) == 34 )
 		goto tr19;
 	goto st12;
@@ -658,26 +655,26 @@ case 12:
 		goto tr19;
 	goto st12;
 tr19:
-#line 309 "wmkdepend.rl"
+#line 313 "wmkdepend.rl"
 	{ processFile(std::string(tok, (p - tok))); }
 	goto st13;
 st13:
 	if ( ++p == pe )
 		goto _test_eof13;
 case 13:
-#line 669 "wmkdepend.cpp"
+#line 666 "wmkdepend.cpp"
 	if ( (*p) == 10 )
 		goto tr21;
 	goto st13;
 tr16:
-#line 309 "wmkdepend.rl"
+#line 313 "wmkdepend.rl"
 	{ processFile(std::string(tok, (p - tok))); }
 	goto st14;
 st14:
 	if ( ++p == pe )
 		goto _test_eof14;
 case 14:
-#line 681 "wmkdepend.cpp"
+#line 678 "wmkdepend.cpp"
 	if ( (*p) == 10 )
 		goto tr21;
 	goto st14;
@@ -687,185 +684,87 @@ st15:
 case 15:
 	switch( (*p) ) {
 		case 10: goto tr2;
-		case 34: goto tr24;
-		case 92: goto st16;
+		case 42: goto st16;
+		case 47: goto st20;
 	}
-	goto st15;
-tr24:
-#line 1 "NONE"
-	{te = p+1;}
-#line 326 "wmkdepend.rl"
-	{act = 4;}
-	goto st33;
-tr31:
-#line 1 "NONE"
-	{te = p+1;}
-#line 325 "wmkdepend.rl"
-	{act = 3;}
-	goto st33;
-tr37:
-#line 1 "NONE"
-	{te = p+1;}
-#line 329 "wmkdepend.rl"
-	{act = 6;}
-	goto st33;
-st33:
-	if ( ++p == pe )
-		goto _test_eof33;
-case 33:
-#line 717 "wmkdepend.cpp"
-	if ( (*p) == 10 )
-		goto tr2;
 	goto st1;
 st16:
 	if ( ++p == pe )
 		goto _test_eof16;
 case 16:
-	if ( (*p) == 10 )
-		goto tr26;
-	goto st15;
-tr26:
+	switch( (*p) ) {
+		case 10: goto tr25;
+		case 42: goto st19;
+	}
+	goto st16;
+tr25:
 #line 1 "NONE"
 	{te = p+1;}
-	goto st34;
-st34:
+	goto st26;
+st26:
 	if ( ++p == pe )
-		goto _test_eof34;
-case 34:
-#line 736 "wmkdepend.cpp"
-	switch( (*p) ) {
-		case 10: goto tr49;
-		case 34: goto tr28;
-		case 92: goto st18;
-	}
+		goto _test_eof26;
+case 26:
+#line 709 "wmkdepend.cpp"
+	if ( (*p) == 42 )
+		goto st18;
 	goto st17;
 st17:
 	if ( ++p == pe )
 		goto _test_eof17;
 case 17:
-	switch( (*p) ) {
-		case 10: goto tr17;
-		case 34: goto tr28;
-		case 92: goto st18;
-	}
+	if ( (*p) == 42 )
+		goto st18;
 	goto st17;
 st18:
 	if ( ++p == pe )
 		goto _test_eof18;
 case 18:
+	switch( (*p) ) {
+		case 42: goto st18;
+		case 47: goto tr29;
+	}
 	goto st17;
 st19:
 	if ( ++p == pe )
 		goto _test_eof19;
 case 19:
 	switch( (*p) ) {
-		case 10: goto tr2;
-		case 39: goto tr31;
-		case 92: goto st20;
+		case 10: goto tr25;
+		case 42: goto st19;
+		case 47: goto tr30;
 	}
-	goto st19;
+	goto st16;
+tr30:
+#line 1 "NONE"
+	{te = p+1;}
+#line 330 "wmkdepend.rl"
+	{act = 4;}
+	goto st27;
+st27:
+	if ( ++p == pe )
+		goto _test_eof27;
+case 27:
+#line 749 "wmkdepend.cpp"
+	if ( (*p) == 10 )
+		goto tr2;
+	goto st1;
 st20:
 	if ( ++p == pe )
 		goto _test_eof20;
 case 20:
 	if ( (*p) == 10 )
-		goto tr33;
-	goto st19;
-tr33:
-#line 1 "NONE"
-	{te = p+1;}
-	goto st35;
-st35:
-	if ( ++p == pe )
-		goto _test_eof35;
-case 35:
-#line 783 "wmkdepend.cpp"
-	switch( (*p) ) {
-		case 10: goto tr49;
-		case 39: goto tr35;
-		case 92: goto st22;
-	}
-	goto st21;
-st21:
-	if ( ++p == pe )
-		goto _test_eof21;
-case 21:
-	switch( (*p) ) {
-		case 10: goto tr17;
-		case 39: goto tr35;
-		case 92: goto st22;
-	}
-	goto st21;
-st22:
-	if ( ++p == pe )
-		goto _test_eof22;
-case 22:
-	goto st21;
-st23:
-	if ( ++p == pe )
-		goto _test_eof23;
-case 23:
-	switch( (*p) ) {
-		case 10: goto tr2;
-		case 42: goto tr37;
-		case 47: goto st24;
-	}
-	goto st1;
-st24:
-	if ( ++p == pe )
-		goto _test_eof24;
-case 24:
-	if ( (*p) == 10 )
-		goto tr39;
-	goto st24;
-st25:
-	if ( ++p == pe )
-		goto _test_eof25;
-case 25:
-	switch( (*p) ) {
-		case 10: goto tr2;
-		case 34: goto st15;
-		case 39: goto st19;
-	}
-	goto st1;
-st26:
-#line 1 "NONE"
-	{ts = 0;}
-	if ( ++p == pe )
-		goto _test_eof26;
-case 26:
-#line 838 "wmkdepend.cpp"
-	if ( (*p) == 42 )
-		goto st27;
-	goto st26;
-st27:
-	if ( ++p == pe )
-		goto _test_eof27;
-case 27:
-	switch( (*p) ) {
-		case 42: goto st27;
-		case 47: goto tr42;
-	}
-	goto st26;
-tr42:
-#line 315 "wmkdepend.rl"
-	{ {goto st28;} }
-	goto st36;
-st36:
-	if ( ++p == pe )
-		goto _test_eof36;
-case 36:
-#line 859 "wmkdepend.cpp"
-	goto st0;
+		goto tr31;
+	goto st20;
 st0:
 cs = 0;
 	goto _out;
 	}
-	_test_eof28: cs = 28; goto _test_eof; 
+	_test_eof21: cs = 21; goto _test_eof; 
 	_test_eof1: cs = 1; goto _test_eof; 
-	_test_eof29: cs = 29; goto _test_eof; 
-	_test_eof30: cs = 30; goto _test_eof; 
-	_test_eof31: cs = 31; goto _test_eof; 
+	_test_eof22: cs = 22; goto _test_eof; 
+	_test_eof23: cs = 23; goto _test_eof; 
+	_test_eof24: cs = 24; goto _test_eof; 
 	_test_eof2: cs = 2; goto _test_eof; 
 	_test_eof3: cs = 3; goto _test_eof; 
 	_test_eof4: cs = 4; goto _test_eof; 
@@ -876,36 +775,27 @@ cs = 0;
 	_test_eof9: cs = 9; goto _test_eof; 
 	_test_eof10: cs = 10; goto _test_eof; 
 	_test_eof11: cs = 11; goto _test_eof; 
-	_test_eof32: cs = 32; goto _test_eof; 
+	_test_eof25: cs = 25; goto _test_eof; 
 	_test_eof12: cs = 12; goto _test_eof; 
 	_test_eof13: cs = 13; goto _test_eof; 
 	_test_eof14: cs = 14; goto _test_eof; 
 	_test_eof15: cs = 15; goto _test_eof; 
-	_test_eof33: cs = 33; goto _test_eof; 
 	_test_eof16: cs = 16; goto _test_eof; 
-	_test_eof34: cs = 34; goto _test_eof; 
+	_test_eof26: cs = 26; goto _test_eof; 
 	_test_eof17: cs = 17; goto _test_eof; 
 	_test_eof18: cs = 18; goto _test_eof; 
 	_test_eof19: cs = 19; goto _test_eof; 
-	_test_eof20: cs = 20; goto _test_eof; 
-	_test_eof35: cs = 35; goto _test_eof; 
-	_test_eof21: cs = 21; goto _test_eof; 
-	_test_eof22: cs = 22; goto _test_eof; 
-	_test_eof23: cs = 23; goto _test_eof; 
-	_test_eof24: cs = 24; goto _test_eof; 
-	_test_eof25: cs = 25; goto _test_eof; 
-	_test_eof26: cs = 26; goto _test_eof; 
 	_test_eof27: cs = 27; goto _test_eof; 
-	_test_eof36: cs = 36; goto _test_eof; 
+	_test_eof20: cs = 20; goto _test_eof; 
 
 	_test_eof: {}
 	if ( p == eof )
 	{
 	switch ( cs ) {
 	case 1: goto tr0;
-	case 29: goto tr48;
-	case 30: goto tr48;
-	case 31: goto tr48;
+	case 22: goto tr36;
+	case 23: goto tr36;
+	case 24: goto tr36;
 	case 2: goto tr0;
 	case 3: goto tr0;
 	case 4: goto tr0;
@@ -916,24 +806,21 @@ cs = 0;
 	case 9: goto tr0;
 	case 10: goto tr0;
 	case 11: goto tr0;
-	case 32: goto tr49;
+	case 25: goto tr37;
 	case 12: goto tr17;
 	case 13: goto tr17;
 	case 14: goto tr0;
-	case 33: goto tr0;
-	case 34: goto tr49;
+	case 26: goto tr37;
 	case 17: goto tr17;
 	case 18: goto tr17;
-	case 35: goto tr49;
-	case 21: goto tr17;
-	case 22: goto tr17;
+	case 27: goto tr38;
 	}
 	}
 
 	_out: {}
 	}
 
-#line 406 "wmkdepend.rl"
+#line 412 "wmkdepend.rl"
        /* ^^^ FSM execution here ^^^ */;
 
         if (0 == cs)

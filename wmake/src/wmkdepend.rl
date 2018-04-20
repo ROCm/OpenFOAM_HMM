@@ -39,6 +39,10 @@ Description
 
         ragel -G2 -o wmkdepend.cpp wmkdepend.rl
 
+    The FSM can be visualized (eg, in a browser) with the following command
+
+        ragel -V wmkdepend.cpp | dot -Tsvg -owmkdepend.svg
+
 Usage
     wmkdepend [-Idir..] [-iheader...] [-eENV...] [-oFile] filename
 
@@ -309,24 +313,26 @@ namespace Files
     action  process { processFile(std::string(tok, (p - tok))); }
 
     white   = [ \t\f\r];        # Horizontal whitespace
-    nl      = white* '\n';      # Newline
-    dnl     = [^\n]* '\n';      # Discard up to and including newline
+    nl      = white* '\n';      # Newline (allow trailing whitespace)
+    dnl     = (any* -- '\n') '\n';  # Discard up to and including newline
 
-    comment := any* :>> '*/' @{ fgoto main; };
+    dquot   = '"';              # double quote
+    dqarg   = (any+ -- dquot);  # double quoted argument
 
     main := |*
 
         space*;                         # Discard whitespace, empty lines
 
         white* '#' white* 'include' white*
-            ('"' [^\"]+ >buffer %process '"') dnl;
+            (dquot dqarg >buffer %process dquot) dnl;
 
-        # Single and double quoted strings
-        ( 'L'? "'" ( [^'\\\n] | /\\./ )* "'") ;     # " swallow
-        ( 'L'? '"' ( [^"\\\n] | /\\./ )* '"') ;     # ' swallow
+        '//' dnl;                       # 1-line comment
+        '/*' any* :>> '*/';             # Multi-line comment
 
-        '//' dnl;                # 1-line comment
-        '/*' { fgoto comment; }; # Multi-line comment
+        # String handling is currently unused
+        ### # Single and double quoted strings
+        ### 'L'? '"' ( /\\./ | [^"\\\n] )* '"';     # ' quoted - discard
+        ### 'L'? "'" ( /\\./ | [^'\\\n] )* "'";     # " quoted - discard
 
         dnl;                            # Discard all other lines
 
