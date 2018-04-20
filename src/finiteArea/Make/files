@@ -92,6 +92,10 @@ $(ddtSchemes)/EulerFaDdtScheme/EulerFaDdtSchemes.C
 $(ddtSchemes)/backwardFaDdtScheme/backwardFaDdtSchemes.C
 $(ddtSchemes)/boundedBackwardFaDdtScheme/boundedBackwardFaDdtScheme.C
 
+d2dt2Schemes = finiteArea/d2dt2Schemes
+$(d2dt2Schemes)/faD2dt2Scheme/faD2dt2Schemes.C
+$(d2dt2Schemes)/EulerFaD2dt2Scheme/EulerFaD2dt2Schemes.C
+
 divSchemes = finiteArea/divSchemes
 finiteArea/fam/vectorFamDiv.C
 $(divSchemes)/faDivScheme/faDivSchemes.C

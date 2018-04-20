@@ -36,6 +36,7 @@ Description
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "famDdt.H"
+#include "famD2dt2.H"
 #include "famDiv.H"
 #include "famLaplacian.H"
 #include "famSup.H"
