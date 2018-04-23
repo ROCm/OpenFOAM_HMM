@@ -1570,7 +1570,7 @@ Foam::label Foam::meshRefinement::markSmallFeatureRefinement
                 );
 
                 //- Option 1: use octree nearest searching inside polyMesh
-                //label cellI = mesh_.findCell(pt);
+                //label cellI = mesh_.findCell(pt, polyMesh::CELL_TETS);
 
                 //- Option 2: use octree 'inside' searching inside polyMesh. Is
                 //            much faster.

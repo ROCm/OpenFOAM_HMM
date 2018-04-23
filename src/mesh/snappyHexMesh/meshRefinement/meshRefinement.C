@@ -108,6 +108,16 @@ Foam::meshRefinement::writeType Foam::meshRefinement::writeLevel_;
 
 Foam::meshRefinement::outputType Foam::meshRefinement::outputLevel_;
 
+// Inside/outside test for polyMesh:.findCell()
+//   2.4.x : default = polyMesh::FACE_DIAG_TRIS
+//   1712  : default = polyMesh::CELL_TETS
+//
+// - CELL_TETS is better with concave cells, but much slower.
+// - use faster method (FACE_DIAG_TRIS) here
+
+static const Foam::polyMesh::cellDecomposition
+    findCellMode(Foam::polyMesh::FACE_DIAG_TRIS);
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -2198,18 +2208,7 @@ Foam::label Foam::meshRefinement::findRegion
     // Force calculation of base points (needs to be synchronised)
     (void)mesh.tetBasePtIs();
 
-    label celli = mesh.findCell(p);
-    //if (celli != -1)
-    //{
-    //    Pout<< "findRegion : Found point:" << p << " in cell " << celli
-    //        << " at:" << mesh.cellCentres()[celli] << endl;
-    //}
-    //else
-    //{
-    //    Pout<< "findRegion : Found point:" << p << " in cell " << celli
-    //        << endl;
-    //}
-
+    label celli = mesh.findCell(p, findCellMode);
     if (celli != -1)
     {
         regioni = cellToRegion[celli];
@@ -2219,7 +2218,7 @@ Foam::label Foam::meshRefinement::findRegion
     if (regioni == -1)
     {
         // See if we can perturb a bit
-        celli = mesh.findCell(p+perturbVec);
+        celli = mesh.findCell(p+perturbVec, findCellMode);
         if (celli != -1)
         {
             regioni = cellToRegion[celli];
@@ -2228,61 +2227,12 @@ Foam::label Foam::meshRefinement::findRegion
     }
     return regioni;
 }
-//XXXXXXXX
-//Foam::labelList Foam::meshRefinement::findRegion
-//(
-//    const polyMesh& mesh,
-//    const labelList& cellToRegion,
-//    const vector& perturbVec,
-//    const pointField& pts
-//)
-//{
-//    labelList regions(pts.size(), -1);
-//
-//    forAll(pts, i)
-//    {
-//        label celli = mesh.findCell(pts[i]);
-//        if (celli != -1)
-//        {
-//            regions[i] = cellToRegion[celli];
-//        }
-//        reduce(regions[i], maxOp<label>());
-//
-//        if (regions[i] == -1)
-//        {
-//            // See if we can perturb a bit
-//            celli = mesh.findCell(pts[i]+perturbVec);
-//            if (celli != -1)
-//            {
-//                regions[i] = cellToRegion[celli];
-//            }
-//            reduce(regions[i], maxOp<label>());
-//        }
-//    }
-//
-//    forAll(regions, i)
-//    {
-//        if (regions[i] == -1)
-//        {
-//            FatalErrorInFunction
-//                << "Point " << pts[i]
-//                << " is not inside the mesh." << nl
-//                << "Bounding box of the mesh:" << mesh.bounds()
-//                //<< "All points " << pts
-//                //<< " with corresponding regions " << regions
-//                << exit(FatalError);
-//        }
-//    }
-//
-//    return regions;
-//}
-//XXXXXXXX
 
 
 // Modify cellRegion to be consistent with locationsInMesh.
 // - all regions not in locationsInMesh are set to -1
 // - check that all regions inside locationsOutsideMesh are set to -1
-void Foam::meshRefinement::findRegions
+Foam::label Foam::meshRefinement::findRegions
 (
     const polyMesh& mesh,
     const vector& perturbVec,
@@ -2352,14 +2302,23 @@ void Foam::meshRefinement::findRegions
     }
 
 
+    label nRemove = 0;
+
     // Now update cellRegion to -1 for unreachable cells
     forAll(insideCell, celli)
     {
-        if (!insideCell[celli])
+        if (!insideCell.test(celli))
         {
             cellRegion[celli] = -1;
+            ++nRemove;
+        }
+        else if (cellRegion[celli] == -1)
+        {
+            ++nRemove;
         }
     }
+
+    return nRemove;
 }
 
 
@@ -2382,7 +2341,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
 
     regionSplit cellRegion(mesh_, blockedFace);
 
-    findRegions
+    label nRemove = findRegions
     (
         mesh_,
         mergeDistance_*vector(1,1,1),   // perturbVec
@@ -2396,7 +2355,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
     // ~~~~~~
 
     // Get cells to remove
-    DynamicList<label> cellsToRemove(mesh_.nCells());
+    DynamicList<label> cellsToRemove(nRemove);
     forAll(cellRegion, celli)
     {
         if (cellRegion[celli] == -1)
