@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class polyMesh;
 class polyPatch;
 
@@ -79,16 +79,21 @@ class FaceCellWave
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        FaceCellWave(const FaceCellWave&);
+        //- No copy construct
+        FaceCellWave(const FaceCellWave&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const FaceCellWave&);
+        //- No copy assignment
+        void operator=(const FaceCellWave&) = delete;
 
 
 protected:
 
-    // Protected data
+    //- Information tagged with a source or destination id.
+    //  With std::pair as lightweight, moveable container.
+    typedef std::pair<label,Type> taggedInfoType;
+
+
+    // Protected Data
 
         //- Reference to mesh
         const polyMesh& mesh_;
@@ -108,15 +113,18 @@ protected:
         //- Has face changed
         bitSet changedFace_;
 
-        //- List of changed faces
-        DynamicList<label> changedFaces_;
-
         //- Has cell changed
         bitSet changedCell_;
+
+        //- List of changed faces
+        DynamicList<label> changedFaces_;
 
         // Cells that have changed
         DynamicList<label> changedCells_;
 
+        // Information exchange for explicit baffle connections
+        // Max capacity = 2x number of explicit connections
+        DynamicList<taggedInfoType> changedBaffles_;
 
         //- Contains cyclics
         const bool hasCyclicPatches_;
@@ -132,8 +140,10 @@ protected:
         label nUnvisitedFaces_;
 
 
-        //- Updates cellInfo with information from neighbour. Updates all
-        //  statistics.
+    // Protected Member Functions
+
+        //- Updates cellInfo with information from neighbour.
+        //  Updates all statistics.
         bool updateCell
         (
             const label celli,
@@ -143,8 +153,8 @@ protected:
             Type& cellInfo
         );
 
-        //- Updates faceInfo with information from neighbour. Updates all
-        //  statistics.
+        //- Updates faceInfo with information from neighbour.
+        //  Updates all statistics.
         bool updateFace
         (
             const label facei,
@@ -154,8 +164,8 @@ protected:
             Type& faceInfo
         );
 
-        //- Updates faceInfo with information from same face. Updates all
-        //  statistics.
+        //- Updates faceInfo with information from same face.
+        //  Updates all statistics.
         bool updateFace
         (
             const label facei,
@@ -179,8 +189,8 @@ protected:
             (
                 const polyPatch& patch,
                 const label nFaces,
-                const labelList&,
-                const List<Type>&
+                const labelUList& changedFaces,
+                const List<Type>& changedFacesInfo
             );
 
             //- Extract info for single patch only
@@ -198,7 +208,7 @@ protected:
             (
                 const polyPatch& patch,
                 const label nFaces,
-                const labelList& faceLabels,
+                const labelUList& faceLabels,
                 List<Type>& faceInfo
             ) const;
 
@@ -207,7 +217,7 @@ protected:
             (
                 const polyPatch& patch,
                 const label nFaces,
-                const labelList& faceLabels,
+                const labelUList& faceLabels,
                 List<Type>& faceInfo
             ) const;
 
@@ -229,16 +239,18 @@ protected:
             );
 
             //- Merge data from across processor boundaries
+            //  Transfer changed faces from neighbouring processors.
             void handleProcPatches();
 
             //- Merge data from across cyclics
+            // Transfer changed faces across cyclic halves
             void handleCyclicPatches();
 
             //- Merge data from across AMI cyclics
             void handleAMICyclicPatches();
 
-            //- Merge data across explicitly provided local connections (usually
-            //  baffles)
+            //- Merge data across explicitly provided local connections
+            //  These are usually baffles
             void handleExplicitConnections();
 
 
@@ -271,11 +283,11 @@ public:
 
     // Constructors
 
-        // Construct from mesh. Use setFaceInfo and iterate() to do actual
-        // calculation.
+        //- Construct from mesh.
+        //- Use setFaceInfo and iterate() to do actual calculation.
         FaceCellWave
         (
-            const polyMesh&,
+            const polyMesh& mesh,
             UList<Type>& allFaceInfo,
             UList<Type>& allCellInfo,
             TrackingData& td = dummyTrackData_
@@ -283,11 +295,11 @@ public:
 
         //- Construct from mesh and list of changed faces with the Type
         //  for these faces. Iterates until nothing changes or maxIter reached.
-        //  (maxIter can be 0)
+        //  (maxIter can be 0 or negative). 0 initializes, -1 does not
         FaceCellWave
         (
-            const polyMesh&,
-            const labelList& initialChangedFaces,
+            const polyMesh& mesh,
+            const labelUList& initialChangedFaces,
             const List<Type>& changedFacesInfo,
             UList<Type>& allFaceInfo,
             UList<Type>& allCellInfo,
@@ -298,13 +310,13 @@ public:
         //- Construct from mesh and explicitly connected boundary faces
         //  and list of changed faces with the Type
         //  for these faces. Iterates until nothing changes or maxIter reached.
-        //  (maxIter can be 0)
+        //  (maxIter can be 0 or negative). 0 initializes, -1 does not
         FaceCellWave
         (
-            const polyMesh&,
+            const polyMesh& mesh,
             const labelPairList& explicitConnections,
             const bool handleCyclicAMI,
-            const labelList& initialChangedFaces,
+            const labelUList& initialChangedFaces,
             const List<Type>& changedFacesInfo,
             UList<Type>& allFaceInfo,
             UList<Type>& allCellInfo,
@@ -314,70 +326,75 @@ public:
 
 
     //- Destructor
-    virtual ~FaceCellWave()
-    {}
+    virtual ~FaceCellWave() = default;
 
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Access allFaceInfo
-            UList<Type>& allFaceInfo()
-            {
-                return allFaceInfo_;
-            }
+        //- Access allFaceInfo
+        UList<Type>& allFaceInfo()
+        {
+            return allFaceInfo_;
+        }
 
-            //- Access allCellInfo
-            UList<Type>& allCellInfo()
-            {
-                return allCellInfo_;
-            }
+        //- Access allCellInfo
+        UList<Type>& allCellInfo()
+        {
+            return allCellInfo_;
+        }
 
-            //- Additional data to be passed into container
-            const TrackingData& data() const
-            {
-                return td_;
-            }
+        //- Additional data to be passed into container
+        const TrackingData& data() const
+        {
+            return td_;
+        }
 
-            //- Access mesh
-            const polyMesh& mesh() const
-            {
-                return mesh_;
-            }
+        //- Access mesh
+        const polyMesh& mesh() const
+        {
+            return mesh_;
+        }
 
-            //- Get number of unvisited cells, i.e. cells that were not (yet)
-            //  reached from walking across mesh. This can happen from
-            //  - not enough iterations done
-            //  - a disconnected mesh
-            //  - a mesh without walls in it
-            label getUnsetCells() const;
+        //- Get number of unvisited cells,
+        //- i.e. cells that were not (yet) reached from walking across mesh.
+        //  This can happen from
+        //  - not enough iterations done
+        //  - a disconnected mesh
+        //  - a mesh without walls in it
+        label nUnvisitedCells() const;
 
-            //- Get number of unvisited faces
-            label getUnsetFaces() const;
+        //- Get number of unvisited faces
+        label nUnvisitedFaces() const;
 
 
-        // Edit
+    // Edit
 
-            //- Set initial changed faces
-            void setFaceInfo
-            (
-                const labelList& changedFaces,
-                const List<Type>& changedFacesInfo
-            );
+        //- Set single initial changed face.
+        //  This is a noop if the face had already been visited
+        void setFaceInfo(const label facei, const Type& faceInfo);
 
-            //- Propagate from face to cell. Returns total number of cells
-            //  (over all processors) changed.
-           virtual label faceToCell();
+        //- Set initial changed faces
+        void setFaceInfo
+        (
+            const labelUList& changedFaces,
+            const List<Type>& changedFacesInfo
+        );
 
-            //- Propagate from cell to face. Returns total number of faces
-            //  (over all processors) changed. (Faces on processorpatches are
-            //  counted double)
-            virtual label cellToFace();
+        //- Propagate from face to cell.
+        //  \return total number of cells (over all processors) changed.
+        virtual label faceToCell();
 
-            //- Iterate until no changes or maxIter reached.  Returns actual
-            //  number of iterations.
-            virtual label iterate(const label maxIter);
+        //- Propagate from cell to face.
+        //  \return total number of faces (over all processors) changed.
+        //  Note that faces on processor patches are counted twice.
+        virtual label cellToFace();
+
+        //- Iterate until no changes or maxIter reached.
+        //  \return the number of iterations taken.
+        virtual label iterate(const label maxIter);
+
 };
 
 

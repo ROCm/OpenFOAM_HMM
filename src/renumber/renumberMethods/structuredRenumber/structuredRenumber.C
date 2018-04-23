@@ -239,7 +239,7 @@ Foam::labelList Foam::structuredRenumber::renumber
     deltaCalc.iterate(nLayers_);
 
     Info<< type() << " : did not visit "
-        << deltaCalc.getUnsetCells()
+        << deltaCalc.nUnvisitedCells()
         << " cells out of " << nTotalCells
         << "; using " << method_().type() << " renumbering for these" << endl;
 

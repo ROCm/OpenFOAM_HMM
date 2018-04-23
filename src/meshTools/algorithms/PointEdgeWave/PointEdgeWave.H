@@ -287,14 +287,14 @@ public:
             return td_;
         }
 
-        //- Get number of unvisited edges, i.e. edges that were not (yet)
+        //- Number of unvisited edges, i.e. edges that were not (yet)
         //  reached from walking across mesh. This can happen from
         //  - not enough iterations done
         //  - a disconnected mesh
         //  - a mesh without walls in it
-        label getUnsetEdges() const;
+        label nUnvisitedEdges() const;
 
-        label getUnsetPoints() const;
+        label nUnvisitedPoints() const;
 
         //- Copy initial data into allPointInfo_
         void setPointInfo
