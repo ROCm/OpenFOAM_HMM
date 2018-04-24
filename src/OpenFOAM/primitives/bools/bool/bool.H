@@ -103,13 +103,13 @@ public:
 
     // Member Functions
 
-        //- Access to the bool value
+        //- Access to the value
         operator bool() const
         {
             return p_;
         }
 
-        //- Access to the bool value
+        //- Access to the value
         operator bool&()
         {
             return p_;

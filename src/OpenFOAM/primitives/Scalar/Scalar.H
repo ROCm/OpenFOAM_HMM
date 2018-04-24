@@ -89,13 +89,13 @@ public:
 
     // Member Functions
 
-        //- Access to the Scalar value
+        //- Access to the value
         operator Scalar() const
         {
             return p_;
         }
 
-        //- Access to the Scalar value
+        //- Access to the value
         operator Scalar&()
         {
             return p_;

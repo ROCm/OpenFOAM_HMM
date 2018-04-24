@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,6 +117,15 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const uint64_t val)
     os.check(FUNCTION_NAME);
     return os;
 }
+
+
+#if WM_ARCH_OPTION == 64 && defined(darwin)
+Foam::Ostream& Foam::operator<<(Ostream& os, const unsigned long val)
+{
+    os << uint64_t(val);
+    return os;
+}
+#endif
 
 
 // ************************************************************************* //

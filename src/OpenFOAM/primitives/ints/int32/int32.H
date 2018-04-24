@@ -107,9 +107,8 @@ inline bool read(const std::string& str, int32_t& val)
 Istream& operator>>(Istream& is, int32_t& val);
 Ostream& operator<<(Ostream& os, const int32_t val);
 
-// On 32bit OSs long is not unambiguously int32_t (or int64_t) causing problems
-// for IO operator resolution.
-// This problem is avoided by explicitly defining the following operators:
+// 32bit OS: long is not unambiguously (int32_t | int64_t)
+// - resolve explicitly for input and output
 #if WM_ARCH_OPTION == 32
     Istream& operator>>(Istream& is, long& val);
     Ostream& operator<<(Ostream& os, const long val);
@@ -163,13 +162,13 @@ public:
 
     // Member Functions
 
-        //- Access to the int32_t value
+        //- Access to the value
         operator int32_t() const
         {
             return p_;
         }
 
-        //- Access to the int value
+        //- Access to the value
         operator int32_t&()
         {
             return p_;

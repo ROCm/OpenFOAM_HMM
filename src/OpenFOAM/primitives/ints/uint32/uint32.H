@@ -154,13 +154,13 @@ public:
 
     // Member Functions
 
-        //- Access to the uint32_t value
+        //- Access to the value
         operator uint32_t() const
         {
             return p_;
         }
 
-        //- Access to the uint32_t value
+        //- Access to the value
         operator uint32_t&()
         {
             return p_;

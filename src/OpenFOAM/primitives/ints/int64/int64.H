@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,6 +108,13 @@ inline bool read(const std::string& str, int64_t& val)
 Istream& operator>>(Istream& is, int64_t& val);
 Ostream& operator<<(Ostream& os, const int64_t val);
 
+// On Darwin: long is not unambiguously (int32_t | int64_t)
+// - explicitly resolve for output
+#if WM_ARCH_OPTION == 64 && defined(darwin)
+    Ostream& operator<<(Ostream& os, const long val);
+#endif
+
+
 //- Template specialization for pTraits<int64_t>
 template<>
 class pTraits<int64_t>
@@ -155,13 +162,13 @@ public:
 
     // Member Functions
 
-        //- Access to the int64_t value
+        //- Access to the value
         operator int64_t() const
         {
             return p_;
         }
 
-        //- Access to the int value
+        //- Access to the value
         operator int64_t&()
         {
             return p_;
