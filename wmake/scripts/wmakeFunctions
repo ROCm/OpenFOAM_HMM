@@ -27,10 +27,10 @@ MakeDir=Make
 
 checkEnv()
 {
-    for envar in WM_OPTIONS WM_LINK_LANGUAGE WM_DIR WM_PROJECT_DIR
+    for check in WM_PROJECT_DIR WM_OPTIONS WM_DIR
     do
-        eval test "\$$envar" || {
-            echo "$Script error: environment variable \$$envar not set" 1>&2
+        eval test "\$$check" || {
+            echo "$Script error: environment variable \$$check not set" 1>&2
             exit 1
         }
     done

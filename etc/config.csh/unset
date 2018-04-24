@@ -53,7 +53,6 @@ unsetenv WM_HOSTS
 unsetenv WM_LABEL_OPTION
 unsetenv WM_LABEL_SIZE
 unsetenv WM_LDFLAGS
-unsetenv WM_LINK_LANGUAGE
 unsetenv WM_MPLIB
 unsetenv WM_NCOMPPROCS
 unsetenv WM_OPTIONS

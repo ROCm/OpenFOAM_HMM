@@ -26,9 +26,9 @@ else
 endif
 
 include $(DEFAULT_RULES)/general
-include $(DEFAULT_RULES)/$(WM_LINK_LANGUAGE)
+include $(DEFAULT_RULES)/c++
 sinclude $(RULES)/general
-sinclude $(RULES)/$(WM_LINK_LANGUAGE)
+sinclude $(RULES)/c++
 include $(GENERAL_RULES)/transform
 
 
