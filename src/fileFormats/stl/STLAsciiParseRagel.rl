@@ -68,19 +68,20 @@ Description
 //
 // Can use 'variable p xxx;' etc to change these names
 
+
 // Define the machine actions
 %%{
     machine stlAscii;
 
-    action  buffer  { tok = p; /* Local token start */ }
-    action  nl      { ++lineNum_; }
+    action line     { ++lineNum_; /* Count '\n' occurrences */ }
+    action buffer   { tok = p; /* Local token start */ }
 
-    action  bsolid  { beginSolid(word::validate(tok, p)); }
-    action  bfacet  { beginFacet(); }
-    action  efacet  { endFacet(); }
+    action bsolid   { beginSolid(word::validate(tok, p)); }
+    action bfacet   { beginFacet(); }
+    action efacet   { endFacet(); }
 
-    action  bvertex { resetVertex(); }
-    action  vertexCmpt
+    action bvertex  { resetVertex(); }
+    action vertexCmpt
     {
         const char saveC = *p;
         *p = '\0';  // Make nul-terminated
@@ -89,46 +90,57 @@ Description
         *p = saveC; // Restore previous character
     }
 
+    ## Error handling. Should be less verbose with ragel-7.
+    action err_bsolid { die("solid", p, pe); }
+    action err_esolid { die("endsolid", p, pe); }
+    action err_bfacet { die("facet", p, pe); }
+    action err_efacet { die("endfacet", p, pe); }
+    action err_bloop  { die("loop", p, pe); }
+    action err_eloop  { die("endloop", p, pe); }
+    action err_vertex { die("vertex", p, pe); }
+
 }%%
 
 
 %%{
     machine stlAscii;
 
-    white   = [ \t\f\r];                # Horizontal whitespace
-    nl      = (white* '\n' %nl);        # Newline
-    dnl     = ([^\n]* '\n' %nl);        # Discard up to and including newline
+    white   = [ \t\f\r];            # Horizontal whitespace
+    nl      = (white* '\n' %line);  # Newline
+    dnl     = ([^\n]* '\n' %line);  # Discard up to and including newline
+    anyspace = ((space -- '\n') | '\n' $line)*;  # Any space, count newlines
 
     decimal = ((digit* '.' digit+) | (digit+ '.'?)) ;
     number  = [\-+]? (digit+ | decimal) ([Ee][\-+]? digit+)? ;
 
-    bfacet  = space* ("facet"|"FACET") white %bfacet dnl;
-    efacet  = space* ("endfacet"|"ENDFACET") %efacet dnl;
+    bfacet  = anyspace (/facet/i) white %bfacet dnl;
+    efacet  = anyspace (/endfacet/i) %efacet dnl;
 
-    solidName =
-        ('' >buffer %bsolid nl)
-      | ((white+ [^\n]*) >buffer %bsolid nl);
+    bsolid  = anyspace /solid/i (('' | (white+ [^\n]*)) >buffer nl @bsolid);
+    esolid  = anyspace /endsolid/i dnl;
 
-    bsolid =
-        space* ("solid"|"SOLID") solidName ;
+    color   = anyspace /color/i dnl;
 
-    esolid = space* ("endsolid"|"ENDSOLID") dnl;
+    bloop   = anyspace (/outer/i white+ /loop/i) dnl;
+    eloop   = anyspace (/endloop/i) dnl;
 
-    color   = space* ("color"|"COLOR") dnl;
-
-    bloop   = space* ("outer" white+ "loop")|("OUTER" white+ "LOOP") dnl;
-    eloop   = space* ("endloop"|"ENDLOOP") dnl;
-
-    vertex  = space* ("vertex"|"VERTEX")
+    vertex  = anyspace /vertex/i
         ((white+ (number > buffer %vertexCmpt)){3} nl);
 
-    main := space*
+    main :=
+    anyspace
     (
-        bsolid
+        bsolid $!err_bsolid
         color?
-        ( bfacet bloop (vertex)* eloop efacet )*
-        esolid
-    )+ space*;
+        (
+            bfacet $!err_bfacet
+            bloop  $!err_bloop
+            (vertex $!err_vertex){3}   ## Triangles only
+            eloop  $!err_eloop
+            efacet $!err_efacet
+        )*
+        esolid $!err_esolid
+    )+ anyspace;
 
 }%%
 
@@ -154,9 +166,8 @@ class STLAsciiParseRagel
 :
     public Detail::STLAsciiParse
 {
-    // Private Data
-    word  startError_;
-
+    //- Error handling
+    void die(const char *what, const char *parsing, const char *pe) const;
 
 public:
 
@@ -276,6 +287,38 @@ void Foam::Detail::STLAsciiParseRagel::execute(std::istream& is)
             break; // done
         }
     }
+}
+
+
+void Foam::Detail::STLAsciiParseRagel::die
+(
+    const char *what,
+    const char *parsing,
+    const char *pe
+) const
+{
+    auto error = FatalErrorInFunction;
+
+    error
+        << nl
+        << "Parsing error at or near line " << lineNum_
+        <<", while parsing for " << what << nl
+        << "    Found text '";
+
+    if (parsing)
+    {
+        // Output first until newline or 80 chars, or end of parsing content
+        for (unsigned i=0; i < 80; ++i)
+        {
+            if (*parsing == '\n' || parsing == pe) break;
+            error << *parsing;
+            ++parsing;
+        }
+    }
+
+    error
+        << "'\n"
+        << exit(FatalError);
 }
 
 
