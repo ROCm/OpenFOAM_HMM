@@ -27,8 +27,8 @@ endif
 
 include $(DEFAULT_RULES)/general
 include $(DEFAULT_RULES)/$(WM_LINK_LANGUAGE)
--include $(RULES)/general
--include $(RULES)/$(WM_LINK_LANGUAGE)
+sinclude $(RULES)/general
+sinclude $(RULES)/$(WM_LINK_LANGUAGE)
 include $(GENERAL_RULES)/transform
 
 
