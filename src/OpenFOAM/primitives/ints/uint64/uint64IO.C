@@ -119,7 +119,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const uint64_t val)
 }
 
 
-#if WM_ARCH_OPTION == 64 && defined(darwin)
+#ifdef darwin
 Foam::Ostream& Foam::operator<<(Ostream& os, const unsigned long val)
 {
     os << uint64_t(val);

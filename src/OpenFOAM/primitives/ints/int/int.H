@@ -35,6 +35,7 @@ SourceFiles
 #ifndef int_H
 #define int_H
 
+#include "int16.H"
 #include "int32.H"
 #include "int64.H"
 

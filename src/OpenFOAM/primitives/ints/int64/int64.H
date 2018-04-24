@@ -109,8 +109,9 @@ Istream& operator>>(Istream& is, int64_t& val);
 Ostream& operator<<(Ostream& os, const int64_t val);
 
 // On Darwin: long is not unambiguously (int32_t | int64_t)
-// - explicitly resolve for output
-#if WM_ARCH_OPTION == 64 && defined(darwin)
+// - explicitly resolve for input and output
+#ifdef darwin
+    Istream& operator>>(Istream& is, long& val);
     Ostream& operator<<(Ostream& os, const long val);
 #endif
 
@@ -153,10 +154,10 @@ public:
 
     // Constructors
 
-        //- Construct from primitive
+        //- Copy construct from primitive
         explicit pTraits(const int64_t& val);
 
-        //- Construct from Istream
+        //- Read construct from Istream
         pTraits(Istream& is);
 
 

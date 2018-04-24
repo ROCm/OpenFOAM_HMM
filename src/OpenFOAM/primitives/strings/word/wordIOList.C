@@ -45,29 +45,34 @@ void Foam::printTable
     Ostream& os
 )
 {
-    if (!wll.size()) return;
+    if (wll.empty()) return;
 
     // Find the maximum word length for each column
     columnWidth.setSize(wll[0].size(), string::size_type(0));
-    forAll(columnWidth, j)
+    forAll(columnWidth, coli)
     {
-        forAll(wll, i)
+        forAll(wll, rowi)
         {
-            columnWidth[j] = max(columnWidth[j], wll[i][j].size());
+            columnWidth[coli] =
+                std::max
+                (
+                    columnWidth[coli],
+                    string::size_type(wll[rowi][coli].size())
+                );
         }
     }
 
     // Print the rows adding spacing for the columns
-    forAll(wll, i)
+    forAll(wll, rowi)
     {
-        forAll(wll[i], j)
+        forAll(wll[rowi], coli)
         {
-            os  << wll[i][j];
+            os  << wll[rowi][coli];
             for
             (
-                string::size_type k=0;
-                k<columnWidth[j] - wll[i][j].size() + 2;
-                k++
+                string::size_type space=0;
+                space < columnWidth[coli] - wll[rowi][coli].size() + 2;
+                ++space
             )
             {
                 os  << ' ';
@@ -75,7 +80,7 @@ void Foam::printTable
         }
         os  << nl;
 
-        if (i == 0) os  << nl;
+        if (!rowi) os  << nl;
     }
 }
 

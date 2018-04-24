@@ -145,10 +145,10 @@ public:
 
     // Constructors
 
-        //- Construct from primitive
+        //- Copy construct from primitive
         explicit pTraits(const uint32_t& val);
 
-        //- Construct from Istream
+        //- Read construct from Istream
         pTraits(Istream& is);
 
 

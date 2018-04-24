@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,54 +22,44 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Primitive
-    uint
+    int16_t
 
 Description
-    System unsigned integer
+    16bit signed integer. I/O is done via an int32.
 
 SourceFiles
-    uintIO.C
+    int16.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef uint_H
-#define uint_H
+#ifndef int16_H
+#define int16_H
 
-#include "uint16.H"
-#include "uint32.H"
-#include "uint64.H"
+#include <cstdint>
+#include "word.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-#define MAXMIN(retType, type1, type2)              \
-                                                   \
-inline retType max(const type1 s1, const type2 s2) \
-{                                                  \
-    return (s1 > s2)? s1: s2;                      \
-}                                                  \
-                                                   \
-inline retType min(const type1 s1, const type2 s2) \
-{                                                  \
-    return (s1 < s2)? s1: s2;                      \
+class Istream;
+class Ostream;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Return a word representation of an int16
+inline word name(const int16_t val)
+{
+    // No stripping required
+    return word(std::to_string(int(val)), false);
 }
-
-
-MAXMIN(uint8_t, uint8_t, uint8_t)
-MAXMIN(uint16_t, uint16_t, uint16_t)
-
-MAXMIN(uint32_t, uint32_t, uint32_t)
-MAXMIN(uint64_t, uint64_t, uint32_t)
-MAXMIN(uint64_t, uint32_t, uint64_t)
-MAXMIN(uint64_t, uint64_t, uint64_t)
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-//- Read unsigned int from stream
-unsigned int readUint(Istream& is);
+Istream& operator>>(Istream& is, int16_t& val);
+Ostream& operator<<(Ostream& os, const int16_t val);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
