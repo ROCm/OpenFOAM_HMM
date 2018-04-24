@@ -26,7 +26,7 @@
 # Note
 #     When _foamAddLibAuto is unset (eg, called from makeFFTW):
 #       - fftw_version variable is retained.
-#       - LD_LIBRARY_PATH is not adjusted.
+#       - the lib-path is not adjusted.
 #
 #     Can also disable by renaming/removing this file or by creating an empty
 #     file with the same name at a user or site location.

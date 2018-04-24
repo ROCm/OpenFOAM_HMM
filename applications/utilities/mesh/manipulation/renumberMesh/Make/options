@@ -1,5 +1,8 @@
+/* Add to EXE_INC as required:
+   -DFULLDEBUG -g -O0
+ */
+
 EXE_INC = \
-    /* -DFULLDEBUG -g -O0 */ \
     ${COMP_FLAGS} \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \

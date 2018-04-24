@@ -106,7 +106,6 @@ Operating system '$WM_ARCH' has incomplete support in this OpenFOAM release.
 For further assistance, please contact www.OpenFOAM.com
 ===============================================================================
 INCOMPLETE
-    echo "Darwin support ($WM_ARCH) is incomplete" 1>&2
     ;;
 
 SunOS)

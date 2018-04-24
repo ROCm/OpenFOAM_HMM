@@ -28,18 +28,17 @@
 #     For central installations not located under ThirdParty, the environment
 #     values must be set manually. For example,
 #
-#         export ParaView_DIR=/opt/paraview/paraview-5.4.1
-#         export ParaView_INCLUDE_DIR=$ParaView_DIR/include/paraview-5.4
-#         export PV_PLUGIN_PATH=$FOAM_LIBBIN/paraview-5.4
+#         export ParaView_DIR=/opt/paraview/paraview-5.5.0
+#         export ParaView_INCLUDE_DIR=$ParaView_DIR/include/paraview-5.5
+#         export PV_PLUGIN_PATH=$FOAM_LIBBIN/paraview-5.5
 #
 #         export PATH=$ParaView_DIR/bin:$PATH
-#         export LD_LIBRARY_PATH=$ParaView_DIR/lib/paraview-5.4:$LD_LIBRARY_PATH
+#         export LD_LIBRARY_PATH=$ParaView_DIR/lib:$LD_LIBRARY_PATH
 #         unset ParaView_VERSION        # avoid using ThirdParty settings
 #
-#     In newer versions (paraview 5.5), the contents of the lib/ changed
-#     and now need to include that as well:
+#     In paraview-5.4 and earlier, the libraries were in the sub-directory:
 #
-#         export LD_LIBRARY_PATH=$ParaView_DIR/lib:$ParaView_DIR/lib/paraview-5.5:$LD_LIBRARY_PATH
+#         export LD_LIBRARY_PATH=$ParaView_DIR/lib/paraview-5.4:$LD_LIBRARY_PATH
 #
 # Note
 #     When _foamAddLib is unset (eg, called from makeParaView or from foamPV):
@@ -53,7 +52,7 @@ cmake_version=cmake-system
 
 # END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
-pv_api=auto             # Either auto or pair of digits (eg, '5.4' etc)
+pv_api=auto             # Either auto or pair of (major.minor) digits
 
 # Compiler-specific location for ThirdParty installations
 archDir="$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER"

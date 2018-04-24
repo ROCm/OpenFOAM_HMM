@@ -1,5 +1,8 @@
+/* Add to EXE_INC as required:
+   -DFULLDEBUG -O0 -g
+ */
+
 EXE_INC = \
-    /* -DFULLDEBUG -O0 -g */ \
     -I$(LIB_SRC)/fileFormats/lnInclude \
     -I$(LIB_SRC)/surfMesh/lnInclude \
     -I$(LIB_SRC)/sampling/lnInclude \

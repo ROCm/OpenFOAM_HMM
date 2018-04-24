@@ -1,5 +1,8 @@
+/* Add to EXE_INC as required:
+   -g -DFULLDEBUG -O0
+ */
+
 EXE_INC = \
-    /* -g -DFULLDEBUG -O0 */ \
     -I$(LIB_SRC)/parallel/decompose/decompositionMethods/lnInclude \
     -I$(LIB_SRC)/mesh/snappyHexMesh/lnInclude \
     -I$(LIB_SRC)/fileFormats/lnInclude \

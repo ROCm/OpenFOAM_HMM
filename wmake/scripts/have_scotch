@@ -118,7 +118,7 @@ have_scotch()
     # Ensure consistent sizes between OpenFOAM and scotch header
     # extract 'typedef int64_t SCOTCH_Num' or equivalent
     label=$(sed -ne \
-        's/^.*typedef *\([^ ]*\) *SCOTCH_Num.*/\1/ip' \
+        's/^.*typedef *\([^ ]*\) *SCOTCH_Num.*/\1/p' \
         "$header")
     : ${label:=unknown} # Failsafe value
 

@@ -1,7 +1,10 @@
+/* Add to EXE_INC as required:
+   -DWITH_MONITORING -DDEBUG_MONITORING
+   -DDEBUG_BAFFLES
+   -DDEBUG_CCMIOREAD
+ */
+
 EXE_INC = \
-    /* -DWITH_MONITORING -DDEBUG_MONITORING */ \
-    /* -DDEBUG_BAFFLES */ \
-    /* -DDEBUG_CCMIOREAD */ \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/fileFormats/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
