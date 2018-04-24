@@ -1,16 +1,14 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
+cd ${0%/*} || exit 1                        # Run from this directory
+export WM_CONTINUE_ON_ERROR=true            # Optional unit
+. $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments # (for error catching)
+. $WM_PROJECT_DIR/wmake/scripts/have_cgal
 
-# Optional unit: continue-on-error
-# - may not have CGAL installed,
-# - or the CGAL installation moved and gives CMake problems
-export WM_CONTINUE_ON_ERROR=true
+#------------------------------------------------------------------------------
+# Optional
+# - CGAL not installed, or installed but gives CMake problems
 
-# Parse arguments for library compilation
-. $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
-
-if [ -f "$CGAL_ARCH_PATH/include/CGAL/version.h" ] || \
-   [ "${CGAL_ARCH_PATH##*-}" = system -a -f /usr/include/CGAL/version.h ]
+if have_cgal
 then
     wmake $targetType conformalVoronoiMesh
     wmake $targetType conformalVoronoi2DMesh

@@ -1,8 +1,8 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments # (for error catching)
 
-# Parse arguments for compilation (at least for error catching)
-. $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
+#------------------------------------------------------------------------------
 
 if [ -d "${FASTDUALOCTREE_SRC_PATH}" ]
 then

@@ -55,20 +55,16 @@ Description
 
 #include <stdio.h>
 
-
-#ifdef HAS_READLINE
+#ifdef HAVE_LIBREADLINE
     #include <readline/readline.h>
     #include <readline/history.h>
+
+    static const char* historyFile = ".setSet";
 #endif
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-
-#ifdef HAS_READLINE
-static const char* historyFile = ".setSet";
-#endif
 
 
 // Write set to VTK readable files
@@ -790,7 +786,7 @@ int main(int argc, char *argv[])
     printAllSets(mesh, Info);
 
     // Read history if interactive
-    #ifdef HAS_READLINE
+    #ifdef HAVE_LIBREADLINE
     if (!batch && !read_history((runTime.path()/historyFile).c_str()))
     {
         Info<< "Successfully read history from " << historyFile << endl;
@@ -872,7 +868,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                #ifdef HAS_READLINE
+                #ifdef HAVE_LIBREADLINE
                 {
                     char* linePtr = readline("readline>");
 

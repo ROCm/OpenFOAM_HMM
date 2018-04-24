@@ -307,7 +307,7 @@ esac
 
 
 # Add (non-dummy) MPI implementation
-# - dummy MPI already added to LD_LIBRARY_PATH and has no external libraries
+# - dummy MPI already in lib-path and has no external libraries
 if [ "$FOAM_MPI" != dummy ] && type _foamAddLib > /dev/null 2>&1
 then
     if [ -n "$FOAM_EXT_LIBBIN" ]    # External libraries (allowed to be unset)

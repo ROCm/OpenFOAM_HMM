@@ -56,7 +56,7 @@ then
         [ -n "$1" ] && export LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH
     }
 
-    # Prefix to LD_LIBRARY_PATH with additional checking
+    # Prepend to LD_LIBRARY_PATH with additional checking
     # $1 = base directory for 'lib' or 'lib64'
     # $2 = fallback libname ('lib' or 'lib64')
     #
@@ -69,7 +69,7 @@ then
     # Return 0 on success
     _foamAddLibAuto()
     {
-        # Note ksh doesn't have 'local' thus these ugly variable names
+        # Note ksh does not have 'local' thus these ugly variable names
         foamVar_prefix="$1"
         foamVar_end="${1##*-}"
 
@@ -110,6 +110,27 @@ then
         unset foamVar_prefix foamVar_end
         return 1    # Nothing set
     }
+
+
+    # Special treatment for Darwin
+    # - DYLD_LIBRARY_PATH instead of LD_LIBRARY_PATH
+    if [ "$(uname -s 2>/dev/null)" = Darwin ]
+    then
+        unset -f _foamAddLib _foamAddLibAuto 2>/dev/null
+
+        # Prepend DYLD_LIBRARY_PATH
+        _foamAddLib()
+        {
+            [ -n "$1" ] && export DYLD_LIBRARY_PATH=$1:$DYLD_LIBRARY_PATH
+        }
+
+        # Prepend to DYLD_LIBRARY_PATH with additional checking
+        # - use lib-dir script instead of rewriting
+        _foamAddLibAuto()
+        {
+            eval "$($WM_PROJECT_DIR/bin/tools/lib-dir -sh $@)";
+        }
+    fi
 
 
     # Source an etc file, possibly with some verbosity

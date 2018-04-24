@@ -1,0 +1,151 @@
+#----------------------------------*-sh-*--------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
+#
+# Script
+#     have_metis
+#
+# Description
+#     Detection/setup of metis
+#
+# Requires
+#     config.sh/metis
+#
+# Functions provided
+#     have_metis, no_metis, echo_metis
+#
+# Variables set on success
+#     HAVE_METIS
+#     METIS_ARCH_PATH
+#     METIS_INC_DIR
+#     METIS_LIB_DIR
+#
+#------------------------------------------------------------------------------
+. $WM_PROJECT_DIR/wmake/scripts/sysFunctions # General system functions
+
+#------------------------------------------------------------------------------
+
+# Reset variables
+no_metis()
+{
+    unset HAVE_METIS METIS_ARCH_PATH METIS_INC_DIR METIS_LIB_DIR
+    unset METIS_VERSION
+    return 0
+}
+
+
+# Report
+echo_metis()
+{
+    echo "metis=${HAVE_METIS:-false}"
+    echo "root=$METIS_ARCH_PATH"
+    echo "include=$METIS_INC_DIR"
+    echo "library=$METIS_LIB_DIR"
+}
+
+
+# On success, return 0 and export variables
+# -> HAVE_METIS, METIS_ARCH_PATH, METIS_INC_DIR, METIS_LIB_DIR
+have_metis()
+{
+    local header library static label settings warn
+    warn="==> skip metis"
+
+    # Basic setup/checks
+    settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/metis) || {
+        [ -n "$warn" ] && echo "$warn (no config.sh/metis settings)"
+        return 1
+    }
+    . $settings
+    if isNone "$METIS_ARCH_PATH"
+    then
+        [ -n "$warn" ] && echo "$warn (not available)"
+        return 1
+    fi
+
+
+    # Header/library names
+    header="metis.h"
+    library="libmetis$extLibso"
+    static="libmetis$extLiba"
+
+
+    if hasAbsdir "$METIS_ARCH_PATH"
+    then
+        header=$(findFirstFile $METIS_ARCH_PATH/include/$header)
+
+        # FOAM_EXT_LIBBIN is allowed to be unset
+        library=$(findFirstFile \
+            $FOAM_EXT_LIBBIN/$library \
+            $METIS_ARCH_PATH/lib/$static \
+            $METIS_ARCH_PATH/lib/$library \
+            $METIS_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/$static \
+            $METIS_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/$library \
+        )
+    elif isSystem "$METIS_ARCH_PATH"
+    then
+        header=$(findFirstFile /usr/include/$header)
+
+        library=$(findFirstFile \
+            /usr/lib/$library \
+            /usr/lib$WM_COMPILER_LIB_ARCH/$library \
+        )
+    else
+        unset header library
+    fi
+
+
+    # Header found?
+    [ -n "$header" ] || {
+        [ -n "$warn" ] && echo "$warn (no header)"
+        return 2
+    }
+
+    # Library found?
+    [ -n "$library" ] || {
+        [ -n "$warn" ] && echo "$warn (missing library)"
+        return 2
+    }
+
+
+    # Ensure consistent sizes between OpenFOAM and metis header
+    # Extract IDXTYPEWIDTH from metis.h: regex as per ThirdParty Allwmake
+    label=$(sed -ne 's/^.*#define  *IDXTYPEWIDTH  *\([1-9][0-9]\).*/\1/p' $header)
+    : ${label:=unknown}
+
+    if [ "$WM_LABEL_SIZE" = "$label" ]
+    then
+        echo "Metis (label=$label) - $METIS_ARCH_PATH"
+        export HAVE_METIS=true
+        export METIS_ARCH_PATH
+        export METIS_INC_DIR="${header%/*}"     # Basename
+        export METIS_LIB_DIR="${library%/*}"    # Basename
+    else
+        if [ -n "$warn" ]
+        then
+            echo "$warn (label=$WM_LABEL_SIZE, metis.h has '$label')"
+        fi
+        no_metis
+        return 1
+    fi
+}
+
+
+# Force reset of old variables
+no_metis
+
+# Testing
+if [ "$1" = "-test" ]
+then
+    have_metis
+    echo_metis
+fi
+
+#------------------------------------------------------------------------------

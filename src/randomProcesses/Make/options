@@ -1,12 +1,10 @@
 EXE_INC = \
-    -I$(FFTW_ARCH_PATH)/include \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/sampling/lnInclude \
-    -I$(LIB_SRC)/surfMesh/lnInclude
+    -I$(LIB_SRC)/surfMesh/lnInclude \
+    -I$(FFTW_INC_DIR)
 
 LIB_LIBS = \
-    -L$(FFTW_ARCH_PATH)/lib \
-    -L$(FFTW_ARCH_PATH)/lib$(WM_COMPILER_LIB_ARCH) \
-    -lfftw3 \
+    -L$(FFTW_LIB_DIR) -lfftw3 \
     -lfiniteVolume \
     -lsampling

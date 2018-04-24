@@ -1,9 +1,6 @@
 EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
-    -I$(MGRIDGEN_ARCH_PATH)/include
+    -I$(MGRIDGEN_INC_DIR)
 
 LIB_LIBS = \
-    -L$(FOAM_EXT_LIBBIN) \
-    -L$(MGRIDGEN_ARCH_PATH)/lib \
-    -L$(MGRIDGEN_ARCH_PATH)/lib$(WM_COMPILER_LIB_ARCH) \
-    -lmgrid
+    -L$(MGRIDGEN_LIB_DIR) -lmgrid

@@ -106,6 +106,12 @@ case Linux:
 case Darwin:    # Presumably x86_64
     if (! $?WM_ARCH_OPTION ) setenv WM_ARCH_OPTION 64  # Default to 64-bit
     setenv WM_ARCH darwin64
+    /bin/cat << INCOMPLETE
+===============================================================================
+Operating system '$WM_ARCH' has incomplete support in this OpenFOAM release.
+For further assistance, please contact www.OpenFOAM.com
+===============================================================================
+INCOMPLETE
     breaksw
 
 case SunOS:
@@ -118,12 +124,12 @@ case SunOS:
     breaksw
 
 default:
-    /bin/cat << UNSUPPORTED_OS
+    /bin/cat << UNSUPPORTED
 ===============================================================================
-Your '$WM_ARCH' operating system is unsupported by this OpenFOAM release.
+Operating system '$WM_ARCH' is unsupported by this OpenFOAM release.
 For further assistance, please contact www.OpenFOAM.com
 ===============================================================================
-UNSUPPORTED_OS
+UNSUPPORTED
     breaksw
 
 endsw

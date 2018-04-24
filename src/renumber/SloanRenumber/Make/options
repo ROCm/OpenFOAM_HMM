@@ -1,14 +1,12 @@
 EXE_INC = \
     ${c++LESSWARN} \
-    -I$(BOOST_ARCH_PATH)/include \
+    -I$(BOOST_INC_DIR) \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/parallel/decompose/decompositionMethods/lnInclude \
     -I$(LIB_SRC)/renumber/renumberMethods/lnInclude
 
 LIB_LIBS = \
-    -L$(BOOST_ARCH_PATH)/lib \
-    -L$(BOOST_ARCH_PATH)/lib$(WM_COMPILER_LIB_ARCH) \
-    -lboost_system \
+    -L$(BOOST_LIB_DIR) -lboost_system \
     -lmeshTools \
     -ldecompositionMethods \
     -lrenumberMethods

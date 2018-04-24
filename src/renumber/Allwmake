@@ -1,29 +1,25 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Parse arguments for library compilation
-targetType=libso
+cd ${0%/*} || exit 1                        # Run from this directory
+targetType=libso                            # Preferred library type
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
+. $WM_PROJECT_DIR/wmake/scripts/have_boost
+. $WM_PROJECT_DIR/wmake/scripts/have_zoltan
 
-# Optional: get ZOLTAN_ARCH_PATH
-if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/zoltan)
-then
-    . $settings
-fi
+#------------------------------------------------------------------------------
 
 wmake $targetType renumberMethods
 
 warning="==> skip SloanRenumber"
-if [ -f "$BOOST_ARCH_PATH/include/boost/version.hpp" ] || \
-   [ "${BOOST_ARCH_PATH##*-}" = system -a -f /usr/include/boost/version.hpp ]
+if have_boost
 then
     wmake $targetType SloanRenumber || echo "$warning (build issues detected)"
 else
     echo "$warning (no boost)"
 fi
 
+
 warning="==> skip zoltanRenumber"
-if [ -d "$ZOLTAN_ARCH_PATH" ]
+if have_zoltan
 then
     wmake $targetType zoltanRenumber || echo "$warning (build issues detected)"
 else

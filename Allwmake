@@ -11,7 +11,6 @@ cd ${0%/*} && wmakeCheckPwd "$WM_PROJECT_DIR" 2>/dev/null || {
     exit 1
 }
 
-# Parse arguments for library compilation
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 
 #------------------------------------------------------------------------------

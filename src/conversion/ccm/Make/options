@@ -6,9 +6,9 @@ EXE_INC = \
     -I$(LIB_SRC)/fileFormats/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/conversion/lnInclude \
-    -I$(CCMIO_ARCH_PATH)/include
+    -I$(CCMIO_INC_DIR)
 
 LIB_LIBS = \
     -lfiniteVolume \
     -lconversion \
-    -L$(CCMIO_ARCH_PATH)/lib -lccmio
+    -L$(CCMIO_LIB_DIR) -lccmio

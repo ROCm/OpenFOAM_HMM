@@ -100,6 +100,13 @@ Linux)
 Darwin)     # Presumably x86_64
     : ${WM_ARCH_OPTION:=64}; export WM_ARCH_OPTION  # Default to 64-bit
     WM_ARCH=darwin64
+    /bin/cat << INCOMPLETE 1>&2
+===============================================================================
+Operating system '$WM_ARCH' has incomplete support in this OpenFOAM release.
+For further assistance, please contact www.OpenFOAM.com
+===============================================================================
+INCOMPLETE
+    echo "Darwin support ($WM_ARCH) is incomplete" 1>&2
     ;;
 
 SunOS)
@@ -112,12 +119,12 @@ SunOS)
     ;;
 
 *)  # An unsupported operating system
-    /bin/cat << UNSUPPORTED_OS 1>&2
+    /bin/cat << UNSUPPORTED 1>&2
 ===============================================================================
-Your '$WM_ARCH' operating system is unsupported by this OpenFOAM release.
+Operating system '$WM_ARCH' is unsupported by this OpenFOAM release.
 For further assistance, please contact www.OpenFOAM.com
 ===============================================================================
-UNSUPPORTED_OS
+UNSUPPORTED
     ;;
 esac
 

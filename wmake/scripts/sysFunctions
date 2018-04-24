@@ -1,0 +1,110 @@
+#----------------------------------*-sh-*--------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
+#
+# Script
+#     sysFunctions
+#
+# Description
+#     General system helper functions
+#
+# Functions provided
+#     isDarwin
+#     isNone
+#     isSystem
+#     isAbsdir, hasAbsdir
+#     findFirstFile
+#
+# Variables provided
+#     extLiba
+#     extLibso
+#
+#------------------------------------------------------------------------------
+
+if [ -z "$WMAKE_SCRIPTS_SYSFUNCTIONS" ]
+then
+    # Load once, but do not rely on this variable elsewhere
+    WMAKE_SCRIPTS_SYSFUNCTIONS=loaded
+
+    # Static library extension. Default=.a
+    extLiba=".a"
+
+    # Shared library extension. Default=.so
+    case "$(uname -s 2>/dev/null)" in
+    Darwin)
+        extLibso=".dylib"
+        ;;
+    *)
+        extLibso=".so"
+        ;;
+    esac
+
+
+    # True if OS is Darwin.
+    # Uses libso extension to cache the value
+    # (instead of calling 'uname -s' each time)
+    isDarwin()
+    {
+        test "$extLibso" = ".dylib"
+    }
+
+
+    # True if '$1' begins with '/'
+    isAbsdir()
+    {
+        test "$1" = "/${1#/}"
+    }
+
+
+    # True if '$1' begins with '/' and also exists as a directory
+    hasAbsdir()
+    {
+        test "$1" = "/${1#/}" -a -d "$1"
+    }
+
+
+    # True if '$1' is an empty string or matches "*-none".
+    # Eg,
+    #    if isNone "$KAHIP_ARCH_PATH" ...
+    isNone()
+    {
+        test -z "$1" -o "${1##*-}" = none
+    }
+
+
+    # True if '$1' matches "*-system"
+    # Eg,
+    #    if isSystem "$BOOST_ARCH_PATH"
+    isSystem()
+    {
+        test "${1##*-}" = system
+    }
+
+
+    # Check for the existence of any of the files
+    # On success, echoes the file found and returns 0, otherwise returns 2
+    findFirstFile()
+    {
+        local file
+        for file
+        do
+            if [ -f "$file" -a -r "$file" ]
+            then
+                echo "$file"
+                return 0
+            fi
+        done
+        return 2
+    }
+
+fi
+
+
+#------------------------------------------------------------------------------

@@ -1,39 +1,18 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Optional component: (eg, may depend on third-party libraries)
-
-# Parse arguments for compilation (at least for error catching)
+cd ${0%/*} || exit 1                         # Run from this directory
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
+. $WM_PROJECT_DIR/wmake/scripts/have_ccmio
+
+#------------------------------------------------------------------------------
+# Optional
+# - may depend on third-party libraries
 
 warning="==> skip optional libccm adapter"
 
-if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/ccmio)
+# Link with static libccmio only (fewer issues)
+if have_ccmio
 then
-    . $settings
-else
-    echo "$warning (no config.sh/ccmio settings)"
-    exit
-fi
-
-
-# Link with static libccmio only (possibly fewer issues)
-if [ -e $CCMIO_ARCH_PATH/include/libccmio/ccmio.h \
-  -a -e $CCMIO_ARCH_PATH/lib/libccmio.a ]
-then
-    # The libccmio uses int32_t.
-    # The OpenFOAM adapter thus requires additional work for 64-bit labels.
-    # The OpenFOAM adapter was originally only designed for 'double'
-
-    if [ "$WM_LABEL_SIZE" = 64 ]
-    then
-        echo "$warning (not designed for 64-bit labels)"
-    elif [ "$WM_PRECISION_OPTION" = SP ]
-    then
-        echo "$warning (not designed for single precision)"
-    else
-        wmake libso || echo "$warning (build issues detected)"
-    fi
+    wmake libso || echo "$warning (build issues detected)"
 else
     echo $warning
 fi

@@ -1,0 +1,101 @@
+#----------------------------------*-sh-*--------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
+#
+# Script
+#     have_readline
+#
+# Description
+#     Detection/setup of readline
+#
+# Requires
+#     None
+#
+# Functions provided
+#     have_readline, no_readline, echo_readline
+#
+# Variables set on success
+#     HAVE_LIBREADLINE - as per GNU autoconf
+#     READLINE_INC_DIR
+#     READLINE_LIB_DIR
+#
+#------------------------------------------------------------------------------
+. $WM_PROJECT_DIR/wmake/scripts/sysFunctions # General system functions
+
+#------------------------------------------------------------------------------
+
+# Reset variables
+no_readline()
+{
+    unset HAVE_LIBREADLINE READLINE_INC_DIR READLINE_LIB_DIR
+    return 0
+}
+
+
+# Report
+echo_readline()
+{
+    echo "readline=${HAVE_LIBREADLINE:-false}"
+    echo "include=$READLINE_INC_DIR"
+    echo "library=$READLINE_LIB_DIR"
+}
+
+
+# On success, return 0 and export variables
+# -> HAVE_LIBREADLINE, READLINE_INC_DIR, READLINE_LIB_DIR
+have_readline()
+{
+    local header library static settings warn
+    # warn="==> skip readline"
+
+
+    # Header/library names
+    header="readline/readline.h"
+    library="libreadline$extLibso"
+
+    # System only?
+    header=$(findFirstFile /usr/include/$header)
+
+    library=$(findFirstFile \
+        /usr/lib/$library \
+        /usr/lib$WM_COMPILER_LIB_ARCH/$library \
+    )
+
+    # Header found?
+    [ -n "$header" ] || {
+        [ -n "$warn" ] && echo "$warn (no header)"
+        return 2
+    }
+
+    # Library found?
+    [ -n "$library" ] || {
+        [ -n "$warn" ] && echo "$warn (missing library)"
+        return 2
+    }
+
+    header="${header%/*}"     # Strip one-level (include/readline/...)
+
+    export HAVE_LIBREADLINE=true
+    export READLINE_INC_DIR="${header%/*}"     # Basename
+    export READLINE_LIB_DIR="${library%/*}"    # Basename
+}
+
+
+# Force reset of old variables
+no_readline
+
+# Testing
+if [ "$1" = "-test" ]
+then
+    have_readline
+    echo_readline
+fi
+
+#------------------------------------------------------------------------------

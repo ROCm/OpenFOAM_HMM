@@ -1,8 +1,9 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments # (for error catching)
 
-# Parse arguments for compilation (at least for error catching)
-. $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
+#------------------------------------------------------------------------------
+
 wmake -all $targetType blockMesh
 wmake -all $targetType extrude
 wmake -all $targetType extrude2DMesh

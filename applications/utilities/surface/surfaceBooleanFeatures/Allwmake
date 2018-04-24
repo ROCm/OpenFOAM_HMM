@@ -1,10 +1,11 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/wmake/scripts/have_cgal
 
+#------------------------------------------------------------------------------
 unset COMP_FLAGS LINK_FLAGS
 
-if [ -f "$CGAL_ARCH_PATH/include/CGAL/version.h" ] || \
-   [ "${CGAL_ARCH_PATH##*-}" = system -a -f /usr/include/CGAL/version.h ]
+if have_cgal
 then
     wmake PolyhedronReader
     export COMP_FLAGS='-IPolyhedronReader'

@@ -142,12 +142,18 @@ fi
 
 if [ -n "$resolved" ]
 then
-    case "$optSyntax" in
-    csh)
+    case "$optSyntax-$(uname -s 2>/dev/null)" in
+    make*)
+        printf "%s\n" "-L$resolved"
+        ;;
+    csh-Darwin*)
+        echo "setenv DYLD_LIBRARY_PATH $resolved:$DYLD_LIBRARY_PATH"
+        ;;
+    csh*)
         echo "setenv LD_LIBRARY_PATH $resolved:$LD_LIBRARY_PATH"
         ;;
-    make)
-        printf "%s\n" "-L$resolved"
+    sh-Darwin*)
+        echo "DYLD_LIBRARY_PATH=$resolved:$DYLD_LIBRARY_PATH"
         ;;
     *)
         echo "LD_LIBRARY_PATH=$resolved:$LD_LIBRARY_PATH"
@@ -155,7 +161,7 @@ then
     esac
     exit 0      # Good
 else
-    exit 1    # Error
+    exit 1      # Error
 fi
 
 

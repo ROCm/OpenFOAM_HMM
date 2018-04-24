@@ -304,7 +304,7 @@ endsw
 
 
 # Add (non-dummy) MPI implementation
-# - dummy MPI already added to LD_LIBRARY_PATH and has no external libraries
+# - dummy MPI already in lib-path and has no external libraries
 if ( "$FOAM_MPI" != dummy ) then
     if ( $?FOAM_EXT_LIBBIN ) then   # External libraries (allowed to be unset)
         _foamAddLib ${FOAM_EXT_LIBBIN}/${FOAM_MPI}

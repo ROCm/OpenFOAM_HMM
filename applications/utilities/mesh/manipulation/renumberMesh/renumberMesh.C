@@ -55,7 +55,7 @@ Description
 #include "processorMeshes.H"
 #include "hexRef8.H"
 
-#ifdef FOAM_USE_ZOLTAN
+#ifdef HAVE_ZOLTAN
     #include "zoltanRenumber.H"
 #endif
 
@@ -633,7 +633,7 @@ int main(int argc, char *argv[])
 
     // Force linker to include zoltan symbols. This section is only needed since
     // Zoltan is a static library
-    #ifdef FOAM_USE_ZOLTAN
+    #ifdef HAVE_ZOLTAN
         Info<< "renumberMesh built with zoltan support." << nl << endl;
         (void)zoltanRenumber::typeName;
     #endif
