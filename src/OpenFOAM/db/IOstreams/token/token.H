@@ -55,7 +55,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 class token;
 
@@ -76,7 +76,7 @@ public:
     //  the maximum number of types is limited to 30.
     enum tokenType
     {
-        UNDEFINED,        //!< An undefined token-type
+        UNDEFINED = 0,    //!< An undefined token-type
 
         // Fundamental types
         FLAG,             //!< stream flag (1-byte bitmask)
@@ -303,7 +303,7 @@ public:
     // Constructors
 
         //- Construct null
-        inline token();
+        inline constexpr token() noexcept;
 
         //- Copy construct
         inline token(const token& t);
