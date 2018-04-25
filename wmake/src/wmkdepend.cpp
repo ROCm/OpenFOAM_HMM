@@ -43,7 +43,7 @@ Description
 
     The FSM can be visualized (eg, in a browser) with the following command
 
-        ragel -V wmkdepend.cpp | dot -Tsvg -owmkdepend.svg
+        ragel -pV wmkdepend.cpp | dot -Tsvg -owmkdepend.svg
 
 Usage
     wmkdepend [-Idir..] [-iheader...] [-eENV...] [-oFile] filename
@@ -309,7 +309,7 @@ namespace Files
 // Can use 'variable p xxx;' etc to change these names
 
 
-#line 340 "wmkdepend.rl"
+#line 334 "wmkdepend.rl"
 
 
 
@@ -325,7 +325,7 @@ static const int wmkdep_error = 0;
 static const int wmkdep_en_main = 21;
 
 
-#line 348 "wmkdepend.rl"
+#line 342 "wmkdepend.rl"
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -356,7 +356,7 @@ void processFile(const std::string& fileName)
 	act = 0;
 	}
 
-#line 369 "wmkdepend.rl"
+#line 363 "wmkdepend.rl"
    /* ^^^ FSM initialization here ^^^ */;
 
     // Local token start
@@ -420,11 +420,11 @@ tr0:
 	}
 	goto st21;
 tr2:
-#line 337 "wmkdepend.rl"
+#line 332 "wmkdepend.rl"
 	{te = p+1;}
 	goto st21;
 tr17:
-#line 337 "wmkdepend.rl"
+#line 332 "wmkdepend.rl"
 	{{p = ((te))-1;}}
 	goto st21;
 tr21:
@@ -444,7 +444,7 @@ tr36:
 	{te = p;p--;}
 	goto st21;
 tr37:
-#line 337 "wmkdepend.rl"
+#line 332 "wmkdepend.rl"
 	{te = p;p--;}
 	goto st21;
 tr38:
@@ -820,15 +820,15 @@ cs = 0;
 	_out: {}
 	}
 
-#line 412 "wmkdepend.rl"
+#line 406 "wmkdepend.rl"
        /* ^^^ FSM execution here ^^^ */;
 
         if (0 == cs)
         {
-            // FSM failed before finding a token
+            // Typically only arises when missing a trailing newline
             std::cerr
                 << EXENAME ": parse error while scanning '"
-                << fileName << "'\n";
+                << fileName << "' ... perhaps missing a final newline\n";
             break;
         }
 

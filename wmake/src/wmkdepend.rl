@@ -41,7 +41,7 @@ Description
 
     The FSM can be visualized (eg, in a browser) with the following command
 
-        ragel -V wmkdepend.cpp | dot -Tsvg -owmkdepend.svg
+        ragel -pV wmkdepend.cpp | dot -Tsvg -owmkdepend.svg
 
 Usage
     wmkdepend [-Idir..] [-iheader...] [-eENV...] [-oFile] filename
@@ -329,13 +329,7 @@ namespace Files
         '//' dnl;                       # 1-line comment
         '/*' any* :>> '*/';             # Multi-line comment
 
-        # String handling is currently unused
-        ### # Single and double quoted strings
-        ### 'L'? '"' ( /\\./ | [^"\\\n] )* '"';     # ' quoted - discard
-        ### 'L'? "'" ( /\\./ | [^'\\\n] )* "'";     # " quoted - discard
-
         dnl;                            # Discard all other lines
-
     *|;
 }%%
 
@@ -413,10 +407,10 @@ void processFile(const std::string& fileName)
 
         if (%%{write error;}%% == cs)
         {
-            // FSM failed before finding a token
+            // Typically only arises when missing a trailing newline
             std::cerr
                 << EXENAME ": parse error while scanning '"
-                << fileName << "'\n";
+                << fileName << "' ... perhaps missing a final newline\n";
             break;
         }
 
