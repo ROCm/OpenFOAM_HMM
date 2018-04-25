@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,27 @@ License
 
 #include "primitiveEntry.H"
 #include "functionEntry.H"
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace
+{
+    // This is akin to a SafeIOWarning, which does not yet exist
+    inline void safeIOWarning
+    (
+        const Foam::IOstream& is,
+        const std::string& msg
+    )
+    {
+        std::cerr
+            << "--> FOAM Warning :\n"
+            << "    Reading \"" << is.name() << "\" at line "
+            << is.lineNumber() << '\n'
+            << "    " << msg << std::endl;
+    }
+
+} // end of anonymous namespace
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -86,6 +107,17 @@ bool Foam::primitiveEntry::read(const dictionary& dict, Istream& is)
 {
     is.fatalCheck(FUNCTION_NAME);
 
+    // Track balanced bracket/brace pairs, with max stack depth of 60.
+    // Use a bitmask to track the opening char: 0 = '()', 1 = '{}'
+    //
+    // Notes
+    // - the bitmask is set *before* increasing the depth since the left
+    //   shift implicitly carries a 1-offset with it.
+    //   Eg, (1u << 0) already corresponds to depth=1 (the first bit)
+    //
+    // - similarly, the bitmask is tested *after* decreasing depth
+
+    uint64_t balanced = 0u;
     label depth = 0;
     token tok;
 
@@ -98,13 +130,65 @@ bool Foam::primitiveEntry::read(const dictionary& dict, Istream& is)
         if (tok.isPunctuation())
         {
             const char c = tok.pToken();
-            if (c == token::BEGIN_BLOCK || c == token::BEGIN_LIST)
+            switch (c)
             {
-                ++depth;
-            }
-            else if (c == token::END_BLOCK || c == token::END_LIST)
-            {
-                --depth;
+                case token::BEGIN_LIST:
+                {
+                    if (depth >= 0 && depth < 61)
+                    {
+                        balanced &= ~(1u << depth); // clear bit
+                    }
+                    ++depth;
+                }
+                break;
+
+                case token::BEGIN_BLOCK:
+                {
+                    if (depth >= 0 && depth < 61)
+                    {
+                        balanced |= (1u << depth); // set bit
+                    }
+                    ++depth;
+                }
+                break;
+
+                case token::END_LIST:
+                {
+                    --depth;
+                    if (depth < 0)
+                    {
+                        safeIOWarning
+                        (
+                            is,
+                            "Too many closing ')' ... was a ';' forgotten?"
+                        );
+                    }
+                    else if (depth < 61 && ((balanced >> depth) & 1u))
+                    {
+                        // Bit was set, but expected it to be unset.
+                        safeIOWarning(is, "Imbalanced '{' with ')'");
+                    }
+                }
+                break;
+
+                case token::END_BLOCK:
+                {
+                    --depth;
+                    if (depth < 0)
+                    {
+                        safeIOWarning
+                        (
+                            is,
+                            "Too many closing '}' ... was a ';' forgotten?"
+                        );
+                    }
+                    else if (depth < 61 && !((balanced >> depth) & 1u))
+                    {
+                        // Bit was unset, but expected it to be set.
+                        safeIOWarning(is, "Imbalanced '(' with '}'");
+                    }
+                }
+                break;
             }
         }
 
@@ -119,6 +203,11 @@ bool Foam::primitiveEntry::read(const dictionary& dict, Istream& is)
         tok = token::punctuationToken::NULL_TOKEN;
     }
 
+    if (depth)
+    {
+        safeIOWarning(is, "Imbalanced brackets");
+    }
+
     is.fatalCheck(FUNCTION_NAME);
     return tok.good();
 }
@@ -126,7 +215,7 @@ bool Foam::primitiveEntry::read(const dictionary& dict, Istream& is)
 
 void Foam::primitiveEntry::readEntry(const dictionary& dict, Istream& is)
 {
-    label keywordLineNumber = is.lineNumber();
+    const label keywordLineNumber = is.lineNumber();
     tokenIndex() = 0;
 
     if (read(dict, is))
@@ -242,7 +331,7 @@ Foam::Ostream& Foam::operator<<
 
     os  << "    primitiveEntry '" << e.keyword() << "' comprises ";
 
-    for (label i=0; i<min(e.size(), nPrintTokens); i++)
+    for (label i=0; i<min(e.size(), nPrintTokens); ++i)
     {
         os  << nl << "        " << e[i].info();
     }
