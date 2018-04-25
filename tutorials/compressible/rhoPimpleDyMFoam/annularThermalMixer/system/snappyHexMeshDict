@@ -111,10 +111,11 @@ castellatedMeshControls
     {
         AMI
         {
-            level       (2 2);
-            faceZone    rotatingZone;
-            cellZone    rotatingZone;
-            cellZoneInside  inside;
+            level           (2 2);
+            faceZone        rotatingZone;
+            cellZone        rotatingZone;
+            cellZoneInside  insidePoint;
+            insidePoint     (-0.0295299 0.00662614 0.1);
         }
 
         innerInlet
