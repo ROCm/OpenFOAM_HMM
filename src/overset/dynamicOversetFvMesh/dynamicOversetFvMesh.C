@@ -91,10 +91,6 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
             << " nExtraFaces:" << nExtraFaces << endl;
     }
 
-    // Send across wanted cells
-    labelListList sendCells;
-    Pstream::exchange<labelList, label>(remoteFaceCells, sendCells);
-
     // Extract relevant remote processors
     labelList nbrProcs(localFaceCells.size());
     {
