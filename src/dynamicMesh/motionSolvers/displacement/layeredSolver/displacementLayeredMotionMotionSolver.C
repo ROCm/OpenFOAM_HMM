@@ -60,8 +60,8 @@ namespace Foam
 void Foam::displacementLayeredMotionMotionSolver::calcZoneMask
 (
     const label cellZoneI,
-    PackedBoolList& isZonePoint,
-    PackedBoolList& isZoneEdge
+    bitSet& isZonePoint,
+    bitSet& isZoneEdge
 ) const
 {
     if (cellZoneI == -1)
@@ -133,8 +133,8 @@ void Foam::displacementLayeredMotionMotionSolver::calcZoneMask
 void Foam::displacementLayeredMotionMotionSolver::walkStructured
 (
     const label cellZoneI,
-    const PackedBoolList& isZonePoint,
-    const PackedBoolList& isZoneEdge,
+    const bitSet& isZonePoint,
+    const bitSet& isZoneEdge,
     const labelList& seedPoints,
     const vectorField& seedData,
     scalarField& distance,
@@ -286,8 +286,8 @@ void Foam::displacementLayeredMotionMotionSolver::cellZoneSolve
     const dictionary& zoneDict
 )
 {
-    PackedBoolList isZonePoint(mesh().nPoints());
-    PackedBoolList isZoneEdge(mesh().nEdges());
+    bitSet isZonePoint(mesh().nPoints());
+    bitSet isZoneEdge(mesh().nEdges());
     calcZoneMask(cellZoneI, isZonePoint, isZoneEdge);
 
     const dictionary& patchesDict = zoneDict.subDict("boundaryField");

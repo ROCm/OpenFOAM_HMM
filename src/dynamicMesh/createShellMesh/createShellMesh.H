@@ -40,7 +40,7 @@ SourceFiles
 #define createShellMesh_H
 
 #include "primitiveFacePatch.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "labelPair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -87,10 +87,10 @@ class createShellMesh
             const globalMeshData&,
             const labelList&,
             const labelList&,
-            const PackedBoolList& sameEdgeOrientation,
+            const bitSet& sameEdgeOrientation,
             const bool syncNonCollocated,
 
-            PackedBoolList& isChangedEdge,
+            bitSet& isChangedEdge,
             DynamicList<label>& changedEdges,
             labelPairList& allEdgeData
         );
@@ -172,7 +172,7 @@ public:
             (
                 const globalMeshData& globalData,
                 const primitiveFacePatch& patch,
-                const PackedBoolList& nonManifoldEdge,
+                const bitSet& nonManifoldEdge,
                 const bool syncNonCollocated,
                 faceList& pointGlobalRegions,
                 faceList& pointLocalRegions,

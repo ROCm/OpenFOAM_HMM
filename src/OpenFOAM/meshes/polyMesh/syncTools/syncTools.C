@@ -62,10 +62,10 @@ void Foam::syncTools::swapBoundaryCellPositions
 }
 
 
-Foam::PackedBoolList Foam::syncTools::getMasterPoints(const polyMesh& mesh)
+Foam::bitSet Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 {
-    PackedBoolList isMasterPoint(mesh.nPoints());
-    PackedBoolList donePoint(mesh.nPoints());
+    bitSet isMasterPoint(mesh.nPoints());
+    bitSet donePoint(mesh.nPoints());
 
     const globalMeshData& globalData = mesh.globalData();
     const labelList& meshPoints = globalData.coupledPatch().meshPoints();
@@ -96,7 +96,7 @@ Foam::PackedBoolList Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 
     forAll(donePoint, pointi)
     {
-        if (!donePoint[pointi])
+        if (!donePoint.test(pointi))
         {
             isMasterPoint.set(pointi);
         }
@@ -106,10 +106,10 @@ Foam::PackedBoolList Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 }
 
 
-Foam::PackedBoolList Foam::syncTools::getMasterEdges(const polyMesh& mesh)
+Foam::bitSet Foam::syncTools::getMasterEdges(const polyMesh& mesh)
 {
-    PackedBoolList isMasterEdge(mesh.nEdges());
-    PackedBoolList doneEdge(mesh.nEdges());
+    bitSet isMasterEdge(mesh.nEdges());
+    bitSet doneEdge(mesh.nEdges());
 
     const globalMeshData& globalData = mesh.globalData();
     const labelList& meshEdges = globalData.coupledPatchMeshEdges();
@@ -140,7 +140,7 @@ Foam::PackedBoolList Foam::syncTools::getMasterEdges(const polyMesh& mesh)
 
     forAll(doneEdge, edgeI)
     {
-        if (!doneEdge[edgeI])
+        if (!doneEdge.test(edgeI))
         {
             isMasterEdge.set(edgeI);
         }
@@ -150,9 +150,9 @@ Foam::PackedBoolList Foam::syncTools::getMasterEdges(const polyMesh& mesh)
 }
 
 
-Foam::PackedBoolList Foam::syncTools::getMasterFaces(const polyMesh& mesh)
+Foam::bitSet Foam::syncTools::getMasterFaces(const polyMesh& mesh)
 {
-    PackedBoolList isMasterFace(mesh.nFaces(), true);
+    bitSet isMasterFace(mesh.nFaces(), true);
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
@@ -177,12 +177,12 @@ Foam::PackedBoolList Foam::syncTools::getMasterFaces(const polyMesh& mesh)
 }
 
 
-Foam::PackedBoolList Foam::syncTools::getInternalOrMasterFaces
+Foam::bitSet Foam::syncTools::getInternalOrMasterFaces
 (
     const polyMesh& mesh
 )
 {
-    PackedBoolList isMasterFace(mesh.nFaces(), true);
+    bitSet isMasterFace(mesh.nFaces(), true);
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
@@ -213,12 +213,12 @@ Foam::PackedBoolList Foam::syncTools::getInternalOrMasterFaces
 }
 
 
-Foam::PackedBoolList Foam::syncTools::getInternalOrCoupledFaces
+Foam::bitSet Foam::syncTools::getInternalOrCoupledFaces
 (
     const polyMesh& mesh
 )
 {
-    PackedBoolList isMasterFace(mesh.nFaces(), true);
+    bitSet isMasterFace(mesh.nFaces(), true);
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 

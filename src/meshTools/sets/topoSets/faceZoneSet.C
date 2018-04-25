@@ -383,7 +383,7 @@ void Foam::faceZoneSet::sync(const polyMesh& mesh)
     syncTools::swapBoundaryFaceList(mesh, neiZoneFace);
 
 
-    const PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh));
+    const bitSet isMasterFace(syncTools::getMasterFaces(mesh));
 
 
     // Rebuild faceZone addressing and flipMap

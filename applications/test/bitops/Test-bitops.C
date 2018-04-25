@@ -27,6 +27,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "bool.H"
+#include "BitOps.H"
 #include "IOstreams.H"
 #include "stdFoam.H"
 
@@ -176,6 +177,15 @@ int main(int argc, char *argv[])
     printTopbit<4097>();
 
     printOffset<double>();
+
+
+    Info<<nl << "Test repeat_value" << nl << nl;
+
+    Info<< BitOps::bitInfo<unsigned>(BitOps::repeat_value<unsigned, 3>(1u))
+        << nl;
+
+    Info<< BitOps::bitInfo<unsigned>(BitOps::repeat_value<unsigned>(1u))
+        << nl;
 
     Info << "---\nEnd\n" << endl;
 

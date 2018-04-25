@@ -27,7 +27,7 @@ License
 #include "triSurfaceSearch.H"
 #include "OBJstream.H"
 #include "labelPairHashes.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "triSurface.H"
 #include "pointIndexHit.H"
 #include "mergePoints.H"
@@ -820,7 +820,7 @@ void Foam::surfaceIntersection::doCutEdges
 
         // Optionally prevent intersection within a single region.
         // Like self-intersect, but only if regions are different
-        PackedBoolList maskRegions(32);
+        bitSet maskRegions(32);
 
         treeDataTriSurface::findAllIntersectOp
             allIntersectOp(searchTree, maskFaces);

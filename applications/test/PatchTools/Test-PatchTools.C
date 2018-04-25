@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
 
         labelList patchEdges;
         labelList coupledEdges;
-        PackedBoolList sameEdgeOrientation;
+        bitSet sameEdgeOrientation;
         PatchTools::matchEdges
         (
             pp,

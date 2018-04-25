@@ -32,6 +32,7 @@ InClass
 #include "Time.H"
 #include "SortableList.H"
 #include "pointSet.H"
+#include "bitSet.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -594,7 +595,7 @@ void Foam::polyDualMesh::dualPatch
     // 3 : done both
     labelList doneEdgeSide(meshEdges.size(), 0);
 
-    boolList donePoint(patch.nPoints(), false);
+    bitSet donePoint(patch.nPoints(), false);
 
 
     // Do points on edge of patch
@@ -650,7 +651,7 @@ void Foam::polyDualMesh::dualPatch
                     dualRegion.append(patch.index());
 
                     doneEdgeSide[patchEdgeI] |= bitMask;
-                    donePoint[pointi] = true;
+                    donePoint.set(pointi);
                 }
             }
         }
@@ -663,7 +664,7 @@ void Foam::polyDualMesh::dualPatch
 
     forAll(donePoint, pointi)
     {
-        if (!donePoint[pointi])
+        if (!donePoint.test(pointi))
         {
             labelList dualFace, featEdgeIndices;
 
@@ -1496,7 +1497,7 @@ void Foam::polyDualMesh::calcFeatures
     const vectorField& faceNormals = allBoundary.faceNormals();
     const labelList& meshPoints = allBoundary.meshPoints();
 
-    boolList isFeatureEdge(edgeFaces.size(), false);
+    bitSet isFeatureEdge(edgeFaces.size(), false);
 
     forAll(edgeFaces, edgeI)
     {
@@ -1514,11 +1515,11 @@ void Foam::polyDualMesh::calcFeatures
                 << " has more than 2 faces connected to it:"
                 << eFaces.size() << endl;
 
-            isFeatureEdge[edgeI] = true;
+            isFeatureEdge.set(edgeI);
         }
         else if (allRegion[eFaces[0]] != allRegion[eFaces[1]])
         {
-            isFeatureEdge[edgeI] = true;
+            isFeatureEdge.set(edgeI);
         }
         else if
         (
@@ -1526,7 +1527,7 @@ void Foam::polyDualMesh::calcFeatures
           < featureCos
         )
         {
-            isFeatureEdge[edgeI] = true;
+            isFeatureEdge.set(edgeI);
         }
     }
 
@@ -1546,9 +1547,9 @@ void Foam::polyDualMesh::calcFeatures
 
         forAll(pEdges, i)
         {
-            if (isFeatureEdge[pEdges[i]])
+            if (isFeatureEdge.test(pEdges[i]))
             {
-                nFeatEdges++;
+                ++nFeatEdges;
             }
         }
         if (nFeatEdges > 2)
@@ -1593,7 +1594,7 @@ void Foam::polyDualMesh::calcFeatures
     DynamicList<label> allFeatureEdges(isFeatureEdge.size());
     forAll(isFeatureEdge, edgeI)
     {
-        if (isFeatureEdge[edgeI])
+        if (isFeatureEdge.test(edgeI))
         {
             // Store in mesh edge label.
             allFeatureEdges.append(meshEdges[edgeI]);

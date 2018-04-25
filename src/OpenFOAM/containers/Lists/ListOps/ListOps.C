@@ -115,16 +115,16 @@ Foam::labelList Foam::identity(const label len, const label start)
 }
 
 
-Foam::PackedBoolList Foam::reorder
+Foam::bitSet Foam::reorder
 (
     const labelUList& oldToNew,
-    const PackedBoolList& input,
+    const bitSet& input,
     const bool prune
 )
 {
     const label len = input.size();
 
-    PackedBoolList output(len);
+    bitSet output;
     output.reserve(len);
 
     for (label i=0; i < len; ++i)
@@ -149,10 +149,6 @@ Foam::PackedBoolList Foam::reorder
         output.trim();
     }
 
-    // Verify addresses (for movable refs)
-    // Info<< "reordered in " << long(input.storage().cdata()) << nl
-    //     << "reordered out " << long(output.storage().cdata()) << nl;
-
     return output;
 }
 
@@ -160,14 +156,11 @@ Foam::PackedBoolList Foam::reorder
 void Foam::inplaceReorder
 (
     const labelUList& oldToNew,
-    PackedBoolList& input,
+    bitSet& input,
     const bool prune
 )
 {
     input = reorder(oldToNew, input, prune);
-
-    // Verify address (for movable refs)
-    // Info<< "now have " << long(input.storage().cdata()) << nl;
 }
 
 

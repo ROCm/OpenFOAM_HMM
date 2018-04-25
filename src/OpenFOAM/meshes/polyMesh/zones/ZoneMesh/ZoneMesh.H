@@ -39,7 +39,7 @@ SourceFiles
 #include "regIOobject.H"
 #include "pointField.H"
 #include "Map.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -180,7 +180,7 @@ public:
         label findZoneID(const word& zoneName) const;
 
         //- Mark items (cells, faces, points) that match the zone specification
-        PackedBoolList findMatching(const keyType& key) const;
+        bitSet findMatching(const keyType& key) const;
 
         //- Clear addressing
         void clearAddressing();

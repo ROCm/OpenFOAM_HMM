@@ -1620,14 +1620,14 @@ int main(int argc, char *argv[])
             labelList cls(end() - start() + 1);
 
             // Mark zone cells, used for finding faces
-            boolList zoneCell(pShapeMesh.nCells(), false);
+            bitSet zoneCell(pShapeMesh.nCells(), false);
 
             // shift cell indizes by 1
             label nr=0;
             for (label celli = (start() - 1); celli < end(); celli++)
             {
                 cls[nr]=celli;
-                zoneCell[celli] = true;
+                zoneCell.set(celli);
                 nr++;
             }
 
@@ -1646,7 +1646,7 @@ int main(int argc, char *argv[])
                 label own = pShapeMesh.faceOwner()[facei];
                 if (nei != -1)
                 {
-                    if (zoneCell[nei] && zoneCell[own])
+                    if (zoneCell.test(nei) && zoneCell.test(own))
                     {
                         zoneFaces.append(facei);
                     }
@@ -1669,7 +1669,7 @@ int main(int argc, char *argv[])
                 const labelList& faceCells = bPatches[pI].faceCells();
                 forAll(faceCells, fcI)
                 {
-                    if (zoneCell[faceCells[fcI] ])
+                    if (zoneCell.test(faceCells[fcI]))
                     {
                         boundaryZones[pI].append(name);
                         break;

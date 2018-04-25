@@ -1187,9 +1187,9 @@ void Foam::globalMeshData::calcGlobalEdgeOrientation() const
         // Now check my edges on how they relate to the master's edgeVerts
         globalEdgeOrientationPtr_.reset
         (
-            new PackedBoolList(coupledPatch().nEdges())
+            new bitSet(coupledPatch().nEdges())
         );
-        PackedBoolList& globalEdgeOrientation = globalEdgeOrientationPtr_();
+        bitSet& globalEdgeOrientation = globalEdgeOrientationPtr_();
 
         forAll(coupledPatch().edges(), edgeI)
         {
@@ -2260,7 +2260,7 @@ const
 }
 
 
-const Foam::PackedBoolList& Foam::globalMeshData::globalEdgeOrientation() const
+const Foam::bitSet& Foam::globalMeshData::globalEdgeOrientation() const
 {
     if (!globalEdgeOrientationPtr_.valid())
     {
@@ -2439,7 +2439,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
 
     // 1. Count number of masters on my processor.
     label nMaster = 0;
-    PackedBoolList isMaster(mesh_.nPoints(), true);
+    bitSet isMaster(mesh_.nPoints(), true);
     forAll(pointSlaves, pointi)
     {
         if (masterGlobalPoint[pointi] == -1)

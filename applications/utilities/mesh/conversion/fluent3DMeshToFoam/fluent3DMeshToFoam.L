@@ -869,7 +869,7 @@ int main(int argc, char *argv[])
     // Pre-filtering: flip "owner" boundary or wrong oriented internal
     // faces and move to neighbour
 
-    boolList fm(faces.size(), false);
+    bitSet fm(faces.size(), false);
     forAll(faces, facei)
     {
         if
@@ -878,7 +878,7 @@ int main(int argc, char *argv[])
          || (neighbour[facei] != -1 && owner[facei] > neighbour[facei])
         )
         {
-            fm[facei] = true;
+            fm.set(facei);
             if (!cubitFile)
             {
                 faces[facei].flip();
@@ -1279,7 +1279,7 @@ int main(int argc, char *argv[])
                     false,              // flipFaceFlux
                     -1,                 // patchID
                     faceZonei,          // zoneID
-                    fm[facei]           // zoneFlip
+                    fm.test(facei)      // zoneFlip
                 );
             }
 

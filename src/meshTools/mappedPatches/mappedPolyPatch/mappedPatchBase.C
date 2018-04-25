@@ -716,7 +716,7 @@ void Foam::mappedPatchBase::calcMapping() const
     if (debug)
     {
         // Check that all elements get a value.
-        PackedBoolList used(patch_.size());
+        bitSet used(patch_.size());
         forAll(constructMap, proci)
         {
             const labelList& map = constructMap[proci];

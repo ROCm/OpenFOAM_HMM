@@ -37,7 +37,7 @@ SourceFiles
 #define targetVolumeToCell_H
 
 #include "topoSetSource.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,13 +70,13 @@ class targetVolumeToCell
 
     // Private Member Functions
 
-        scalar volumeOfSet(const PackedBoolList&) const;
+        scalar volumeOfSet(const bitSet&) const;
 
         label selectCells
         (
             const scalar normalComp,
-            const PackedBoolList&,
-            PackedBoolList& selected
+            const bitSet&,
+            bitSet& selected
         ) const;
 
         void combine(topoSet& set, const bool add) const;

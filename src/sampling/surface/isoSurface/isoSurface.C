@@ -80,13 +80,13 @@ bool Foam::isoSurface::collocatedPatch(const polyPatch& pp)
 }
 
 
-Foam::PackedBoolList Foam::isoSurface::collocatedFaces
+Foam::bitSet Foam::isoSurface::collocatedFaces
 (
     const coupledPolyPatch& pp
 ) const
 {
     // Initialise to false
-    PackedBoolList collocated(pp.size());
+    bitSet collocated(pp.size());
 
     if (isA<processorPolyPatch>(pp))
     {
@@ -671,7 +671,7 @@ void Foam::isoSurface::calcSnappedCc
 
 void Foam::isoSurface::calcSnappedPoint
 (
-    const PackedBoolList& isBoundaryPoint,
+    const bitSet& isBoundaryPoint,
     const labelList& boundaryRegion,
     const volVectorField& meshC,
     const volScalarField& cVals,
@@ -1403,7 +1403,7 @@ Foam::isoSurface::isoSurface
                 meshC.boundaryField()[patchi]
             );
 
-            PackedBoolList isCollocated
+            bitSet isCollocated
             (
                 collocatedFaces(refCast<const coupledPolyPatch>(pp))
             );
@@ -1504,7 +1504,7 @@ Foam::isoSurface::isoSurface
     if (regularise_)
     {
         // Determine if point is on boundary.
-        PackedBoolList isBoundaryPoint(mesh_.nPoints());
+        bitSet isBoundaryPoint(mesh_.nPoints());
 
         forAll(patches, patchi)
         {
@@ -1519,7 +1519,7 @@ Foam::isoSurface::isoSurface
                         patches[patchi]
                     );
 
-                PackedBoolList isCollocated(collocatedFaces(cpp));
+                bitSet isCollocated(collocatedFaces(cpp));
 
                 forAll(isCollocated, i)
                 {

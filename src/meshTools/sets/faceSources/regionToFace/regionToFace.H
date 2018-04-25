@@ -37,7 +37,7 @@ SourceFiles
 #define regionToFace_H
 
 #include "topoSetSource.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "indirectPrimitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

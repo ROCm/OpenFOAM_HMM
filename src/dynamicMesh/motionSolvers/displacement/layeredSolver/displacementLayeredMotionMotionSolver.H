@@ -61,7 +61,7 @@ SourceFiles
 #define displacementLayeredMotionMotionSolver_H
 
 #include "displacementMotionSolver.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -83,15 +83,15 @@ class displacementLayeredMotionMotionSolver
         void calcZoneMask
         (
             const label cellZoneI,
-            PackedBoolList& isZonePoint,
-            PackedBoolList& isZoneEdge
+            bitSet& isZonePoint,
+            bitSet& isZoneEdge
         ) const;
 
         void walkStructured
         (
             const label cellZoneI,
-            const PackedBoolList& isZonePoint,
-            const PackedBoolList& isZoneEdge,
+            const bitSet& isZonePoint,
+            const bitSet& isZoneEdge,
             const labelList& seedPoints,
             const vectorField& seedData,
             scalarField& distance,

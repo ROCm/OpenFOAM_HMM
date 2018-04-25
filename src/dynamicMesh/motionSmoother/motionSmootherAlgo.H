@@ -79,7 +79,7 @@ SourceFiles
 
 #include "pointFields.H"
 #include "HashSet.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "indirectPrimitivePatch.H"
 #include "className.H"
 
@@ -161,11 +161,11 @@ class motionSmootherAlgo
             dictionary paramDict_;
 
             //- Is mesh point on boundary or not
-            PackedBoolList isInternalPoint_;
+            bitSet isInternalPoint_;
 
             //- Is edge master (always except if on coupled boundary and on
             //  lower processor)
-            PackedBoolList isMasterEdge_;
+            bitSet isMasterEdge_;
 
 
     // Private Member Functions
@@ -221,7 +221,7 @@ class motionSmootherAlgo
         void minSmooth
         (
             const scalarField& edgeWeights,
-            const PackedBoolList& isAffectedPoint,
+            const bitSet& isAffectedPoint,
             const pointScalarField& fld,
             pointScalarField& newFld
         ) const;
@@ -230,7 +230,7 @@ class motionSmootherAlgo
         void minSmooth
         (
             const scalarField& edgeWeights,
-            const PackedBoolList& isAffectedPoint,
+            const bitSet& isAffectedPoint,
             const labelList& meshPoints,
             const pointScalarField& fld,
             pointScalarField& newFld
@@ -284,7 +284,7 @@ class motionSmootherAlgo
             const faceSet& wrongFaces,
 
             labelList& affectedFaces,
-            PackedBoolList& isAffectedPoint
+            bitSet& isAffectedPoint
         ) const;
 
         //- Disallow default bitwise copy construct

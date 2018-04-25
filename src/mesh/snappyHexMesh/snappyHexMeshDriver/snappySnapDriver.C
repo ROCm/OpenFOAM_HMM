@@ -59,13 +59,13 @@ defineTypeNameAndDebug(snappySnapDriver, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Calculate geometrically collocated points, Requires PackedBoolList to be
+// Calculate geometrically collocated points, Requires bitSet to be
 // sized and initialised!
 Foam::label Foam::snappySnapDriver::getCollocatedPoints
 (
     const scalar tol,
     const pointField& points,
-    PackedBoolList& isCollocatedPoint
+    bitSet& isCollocatedPoint
 )
 {
     labelList pointMap;
@@ -136,13 +136,13 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothInternalDisplacement
 
 
     // Get the faces on the boundary
-    PackedBoolList isFront(mesh.nFaces(), pp.addressing());
+    bitSet isFront(mesh.nFaces(), pp.addressing());
 
     // Walk out from the surface a bit. Poor man's FaceCellWave.
     // Commented out for now - not sure if needed and if so how much
     //for (label iter = 0; iter < 2; iter++)
     //{
-    //    PackedBoolList newIsFront(mesh.nFaces());
+    //    bitSet newIsFront(mesh.nFaces());
     //
     //    forAll(isFront, facei)
     //    {
@@ -174,7 +174,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothInternalDisplacement
     // Mark all points on faces
     //  - not on the boundary
     //  - inbetween differing refinement levels
-    PackedBoolList isMovingPoint(mesh.nPoints());
+    bitSet isMovingPoint(mesh.nPoints());
 
     label nInterface = 0;
 
@@ -294,7 +294,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothPatchDisplacement
     const indirectPrimitivePatch& pp = meshMover.patch();
 
     // Calculate geometrically non-manifold points on the patch to be moved.
-    PackedBoolList nonManifoldPoint(pp.nPoints());
+    bitSet nonManifoldPoint(pp.nPoints());
     label nNonManifoldPoints = getCollocatedPoints
     (
         SMALL,
@@ -324,7 +324,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothPatchDisplacement
     const polyMesh& mesh = meshMover.mesh();
 
     // Get labels of faces to count (master of coupled faces and baffle pairs)
-    PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh));
+    bitSet isMasterFace(syncTools::getMasterFaces(mesh));
 
     {
         forAll(baffles, i)
@@ -1401,7 +1401,7 @@ void Foam::snappySnapDriver::detectNearSurfaces
     }
 
 
-    const PackedBoolList isPatchMasterPoint
+    const bitSet isPatchMasterPoint
     (
         meshRefinement::getMasterPoints
         (
@@ -2025,7 +2025,7 @@ Foam::vectorField Foam::snappySnapDriver::calcNearestSurface
         }
 
         {
-            const PackedBoolList isPatchMasterPoint
+            const bitSet isPatchMasterPoint
             (
                 meshRefinement::getMasterPoints
                 (
@@ -2245,7 +2245,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::snappySnapDriver::repatchToSurface
 
 
     // Faces that do not move
-    PackedBoolList isZonedFace(mesh.nFaces());
+    bitSet isZonedFace(mesh.nFaces());
     {
         // 1. Preserve faces in preserveFaces list
         forAll(preserveFaces, facei)

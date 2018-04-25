@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,16 +21,47 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::Detail::PackedListCore
+
+Description
+    Implementation of template-invariant details for Foam::PackedList
+
+SourceFiles
+    PackedListCore.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "PackedList.H"
+#ifndef PackedListCore_H
+#define PackedListCore_H
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "className.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-defineTypeNameAndDebug(PackedListCore, 0);
-}
+namespace Detail
+{
 
+/*---------------------------------------------------------------------------*\
+                   Class Detail::PackedListCore Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Template-invariant parts for PackedList
+struct PackedListCore
+{
+    //- Define template name
+    ClassNameNoDebug("PackedList");
+};
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Detail
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

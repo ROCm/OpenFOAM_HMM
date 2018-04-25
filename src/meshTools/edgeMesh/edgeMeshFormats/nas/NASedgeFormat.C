@@ -26,7 +26,7 @@ License
 #include "NASedgeFormat.H"
 #include "IFstream.H"
 #include "StringStream.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -173,7 +173,7 @@ bool Foam::fileFormats::NASedgeFormat::read
     }
 
     // note which points were really used and which can be culled
-    PackedBoolList usedPoints(points().size());
+    bitSet usedPoints(points().size());
 
 
     // Pass1: relabel edges
@@ -189,29 +189,25 @@ bool Foam::fileFormats::NASedgeFormat::read
     pointId.clearStorage();
     mapPointId.clear();
 
-    // Not all the points were used, cull them accordingly
-    if (unsigned(points().size()) != usedPoints.count())
+    // Not all points were used, subset/cull them accordingly
+    if (!usedPoints.all())
     {
         label nUsed = 0;
 
         pointField& pts = storedPoints();
-        forAll(pts, pointi)
+        for (const label pointi : usedPoints)
         {
-            if (usedPoints.test(pointi))
+            if (nUsed != pointi)
             {
-                if (nUsed != pointi)
-                {
-                    pts[nUsed] = pts[pointi];
-                }
-
-                // map prev -> new id
-                mapPointId[pointi] = nUsed;
-
-                ++nUsed;
+                pts[nUsed] = pts[pointi];
             }
-        }
 
-        pts.setSize(nUsed);
+            // map prev -> new id
+            mapPointId.set(pointi, nUsed);
+
+            ++nUsed;
+        }
+        pts.resize(nUsed);
 
         // Renumber edge vertices
         for (edge& e : dynEdges)
@@ -221,8 +217,6 @@ bool Foam::fileFormats::NASedgeFormat::read
         }
     }
 
-
-    // transfer to normal lists
     storedEdges().transfer(dynEdges);
 
     return true;

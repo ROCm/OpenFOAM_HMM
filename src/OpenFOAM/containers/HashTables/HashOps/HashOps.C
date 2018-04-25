@@ -24,26 +24,23 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "HashOps.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 
 #include <algorithm>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::labelHashSet Foam::HashSetOps::used(const PackedBoolList& select)
+Foam::labelHashSet Foam::HashSetOps::used(const bitSet& select)
 {
-    const label count = select.count();
-    const label len = select.size();
+    labelHashSet output(0);
 
-    labelHashSet output(2*count);
-
-    label used = 0;
-    for (label i = 0; i < len && used < count; ++i)
+    if (select.any())
     {
-        if (select[i])
+        output.resize(2*select.count());
+
+        for (label i = select.find_first(); i >= 0; i = select.find_next(i))
         {
             output.insert(i);
-            ++used;
         }
     }
 
@@ -53,11 +50,10 @@ Foam::labelHashSet Foam::HashSetOps::used(const PackedBoolList& select)
 
 Foam::labelHashSet Foam::HashSetOps::used(const UList<bool>& select)
 {
-    // We have no estimate of the size/sparsity, just assume 1/10
-
     const label len = select.size();
 
-    labelHashSet output(len/10);
+    // No idea of the sparseness, just assume 1/8
+    labelHashSet output(len/4);
 
     for (label i = 0; i < len; ++i)
     {
@@ -71,34 +67,19 @@ Foam::labelHashSet Foam::HashSetOps::used(const UList<bool>& select)
 }
 
 
-Foam::PackedBoolList Foam::HashSetOps::bitset(const labelHashSet& labels)
+Foam::bitSet Foam::HashSetOps::bitset(const labelHashSet& locations)
 {
-    auto const max = std::max_element(labels.cbegin(), labels.cend());
-    const label len = (max.found() ? (1 + *max) : 0);
-
-    if (len <= 0)
-    {
-        return PackedBoolList();
-    }
-
-    PackedBoolList output(len);
-
-    for (const label i : labels)
-    {
-        if (i >= 0)
-        {
-            output.set(i);
-        }
-    }
+    bitSet output;
+    output.setMany(locations.begin(), locations.end());
 
     return output;
 }
 
 
-Foam::List<bool> Foam::HashSetOps::bools(const labelHashSet& labels)
+Foam::List<bool> Foam::HashSetOps::bools(const labelHashSet& locations)
 {
-    auto const max = std::max_element(labels.cbegin(), labels.cend());
-    const label len = (max.found() ? (1 + *max) : 0);
+    auto const max = std::max_element(locations.begin(), locations.end());
+    const label len = (max != locations.end() ? (1 + *max) : 0);
 
     if (len <= 0)
     {
@@ -107,7 +88,7 @@ Foam::List<bool> Foam::HashSetOps::bools(const labelHashSet& labels)
 
     List<bool> output(len, false);
 
-    for (const label i : labels)
+    for (const label i : locations)
     {
         if (i >= 0)
         {

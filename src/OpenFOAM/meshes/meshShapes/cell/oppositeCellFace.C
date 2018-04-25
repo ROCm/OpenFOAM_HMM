@@ -29,7 +29,7 @@ Description
 
 #include "cell.H"
 #include "oppositeFace.H"
-#include "boolList.H"
+#include "bitSet.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -136,7 +136,7 @@ Foam::oppositeFace Foam::cell::opposingFace
 
     // Get cell edges
     const edgeList e = edges(meshFaces);
-    boolList usedEdges(e.size(), false);
+    bitSet usedEdges(e.size());
 
     oppositeFace oppFace
     (
@@ -151,7 +151,7 @@ Foam::oppositeFace Foam::cell::opposingFace
         // to the slave face
         forAll(e, edgeI)
         {
-            if (!usedEdges[edgeI])
+            if (!usedEdges.test(edgeI))
             {
                 // Get the other vertex
                 label otherVertex = e[edgeI].otherVertex(masterFace[pointi]);
@@ -165,7 +165,7 @@ Foam::oppositeFace Foam::cell::opposingFace
                     {
                         if (slaveFace[slavePointi] == otherVertex)
                         {
-                            usedEdges[edgeI] = true;
+                            usedEdges.set(edgeI);
                             oppFace[pointi] = otherVertex;
 
                             break;

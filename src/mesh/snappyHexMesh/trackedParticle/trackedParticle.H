@@ -96,7 +96,7 @@ public:
 
         labelList& maxLevel_;
 
-        List<PackedBoolList>& featureEdgeVisited_;
+        List<bitSet>& featureEdgeVisited_;
 
 
         // Constructors
@@ -105,7 +105,7 @@ public:
             (
                 Cloud<trackedParticle>& cloud,
                 labelList& maxLevel,
-                List<PackedBoolList>& featureEdgeVisited
+                List<bitSet>& featureEdgeVisited
             )
             :
                 particle::trackingData(cloud),

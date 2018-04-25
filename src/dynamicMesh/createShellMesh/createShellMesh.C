@@ -66,16 +66,16 @@ void Foam::createShellMesh::syncEdges
 
     const labelList& patchEdges,
     const labelList& coupledEdges,
-    const PackedBoolList& sameEdgeOrientation,
+    const bitSet& sameEdgeOrientation,
     const bool syncNonCollocated,
 
-    PackedBoolList& isChangedEdge,
+    bitSet& isChangedEdge,
     DynamicList<label>& changedEdges,
     labelPairList& allEdgeData
 )
 {
     const mapDistribute& map = globalData.globalEdgeSlavesMap();
-    const PackedBoolList& cppOrientation = globalData.globalEdgeOrientation();
+    const bitSet& cppOrientation = globalData.globalEdgeOrientation();
 
     // Convert patch-edge data into cpp-edge data
     labelPairList cppEdgeData
@@ -154,7 +154,7 @@ void Foam::createShellMesh::calcPointRegions
 (
     const globalMeshData& globalData,
     const primitiveFacePatch& patch,
-    const PackedBoolList& nonManifoldEdge,
+    const bitSet& nonManifoldEdge,
     const bool syncNonCollocated,
 
     faceList& pointGlobalRegions,
@@ -167,7 +167,7 @@ void Foam::createShellMesh::calcPointRegions
     // Calculate correspondence between patch and globalData.coupledPatch.
     labelList patchEdges;
     labelList coupledEdges;
-    PackedBoolList sameEdgeOrientation;
+    bitSet sameEdgeOrientation;
     PatchTools::matchEdges
     (
         cpp,
@@ -211,7 +211,7 @@ void Foam::createShellMesh::calcPointRegions
 
     DynamicList<label> changedEdges(patch.nEdges());
     labelPairList allEdgeData(patch.nEdges(), labelPair(labelMax, labelMax));
-    PackedBoolList isChangedEdge(patch.nEdges());
+    bitSet isChangedEdge(patch.nEdges());
 
 
     // Fill initial seed
@@ -267,7 +267,7 @@ void Foam::createShellMesh::calcPointRegions
         // ~~~~~~~~~~~~~~~~~
 
         DynamicList<label> changedFaces(patch.size());
-        PackedBoolList isChangedFace(patch.size());
+        bitSet isChangedFace(patch.size());
 
         forAll(changedEdges, changedI)
         {

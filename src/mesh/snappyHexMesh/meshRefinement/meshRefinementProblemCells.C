@@ -528,7 +528,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
 
     // Count of faces marked for baffling
     label nBaffleFaces = 0;
-    PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));
+    bitSet isMasterFace(syncTools::getMasterFaces(mesh_));
 
     // Count of faces not baffled since would not cause a collapse
     label nPrevented = 0;
@@ -711,7 +711,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
 
 
     // Does cell have exactly 7 of its 8 anchor points on the boundary?
-    PackedBoolList hasSevenBoundaryAnchorPoints(mesh_.nCells());
+    bitSet hasSevenBoundaryAnchorPoints(mesh_.nCells());
     // If so what is the remaining non-boundary anchor point?
     labelHashSet nonBoundaryAnchors(mesh_.nCells()/10000);
 

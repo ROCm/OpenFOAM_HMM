@@ -1268,7 +1268,7 @@ void extrudeGeometricProperties
     // Determine edge normals on original patch
     labelList patchEdges;
     labelList coupledEdges;
-    PackedBoolList sameEdgeOrientation;
+    bitSet sameEdgeOrientation;
     PatchTools::matchEdges
     (
         extrudePatch,
@@ -2160,7 +2160,7 @@ int main(int argc, char *argv[])
     labelListList extrudeEdgePatches(extrudePatch.nEdges());
 
     // Is edge a non-manifold edge
-    PackedBoolList nonManifoldEdge(extrudePatch.nEdges());
+    bitSet nonManifoldEdge(extrudePatch.nEdges());
 
     // Note: logic has to be same as in countExtrudePatches.
     forAll(edgeFaces, edgeI)

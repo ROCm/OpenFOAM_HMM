@@ -35,7 +35,7 @@ SourceFiles
 #define primitiveMeshTools_H
 
 #include "primitiveMesh.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -125,7 +125,7 @@ public:
         const primitiveMesh& mesh,
         const Vector<label>& directions,
         const vectorField& faceAreas,
-        const PackedBoolList& internalOrCoupledFace
+        const bitSet& internalOrCoupledFace
     );
 
 

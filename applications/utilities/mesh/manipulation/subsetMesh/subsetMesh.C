@@ -303,7 +303,7 @@ void subsetTopoSets
         Info<< "Subsetting " << set.type() << " " << set.name() << endl;
 
         // Map the data
-        PackedBoolList isSet(set.maxSize(mesh));
+        bitSet isSet(set.maxSize(mesh));
         forAllConstIters(set, iter)
         {
             isSet.set(iter.key());

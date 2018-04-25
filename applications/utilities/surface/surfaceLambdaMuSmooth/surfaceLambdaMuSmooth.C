@@ -54,7 +54,7 @@ using namespace Foam;
 tmp<pointField> avg
 (
     const meshedSurface& s,
-    const PackedBoolList& fixedPoints
+    const bitSet& fixedPoints
 )
 {
     const labelListList& pointEdges = s.pointEdges();
@@ -95,7 +95,7 @@ void getFixedPoints
 (
     const edgeMesh& feMesh,
     const pointField& points,
-    PackedBoolList& fixedPoints
+    bitSet& fixedPoints
 )
 {
     scalarList matchDistance(feMesh.points().size(), 1e-1);
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
         << "Vertices    : " << surf1.nPoints() << nl
         << "Bounding Box: " << boundBox(surf1.localPoints()) << endl;
 
-    PackedBoolList fixedPoints(surf1.localPoints().size(), false);
+    bitSet fixedPoints(surf1.localPoints().size(), false);
 
     if (args.found("featureFile"))
     {

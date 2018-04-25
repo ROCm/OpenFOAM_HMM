@@ -321,7 +321,7 @@ void Foam::controlMeshRefinement::initialMeshPopulation
         sizes.clear();
         alignments.clear();
 
-        PackedBoolList keepVertex(vertices.size(), true);
+        bitSet keepVertex(vertices.size(), true);
 
         forAll(vertices, vI)
         {
@@ -496,7 +496,7 @@ void Foam::controlMeshRefinement::initialMeshPopulation
             }
         }
 
-        PackedBoolList keepVertex(vertices.size(), true);
+        bitSet keepVertex(vertices.size(), true);
 
         forAll(vertices, vI)
         {

@@ -32,7 +32,7 @@ Description
 
 #include "domainDecomposition.H"
 #include "IOstreams.H"
-#include "boolList.H"
+#include "bitSet.H"
 #include "cyclicPolyPatch.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -434,7 +434,6 @@ void Foam::domainDecomposition::decomposeMesh()
 //    }
 
 
-
     Info<< "\nDistributing points to processors" << endl;
     // For every processor, loop through the list of faces for the processor.
     // For every face, loop through the list of points and mark the point as
@@ -443,42 +442,19 @@ void Foam::domainDecomposition::decomposeMesh()
 
     forAll(procPointAddressing_, proci)
     {
-        boolList pointLabels(nPoints(), false);
+        bitSet pointsInUse(nPoints(), false);
 
-        // Get reference to list of used faces
-        const labelList& procFaceLabels = procFaceAddressing_[proci];
-
-        forAll(procFaceLabels, facei)
+        // For each of the faces used
+        for (const label facei : procFaceAddressing_[proci])
         {
-            // Because of the turning index, some labels may be negative
-            const labelList& facePoints = fcs[mag(procFaceLabels[facei]) - 1];
+            // Because of the turning index, some face labels may be -ve
+            const labelList& facePoints = fcs[mag(facei) - 1];
 
-            forAll(facePoints, pointi)
-            {
-                // Mark the point as used
-                pointLabels[facePoints[pointi]] = true;
-            }
+            // Mark the face points as being used
+            pointsInUse.setMany(facePoints);
         }
 
-        // Collect the used points
-        labelList& procPointLabels = procPointAddressing_[proci];
-
-        procPointLabels.setSize(pointLabels.size());
-
-        label nUsedPoints = 0;
-
-        forAll(pointLabels, pointi)
-        {
-            if (pointLabels[pointi])
-            {
-                procPointLabels[nUsedPoints] = pointi;
-
-                nUsedPoints++;
-            }
-        }
-
-        // Reset the size of used points
-        procPointLabels.setSize(nUsedPoints);
+        procPointAddressing_[proci] = pointsInUse.sortedToc();
     }
 }
 

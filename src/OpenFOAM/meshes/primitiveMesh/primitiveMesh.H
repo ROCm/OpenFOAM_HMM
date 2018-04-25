@@ -66,7 +66,8 @@ SourceFiles
 namespace Foam
 {
 
-class PackedBoolList;
+// Forward declarations
+class bitSet;
 
 /*---------------------------------------------------------------------------*\
                       Class primitiveMesh Declaration
@@ -296,7 +297,7 @@ protected:
             (
                 const vectorField& areas,
                 const bool report,
-                const PackedBoolList& internalOrCoupledFaces
+                const bitSet& internalOrCoupledFaces
             ) const;
 
             //- Check cells for closedness

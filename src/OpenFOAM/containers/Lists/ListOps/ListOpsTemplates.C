@@ -128,7 +128,7 @@ void Foam::inplaceReorder
     // the oldToNew map is unique (ie, shuffle)
 
     // Use const reference to ensure we obtain the proper operator[]
-    // on lazy lists (eg, List<bool>, PackedBoolList)
+    // on lazy lists (eg, List<bool>, PackedList)
 
     const ListType& input = inputOutput;
     const label len = input.size();
@@ -439,7 +439,7 @@ ListType Foam::subset
 {
     const label len = input.size();
 
-    // select can have a different size (eg, PackedBoolList, labelHashSet)
+    // select can have a different size (eg, bitSet, labelHashSet)
 
     ListType output(len);
     output.resize(len);   // Consistent sizing (eg, DynamicList)
@@ -468,7 +468,7 @@ void Foam::inplaceSubset
 {
     const label len = input.size();
 
-    // select can have a different size (eg, PackedBoolList, labelHashSet)
+    // select can have a different size (eg, bitSet, labelHashSet)
 
     label count = 0;
     for (label i=0; i < len; ++i)
@@ -979,22 +979,20 @@ template<class T>
 void Foam::ListOps::setValue
 (
     UList<T>& list,
-    const PackedBoolList& locations,
+    const bitSet& locations,
     const T& val
 )
 {
-    // Need improvements in PackedBoolList for more efficiency
-
     const label len = list.size();
-    const label count = locations.count();
 
-    for (label index = 0, used = 0; index < len && used < count; ++index)
+    for
+    (
+        label pos = locations.find_first();
+        pos >= 0 && pos < len;
+        pos = locations.find_next(pos)
+    )
     {
-        if (locations.test(index))
-        {
-            list[index] = val;
-            ++used;
-        }
+        list[pos] = val;
     }
 }
 
@@ -1106,7 +1104,7 @@ template<class T>
 Foam::List<T> Foam::ListOps::createWithValue
 (
     const label len,
-    const PackedBoolList& locations,
+    const bitSet& locations,
     const T& val,
     const T& deflt
 )

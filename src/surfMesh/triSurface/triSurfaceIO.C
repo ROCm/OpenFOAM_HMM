@@ -27,7 +27,7 @@ License
 #include "Fstream.H"
 #include "Time.H"
 #include "boundBox.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "surfZoneList.H"
 #include "surfaceFormatsCore.H"
 #include "MeshedSurfaceProxy.H"
@@ -326,7 +326,7 @@ void Foam::triSurface::writeStats(Ostream& os) const
 {
     // Unfortunately nPoints constructs meshPoints() so do compact version
     // ourselves.
-    PackedBoolList pointIsUsed(points().size());
+    bitSet pointIsUsed(points().size());
 
     label nPoints = 0;
     boundBox bb(boundBox::invertedBox);

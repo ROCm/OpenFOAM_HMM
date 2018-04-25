@@ -36,7 +36,7 @@ SourceFiles
 #define badQualityToFace_H
 
 #include "topoSetSource.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

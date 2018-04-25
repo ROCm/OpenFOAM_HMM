@@ -257,7 +257,7 @@ void Foam::meshRefinement::calcCellCellRays
 void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
 {
     // Stats on edges to test. Count proc faces only once.
-    PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));
+    bitSet isMasterFace(syncTools::getMasterFaces(mesh_));
 
     {
         label nMasterFaces = 0;
@@ -1254,7 +1254,7 @@ Foam::meshRefinement::meshRefinement
 Foam::label Foam::meshRefinement::countHits() const
 {
     // Stats on edges to test. Count proc faces only once.
-    PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));
+    bitSet isMasterFace(syncTools::getMasterFaces(mesh_));
 
     label nHits = 0;
 
@@ -1551,7 +1551,7 @@ Foam::labelList Foam::meshRefinement::intersectedPoints() const
     const faceList& faces = mesh_.faces();
 
     // Mark all points on faces that will become baffles
-    PackedBoolList isBoundaryPoint(mesh_.nPoints());
+    bitSet isBoundaryPoint(mesh_.nPoints());
     label nBoundaryPoints = 0;
 
     forAll(surfaceIndex_, facei)
@@ -1800,7 +1800,7 @@ void Foam::meshRefinement::checkCoupledFaceZones(const polyMesh& mesh)
 void Foam::meshRefinement::calculateEdgeWeights
 (
     const polyMesh& mesh,
-    const PackedBoolList& isMasterEdge,
+    const bitSet& isMasterEdge,
     const labelList& meshPoints,
     const edgeList& edges,
     scalarField& edgeWeights,
@@ -2292,7 +2292,7 @@ void Foam::meshRefinement::findRegions
     labelList& cellRegion
 )
 {
-    PackedBoolList insideCell(mesh.nCells());
+    bitSet insideCell(mesh.nCells());
 
     // Mark all cells reachable from locationsInMesh
     labelList insideRegions(locationsInMesh.size());
@@ -2702,7 +2702,7 @@ bool Foam::meshRefinement::write() const
 }
 
 
-Foam::PackedBoolList Foam::meshRefinement::getMasterPoints
+Foam::bitSet Foam::meshRefinement::getMasterPoints
 (
     const polyMesh& mesh,
     const labelList& meshPoints
@@ -2726,7 +2726,7 @@ Foam::PackedBoolList Foam::meshRefinement::getMasterPoints
     );
 
 
-    PackedBoolList isPatchMasterPoint(meshPoints.size());
+    bitSet isPatchMasterPoint(meshPoints.size());
     forAll(meshPoints, pointi)
     {
         if (myPoints[pointi] == globalPoints.toGlobal(pointi))
@@ -2739,7 +2739,7 @@ Foam::PackedBoolList Foam::meshRefinement::getMasterPoints
 }
 
 
-Foam::PackedBoolList Foam::meshRefinement::getMasterEdges
+Foam::bitSet Foam::meshRefinement::getMasterEdges
 (
     const polyMesh& mesh,
     const labelList& meshEdges
@@ -2763,7 +2763,7 @@ Foam::PackedBoolList Foam::meshRefinement::getMasterEdges
     );
 
 
-    PackedBoolList isMasterEdge(meshEdges.size());
+    bitSet isMasterEdge(meshEdges.size());
     forAll(meshEdges, edgei)
     {
         if (myEdges[edgei] == globalEdges.toGlobal(edgei))
@@ -2791,7 +2791,7 @@ const
     }
 
     {
-        PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));
+        bitSet isMasterFace(syncTools::getMasterFaces(mesh_));
         label nMasterFaces = 0;
         forAll(isMasterFace, i)
         {
@@ -2801,7 +2801,7 @@ const
             }
         }
 
-        PackedBoolList isMeshMasterPoint(syncTools::getMasterPoints(mesh_));
+        bitSet isMeshMasterPoint(syncTools::getMasterPoints(mesh_));
         label nMasterPoints = 0;
         forAll(isMeshMasterPoint, i)
         {

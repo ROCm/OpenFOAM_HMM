@@ -44,7 +44,7 @@ SourceFiles
 
 #include "Pstream.H"
 #include "EdgeMap.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "polyMesh.H"
 #include "coupledPolyPatch.H"
 #include "mapDistribute.H"
@@ -590,22 +590,22 @@ public:
 
             //- Get per point whether it is uncoupled or a master of a
             //  coupled set of points
-            static PackedBoolList getMasterPoints(const polyMesh&);
+            static bitSet getMasterPoints(const polyMesh&);
 
             //- Get per edge whether it is uncoupled or a master of a
             //  coupled set of edges
-            static PackedBoolList getMasterEdges(const polyMesh&);
+            static bitSet getMasterEdges(const polyMesh&);
 
             //- Get per face whether it is uncoupled or a master of a
             //  coupled set of faces
-            static PackedBoolList getMasterFaces(const polyMesh&);
+            static bitSet getMasterFaces(const polyMesh&);
 
             //- Get per face whether it is internal or a master of a
             //  coupled set of faces
-            static PackedBoolList getInternalOrMasterFaces(const polyMesh&);
+            static bitSet getInternalOrMasterFaces(const polyMesh&);
 
             //- Get per face whether it is internal or coupled
-            static PackedBoolList getInternalOrCoupledFaces(const polyMesh&);
+            static bitSet getInternalOrCoupledFaces(const polyMesh&);
 
 };
 

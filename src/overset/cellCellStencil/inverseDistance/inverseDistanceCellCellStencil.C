@@ -1173,7 +1173,7 @@ void Foam::cellCellStencils::inverseDistance::seedCell
 (
     const label cellI,
     const scalar wantedFraction,
-    PackedBoolList& isFront,
+    bitSet& isFront,
     scalarField& fraction
 ) const
 {
@@ -1199,7 +1199,7 @@ void Foam::cellCellStencils::inverseDistance::walkFront
 ) const
 {
     // Current front
-    PackedBoolList isFront(mesh_.nFaces());
+    bitSet isFront(mesh_.nFaces());
 
     const fvBoundaryMesh& fvm = mesh_.boundary();
 
@@ -1286,10 +1286,10 @@ void Foam::cellCellStencils::inverseDistance::walkFront
     }
 
 
-    while (returnReduce(isFront.count(), sumOp<label>()))
+    while (returnReduce(isFront.any(), orOp<bool>()))
     {
         // Interpolate cells on front
-        PackedBoolList newIsFront(mesh_.nFaces());
+        bitSet newIsFront(mesh_.nFaces());
         scalarField newFraction(fraction);
         forAll(isFront, faceI)
         {
@@ -1435,7 +1435,7 @@ void Foam::cellCellStencils::inverseDistance::createStencil
     const vector greatPoint(GREAT, GREAT, GREAT);
 
     // Has acceptor been handled already?
-    PackedBoolList doneAcceptor(interpolationCells_.size());
+    bitSet doneAcceptor(interpolationCells_.size());
 
     while (true)
     {

@@ -251,7 +251,7 @@ void Foam::ensightFaces::classify
     const faceList& faces,
     const labelUList& addressing,
     const boolList& flipMap,
-    const PackedBoolList& exclude
+    const bitSet& exclude
 )
 {
     // Note: Since PackedList::operator[] returns zero (false) for out-of-range

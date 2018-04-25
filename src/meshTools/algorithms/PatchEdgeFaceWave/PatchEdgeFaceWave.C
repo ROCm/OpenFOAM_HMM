@@ -170,7 +170,7 @@ syncEdges()
 {
     const globalMeshData& globalData = mesh_.globalData();
     const mapDistribute& map = globalData.globalEdgeSlavesMap();
-    const PackedBoolList& cppOrientation = globalData.globalEdgeOrientation();
+    const bitSet& cppOrientation = globalData.globalEdgeOrientation();
 
     // Convert patch-edge data into cpp-edge data
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

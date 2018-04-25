@@ -54,7 +54,7 @@ namespace Foam
 class polyMesh;
 class fvMesh;
 class faceSet;
-class PackedBoolList;
+class bitSet;
 
 /*---------------------------------------------------------------------------*\
                        Class polyMeshFilter Declaration
@@ -114,7 +114,7 @@ class polyMeshFilter
         //- Increment pointErrorCount for points attached to a bad face
         void updatePointErrorCount
         (
-            const PackedBoolList& isErrorPoint,
+            const bitSet& isErrorPoint,
             const labelList& oldToNewMesh,
             labelList& pointErrorCount
         ) const;
@@ -126,7 +126,7 @@ class polyMeshFilter
         (
             const polyMesh& newMesh,
             const labelList& oldToNewMesh,
-            const PackedBoolList& isErrorPoint,
+            const bitSet& isErrorPoint,
             const labelList& pointErrorCount
         );
 
@@ -136,7 +136,7 @@ class polyMeshFilter
         (
             const polyMesh& newMesh,
             const labelList& oldToNewMesh,
-            const PackedBoolList& isErrorPoint,
+            const bitSet& isErrorPoint,
             const labelList& pointErrorCount
         );
 

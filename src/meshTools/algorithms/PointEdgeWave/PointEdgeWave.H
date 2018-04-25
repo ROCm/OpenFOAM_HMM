@@ -58,7 +58,7 @@ SourceFiles
 #ifndef PointEdgeWave_H
 #define PointEdgeWave_H
 
-#include "boolList.H"
+#include "bitSet.H"
 #include "scalarField.H"
 #include "tensorField.H"
 
@@ -114,7 +114,7 @@ class PointEdgeWave
         TrackingData& td_;
 
         //- Has point changed
-        boolList changedPoint_;
+        bitSet changedPoint_;
 
         //- List of changed points
         labelList changedPoints_;
@@ -123,7 +123,8 @@ class PointEdgeWave
         label nChangedPoints_;
 
         //- Edges that have changed
-        boolList changedEdge_;
+        bitSet changedEdge_;
+
         labelList changedEdges_;
         label nChangedEdges_;
 

@@ -175,8 +175,7 @@ void Foam::triSurface::checkTriangles(const bool verbose)
     // Done to keep numbering constant in phase 1
 
     // List of valid triangles
-    boolList valid(size(), true);
-    bool hasInvalid = false;
+    bitSet valid(size(), true);
 
     forAll(*this, facei)
     {
@@ -185,8 +184,7 @@ void Foam::triSurface::checkTriangles(const bool verbose)
         if ((f[0] == f[1]) || (f[0] == f[2]) || (f[1] == f[2]))
         {
             // 'degenerate' triangle check
-            valid[facei] = false;
-            hasInvalid = true;
+            valid.unset(facei);
 
             if (verbose)
             {
@@ -222,8 +220,7 @@ void Foam::triSurface::checkTriangles(const bool verbose)
                          && ((f[2] == n[0]) || (f[2] == n[1]) || (f[2] == n[2]))
                         )
                         {
-                            valid[facei] = false;
-                            hasInvalid = true;
+                            valid.unset(facei);
 
                             if (verbose)
                             {
@@ -247,17 +244,13 @@ void Foam::triSurface::checkTriangles(const bool verbose)
         }
     }
 
-    if (hasInvalid)
+    if (!valid.all())
     {
-        // Pack
+        // Compact
         label newFacei = 0;
-        forAll(*this, facei)
+        for (const label facei : valid)
         {
-            if (valid[facei])
-            {
-                const labelledTri& f = (*this)[facei];
-                (*this)[newFacei++] = f;
-            }
+            (*this)[newFacei++] = (*this)[facei];
         }
 
         if (verbose)
@@ -789,7 +782,7 @@ void Foam::triSurface::subsetMeshMap
 
     pointMap.setSize(nPoints());
 
-    boolList pointHad(nPoints(), false);
+    bitSet pointHad(nPoints(), false);
 
     forAll(include, oldFacei)
     {
@@ -803,9 +796,8 @@ void Foam::triSurface::subsetMeshMap
 
             for (const label verti : f)
             {
-                if (!pointHad[verti])
+                if (pointHad.set(verti))
                 {
-                    pointHad[verti] = true;
                     pointMap[pointi++] = verti;
                 }
             }

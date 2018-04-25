@@ -79,7 +79,7 @@ void printEdgeStats(const polyMesh& mesh)
     scalar minOther = GREAT;
     scalar maxOther = -GREAT;
 
-    PackedBoolList isMasterEdge(syncTools::getMasterEdges(mesh));
+    bitSet isMasterEdge(syncTools::getMasterEdges(mesh));
 
     const edgeList& edges = mesh.edges();
 

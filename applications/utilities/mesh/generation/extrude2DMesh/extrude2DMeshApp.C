@@ -256,7 +256,7 @@ int main(int argc, char *argv[])
         const boundBox& bb = mesh().bounds();
         const scalar mergeDim = 1e-4 * bb.minDim();
 
-        PackedBoolList collapseEdge(mesh().nEdges());
+        bitSet collapseEdge(mesh().nEdges());
         Map<point> collapsePointToLocation(mesh().nPoints());
 
         forAll(edges, edgeI)

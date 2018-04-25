@@ -81,7 +81,7 @@ bool Foam::isoSurfaceCell::isTriCut
 
 Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
 (
-    const PackedBoolList& isTet,
+    const bitSet& isTet,
     const scalarField& cellValues,
     const scalarField& pointValues,
     const label celli
@@ -192,7 +192,7 @@ Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
 
 void Foam::isoSurfaceCell::calcCutTypes
 (
-    const PackedBoolList& isTet,
+    const bitSet& isTet,
     const scalarField& cVals,
     const scalarField& pVals
 )
@@ -360,7 +360,7 @@ Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
 
 void Foam::isoSurfaceCell::calcSnappedCc
 (
-    const PackedBoolList& isTet,
+    const bitSet& isTet,
     const scalarField& cVals,
     const scalarField& pVals,
 
@@ -685,7 +685,7 @@ void Foam::isoSurfaceCell::genPointTris
 
 void Foam::isoSurfaceCell::calcSnappedPoint
 (
-    const PackedBoolList& isTet,
+    const bitSet& isTet,
     const scalarField& cVals,
     const scalarField& pVals,
 
@@ -695,7 +695,7 @@ void Foam::isoSurfaceCell::calcSnappedPoint
 {
     // Determine if point is on boundary. Points on boundaries are never
     // snapped. Coupled boundaries are handled explicitly so not marked here.
-    PackedBoolList isBoundaryPoint(mesh_.nPoints());
+    bitSet isBoundaryPoint(mesh_.nPoints());
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
     forAll(patches, patchi)
     {
@@ -1319,7 +1319,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
     }
 
     // Determine if cell is tet
-    PackedBoolList isTet(mesh_.nCells());
+    bitSet isTet(mesh_.nCells());
     {
         tetMatcher tet;
 

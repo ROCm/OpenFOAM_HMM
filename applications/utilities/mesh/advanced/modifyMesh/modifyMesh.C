@@ -579,7 +579,7 @@ int main(int argc, char *argv[])
 
         pointField newPoints(points);
 
-        PackedBoolList collapseEdge(mesh.nEdges());
+        bitSet collapseEdge(mesh.nEdges());
         Map<point> collapsePointToLocation(mesh.nPoints());
 
         // Get new positions and construct collapse network

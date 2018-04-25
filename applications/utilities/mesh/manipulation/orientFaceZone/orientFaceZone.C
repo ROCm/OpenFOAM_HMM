@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 
 
 
-    const PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh));
+    const bitSet isMasterFace(syncTools::getMasterFaces(mesh));
 
 
     // Data on all edges and faces

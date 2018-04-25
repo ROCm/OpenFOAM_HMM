@@ -29,7 +29,7 @@ License
 #include "addToMemberFunctionSelectionTable.H"
 #include "ListOps.H"
 #include "edgeHashes.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -237,7 +237,7 @@ void Foam::edgeMesh::mergePoints(const scalar mergeDist)
 void Foam::edgeMesh::mergeEdges()
 {
     edgeHashSet uniqEdges(2*edges_.size());
-    PackedBoolList pointIsUsed(points_.size());
+    bitSet pointIsUsed(points_.size());
 
     label nUniqEdges = 0;
     label nUniqPoints = 0;

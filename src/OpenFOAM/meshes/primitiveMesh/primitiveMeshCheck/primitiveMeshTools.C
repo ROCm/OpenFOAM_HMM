@@ -455,7 +455,7 @@ Foam::tmp<Foam::scalarField> Foam::primitiveMeshTools::cellDeterminant
     const primitiveMesh& mesh,
     const Vector<label>& meshD,
     const vectorField& faceAreas,
-    const PackedBoolList& internalOrCoupledFace
+    const bitSet& internalOrCoupledFace
 )
 {
     // Determine number of dimensions and (for 2D) missing dimension

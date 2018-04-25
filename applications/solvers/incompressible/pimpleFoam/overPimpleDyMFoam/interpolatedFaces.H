@@ -2,8 +2,8 @@
 interpolationCellPoint<vector> UInterpolator(HbyA);
 
 // Determine faces on outside of interpolated cells
-PackedBoolList isOwnerInterpolatedFace(mesh.nInternalFaces());
-PackedBoolList isNeiInterpolatedFace(mesh.nInternalFaces());
+bitSet isOwnerInterpolatedFace(mesh.nInternalFaces());
+bitSet isNeiInterpolatedFace(mesh.nInternalFaces());
 
 // Determine donor cells
 labelListList donorCell(mesh.nInternalFaces());
@@ -175,11 +175,11 @@ surfaceVectorField faceNormals(mesh.Sf()/mesh.magSf());
 forAll(isNeiInterpolatedFace, faceI)
 {
     label cellId = -1;
-    if (isNeiInterpolatedFace[faceI])
+    if (isNeiInterpolatedFace.test(faceI))
     {
         cellId = mesh.faceNeighbour()[faceI];
     }
-    else if (isOwnerInterpolatedFace[faceI])
+    else if (isOwnerInterpolatedFace.test(faceI))
     {
         cellId = mesh.faceOwner()[faceI];
     }

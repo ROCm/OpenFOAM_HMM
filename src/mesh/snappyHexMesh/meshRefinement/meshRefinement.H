@@ -505,7 +505,7 @@ private:
                 const labelList& testFaces,
 
                 labelList& namedSurfaceIndex,
-                PackedBoolList& posOrientation
+                bitSet& posOrientation
             ) const;
 
             //- Determine patches for baffles
@@ -707,17 +707,17 @@ private:
                 labelList& unnamedRegion1,
                 labelList& unnamedRegion2,
                 labelList& namedSurfaceIndex,
-                PackedBoolList& posOrientation
+                bitSet& posOrientation
             ) const;
 
             //- Put cells into cellZone, faces into faceZone
             void zonify
             (
-                const PackedBoolList& isMasterFace,
+                const bitSet& isMasterFace,
                 const labelList& cellToZone,
                 const labelList& neiCellZone,
                 const labelList& faceToZone,
-                const PackedBoolList& meshFlipMap,
+                const bitSet& meshFlipMap,
                 polyTopoChange& meshMod
             ) const;
 
@@ -759,7 +759,7 @@ private:
             //  to detect non-manifold situations.
             void calcPatchNumMasterFaces
             (
-                const PackedBoolList& isMasterFace,
+                const bitSet& isMasterFace,
                 const indirectPrimitivePatch& patch,
                 labelList& nMasterFaces
             ) const;
@@ -776,12 +776,12 @@ private:
             //- Make faces consistent.
             void consistentOrientation
             (
-                const PackedBoolList& isMasterFace,
+                const bitSet& isMasterFace,
                 const indirectPrimitivePatch& patch,
                 const labelList& nMasterFaces,
                 const labelList& faceToZone,
                 const Map<label>& zoneToOrientation,
-                PackedBoolList& meshFlipMap
+                bitSet& meshFlipMap
             ) const;
 
 
@@ -950,7 +950,7 @@ public:
             static void calculateEdgeWeights
             (
                 const polyMesh& mesh,
-                const PackedBoolList& isMasterEdge,
+                const bitSet& isMasterEdge,
                 const labelList& meshPoints,
                 const edgeList& edges,
                 scalarField& edgeWeights,
@@ -963,7 +963,7 @@ public:
             static void weightedSum
             (
                 const polyMesh& mesh,
-                const PackedBoolList& isMasterEdge,
+                const bitSet& isMasterEdge,
                 const labelList& meshPoints,
                 const edgeList& edges,
                 const scalarField& edgeWeights,
@@ -1410,7 +1410,7 @@ public:
 
             //- Determine master point for subset of points. If coupled
             //  chooses only one
-            static PackedBoolList getMasterPoints
+            static bitSet getMasterPoints
             (
                 const polyMesh& mesh,
                 const labelList& meshPoints
@@ -1418,7 +1418,7 @@ public:
 
             //- Determine master edge for subset of edges. If coupled
             //  chooses only one
-            static PackedBoolList getMasterEdges
+            static bitSet getMasterEdges
             (
                 const polyMesh& mesh,
                 const labelList& meshEdges
@@ -1458,7 +1458,7 @@ public:
             template<class T>
             static T gAverage
             (
-                const PackedBoolList& isMasterElem,
+                const bitSet& isMasterElem,
                 const UList<T>& values
             );
 

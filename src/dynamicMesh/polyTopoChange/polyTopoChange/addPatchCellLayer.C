@@ -937,7 +937,7 @@ void Foam::addPatchCellLayer::calcExtrudeInfo
 
         labelList patchEdges;
         labelList coupledEdges;
-        PackedBoolList sameEdgeOrientation;
+        bitSet sameEdgeOrientation;
         PatchTools::matchEdges
         (
             pp,

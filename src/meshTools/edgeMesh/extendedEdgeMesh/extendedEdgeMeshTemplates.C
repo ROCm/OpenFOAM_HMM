@@ -26,7 +26,7 @@ License
 #include "extendedEdgeMesh.H"
 #include "ListListOps.H"
 #include "unitConversion.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "PatchTools.H"
 #include "searchableBox.H"
 
@@ -98,7 +98,7 @@ void Foam::extendedEdgeMesh::sortPointsAndEdges
     // All feature points have been added
     nonFeatureStart_ = tmpPts.size();
 
-    PackedBoolList isRegionFeatureEdge(regionFeatureEdges);
+    bitSet isRegionFeatureEdge(regionFeatureEdges);
 
     forAll(featureEdges, i)
     {

@@ -306,7 +306,7 @@ void Foam::meshRefinement::getBafflePatches
     labelList unnamedRegion2;
     labelList namedSurfaceIndex;
     {
-        PackedBoolList posOrientation;
+        bitSet posOrientation;
         zonify
         (
             true,               // allowFreeStandingZoneFaces
@@ -2252,7 +2252,7 @@ void Foam::meshRefinement::getIntersections
     const labelList& testFaces,
 
     labelList& namedSurfaceIndex,
-    PackedBoolList& posOrientation
+    bitSet& posOrientation
 ) const
 {
     namedSurfaceIndex.setSize(mesh_.nFaces());
@@ -2389,7 +2389,7 @@ void Foam::meshRefinement::zonify
     labelList& unnamedRegion1,
     labelList& unnamedRegion2,
     labelList& namedSurfaceIndex,
-    PackedBoolList& posOrientation
+    bitSet& posOrientation
 ) const
 {
     // Determine zones for cells and faces
@@ -2898,7 +2898,7 @@ Foam::labelList Foam::meshRefinement::freeStandingBaffleFaces
 
 void Foam::meshRefinement::calcPatchNumMasterFaces
 (
-    const PackedBoolList& isMasterFace,
+    const bitSet& isMasterFace,
     const indirectPrimitivePatch& patch,
     labelList& nMasterFacesPerEdge
 ) const
@@ -3089,12 +3089,12 @@ Foam::label Foam::meshRefinement::markPatchZones
 
 void Foam::meshRefinement::consistentOrientation
 (
-    const PackedBoolList& isMasterFace,
+    const bitSet& isMasterFace,
     const indirectPrimitivePatch& patch,
     const labelList& nMasterFacesPerEdge,
     const labelList& faceToZone,
     const Map<label>& zoneToOrientation,
-    PackedBoolList& meshFlipMap
+    bitSet& meshFlipMap
 ) const
 {
     const polyBoundaryMesh& bm = mesh_.boundaryMesh();
@@ -3340,11 +3340,11 @@ void Foam::meshRefinement::consistentOrientation
 void Foam::meshRefinement::zonify
 (
     // Get per face whether is it master (of a coupled set of faces)
-    const PackedBoolList& isMasterFace,
+    const bitSet& isMasterFace,
     const labelList& cellToZone,
     const labelList& neiCellZone,
     const labelList& faceToZone,
-    const PackedBoolList& meshFlipMap,
+    const bitSet& meshFlipMap,
     polyTopoChange& meshMod
 ) const
 {
@@ -4399,7 +4399,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     // >=0 : index of named surface
     labelList cellToZone;
     labelList namedSurfaceIndex;
-    PackedBoolList posOrientation;
+    bitSet posOrientation;
     {
         labelList unnamedRegion1;
         labelList unnamedRegion2;
@@ -4610,7 +4610,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
 
     // Get per face whether is it master (of a coupled set of faces)
-    const PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));
+    const bitSet isMasterFace(syncTools::getMasterFaces(mesh_));
 
 
     // faceZones
@@ -4623,7 +4623,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     //      - do a consistent orientation
     //      - check number of faces with consistent orientation
     //      - if <0 flip the whole patch
-    PackedBoolList meshFlipMap(mesh_.nFaces(), false);
+    bitSet meshFlipMap(mesh_.nFaces(), false);
     {
         // Collect all data on zone faces without cellZones on either side.
         const indirectPrimitivePatch patch

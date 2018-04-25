@@ -91,7 +91,7 @@ void Foam::PatchTools::matchEdges
 
     labelList& p1EdgeLabels,
     labelList& p2EdgeLabels,
-    PackedBoolList& sameOrientation
+    bitSet& sameOrientation
 )
 {
     p1EdgeLabels.setSize(p1.nEdges());

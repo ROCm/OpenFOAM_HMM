@@ -47,7 +47,7 @@ SourceFiles
 #include "cellShapeControl.H"
 #include "cvControls.H"
 #include "DynamicList.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "Time.H"
 #include "polyMesh.H"
 #include "plane.H"
@@ -606,7 +606,7 @@ private:
             pointField& cellCentres,
             labelList& cellToDelaunayVertex,
             labelListList& patchToDelaunayVertex,
-            PackedBoolList& boundaryFacesToRemove
+            bitSet& boundaryFacesToRemove
         );
 
         void calcNeighbourCellCentres
@@ -760,7 +760,7 @@ private:
             wordList& patchNames,
             PtrList<dictionary>& patchDicts,
             labelListList& patchPointPairSlaves,
-            PackedBoolList& boundaryFacesToRemove,
+            bitSet& boundaryFacesToRemove,
             bool includeEmptyPatches = false
         ) const;
 
@@ -791,7 +791,7 @@ private:
             faceList& faces,
             labelList& owner,
             PtrList<dictionary>& patchDicts,
-            PackedBoolList& boundaryFacesToRemove,
+            bitSet& boundaryFacesToRemove,
             const List<DynamicList<face>>& patchFaces,
             const List<DynamicList<label>>& patchOwners,
             const List<DynamicList<bool>>& indirectPatchFace
@@ -997,7 +997,7 @@ public:
                 const wordList& patchNames,
                 const PtrList<dictionary>& patchDicts,
                 const pointField& cellCentres,
-                PackedBoolList& boundaryFacesToRemove
+                bitSet& boundaryFacesToRemove
             ) const;
 
             //- Calculate and write a field of the target cell size,

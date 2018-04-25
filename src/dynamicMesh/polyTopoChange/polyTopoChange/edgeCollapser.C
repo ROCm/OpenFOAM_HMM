@@ -82,7 +82,7 @@ Foam::label Foam::edgeCollapser::checkMeshQuality
 (
     const polyMesh& mesh,
     const dictionary& meshQualityDict,
-    PackedBoolList& isErrorPoint
+    bitSet& isErrorPoint
 )
 {
     labelHashSet badFaces = edgeCollapser::checkBadFaces
@@ -93,9 +93,9 @@ Foam::label Foam::edgeCollapser::checkMeshQuality
 
     label nBadFaces = returnReduce(badFaces.size(), sumOp<label>());
 
-    forAllConstIter(labelHashSet, badFaces, iter)
+    for (const label facei : badFaces)
     {
-        const face& f = mesh.faces()[iter.key()];
+        const face& f = mesh.faces()[facei];
 
         isErrorPoint.setMany(f);
     }
@@ -175,7 +175,7 @@ void Foam::edgeCollapser::collapseToEdge
     const scalarList& dNeg,
     const scalarList& dPos,
     const scalar dShift,
-    PackedBoolList& collapseEdge,
+    bitSet& collapseEdge,
     Map<point>& collapsePointToLocation
 ) const
 {
@@ -282,7 +282,7 @@ void Foam::edgeCollapser::collapseToPoint
     const labelList& pointPriority,
     const point& fC,
     const labelList& facePts,
-    PackedBoolList& collapseEdge,
+    bitSet& collapseEdge,
     Map<point>& collapsePointToLocation
 ) const
 {
@@ -552,7 +552,7 @@ Foam::edgeCollapser::collapseType Foam::edgeCollapser::collapseFace
     const face& f,
     const label facei,
     const scalar targetFaceSize,
-    PackedBoolList& collapseEdge,
+    bitSet& collapseEdge,
     Map<point>& collapsePointToLocation,
     const scalarField& faceFilterFactor
 ) const
@@ -841,8 +841,8 @@ void Foam::edgeCollapser::checkBoundaryPointMergeEdges
 
 Foam::label Foam::edgeCollapser::breakStringsAtEdges
 (
-    const PackedBoolList& markedEdges,
-    PackedBoolList& collapseEdge,
+    const bitSet& markedEdges,
+    bitSet& collapseEdge,
     List<pointEdgeCollapse>& allPointInfo
 ) const
 {
@@ -904,7 +904,7 @@ Foam::label Foam::edgeCollapser::breakStringsAtEdges
 void Foam::edgeCollapser::determineDuplicatePointsOnFace
 (
     const face& f,
-    PackedBoolList& markedPoints,
+    bitSet& markedPoints,
     labelHashSet& uniqueCollapses,
     labelHashSet& duplicateCollapses,
     List<pointEdgeCollapse>& allPointInfo
@@ -1003,7 +1003,7 @@ Foam::label Foam::edgeCollapser::syncCollapse
 (
     const globalIndex& globalPoints,
     const labelList& pointPriority,
-    const PackedBoolList& collapseEdge,
+    const bitSet& collapseEdge,
     const Map<point>& collapsePointToLocation,
     List<pointEdgeCollapse>& allPointInfo
 ) const
@@ -1300,7 +1300,7 @@ bool Foam::edgeCollapser::setRefinement
 
     bool meshChanged = false;
 
-    PackedBoolList removedPoints(mesh_.nPoints());
+    bitSet removedPoints(mesh_.nPoints());
 
     // Create strings of edges.
     // Map from collapseIndex(=global master point) to set of points
@@ -1372,7 +1372,7 @@ bool Foam::edgeCollapser::setRefinement
     faceList newFaces(mesh_.faces());
 
     // Current cellCollapse status
-    PackedBoolList cellRemoved(mesh_.nCells(), false);
+    bitSet cellRemoved(mesh_.nCells(), false);
 
     label nUnvisited = 0;
     label nUncollapsed = 0;
@@ -1481,11 +1481,11 @@ bool Foam::edgeCollapser::setRefinement
 
 
     // Keep track of faces that have been done already.
-    PackedBoolList doneFace(mesh_.nFaces(), false);
+    bitSet doneFace(mesh_.nFaces(), false);
 
     {
         // Mark points used.
-        PackedBoolList usedPoint(mesh_.nPoints(), false);
+        bitSet usedPoint(mesh_.nPoints(), false);
 
         forAll(cellRemoved, celli)
         {
@@ -1622,7 +1622,7 @@ void Foam::edgeCollapser::consistentCollapse
     const globalIndex& globalPoints,
     const labelList& pointPriority,
     const Map<point>& collapsePointToLocation,
-    PackedBoolList& collapseEdge,
+    bitSet& collapseEdge,
     List<pointEdgeCollapse>& allPointInfo,
     const bool allowCellCollapse
 ) const
@@ -1664,8 +1664,8 @@ void Foam::edgeCollapser::consistentCollapse
 
         // Get collapsed faces
 
-        PackedBoolList isCollapsedFace(mesh_.nFaces());
-        PackedBoolList markedPoints(mesh_.nPoints());
+        bitSet isCollapsedFace(mesh_.nFaces());
+        bitSet markedPoints(mesh_.nPoints());
 
         forAll(faces, facei)
         {
@@ -1720,7 +1720,7 @@ void Foam::edgeCollapser::consistentCollapse
             }
         }
 
-        PackedBoolList markedEdges(mesh_.nEdges());
+        bitSet markedEdges(mesh_.nEdges());
 
         if (!allowCellCollapse)
         {
@@ -1811,7 +1811,7 @@ Foam::label Foam::edgeCollapser::markSmallEdges
 (
     const scalarField& minEdgeLen,
     const labelList& pointPriority,
-    PackedBoolList& collapseEdge,
+    bitSet& collapseEdge,
     Map<point>& collapsePointToLocation
 ) const
 {
@@ -1862,7 +1862,7 @@ Foam::label Foam::edgeCollapser::markMergeEdges
 (
     const scalar maxCos,
     const labelList& pointPriority,
-    PackedBoolList& collapseEdge,
+    bitSet& collapseEdge,
     Map<point>& collapsePointToLocation
 ) const
 {
@@ -1949,7 +1949,7 @@ Foam::labelPair Foam::edgeCollapser::markSmallSliverFaces
 (
     const scalarField& faceFilterFactor,
     const labelList& pointPriority,
-    PackedBoolList& collapseEdge,
+    bitSet& collapseEdge,
     Map<point>& collapsePointToLocation
 ) const
 {
@@ -2011,7 +2011,7 @@ Foam::labelPair Foam::edgeCollapser::markFaceZoneEdges
     const faceZone& fZone,
     const scalarField& faceFilterFactor,
     const labelList& pointPriority,
-    PackedBoolList& collapseEdge,
+    bitSet& collapseEdge,
     Map<point>& collapsePointToLocation
 ) const
 {

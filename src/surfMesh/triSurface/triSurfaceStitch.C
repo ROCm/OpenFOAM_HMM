@@ -25,7 +25,7 @@ License
 
 #include "triSurface.H"
 #include "mergePoints.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -101,7 +101,7 @@ bool Foam::triSurface::stitchTriangles
             // Done in two passes to save memory (pointField)
 
             // 1. Detect only
-            PackedBoolList pointIsUsed(ps.size());
+            bitSet pointIsUsed(ps.size());
 
             label nPoints = 0;
 

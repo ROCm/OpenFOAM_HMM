@@ -147,11 +147,12 @@ primitives/polynomialEqns/quadraticEqn/quadraticEqn.C
 primitives/Barycentric/barycentric/barycentric.C
 primitives/Barycentric2D/barycentric2D/barycentric2D.C
 
+containers/Bits/bitSet/bitSet.C
+containers/Bits/bitSet/bitSetIO.C
+containers/Bits/PackedList/PackedListCore.C
 containers/HashTables/HashOps/HashOps.C
 containers/HashTables/HashTable/HashTableCore.C
 containers/Lists/SortableList/ParSortableListName.C
-containers/Lists/PackedList/PackedListCore.C
-containers/Lists/PackedList/PackedBoolList.C
 containers/Lists/ListOps/ListOps.C
 containers/LinkedLists/linkTypes/SLListBase/SLListBase.C
 containers/LinkedLists/linkTypes/DLListBase/DLListBase.C

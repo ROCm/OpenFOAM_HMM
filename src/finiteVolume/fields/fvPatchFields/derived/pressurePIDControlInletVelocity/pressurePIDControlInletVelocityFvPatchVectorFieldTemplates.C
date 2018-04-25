@@ -39,7 +39,7 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::faceZoneAverage
 {
     const fvMesh& mesh(patch().boundaryMesh().mesh());
 
-    PackedBoolList isMasterFace(syncTools::getInternalOrMasterFaces(mesh));
+    bitSet isMasterFace(syncTools::getInternalOrMasterFaces(mesh));
 
     const faceZone& zone = mesh.faceZones()[name];
 

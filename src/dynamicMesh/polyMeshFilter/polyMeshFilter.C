@@ -31,7 +31,7 @@ License
 #include "syncTools.H"
 #include "polyTopoChange.H"
 #include "globalIndex.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "pointSet.H"
 #include "faceSet.H"
 #include "cellSet.H"
@@ -110,7 +110,7 @@ Foam::label Foam::polyMeshFilter::filterFacesLoop(const label nOriginalBadFaces)
     // Maintain the number of times a point has been part of a bad face
     labelList pointErrorCount(mesh_.nPoints(), 0);
 
-    PackedBoolList newErrorPoint(mesh_.nPoints());
+    bitSet newErrorPoint(mesh_.nPoints());
     edgeCollapser::checkMeshQuality
     (
         mesh_,
@@ -228,7 +228,7 @@ Foam::label Foam::polyMeshFilter::filterFacesLoop(const label nOriginalBadFaces)
 
         if (controlMeshQuality())
         {
-            PackedBoolList isErrorPoint(newMesh.nPoints());
+            bitSet isErrorPoint(newMesh.nPoints());
             nBadFaces = edgeCollapser::checkMeshQuality
             (
                 newMesh,
@@ -301,7 +301,7 @@ Foam::label Foam::polyMeshFilter::filterFaces
 )
 {
     // Per edge collapse status
-    PackedBoolList collapseEdge(newMesh.nEdges());
+    bitSet collapseEdge(newMesh.nEdges());
 
     Map<point> collapsePointToLocation(newMesh.nPoints());
 
@@ -417,7 +417,7 @@ Foam::label Foam::polyMeshFilter::filterEdges
 )
 {
     // Per edge collapse status
-    PackedBoolList collapseEdge(newMesh.nEdges());
+    bitSet collapseEdge(newMesh.nEdges());
 
     Map<point> collapsePointToLocation(newMesh.nPoints());
 
@@ -528,7 +528,7 @@ Foam::label Foam::polyMeshFilter::filterEdges
 
 void Foam::polyMeshFilter::updatePointErrorCount
 (
-    const PackedBoolList& isErrorPoint,
+    const bitSet& isErrorPoint,
     const labelList& oldToNewMesh,
     labelList& pointErrorCount
 ) const
@@ -547,7 +547,7 @@ void Foam::polyMeshFilter::checkMeshEdgesAndRelaxEdges
 (
     const polyMesh& newMesh,
     const labelList& oldToNewMesh,
-    const PackedBoolList& isErrorPoint,
+    const bitSet& isErrorPoint,
     const labelList& pointErrorCount
 )
 {
@@ -624,7 +624,7 @@ void Foam::polyMeshFilter::checkMeshFacesAndRelaxEdges
 (
     const polyMesh& newMesh,
     const labelList& oldToNewMesh,
-    const PackedBoolList& isErrorPoint,
+    const bitSet& isErrorPoint,
     const labelList& pointErrorCount
 )
 {
@@ -1084,7 +1084,7 @@ Foam::label Foam::polyMeshFilter::filterEdges
 
         if (controlMeshQuality())
         {
-            PackedBoolList isErrorPoint(newMesh.nPoints());
+            bitSet isErrorPoint(newMesh.nPoints());
             nBadFaces = edgeCollapser::checkMeshQuality
             (
                 newMesh,

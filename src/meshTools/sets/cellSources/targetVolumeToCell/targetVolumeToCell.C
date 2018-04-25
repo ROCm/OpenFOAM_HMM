@@ -57,7 +57,7 @@ Foam::topoSetSource::addToUsageTable Foam::targetVolumeToCell::usage_
 
 Foam::scalar Foam::targetVolumeToCell::volumeOfSet
 (
-    const PackedBoolList& selected
+    const bitSet& selected
 ) const
 {
     scalar sumVol = 0.0;
@@ -76,8 +76,8 @@ Foam::scalar Foam::targetVolumeToCell::volumeOfSet
 Foam::label Foam::targetVolumeToCell::selectCells
 (
     const scalar normalComp,
-    const PackedBoolList& maskSet,
-    PackedBoolList& selected
+    const bitSet& maskSet,
+    bitSet& selected
 ) const
 {
     selected.resize(mesh_.nCells());
@@ -89,7 +89,7 @@ Foam::label Foam::targetVolumeToCell::selectCells
     {
         const point& cc = mesh_.cellCentres()[celli];
 
-        if (maskSet[celli] && ((cc&n_) < normalComp))
+        if (maskSet.test(celli) && ((cc&n_) < normalComp))
         {
             selected.set(celli);
             nSelected++;
@@ -108,7 +108,7 @@ void Foam::targetVolumeToCell::combine(topoSet& set, const bool add) const
     }
 
 
-    PackedBoolList maskSet(mesh_.nCells(), true);
+    bitSet maskSet(mesh_.nCells(), true);
     label nTotCells = mesh_.globalData().nTotalCells();
     if (maskSetName_.size())
     {
@@ -157,7 +157,7 @@ void Foam::targetVolumeToCell::combine(topoSet& set, const bool add) const
             }
         }
 
-        PackedBoolList maxSelected(mesh_.nCells());
+        bitSet maxSelected(mesh_.nCells());
         maxCells = selectCells(maxComp, maskSet, maxSelected);
         //maxVol = volumeOfSet(maxSelected);
 
@@ -177,7 +177,7 @@ void Foam::targetVolumeToCell::combine(topoSet& set, const bool add) const
     // Bisection
     // ~~~~~~~~~
 
-    PackedBoolList selected(mesh_.nCells());
+    bitSet selected(mesh_.nCells());
     label nSelected = -1;
     scalar selectedVol = 0.0;
     //scalar selectedComp = 0.0;
@@ -204,7 +204,7 @@ void Foam::targetVolumeToCell::combine(topoSet& set, const bool add) const
         {
             low = mid;
 
-            PackedBoolList highSelected(mesh_.nCells());
+            bitSet highSelected(mesh_.nCells());
             label nHigh = selectCells(high, maskSet, selected);
             if (nSelected == nHigh)
             {
@@ -215,7 +215,7 @@ void Foam::targetVolumeToCell::combine(topoSet& set, const bool add) const
         {
             high = mid;
 
-            PackedBoolList lowSelected(mesh_.nCells());
+            bitSet lowSelected(mesh_.nCells());
             label nLow = selectCells(low, maskSet, selected);
             if (nSelected == nLow)
             {
@@ -259,7 +259,7 @@ void Foam::targetVolumeToCell::combine(topoSet& set, const bool add) const
 
     forAll(selected, celli)
     {
-        if (selected[celli])
+        if (selected.test(celli))
         {
             addOrDelete(set, celli, add);
         }

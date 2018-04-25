@@ -474,7 +474,7 @@ int main(int argc, char *argv[])
         }
 
         {
-            PackedBoolList select = HashSetOps::bitset(locations);
+            bitSet select = HashSetOps::bitset(locations);
             auto output = ListOps::createWithValue<label>
             (
                 30,
@@ -482,8 +482,8 @@ int main(int argc, char *argv[])
                 100,
                 -1  // default value
             );
-            Info<< "with PackedBoolList: " << flatOutput(output)
-                << " selector: " << flatOutput(select.used()) << nl;
+            Info<< "with bitSet: " << flatOutput(output)
+                << " selector: " << flatOutput(select.toc()) << nl;
         }
 
         {
@@ -516,7 +516,7 @@ int main(int argc, char *argv[])
         }
 
         {
-            PackedBoolList select = HashSetOps::bitset(locations);
+            bitSet select = HashSetOps::bitset(locations);
             auto output = ListOps::createWithValue<label>
             (
                 30,
@@ -524,7 +524,7 @@ int main(int argc, char *argv[])
                 100,
                 -1  // default value
             );
-            Info<< "with PackedBoolList: " << flatOutput(output)
+            Info<< "with bitSet: " << flatOutput(output)
                 << " selector: " << flatOutput(HashSetOps::used(select))
                 << nl;
         }

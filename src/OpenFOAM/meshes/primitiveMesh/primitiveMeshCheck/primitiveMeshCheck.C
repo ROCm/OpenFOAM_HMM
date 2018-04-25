@@ -46,7 +46,7 @@ bool Foam::primitiveMesh::checkClosedBoundary
 (
     const vectorField& areas,
     const bool report,
-    const PackedBoolList& internalOrCoupledFaces
+    const bitSet& internalOrCoupledFaces
 ) const
 {
     if (debug)
@@ -1684,7 +1684,7 @@ bool Foam::primitiveMesh::checkFaceFaces
 
 bool Foam::primitiveMesh::checkClosedBoundary(const bool report) const
 {
-    return checkClosedBoundary(faceAreas(), report, PackedBoolList());
+    return checkClosedBoundary(faceAreas(), report, bitSet());
 }
 
 

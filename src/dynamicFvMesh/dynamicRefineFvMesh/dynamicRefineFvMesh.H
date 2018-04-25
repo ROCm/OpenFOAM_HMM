@@ -70,7 +70,7 @@ SourceFiles
 
 #include "dynamicFvMesh.H"
 #include "hexRef8.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -101,17 +101,17 @@ protected:
         label nRefinementIterations_;
 
         //- Protected cells (usually since not hexes)
-        PackedBoolList protectedCell_;
+        bitSet protectedCell_;
 
 
     // Protected Member Functions
 
         //- Count set/unset elements in packedlist.
-        static label count(const PackedBoolList&, const unsigned int);
+        static label count(const bitSet&, const unsigned int);
 
         //- Calculate cells that cannot be refined since would trigger
         //  refinement of protectedCell_ (since 2:1 refinement cascade)
-        void calculateProtectedCells(PackedBoolList& unrefineableCell) const;
+        void calculateProtectedCells(bitSet& unrefineableCell) const;
 
         //- Read the projection parameters from dictionary
         void readDict();
@@ -157,7 +157,7 @@ protected:
                 const scalar lowerRefineLevel,
                 const scalar upperRefineLevel,
                 const scalarField& vFld,
-                PackedBoolList& candidateCell
+                bitSet& candidateCell
             ) const;
 
             //- Subset candidate cells for refinement
@@ -165,24 +165,24 @@ protected:
             (
                 const label maxCells,
                 const label maxRefinement,
-                const PackedBoolList& candidateCell
+                const bitSet& candidateCell
             ) const;
 
             //- Select points that can be unrefined.
             virtual labelList selectUnrefinePoints
             (
                 const scalar unrefineLevel,
-                const PackedBoolList& markedCell,
+                const bitSet& markedCell,
                 const scalarField& pFld
             ) const;
 
             //- Extend markedCell with cell-face-cell.
-            void extendMarkedCells(PackedBoolList& markedCell) const;
+            void extendMarkedCells(bitSet& markedCell) const;
 
             //- Check all cells have 8 anchor points
             void checkEightAnchorPoints
             (
-                PackedBoolList& protectedCell,
+                bitSet& protectedCell,
                 label& nProtected
             ) const;
 
@@ -219,13 +219,13 @@ public:
         }
 
         //- Cells which should not be refined/unrefined
-        const PackedBoolList& protectedCell() const
+        const bitSet& protectedCell() const
         {
             return protectedCell_;
         }
 
         //- Cells which should not be refined/unrefined
-        PackedBoolList& protectedCell()
+        bitSet& protectedCell()
         {
             return protectedCell_;
         }

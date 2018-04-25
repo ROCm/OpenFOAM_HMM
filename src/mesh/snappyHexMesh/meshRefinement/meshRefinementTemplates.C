@@ -57,7 +57,7 @@ template<class T> void Foam::meshRefinement::updateList
 template<class T>
 T Foam::meshRefinement::gAverage
 (
-    const PackedBoolList& isMasterElem,
+    const bitSet& isMasterElem,
     const UList<T>& values
 )
 {
@@ -274,7 +274,7 @@ template<class Type>
 void Foam::meshRefinement::weightedSum
 (
     const polyMesh& mesh,
-    const PackedBoolList& isMasterEdge,
+    const bitSet& isMasterEdge,
     const labelList& meshPoints,
     const edgeList& edges,
     const scalarField& edgeWeights,

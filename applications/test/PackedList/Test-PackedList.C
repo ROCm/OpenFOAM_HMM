@@ -32,7 +32,7 @@ Description
 #include "IOobject.H"
 #include "IOstreams.H"
 #include "IFstream.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include <climits>
 
 
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
         IFstream ifs(srcFile);
         List<label> rawLst(ifs);
 
-        PackedBoolList packLst(rawLst);
+        bitSet packLst(rawLst);
 
         Info<< "size: " << packLst.size() << nl;
 

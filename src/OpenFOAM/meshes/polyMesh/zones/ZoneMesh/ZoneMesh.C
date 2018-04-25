@@ -435,12 +435,12 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findZoneID
 
 
 template<class ZoneType, class MeshType>
-Foam::PackedBoolList Foam::ZoneMesh<ZoneType, MeshType>::findMatching
+Foam::bitSet Foam::ZoneMesh<ZoneType, MeshType>::findMatching
 (
     const keyType& key
 ) const
 {
-    PackedBoolList bitset;
+    bitSet bitset;
 
     const labelList indices = this->findIndices(key);
     forAll(indices, i)

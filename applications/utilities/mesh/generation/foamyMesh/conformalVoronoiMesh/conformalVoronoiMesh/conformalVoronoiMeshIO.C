@@ -115,7 +115,7 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
         wordList patchNames;
         PtrList<dictionary> patchDicts;
         pointField cellCentres;
-        PackedBoolList boundaryFacesToRemove;
+        bitSet boundaryFacesToRemove;
 
         calcDualMesh
         (
@@ -377,7 +377,7 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
 //
 //        Info<< nl << "Writing tetDualMesh to " << instance << endl;
 //
-//        PackedBoolList boundaryFacesToRemove;
+//        bitSet boundaryFacesToRemove;
 //        writeMesh
 //        (
 //            "tetDualMesh",
@@ -773,7 +773,7 @@ void Foam::conformalVoronoiMesh::writeMesh
     const wordList& patchNames,
     const PtrList<dictionary>& patchDicts,
     const pointField& cellCentres,
-    PackedBoolList& boundaryFacesToRemove
+    bitSet& boundaryFacesToRemove
 ) const
 {
     if (foamyHexMeshControls().objOutput())
@@ -949,7 +949,7 @@ void Foam::conformalVoronoiMesh::writeMesh
         orEqOp<unsigned int>()
     );
 
-    labelList addr(boundaryFacesToRemove.used());
+    labelList addr(boundaryFacesToRemove.toc());
 
     faceSet indirectPatchFaces
     (

@@ -32,7 +32,7 @@ template<class Type>
 void Foam::snappyLayerDriver::averageNeighbours
 (
     const polyMesh& mesh,
-    const PackedBoolList& isMasterEdge,
+    const bitSet& isMasterEdge,
     const labelList& meshEdges,
     const labelList& meshPoints,
     const edgeList& edges,

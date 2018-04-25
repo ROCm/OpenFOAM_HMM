@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
             fvc::makeAbsolute(phi, rho, U);
 
             // Test : disable refinement for some cells
-            PackedBoolList& protectedCell =
+            bitSet& protectedCell =
                 refCast<dynamicRefineFvMesh>(mesh).protectedCell();
 
             if (protectedCell.empty())

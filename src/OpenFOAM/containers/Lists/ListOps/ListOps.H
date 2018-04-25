@@ -45,7 +45,7 @@ SourceFiles
 #include "FlatOutput.H"
 #include "labelList.H"
 #include "HashSet.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "ops.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -126,22 +126,20 @@ void inplaceReorder
 
 
 //- Reorder the elements of a list.
-//  Similar to the general templated form, but with auto-vivify
-//  for PackedBoolList.
-PackedBoolList reorder
+//  Similar to the general templated form, but with auto-vivify for Bitset.
+bitSet reorder
 (
     const labelUList& oldToNew,
-    const PackedBoolList& input,
+    const bitSet& input,
     const bool prune = false
 );
 
 //- Inplace reorder the elements of a list.
-//  Similar to the general templated form, but with auto-vivify
-//  for PackedBoolList.
+//  Similar to the general templated form, but with auto-vivify for bitSet.
 void inplaceReorder
 (
     const labelUList& oldToNew,
-    PackedBoolList& input,
+    bitSet& input,
     const bool prune = false
 );
 
@@ -456,7 +454,7 @@ template<class T>
 void setValue
 (
     UList<T>& list,
-    const PackedBoolList& locations,
+    const bitSet& locations,
     const T& val
 );
 
@@ -578,7 +576,7 @@ template<class T>
 List<T> createWithValue
 (
     const label len,
-    const PackedBoolList& locations,
+    const bitSet& locations,
     const T& val,
     const T& deflt = T()
 );

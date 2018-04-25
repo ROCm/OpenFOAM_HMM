@@ -52,8 +52,8 @@ Foam::fieldSmoother::~fieldSmoother()
 void Foam::fieldSmoother::smoothNormals
 (
     const label nIter,
-    const PackedBoolList& isMeshMasterPoint,
-    const PackedBoolList& isMeshMasterEdge,
+    const bitSet& isMeshMasterPoint,
+    const bitSet& isMeshMasterEdge,
     const labelList& fixedPoints,
     pointVectorField& normals
 ) const
@@ -65,7 +65,7 @@ void Foam::fieldSmoother::smoothNormals
     const edgeList& edges = mesh_.edges();
 
     // Points that do not change.
-    PackedBoolList isFixedPoint(mesh_.nPoints());
+    bitSet isFixedPoint(mesh_.nPoints());
 
     // Internal points that are fixed
     forAll(fixedPoints, i)
@@ -140,8 +140,8 @@ void Foam::fieldSmoother::smoothNormals
 void Foam::fieldSmoother::smoothPatchNormals
 (
     const label nIter,
-    const PackedBoolList& isPatchMasterPoint,
-    const PackedBoolList& isPatchMasterEdge,
+    const bitSet& isPatchMasterPoint,
+    const bitSet& isPatchMasterEdge,
     const indirectPrimitivePatch& adaptPatch,
     pointField& normals
 ) const
@@ -206,9 +206,9 @@ void Foam::fieldSmoother::smoothPatchNormals
 void Foam::fieldSmoother::smoothLambdaMuDisplacement
 (
     const label nIter,
-    const PackedBoolList& isMeshMasterPoint,
-    const PackedBoolList& isMeshMasterEdge,
-    const PackedBoolList& isToBeSmoothed,
+    const bitSet& isMeshMasterPoint,
+    const bitSet& isMeshMasterEdge,
+    const bitSet& isToBeSmoothed,
     vectorField& displacement
 ) const
 {

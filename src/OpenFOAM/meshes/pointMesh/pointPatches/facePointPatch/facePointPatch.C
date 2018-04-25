@@ -27,7 +27,6 @@ License
 #include "pointBoundaryMesh.H"
 #include "pointMesh.H"
 #include "demandDrivenData.H"
-#include "boolList.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
