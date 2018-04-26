@@ -601,7 +601,6 @@ inline bool Foam::PackedList<Width>::set
             << "Ignoring attempt to set a negative index " << i
             << " range is [0," << size_ << ")"
             << endl;
-        }
         #endif
 
         // Lazy evaluation - ignore out-of-bounds
