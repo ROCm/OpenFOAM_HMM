@@ -135,8 +135,8 @@ void Foam::volPointInterpolation::interpolateInternalField
         Pout<< "volPointInterpolation::interpolateInternalField("
             << "const GeometricField<Type, fvPatchField, volMesh>&, "
             << "GeometricField<Type, pointPatchField, pointMesh>&) : "
-            << "interpolating field from cells to points"
-            << endl;
+            << "interpolating field " << vf.name()
+            << " from cells to points " << pf.name() << endl;
     }
 
     const labelListList& pointCells = vf.mesh().pointCells();
@@ -172,8 +172,8 @@ void Foam::volPointInterpolation::interpolateDimensionedInternalField
         Pout<< "volPointInterpolation::interpolateDimensionedInternalField("
             << "const DimensionedField<Type, volMesh>&, "
             << "DimensionedField<Type, pointMesh>&) : "
-            << "interpolating field from cells to points"
-            << endl;
+            << "interpolating field " << vf.name() << " from cells to points "
+            << pf.name() << endl;
     }
 
     const fvMesh& mesh = vf.mesh();
@@ -350,8 +350,8 @@ void Foam::volPointInterpolation::interpolate
         Pout<< "volPointInterpolation::interpolate("
             << "const GeometricField<Type, fvPatchField, volMesh>&, "
             << "GeometricField<Type, pointPatchField, pointMesh>&) : "
-            << "interpolating field from cells to points"
-            << endl;
+            << "interpolating field " << vf.name() <<  " from cells to points "
+            << pf.name() << endl;
     }
 
     interpolateInternalField(vf, pf);
