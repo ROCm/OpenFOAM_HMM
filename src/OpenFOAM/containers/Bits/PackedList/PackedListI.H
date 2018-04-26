@@ -30,7 +30,6 @@ License
 template<unsigned Width>
 inline unsigned int Foam::PackedList<Width>::repeated_value(unsigned val)
 {
-    std::cout << "call repeated_value" << nl;
     return BitOps::repeat_value<block_type,Width>(val);
 }
 

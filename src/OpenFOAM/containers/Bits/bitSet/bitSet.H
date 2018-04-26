@@ -504,6 +504,14 @@ public:
             Ostream& os,
             const bitSet& bitset
         );
+
+
+    // Housekeeping
+
+        //- Identical to toc()
+        //  \deprecated compatibility method for PackedBoolList (APR-2018)
+        inline labelList used() const { return toc(); }
+
 };
 
 
