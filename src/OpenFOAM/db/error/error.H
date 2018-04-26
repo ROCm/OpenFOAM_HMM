@@ -104,9 +104,10 @@ public:
 
         //- Emit warning on stderr about something being old.
         //  \param what description for the warning
-        //  \param oldVersion is a YYMM version value for determining the
-        //      age in months.
-        static void warnAboutAge(const char* what, const int oldVersion);
+        //  \param version is the old version (YYMM) for determining the
+        //      age in months compared to the current OpenFOAM version
+        //      as conveyed by the \c OPENFOAM compiler define.
+        static void warnAboutAge(const char* what, const int version);
 
 
     // Member functions

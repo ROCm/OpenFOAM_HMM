@@ -47,6 +47,18 @@ SeeAlso
 #include <initializer_list>
 #include <utility>
 
+// Mirror OPENFOAM define in other variants
+#ifdef OPENFOAM
+// Code base from www.openfoam.com
+# ifndef OPENFOAM_COM
+#  define OPENFOAM_COM OPENFOAM
+# endif
+// Older name (prior to 1806)
+# ifndef OPENFOAM_PLUS
+#  define OPENFOAM_PLUS OPENFOAM
+# endif
+#endif
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace stdFoam
@@ -80,7 +92,7 @@ constexpr auto cbegin(const C& c) -> decltype(c.begin())
     return c.begin();
 }
 
-//- Return iterator to the end of the container \a c array.
+//- Return iterator to the end of the container \a c.
 //  Definition as per std::end C++17
 template<class C>
 constexpr auto end(C& c) -> decltype(c.end())
@@ -88,7 +100,7 @@ constexpr auto end(C& c) -> decltype(c.end())
     return c.end();
 }
 
-//- Return const_iterator to the end of the container \a c array.
+//- Return const_iterator to the end of the container \a c.
 //  Definition as per std::end C++17
 template<class C>
 constexpr auto end(const C& c) -> decltype(c.end())
@@ -176,8 +188,7 @@ constexpr inline const T& max(const T& a, const T& b)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Iterate across all elements in the \a container object of type
-//  \a Container.
+//- Iterate across all elements in the \a container object.
 //  \par Usage
 //  \code
 //  forAllIters(container, iter)

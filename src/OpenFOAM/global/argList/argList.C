@@ -111,6 +111,21 @@ Foam::argList::initValidTables dummyInitValidTables;
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
+namespace
+{
+
+// Should issue warning if there is +ve versioning (+ve version number)
+// and the this version number is older than the current OpenFOAM version
+// as conveyed by the OPENFOAM compiler define.
+
+static inline constexpr bool shouldWarnVersion(const int version)
+{
+    return (version > 0 && version < OPENFOAM);
+}
+
+} // End anonymous namespace
+
+
 namespace Foam
 {
 
@@ -166,24 +181,6 @@ static void printBuildInfo(const bool full=true)
     {
         Info << "Arch:  " << Foam::FOAMbuildArch << nl;
     }
-}
-
-
-// Should issue warning if there is +ve versioning (+ve version number)
-// and if this version number is not in the future (ie, version > current).
-// No warning for 0 (unversioned) or -ve values (silent versioning)
-static inline constexpr bool shouldWarnVersion(const int version)
-{
-    return
-    (
-        version > 0
-     &&
-        (
-            (OPENFOAM_PLUS > 1700)  // Guard against bad #define value
-          ? (OPENFOAM_PLUS > version)
-          : true
-        )
-    );
 }
 
 } // End namespace Foam

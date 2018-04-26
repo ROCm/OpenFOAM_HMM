@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,6 +46,13 @@ Description
     OpenFOAM build architecture information (endian, label/scalar sizes)
     as a static string
 
+Note
+    Compile-time version information is conveyed by the \b OPENFOAM define
+    provided in the wmake rules "General/general".
+    This value is mirrored by the \b OPENFOAM_COM and \b OPENFOAM_PLUS defines
+    provided via the stdFoam.H file.
+    The OPENFOAM_PLUS define was last used for 1712.
+
 SourceFiles
     global.Cver
 
@@ -66,6 +73,9 @@ namespace Foam
     extern const char* const FOAMversion;
     extern const char* const FOAMbuild;
     extern const std::string FOAMbuildArch;
+
+    //- Implementation details of various OpenFOAM classes
+    namespace Detail {}
 
     //- Additional OpenFOAM modules
     namespace Module {}

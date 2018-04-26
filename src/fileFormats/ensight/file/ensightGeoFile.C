@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,13 +42,13 @@ void Foam::ensightGeoFile::initialize()
     newline();
 
     // Description line 2
-    #ifdef OPENFOAM_PLUS
-    write(string("Written by OpenFOAM-" STRING_QUOTE(OPENFOAM_PLUS)));
+    #if OPENFOAM
+    write("Written by OpenFOAM-" STRING_QUOTE(OPENFOAM));
     #else
     write(string("Written by OpenFOAM-" + string(Foam::FOAMversion)));
     #endif
-
     newline();
+
     write("node id assign");
     newline();
 

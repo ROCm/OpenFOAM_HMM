@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,27 +27,19 @@ License
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-namespace Foam
+namespace
 {
 
 // Should issue warning if there is +ve versioning (+ve version number)
-// and if this version number is not in the future (ie, version > current).
-// No warning for 0 (unversioned) or -ve values (silent versioning)
+// and the this version number is older than the current OpenFOAM version
+// as conveyed by the OPENFOAM compiler define.
+
 static inline constexpr bool shouldWarnVersion(const int version)
 {
-    return
-    (
-        version > 0
-     &&
-        (
-            (OPENFOAM_PLUS > 1700)  // Guard against bad #define value
-          ? (OPENFOAM_PLUS > version)
-          : true
-        )
-    );
+    return (version > 0 && version < OPENFOAM);
 }
 
-} // End namespace Foam
+} // End anonymous namespace
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
