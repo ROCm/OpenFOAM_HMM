@@ -31,6 +31,7 @@ License
 #include "regionSplit.H"
 #include "localPointRegion.H"
 #include "minData.H"
+#include "BitOps.H"
 #include "FaceCellWave.H"
 
 #include "preserveBafflesConstraint.H"
@@ -48,7 +49,8 @@ namespace Foam
 
     // Fallback name when searching for optional coefficients directories
     static const word defaultName("coeffs");
-}
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -654,14 +656,14 @@ void Foam::decompositionMethod::calcCellCells
     // Check for duplicates connections between cells
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Done as postprocessing step since we now have cellCells.
-    label newIndex = 0;
-    labelHashSet nbrCells;
-
 
     if (cellCells.size() == 0)
     {
         return;
     }
+
+    label newIndex = 0;
+    labelHashSet nbrCells;
 
     label startIndex = cellCells.offsets()[0];
 
@@ -783,8 +785,8 @@ void Foam::decompositionMethod::calcCellCells
             forAll(pp, i)
             {
                 const label own = agglom[faceOwner[facei]];
-
                 const label globalNei = globalNeighbour[bFacei];
+
                 if
                 (
                    !globalAgglom.isLocal(globalNei)
@@ -839,7 +841,6 @@ void Foam::decompositionMethod::calcCellCells
             forAll(pp, i)
             {
                 const label own = agglom[faceOwner[facei]];
-
                 const label globalNei = globalNeighbour[bFacei];
 
                 if
@@ -848,7 +849,7 @@ void Foam::decompositionMethod::calcCellCells
                  || globalAgglom.toLocal(globalNei) != own
                 )
                 {
-                    label ownIndex = offsets[own] + nFacesPerCell[own]++;
+                    const label ownIndex = offsets[own] + nFacesPerCell[own]++;
                     m[ownIndex] = globalNei;
                     w[ownIndex] = mag(mesh.faceAreas()[facei]);
                 }
@@ -863,14 +864,14 @@ void Foam::decompositionMethod::calcCellCells
     // Check for duplicates connections between cells
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Done as postprocessing step since we now have cellCells.
-    label newIndex = 0;
-    labelHashSet nbrCells;
-
 
     if (cellCells.size() == 0)
     {
         return;
     }
+
+    label newIndex = 0;
+    labelHashSet nbrCells;
 
     label startIndex = cellCells.offsets()[0];
 
@@ -923,9 +924,9 @@ Foam::labelList Foam::decompositionMethod::decompose
 ) const
 {
     // Any weights specified?
-    label nWeights = returnReduce(cellWeights.size(), sumOp<label>());
+    const bool hasWeights = returnReduce(!cellWeights.empty(), orOp<bool>());
 
-    if (nWeights > 0 && cellWeights.size() != mesh.nCells())
+    if (hasWeights && cellWeights.size() != mesh.nCells())
     {
         FatalErrorInFunction
             << "Number of weights " << cellWeights.size()
@@ -933,128 +934,126 @@ Foam::labelList Foam::decompositionMethod::decompose
             << exit(FatalError);
     }
 
+    // Any faces not blocked?
+    const bool hasUnblocked =
+        returnReduce
+        (
+            (!blockedFace.empty() && !BitOps::all(blockedFace)),
+            orOp<bool>()
+        );
 
-    // Any processor sets?
-    label nProcSets = 0;
-    forAll(specifiedProcessorFaces, setI)
-    {
-        nProcSets += specifiedProcessorFaces[setI].size();
-    }
-    reduce(nProcSets, sumOp<label>());
 
     // Any non-mesh connections?
-    label nConnections = returnReduce
+    const label nConnections = returnReduce
     (
         explicitConnections.size(),
         sumOp<label>()
     );
 
-    // Any faces not blocked?
-    label nUnblocked = 0;
-    forAll(blockedFace, facei)
-    {
-        if (!blockedFace[facei])
-        {
-            nUnblocked++;
-        }
-    }
-    reduce(nUnblocked, sumOp<label>());
 
+    // Any processor sets?
+    label nProcSets = 0;
+    for (const labelList& procset : specifiedProcessorFaces)
+    {
+        nProcSets += procset.size();
+    }
+    reduce(nProcSets, sumOp<label>());
 
 
     // Either do decomposition on cell centres or on agglomeration
 
-    labelList finalDecomp;
-
-
-    if (nProcSets+nConnections+nUnblocked == 0)
+    if (!hasUnblocked && !nConnections && !nProcSets)
     {
         // No constraints, possibly weights
 
-        if (nWeights > 0)
-        {
-            finalDecomp = decompose
-            (
-                mesh,
-                mesh.cellCentres(),
-                cellWeights
-            );
-        }
-        else
-        {
-            finalDecomp = decompose(mesh, mesh.cellCentres());
-        }
+        return
+        (
+            hasWeights
+          ? decompose(mesh, mesh.cellCentres(), cellWeights)
+          : decompose(mesh, mesh.cellCentres())
+        );
     }
-    else
+
+
+    // The harder work.
+    // When we have processor sets, connections, or blocked faces.
+
+
+    // Determine local regions, separated by blockedFaces
+    regionSplit localRegion(mesh, blockedFace, explicitConnections, false);
+
+    if (debug)
     {
-        if (debug)
-        {
-            Info<< "Constrained decomposition:" << endl
-                << "    faces with same owner and neighbour processor : "
-                << nUnblocked << endl
-                << "    baffle faces with same owner processor        : "
-                << nConnections << endl
-                << "    faces all on same processor                   : "
-                << nProcSets << endl << endl;
-        }
+        // Only need to count unblocked faces for debugging
+        const label nUnblocked =
+        (
+            hasUnblocked
+          ? returnReduce
+            (
+                label(BitOps::count(blockedFace, false)),
+                sumOp<label>()
+            )
+          : 0
+        );
 
-        // Determine local regions, separated by blockedFaces
-        regionSplit localRegion(mesh, blockedFace, explicitConnections, false);
+        Info<< "Constrained decomposition:" << nl
+            << "    faces with same owner and neighbour processor : "
+            << nUnblocked << nl
+            << "    baffle faces with same owner processor        : "
+            << nConnections << nl
+            << "    faces all on same processor                   : "
+            << nProcSets << nl
+            << "    split into " << localRegion.nLocalRegions()
+            << " regions."
+            << endl;
+    }
 
 
-        if (debug)
-        {
-            Info<< "Constrained decomposition:" << endl
-                << "    split into " << localRegion.nLocalRegions()
-                << " regions."
-                << endl;
-        }
+    // Gather region weights and determine region cell centres
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        // Determine region cell centres
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // For the region centre, just take the first cell in the region.
+    // If we average the region centre instead, cyclics could cause
+    // the average domain centre to be outside of domain.
 
-        // This just takes the first cell in the region. Otherwise the problem
-        // is with cyclics - if we'd average the region centre might be
-        // somewhere in the middle of the domain which might not be anywhere
-        // near any of the cells.
+    scalarField regionWeights(localRegion.nLocalRegions(), 0.0);
 
-        pointField regionCentres(localRegion.nLocalRegions(), point::max);
+    pointField regionCentres(localRegion.nLocalRegions(), point::max);
 
+    if (hasWeights)
+    {
         forAll(localRegion, celli)
         {
             const label regioni = localRegion[celli];
+
+            regionWeights[regioni] += cellWeights[celli];
 
             if (regionCentres[regioni] == point::max)
             {
                 regionCentres[regioni] = mesh.cellCentres()[celli];
             }
         }
-
-        // Do decomposition on agglomeration
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        scalarField regionWeights(localRegion.nLocalRegions(), 0);
-
-        if (nWeights > 0)
+    }
+    else
+    {
+        forAll(localRegion, celli)
         {
-            forAll(localRegion, celli)
-            {
-                const label regioni = localRegion[celli];
+            const label regioni = localRegion[celli];
 
-                regionWeights[regioni] += cellWeights[celli];
+            regionWeights[regioni] += 1.0;
+
+            if (regionCentres[regioni] == point::max)
+            {
+                regionCentres[regioni] = mesh.cellCentres()[celli];
             }
         }
-        else
-        {
-            forAll(localRegion, celli)
-            {
-                const label regioni = localRegion[celli];
+    }
 
-                regionWeights[regioni] += 1.0;
-            }
-        }
+    // Do decomposition on agglomeration
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        finalDecomp = decompose
+    labelList finalDecomp =
+        decompose
         (
             mesh,
             localRegion,
@@ -1063,189 +1062,188 @@ Foam::labelList Foam::decompositionMethod::decompose
         );
 
 
+    // Apply explicitConnections since decompose did not know about them
+    for (const labelPair& baffle : explicitConnections)
+    {
+        const label f0 = baffle.first();
+        const label f1 = baffle.second();
 
-        // Implement the explicitConnections since above decompose
-        // does not know about them
-        forAll(explicitConnections, connectioni)
+        if (!blockedFace[f0] && !blockedFace[f1])
         {
-            const labelPair& baffle = explicitConnections[connectioni];
-            const label f0 = baffle.first();
-            const label f1 = baffle.second();
+            // Note: what if internal faces and owner and neighbour on
+            // different processor?
+            // So for now just push owner side proc
 
-            if (!blockedFace[f0] && !blockedFace[f1])
+            const label proci = finalDecomp[mesh.faceOwner()[f0]];
+
+            finalDecomp[mesh.faceOwner()[f1]] = proci;
+            if (mesh.isInternalFace(f1))
             {
-                // Note: what if internal faces and owner and neighbour on
-                // different processor? So for now just push owner side
-                // proc
-
-                const label proci = finalDecomp[mesh.faceOwner()[f0]];
-
-                finalDecomp[mesh.faceOwner()[f1]] = proci;
-                if (mesh.isInternalFace(f1))
-                {
-                    finalDecomp[mesh.faceNeighbour()[f1]] = proci;
-                }
+                finalDecomp[mesh.faceNeighbour()[f1]] = proci;
             }
-            else if (blockedFace[f0] != blockedFace[f1])
+        }
+        else if (blockedFace[f0] != blockedFace[f1])
+        {
+            FatalErrorInFunction
+                << "On explicit connection between faces " << f0
+                << " and " << f1
+                << " the two blockedFace status are not equal : "
+                << blockedFace[f0] << " and " << blockedFace[f1]
+                << exit(FatalError);
+        }
+    }
+
+
+    // blockedFaces corresponding to processor faces need to be handled
+    // separately since not handled by local regionSplit. We need to
+    // walk now across coupled faces and make sure to move a whole
+    // global region across
+
+    // This additionally consolidates/compacts the regions numbers globally,
+    // since that was skipped in the previous regionSplit.
+    if (Pstream::parRun())
+    {
+        // Re-do regionSplit
+
+        // Field on cells and faces.
+        List<minData> cellData(mesh.nCells());
+        List<minData> faceData(mesh.nFaces());
+
+        // Take over blockedFaces by seeding a negative number
+        // (so is always less than the decomposition)
+        label nUnblocked = 0;
+        forAll(blockedFace, facei)
+        {
+            if (blockedFace[facei])
             {
-                FatalErrorInFunction
-                    << "On explicit connection between faces " << f0
-                    << " and " << f1
-                    << " the two blockedFace status are not equal : "
-                    << blockedFace[f0] << " and " << blockedFace[f1]
-                    << exit(FatalError);
+                faceData[facei] = minData(-123);
+            }
+            else
+            {
+                ++nUnblocked;
+            }
+        }
+
+        // Seed unblocked faces with destination processor
+        labelList seedFaces(nUnblocked);
+        List<minData> seedData(nUnblocked);
+        nUnblocked = 0;
+
+        forAll(blockedFace, facei)
+        {
+            if (!blockedFace[facei])
+            {
+                const label own = mesh.faceOwner()[facei];
+                seedFaces[nUnblocked] = facei;
+                seedData[nUnblocked] = minData(finalDecomp[own]);
+                nUnblocked++;
             }
         }
 
 
-        // blockedFaces corresponding to processor faces need to be handled
-        // separately since not handled by local regionSplit. We need to
-        // walk now across coupled faces and make sure to move a whole
-        // global region across
-        if (Pstream::parRun())
+        // Propagate information inwards
+        FaceCellWave<minData> deltaCalc
+        (
+            mesh,
+            seedFaces,
+            seedData,
+            faceData,
+            cellData,
+            mesh.globalData().nTotalCells()+1
+        );
+
+        // And extract
+        forAll(finalDecomp, celli)
         {
-            // Re-do regionSplit
-
-            // Field on cells and faces.
-            List<minData> cellData(mesh.nCells());
-            List<minData> faceData(mesh.nFaces());
-
-            // Take over blockedFaces by seeding a negative number
-            // (so is always less than the decomposition)
-            label nUnblocked = 0;
-            forAll(blockedFace, facei)
+            if (cellData[celli].valid(deltaCalc.data()))
             {
-                if (blockedFace[facei])
-                {
-                    faceData[facei] = minData(-123);
-                }
-                else
-                {
-                    nUnblocked++;
-                }
+                finalDecomp[celli] = cellData[celli].data();
             }
+        }
+    }
 
-            // Seed unblocked faces with destination processor
-            labelList seedFaces(nUnblocked);
-            List<minData> seedData(nUnblocked);
-            nUnblocked = 0;
 
-            forAll(blockedFace, facei)
+    // For specifiedProcessorFaces rework the cellToProc to enforce
+    // all on one processor since we can't guarantee that the input
+    // to regionSplit was a single region.
+    // E.g. faceSet 'a' with the cells split into two regions
+    // by a notch formed by two walls
+    //
+    //          \   /
+    //           \ /
+    //    ---a----+-----a-----
+    //
+    //
+    // Note that reworking the cellToProc might make the decomposition
+    // unbalanced.
+    forAll(specifiedProcessorFaces, seti)
+    {
+        const labelList& set = specifiedProcessorFaces[seti];
+
+        label proci = specifiedProcessor[seti];
+        if (proci == -1)
+        {
+            // If no processor specified - use the one from the 0th element
+            if (set.size())
             {
-                if (!blockedFace[facei])
-                {
-                    const label own = mesh.faceOwner()[facei];
-                    seedFaces[nUnblocked] = facei;
-                    seedData[nUnblocked] = minData(finalDecomp[own]);
-                    nUnblocked++;
-                }
+                proci = finalDecomp[mesh.faceOwner()[set[0]]];
             }
-
-
-            // Propagate information inwards
-            FaceCellWave<minData> deltaCalc
-            (
-                mesh,
-                seedFaces,
-                seedData,
-                faceData,
-                cellData,
-                mesh.globalData().nTotalCells()+1
-            );
-
-            // And extract
-            forAll(finalDecomp, celli)
+            else
             {
-                if (cellData[celli].valid(deltaCalc.data()))
-                {
-                    finalDecomp[celli] = cellData[celli].data();
-                }
+                // Zero-sized processor (e.g. from redistributePar)
+                proci = 0;
             }
         }
 
-
-        // For specifiedProcessorFaces rework the cellToProc to enforce
-        // all on one processor since we can't guarantee that the input
-        // to regionSplit was a single region.
-        // E.g. faceSet 'a' with the cells split into two regions
-        // by a notch formed by two walls
-        //
-        //          \   /
-        //           \ /
-        //    ---a----+-----a-----
-        //
-        //
-        // Note that reworking the cellToProc might make the decomposition
-        // unbalanced.
-        forAll(specifiedProcessorFaces, setI)
+        for (const label facei : set)
         {
-            const labelList& set = specifiedProcessorFaces[setI];
-
-            label proci = specifiedProcessor[setI];
-            if (proci == -1)
+            const face& f = mesh.faces()[facei];
+            for (const label pointi : f)
             {
-                // If no processor specified use the one from the
-                // 0th element
-                if (set.size())
+                const labelList& pFaces = mesh.pointFaces()[pointi];
+                for (const label pFacei : pFaces)
                 {
-                    proci = finalDecomp[mesh.faceOwner()[set[0]]];
-                }
-                else
-                {
-                    // Zero-sized processor (e.g. from redistributePar)
-                    proci = 0;
-                }
-            }
-
-            forAll(set, fI)
-            {
-                const face& f = mesh.faces()[set[fI]];
-                forAll(f, fp)
-                {
-                    const labelList& pFaces = mesh.pointFaces()[f[fp]];
-                    for (const label facei : pFaces)
+                    finalDecomp[mesh.faceOwner()[pFacei]] = proci;
+                    if (mesh.isInternalFace(pFacei))
                     {
-                        finalDecomp[mesh.faceOwner()[facei]] = proci;
-                        if (mesh.isInternalFace(facei))
-                        {
-                            finalDecomp[mesh.faceNeighbour()[facei]] = proci;
-                        }
+                        finalDecomp[mesh.faceNeighbour()[pFacei]] = proci;
                     }
                 }
             }
         }
+    }
 
 
-        if (debug && Pstream::parRun())
+    if (debug && Pstream::parRun())
+    {
+        labelList nbrDecomp;
+        syncTools::swapBoundaryCellList(mesh, finalDecomp, nbrDecomp);
+
+        const polyBoundaryMesh& patches = mesh.boundaryMesh();
+        for (const polyPatch& pp : patches)
         {
-            labelList nbrDecomp;
-            syncTools::swapBoundaryCellList(mesh, finalDecomp, nbrDecomp);
-
-            const polyBoundaryMesh& patches = mesh.boundaryMesh();
-            for (const polyPatch& pp : patches)
+            if (pp.coupled())
             {
-                if (pp.coupled())
+                forAll(pp, i)
                 {
-                    forAll(pp, i)
-                    {
-                        label facei = pp.start()+i;
-                        label own = mesh.faceOwner()[facei];
-                        label bFacei = facei-mesh.nInternalFaces();
+                    const label facei = pp.start()+i;
+                    const label own = mesh.faceOwner()[facei];
+                    const label bFacei = facei-mesh.nInternalFaces();
 
-                        if (!blockedFace[facei])
+                    if (!blockedFace[facei])
+                    {
+                        const label ownProc = finalDecomp[own];
+                        const label nbrProc = nbrDecomp[bFacei];
+
+                        if (ownProc != nbrProc)
                         {
-                            label ownProc = finalDecomp[own];
-                            label nbrProc = nbrDecomp[bFacei];
-                            if (ownProc != nbrProc)
-                            {
-                                FatalErrorInFunction
-                                    << "patch:" << pp.name()
-                                    << " face:" << facei
-                                    << " at:" << mesh.faceCentres()[facei]
-                                    << " ownProc:" << ownProc
-                                    << " nbrProc:" << nbrProc
-                                    << exit(FatalError);
-                            }
+                            FatalErrorInFunction
+                                << "patch:" << pp.name()
+                                << " face:" << facei
+                                << " at:" << mesh.faceCentres()[facei]
+                                << " ownProc:" << ownProc
+                                << " nbrProc:" << nbrProc
+                                << exit(FatalError);
                         }
                     }
                 }
