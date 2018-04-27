@@ -44,7 +44,7 @@ namespace
             << "    " << msg << std::endl;
     }
 
-} // end of anonymous namespace
+} // End anonymous namespace
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

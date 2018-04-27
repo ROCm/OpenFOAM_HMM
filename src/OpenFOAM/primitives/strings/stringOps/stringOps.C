@@ -165,7 +165,7 @@ static void expandLeading(std::string& s)
     }
 }
 
-} // end of namespace Foam
+} // End namespace Foam
 
 
 //! \cond fileScope

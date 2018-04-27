@@ -72,8 +72,8 @@ bool writeCloudField
 );
 
 
-} // namespace ensightSerialCloud
-} // namespace Foam
+} // End namespace ensightSerialCloud
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

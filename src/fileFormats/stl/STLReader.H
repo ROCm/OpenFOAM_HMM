@@ -49,10 +49,11 @@ namespace Foam
 namespace Detail
 {
 
-// Forward Declarations
+// Forward declarations
 class STLAsciiParse;
 
-}
+} // End namespace Detail
+
 
 namespace fileFormats
 {

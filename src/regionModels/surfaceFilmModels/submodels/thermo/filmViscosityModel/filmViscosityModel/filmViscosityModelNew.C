@@ -65,8 +65,8 @@ autoPtr<filmViscosityModel> filmViscosityModel::New
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // end namespace surfaceFilmModels
-} // end namespace regionModels
-} // end namespace Foam
+} // End namespace surfaceFilmModels
+} // End namespace regionModels
+} // End namespace Foam
 
 // ************************************************************************* //

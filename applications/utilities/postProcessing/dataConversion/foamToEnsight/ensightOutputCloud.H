@@ -80,8 +80,8 @@ bool writeCloudField
 );
 
 
-} // namespace ensightCloud
-} // namespace Foam
+} // End namespace ensightCloud
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

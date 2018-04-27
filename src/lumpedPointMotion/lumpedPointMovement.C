@@ -78,8 +78,7 @@ static void writeList(Ostream& os, const string& header, const UList<T>& lst)
 }
 //! \endcond
 
-}
-// namespace Foam
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //

@@ -76,7 +76,7 @@ addstopAtWriteNowSignalToOpt addstopAtWriteNowSignalToOpt_
     "stopAtWriteNowSignal"
 );
 
-} // end of namespace Foam
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

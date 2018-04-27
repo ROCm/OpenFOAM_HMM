@@ -186,7 +186,8 @@ class reader
     protected fileFormats::STARCDCore
 {
 public:
-    // Forward Declarations
+
+    // Forward declarations
     class options;
 
 

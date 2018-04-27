@@ -74,7 +74,7 @@ public:
 
 addwriteNowSignalToOpt addwriteNowSignalToOpt_("writeNowSignal");
 
-} // end of namespace Foam
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

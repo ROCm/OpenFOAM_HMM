@@ -298,7 +298,7 @@ namespace Files
         return infile;
     }
 
-} // end of namespace Files
+} // End namespace Files
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

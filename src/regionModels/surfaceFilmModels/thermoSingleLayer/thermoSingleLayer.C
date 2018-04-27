@@ -864,8 +864,8 @@ tmp<volScalarField::Internal> thermoSingleLayer::Sh() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // end namespace Foam
-} // end namespace regionModels
-} // end namespace surfaceFilmModels
+} // End namespace Foam
+} // End namespace regionModels
+} // End namespace surfaceFilmModels
 
 // ************************************************************************* //

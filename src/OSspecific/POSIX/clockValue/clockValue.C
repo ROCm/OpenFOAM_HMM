@@ -35,7 +35,7 @@ namespace
     constexpr int factorMicro = (1000000);
     constexpr int factorMicro2 = (500000);
 
-} // end of anonymous
+} // End anonymous namespace
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

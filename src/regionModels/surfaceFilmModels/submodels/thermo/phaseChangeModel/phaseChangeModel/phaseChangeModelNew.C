@@ -64,8 +64,8 @@ autoPtr<phaseChangeModel> phaseChangeModel::New
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // end namespace surfaceFilmModels
-} // end namespace regionModels
-} // end namespace Foam
+} // End namespace surfaceFilmModels
+} // End namespace regionModels
+} // End namespace Foam
 
 // ************************************************************************* //

@@ -125,8 +125,7 @@ namespace Foam
     }
 
 
-}  // end of namespace Foam
-
+}  // End namespace Foam
 
 
 // ************************************************************************* //

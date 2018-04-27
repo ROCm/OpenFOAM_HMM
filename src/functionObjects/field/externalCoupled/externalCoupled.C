@@ -46,8 +46,8 @@ namespace functionObjects
         externalCoupled,
         dictionary
     );
-}
-}
+} // End namespace functionObject
+} // End namespace Foam
 
 Foam::string Foam::functionObjects::externalCoupled::patchKey = "// Patch:";
 
@@ -78,8 +78,7 @@ static void writeList(Ostream& os, const string& header, const UList<T>& L)
 }
 //! \endcond
 
-}
-// namespace Foam
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

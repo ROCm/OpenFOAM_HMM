@@ -64,7 +64,7 @@ public:
     using List<string>::List;
 };
 
-} // end namespace Foam
+} // End namespace Foam
 
 
 using namespace Foam;

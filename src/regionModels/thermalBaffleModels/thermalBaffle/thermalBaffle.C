@@ -354,8 +354,8 @@ void thermalBaffle::info()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // end namespace thermalBaffleModels
-} // end namespace regionModels
-} // end namespace Foam
+} // End namespace thermalBaffleModels
+} // End namespace regionModels
+} // End namespace Foam
 
 // ************************************************************************* //

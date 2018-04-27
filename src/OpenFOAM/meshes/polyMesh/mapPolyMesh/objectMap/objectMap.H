@@ -43,7 +43,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 class objectMap;
 inline bool operator==(const objectMap& a, const objectMap& b);
@@ -53,7 +53,7 @@ inline Istream& operator>>(Istream&, objectMap&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class objectMap Declaration
+                          Class objectMap Declaration
 \*---------------------------------------------------------------------------*/
 
 class objectMap
@@ -71,14 +71,14 @@ public:
 
     // Constructors
 
-        //- Null constructor for lists
+        //- Null constructor, with index=-1 and no objects
         inline objectMap();
 
         //- Construct from components
-        inline objectMap(const label index, const labelList& master);
+        inline objectMap(const label index, const UList<label>& master);
 
         //- Construct from Istream
-        inline objectMap(Istream&);
+        inline objectMap(Istream& is);
 
 
     // Member Functions
@@ -101,7 +101,6 @@ public:
     // IOstream Operators
 
         friend Ostream& operator<<(Ostream&, const objectMap&);
-
         friend Istream& operator>>(Istream&, objectMap&);
 };
 

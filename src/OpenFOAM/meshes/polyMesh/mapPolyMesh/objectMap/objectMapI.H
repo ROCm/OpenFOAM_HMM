@@ -21,68 +21,58 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline objectMap::objectMap()
+inline Foam::objectMap::objectMap()
 :
     index_(-1),
-    masterObjects_(0)
+    masterObjects_()
 {}
 
 
-inline objectMap::objectMap(const label index, const labelList& master)
+inline Foam::objectMap::objectMap(const label index, const UList<label>& master)
 :
     index_(index),
     masterObjects_(master)
 {}
 
 
-inline objectMap::objectMap(Istream& is)
+inline Foam::objectMap::objectMap(Istream& is)
 {
-    // Read beginning of objectMap
     is.readBegin("objectMap");
 
     is >> index_ >> static_cast<labelList&>(masterObjects_);
 
-    // Read master of objectMap
     is.readEnd("objectMap");
-
     is.check(FUNCTION_NAME);
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-label& objectMap::index()
+Foam::label& Foam::objectMap::index()
 {
     return index_;
 }
 
 
-inline label objectMap::index() const
+inline Foam::label Foam::objectMap::index() const
 {
     return index_;
 }
 
 
-inline labelList& objectMap::masterObjects()
+inline Foam::labelList& Foam::objectMap::masterObjects()
 {
     return masterObjects_;
 }
 
 
-inline const labelList& objectMap::masterObjects() const
+inline const Foam::labelList& Foam::objectMap::masterObjects() const
 {
     return masterObjects_;
 }
@@ -90,7 +80,7 @@ inline const labelList& objectMap::masterObjects() const
 
 // * * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * //
 
-inline bool operator==(const objectMap& a, const objectMap& b)
+inline bool Foam::operator==(const objectMap& a, const objectMap& b)
 {
     return
     (
@@ -99,15 +89,15 @@ inline bool operator==(const objectMap& a, const objectMap& b)
 }
 
 
-inline bool operator!=(const objectMap& a, const objectMap& b)
+inline bool Foam::operator!=(const objectMap& a, const objectMap& b)
 {
-    return (!(a == b));
+    return !(a == b);
 }
 
 
 // * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
 
-inline Ostream& operator<<(Ostream& os, const objectMap& a)
+inline Foam::Ostream& Foam::operator<<(Ostream& os, const objectMap& a)
 {
     os  << token::BEGIN_LIST
         << a.index_ << token::SPACE
@@ -119,19 +109,15 @@ inline Ostream& operator<<(Ostream& os, const objectMap& a)
 }
 
 
-inline Istream& operator>>(Istream& is, objectMap& a)
+inline Foam::Istream& Foam::operator>>(Istream& is, objectMap& a)
 {
     is.readBegin("objectMap");
-    is  >> a.index_ >> a.masterObjects_;
+    is >> a.index_ >> a.masterObjects_;
     is.readEnd("objectMap");
 
     is.check(FUNCTION_NAME);
     return is;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // Master namespace Foam
 
 // ************************************************************************* //

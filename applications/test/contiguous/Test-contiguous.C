@@ -50,7 +50,7 @@ namespace Foam
 // Wrong, but interesting to test
 // template<> struct contiguous<Pair<word>> : std::true_type {};
 
-} // end namespace Foam
+} // End namespace Foam
 
 using namespace Foam;
 

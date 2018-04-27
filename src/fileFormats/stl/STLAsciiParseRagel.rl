@@ -181,8 +181,8 @@ public:
     void execute(std::istream& is);
 };
 
-} // end of namespace Detail
-} // end of namespace Foam
+} // End namespace Detail
+} // End namespace Foam
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
