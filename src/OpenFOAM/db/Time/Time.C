@@ -30,6 +30,7 @@ License
 #include "profiling.H"
 #include "demandDrivenData.H"
 #include "IOdictionary.H"
+#include "registerSwitch.H"
 
 #include <sstream>
 
@@ -76,6 +77,19 @@ int Foam::Time::precision_(6);
 const int Foam::Time::maxPrecision_(3 - log10(SMALL));
 
 Foam::word Foam::Time::controlDictName("controlDict");
+
+int Foam::Time::printExecutionFormat_
+(
+    Foam::debug::infoSwitch("printExecutionFormat", 0)
+);
+
+
+registerInfoSwitch
+(
+    "printExecutionFormat",
+    int,
+    Foam::Time::printExecutionFormat_
+);
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -1161,7 +1175,7 @@ Foam::Time& Foam::Time::operator++()
             {
                 const label writeIndex = label
                 (
-                    returnReduce(label(elapsedClockTime()), maxOp<label>())
+                    returnReduce(elapsedClockTime(), maxOp<double>())
                   / writeInterval_
                 );
                 if (writeIndex > writeTimeIndex_)

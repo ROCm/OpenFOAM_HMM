@@ -85,9 +85,7 @@ int main(int argc, char *argv[])
         #include "calculateStress.H"
         #include "kineticEnergyLimiter.H"
 
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
+        runTime.printExecutionTime(Info);
     }
 
     Info<< "End\n" << endl;

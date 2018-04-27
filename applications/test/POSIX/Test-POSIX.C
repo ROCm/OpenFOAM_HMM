@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
             << "clock: iso  "  << clock::dateTime() << nl;
     }
 
+    Info<< "since epoch = " << clockValue::now().str() << nl;
 
     {
         clockValue a;
@@ -67,6 +68,7 @@ int main(int argc, char *argv[])
 
         Info<< "elapsed = " << a.elapsed() << nl;
         Info<< "elapsed = " << a.elapsed().seconds() << nl;
+        Info<< "elapsed = " << a.elapsed().str() << nl;
 
         clockValue b = clockValue::now();
 

@@ -82,9 +82,7 @@ int main(int argc, char *argv[])
 
         #include "output.H"
 
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
+        runTime.printExecutionTime(Info);
     }
 
     Info << "Number of steps = " << runTime.timeIndex() << endl;

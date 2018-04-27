@@ -701,9 +701,8 @@ int main(int argc, char *argv[])
     sizesIO.write();
     alignmentsIO.write();
 
-    Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-        << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-        << nl << endl;
+    Info<< nl;
+    runTime.printExecutionTime(Info);
 
     Info<< "\nEnd\n" << endl;
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,9 +59,10 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class argList;
 class profilingTrigger;
+class OSstream;
 
 /*---------------------------------------------------------------------------*\
                              Class Time Declaration
@@ -112,6 +113,14 @@ public:
 
         //- Names for stopAtControls
         static const Enum<stopAtControls> stopAtControlNames;
+
+
+        //- Style for "ExecutionTime = " output
+        //  0 = seconds (with trailing 's')
+        //  1 = day-hh:mm:ss
+        //
+        // \note this is public so registered info switches can modify it.
+        static int printExecutionFormat_;
 
 
 private:
@@ -262,7 +271,7 @@ public:
     virtual ~Time();
 
 
-    // Member functions
+    // Member Functions
 
         // Database functions
 
@@ -395,6 +404,9 @@ public:
 
             //- Write the objects once (one shot) and continue the run
             void writeOnce();
+
+            //- Print the elapsed ExecutionTime (cpu-time), ClockTime
+            Ostream& printExecutionTime(OSstream& os) const;
 
 
         // Access

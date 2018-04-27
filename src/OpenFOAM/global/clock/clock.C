@@ -49,7 +49,7 @@ time_t Foam::clock::getTime()
 const struct tm Foam::clock::rawDate()
 {
     time_t t = getTime();
-    struct tm *curr = localtime(&t);
+    struct tm *curr = ::localtime(&t);
     return *curr;
 }
 
@@ -57,7 +57,7 @@ const struct tm Foam::clock::rawDate()
 std::string Foam::clock::dateTime()
 {
     time_t t = getTime();
-    struct tm *curr = localtime(&t);
+    struct tm *curr = ::localtime(&t);
 
     std::ostringstream os;
     os
@@ -76,7 +76,7 @@ std::string Foam::clock::dateTime()
 std::string Foam::clock::date()
 {
     time_t t = getTime();
-    struct tm *curr = localtime(&t);
+    struct tm *curr = ::localtime(&t);
 
     std::ostringstream os;
     os
@@ -91,7 +91,7 @@ std::string Foam::clock::date()
 std::string Foam::clock::clockTime()
 {
     time_t t = getTime();
-    struct tm *curr = localtime(&t);
+    struct tm *curr = ::localtime(&t);
 
     std::ostringstream os;
     os
@@ -115,19 +115,19 @@ Foam::clock::clock()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-time_t Foam::clock::elapsedClockTime() const
+double Foam::clock::elapsedClockTime() const
 {
     last_ = getTime();
-    return last_ - start_;
+    return ::difftime(last_, start_);
 }
 
 
-time_t Foam::clock::clockTimeIncrement() const
+double Foam::clock::clockTimeIncrement() const
 {
     const value_type prev(last_);
 
     last_ = getTime();
-    return last_ - prev;
+    return ::difftime(last_, prev);
 }
 
 

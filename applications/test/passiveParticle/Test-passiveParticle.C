@@ -65,9 +65,7 @@ int main(int argc, char *argv[])
                 << endl;
         }
 
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
+        runTime.printExecutionTime(Info);
 
         runTime++;
         Pout<< "Writing particles to time " << runTime.timeName() << endl;
@@ -89,11 +87,7 @@ int main(int argc, char *argv[])
         }
     }
 
-
-    Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-        << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-        << nl << endl;
-
+    runTime.printExecutionTime(Info);
 
     Info<< "End\n" << endl;
 

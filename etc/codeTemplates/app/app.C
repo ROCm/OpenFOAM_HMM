@@ -39,9 +39,8 @@ int main(int argc, char *argv[])
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-        << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-        << nl << endl;
+    Info<< nl;
+    runTime.printExecutionTime(Info);
 
     Info<< "End\n" << endl;
 

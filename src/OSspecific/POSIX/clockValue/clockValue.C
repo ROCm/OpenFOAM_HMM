@@ -26,14 +26,17 @@ License
 #include "clockValue.H"
 #include "IOstreams.H"
 #include <sys/time.h>
+#include <sstream>
+#include <iomanip>
 
 // * * * * * * * * * * * * * * * * Local Data  * * * * * * * * * * * * * * * //
 
 namespace
 {
 
-    constexpr int factorMicro = (1000000);
-    constexpr int factorMicro2 = (500000);
+    constexpr int factorMicro = (1000000);  //!< From usec to sec
+    constexpr int factorMicro2 = (500000);  //!< Rounding usec to sec
+    constexpr int factorHundred = (10000);  //!< From usec to 0.01 sec
 
 } // End anonymous namespace
 
@@ -92,6 +95,47 @@ long Foam::clockValue::seconds() const
 }
 
 
+std::string Foam::clockValue::str() const
+{
+    std::ostringstream os;
+
+    const unsigned long ss = value_.tv_sec;
+
+    // days
+    const auto dd = (ss / 86400);
+
+    if (dd) os << dd << '-';
+
+    // hours
+    const int hh = ((ss / 3600) % 24);
+
+    if (dd || hh)
+    {
+        os  << std::setw(2) << std::setfill('0')
+            << hh << ':';
+    }
+
+
+    // minutes
+    os  << std::setw(2) << std::setfill('0')
+        << ((ss / 60) % 60) << ':';
+
+    // seconds
+    os  << std::setw(2) << std::setfill('0')
+        << (ss % 60);
+
+    // 1/100th seconds. As none or 2 decimal places
+    const int hundredths = (value_.tv_sec % factorHundred);
+
+    if (hundredths)
+    {
+        os  << '.' << std::setw(2) << std::setfill('0') << hundredths;
+    }
+
+    return os.str();
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 Foam::clockValue::operator double () const
@@ -99,8 +143,6 @@ Foam::clockValue::operator double () const
     return (value_.tv_sec + 1e-6*value_.tv_usec);
 }
 
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 Foam::clockValue& Foam::clockValue::operator-=(const clockValue& rhs)
 {

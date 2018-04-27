@@ -43,8 +43,6 @@ SourceFiles
 namespace Foam
 {
 
-class string;
-
 /*---------------------------------------------------------------------------*\
                            Class clock Declaration
 \*---------------------------------------------------------------------------*/
@@ -92,10 +90,10 @@ public:
     // Member Functions
 
         //- Returns wall-clock time from clock instantiation
-        time_t elapsedClockTime() const;
+        double elapsedClockTime() const;
 
         //- Returns wall-clock time from last call of clockTimeIncrement()
-        time_t clockTimeIncrement() const;
+        double clockTimeIncrement() const;
 };
 
 

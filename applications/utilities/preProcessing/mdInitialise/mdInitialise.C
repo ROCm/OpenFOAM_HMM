@@ -91,8 +91,8 @@ int main(int argc, char *argv[])
             << nl << exit(FatalError);
     }
 
-    Info<< nl << "ClockTime = " << runTime.elapsedClockTime() << " s"
-        << nl << endl;
+    Info<< nl;
+    runTime.printExecutionTime(Info);
 
     Info<< "\nEnd\n" << endl;
 

@@ -71,11 +71,9 @@ int main(int argc, char *argv[])
                 #include "EEqn.H"
             }
 
-            Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-                << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-                << nl << endl;
-
             runTime.write();
+
+            runTime.printExecutionTime(Info);
         }
     }
     else
@@ -93,11 +91,9 @@ int main(int argc, char *argv[])
                 #include "EEqn.H"
             }
 
-            Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-                << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-                << nl << endl;
-
             runTime.write();
+
+            runTime.printExecutionTime(Info);
         }
     }
 

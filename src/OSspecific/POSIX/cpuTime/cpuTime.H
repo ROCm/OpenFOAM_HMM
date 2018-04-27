@@ -38,6 +38,7 @@ SourceFiles
 #ifndef cpuTime_H
 #define cpuTime_H
 
+#include <string>
 #include <time.h>
 #include <sys/times.h>
 

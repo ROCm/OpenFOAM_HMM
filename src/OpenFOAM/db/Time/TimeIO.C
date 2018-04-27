@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,55 @@ License
 #include "profiling.H"
 #include "IOdictionary.H"
 #include "fileOperation.H"
+
+#include <iomanip>
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Output seconds as day-hh:mm:ss
+static std::ostream& printTimeHMS(std::ostream& os, double seconds)
+{
+    const unsigned long ss = seconds;
+
+    // days
+    const auto dd = (ss / 86400);
+
+    if (dd) os << dd << '-';
+
+    // hours
+    const int hh = ((ss / 3600) % 24);
+
+    if (dd || hh)
+    {
+        os  << std::setw(2) << std::setfill('0')
+            << hh << ':';
+    }
+
+    // minutes
+    os  << std::setw(2) << std::setfill('0')
+        << ((ss / 60) % 60) << ':';
+
+    // seconds
+    os  << std::setw(2) << std::setfill('0')
+        << (ss % 60);
+
+
+    // 1/100th seconds. As none or 2 decimal places
+    const int hundredths = int(100 * (seconds - ss)) % 100;
+
+    if (hundredths)
+    {
+        os  << '.' << std::setw(2) << std::setfill('0') << hundredths;
+    }
+
+    return os;
+}
+
+} // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -683,6 +732,34 @@ bool Foam::Time::writeAndEnd()
 void Foam::Time::writeOnce()
 {
     writeOnce_ = true;
+}
+
+
+Foam::Ostream& Foam::Time::printExecutionTime(OSstream& os) const
+{
+    switch (printExecutionFormat_)
+    {
+        case 1:
+        {
+            os  << "ExecutionTime = ";
+            printTimeHMS(os.stdStream(), elapsedCpuTime());
+
+            os  << "  ClockTime = ";
+            printTimeHMS(os.stdStream(), elapsedClockTime());
+        }
+        break;
+
+        default:
+        {
+            os  << "ExecutionTime = " << elapsedCpuTime() << " s"
+                << "  ClockTime = " << elapsedClockTime() << " s";
+        }
+        break;
+    }
+
+    os  << nl << endl;
+
+    return os;
 }
 
 

@@ -135,9 +135,7 @@ int main(int argc, char *argv[])
 
         runTime.write();
 
-        Info<< "ExecutionTime = "
-            << runTime.elapsedCpuTime()
-            << " s\n\n" << endl;
+        runTime.printExecutionTime(Info);
     }
 
     Info<< "End\n" << endl;

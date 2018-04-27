@@ -36,6 +36,7 @@ SourceFiles
 #ifndef clockValue_H
 #define clockValue_H
 
+#include <string>
 #include <sys/types.h>
 #ifdef darwin
     #include <sys/time.h>
@@ -47,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class clockValue Declaration
+                         Class clockValue Declaration
 \*---------------------------------------------------------------------------*/
 
 class clockValue
@@ -92,6 +93,9 @@ public:
 
         //- The value in seconds (rounded)
         long seconds() const;
+
+        //- Format as day-hh:mm:ss string
+        std::string str() const;
 
 
     // Operators

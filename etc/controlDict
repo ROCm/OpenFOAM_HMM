@@ -54,6 +54,11 @@ InfoSwitches
     // Enable job info
     writeJobInfo    0;
 
+    // Style for "ExecutionTime = " output
+    // - 0 = seconds (with trailing 's')
+    // - 1 = day-hh:mm::ss
+    printExecutionFormat 0;
+
     // Allow profiling
     allowProfiling  1;
 
