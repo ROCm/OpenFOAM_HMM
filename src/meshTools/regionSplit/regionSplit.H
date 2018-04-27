@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,12 +103,11 @@ Description
 
     \endverbatim
 
-
     Can optionally keep all regions local to the processor.
 
-    Note: does not walk across cyclicAMI/cyclicACMI - since not 'coupled()'
-          at the patch level.
-
+Note
+    does not walk across cyclicAMI/cyclicACMI - since these are not
+    \c coupled() at the patch level.
 
 SourceFiles
     regionSplit.C
@@ -128,6 +127,8 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -141,21 +142,52 @@ class regionSplit
 {
     // Private data
 
-        mutable autoPtr<globalIndex> globalNumberingPtr_;
+        autoPtr<globalIndex> globalNumberingPtr_;
+
+        //- Temporary list of cells that have changed
+        mutable DynamicList<label> changedCells_;
+
+        //- Temporary list of faces that have changed
+        mutable DynamicList<label> changedFaces_;
 
 
     // Private Member Functions
 
-        //- Calculate region split in non-compact (global) numbering.
-        void calcNonCompactRegionSplit
+        //- Update faceRegion data between (non-processor) coupled faces.
+        void updateFacePair
         (
-            const globalIndex& globalFaces,
+            const label face0,
+            const label face1,
+            labelList& faceRegion,
+            DynamicList<label>& facesChanged
+        ) const;
+
+        //- Given a seed cell label, fill cellRegion/faceRegion with markValue
+        //- for contiguous region around it
+        void fillSeedMask
+        (
+            const List<labelPair>& explicitConnections,
+            const label seedCellID,
+            const label markValue,
+            labelList& cellRegion,
+            labelList& faceRegion
+        ) const;
+
+
+        //- Calculate the local region split.
+        //  \return number of processor-local regions,
+        //      without consolidation between procesors
+        label calcLocalRegionSplit
+        (
             const boolList& blockedFace,
             const List<labelPair>& explicitConnections,
             labelList& cellRegion
         ) const;
 
-        //- Calculate global region split. Return globalIndex.
+
+        //- Calculate the local region split.
+        //  \return number of processor-local regions,
+        //      without consolidation between procesors
         autoPtr<globalIndex> calcRegionSplit
         (
             const bool doGlobalRegions,
@@ -176,27 +208,27 @@ public:
         //- Construct from mesh
         regionSplit
         (
-            const polyMesh&,
+            const polyMesh& mesh,
             const bool doGlobalRegions = Pstream::parRun()
         );
 
         //- Construct from mesh and whether face is blocked
-        //  \note blockedFace has to be consistent across coupled faces!
+        //  \note blockedFace must be consistent across coupled faces!
         regionSplit
         (
-            const polyMesh&,
+            const polyMesh& mesh,
             const boolList& blockedFace,
             const bool doGlobalRegions = Pstream::parRun()
         );
 
-        //- Construct from mesh and whether face is blocked.
-        //  Additional explicit connections between normal boundary faces.
-        //  \note blockedFace has to be consistent across coupled faces!
+        //- Construct from mesh and whether face is blocked, with additional
+        //- explicit connections between normal boundary faces.
+        //  \note blockedFace must be consistent across coupled faces!
         regionSplit
         (
-            const polyMesh&,
+            const polyMesh& mesh,
             const boolList& blockedFace,
-            const List<labelPair>&,
+            const List<labelPair>& explicitConnections,
             const bool doGlobalRegions = Pstream::parRun()
         );
 
@@ -220,6 +252,19 @@ public:
         {
             return globalNumbering().size();
         }
+
+
+        //- Manually consolidate the regions globally by swapping information
+        //  between processor domains and reducing the regions accordingly.
+        //
+        //  \return number of local regions after reduction.
+        autoPtr<globalIndex> reduceRegions
+        (
+            const label numLocalRegions,
+            const boolList& blockedFace,
+            labelList& cellRegion
+        ) const;
+
 };
 
 
