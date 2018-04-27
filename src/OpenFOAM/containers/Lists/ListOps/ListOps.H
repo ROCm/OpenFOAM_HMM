@@ -45,6 +45,7 @@ SourceFiles
 #include "FlatOutput.H"
 #include "labelList.H"
 #include "HashSet.H"
+#include "Map.H"
 #include "bitSet.H"
 #include "ops.H"
 
@@ -144,16 +145,44 @@ void inplaceReorder
 );
 
 
-// Variants to work with iterators and sparse tables.
-// Need to have iterators and insert()
-
-//- Map values. Do not map negative values.
-template<class Container>
-void inplaceMapValue(const labelUList& oldToNew, Container& input);
-
-//- Recreate with mapped keys. Do not map elements with negative key.
+//- Rewrite with mapped keys. Ignore elements with negative key.
+//  The Container is some type of HashTable or Map with a label for its key.
 template<class Container>
 void inplaceMapKey(const labelUList& oldToNew, Container& input);
+
+//- Map values. Ignore negative values.
+//  \return number of values changed
+template<class Container>
+label inplaceMapValue(const labelUList& oldToNew, Container& input);
+
+//- Use mapper as a lookup to modify the values of input.
+//
+//  \return number of values changed
+//
+//  \code
+//  Map<label> mapper({{1, 3}, {2, 6}, {3, 12}, {5, 8}});
+//
+//  HashTable<label> models with
+//  {
+//      model0 => 1,
+//      model1 => 4,
+//      model2 => 5,
+//  }
+//
+//  inplaceMapValue(mapper, models);
+//
+//  Now contains
+//  {
+//      model0 => 3,
+//      model1 => 4,
+//      model2 => 8,
+//  }
+//  \endcode
+//
+//  \note the modification occurs in a single pass and will not
+//  remap more than once.
+template<class Container>
+label inplaceMapValue(const Map<label>& mapper, Container& input);
 
 
 //- Generate the (stable) sort order for the list
@@ -284,7 +313,7 @@ List<OutputIntListType> invertManyToMany
 
 //- Create identity map of the given length with (map[i] == i)
 //  Optionally with an alternative start index, so that (map[i] == i+start)
-labelList identity(const label len, const label start=0);
+labelList identity(const label len, label start=0);
 
 //- Find first occurence of given element and return index,
 //  return -1 if not found. Linear search.
@@ -396,6 +425,44 @@ template<class T>
 struct uniqueEqOp
 {
     void operator()(List<T>& x, const List<T>& y) const;
+};
+
+
+// Public classes
+
+//- A list compare binary predicate for normal sort
+template<class ListType>
+struct less
+{
+    const ListType& values;
+
+    less(const ListType& list)
+    :
+        values(list)
+    {}
+
+    bool operator()(const label a, const label b) const
+    {
+        return values[a] < values[b];
+    }
+};
+
+
+//- A list compare binary predicate for reverse sort
+template<class ListType>
+struct greater
+{
+    const ListType& values;
+
+    greater(const ListType& list)
+    :
+        values(list)
+    {}
+
+    bool operator()(const label a, const label b) const
+    {
+        return values[b] < values[a];
+    }
 };
 
 

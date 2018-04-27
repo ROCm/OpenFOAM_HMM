@@ -35,8 +35,81 @@ Description
 #include "SubList.H"
 #include "ListOps.H"
 #include "FlatOutput.H"
+#include "UPtrList.H"
 
 using namespace Foam;
+
+
+// Proof-of-concept for sorted HashTable output
+// .. but yet not really convincing
+
+
+// Forward declarations
+template<class T, class Key, class Hash> class HashSorter;
+
+template<class T, class Key, class Hash>
+Ostream& operator<<(Ostream& os, const HashSorter<T, Key, Hash>& sorter);
+
+
+template<class T, class Key, class Hash>
+class HashSorter
+{
+    const HashTable<T,Key,Hash>& table;
+
+public:
+
+    HashSorter(const HashTable<T,Key,Hash>& ht)
+    :
+        table(ht)
+    {}
+
+    friend Ostream& operator<<
+    (
+        Ostream& os,
+        const HashSorter<T, Key, Hash>& sorter
+    )
+    {
+        const auto& tbl = sorter.table;
+        const label len = tbl.size();
+
+        // Should actually be able to get the flat entries or iterators
+        // and sort that instead.
+
+        UPtrList<const Key> keys(len);
+        label count = 0;
+
+        for (auto iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
+        {
+            keys.set(count, &(iter.key()));
+            ++count;
+        }
+
+        labelList order(identity(len));
+        std::sort
+        (
+            order.begin(),
+            order.end(),
+            ListOps::less<UPtrList<const Key>>(keys)
+        );
+
+        // Size and start list delimiter
+        os << nl << len << nl << token::BEGIN_LIST << nl;
+
+        // Contents
+        for (const label idx : order)
+        {
+            const auto& k = keys[idx];
+
+            os << k << token::SPACE << tbl[k] << nl;
+        }
+
+        os << token::END_LIST;    // End list delimiter
+
+        return os;
+    }
+
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -132,6 +205,42 @@ int main(int argc, char *argv[])
             list.remove(i);
             Info<<"rmMove: " << i << " = " << flatOutput(list) << nl;
         }
+    }
+
+
+    // Test remapping
+    {
+        Info<< nl << "Test inplaceMapValue" << nl << nl;
+
+        HashTable<label> input;
+        typedef HashSorter<label, label, Hash<label>> Mapper;
+        typedef HashSorter<label, word, string::hash> Sorter;
+
+        for (label i=0; i < 10; ++i)
+        {
+            input.insert(word::printf("word%d", i), i);
+        }
+
+        Map<label> mapper;
+        {
+            // A mapping that does some, but not all values
+
+            labelList rndList(identity(16));  // larger range
+            shuffle(rndList);
+
+            for (label i=0; i < 8; ++i)     // smaller sample
+            {
+                mapper.insert(rndList[i], 100*i);
+            }
+        }
+
+        Info<< nl
+            << "input: " << Sorter(input) << nl
+            << "mapper: " << Mapper(mapper) << nl << nl;
+
+        inplaceMapValue(mapper, input);
+
+        Info<< nl << "output: " << Sorter(input) << nl;
     }
 
 

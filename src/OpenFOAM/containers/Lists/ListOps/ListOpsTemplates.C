@@ -85,7 +85,7 @@ ListType Foam::reorder
     ListType output(len);
     output.resize(len);     // Consistent sizing (eg, DynamicList)
 
-    label maxIdx = -1;      // For pruning: newSize = maxIdx+1
+    label maxIdx = -1;      // For pruning: The new size = maxIdx+1
     for (label i=0; i < len; ++i)
     {
         const label newIdx = oldToNew[i];
@@ -136,7 +136,7 @@ void Foam::inplaceReorder
     ListType output(len);
     output.resize(len);     // Consistent sizing (eg, DynamicList)
 
-    label maxIdx = -1;      // For pruning: newSize = maxIdx+1
+    label maxIdx = -1;      // For pruning: The new size = maxIdx+1
     for (label i=0; i < len; ++i)
     {
         const label newIdx = oldToNew[i];
@@ -179,7 +179,7 @@ Foam::PackedList<Width> Foam::reorder
 
     PackedList<Width> output(len);
 
-    label maxIdx = -1;      // For pruning: newSize = maxIdx+1
+    label maxIdx = -1;      // For pruning: The new size = maxIdx+1
     for (label i=0; i < len; ++i)
     {
         const auto& val = input.get(i);
@@ -233,27 +233,6 @@ void Foam::inplaceReorder
 
 
 template<class Container>
-void Foam::inplaceMapValue
-(
-    const labelUList& oldToNew,
-    Container& input
-)
-{
-    for (auto iter = input.begin(); iter != input.end(); ++iter)
-    {
-        const label oldIdx = iter.object();
-        if (oldIdx >= 0)
-        {
-            // Could enforce (oldIdx < oldToNew.size())
-            // ... or just rely on FULLDEBUG from UList
-
-            iter.object() = oldToNew[oldIdx];
-        }
-    }
-}
-
-
-template<class Container>
 void Foam::inplaceMapKey
 (
     const labelUList& oldToNew,
@@ -278,6 +257,67 @@ void Foam::inplaceMapKey
 }
 
 
+template<class Container>
+Foam::label Foam::inplaceMapValue
+(
+    const labelUList& oldToNew,
+    Container& input
+)
+{
+    label nChanged = 0;
+
+    for (auto iter = input.begin(); iter != input.end(); ++iter)
+    {
+        const label oldIdx = iter.object();
+        if (oldIdx >= 0)
+        {
+            // Could enforce (oldIdx < oldToNew.size())
+            // ... or just rely on FULLDEBUG from UList
+
+            const label newIdx = oldToNew[oldIdx];
+
+            if (oldIdx != newIdx)
+            {
+                iter.object() = newIdx;
+                ++nChanged;
+            }
+        }
+    }
+
+    return nChanged;
+}
+
+
+template<class Container>
+Foam::label Foam::inplaceMapValue
+(
+    const Map<label>& mapper,
+    Container& input
+)
+{
+    if (mapper.empty())
+    {
+        return 0;
+    }
+
+    label nChanged = 0;
+
+    for (auto iter = input.begin(); iter != input.end(); ++iter)
+    {
+        label& value = iter.object();
+
+        auto mapIter = mapper.find(value);
+        if (mapIter.found() && value != *mapIter)
+        {
+            value = *mapIter;
+            ++nChanged;
+        }
+    }
+
+    return nChanged;
+}
+
+
 template<class T>
 void Foam::sortedOrder
 (
@@ -299,7 +339,7 @@ void Foam::sortedOrder
 {
     const label len = input.size();
 
-    // list lengths must be identical
+    // List lengths must be identical
     if (order.size() != len)
     {
         // Avoid copying elements, they are overwritten anyhow
@@ -562,10 +602,10 @@ void Foam::invertManyToMany
     }
 
     // Size output
-    output.setSize(len);
+    output.resize(len);
     forAll(sizes, outi)
     {
-        output[outi].setSize(sizes[outi]);
+        output[outi].resize(sizes[outi]);
     }
 
     // Fill output
@@ -1039,12 +1079,11 @@ Foam::List<T> Foam::ListOps::create
     {
         List_ACCESS(T, output, out);
 
-        InputIterator in = first;
-
-        for (label i = 0; i < len; ++i)
+        while (first != last)
         {
-            out[i] = op(*in);
-            ++in;
+            *out = op(*first);
+            ++first;
+            ++out;
         }
     }
 

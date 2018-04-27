@@ -184,8 +184,9 @@ int main(int argc, char *argv[])
     Info<< BitOps::bitInfo<unsigned>(BitOps::repeat_value<unsigned, 3>(1u))
         << nl;
 
-    Info<< BitOps::bitInfo<unsigned>(BitOps::repeat_value<unsigned>(1u))
+    Info<< BitOps::bitInfo<unsigned>(BitOps::repeat_value<unsigned, 1>(1u))
         << nl;
+
 
     Info << "---\nEnd\n" << endl;
 

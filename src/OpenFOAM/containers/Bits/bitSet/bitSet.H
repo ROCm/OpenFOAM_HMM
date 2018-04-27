@@ -189,7 +189,9 @@ public:
         inline bool uniform() const;
 
         //- Count number of bits set.
-        inline unsigned int count() const;
+        //  \param on can be set to false to count the number of unset bits
+        //     instead.
+        inline unsigned int count(const bool on=true) const;
 
         //- True if any bits in the other bitset intersect (are the same).
         //

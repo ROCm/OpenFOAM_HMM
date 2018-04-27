@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ListOps.H"
+#include <numeric>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -83,7 +84,7 @@ Foam::labelListList Foam::invertOneToMany
 
     for (label i=0; i<len; ++i)
     {
-        inverse[i].setSize(sizes[i]);
+        inverse[i].resize(sizes[i]);
         sizes[i] = 0; // reset size counter
     }
 
@@ -101,15 +102,10 @@ Foam::labelListList Foam::invertOneToMany
 }
 
 
-Foam::labelList Foam::identity(const label len, const label start)
+Foam::labelList Foam::identity(const label len, label start)
 {
     labelList map(len);
-
-    // Same as std::iota(map.begin(), map.end(), start);
-    for (label i = 0; i < len; ++i)
-    {
-        map[i] = i + start;
-    }
+    std::iota(map.begin(), map.end(), start);
 
     return map;
 }
@@ -127,20 +123,22 @@ Foam::bitSet Foam::reorder
     bitSet output;
     output.reserve(len);
 
-    for (label i=0; i < len; ++i)
+    for
+    (
+        label pos = input.find_first();
+        pos >= 0 && pos < len;
+        pos = input.find_next(pos)
+    )
     {
-        if (input.test(i))
-        {
-            const label newIdx = oldToNew[i];
+        const label newIdx = oldToNew[pos];
 
-            if (newIdx >= 0)
-            {
-                output.set(newIdx);
-            }
-            else if (!prune)
-            {
-                output.set(i);
-            }
+        if (newIdx >= 0)
+        {
+            output.set(newIdx);
+        }
+        else if (!prune)
+        {
+            output.set(pos);
         }
     }
 

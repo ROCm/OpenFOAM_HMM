@@ -36,7 +36,9 @@ Description
 #define BitOps_H
 
 #include "label.H"
+#include "UList.H"
 #include "Ostream.H"
+#include <algorithm>
 #include <limits>
 #include <utility>
 
@@ -53,6 +55,36 @@ namespace BitOps
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Count number of 'true' entries.
+//  \param val can be set to false to count the number of false values instead
+//  For compatibility with bitSet::count()
+inline unsigned int count(const UList<bool>& bools, const bool val=true)
+{
+    return std::count(bools.begin(), bools.end(), val);
+}
+
+//- True if all entries are 'true' or if the set is empty.
+//  For compatibility with bitSet::all()
+inline bool all(const UList<bool>& bools)
+{
+    return std::all_of(bools.begin(), bools.end(), [](bool b){return b;});
+}
+
+//- True if any entries are 'true'.
+//  For compatibility with bitSet::any()
+inline bool any(const UList<bool>& bools)
+{
+    return std::any_of(bools.begin(), bools.end(), [](bool b){return b;});
+}
+
+//- True if no entries are 'true'.
+//  For compatibility with bitSet::none()
+inline bool none(const UList<bool>& bools)
+{
+    return std::none_of(bools.begin(), bools.end(), [](bool b){return b;});
+}
+
 
 //- Count arbitrary number of bits (of an integral type)
 template<class UIntType>
@@ -90,6 +122,11 @@ inline unsigned int bit_count(uint64_t x)
 
 
 //- Repeat a value of the given BitWidth into the destination output type.
+//
+//  \note when BitWidth is 1, it is better to do directly.
+//  \code
+//     (val ? ~0u : 0u)
+//  \endcode
 template<class UIntType, unsigned BitWidth>
 inline UIntType repeat_value(unsigned val)
 {
@@ -150,11 +187,10 @@ template<class UIntType>
 struct bitInfo
 {
     typedef UIntType value_type;
-
     value_type value;
 
     //- Null constructible as zero
-    bitInfo() : value(0) {}
+    constexpr bitInfo() noexcept : value(0) {}
 
     //- Value construct
     explicit bitInfo(UIntType val) : value(val) {}

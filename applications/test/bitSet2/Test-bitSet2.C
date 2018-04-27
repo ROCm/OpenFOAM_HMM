@@ -49,6 +49,7 @@ inline Ostream& report
 {
     Info<< "size=" << bitset.size() << "/" << bitset.capacity()
         << " count=" << bitset.count()
+        << " !count=" << bitset.count(false)
         << " all:" << bitset.all()
         << " any:" << bitset.any()
         << " none:" << bitset.none() << nl;
@@ -58,6 +59,19 @@ inline Ostream& report
     {
         bitset.printBits(Info, debugOutput) << nl;
     }
+
+    return Info;
+}
+
+
+inline Ostream& report(const UList<bool>& bools)
+{
+    Info<< "size=" << bools.size()
+        << " count=" << BitOps::count(bools)
+        << " !count=" << BitOps::count(bools, false)
+        << " all:" << BitOps::all(bools)
+        << " any:" << BitOps::any(bools)
+        << " none:" << BitOps::none(bools) << nl;
 
     return Info;
 }
@@ -304,6 +318,35 @@ int main(int argc, char *argv[])
             << flatOutput(bools1.toc()) << endl;
     }
 
+
+    // Check bitSet vs boolList
+    {
+        boolList bools(list4.values());
+
+        Info<< nl << "Check BitOps on boolList" << nl << nl;
+
+        Info<<"bitSet ";
+        report(list4);
+
+        list4.shrink();
+        Info<<"shrunk ";
+        report(list4);
+
+        Info<< nl;
+
+        Info<<"bools ";
+        report(bools);
+
+        bools = false;
+        Info<<"bools (all unset) ";
+        report(bools);
+
+        bools = true;
+        Info<<"bools (all set) ";
+        report(bools);
+    }
+
+    Info<< "\nDone" << nl << endl;
     return 0;
 }
 

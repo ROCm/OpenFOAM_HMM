@@ -408,7 +408,7 @@ inline bool Foam::bitSet::uniform() const
 }
 
 
-inline unsigned int Foam::bitSet::count() const
+inline unsigned int Foam::bitSet::count(const bool on) const
 {
     unsigned int total = 0;
 
@@ -417,6 +417,12 @@ inline unsigned int Foam::bitSet::count() const
     for (label blocki = 0; blocki < nblocks; ++blocki)
     {
         total += BitOps::bit_count(blocks_[blocki]);
+    }
+
+    if (!on)
+    {
+        // Return the number of bits that are off.
+        return (unsigned(size()) - total);
     }
 
     return total;
