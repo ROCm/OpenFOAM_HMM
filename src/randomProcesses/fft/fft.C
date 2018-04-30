@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fft.H"
-
 #include <fftw3.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -33,7 +32,7 @@ void Foam::fft::fftRenumberRecurse
 (
     List<complex>& data,
     List<complex>& renumData,
-    const labelList& nn,
+    const UList<int>& nn,
     label nnprod,
     label ii,
     label l1,
@@ -89,7 +88,7 @@ void Foam::fft::fftRenumberRecurse
 }
 
 
-void Foam::fft::fftRenumber(List<complex>& data, const labelList& nn)
+void Foam::fft::fftRenumber(List<complex>& data, const UList<int>& nn)
 {
     List<complex> renumData(data);
 
@@ -181,6 +180,8 @@ void Foam::fft::transform
 )
 {
     // Copy field into fftw containers
+    // NB: this is not fully compliant, since array sizing is non-constexpr.
+    // However, cannot instantiate List with fftw_complex
     const label N = field.size();
     fftw_complex in[N], out[N];
 
@@ -236,13 +237,13 @@ Foam::tmp<Foam::complexField> Foam::fft::forwardTransform
     const UList<int>& nn
 )
 {
-    tmp<complexField> tfftField(new complexField(tfield));
+    tmp<complexField> tresult(new complexField(tfield));
 
-    transform(tfftField.ref(), nn, FORWARD_TRANSFORM);
+    transform(tresult.ref(), nn, FORWARD_TRANSFORM);
 
     tfield.clear();
 
-    return tfftField;
+    return tresult;
 }
 
 
@@ -252,13 +253,13 @@ Foam::tmp<Foam::complexField> Foam::fft::reverseTransform
     const UList<int>& nn
 )
 {
-    tmp<complexField> tifftField(new complexField(tfield));
+    tmp<complexField> tresult(new complexField(tfield));
 
-    transform(tifftField.ref(), nn, REVERSE_TRANSFORM);
+    transform(tresult.ref(), nn, REVERSE_TRANSFORM);
 
     tfield.clear();
 
-    return tifftField;
+    return tresult;
 }
 
 
@@ -268,17 +269,11 @@ Foam::tmp<Foam::complexVectorField> Foam::fft::forwardTransform
     const UList<int>& nn
 )
 {
-    tmp<complexVectorField> tfftVectorField
-    (
-        new complexVectorField
-        (
-            tfield().size()
-        )
-    );
+    auto tresult = tmp<complexVectorField>::New(tfield().size());
 
     for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
     {
-        tfftVectorField.ref().replace
+        tresult.ref().replace
         (
             cmpt,
             forwardTransform(tfield().component(cmpt), nn)
@@ -287,7 +282,7 @@ Foam::tmp<Foam::complexVectorField> Foam::fft::forwardTransform
 
     tfield.clear();
 
-    return tfftVectorField;
+    return tresult;
 }
 
 
@@ -297,17 +292,11 @@ Foam::tmp<Foam::complexVectorField> Foam::fft::reverseTransform
     const UList<int>& nn
 )
 {
-    tmp<complexVectorField> tifftVectorField
-    (
-        new complexVectorField
-        (
-            tfield().size()
-        )
-    );
+    auto tresult = tmp<complexVectorField>::New(tfield().size());
 
     for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
     {
-        tifftVectorField.ref().replace
+        tresult.ref().replace
         (
             cmpt,
             reverseTransform(tfield().component(cmpt), nn)
@@ -316,7 +305,7 @@ Foam::tmp<Foam::complexVectorField> Foam::fft::reverseTransform
 
     tfield.clear();
 
-    return tifftVectorField;
+    return tresult;
 }
 
 

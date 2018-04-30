@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,15 +57,15 @@ public:
 
     enum transformDirection
     {
-        FORWARD_TRANSFORM = -1,
-        REVERSE_TRANSFORM = 1
+        FORWARD_TRANSFORM = -1, //!< The sign -1 = FFTW_FORWARD
+        REVERSE_TRANSFORM = 1   //!< The sign +1 = FFTW_BACKWARD
     };
 
     static void fftRenumberRecurse
     (
         List<complex>& data,
         List<complex>& renumData,
-        const labelList& nn,
+        const UList<int>& nn,
         label nnprod,
         label ii,
         label l1,
@@ -74,7 +74,7 @@ public:
 
     //- fftRenumber: fold the n-d data array to get the fft components in
     //- the right places.
-    static void fftRenumber(List<complex>& data, const labelList& nn);
+    static void fftRenumber(List<complex>& data, const UList<int>& nn);
 
     //- Transform real-value data
     //  - uses the fftw real to half-complex method
