@@ -46,29 +46,6 @@ static constexpr Foam::label BLOCKED = -2;
 namespace Foam
 {
 
-//- Use key/value from mapper to modify the values for map
-
-template<class Container>
-static void inplaceMapValue(const Map<label>& mapper, Container& input)
-{
-    if (mapper.empty())
-    {
-        return;
-    }
-
-    for (auto iter = input.begin(); iter != input.end(); ++iter)
-    {
-        label& value = *iter;
-
-        auto mapIter = mapper.find(value);
-        if (mapIter.found())
-        {
-            value = *mapIter;
-        }
-    }
-}
-
-
 //- The sizes of a List of containers (eg, labelHashSet)
 template<class Container>
 static labelList containerSizes(const UList<Container>& input)
@@ -85,8 +62,7 @@ static labelList containerSizes(const UList<Container>& input)
     return output;
 }
 
-} // end of namespace Foam
-
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
