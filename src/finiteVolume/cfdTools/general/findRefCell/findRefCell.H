@@ -69,6 +69,7 @@ bool setRefCell
     const bool forceReference = false
 );
 
+
 //- Return the current value of field in the reference cell
 scalar getRefCellValue
 (

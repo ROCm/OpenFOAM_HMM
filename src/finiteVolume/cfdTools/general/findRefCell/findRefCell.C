@@ -39,10 +39,9 @@ bool Foam::setRefCell
 {
     if (fieldRef.needReference() || forceReference)
     {
-        word refCellName = field.name() + "RefCell";
-        word refPointName = field.name() + "RefPoint";
-
-        word refValueName = field.name() + "RefValue";
+        const word refCellName = field.name() + "RefCell";
+        const word refPointName = field.name() + "RefPoint";
+        const word refValueName = field.name() + "RefValue";
 
         if (dict.found(refCellName))
         {
@@ -75,7 +74,7 @@ bool Foam::setRefCell
             label hasRef = (refCelli >= 0 ? 1 : 0);
             label sumHasRef = returnReduce<label>(hasRef, sumOp<label>());
 
-            // If reference cell no found use octree search
+            // If reference cell not found, use octree search
             // with cell tet-decompositoin
             if (sumHasRef != 1)
             {
@@ -138,7 +137,31 @@ Foam::scalar Foam::getRefCellValue
     const label refCelli
 )
 {
+    #ifdef FULLDEBUG
+    if (refCelli >= field.mesh().nCells())
+    {
+        FatalErrorInFunction
+            << "Illegal reference cellID " << refCelli
+            << ". Mesh has " << field.mesh().nCells() << ". cells."
+            << exit(FatalIOError);
+    }
+
+    // Catch duplicates
+    label hasRef =
+        (refCelli >= 0 && refCelli < field.mesh().nCells() ? 1 : 0);
+
+    if (1 != returnReduce<label>(hasRef, sumOp<label>()))
+    {
+        FatalErrorInFunction
+            << "Invalid reference cellID " << refCelli
+            << ". Mesh has " << field.mesh().nCells() << ". cells."
+            << exit(FatalIOError);
+    }
+    scalar refCellValue = (hasRef ? field[refCelli] : 0.0);
+    #else
     scalar refCellValue = (refCelli >= 0 ? field[refCelli] : 0.0);
+    #endif
+
     return returnReduce(refCellValue, sumOp<scalar>());
 }
 
