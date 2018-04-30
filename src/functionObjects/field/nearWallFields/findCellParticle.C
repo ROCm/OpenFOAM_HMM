@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,7 +110,10 @@ bool Foam::findCellParticle::move
         trackToAndHitFace(f*(end_ - start_), f, cloud, td);
     }
 
-    if (stepFraction() == 1 || !td.keepParticle)
+    // Note: stepFraction is might not be exactly 1 so check for 1 or
+    // slightly larger
+
+    if (stepFraction() >= 1 || !td.keepParticle)
     {
         // Hit endpoint or patch. If patch hit could do fancy stuff but just
         // to use the patch point is good enough for now.
