@@ -82,6 +82,7 @@ foamAddCompletion()
             # echo "complete ${appName##*/}" 1>&2
         else
             echo "No completion added for $appName" 1>&2
+            echo "... incorrect platform, or not yet compiled?" 1>&2
         fi
     done
 }
