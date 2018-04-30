@@ -1226,7 +1226,9 @@ public:
                 const point& p
             );
 
-            static void findRegions
+            //- Find regions points are in.
+            //  \return number of cells to be removed
+            static label findRegions
             (
                 const polyMesh&,
                 const vector& perturbVec,

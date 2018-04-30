@@ -259,9 +259,9 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
         );
         wallDistCalc.iterate(nMedialAxisIter);
 
-        label nUnvisit = returnReduce
+        const label nUnvisit = returnReduce
         (
-            wallDistCalc.getUnsetPoints(),
+            wallDistCalc.nUnvisitedPoints(),
             sumOp<label>()
         );
 

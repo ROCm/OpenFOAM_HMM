@@ -420,7 +420,7 @@ template
     class TrackingData
 >
 Foam::label Foam::PatchEdgeFaceWave<PrimitivePatchType, Type, TrackingData>::
-getUnsetEdges() const
+nUnvisitedEdges() const
 {
     return nUnvisitedEdges_;
 }
@@ -433,7 +433,7 @@ template
     class TrackingData
 >
 Foam::label Foam::PatchEdgeFaceWave<PrimitivePatchType, Type, TrackingData>::
-getUnsetFaces() const
+nUnvisitedFaces() const
 {
     return nUnvisitedFaces_;
 }

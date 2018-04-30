@@ -226,14 +226,14 @@ public:
             return td_;
         }
 
-        //- Get number of unvisited faces, i.e. faces that were not (yet)
+        //- Number of unvisited faces, i.e. faces that were not (yet)
         //  reached from walking across patch. This can happen from
         //  - not enough iterations done
         //  - a disconnected patch
         //  - a patch without walls in it
-        label getUnsetFaces() const;
+        label nUnvisitedFaces() const;
 
-        label getUnsetEdges() const;
+        label nUnvisitedEdges() const;
 
         //- Copy initial data into allEdgeInfo_
         void setEdgeInfo

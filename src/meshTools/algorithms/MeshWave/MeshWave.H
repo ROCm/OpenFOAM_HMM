@@ -141,20 +141,20 @@ public:
             return calc_.iterate(maxIter);
         }
 
-        //- Get number of unvisited cells, i.e. cells that were not (yet)
+        //- Number of unvisited cells, i.e. cells that were not (yet)
         //  reached from walking across mesh. This can happen from
         //  - not enough iterations done
         //  - a disconnected mesh
         //  - a mesh without walls in it
-        label getUnsetCells() const
+        label nUnvisitedCells() const
         {
-            return calc_.getUnsetCells();
+            return calc_.nUnvisitedCells();
         }
 
-        //- Get number of unvisited faces
-        label getUnsetFaces() const
+        //- Number of unvisited faces
+        label nUnvisitedFaces() const
         {
-            return calc_.getUnsetFaces();
+            return calc_.nUnvisitedFaces();
         }
 };
 

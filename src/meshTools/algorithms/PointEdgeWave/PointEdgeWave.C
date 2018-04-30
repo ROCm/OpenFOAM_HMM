@@ -714,14 +714,14 @@ Foam::PointEdgeWave<Type, TrackingData>::~PointEdgeWave()
 
 
 template<class Type, class TrackingData>
-Foam::label Foam::PointEdgeWave<Type, TrackingData>::getUnsetPoints() const
+Foam::label Foam::PointEdgeWave<Type, TrackingData>::nUnvisitedPoints() const
 {
     return nUnvisitedPoints_;
 }
 
 
 template<class Type, class TrackingData>
-Foam::label Foam::PointEdgeWave<Type, TrackingData>::getUnsetEdges() const
+Foam::label Foam::PointEdgeWave<Type, TrackingData>::nUnvisitedEdges() const
 {
     return nUnvisitedEdges_;
 }
@@ -737,9 +737,9 @@ void Foam::PointEdgeWave<Type, TrackingData>::setPointInfo
 {
     forAll(changedPoints, changedPointi)
     {
-        label pointi = changedPoints[changedPointi];
+        const label pointi = changedPoints[changedPointi];
 
-        bool wasValid = allPointInfo_[pointi].valid(td_);
+        const bool wasValid = allPointInfo_[pointi].valid(td_);
 
         // Copy info for pointi
         allPointInfo_[pointi] = changedPointsInfo[changedPointi];
