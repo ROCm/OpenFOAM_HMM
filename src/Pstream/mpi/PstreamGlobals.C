@@ -25,49 +25,22 @@ License
 
 #include "PstreamGlobals.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// Outstanding non-blocking operations.
-//! \cond fileScope
-DynamicList<MPI_Request> PstreamGlobals::outstandingRequests_;
-//! \endcond
+Foam::DynamicList<MPI_Request> Foam::PstreamGlobals::outstandingRequests_;
 
-//// Max outstanding non-blocking operations.
-////! \cond fileScope
-//int PstreamGlobals::nRequests_ = 0;
-////! \endcond
+int Foam::PstreamGlobals::nTags_ = 0;
 
-// Free'd non-blocking operations.
-//! \cond fileScope
-//DynamicList<label> PstreamGlobals::freedRequests_;
-//! \endcond
+Foam::DynamicList<int> Foam::PstreamGlobals::freedTags_;
 
-// Max outstanding message tag operations.
-//! \cond fileScope
-int PstreamGlobals::nTags_ = 0;
-//! \endcond
-
-// Free'd message tags
-//! \cond fileScope
-DynamicList<int> PstreamGlobals::freedTags_;
-//! \endcond
+Foam::DynamicList<MPI_Comm> Foam::PstreamGlobals::MPICommunicators_;
+Foam::DynamicList<MPI_Group> Foam::PstreamGlobals::MPIGroups_;
 
 
-// Allocated communicators.
-//! \cond fileScope
-DynamicList<MPI_Comm> PstreamGlobals::MPICommunicators_;
-DynamicList<MPI_Group> PstreamGlobals::MPIGroups_;
-//! \endcond
-
-void PstreamGlobals::checkCommunicator
+void Foam::PstreamGlobals::checkCommunicator
 (
     const label comm,
-    const label otherProcNo
+    const label toProcNo
 )
 {
     if
@@ -77,16 +50,13 @@ void PstreamGlobals::checkCommunicator
     )
     {
         FatalErrorInFunction
-            << "otherProcNo:" << otherProcNo << " : illegal communicator "
-            << comm << endl
-            << "Communicator should be within range 0.."
-            << PstreamGlobals::MPICommunicators_.size()-1 << abort(FatalError);
+            << "toProcNo:" << toProcNo << " : illegal communicator "
+            << comm << nl
+            << "Communicator should be within range [0,"
+            << PstreamGlobals::MPICommunicators_.size()
+            << ')' << abort(FatalError);
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

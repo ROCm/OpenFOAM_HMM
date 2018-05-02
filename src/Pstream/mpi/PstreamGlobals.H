@@ -37,36 +37,30 @@ SourceFiles
 #define PstreamGlobals_H
 
 #include "DynamicList.H"
-
 #include <mpi.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-/*---------------------------------------------------------------------------*\
-                           Class PstreamGlobals Declaration
-\*---------------------------------------------------------------------------*/
-
 namespace PstreamGlobals
 {
 
+//- Outstanding non-blocking operations.
 extern DynamicList<MPI_Request> outstandingRequests_;
 
-//extern int nRequests_;
-//extern DynamicList<label> freedRequests_;
-
+//- Max outstanding message tag operations.
 extern int nTags_;
 
+//- Free'd message tags
 extern DynamicList<int> freedTags_;
-
 
 // Current communicators. First element will be MPI_COMM_WORLD
 extern DynamicList<MPI_Comm> MPICommunicators_;
 extern DynamicList<MPI_Group> MPIGroups_;
 
-void checkCommunicator(const label, const label procNo);
+
+void checkCommunicator(const label comm, const label toProcNo);
 
 };
 

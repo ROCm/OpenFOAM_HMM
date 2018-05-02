@@ -27,11 +27,7 @@ License
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
-namespace Foam
-{
-
-    DynamicList<char> PstreamBuffers::nullBuf(0);
-}
+Foam::DynamicList<char> Foam::PstreamBuffers::nullBuf(0);
 
 
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
@@ -52,7 +48,7 @@ Foam::PstreamBuffers::PstreamBuffers
     version_(version),
     sendBuf_(UPstream::nProcs(comm)),
     recvBuf_(UPstream::nProcs(comm)),
-    recvBufPos_(UPstream::nProcs(comm),  0),
+    recvBufPos_(UPstream::nProcs(comm), 0),
     finishedSendsCalled_(false)
 {}
 
@@ -131,13 +127,13 @@ void Foam::PstreamBuffers::finishedSends(labelList& recvSizes, const bool block)
 
 void Foam::PstreamBuffers::clear()
 {
-    forAll(sendBuf_, i)
+    for (DynamicList<char>& buf : sendBuf_)
     {
-        sendBuf_[i].clear();
+        buf.clear();
     }
-    forAll(recvBuf_, i)
+    for (DynamicList<char>& buf : recvBuf_)
     {
-        recvBuf_[i].clear();
+        buf.clear();
     }
     recvBufPos_ = 0;
     finishedSendsCalled_ = false;

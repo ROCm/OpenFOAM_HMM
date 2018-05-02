@@ -34,30 +34,31 @@ Description
     explicit buffers.
 
     Example usage:
+    \code
+        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
-        PstreamBuffers pBuffers(Pstream::commsTypes::nonBlocking);
-
-        for (label proci = 0; proci < Pstream::nProcs(); proci++)
+        for (label proci = 0; proci < Pstream::nProcs(); ++proci)
         {
             if (proci != Pstream::myProcNo())
             {
                 someObject vals;
 
-                UOPstream str(proci, pBuffers);
-                str << vals;
+                UOPstream send(proci, pBufs);
+                send << vals;
             }
         }
 
-        pBuffers.finishedSends();   // no-op for blocking
+        pBufs.finishedSends();   // no-op for blocking
 
-        for (label proci = 0; proci < Pstream::nProcs(); proci++)
+        for (label proci = 0; proci < Pstream::nProcs(); ++proci)
         {
             if (proci != Pstream::myProcNo())
             {
-                UIPstream str(proci, pBuffers);
-                someObject vals(str);
+                UIPstream recv(proci, pBufs);
+                someObject vals(recv);
             }
         }
+    \endcode
 
 
 SourceFiles

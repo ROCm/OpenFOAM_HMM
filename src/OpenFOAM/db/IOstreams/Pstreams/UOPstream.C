@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,8 +53,8 @@ inline void Foam::UOPstream::prepareBuffer
     // Extend buffer (as required)
     sendBuf_.reserve(max(1000, label(pos + count)));
 
-    // Move to the aligned output position
-    sendBuf_.setSize(pos);
+    // Move to the aligned output position. Fill any gap with nul char.
+    sendBuf_.resize(pos, '\0');
 }
 
 
@@ -93,7 +93,7 @@ inline void Foam::UOPstream::writeToBuffer
     const label pos = sendBuf_.size();
 
     // Extend the addressable range for direct pointer access
-    sendBuf_.setSize(pos + count);
+    sendBuf_.resize(pos + count);
 
     char* const __restrict__ buf = (sendBuf_.begin() + pos);
     const char* const __restrict__ input = reinterpret_cast<const char*>(data);

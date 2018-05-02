@@ -212,7 +212,7 @@ void Foam::Pstream::exchange
         // Presize all receive buffers
         forAll(recvSizes, proci)
         {
-            label nRecv = recvSizes[proci];
+            const label nRecv = recvSizes[proci];
 
             if (proci != Pstream::myProcNo(comm) && nRecv > 0)
             {
