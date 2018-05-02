@@ -23,6 +23,53 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+inline Foam::label Foam::bitSet::first_not_block() const
+{
+    if (empty())
+    {
+        return -1;
+    }
+
+    // Use complement to change 0 <-> 1 and check if any 1's now appear
+
+    const label nblocks = num_blocks(size());
+
+    // Extra bits in the final block?
+    const unsigned int off = size() % elem_per_block;
+
+    if (!off)
+    {
+        for (label blocki=0; blocki < nblocks; ++blocki)
+        {
+            if (~(blocks_[blocki]))
+            {
+                return blocki;
+            }
+        }
+    }
+    else
+    {
+        for (label blocki=0; blocki < nblocks-1; ++blocki)
+        {
+            if (~(blocks_[blocki]))
+            {
+                return blocki;
+            }
+        }
+
+        // The final block needs masking
+        if (~(blocks_[nblocks-1]) & mask_lower(off))
+        {
+            return nblocks-1;
+        }
+    }
+
+    return -1;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline constexpr Foam::bitSet::bitSet() noexcept
@@ -257,6 +304,38 @@ inline Foam::label Foam::bitSet::find_first() const
 }
 
 
+inline Foam::label Foam::bitSet::find_first_not() const
+{
+    const label blocki = first_not_block();
+
+    if (blocki >= 0)
+    {
+        label pos = (blocki * elem_per_block);
+
+        // Detect first '0' bit by checking the complement.
+
+        // No special masking for the final block, that was already checked
+        // in the first_not_block() call.
+
+        for
+        (
+            unsigned int blockval = ~(blocks_[blocki]);
+            blockval;
+            blockval >>= 1u
+        )
+        {
+            if (blockval & 1u)
+            {
+                return pos;
+            }
+            ++pos;
+        }
+    }
+
+    return -1;
+}
+
+
 inline Foam::label Foam::bitSet::find_last() const
 {
     // Process block-wise, detecting any '1' bits
@@ -339,44 +418,7 @@ inline Foam::label Foam::bitSet::find_next(label pos) const
 
 inline bool Foam::bitSet::all() const
 {
-    if (empty())
-    {
-        return true;
-    }
-
-    // Use complement to change 0 <-> 1 and check if any 1's now appear
-
-    const label nblocks = num_blocks(size());
-
-    // Extra bits in the final block?
-    const unsigned int off = size() % elem_per_block;
-
-    if (!off)
-    {
-        for (label blocki=0; blocki < nblocks; ++blocki)
-        {
-            if (~(blocks_[blocki]))
-            {
-                return false;
-            }
-        }
-    }
-    else
-    {
-        for (label blocki=0; blocki < nblocks-1; ++blocki)
-        {
-            if (~(blocks_[blocki]))
-            {
-                return false;
-            }
-        }
-
-        // Verify the final block, with masking
-
-        return (!(~blocks_[nblocks-1] & mask_lower(off)));
-    }
-
-    return true;
+    return -1 == first_not_block();
 }
 
 
@@ -388,7 +430,10 @@ inline bool Foam::bitSet::any() const
 
         for (label blocki=0; blocki < nblocks; ++blocki)
         {
-            if (blocks_[blocki]) return true;
+            if (blocks_[blocki])
+            {
+                return true;
+            }
         }
     }
 
@@ -421,7 +466,7 @@ inline unsigned int Foam::bitSet::count(const bool on) const
 
     if (!on)
     {
-        // Return the number of bits that are off.
+        // Return the number of bits that are OFF.
         return (unsigned(size()) - total);
     }
 

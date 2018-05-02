@@ -40,12 +40,19 @@ Description
 
 using namespace Foam;
 
-inline Ostream& report
-(
-    const bitSet& bitset,
-    bool showBits = false,
-    bool debugOutput = false
-)
+
+inline Ostream& extent(const bitSet& bitset)
+{
+    Info<< "first: " << bitset.find_first()
+        << " last: " << bitset.find_last()
+        << " first_not: " << bitset.find_first_not()
+        << endl;
+
+    return Info;
+}
+
+
+inline Ostream& info(const bitSet& bitset)
 {
     Info<< "size=" << bitset.size() << "/" << bitset.capacity()
         << " count=" << bitset.count()
@@ -53,6 +60,32 @@ inline Ostream& report
         << " all:" << bitset.all()
         << " any:" << bitset.any()
         << " none:" << bitset.none() << nl;
+
+    return Info;
+}
+
+
+inline Ostream& info(const UList<bool>& bools)
+{
+    Info<< "size=" << bools.size()
+        << " count=" << BitOps::count(bools)
+        << " !count=" << BitOps::count(bools, false)
+        << " all:" << BitOps::all(bools)
+        << " any:" << BitOps::any(bools)
+        << " none:" << BitOps::none(bools) << nl;
+
+    return Info;
+}
+
+
+inline Ostream& report
+(
+    const bitSet& bitset,
+    bool showBits = false,
+    bool debugOutput = false
+)
+{
+    info(bitset);
 
     Info<< "values: " << flatOutput(bitset) << nl;
     if (showBits)
@@ -66,14 +99,7 @@ inline Ostream& report
 
 inline Ostream& report(const UList<bool>& bools)
 {
-    Info<< "size=" << bools.size()
-        << " count=" << BitOps::count(bools)
-        << " !count=" << BitOps::count(bools, false)
-        << " all:" << BitOps::all(bools)
-        << " any:" << BitOps::any(bools)
-        << " none:" << BitOps::none(bools) << nl;
-
-    return Info;
+    return info(bools);
 }
 
 
@@ -153,10 +179,7 @@ int main(int argc, char *argv[])
     compare(list1, "...................1..1..1..1..1");
 
     report(list1, true);
-
-
-    Info<< "first: " << list1.find_first()
-        << " last: " << list1.find_last() << endl;
+    extent(list1);
 
     Info<< "iterate through:";
     for (const label idx : list1)
@@ -172,6 +195,21 @@ int main(int argc, char *argv[])
 
     Info<< "\nflipped bit pattern\n";
     report(list2, true);
+    extent(list2);
+
+    Info<< "\nsparse set\n";
+    {
+        bitSet sparse(1000);
+        sparse.set(300);
+
+        info(sparse);
+        extent(sparse);
+
+        sparse.set(0);
+
+        info(sparse);
+        extent(sparse);
+    }
 
     // set every other on
     forAll(list2, i)

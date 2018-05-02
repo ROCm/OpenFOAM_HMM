@@ -65,6 +65,15 @@ class bitSet
 :
     public PackedList<1>
 {
+private:
+
+    // Private Member Functions
+
+        //- Find the first block with a '0' bit
+        //  \return block number or -1 if the set is empty or all bits are on.
+        inline label first_not_block() const;
+
+
 protected:
 
     // Protected Member Functions
@@ -203,11 +212,17 @@ public:
         //  \note Method name compatibility with std::bitset
         inline bool test(const label pos) const;
 
-        //- Locate the first bit set.
+        //- Locate the first bit that is set.
         //  \return the location or -1 if there are no bits set.
         //
         //  \note Method name compatibility with boost::dynamic_bitset
         inline label find_first() const;
+
+        //- Locate the first bit that is unset.
+        //  \return the location or -1 if the set is empty or all bits are on.
+        //
+        //  \note Provided for symmetry with find_first()
+        inline label find_first_not() const;
 
         //- Locate the last bit set.
         //  \return the location or -1 if there are no bits set.
