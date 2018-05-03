@@ -185,16 +185,16 @@ void Foam::fft::transform
     const label N = field.size();
     fftw_complex in[N], out[N];
 
+    // If reverse transform : renumber before transform
+    if (dir == REVERSE_TRANSFORM)
+    {
+        fftRenumber(field, nn);
+    }
+
     forAll(field, i)
     {
         in[i][0] = field[i].Re();
         in[i][1] = field[i].Im();
-    }
-
-    // If backward transform : renumber before transform
-    if (dir == FFTW_BACKWARD)
-    {
-        fftRenumber(field, nn);
     }
 
     // Create the plan
