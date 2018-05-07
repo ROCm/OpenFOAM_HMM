@@ -510,19 +510,6 @@ public:
             return *this;
         }
 
-        friend Ostream& operator<<
-        (
-            Ostream& os,
-            const InfoProxy<bitSet>& info
-        );
-
-        friend Ostream& operator<<
-        (
-            Ostream& os,
-            const bitSet& bitset
-        );
-
-
     // Housekeeping
 
         //- Identical to toc()
@@ -533,6 +520,10 @@ public:
 
 
 // Global Operators
+//
+Ostream& operator<<(Ostream& os, const InfoProxy<bitSet>& info);
+Ostream& operator<<(Ostream& os, const bitSet& bitset);
+
 
 //- Bitwise-AND of two bitsets.
 //  See bitSet::operator&= for more details.

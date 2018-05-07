@@ -197,7 +197,6 @@ inline void Foam::PtrDynList<T, SizeMin>::shrink()
         PtrList<T>::resize(capacity_);
         PtrList<T>::size(nextFree);
     }
-    return *this;
 }
 
 

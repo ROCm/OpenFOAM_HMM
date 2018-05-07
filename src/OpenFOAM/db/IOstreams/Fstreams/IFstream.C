@@ -170,7 +170,7 @@ void Foam::IFstream::rewind()
     {
         gzPtr = dynamic_cast<igzstream*>(allocatedPtr_);
     }
-    catch (std::bad_cast)
+    catch (std::bad_cast&)
     {
         gzPtr = nullptr;
     }

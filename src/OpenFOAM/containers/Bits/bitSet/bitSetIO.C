@@ -107,7 +107,7 @@ void Foam::bitSet::writeEntry
 }
 
 
-// * * * * * * * * * * * * * *  Friend Operators * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Ostream Operators * * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const bitSet& bitset)
 {

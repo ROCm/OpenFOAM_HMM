@@ -55,6 +55,8 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 class faMesh;
+class faBoundaryMesh;
+Ostream& operator<<(Ostream&, const faBoundaryMesh&);
 
 /*---------------------------------------------------------------------------*\
                       Class faBoundaryMesh Declaration

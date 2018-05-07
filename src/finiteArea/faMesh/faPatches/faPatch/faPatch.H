@@ -56,6 +56,8 @@ namespace Foam
 {
 
 class faBoundaryMesh;
+class faPatch;
+Ostream& operator<<(Ostream&, const faPatch&);
 
 /*---------------------------------------------------------------------------*\
                            Class faPatch Declaration
@@ -91,10 +93,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow construct as copy
+        //- No copy construct
         faPatch(const faPatch&) = delete;
 
-        //- Disallow assignment
+        //- No copy assignment
         void operator=(const faPatch&) = delete;
 
 

@@ -149,8 +149,8 @@ private:
         //- Construct reaction thermo
         void setThermo(const HashPtrTable<ReactionThermo>& thermoDatabase);
 
-        //- Disallow default bitwise assignment
-        void operator=(const Reaction<ReactionThermo>&);
+        //- No copy assignment
+        void operator=(const Reaction<ReactionThermo>&) = delete;
 
         //- Return new reaction ID for un-named reactions
         label getNewReactionID();
@@ -244,7 +244,6 @@ public:
 
         // Access
 
-            inline word& name();
             inline const word& name() const;
 
             // - Access to basic components of the reaction

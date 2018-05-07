@@ -104,11 +104,12 @@ class loopControl
         //- Execute specified function names
         bool checkConverged() const;
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         loopControl(const loopControl&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const loopControl&) = delete;
+
 
 protected:
 
@@ -206,17 +207,14 @@ public:
         //      }
         //  \endcode
         bool loop();
-
-
-    // IOstream operators
-
-        //- Write name and state (on/off, index/total) to Ostream
-        friend Ostream& operator<<(Ostream& os, const loopControl& ctrl);
-
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Write name and state (on/off, index/total) to Ostream
+Ostream& operator<<(Ostream& os, const loopControl& ctrl);
+
 
 } // End namespace Foam
 
