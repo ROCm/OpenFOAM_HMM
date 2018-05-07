@@ -57,7 +57,7 @@ setenv FOAM_INST_DIR `lsof +p $$ |& \
 setenv WM_COMPILER_TYPE system
 
 # [WM_COMPILER] - Compiler:
-# = Gcc | Gcc4[8-9] | Gcc5[1-5] | Gcc6[1-4] | Gcc7[1-3] | GccKNL |
+# = Gcc | Gcc4[8-9] | Gcc5[1-5] | Gcc6[1-4] | Gcc7[1-3] | Gcc8[1] | GccKNL |
 #   Clang | Clang3[8-9] | Clang[4-6]0 | Icc | IccKNL | Cray | Arm
 setenv WM_COMPILER Gcc
 
