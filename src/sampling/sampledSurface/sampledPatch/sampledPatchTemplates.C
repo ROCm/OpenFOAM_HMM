@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,19 +29,23 @@ License
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::sampledPatch::sampleField
+Foam::sampledPatch::sampleOnFaces
 (
-    const GeometricField<Type, fvPatchField, volMesh>& vField
+    const interpolation<Type>& sampler
 ) const
 {
+    const auto& vField = sampler.psi();
+
     // One value per face
-    tmp<Field<Type>> tvalues(new Field<Type>(patchFaceLabels_.size()));
-    Field<Type>& values = tvalues.ref();
+    auto tvalues = tmp<Field<Type>>::New(patchFaceLabels_.size());
+    auto& values = tvalues.ref();
+
     forAll(patchFaceLabels_, i)
     {
-        label patchi = patchIDs_[patchIndex_[i]];
-        const Field<Type>& bField = vField.boundaryField()[patchi];
-        values[i] = bField[patchFaceLabels_[i]];
+        const label patchi = patchIDs_[patchIndex_[i]];
+        const label patchFacei = patchFaceLabels_[i];
+
+        values[i] = vField.boundaryField()[patchi][patchFacei];
     }
 
     return tvalues;
@@ -50,19 +54,21 @@ Foam::sampledPatch::sampleField
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::sampledPatch::sampleField
+Foam::sampledPatch::sampleOnFaces
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& sField
 ) const
 {
     // One value per face
-    tmp<Field<Type>> tvalues(new Field<Type>(patchFaceLabels_.size()));
-    Field<Type>& values = tvalues.ref();
+    auto tvalues = tmp<Field<Type>>::New(patchFaceLabels_.size());
+    auto& values = tvalues.ref();
 
     forAll(patchFaceLabels_, i)
     {
-        label patchi = patchIDs_[patchIndex_[i]];
-        values[i] = sField.boundaryField()[patchi][patchFaceLabels_[i]];
+        const label patchi = patchIDs_[patchIndex_[i]];
+        const label patchFacei = patchFaceLabels_[i];
+
+        values[i] = sField.boundaryField()[patchi][patchFacei];
     }
 
     return tvalues;
@@ -71,34 +77,32 @@ Foam::sampledPatch::sampleField
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::sampledPatch::interpolateField
+Foam::sampledPatch::sampleOnPoints
 (
     const interpolation<Type>& interpolator
 ) const
 {
     // One value per vertex
-    tmp<Field<Type>> tvalues(new Field<Type>(points().size()));
-    Field<Type>& values = tvalues.ref();
+    auto tvalues = tmp<Field<Type>>::New(points().size());
+    auto& values = tvalues.ref();
 
     const labelList& own = mesh().faceOwner();
 
-    boolList pointDone(points().size(), false);
+    bitSet pointDone(points().size());
 
     forAll(faces(), cutFacei)
     {
-        label patchi = patchIDs_[patchIndex_[cutFacei]];
+        const label patchi = patchIDs_[patchIndex_[cutFacei]];
         const polyPatch& pp = mesh().boundaryMesh()[patchi];
-        label patchFacei = patchFaceLabels()[cutFacei];
+        const label patchFacei = patchFaceLabels()[cutFacei];
         const face& f = faces()[cutFacei];
 
-        forAll(f, faceVertI)
+        for (const label pointi : f)
         {
-            label pointi = f[faceVertI];
-
-            if (!pointDone[pointi])
+            if (pointDone.set(pointi))
             {
-                label facei = patchFacei + pp.start();
-                label celli = own[facei];
+                const label facei = patchFacei + pp.start();
+                const label celli = own[facei];
 
                 values[pointi] = interpolator.interpolate
                 (
@@ -106,7 +110,6 @@ Foam::sampledPatch::interpolateField
                     celli,
                     facei
                 );
-                pointDone[pointi] = true;
             }
         }
     }

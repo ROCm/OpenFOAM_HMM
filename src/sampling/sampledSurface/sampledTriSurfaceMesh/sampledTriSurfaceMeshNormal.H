@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,6 +30,34 @@ Description
 
     Returns a vector field with the value in the first component and sets
     the other two to zero.
+
+    This is often embedded as part of a sampled surfaces function object.
+
+Usage
+    Example of function object partial specification:
+    \verbatim
+    surfaces
+    (
+        surface1
+        {
+            type    sampledTriSurfaceMeshNormal;
+            surface something.obj;
+            source  cells;
+        }
+    );
+    \endverbatim
+
+    Where the sub-entries comprise:
+    \table
+        Property | Description                             | Required | Default
+        type     | sampledTriSurfaceMeshNormal             | yes      |
+        surface  | surface name in triSurface/             | yes      |
+        source   | cells/insideCells/boundaryFaces         | yes      |
+        keepIds  | pass through id numbering               | no       | false
+    \endtable
+
+SeeAlso
+    Foam::sampledTriSurfaceMesh
 
 SourceFiles
     sampledTriSurfaceMeshNormal.C
@@ -91,97 +119,102 @@ public:
 
 
     //- Destructor
-    virtual ~sampledTriSurfaceMeshNormal();
+    virtual ~sampledTriSurfaceMeshNormal() = default;
 
 
     // Member Functions
 
-        //- Sample field on surface
+    // Sample
+
+        //- Sample volume field onto surface faces
         virtual tmp<scalarField> sample
         (
-            const volScalarField&
+            const interpolation<scalar>& sampler
         ) const
         {
             NotImplemented;
             return nullptr;
         }
 
-        //- Sample field on surface
+        //- Sample volume field onto surface faces
         virtual tmp<vectorField> sample
         (
-            const volVectorField&
+            const interpolation<vector>& sampler
         ) const;
 
-        //- Sample field on surface
+        //- Sample volume field onto surface faces
         virtual tmp<sphericalTensorField> sample
         (
-            const volSphericalTensorField&
+            const interpolation<sphericalTensor>& sampler
         ) const
         {
             NotImplemented;
             return nullptr;
         }
 
-        //- Sample field on surface
+        //- Sample volume field onto surface faces
         virtual tmp<symmTensorField> sample
         (
-            const volSymmTensorField&
+            const interpolation<symmTensor>& sampler
         ) const
         {
             NotImplemented;
             return nullptr;
         }
 
-        //- Sample field on surface
+        //- Sample volume field onto surface faces
         virtual tmp<tensorField> sample
         (
-            const volTensorField&
+            const interpolation<tensor>& sampler
         ) const
         {
             NotImplemented;
             return nullptr;
         }
 
-        //- Interpolate field on surface
+
+    // Interpolate
+
+        //- Interpolate volume field onto surface points
         virtual tmp<scalarField> interpolate
         (
-            const interpolation<scalar>&
+            const interpolation<scalar>& interpolator
         ) const
         {
             NotImplemented;
             return nullptr;
         }
 
-        //- Interpolate field on surface
+        //- Interpolate volume field onto surface points
         virtual tmp<vectorField> interpolate
         (
-            const interpolation<vector>&
+            const interpolation<vector>& interpolator
         ) const;
 
-        //- Interpolate field on surface
+        //- Interpolate volume field onto surface points
         virtual tmp<sphericalTensorField> interpolate
         (
-            const interpolation<sphericalTensor>&
+            const interpolation<sphericalTensor>& interpolator
         ) const
         {
             NotImplemented;
             return nullptr;
         }
 
-        //- Interpolate field on surface
+        //- Interpolate volume field onto surface points
         virtual tmp<symmTensorField> interpolate
         (
-            const interpolation<symmTensor>&
+            const interpolation<symmTensor>& interpolator
         ) const
         {
             NotImplemented;
             return nullptr;
         }
 
-        //- Interpolate field on surface
+        //- Interpolate volume field onto surface points
         virtual tmp<tensorField> interpolate
         (
-            const interpolation<tensor>&
+            const interpolation<tensor>& interpolator
         ) const
         {
             NotImplemented;

@@ -214,8 +214,7 @@ Foam::label Foam::probes::prepare()
         {
             probeDir = mesh_.time().path()/probeSubDir;
         }
-        // Remove ".."
-        probeDir.clean();
+        probeDir.clean();  // Remove unneeded ".."
 
         // ignore known fields, close streams for fields that no longer exist
         forAllIter(HashPtrTable<OFstream>, probeFilePtrs_, iter)

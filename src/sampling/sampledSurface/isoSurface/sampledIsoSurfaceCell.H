@@ -29,6 +29,33 @@ Description
     To be used in sampleSurfaces / functionObjects. Recalculates iso surface
     only if time changes.
 
+    This is often embedded as part of a sampled surfaces function object.
+
+Usage
+    Example of function object partial specification:
+    \verbatim
+    surfaces
+    (
+        surface1
+        {
+            type    sampledIsoSurfaceCell;
+            cell    true;
+        }
+    );
+    \endverbatim
+
+    Where the sub-entries comprise:
+    \table
+        Property | Description                             | Required | Default
+        type     | sampledIsoSurfaceCell                   | yes      |
+        isoField | field name for obtaining iso-surface    | yes      |
+        isoValue | value of iso-surface                    | yes      |
+        mergeTol | tolerance for merging points            | no       | 1e-6
+        regularise | point snapping                        | yes      |
+        average  | cell values from averaged point values  | no       | false
+        bounds   | limit with bounding box                 | no       |
+    \endtable
+
 SourceFiles
     sampledIsoSurfaceCell.C
 
@@ -79,13 +106,13 @@ class sampledIsoSurfaceCell
         keyType zoneKey_;
 
 
-        // Recreated for every isoSurface
+    // Recreated for every isoSurface
 
-            //- Time at last call, also track it surface needs an update
-            mutable label prevTimeIndex_;
+        //- Time at last call, also track it surface needs an update
+        mutable label prevTimeIndex_;
 
-            //- For every triangle the original cell in mesh
-            mutable labelList meshCells_;
+        //- For every triangle the original cell in mesh
+        mutable labelList meshCells_;
 
 
     // Private Member Functions
@@ -94,17 +121,19 @@ class sampledIsoSurfaceCell
         //  Do nothing (and return false) if no update was needed
         bool updateGeometry() const;
 
-        //- Sample field on faces
+        //- Sample volume field onto surface faces
         template<class Type>
-        tmp<Field<Type>> sampleField
+        tmp<Field<Type>> sampleOnFaces
         (
-            const GeometricField<Type, fvPatchField, volMesh>& vField
+            const interpolation<Type>& sampler
         ) const;
 
-
+        //- Interpolate volume field onto surface points
         template<class Type>
-        tmp<Field<Type>>
-        interpolateField(const interpolation<Type>&) const;
+        tmp<Field<Type>> sampleOnPoints
+        (
+            const interpolation<Type>& interpolator
+        ) const;
 
 
 public:
@@ -180,65 +209,69 @@ public:
         }
 
 
-        //- Sample field on surface
+    // Sample
+
+        //- Sample volume field onto surface faces
         virtual tmp<scalarField> sample
         (
-            const volScalarField&
+            const interpolation<scalar>& sampler
         ) const;
 
-        //- Sample field on surface
+        //- Sample volume field onto surface faces
         virtual tmp<vectorField> sample
         (
-            const volVectorField&
+            const interpolation<vector>& sampler
         ) const;
 
-        //- Sample field on surface
+        //- Sample volume field onto surface faces
         virtual tmp<sphericalTensorField> sample
         (
-            const volSphericalTensorField&
+            const interpolation<sphericalTensor>& sampler
         ) const;
 
-        //- Sample field on surface
+        //- Sample volume field onto surface faces
         virtual tmp<symmTensorField> sample
         (
-            const volSymmTensorField&
+            const interpolation<symmTensor>& sampler
         ) const;
 
-        //- Sample field on surface
+        //- Sample volume field onto surface faces
         virtual tmp<tensorField> sample
         (
-            const volTensorField&
+            const interpolation<tensor>& sampler
         ) const;
 
 
-        //- Interpolate field on surface
+    // Interpolate
+
+        //- Interpolate volume field onto surface points
         virtual tmp<scalarField> interpolate
         (
-            const interpolation<scalar>&
+            const interpolation<scalar>& interpolator
         ) const;
 
-        //- Interpolate field on surface
+        //- Interpolate volume field onto surface points
         virtual tmp<vectorField> interpolate
         (
-            const interpolation<vector>&
+            const interpolation<vector>& interpolator
         ) const;
 
-        //- Interpolate field on surface
+        //- Interpolate volume field onto surface points
         virtual tmp<sphericalTensorField> interpolate
         (
-            const interpolation<sphericalTensor>&
+            const interpolation<sphericalTensor>& interpolator
         ) const;
 
-        //- Interpolate field on surface
+        //- Interpolate volume field onto surface points
         virtual tmp<symmTensorField> interpolate
         (
-            const interpolation<symmTensor>&
+            const interpolation<symmTensor>& interpolator
         ) const;
 
-        //- Interpolate field on surface
+        //- Interpolate volume field onto surface points
         virtual tmp<tensorField> interpolate
         (
-            const interpolation<tensor>&
+            const interpolation<tensor>& interpolator
         ) const;
 
         //- Write

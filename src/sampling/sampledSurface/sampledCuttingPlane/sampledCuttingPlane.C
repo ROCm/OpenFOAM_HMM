@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -386,50 +386,50 @@ bool Foam::sampledCuttingPlane::update()
 Foam::tmp<Foam::scalarField>
 Foam::sampledCuttingPlane::sample
 (
-    const volScalarField& vField
+    const interpolation<scalar>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::vectorField>
 Foam::sampledCuttingPlane::sample
 (
-    const volVectorField& vField
+    const interpolation<vector>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::sphericalTensorField>
 Foam::sampledCuttingPlane::sample
 (
-    const volSphericalTensorField& vField
+    const interpolation<sphericalTensor>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::symmTensorField>
 Foam::sampledCuttingPlane::sample
 (
-    const volSymmTensorField& vField
+    const interpolation<symmTensor>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::tensorField>
 Foam::sampledCuttingPlane::sample
 (
-    const volTensorField& vField
+    const interpolation<tensor>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
@@ -439,7 +439,7 @@ Foam::sampledCuttingPlane::interpolate
     const interpolation<scalar>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 
@@ -449,8 +449,9 @@ Foam::sampledCuttingPlane::interpolate
     const interpolation<vector>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
+
 
 Foam::tmp<Foam::sphericalTensorField>
 Foam::sampledCuttingPlane::interpolate
@@ -458,7 +459,7 @@ Foam::sampledCuttingPlane::interpolate
     const interpolation<sphericalTensor>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 
@@ -468,7 +469,7 @@ Foam::sampledCuttingPlane::interpolate
     const interpolation<symmTensor>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 
@@ -478,7 +479,7 @@ Foam::sampledCuttingPlane::interpolate
     const interpolation<tensor>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 

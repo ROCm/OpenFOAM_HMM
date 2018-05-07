@@ -87,9 +87,8 @@ void Foam::sampledTriSurfaceMesh::setZoneMap
 )
 {
     label sz = 0;
-    forAll(zoneLst, zonei)
+    for (const surfZone& zn : zoneLst)
     {
-        const surfZone& zn = zoneLst[zonei];
         sz += zn.size();
     }
 
@@ -119,9 +118,8 @@ Foam::sampledTriSurfaceMesh::nonCoupledboundaryTree() const
 
         labelList bndFaces(mesh().nFaces()-mesh().nInternalFaces());
         label bndI = 0;
-        forAll(patches, patchi)
+        for (const polyPatch& pp : patches)
         {
-            const polyPatch& pp = patches[patchi];
             if (!pp.coupled())
             {
                 forAll(pp, i)
@@ -174,10 +172,10 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
     // elements
     globalIndex globalCells(onBoundary() ? mesh().nFaces() : mesh().nCells());
 
-    forAll(nearest, i)
+    for (nearInfo& near : nearest)
     {
-        nearest[i].first()  = GREAT;
-        nearest[i].second() = labelMax;
+        near.first()  = GREAT;
+        near.second() = labelMax;
     }
 
     if (sampleSource_ == cells)
@@ -333,20 +331,16 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
                 const triSurface::FaceType& f = s[facei];
                 const label regionid = f.region();
 
-                Map<label>::iterator fnd = zoneSizes.find(regionid);
-                if (fnd != zoneSizes.end())
+                auto fnd = zoneSizes.find(regionid);
+                if (fnd.found())
                 {
-                    fnd()++;
+                    ++(*fnd);
                 }
                 else
                 {
                     // This shouldn't happen
                     zoneSizes.insert(regionid, 1);
-                    zoneNames.set
-                    (
-                        regionid,
-                        word::printf("patch%d", regionid)
-                    );
+                    zoneNames.set(regionid, word::printf("patch%d", regionid));
                 }
 
                 // Store new faces compact
@@ -355,14 +349,12 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
                 ++newFacei;
 
                 // Renumber face points
-                forAll(f, fp)
+                for (const label labi : f)
                 {
-                    const label labI = f[fp];
-
-                    if (reversePointMap[labI] == -1)
+                    if (reversePointMap[labi] == -1)
                     {
-                        pointMap[newPointi] = labI;
-                        reversePointMap[labI] = newPointi++;
+                        pointMap[newPointi] = labi;
+                        reversePointMap[labi] = newPointi++;
                     }
                 }
             }
@@ -380,16 +372,16 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
     surfZoneList zoneLst(zoneSizes.size());
     label start = 0;
     label zoneI = 0;
-    forAllIter(Map<label>, zoneSizes, iter)
+    forAllIters(zoneSizes, iter)
     {
-        // No negative regionids, so Map<label> sorts properly
+        // No negative regionids, so Map<label> usually sorts properly
         const label regionid = iter.key();
 
         word name;
-        Map<word>::const_iterator fnd = zoneNames.find(regionid);
-        if (fnd != zoneNames.end())
+        auto fnd = zoneNames.cfind(regionid);
+        if (fnd.found())
         {
-            name = fnd();
+            name = *fnd;
         }
         if (name.empty())
         {
@@ -420,7 +412,7 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
 
     forAll(zoneIds_, facei)
     {
-        label zonei = zoneIds_[facei];
+        const label zonei = zoneIds_[facei];
         label sortedFacei = zoneLst[zonei].start() + zoneLst[zonei].size()++;
         sortedFaceMap[sortedFacei] = faceMap[facei];
     }
@@ -460,9 +452,9 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
             reversePointMap[origF[2]]
         );
 
-        forAll(f, fp)
+        for (const label labi : f)
         {
-            pointToFace[f[fp]] = facei;
+            pointToFace[labi] = facei;
         }
     }
 
@@ -658,8 +650,8 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
     keepIds_(false),
     originalIds_(),
     zoneIds_(),
-    sampleElements_(0),
-    samplePoints_(0)
+    sampleElements_(),
+    samplePoints_()
 {}
 
 
@@ -691,8 +683,8 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
     keepIds_(dict.lookupOrDefault("keepIds", false)),
     originalIds_(),
     zoneIds_(),
-    sampleElements_(0),
-    samplePoints_(0)
+    sampleElements_(),
+    samplePoints_()
 {}
 
 
@@ -725,8 +717,8 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
     keepIds_(false),
     originalIds_(),
     zoneIds_(),
-    sampleElements_(0),
-    samplePoints_(0)
+    sampleElements_(),
+    samplePoints_()
 {}
 
 
@@ -832,45 +824,46 @@ bool Foam::sampledTriSurfaceMesh::update(const treeBoundBox& bb)
 
 Foam::tmp<Foam::scalarField> Foam::sampledTriSurfaceMesh::sample
 (
-    const volScalarField& vField
+    const interpolation<scalar>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::vectorField> Foam::sampledTriSurfaceMesh::sample
 (
-    const volVectorField& vField
+    const interpolation<vector>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
+
 
 Foam::tmp<Foam::sphericalTensorField> Foam::sampledTriSurfaceMesh::sample
 (
-    const volSphericalTensorField& vField
+    const interpolation<sphericalTensor>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::symmTensorField> Foam::sampledTriSurfaceMesh::sample
 (
-    const volSymmTensorField& vField
+    const interpolation<symmTensor>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::tensorField> Foam::sampledTriSurfaceMesh::sample
 (
-    const volTensorField& vField
+    const interpolation<tensor>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
@@ -879,7 +872,7 @@ Foam::tmp<Foam::scalarField> Foam::sampledTriSurfaceMesh::interpolate
     const interpolation<scalar>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 
@@ -888,7 +881,7 @@ Foam::tmp<Foam::vectorField> Foam::sampledTriSurfaceMesh::interpolate
     const interpolation<vector>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 Foam::tmp<Foam::sphericalTensorField> Foam::sampledTriSurfaceMesh::interpolate
@@ -896,7 +889,7 @@ Foam::tmp<Foam::sphericalTensorField> Foam::sampledTriSurfaceMesh::interpolate
     const interpolation<sphericalTensor>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 
@@ -905,7 +898,7 @@ Foam::tmp<Foam::symmTensorField> Foam::sampledTriSurfaceMesh::interpolate
     const interpolation<symmTensor>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 
@@ -914,7 +907,7 @@ Foam::tmp<Foam::tensorField> Foam::sampledTriSurfaceMesh::interpolate
     const interpolation<tensor>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 

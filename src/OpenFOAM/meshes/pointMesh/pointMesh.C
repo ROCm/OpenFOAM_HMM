@@ -35,9 +35,7 @@ License
 
 namespace Foam
 {
-
 defineTypeNameAndDebug(pointMesh, 0);
-
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -88,18 +86,6 @@ Foam::pointMesh::pointMesh(const polyMesh& pMesh)
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::pointMesh::~pointMesh()
-{
-    if (debug)
-    {
-        Pout<< "~pointMesh::pointMesh()"
-            << endl;
-    }
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::pointMesh::movePoints()
@@ -121,8 +107,7 @@ void Foam::pointMesh::updateMesh(const mapPolyMesh& mpm)
     if (debug)
     {
         Pout<< "pointMesh::updateMesh(const mapPolyMesh&): "
-            << "Updating for topology changes." << endl;
-        Pout<< endl;
+            << "Updating for topology changes." << nl << endl;
     }
     boundary_.updateMesh();
 

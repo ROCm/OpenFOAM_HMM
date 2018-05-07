@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -155,13 +155,35 @@ private:
         bool update(const meshSearch& meshSearcher);
 
 
+
+protected:
+
+    // Protected Member Functions
+
         //- Sample the volume field onto surface,
         //  store it (temporarily) onto the given registry
         template<class Type>
         bool sampleType
         (
             const objectRegistry& store,
-            const word& fieldName
+            const word& fieldName,
+            const word& sampleScheme
+        ) const;
+
+
+        //- Sample field on surface faces
+        template<class Type>
+        tmp<Field<Type>> sampleOnFaces
+        (
+            const interpolation<Type>& sampler
+        ) const;
+
+
+        //- Sample field on surface points
+        template<class Type>
+        tmp<Field<Type>> sampleOnPoints
+        (
+            const interpolation<Type>& interpolator
         ) const;
 
 
@@ -211,7 +233,7 @@ public:
         static void setZoneMap(const surfZoneList&, labelList& zoneIds);
 
 
-      // Access
+    // Access
 
         //- Access to the underlying mesh
         const polyMesh& mesh() const
@@ -291,7 +313,8 @@ public:
         virtual bool sampleAndStore
         (
             const objectRegistry& store,
-            const word& fieldName
+            const word& fieldName,
+            const word& sampleScheme
         ) const;
 
 
@@ -299,28 +322,13 @@ public:
         template<class Type>
         tmp<Field<Type>> sampleType
         (
-            const word& fieldName
-        ) const;
-
-
-        //- Sample field on surface
-        template<class Type>
-        tmp<Field<Type>> sampleField
-        (
-            const GeometricField<Type, fvPatchField, volMesh>&
-        ) const;
-
-
-        //- Interpolate field on surface
-        template<class Type>
-        tmp<Field<Type>> interpolateField
-        (
-            const interpolation<Type>&
+            const word& fieldName,
+            const word& sampleScheme
         ) const;
 
 
         //- Write information
-        virtual void print(Ostream&) const;
+        virtual void print(Ostream& os) const;
 };
 
 

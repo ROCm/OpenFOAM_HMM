@@ -34,25 +34,19 @@ void Foam::plane::calcPntAndVec(const scalarList& C)
     {
         point_ = vector((-C[3]/C[0]), 0, 0);
     }
+    else if (mag(C[1]) > VSMALL)
+    {
+        point_ = vector(0, (-C[3]/C[1]), 0);
+    }
+    else if (mag(C[2]) > VSMALL)
+    {
+        point_ = vector(0, 0, (-C[3]/C[2]));
+    }
     else
     {
-        if (mag(C[1]) > VSMALL)
-        {
-            point_ = vector(0, (-C[3]/C[1]), 0);
-        }
-        else
-        {
-            if (mag(C[2]) > VSMALL)
-            {
-                point_ = vector(0, 0, (-C[3]/C[2]));
-            }
-            else
-            {
-                FatalErrorInFunction
-                    << "At least one plane coefficient must have a value"
-                    << abort(FatalError);
-            }
-        }
+        FatalErrorInFunction
+            << "At least one plane coefficient must have a value"
+            << abort(FatalError);
     }
 
     normal_ = vector(C[0], C[1], C[2]);
@@ -127,7 +121,7 @@ Foam::plane::plane(const vector& normalVector)
     else
     {
         FatalErrorInFunction
-            << "plane normal has zero length. basePoint:" << point_
+            << "plane normal has zero length. base point:" << point_
             << abort(FatalError);
     }
 }
@@ -148,7 +142,7 @@ Foam::plane::plane
     if (magSqrNormalVector < VSMALL)
     {
         FatalErrorInFunction
-            << "plane normal has zero length. basePoint:" << point_
+            << "plane normal has zero length. base point:" << point_
             << abort(FatalError);
     }
 
@@ -247,7 +241,7 @@ Foam::plane::plane(Istream& is)
     else
     {
         FatalErrorInFunction
-            << "plane normal has zero length. basePoint:" << point_
+            << "plane normal has zero length. base point:" << point_
             << abort(FatalError);
     }
 }

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -538,13 +538,13 @@ bool Foam::sampledIsoSurface::expire()
     // Clear derived data
     clearGeom();
 
-    // already marked as expired
+    // Already marked as expired
     if (prevTimeIndex_ == -1)
     {
         return false;
     }
 
-    // force update
+    // Force update
     prevTimeIndex_ = -1;
     return true;
 }
@@ -558,46 +558,46 @@ bool Foam::sampledIsoSurface::update()
 
 Foam::tmp<Foam::scalarField> Foam::sampledIsoSurface::sample
 (
-    const volScalarField& vField
+    const interpolation<scalar>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::vectorField> Foam::sampledIsoSurface::sample
 (
-    const volVectorField& vField
+    const interpolation<vector>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::sphericalTensorField> Foam::sampledIsoSurface::sample
 (
-    const volSphericalTensorField& vField
+    const interpolation<sphericalTensor>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::symmTensorField> Foam::sampledIsoSurface::sample
 (
-    const volSymmTensorField& vField
+    const interpolation<symmTensor>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::tensorField> Foam::sampledIsoSurface::sample
 (
-    const volTensorField& vField
+    const interpolation<tensor>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
@@ -606,7 +606,7 @@ Foam::tmp<Foam::scalarField> Foam::sampledIsoSurface::interpolate
     const interpolation<scalar>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 
@@ -615,7 +615,7 @@ Foam::tmp<Foam::vectorField> Foam::sampledIsoSurface::interpolate
     const interpolation<vector>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 Foam::tmp<Foam::sphericalTensorField> Foam::sampledIsoSurface::interpolate
@@ -623,7 +623,7 @@ Foam::tmp<Foam::sphericalTensorField> Foam::sampledIsoSurface::interpolate
     const interpolation<sphericalTensor>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 
@@ -632,7 +632,7 @@ Foam::tmp<Foam::symmTensorField> Foam::sampledIsoSurface::interpolate
     const interpolation<symmTensor>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 
@@ -641,7 +641,7 @@ Foam::tmp<Foam::tensorField> Foam::sampledIsoSurface::interpolate
     const interpolation<tensor>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 

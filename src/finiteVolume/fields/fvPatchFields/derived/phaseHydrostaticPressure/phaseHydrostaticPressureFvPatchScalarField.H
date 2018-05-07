@@ -45,7 +45,7 @@ Description
     \endtable
 
     The values are assigned according to the phase-fraction field:
-    - 1: apply \$fp_{hyd}\$f
+    - 1: apply \f$p_{hyd}\f$
     - 0: apply a zero-gradient condition
 
 Usage

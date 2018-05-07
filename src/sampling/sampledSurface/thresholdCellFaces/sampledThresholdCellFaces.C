@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,53 +59,48 @@ bool Foam::sampledThresholdCellFaces::updateGeometry() const
 
     prevTimeIndex_ = fvm.time().timeIndex();
 
-    // Optionally read volScalarField
-    autoPtr<volScalarField> readFieldPtr_;
+    // Use volField from database, or try to read it in
 
-    // 1. see if field in database
-    // 2. see if field can be read
-    const volScalarField* cellFldPtr = nullptr;
-    if (fvm.foundObject<volScalarField>(fieldName_))
+    const auto* cellFldPtr = fvm.lookupObjectPtr<volScalarField>(fieldName_);
+
+    if (debug)
     {
-        if (debug)
+        if (cellFldPtr)
         {
-            InfoInFunction<< "Lookup " << fieldName_ << endl;
+            InfoInFunction << "Lookup " << fieldName_ << endl;
         }
-
-        cellFldPtr = &fvm.lookupObject<volScalarField>(fieldName_);
-    }
-    else
-    {
-        // Bit of a hack. Read field and store.
-
-        if (debug)
+        else
         {
             InfoInFunction
                 << "Reading " << fieldName_
                 << " from time " << fvm.time().timeName()
                 << endl;
         }
-
-        readFieldPtr_.reset
-        (
-            new volScalarField
-            (
-                IOobject
-                (
-                    fieldName_,
-                    fvm.time().timeName(),
-                    fvm,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                fvm
-            )
-        );
-
-        cellFldPtr = readFieldPtr_.operator->();
     }
-    const volScalarField& cellFld = *cellFldPtr;
+
+    // For holding the volScalarField read in.
+    autoPtr<volScalarField> fieldReadPtr;
+
+    if (!cellFldPtr)
+    {
+        // Bit of a hack. Read field and store.
+
+        fieldReadPtr = autoPtr<volScalarField>::New
+        (
+            IOobject
+            (
+                fieldName_,
+                fvm.time().timeName(),
+                fvm,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            fvm
+        );
+    }
+    const volScalarField& cellFld =
+        (fieldReadPtr.valid() ? *fieldReadPtr : *cellFldPtr);
 
 
     thresholdCellFaces surf
@@ -123,7 +118,7 @@ bool Foam::sampledThresholdCellFaces::updateGeometry() const
     ).MeshedSurface<face>::transfer(surf);
     meshCells_.transfer(surf.meshCells());
 
-    // clear derived data
+    // Clear derived data
     sampledSurface::clearGeom();
 
     if (debug)
@@ -169,12 +164,6 @@ Foam::sampledThresholdCellFaces::sampledThresholdCellFaces
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::sampledThresholdCellFaces::~sampledThresholdCellFaces()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::sampledThresholdCellFaces::needsUpdate() const
@@ -207,46 +196,46 @@ bool Foam::sampledThresholdCellFaces::update()
 
 Foam::tmp<Foam::scalarField> Foam::sampledThresholdCellFaces::sample
 (
-    const volScalarField& vField
+    const interpolation<scalar>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::vectorField> Foam::sampledThresholdCellFaces::sample
 (
-    const volVectorField& vField
+    const interpolation<vector>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::sphericalTensorField> Foam::sampledThresholdCellFaces::sample
 (
-    const volSphericalTensorField& vField
+    const interpolation<sphericalTensor>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::symmTensorField> Foam::sampledThresholdCellFaces::sample
 (
-    const volSymmTensorField& vField
+    const interpolation<symmTensor>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::tensorField> Foam::sampledThresholdCellFaces::sample
 (
-    const volTensorField& vField
+    const interpolation<tensor>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
@@ -255,7 +244,7 @@ Foam::tmp<Foam::scalarField> Foam::sampledThresholdCellFaces::interpolate
     const interpolation<scalar>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 
@@ -264,7 +253,7 @@ Foam::tmp<Foam::vectorField> Foam::sampledThresholdCellFaces::interpolate
     const interpolation<vector>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 Foam::tmp<Foam::sphericalTensorField>
@@ -273,7 +262,7 @@ Foam::sampledThresholdCellFaces::interpolate
     const interpolation<sphericalTensor>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 
@@ -282,7 +271,7 @@ Foam::tmp<Foam::symmTensorField> Foam::sampledThresholdCellFaces::interpolate
     const interpolation<symmTensor>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 
@@ -291,7 +280,7 @@ Foam::tmp<Foam::tensorField> Foam::sampledThresholdCellFaces::interpolate
     const interpolation<tensor>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 

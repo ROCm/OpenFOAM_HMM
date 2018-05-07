@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::MeshedSurfaceIOAllocator::MeshedSurfaceIOAllocator
+Foam::Detail::MeshedSurfaceIOAllocator::MeshedSurfaceIOAllocator
 (
     const IOobject& ioPoints,
     const IOobject& ioFaces,
@@ -40,7 +40,7 @@ Foam::MeshedSurfaceIOAllocator::MeshedSurfaceIOAllocator
 {}
 
 
-Foam::MeshedSurfaceIOAllocator::MeshedSurfaceIOAllocator
+Foam::Detail::MeshedSurfaceIOAllocator::MeshedSurfaceIOAllocator
 (
     const IOobject& ioPoints, const pointField& points,
     const IOobject& ioFaces,  const faceList& faces,
@@ -53,7 +53,7 @@ Foam::MeshedSurfaceIOAllocator::MeshedSurfaceIOAllocator
 {}
 
 
-Foam::MeshedSurfaceIOAllocator::MeshedSurfaceIOAllocator
+Foam::Detail::MeshedSurfaceIOAllocator::MeshedSurfaceIOAllocator
 (
     const IOobject& ioPoints, pointField&& points,
     const IOobject& ioFaces,  faceList&& faces,
@@ -68,7 +68,7 @@ Foam::MeshedSurfaceIOAllocator::MeshedSurfaceIOAllocator
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::MeshedSurfaceIOAllocator::~MeshedSurfaceIOAllocator()
+Foam::Detail::MeshedSurfaceIOAllocator::~MeshedSurfaceIOAllocator()
 {
     clear();
 }
@@ -76,7 +76,10 @@ Foam::MeshedSurfaceIOAllocator::~MeshedSurfaceIOAllocator()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::MeshedSurfaceIOAllocator::setInstance(const fileName& inst)
+void Foam::Detail::MeshedSurfaceIOAllocator::setInstance
+(
+    const fileName& inst
+)
 {
     points_.instance() = inst;
     faces_.instance()  = inst;
@@ -84,7 +87,10 @@ void Foam::MeshedSurfaceIOAllocator::setInstance(const fileName& inst)
 }
 
 
-void Foam::MeshedSurfaceIOAllocator::setWriteOption(IOobject::writeOption wOpt)
+void Foam::Detail::MeshedSurfaceIOAllocator::setWriteOption
+(
+    IOobject::writeOption wOpt
+)
 {
     points_.writeOpt() = wOpt;
     faces_.writeOpt()  = wOpt;
@@ -92,7 +98,7 @@ void Foam::MeshedSurfaceIOAllocator::setWriteOption(IOobject::writeOption wOpt)
 }
 
 
-void Foam::MeshedSurfaceIOAllocator::clear()
+void Foam::Detail::MeshedSurfaceIOAllocator::clear()
 {
     points_.clear();
     faces_.clear();
@@ -100,7 +106,7 @@ void Foam::MeshedSurfaceIOAllocator::clear()
 }
 
 
-bool Foam::MeshedSurfaceIOAllocator::writeObject
+bool Foam::Detail::MeshedSurfaceIOAllocator::writeObject
 (
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,

@@ -109,8 +109,7 @@ Foam::sampledSets::sampledSets
     {
         outputPath_ = outputPath_/mesh_.name();
     }
-    // Remove ".."
-    outputPath_.clean();
+    outputPath_.clean();  // Remove unneeded ".."
 
     read(dict);
 }
@@ -145,8 +144,7 @@ Foam::sampledSets::sampledSets
     {
         outputPath_ = outputPath_/mesh_.name();
     }
-    // Remove ".."
-    outputPath_.clean();
+    outputPath_.clean();  // Remove unneeded ".."
 
     read(dict);
 }

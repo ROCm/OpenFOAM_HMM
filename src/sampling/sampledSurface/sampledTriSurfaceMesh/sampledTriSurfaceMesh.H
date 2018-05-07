@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,6 +59,31 @@ Description
     - since it finds a nearest per triangle each triangle is guaranteed
     to be on one processor only. So after stitching (by sampledSurfaces)
     the original surface should be complete.
+
+    This is often embedded as part of a sampled surfaces function object.
+
+Usage
+    Example of function object partial specification:
+    \verbatim
+    surfaces
+    (
+        surface1
+        {
+            type    sampledTriSurfaceMesh;
+            surface something.obj;
+            source  cells;
+        }
+    );
+    \endverbatim
+
+    Where the sub-entries comprise:
+    \table
+        Property | Description                             | Required | Default
+        type     | sampledTriSurfaceMesh                   | yes      |
+        surface  | surface name in triSurface/             | yes      |
+        source   | cells/insideCells/boundaryFaces         | yes      |
+        keepIds  | pass through id numbering               | no       | false
+    \endtable
 
 SourceFiles
     sampledTriSurfaceMesh.C
@@ -144,17 +169,19 @@ private:
         //- Get tree of all non-coupled boundary faces
         const indexedOctree<treeDataFace>& nonCoupledboundaryTree() const;
 
-        //- Sample field on faces
+        //- Sample volume field onto surface faces
         template<class Type>
-        tmp<Field<Type>> sampleField
+        tmp<Field<Type>> sampleOnFaces
         (
-            const GeometricField<Type, fvPatchField, volMesh>& vField
+            const interpolation<Type>& sampler
         ) const;
 
-
+        //- Interpolate volume field onto surface points
         template<class Type>
-        tmp<Field<Type>>
-        interpolateField(const interpolation<Type>&) const;
+        tmp<Field<Type>> sampleOnPoints
+        (
+            const interpolation<Type>& interpolator
+        ) const;
 
         bool update(const meshSearch& meshSearcher);
 
@@ -200,7 +227,11 @@ public:
     // Member Functions
 
         //- Set new zoneIds list based on the surfZoneList information
-        static void setZoneMap(const surfZoneList&, labelList& zoneIds);
+        static void setZoneMap
+        (
+            const surfZoneList& zoneLst,
+            labelList& zoneIds
+        );
 
 
         //- Does the surface need an update?
@@ -218,7 +249,7 @@ public:
         //- Update the surface using a bound box to limit the searching.
         //  For direct use, i.e. not through sample.
         //  Do nothing (and return false) if no update was needed
-        bool update(const treeBoundBox&);
+        bool update(const treeBoundBox& bb);
 
         //- Points of surface
         virtual const pointField& points() const
@@ -276,70 +307,76 @@ public:
         }
 
 
-        //- Sample field on surface
+    // Sample
+
+        //- Sample volume field onto surface faces
         virtual tmp<scalarField> sample
         (
-            const volScalarField&
+            const interpolation<scalar>& sampler
         ) const;
 
-        //- Sample field on surface
+        //- Sample volume field onto surface faces
         virtual tmp<vectorField> sample
         (
-            const volVectorField&
+            const interpolation<vector>& sampler
         ) const;
 
-        //- Sample field on surface
+        //- Sample volume field onto surface faces
         virtual tmp<sphericalTensorField> sample
         (
-            const volSphericalTensorField&
+            const interpolation<sphericalTensor>& sampler
         ) const;
 
-        //- Sample field on surface
+        //- Sample volume field onto surface faces
         virtual tmp<symmTensorField> sample
         (
-            const volSymmTensorField&
+            const interpolation<symmTensor>& sampler
         ) const;
 
-        //- Sample field on surface
+        //- Sample volume field onto surface faces
         virtual tmp<tensorField> sample
         (
-            const volTensorField&
+            const interpolation<tensor>& sampler
         ) const;
 
 
-        //- Interpolate field on surface
+    // Interpolate
+
+        //- Interpolate volume field onto surface points
         virtual tmp<scalarField> interpolate
         (
-            const interpolation<scalar>&
+            const interpolation<scalar>& interpolator
         ) const;
 
-
-        //- Interpolate field on surface
+        //- Interpolate volume field onto surface points
         virtual tmp<vectorField> interpolate
         (
-            const interpolation<vector>&
+            const interpolation<vector>& interpolator
         ) const;
 
-        //- Interpolate field on surface
+        //- Interpolate volume field onto surface points
         virtual tmp<sphericalTensorField> interpolate
         (
-            const interpolation<sphericalTensor>&
+            const interpolation<sphericalTensor>& interpolator
         ) const;
 
-        //- Interpolate field on surface
+        //- Interpolate volume field onto surface points
         virtual tmp<symmTensorField> interpolate
         (
-            const interpolation<symmTensor>&
+            const interpolation<symmTensor>& interpolator
         ) const;
 
-        //- Interpolate field on surface
+        //- Interpolate volume field onto surface points
         virtual tmp<tensorField> interpolate
         (
-            const interpolation<tensor>&
+            const interpolation<tensor>& interpolator
         ) const;
 
-        //- Write information
-        virtual void print(Ostream&) const;
+
+    // Output
+
+        //- Write
+        virtual void print(Ostream& os) const;
 };
 
 

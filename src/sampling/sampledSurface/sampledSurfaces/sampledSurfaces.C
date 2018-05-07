@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ License
 #include "dictionary.H"
 #include "Time.H"
 #include "IOmanip.H"
+#include "interpolationCell.H"
 #include "volPointInterpolation.H"
 #include "PatchTools.H"
 #include "mapPolyMesh.H"
@@ -61,19 +62,19 @@ void Foam::sampledSurfaces::writeGeometry() const
 
     const fileName outputDir = outputPath_/time_.timeName();
 
-    forAll(*this, surfI)
+    forAll(*this, surfi)
     {
-        const sampledSurface& s = operator[](surfI);
+        const sampledSurface& s = operator[](surfi);
 
         if (Pstream::parRun())
         {
-            if (Pstream::master() && mergedList_[surfI].size())
+            if (Pstream::master() && mergedList_[surfi].size())
             {
                 formatter_->write
                 (
                     outputDir,
                     s.name(),
-                    mergedList_[surfI]
+                    mergedList_[surfi]
                 );
             }
         }
@@ -90,9 +91,9 @@ void Foam::sampledSurfaces::writeOriginalIds()
     const word fieldName = "Ids";
     const fileName outputDir = outputPath_/time_.timeName();
 
-    forAll(*this, surfI)
+    forAll(*this, surfi)
     {
-        const sampledSurface& s = operator[](surfI);
+        const sampledSurface& s = operator[](surfi);
 
         if (isA<sampledTriSurfaceMesh>(s))
         {
@@ -109,7 +110,7 @@ void Foam::sampledSurfaces::writeOriginalIds()
                     ids[i] = idLst[i];
                 }
 
-                writeSurface(ids, surfI, fieldName, outputDir);
+                writeSurface(ids, surfi, fieldName, outputDir);
             }
         }
     }
@@ -131,7 +132,8 @@ Foam::sampledSurfaces::sampledSurfaces
     loadFromFiles_(false),
     outputPath_(fileName::null),
     fieldSelection_(),
-    interpolationScheme_(word::null),
+    sampleFaceScheme_(word::null),
+    sampleNodeScheme_(word::null),
     mergedList_(),
     formatter_(nullptr)
 {
@@ -143,8 +145,7 @@ Foam::sampledSurfaces::sampledSurfaces
     {
         outputPath_ = mesh_.time().path()/"postProcessing"/name;
     }
-    // Remove ".."
-    outputPath_.clean();
+    outputPath_.clean();  // Remove unneeded ".."
 
     read(dict);
 }
@@ -164,7 +165,8 @@ Foam::sampledSurfaces::sampledSurfaces
     loadFromFiles_(loadFromFiles),
     outputPath_(fileName::null),
     fieldSelection_(),
-    interpolationScheme_(word::null),
+    sampleFaceScheme_(word::null),
+    sampleNodeScheme_(word::null),
     mergedList_(),
     formatter_(nullptr)
 {
@@ -178,8 +180,7 @@ Foam::sampledSurfaces::sampledSurfaces
     {
         outputPath_ = time_.path()/"postProcessing"/name;
     }
-    // Remove ".."
-    outputPath_.clean();
+    outputPath_.clean();  // Remove unneeded ".."
 
     read(dict);
 }
@@ -207,34 +208,37 @@ bool Foam::sampledSurfaces::execute()
 
 bool Foam::sampledSurfaces::write()
 {
-    if (size())
+    if (empty())
     {
-        // Finalize surfaces, merge points etc.
-        update();
-
-        const label nFields = classifyFields();
-
-        // write geometry first if required,
-        // or when no fields would otherwise be written
-        if (nFields == 0 || formatter_->separateGeometry())
-        {
-            writeGeometry();
-        }
-
-        const IOobjectList objects(obr_, obr_.time().timeName());
-
-        sampleAndWrite<volScalarField>(objects);
-        sampleAndWrite<volVectorField>(objects);
-        sampleAndWrite<volSphericalTensorField>(objects);
-        sampleAndWrite<volSymmTensorField>(objects);
-        sampleAndWrite<volTensorField>(objects);
-
-        sampleAndWrite<surfaceScalarField>(objects);
-        sampleAndWrite<surfaceVectorField>(objects);
-        sampleAndWrite<surfaceSphericalTensorField>(objects);
-        sampleAndWrite<surfaceSymmTensorField>(objects);
-        sampleAndWrite<surfaceTensorField>(objects);
+        return true;
     }
+
+
+    // Finalize surfaces, merge points etc.
+    update();
+
+    const label nFields = classifyFields();
+
+    // write geometry first if required,
+    // or when no fields would otherwise be written
+    if (nFields == 0 || formatter_->separateGeometry())
+    {
+        writeGeometry();
+    }
+
+    const IOobjectList objects(obr_, obr_.time().timeName());
+
+    sampleAndWrite<volScalarField>(objects);
+    sampleAndWrite<volVectorField>(objects);
+    sampleAndWrite<volSphericalTensorField>(objects);
+    sampleAndWrite<volSymmTensorField>(objects);
+    sampleAndWrite<volTensorField>(objects);
+
+    sampleAndWrite<surfaceScalarField>(objects);
+    sampleAndWrite<surfaceVectorField>(objects);
+    sampleAndWrite<surfaceSphericalTensorField>(objects);
+    sampleAndWrite<surfaceSymmTensorField>(objects);
+    sampleAndWrite<surfaceTensorField>(objects);
 
     return true;
 }
@@ -246,9 +250,12 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
 
     if (surfacesFound)
     {
+        sampleFaceScheme_ = dict.lookupOrDefault<word>("sampleScheme", "cell");
+
+        dict.lookup("interpolationScheme") >> sampleNodeScheme_;
+
         dict.lookup("fields") >> fieldSelection_;
 
-        dict.lookup("interpolationScheme") >> interpolationScheme_;
         const word writeType(dict.lookup("surfaceFormat"));
 
         // Define the surface formatter
@@ -277,9 +284,9 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
         if (this->size())
         {
             Info<< "Reading surface description:" << nl;
-            forAll(*this, surfI)
+            forAll(*this, surfi)
             {
-                Info<< "    " << operator[](surfI).name() << nl;
+                Info<< "    " << operator[](surfi).name() << nl;
             }
             Info<< endl;
         }
@@ -290,9 +297,9 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
         Pout<< "sample fields:" << fieldSelection_ << nl
             << "sample surfaces:" << nl << "(" << nl;
 
-        forAll(*this, surfI)
+        forAll(*this, surfi)
         {
-            Pout<< "  " << operator[](surfI) << endl;
+            Pout<< "  " << operator[](surfi) << nl;
         }
         Pout<< ")" << endl;
     }
@@ -332,9 +339,9 @@ void Foam::sampledSurfaces::readUpdate(const polyMesh::readUpdateState state)
 
 bool Foam::sampledSurfaces::needsUpdate() const
 {
-    forAll(*this, surfI)
+    forAll(*this, surfi)
     {
-        if (operator[](surfI).needsUpdate())
+        if (operator[](surfi).needsUpdate())
         {
             return true;
         }
@@ -348,9 +355,9 @@ bool Foam::sampledSurfaces::expire()
 {
     bool justExpired = false;
 
-    forAll(*this, surfI)
+    forAll(*this, surfi)
     {
-        if (operator[](surfI).expire())
+        if (operator[](surfi).expire())
         {
             justExpired = true;
         }
@@ -358,7 +365,7 @@ bool Foam::sampledSurfaces::expire()
         // Clear merge information
         if (Pstream::parRun())
         {
-            mergedList_[surfI].clear();
+            mergedList_[surfi].clear();
         }
     }
 
@@ -379,9 +386,9 @@ bool Foam::sampledSurfaces::update()
     // Serial: quick and easy, no merging required
     if (!Pstream::parRun())
     {
-        forAll(*this, surfI)
+        forAll(*this, surfi)
         {
-            if (operator[](surfI).update())
+            if (operator[](surfi).update())
             {
                 updated = true;
             }
@@ -390,8 +397,9 @@ bool Foam::sampledSurfaces::update()
         return updated;
     }
 
+
     // Dimension as fraction of mesh bounding box
-    scalar mergeDim = mergeTol_*mesh_.bounds().mag();
+    const scalar mergeDim = mergeTol_*mesh_.bounds().mag();
 
     if (Pstream::master() && debug)
     {
@@ -399,14 +407,14 @@ bool Foam::sampledSurfaces::update()
             << mergeDim << " metre" << endl;
     }
 
-    forAll(*this, surfI)
+    forAll(*this, surfi)
     {
-        sampledSurface& s = operator[](surfI);
+        sampledSurface& s = operator[](surfi);
 
         if (s.update())
         {
             updated = true;
-            mergedList_[surfI].merge(s, mergeDim);
+            mergedList_[surfi].merge(s, mergeDim);
         }
     }
 
@@ -422,9 +430,9 @@ Foam::scalar Foam::sampledSurfaces::mergeTol()
 
 Foam::scalar Foam::sampledSurfaces::mergeTol(const scalar tol)
 {
-    scalar oldTol = mergeTol_;
+    const scalar prev(mergeTol_);
     mergeTol_ = tol;
-    return oldTol;
+    return prev;
 }
 
 

@@ -28,6 +28,40 @@ Description
     Geometric class that creates a 3D plane and can return the intersection
     point between a line and the plane.
 
+    Construction from a dictionary is driven by the \c planeType
+
+    For \c planeType as \c pointAndNormal :
+    \verbatim
+    pointAndNormalDict
+    {
+        point   <point>;   // or basePoint
+        normal  <vector>;  // or normalVector
+    }
+    \endverbatim
+
+    For \c planeType as \c embeddedPoints :
+    \verbatim
+    embeddedPointsDict
+    {
+        point1  <point>;
+        point2  <point>;
+        point3  <point>;
+    }
+    \endverbatim
+
+    For \c planeType with \c planeEquation coefficients
+    \f$ ax + by + cz + d = 0 \f$ :
+
+    \verbatim
+    planeEquationDict
+    {
+       a   <scalar>;
+       b   <scalar>;
+       c   <scalar>;
+       d   <scalar>;
+    }
+    \endverbatim
+
 SourceFiles
     plane.C
 
@@ -63,9 +97,10 @@ public:
     //- Side of the plane
     enum side
     {
-        NORMAL,
-        FLIP
+        NORMAL = 1,  //!< The front (or normal) side of the plane
+        FLIP  = -1   //!< The back (or flip) side of the plane
     };
+
 
     //- A direction and a reference point
     class ray
@@ -126,10 +161,12 @@ public:
         //- Construct null. Does not set normal and point.
         plane();
 
-        //- Construct from normal vector through the origin
+        //- Construct from normal vector through the origin.
+        //  The vector is normalised to a unit vector on input.
         explicit plane(const vector& normalVector);
 
-        //- Construct from normal vector and point in plane
+        //- Construct from normal vector and point in plane.
+        //  By default, the vector is normalised to a unit vector on input.
         explicit plane
         (
             const point& basePoint,
@@ -150,7 +187,7 @@ public:
         explicit plane(const scalarList& C);
 
         //- Construct from dictionary
-        explicit plane(const dictionary& planeDict);
+        explicit plane(const dictionary& dict);
 
         //- Construct from Istream. Assumes the base + normal notation.
         explicit plane(Istream& is);

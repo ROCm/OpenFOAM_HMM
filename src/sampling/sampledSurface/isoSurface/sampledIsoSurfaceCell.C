@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,7 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
 {
     const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
 
-    // no update needed
+    // No update needed
     if (fvm.time().timeIndex() == prevTimeIndex_)
     {
         return false;
@@ -62,76 +62,67 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
     // Clear derived data
     sampledSurface::clearGeom();
 
-    // Optionally read volScalarField
-    autoPtr<volScalarField> readFieldPtr_;
+    // Use field from database, or try to read it in
 
-    // 1. see if field in database
-    // 2. see if field can be read
-    const volScalarField* cellFldPtr = nullptr;
-    if (fvm.foundObject<volScalarField>(isoField_))
+    const auto* cellFldPtr = fvm.lookupObjectPtr<volScalarField>(isoField_);
+
+    if (debug)
     {
-        if (debug)
+        if (cellFldPtr)
         {
             InfoInFunction << "Lookup " << isoField_ << endl;
         }
-
-        cellFldPtr = &fvm.lookupObject<volScalarField>(isoField_);
-    }
-    else
-    {
-        // Bit of a hack. Read field and store.
-
-        if (debug)
+        else
         {
             InfoInFunction
                 << "Reading " << isoField_
-                << " from time " <<fvm.time().timeName()
+                << " from time " << fvm.time().timeName()
                 << endl;
         }
-
-        readFieldPtr_.reset
-        (
-            new volScalarField
-            (
-                IOobject
-                (
-                    isoField_,
-                    fvm.time().timeName(),
-                    fvm,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                fvm
-            )
-        );
-
-        cellFldPtr = readFieldPtr_.operator->();
     }
-    const volScalarField& cellFld = *cellFldPtr;
 
-    tmp<pointScalarField> pointFld
-    (
-        volPointInterpolation::New(fvm).interpolate(cellFld)
-    );
+    // For holding the volScalarField read in.
+    autoPtr<volScalarField> fieldReadPtr;
+
+    if (!cellFldPtr)
+    {
+        // Bit of a hack. Read field and store.
+
+        fieldReadPtr = autoPtr<volScalarField>::New
+        (
+            IOobject
+            (
+                isoField_,
+                fvm.time().timeName(),
+                fvm,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            fvm
+        );
+    }
+
+    const volScalarField& cellFld =
+        (fieldReadPtr.valid() ? *fieldReadPtr : *cellFldPtr);
+
+    auto tpointFld = volPointInterpolation::New(fvm).interpolate(cellFld);
 
     if (average_)
     {
         //- From point field and interpolated cell.
-        scalarField cellAvg(fvm.nCells(), scalar(0.0));
-        labelField nPointCells(fvm.nCells(), 0);
+        scalarField cellAvg(fvm.nCells(), Zero);
+        labelField nPointCells(fvm.nCells(), Zero);
+
+        for (label pointi = 0; pointi < fvm.nPoints(); ++pointi)
         {
-            for (label pointi = 0; pointi < fvm.nPoints(); pointi++)
+            const scalar& val = tpointFld().primitiveField()[pointi];
+            const labelList& pCells = fvm.pointCells(pointi);
+
+            for (const label celli : pCells)
             {
-                const labelList& pCells = fvm.pointCells(pointi);
-
-                forAll(pCells, i)
-                {
-                    label celli = pCells[i];
-
-                    cellAvg[celli] += pointFld().primitiveField()[pointi];
-                    nPointCells[celli]++;
-                }
+                cellAvg[celli] += val;
+                ++nPointCells[celli];
             }
         }
         forAll(cellAvg, celli)
@@ -139,11 +130,11 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
             cellAvg[celli] /= nPointCells[celli];
         }
 
-        isoSurfaceCell iso
+        isoSurfaceCell surf
         (
             fvm,
             cellAvg,
-            pointFld().primitiveField(),
+            tpointFld().primitiveField(),
             isoVal_,
             regularise_,
             bounds_
@@ -152,17 +143,17 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
         const_cast<sampledIsoSurfaceCell&>
         (
             *this
-        ).transfer(static_cast<meshedSurface&>(iso));
-        meshCells_ = iso.meshCells();
+        ).transfer(static_cast<meshedSurface&>(surf));
+        meshCells_.transfer(surf.meshCells());
     }
     else
     {
         //- Direct from cell field and point field. Gives bad continuity.
-        isoSurfaceCell iso
+        isoSurfaceCell surf
         (
             fvm,
             cellFld.primitiveField(),
-            pointFld().primitiveField(),
+            tpointFld().primitiveField(),
             isoVal_,
             regularise_,
             bounds_
@@ -171,8 +162,8 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
         const_cast<sampledIsoSurfaceCell&>
         (
             *this
-        ).transfer(static_cast<meshedSurface&>(iso));
-        meshCells_ = iso.meshCells();
+        ).transfer(static_cast<meshedSurface&>(surf));
+        meshCells_.transfer(surf.meshCells());
     }
 
 
@@ -212,7 +203,7 @@ Foam::sampledIsoSurfaceCell::sampledIsoSurfaceCell
     average_(dict.lookupOrDefault("average", true)),
     zoneKey_(keyType::null),
     prevTimeIndex_(-1),
-    meshCells_(0)
+    meshCells_()
 {}
 
 
@@ -237,13 +228,13 @@ bool Foam::sampledIsoSurfaceCell::expire()
     // Clear derived data
     sampledSurface::clearGeom();
 
-    // already marked as expired
+    // Already marked as expired
     if (prevTimeIndex_ == -1)
     {
         return false;
     }
 
-    // force update
+    // Force update
     prevTimeIndex_ = -1;
     return true;
 }
@@ -258,50 +249,50 @@ bool Foam::sampledIsoSurfaceCell::update()
 Foam::tmp<Foam::scalarField>
 Foam::sampledIsoSurfaceCell::sample
 (
-    const volScalarField& vField
+    const interpolation<scalar>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::vectorField>
 Foam::sampledIsoSurfaceCell::sample
 (
-    const volVectorField& vField
+    const interpolation<vector>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::sphericalTensorField>
 Foam::sampledIsoSurfaceCell::sample
 (
-    const volSphericalTensorField& vField
+    const interpolation<sphericalTensor>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::symmTensorField>
 Foam::sampledIsoSurfaceCell::sample
 (
-    const volSymmTensorField& vField
+    const interpolation<symmTensor>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::tensorField>
 Foam::sampledIsoSurfaceCell::sample
 (
-    const volTensorField& vField
+    const interpolation<tensor>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
@@ -311,7 +302,7 @@ Foam::sampledIsoSurfaceCell::interpolate
     const interpolation<scalar>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 
@@ -321,7 +312,7 @@ Foam::sampledIsoSurfaceCell::interpolate
     const interpolation<vector>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 Foam::tmp<Foam::sphericalTensorField>
@@ -330,7 +321,7 @@ Foam::sampledIsoSurfaceCell::interpolate
     const interpolation<sphericalTensor>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 
@@ -340,7 +331,7 @@ Foam::sampledIsoSurfaceCell::interpolate
     const interpolation<symmTensor>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 
@@ -350,7 +341,7 @@ Foam::sampledIsoSurfaceCell::interpolate
     const interpolation<tensor>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 

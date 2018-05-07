@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,50 +34,69 @@ License
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::sampledThresholdCellFaces::sampleField
+Foam::sampledThresholdCellFaces::sampleOnFaces
 (
-    const GeometricField<Type, fvPatchField, volMesh>& vField
+    const interpolation<Type>& sampler
 ) const
 {
-    // Recreate geometry if time has changed
-    updateGeometry();
+    updateGeometry(); // Recreate geometry if time has changed
 
-    return tmp<Field<Type>>::New(vField, meshCells_);
+    const labelList& elements = meshCells_;
+
+    const label len = faces().size();
+
+    auto tvalues = tmp<Field<Type>>::New(len);
+    auto& values = tvalues.ref();
+
+    const faceList& fcs = faces();
+    const pointField& pts = points();
+
+    for (label i=0; i < len; ++i)
+    {
+        const label celli = elements[i];
+        const point pt = fcs[i].centre(pts);
+
+        values[i] = sampler.interpolate(pt, celli);
+    }
+
+    return tvalues;
 }
 
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::sampledThresholdCellFaces::interpolateField
+Foam::sampledThresholdCellFaces::sampleOnPoints
 (
     const interpolation<Type>& interpolator
 ) const
 {
-    // Recreate geometry if time has changed
-    updateGeometry();
+    updateGeometry(); // Recreate geometry if time has changed
+
+    const labelList& elements = meshCells_;
 
     // One value per point
-    tmp<Field<Type>> tvalues(new Field<Type>(points().size()));
-    Field<Type>& values = tvalues.ref();
+    auto tvalues = tmp<Field<Type>>::New(points().size(), Zero);
+    auto& values = tvalues.ref();
 
-    boolList pointDone(points().size(), false);
+    bitSet pointDone(points().size());
 
-    forAll(faces(), cutFacei)
+    const faceList& fcs = faces();
+    const pointField& pts = points();
+
+    forAll(fcs, i)
     {
-        const face& f = faces()[cutFacei];
+        const face& f = fcs[i];
+        const label celli = elements[i];
 
-        forAll(f, faceVertI)
+        for (const label pointi : f)
         {
-            label pointi = f[faceVertI];
-
-            if (!pointDone[pointi])
+            if (pointDone.set(pointi))
             {
                 values[pointi] = interpolator.interpolate
                 (
-                    points()[pointi],
-                    meshCells_[cutFacei]
+                    pts[pointi],
+                    celli
                 );
-                pointDone[pointi] = true;
             }
         }
     }

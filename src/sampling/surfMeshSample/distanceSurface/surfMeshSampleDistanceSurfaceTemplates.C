@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,44 +23,50 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfMeshSamplers.H"
-#include "volFields.H"
+#include "surfMeshSampleDistanceSurface.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-Foam::wordList
-Foam::surfMeshSamplers::acceptType() const
+Foam::tmp<Foam::Field<Type>>
+Foam::surfMeshSampleDistanceSurface::sampleOnFaces
+(
+    const interpolation<Type>& sampler
+) const
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
-
-    return mesh_.names<VolFieldType>(fieldSelection_);
+    return surfMeshSample::sampleOnFaces
+    (
+        sampler,
+        SurfaceSource::meshCells(),
+        surface().faces(),
+        surface().points()
+    );
 }
 
-#if 0
+
 template<class Type>
-Foam::wordList
-Foam::surfMeshSamplers::acceptType
+bool Foam::surfMeshSampleDistanceSurface::sampleType
 (
-    const IOobjectList& objects,
-    bool fromFiles
+    const word& fieldName,
+    const word& sampleScheme
 ) const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
-    if (fromFiles_)
-    {
-        // This should actually be in the caller:
-        // IOobjectList objects1 = objects.lookup(fieldSelection_);
+    const auto* volFldPtr = mesh().lookupObjectPtr<VolFieldType>(fieldName);
 
-        return objects.names(VolFieldType::typeName, fieldSelection_);
-    }
-    else
+    if (!volFldPtr)
     {
-        return mesh_.names<VolFieldType>(fieldSelection_);
+        return false;
     }
+
+    auto samplerPtr = interpolation<Type>::New(sampleScheme, *volFldPtr);
+
+    getOrCreateSurfField<Type>(*volFldPtr).field() =
+        sampleOnFaces(*samplerPtr);
+
+    return true;
 }
-#endif
 
 
 // ************************************************************************* //

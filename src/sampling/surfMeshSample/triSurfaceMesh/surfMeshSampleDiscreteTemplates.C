@@ -23,31 +23,33 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfMeshDiscreteSampler.H"
+#include "surfMeshSampleDiscrete.H"
 #include "dimensionedType.H"
 #include "error.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-bool Foam::surfMeshDiscreteSampler::sampleType
+bool Foam::surfMeshSampleDiscrete::sampleType
 (
-    const word& fieldName
+    const word& fieldName,
+    const word& sampleScheme
 ) const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
-    const polyMesh& mesh = SurfaceSource::mesh();
+    const auto volFldPtr =
+        SurfaceSource::mesh().lookupObjectPtr<VolFieldType>(fieldName);
 
-    if (!mesh.foundObject<VolFieldType>(fieldName))
+    if (!volFldPtr)
     {
         return false;
     }
 
-    const VolFieldType& fld = mesh.lookupObject<VolFieldType>(fieldName);
+    auto samplerPtr = interpolation<Type>::New(sampleScheme, *volFldPtr);
 
-    getOrCreateSurfField<Type>(fld).field()
-        = SurfaceSource::sampleField(fld);
+    getOrCreateSurfField<Type>(*volFldPtr).field()
+        = SurfaceSource::sampleOnFaces(*samplerPtr);
 
     return true;
 }
@@ -55,14 +57,14 @@ bool Foam::surfMeshDiscreteSampler::sampleType
 
 // template<class Type>
 // Foam::tmp<Foam::DimensionedField<Type, Foam::surfGeoMesh>>
-// Foam::surfMeshDiscreteSampler::sampleField
+// Foam::surfMeshSampleDiscrete::sampleOnFaces
 // (
 //     const GeometricField<Type, fvPatchField, volMesh>& fld
 // ) const
 // {
 //     typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
 //
-//     tmp<Field<Type>> tfield = SurfaceSource::sampleField(fld);
+//     tmp<Field<Type>> tfield = SurfaceSource::sampleOnFaces(fld);
 //     SurfFieldType& result = getOrCreateSurfField<Type>(fld);
 //
 //     // need to verify if this will be needed (in the future)
@@ -72,7 +74,7 @@ bool Foam::surfMeshDiscreteSampler::sampleType
 //         // maybe resampling changed the surfMesh,
 //         // but the existing surfField wasn't updated
 //
-//         result.setSize(s.size(), Zero);
+//         result.resize(s.size(), Zero);
 //     }
 //
 //     if (result.size() != sampleElements().size())

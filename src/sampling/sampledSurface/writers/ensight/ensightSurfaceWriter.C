@@ -130,7 +130,7 @@ Foam::fileName Foam::ensightSurfaceWriter::write
 }
 
 
-// create write methods
+// Create all write methods
 defineSurfaceWriterWriteFields(Foam::ensightSurfaceWriter);
 
 

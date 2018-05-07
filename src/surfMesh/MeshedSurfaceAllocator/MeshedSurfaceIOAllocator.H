@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::MeshedSurfaceIOAllocator
+    Foam::Detail::MeshedSurfaceIOAllocator
 
 Description
     A helper class for storing points, faces and zones with IO capabilities.
@@ -43,9 +43,11 @@ SourceFiles
 
 namespace Foam
 {
+namespace Detail
+{
 
 /*---------------------------------------------------------------------------*\
-                  Class MeshedSurfaceIOAllocator Declaration
+              Class Detail::MeshedSurfaceIOAllocator Declaration
 \*---------------------------------------------------------------------------*/
 
 class MeshedSurfaceIOAllocator
@@ -64,10 +66,10 @@ class MeshedSurfaceIOAllocator
 
     // Private Member Functions
 
-        //- Disallow copy construct
+        //- No copy construct
         MeshedSurfaceIOAllocator(const MeshedSurfaceIOAllocator&) = delete;
 
-        //- Disallow copy assignment
+        //- No copy assignment
         void operator=(const MeshedSurfaceIOAllocator&) = delete;
 
 
@@ -115,49 +117,49 @@ public:
         void setWriteOption(IOobject::writeOption wOpt);
 
 
-   // Access
+    // Access
 
-       //- Non-const access to the points
-       pointIOField& storedIOPoints()
-       {
-           return points_;
-       }
+        //- Non-const access to the points
+        pointIOField& storedIOPoints()
+        {
+            return points_;
+        }
 
-       //- Non-const access to the faces
-       faceCompactIOList& storedIOFaces()
-       {
-           return faces_;
-       }
+        //- Non-const access to the faces
+        faceCompactIOList& storedIOFaces()
+        {
+            return faces_;
+        }
 
-       //- Non-const access to the zones
-       surfZoneIOList& storedIOZones()
-       {
-           return zones_;
-       }
+        //- Non-const access to the zones
+        surfZoneIOList& storedIOZones()
+        {
+            return zones_;
+        }
 
-       //- Const access to the points
-       const pointIOField& storedIOPoints() const
-       {
-           return points_;
-       }
+        //- Const access to the points
+        const pointIOField& storedIOPoints() const
+        {
+            return points_;
+        }
 
-       //- Const access to the faces
-       const faceCompactIOList& storedIOFaces() const
-       {
-           return faces_;
-       }
+        //- Const access to the faces
+        const faceCompactIOList& storedIOFaces() const
+        {
+            return faces_;
+        }
 
-       //- Const access to the zones
-       const surfZoneIOList& storedIOZones() const
-       {
-           return zones_;
-       }
+        //- Const access to the zones
+        const surfZoneIOList& storedIOZones() const
+        {
+            return zones_;
+        }
 
 
-   //  Storage Management
+    //  Storage Management
 
-       //- Clear primitive data (points, faces and zones)
-       void clear();
+        //- Clear primitive data (points, faces and zones)
+        void clear();
 
 
    // Writing
@@ -176,6 +178,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace Detail
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

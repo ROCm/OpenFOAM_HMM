@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,34 +21,52 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Cutting plane sampling functionality
-
 \*---------------------------------------------------------------------------*/
 
-#include "cuttingPlane.H"
+#include "surfMeshSamplePlane.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::Field<Type>> Foam::cuttingPlane::sample
+Foam::tmp<Foam::Field<Type>>
+Foam::surfMeshSamplePlane::sampleOnFaces
 (
-    const Field<Type>& fld
+    const interpolation<Type>& sampler
 ) const
 {
-    return tmp<Field<Type>>::New(fld, meshCells());
+    return surfMeshSample::sampleOnFaces
+    (
+        sampler,
+        SurfaceSource::meshCells(),
+        surface().faces(),
+        surface().points()
+    );
 }
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type>> Foam::cuttingPlane::sample
+bool Foam::surfMeshSamplePlane::sampleType
 (
-    const tmp<Field<Type>>& tfld
+    const word& fieldName,
+    const word& sampleScheme
 ) const
 {
-    tmp<Field<Type>> tsf = sample(tfld());
-    tfld.clear();
-    return tsf;
+    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
+
+    const auto* volFldPtr = mesh().lookupObjectPtr<VolFieldType>(fieldName);
+
+    if (!volFldPtr)
+    {
+        return false;
+    }
+
+    auto samplerPtr = interpolation<Type>::New(sampleScheme, *volFldPtr);
+
+    getOrCreateSurfField<Type>(*volFldPtr).field() =
+        sampleOnFaces(*samplerPtr);
+
+    return true;
 }
+
 
 // ************************************************************************* //

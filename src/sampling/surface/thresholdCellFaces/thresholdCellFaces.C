@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,7 +84,6 @@ void Foam::thresholdCellFaces::calculate
     label nFaces = 0;
     label nPoints = 0;
 
-
     meshCells_.clear();
 
     DynamicList<face>  surfFaces(0.5 * mesh_.nFaces());
@@ -98,7 +97,7 @@ void Foam::thresholdCellFaces::calculate
     {
         int side = 0;
 
-        // check lowerThreshold
+        // Check lowerThreshold
         if (field[own[facei]] > lowerThreshold)
         {
             if (field[nei[facei]] < lowerThreshold)
@@ -111,7 +110,7 @@ void Foam::thresholdCellFaces::calculate
             side = -1;
         }
 
-        // check upperThreshold
+        // Check upperThreshold
         if (field[own[facei]] < upperThreshold)
         {
             if (field[nei[facei]] > upperThreshold)
@@ -129,11 +128,11 @@ void Foam::thresholdCellFaces::calculate
         {
             const face& f = origFaces[facei];
 
-            forAll(f, fp)
+            for (const label pointi : f)
             {
-                if (oldToNewPoints[f[fp]] == -1)
+                if (oldToNewPoints[pointi] == -1)
                 {
-                    oldToNewPoints[f[fp]] = nPoints++;
+                    oldToNewPoints[pointi] = nPoints++;
                 }
             }
 
@@ -201,11 +200,11 @@ void Foam::thresholdCellFaces::calculate
             )
             {
                 const face& f = origFaces[facei];
-                forAll(f, fp)
+                for (const label pointi : f)
                 {
-                    if (oldToNewPoints[f[fp]] == -1)
+                    if (oldToNewPoints[pointi] == -1)
                     {
-                        oldToNewPoints[f[fp]] = nPoints++;
+                        oldToNewPoints[pointi] = nPoints++;
                     }
                 }
 
@@ -237,9 +236,9 @@ void Foam::thresholdCellFaces::calculate
     surfCells.shrink();
 
     // renumber
-    forAll(surfFaces, facei)
+    for (face& f : surfFaces)
     {
-        inplaceRenumber(oldToNewPoints, surfFaces[facei]);
+        inplaceRenumber(oldToNewPoints, f);
     }
 
 
@@ -250,7 +249,7 @@ void Foam::thresholdCellFaces::calculate
         if (oldToNewPoints[pointi] >= 0)
         {
             surfPoints[oldToNewPoints[pointi]] = origPoints[pointi];
-            nPoints++;
+            ++nPoints;
         }
     }
     surfPoints.setSize(nPoints);
@@ -276,7 +275,6 @@ Foam::thresholdCellFaces::thresholdCellFaces
 :
     mesh_(mesh)
 {
-
     if (lowerThreshold > upperThreshold)
     {
         WarningInFunction

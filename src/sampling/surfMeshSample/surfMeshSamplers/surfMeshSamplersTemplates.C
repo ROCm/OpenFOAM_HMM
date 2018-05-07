@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,41 +23,43 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfMeshPlaneSampler.H"
+#include "surfMeshSamplers.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-bool Foam::surfMeshPlaneSampler::sampleType
+Foam::wordList
+Foam::surfMeshSamplers::acceptType() const
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
+
+    return mesh_.names<VolFieldType>(fieldSelection_);
+}
+
+
+#if 0
+template<class Type>
+Foam::wordList
+Foam::surfMeshSamplers::acceptType
 (
-    const word& fieldName
+    const IOobjectList& objects,
+    bool fromFiles
 ) const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
-    if (!mesh().foundObject<VolFieldType>(fieldName))
+    if (fromFiles_)
     {
-        return false;
+        // This should actually be in the caller:
+        // IOobjectList objects1 = objects.lookup(fieldSelection_);
+
+        return objects.names(VolFieldType::typeName, fieldSelection_);
     }
 
-    const VolFieldType& fld = mesh().lookupObject<VolFieldType>(fieldName);
-
-    getOrCreateSurfField<Type>(fld).field()
-        = SurfaceSource::sample<Type>(fld);
-
-    return true;
+    return mesh_.names<VolFieldType>(fieldSelection_);
 }
-
-
-template<class Type>
-Foam::tmp<Foam::Field<Type>>
-Foam::surfMeshPlaneSampler::sampleField
-(
-    const GeometricField<Type, fvPatchField, volMesh>& vField
-) const
-{
-    return SurfaceSource::sample<Type>(vField);
-}
+#endif
 
 
 // ************************************************************************* //

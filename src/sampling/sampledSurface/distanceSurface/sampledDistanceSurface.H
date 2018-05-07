@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,25 +22,51 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::distanceSurface
+    Foam::sampledDistanceSurface
 
 Description
-    A sampledSurface defined by a distance to a surface.
+    A sampledSurface defined by a distance to a surface - using either
+    an isoSurfaceCell or an isoSurface.
 
-    Uses either isoSurfaceCell or isoSurface.
+    This is often embedded as part of a sampled surfaces function object.
+
+Usage
+    Example of function object partial specification:
+    \verbatim
+    surfaces
+    (
+        surface1
+        {
+            type        dDistanceSurface;
+        }
+    );
+    \endverbatim
+
+    Where the sub-entries comprise:
+    \table
+        Property | Description                             | Required | Default
+        type     | distanceSurface                         | yes      |
+        distance | distance from surface                   | yes      |
+        signed   | apply sign for +ve/-ve distance         | yes      |
+        cell     | use isoSurfaceCell algorithm            | no       | true
+        regularise | point snapping                        | yes      |
+        average  | cell values from averaged point values  | no       | false
+        bounds   | limit with bounding box                 | no       |
+        surfaceType | type of surface                      | yes      |
+        surfaceName | name of surface in triSurface/       | no  | dict name
+    \endtable
+
 
 SourceFiles
-    distanceSurface.C
+    sampledDistanceSurface.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef distanceSurface_H
-#define distanceSurface_H
+#ifndef sampledDistanceSurface_H
+#define sampledDistanceSurface_H
 
 #include "sampledSurface.H"
-#include "searchableSurface.H"
-#include "isoSurfaceCell.H"
-#include "isoSurface.H"
+#include "distanceSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,109 +74,59 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class distanceSurface Declaration
+                   Class sampledDistanceSurface Declaration
 \*---------------------------------------------------------------------------*/
 
-class distanceSurface
+class sampledDistanceSurface
 :
-    public sampledSurface
+    public sampledSurface,
+    public distanceSurface
 {
     // Private data
 
-        //- Surface
-        const autoPtr<searchableSurface> surfPtr_;
-
-        //- Distance value
-        const scalar distance_;
-
-        //- Signed distance
-        const bool signed_;
-
-        //- Whether to use isoSurfaceCell or isoSurface
-        const bool cell_;
-
-        //- Whether to coarsen
-        const Switch regularise_;
-
         //- Whether to recalculate cell values as average of point values
         const Switch average_;
-
-        //- Optional bounding box to trim triangles against
-        const boundBox bounds_;
-
-        //- If restricted to zones, name of this zone or a regular expression
-        keyType zoneKey_;
 
         //- Track if the surface needs an update
         mutable bool needsUpdate_;
 
 
-        //- Distance to cell centres
-        autoPtr<volScalarField> cellDistancePtr_;
-
-        //- Distance to points
-        scalarField pointDistance_;
-
-        //- Constructed iso surface
-        autoPtr<isoSurfaceCell> isoSurfCellPtr_;
-
-        //- Constructed iso surface
-        autoPtr<isoSurface> isoSurfPtr_;
-
-
     // Private Member Functions
 
-        //- Create iso surface
-        void createGeometry();
-
-        //- Sample field on faces
+        //- Sample volume field onto surface faces
         template<class Type>
-        tmp<Field<Type>> sampleField
+        tmp<Field<Type>> sampleOnFaces
         (
-            const GeometricField<Type, fvPatchField, volMesh>& vField
+            const interpolation<Type>& sampler
         ) const;
 
-
+        //- Interpolate volume field onto surface points
         template<class Type>
-        tmp<Field<Type>>
-        interpolateField(const interpolation<Type>&) const;
+        tmp<Field<Type>> sampleOnPoints
+        (
+            const interpolation<Type>& interpolation
+        ) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("distanceSurface");
+    TypeName("sampledDistanceSurface");
 
 
     // Constructors
 
         //- Construct from dictionary
-        distanceSurface
+        sampledDistanceSurface
         (
             const word& name,
             const polyMesh& mesh,
             const dictionary& dict
         );
 
-        //- Construct from components
-        distanceSurface
-        (
-            const word& name,
-            const polyMesh& mesh,
-            const bool interpolate,
-            const word& surfaceType,
-            const word& surfaceName,
-            const scalar distance,
-            const bool signedDistance,
-            const bool cell,
-            const Switch regularise,
-            const Switch average,
-            const boundBox& bounds = boundBox::invertedBox
-        );
-
 
     //- Destructor
-    virtual ~distanceSurface();
+    virtual ~sampledDistanceSurface() = default;
 
 
     // Member Functions
@@ -204,81 +180,76 @@ public:
         }
 
 
-        //- The underlying surface
-        const meshedSurface& surface() const
-        {
-            if (cell_)
-            {
-                return *isoSurfCellPtr_;
-            }
+    // Sample
 
-            return *isoSurfPtr_;
-        }
-
-
-        //- Sample field on surface
+        //- Sample volume field onto surface faces
         virtual tmp<scalarField> sample
         (
-            const volScalarField&
+            const interpolation<scalar>& sampler
         ) const;
 
-        //- Sample field on surface
+        //- Sample volume field onto surface faces
         virtual tmp<vectorField> sample
         (
-            const volVectorField&
+            const interpolation<vector>& sampler
         ) const;
 
-        //- Sample field on surface
+        //- Sample volume field onto surface faces
         virtual tmp<sphericalTensorField> sample
         (
-            const volSphericalTensorField&
+            const interpolation<sphericalTensor>& sampler
         ) const;
 
-        //- Sample field on surface
+        //- Sample volume field onto surface faces
         virtual tmp<symmTensorField> sample
         (
-            const volSymmTensorField&
+            const interpolation<symmTensor>& sampler
         ) const;
 
-        //- Sample field on surface
+        //- Sample volume field onto surface faces
         virtual tmp<tensorField> sample
         (
-            const volTensorField&
+            const interpolation<tensor>& sampler
         ) const;
 
 
-        //- Interpolate field on surface
+    // Interpolate
+
+        //- Interpolate volume field onto surface points
         virtual tmp<scalarField> interpolate
         (
-            const interpolation<scalar>&
+            const interpolation<scalar>& interpolator
         ) const;
 
-        //- Interpolate field on surface
+        //- Interpolate volume field onto surface points
         virtual tmp<vectorField> interpolate
         (
-            const interpolation<vector>&
+            const interpolation<vector>& interpolator
         ) const;
 
-        //- Interpolate field on surface
+        //- Interpolate volume field onto surface points
         virtual tmp<sphericalTensorField> interpolate
         (
-            const interpolation<sphericalTensor>&
+            const interpolation<sphericalTensor>& interpolator
         ) const;
 
-        //- Interpolate field on surface
+        //- Interpolate volume field onto surface points
         virtual tmp<symmTensorField> interpolate
         (
-            const interpolation<symmTensor>&
+            const interpolation<symmTensor>& interpolator
         ) const;
 
-        //- Interpolate field on surface
+        //- Interpolate volume field onto surface points
         virtual tmp<tensorField> interpolate
         (
-            const interpolation<tensor>&
+            const interpolation<tensor>& interpolator
         ) const;
 
-        //- Write
-        virtual void print(Ostream&) const;
+
+    // Output
+
+        //- Print information
+        virtual void print(Ostream& os) const;
 };
 
 
@@ -289,7 +260,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "distanceSurfaceTemplates.C"
+    #include "sampledDistanceSurfaceTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

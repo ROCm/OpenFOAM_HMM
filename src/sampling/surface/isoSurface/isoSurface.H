@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,6 @@ Description
     can use the neighbouring value. Any separated processor face or cyclic
     face gets handled just like any boundary face.
 
-
 SourceFiles
     isoSurface.C
     isoSurfaceTemplates.C
@@ -74,6 +73,8 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward declarations
 
 class fvMesh;
 class plane;
@@ -162,7 +163,7 @@ class isoSurface
             bool noTransform(const tensor& tt) const;
 
             //- Is patch a collocated (i.e. non-separated) coupled patch?
-            static bool collocatedPatch(const polyPatch&);
+            static bool collocatedPatch(const polyPatch& pp);
 
             //- Per face whether is collocated
             bitSet collocatedFaces(const coupledPolyPatch&) const;
@@ -291,7 +292,7 @@ class isoSurface
             const bool hasSnap3,
             const Type& snapP3,
 
-            DynamicList<Type>& points
+            DynamicList<Type>& pts
         ) const;
 
         template<class Type>
@@ -402,9 +403,9 @@ public:
 
     // Constructors
 
-        //- Construct from cell values and point values. Uses boundaryField
-        //  for boundary values. Holds reference to cellIsoVals and
-        //  pointIsoVals.
+        //- Construct from cell values and point values.
+        //  Uses boundaryField for boundary values.
+        //  Holds reference to cellIsoVals and pointIsoVals.
         isoSurface
         (
             const volScalarField& cellIsoVals,
@@ -418,14 +419,22 @@ public:
 
     // Member Functions
 
-        //- For every face, the original cell in mesh
+        //- For each face, the original cell in mesh
         const labelList& meshCells() const
         {
             return meshCells_;
         }
 
-        //- Interpolates cCoords,pCoords. Uses the references to the original
-        //  fields used to create the iso surface.
+        //- For each face, the original cell in mesh
+        labelList& meshCells()
+        {
+            return meshCells_;
+        }
+
+
+        //- Interpolates cCoords, pCoords.
+        //  Uses the references to the original fields used to create the
+        //  iso surface.
         template<class Type>
         tmp<Field<Type>> interpolate
         (

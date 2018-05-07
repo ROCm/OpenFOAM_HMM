@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,26 +36,105 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(distanceSurface, 0);
-    addToRunTimeSelectionTable(sampledSurface, distanceSurface, word);
 }
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::distanceSurface::distanceSurface
+(
+    const word& defaultSurfaceName,
+    const polyMesh& mesh,
+    const dictionary& dict
+)
+:
+    mesh_(mesh),
+    surfPtr_
+    (
+        searchableSurface::New
+        (
+            dict.lookup("surfaceType"),
+            IOobject
+            (
+                dict.lookupOrDefault("surfaceName", defaultSurfaceName),
+                mesh.time().constant(), // directory
+                "triSurface",           // instance
+                mesh.time(),            // registry
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            ),
+            dict
+        )
+    ),
+    distance_(readScalar(dict.lookup("distance"))),
+    signed_(readBool(dict.lookup("signed"))),
+    cell_(dict.lookupOrDefault("cell", true)),
+    regularise_(dict.lookupOrDefault("regularise", true)),
+    bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox)),
+    zoneKey_(keyType::null),
+    isoSurfCellPtr_(nullptr),
+    isoSurfPtr_(nullptr)
+{}
+
+
+Foam::distanceSurface::distanceSurface
+(
+    const polyMesh& mesh,
+    const bool interpolate,
+    const word& surfaceType,
+    const word& surfaceName,
+    const scalar distance,
+    const bool signedDistance,
+    const bool cell,
+    const Switch regularise,
+    const boundBox& bounds
+)
+:
+    mesh_(mesh),
+    surfPtr_
+    (
+        searchableSurface::New
+        (
+            surfaceType,
+            IOobject
+            (
+                surfaceName,            // name
+                mesh.time().constant(), // directory
+                "triSurface",           // instance
+                mesh.time(),            // registry
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            ),
+            dictionary()
+        )
+    ),
+    distance_(distance),
+    signed_(signedDistance),
+    cell_(cell),
+    regularise_(regularise),
+    bounds_(bounds),
+    zoneKey_(keyType::null),
+    isoSurfCellPtr_(nullptr),
+    isoSurfPtr_(nullptr)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::distanceSurface::createGeometry()
 {
     if (debug)
     {
-        Pout<< "distanceSurface::createGeometry :updating geometry." << endl;
+        Pout<< "distanceSurface::createGeometry updating geometry." << endl;
     }
 
     // Clear any stored topologies
     isoSurfCellPtr_.clear();
     isoSurfPtr_.clear();
 
-    // Clear derived data
-    clearGeom();
+    const fvMesh& fvm = static_cast<const fvMesh&>(mesh_);
 
-    const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
+    const labelList& own = fvm.faceOwner();
 
     // Distance to cell centres
     // ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -77,7 +156,7 @@ void Foam::distanceSurface::createGeometry()
             dimensionedScalar(dimLength, Zero)
         )
     );
-    volScalarField& cellDistance = cellDistancePtr_();
+    volScalarField& cellDistance = *cellDistancePtr_;
 
     // Internal field
     {
@@ -110,10 +189,17 @@ void Foam::distanceSurface::createGeometry()
                 {
                     fld[i] = -Foam::mag(cc[i] - nearest[i].hitPoint());
                 }
+                else if (vT == volumeType::UNKNOWN)
+                {
+                    // Treat as very far outside
+                    fld[i] = GREAT;
+                }
                 else
                 {
                     FatalErrorInFunction
-                        << "getVolumeType failure, neither INSIDE or OUTSIDE"
+                        << "getVolumeType failure:"
+                        << " neither INSIDE or OUTSIDE but "
+                        << volumeType::names[vT]
                         << exit(FatalError);
                 }
             }
@@ -136,6 +222,9 @@ void Foam::distanceSurface::createGeometry()
         {
             const pointField& cc = fvm.C().boundaryField()[patchi];
             fvPatchScalarField& fld = cellDistanceBf[patchi];
+
+            const label patchStarti = fvm.boundaryMesh()[patchi].start();
+
 
             List<pointIndexHit> nearest;
             surfPtr_().findNearest
@@ -163,11 +252,23 @@ void Foam::distanceSurface::createGeometry()
                     {
                         fld[i] = -Foam::mag(cc[i] - nearest[i].hitPoint());
                     }
+                    else if (vT == volumeType::UNKNOWN)
+                    {
+                        // Nothing known, so use the cell value.
+                        // - this avoids spurious changes on the boundary
+
+                        // The cell value
+                        const label meshFacei = i+patchStarti;
+                        const scalar& cellVal = cellDistance[own[meshFacei]];
+
+                        fld[i] = cellVal;
+                    }
                     else
                     {
                         FatalErrorInFunction
-                            << "getVolumeType failure, "
-                            << "neither INSIDE or OUTSIDE"
+                            << "getVolumeType failure:"
+                            << " neither INSIDE or OUTSIDE but "
+                            << volumeType::names[vT]
                             << exit(FatalError);
                     }
                 }
@@ -220,10 +321,17 @@ void Foam::distanceSurface::createGeometry()
                     pointDistance_[i] =
                         -Foam::mag(pts[i] - nearest[i].hitPoint());
                 }
+                else if (vT == volumeType::UNKNOWN)
+                {
+                    // Treat as very far outside
+                    pointDistance_[i] = GREAT;
+                }
                 else
                 {
                     FatalErrorInFunction
-                        << "getVolumeType failure, neither INSIDE or OUTSIDE"
+                        << "getVolumeType failure:"
+                        << " neither INSIDE or OUTSIDE but "
+                        << volumeType::names[vT]
                         << exit(FatalError);
                 }
             }
@@ -263,7 +371,7 @@ void Foam::distanceSurface::createGeometry()
     }
 
 
-    //- Direct from cell field and point field.
+    // Direct from cell field and point field.
     if (cell_)
     {
         isoSurfCellPtr_.reset
@@ -302,253 +410,12 @@ void Foam::distanceSurface::createGeometry()
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::distanceSurface::distanceSurface
-(
-    const word& name,
-    const polyMesh& mesh,
-    const dictionary& dict
-)
-:
-    sampledSurface(name, mesh, dict),
-    surfPtr_
-    (
-        searchableSurface::New
-        (
-            dict.lookup("surfaceType"),
-            IOobject
-            (
-                dict.lookupOrDefault("surfaceName", name),  // name
-                mesh.time().constant(),                     // directory
-                "triSurface",                               // instance
-                mesh.time(),                                // registry
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            ),
-            dict
-        )
-    ),
-    distance_(readScalar(dict.lookup("distance"))),
-    signed_(readBool(dict.lookup("signed"))),
-    cell_(dict.lookupOrDefault("cell", true)),
-    regularise_(dict.lookupOrDefault("regularise", true)),
-    average_(dict.lookupOrDefault("average", false)),
-    bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox)),
-    zoneKey_(keyType::null),
-    needsUpdate_(true),
-    isoSurfCellPtr_(nullptr),
-    isoSurfPtr_(nullptr)
-{
-//    dict.readIfPresent("zone", zoneKey_);
-//
-//    if (debug && zoneKey_.size() && mesh.cellZones().findZoneID(zoneKey_) < 0)
-//    {
-//        Info<< "cellZone " << zoneKey_
-//            << " not found - using entire mesh" << endl;
-//    }
-}
-
-
-
-Foam::distanceSurface::distanceSurface
-(
-    const word& name,
-    const polyMesh& mesh,
-    const bool interpolate,
-    const word& surfaceType,
-    const word& surfaceName,
-    const scalar distance,
-    const bool signedDistance,
-    const bool cell,
-    const Switch regularise,
-    const Switch average,
-    const boundBox& bounds
-)
-:
-    sampledSurface(name, mesh, interpolate),
-    surfPtr_
-    (
-        searchableSurface::New
-        (
-            surfaceType,
-            IOobject
-            (
-                surfaceName,  // name
-                mesh.time().constant(),                     // directory
-                "triSurface",                               // instance
-                mesh.time(),                                // registry
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            ),
-            dictionary()
-        )
-    ),
-    distance_(distance),
-    signed_(signedDistance),
-    cell_(cell),
-    regularise_(regularise),
-    average_(average),
-    bounds_(bounds),
-    zoneKey_(keyType::null),
-    needsUpdate_(true),
-    isoSurfCellPtr_(nullptr),
-    isoSurfPtr_(nullptr)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::distanceSurface::~distanceSurface()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::distanceSurface::needsUpdate() const
-{
-    return needsUpdate_;
-}
-
-
-bool Foam::distanceSurface::expire()
-{
-    if (debug)
-    {
-        Pout<< "distanceSurface::expire :"
-            << " needsUpdate:" << needsUpdate_ << endl;
-    }
-
-    // Clear derived data
-    clearGeom();
-
-    // already marked as expired
-    if (needsUpdate_)
-    {
-        return false;
-    }
-
-    needsUpdate_ = true;
-    return true;
-}
-
-
-bool Foam::distanceSurface::update()
-{
-    if (debug)
-    {
-        Pout<< "distanceSurface::update :"
-            << " needsUpdate:" << needsUpdate_ << endl;
-    }
-
-    if (!needsUpdate_)
-    {
-        return false;
-    }
-
-    createGeometry();
-
-    needsUpdate_ = false;
-    return true;
-}
-
-
-Foam::tmp<Foam::scalarField> Foam::distanceSurface::sample
-(
-    const volScalarField& vField
-) const
-{
-    return sampleField(vField);
-}
-
-
-Foam::tmp<Foam::vectorField> Foam::distanceSurface::sample
-(
-    const volVectorField& vField
-) const
-{
-    return sampleField(vField);
-}
-
-
-Foam::tmp<Foam::sphericalTensorField> Foam::distanceSurface::sample
-(
-    const volSphericalTensorField& vField
-) const
-{
-    return sampleField(vField);
-}
-
-
-Foam::tmp<Foam::symmTensorField> Foam::distanceSurface::sample
-(
-    const volSymmTensorField& vField
-) const
-{
-    return sampleField(vField);
-}
-
-
-Foam::tmp<Foam::tensorField> Foam::distanceSurface::sample
-(
-    const volTensorField& vField
-) const
-{
-    return sampleField(vField);
-}
-
-
-Foam::tmp<Foam::scalarField> Foam::distanceSurface::interpolate
-(
-    const interpolation<scalar>& interpolator
-) const
-{
-    return interpolateField(interpolator);
-}
-
-
-Foam::tmp<Foam::vectorField> Foam::distanceSurface::interpolate
-(
-    const interpolation<vector>& interpolator
-) const
-{
-    return interpolateField(interpolator);
-}
-
-Foam::tmp<Foam::sphericalTensorField> Foam::distanceSurface::interpolate
-(
-    const interpolation<sphericalTensor>& interpolator
-) const
-{
-    return interpolateField(interpolator);
-}
-
-
-Foam::tmp<Foam::symmTensorField> Foam::distanceSurface::interpolate
-(
-    const interpolation<symmTensor>& interpolator
-) const
-{
-    return interpolateField(interpolator);
-}
-
-
-Foam::tmp<Foam::tensorField> Foam::distanceSurface::interpolate
-(
-    const interpolation<tensor>& interpolator
-) const
-{
-    return interpolateField(interpolator);
-}
-
-
 void Foam::distanceSurface::print(Ostream& os) const
 {
-    os  << "distanceSurface: " << name() << " :"
-        << "  surface:" << surfPtr_().name()
-        << "  distance:" << distance_
-        << "  faces:" << faces().size()
-        << "  points:" << points().size();
+    os  << "  surface:" << surfaceName()
+        << "  distance:" << distance()
+        << "  faces:" << surface().surfFaces().size()
+        << "  points:" << surface().points().size();
 }
 
 

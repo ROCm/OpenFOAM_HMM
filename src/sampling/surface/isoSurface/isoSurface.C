@@ -36,7 +36,13 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(isoSurface, 0);
+}
 
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
     // Helper class for slicing triangles
     class storeOp
     {
@@ -53,7 +59,16 @@ namespace Foam
             tris_.append(tri);
         }
     };
-}
+
+
+    // Avoid detecting change if the cells have been marked as GREAT
+    // (ie, ignore them)
+    static inline constexpr bool ignoreValue(const scalar val)
+    {
+        return (val >= 0.5*Foam::GREAT);
+    }
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -254,7 +269,7 @@ void Foam::isoSurface::syncUnseparatedPoints
 
         forAll(pd.sharedPointLabels(), i)
         {
-            label meshPointi = pd.sharedPointLabels()[i];
+            const label meshPointi = pd.sharedPointLabels()[i];
             // Fill my entries in the shared points
             sharedPts[pd.sharedPointAddr()[i]] = pointValues[meshPointi];
         }
@@ -267,7 +282,7 @@ void Foam::isoSurface::syncUnseparatedPoints
         // my local information.
         forAll(pd.sharedPointLabels(), i)
         {
-            label meshPointi = pd.sharedPointLabels()[i];
+            const label meshPointi = pd.sharedPointLabels()[i];
             pointValues[meshPointi] = sharedPts[pd.sharedPointAddr()[i]];
         }
     }
@@ -280,16 +295,14 @@ Foam::scalar Foam::isoSurface::isoFraction
     const scalar s1
 ) const
 {
-    scalar d = s1-s0;
+    const scalar d = s1-s0;
 
     if (mag(d) > VSMALL)
     {
         return (iso_-s0)/d;
     }
-    else
-    {
-        return -1.0;
-    }
+
+    return -1.0;
 }
 
 
@@ -301,19 +314,41 @@ bool Foam::isoSurface::isEdgeOfFaceCut
     const bool neiLower
 ) const
 {
+    // Could also count number of edges cut and return when they are > 1
+    // but doesn't appear to improve anything
+
     forAll(f, fp)
     {
-        bool fpLower = (pVals[f[fp]] < iso_);
-        if
-        (
-            (fpLower != ownLower)
-         || (fpLower != neiLower)
-         || (fpLower != (pVals[f[f.fcIndex(fp)]] < iso_))
-        )
+        const scalar& pt0Value = pVals[f[fp]];
+
+        if (ignoreValue(pt0Value))
         {
+            continue;
+        }
+
+        const bool fpLower = (pt0Value < iso_);
+
+        if (fpLower != ownLower || fpLower != neiLower)
+        {
+            // ++ncut;
             return true;
         }
+        else
+        {
+            const scalar& pt1Value = pVals[f[f.fcIndex(fp)]];
+
+            if (!ignoreValue(pt1Value) && (fpLower != (pt1Value < iso_)))
+            {
+                // ++ncut;
+                return true;
+            }
+        }
+        // if (ncut > 1)
+        // {
+        //     return true;
+        // }
     }
+
     return false;
 }
 
@@ -334,16 +369,16 @@ void Foam::isoSurface::getNeighbour
 
     if (mesh_.isInternalFace(facei))
     {
-        label nbr = (own[facei] == celli ? nei[facei] : own[facei]);
+        const label nbr = (own[facei] == celli ? nei[facei] : own[facei]);
         nbrValue = cVals[nbr];
         nbrPoint = meshC[nbr];
     }
     else
     {
-        label bFacei = facei-mesh_.nInternalFaces();
-        label patchi = boundaryRegion[bFacei];
+        const label bFacei = facei-mesh_.nInternalFaces();
+        const label patchi = boundaryRegion[bFacei];
         const polyPatch& pp = mesh_.boundaryMesh()[patchi];
-        label patchFacei = facei-pp.start();
+        const label patchFacei = facei-pp.start();
 
         nbrValue = cVals.boundaryField()[patchi][patchFacei];
         nbrPoint = meshC.boundaryField()[patchi][patchFacei];
@@ -366,10 +401,18 @@ void Foam::isoSurface::calcCutTypes
     faceCutType_.setSize(mesh_.nFaces());
     faceCutType_ = NOTCUT;
 
-    for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
+    // Avoid detecting change if the cells have been marked as GREAT
+    // (ie, ignore them)
+
+    for (label facei = 0; facei < mesh_.nInternalFaces(); ++facei)
     {
-        // CC edge.
-        bool ownLower = (cVals[own[facei]] < iso_);
+        const scalar& ownValue = cVals[own[facei]];
+        if (ignoreValue(ownValue))
+        {
+            continue;
+        }
+
+        const bool ownLower = (ownValue < iso_);
 
         scalar nbrValue;
         point nbrPoint;
@@ -384,7 +427,12 @@ void Foam::isoSurface::calcCutTypes
             nbrPoint
         );
 
-        bool neiLower = (nbrValue < iso_);
+        if (ignoreValue(nbrValue))
+        {
+            continue;
+        }
+
+        const bool neiLower = (nbrValue < iso_);
 
         if (ownLower != neiLower)
         {
@@ -392,8 +440,8 @@ void Foam::isoSurface::calcCutTypes
         }
         else
         {
-            // See if any mesh edge is cut by looping over all the edges of the
-            // face.
+            // Is mesh edge cut?
+            // - by looping over all the edges of the face.
             const face f = mesh_.faces()[facei];
 
             if (isEdgeOfFaceCut(pVals, f, ownLower, neiLower))
@@ -411,7 +459,8 @@ void Foam::isoSurface::calcCutTypes
 
         forAll(pp, i)
         {
-            bool ownLower = (cVals[own[facei]] < iso_);
+            const scalar& ownValue = cVals[own[facei]];
+            const bool ownLower = (ownValue < iso_);
 
             scalar nbrValue;
             point nbrPoint;
@@ -426,7 +475,7 @@ void Foam::isoSurface::calcCutTypes
                 nbrPoint
             );
 
-            bool neiLower = (nbrValue < iso_);
+            const bool neiLower = (nbrValue < iso_);
 
             if (ownLower != neiLower)
             {
@@ -434,7 +483,8 @@ void Foam::isoSurface::calcCutTypes
             }
             else
             {
-                // Mesh edge.
+                // Is mesh edge cut?
+                // - by looping over all the edges of the face.
                 const face f = mesh_.faces()[facei];
 
                 if (isEdgeOfFaceCut(pVals, f, ownLower, neiLower))
@@ -443,49 +493,73 @@ void Foam::isoSurface::calcCutTypes
                 }
             }
 
-            facei++;
+            ++facei;
         }
     }
-
-
 
     nCutCells_ = 0;
     cellCutType_.setSize(mesh_.nCells());
     cellCutType_ = NOTCUT;
 
-    for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
+
+    // Propagate internal face cuts into the cells.
+    // For cells marked as ignore (eg, GREAT) - skip this.
+
+    for (label facei = 0; facei < mesh_.nInternalFaces(); ++facei)
     {
-        if (faceCutType_[facei] != NOTCUT)
+        if (faceCutType_[facei] == NOTCUT)
         {
-            if (cellCutType_[own[facei]] == NOTCUT)
-            {
-                cellCutType_[own[facei]] = CUT;
-                nCutCells_++;
-            }
-            if (cellCutType_[nei[facei]] == NOTCUT)
-            {
-                cellCutType_[nei[facei]] = CUT;
-                nCutCells_++;
-            }
+            continue;
+        }
+
+        if
+        (
+            cellCutType_[own[facei]] == NOTCUT
+         && !ignoreValue(cVals[own[facei]])
+        )
+        {
+            cellCutType_[own[facei]] = CUT;
+            ++nCutCells_;
+        }
+        if
+        (
+            cellCutType_[nei[facei]] == NOTCUT
+         && !ignoreValue(cVals[nei[facei]])
+        )
+        {
+            cellCutType_[nei[facei]] = CUT;
+            ++nCutCells_;
         }
     }
-    for (label facei = mesh_.nInternalFaces(); facei < mesh_.nFaces(); facei++)
+
+
+    // Propagate boundary face cuts into the cells.
+    // For cells marked as ignore (eg, GREAT) - skip this and
+    // also suppress the boundary face cut to prevent dangling face cuts.
+
+    for (label facei = mesh_.nInternalFaces(); facei < mesh_.nFaces(); ++facei)
     {
-        if (faceCutType_[facei] != NOTCUT)
+        if (faceCutType_[facei] == NOTCUT)
         {
-            if (cellCutType_[own[facei]] == NOTCUT)
-            {
-                cellCutType_[own[facei]] = CUT;
-                nCutCells_++;
-            }
+            continue;
+        }
+
+        if (ignoreValue(cVals[own[facei]]))
+        {
+            // Suppress dangling boundary face cut
+            faceCutType_[facei] = NOTCUT;
+        }
+        else if (cellCutType_[own[facei]] == NOTCUT)
+        {
+            cellCutType_[own[facei]] = CUT;
+            ++nCutCells_;
         }
     }
 
     if (debug)
     {
-        Pout<< "isoSurface : detected " << nCutCells_
-            << " candidate cut cells (out of " << mesh_.nCells()
-            << ")." << endl;
+        Pout<< "isoSurface : candidate cut cells "
+            << nCutCells_ << " / " << mesh_.nCells() << endl;
     }
 }
 
@@ -597,7 +671,7 @@ void Foam::isoSurface::calcSnappedCc
                             if (s[i] >= 0.0 && s[i] <= 0.5)
                             {
                                 otherPointSum += pt[i];
-                                nOther++;
+                                ++nOther;
                             }
                         }
                     }
@@ -792,7 +866,7 @@ void Foam::isoSurface::calcSnappedPoint
                 if (s[i] >= 0.0 && s[i] <= 0.5)
                 {
                     otherPointSum += pt[i];
-                    nOther++;
+                    ++nOther;
                 }
             }
         }
@@ -1455,7 +1529,7 @@ Foam::isoSurface::isoSurface
         forAll(pp, i)
         {
             boundaryRegion[facei-mesh_.nInternalFaces()] = patchi;
-            facei++;
+            ++facei;
         }
     }
 
@@ -1463,6 +1537,38 @@ Foam::isoSurface::isoSurface
 
     // Determine if any cut through face/cell
     calcCutTypes(boundaryRegion, meshC, cValsPtr_(), pVals_);
+
+    if (debug)
+    {
+        const fvMesh& fvm = mesh_;
+
+        volScalarField debugField
+        (
+            IOobject
+            (
+                "cutType",
+                fvm.time().timeName(),
+                fvm.time(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            fvm,
+            dimensionedScalar(dimless, Zero)
+        );
+
+        auto& debugFld = debugField.primitiveFieldRef();
+
+        forAll(cellCutType_, celli)
+        {
+            debugFld[celli] = cellCutType_[celli];
+        }
+
+        Pout<< "Writing cut types:"
+            << debugField.objectPath() << endl;
+
+        debugField.write();
+    }
 
 
     DynamicList<point> snappedPoints(nCutCells_);

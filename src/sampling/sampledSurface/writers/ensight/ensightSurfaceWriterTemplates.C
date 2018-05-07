@@ -306,11 +306,11 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
                 << "time values:" << nl;
 
             label count = 0;
-            forAll(times, timeI)
+            forAll(times, timei)
             {
-                osCase << ' ' << setw(12) << times[timeI];
+                osCase << ' ' << setw(12) << times[timei];
 
-                if (++count % 6 == 0)
+                if (!(++count % 6))
                 {
                     osCase << nl;
                 }
@@ -335,7 +335,7 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
         {
             Info<< "Writing mesh file to " << meshFile.name() << endl;
         }
-        // use two-argument form for path-name to avoid validating the base-dir
+        // Use two-argument form for path-name to avoid validating the base-dir
         ensightGeoFile osGeom(meshFile.path(), meshFile.name(), writeFormat_);
         osGeom << ensPart;
     }
@@ -352,7 +352,7 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
 
     fileName dataDir = baseDir/"data"/timeString;
 
-    // as per mkdir -p "data/000000"
+    // As per mkdir -p "data/000000"
     mkDir(dataDir);
 
     // Write field
@@ -378,7 +378,7 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
         isNodeValues
     );
 
-    // place a timestamp in the directory for future reference
+    // Place a timestamp in the directory for future reference
     {
         OFstream timeStamp(dataDir/"time");
         timeStamp

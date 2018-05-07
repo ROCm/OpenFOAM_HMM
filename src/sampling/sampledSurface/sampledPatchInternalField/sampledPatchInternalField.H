@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,34 @@ Description
     - interpolate=false : get cell value on faces
     - interpolate=true  : interpolate inside cell and interpolate to points
     There is no option to get interpolated value inside the cell on the faces.
+
+    This is often embedded as part of a sampled surfaces function object.
+
+Usage
+    Example of function object partial specification:
+    \verbatim
+    surfaces
+    (
+        surface1
+        {
+            type    patchInternalField;
+            patches (inlet "outlet.*");
+            offsetMode  normal;
+            distance    0.05;
+        }
+    );
+    \endverbatim
+
+    Where the sub-entries comprise:
+    \table
+        Property | Description                             | Required | Default
+        type     | patchInternalField                      | yes      |
+        patches  | patch selection as word/regex list      | yes      |
+        offsetMode | normal/uniform/nonuniform             | no       | normal
+        distance | distance for normal offset              | partly   |
+        offset   | point offset for uniform offset         | partly   |
+        offsets  | point offsets for nonuniform offset     | partly   |
+    \endtable
 
 SourceFiles
     sampledPatchInternalField.C
@@ -64,15 +92,19 @@ class sampledPatchInternalField
 
     // Private Member Functions
 
-        //- Sample field on faces
+        //- Sample volume field onto surface faces
         template<class Type>
-        tmp<Field<Type>> sampleField
+        tmp<Field<Type>> sampleOnFaces
         (
-            const GeometricField<Type, fvPatchField, volMesh>& vField
+            const interpolation<Type>& sampler
         ) const;
 
+        //- Interpolate volume field onto surface points
         template<class Type>
-        tmp<Field<Type>> interpolateField(const interpolation<Type>&) const;
+        tmp<Field<Type>> sampleOnPoints
+        (
+            const interpolation<Type>& interpolator
+        ) const;
 
 
 public:
@@ -93,79 +125,81 @@ public:
 
 
     //- Destructor
-    virtual ~sampledPatchInternalField();
+    virtual ~sampledPatchInternalField() = default;
 
 
     // Member Functions
 
-        // Sample
+    // Sample
 
-            //- Sample field on surface
-            virtual tmp<scalarField> sample
-            (
-                const volScalarField&
-            ) const;
+        //- Sample boundary of volume field onto surface faces
+        virtual tmp<scalarField> sample
+        (
+            const interpolation<scalar>& sampler
+        ) const;
 
-            //- Sample field on surface
-            virtual tmp<vectorField> sample
-            (
-                const volVectorField&
-            ) const;
+        //- Sample boundary of volume field onto surface faces
+        virtual tmp<vectorField> sample
+        (
+            const interpolation<vector>& sampler
+        ) const;
 
-            //- Sample field on surface
-            virtual tmp<sphericalTensorField> sample
-            (
-                const volSphericalTensorField&
-            ) const;
+        //- Sample boundary of volume field onto surface faces
+        virtual tmp<sphericalTensorField> sample
+        (
+            const interpolation<sphericalTensor>& sampler
+        ) const;
 
-            //- Sample field on surface
-            virtual tmp<symmTensorField> sample
-            (
-                const volSymmTensorField&
-            ) const;
+        //- Sample boundary of volume field onto surface faces
+        virtual tmp<symmTensorField> sample
+        (
+            const interpolation<symmTensor>& sampler
+        ) const;
 
-            //- Sample field on surface
-            virtual tmp<tensorField> sample
-            (
-                const volTensorField&
-            ) const;
-
-
-        // Interpolate
-
-            //- Interpolate field on surface
-            virtual tmp<scalarField> interpolate
-            (
-                const interpolation<scalar>&
-            ) const;
-
-            //- Interpolate field on surface
-            virtual tmp<vectorField> interpolate
-            (
-                const interpolation<vector>&
-            ) const;
-
-            //- Interpolate field on surface
-            virtual tmp<sphericalTensorField> interpolate
-            (
-                const interpolation<sphericalTensor>&
-            ) const;
-
-            //- Interpolate field on surface
-            virtual tmp<symmTensorField> interpolate
-            (
-                const interpolation<symmTensor>&
-            ) const;
-
-            //- Interpolate field on surface
-            virtual tmp<tensorField> interpolate
-            (
-                const interpolation<tensor>&
-            ) const;
+        //- Sample boundary of volume field onto surface faces
+        virtual tmp<tensorField> sample
+        (
+            const interpolation<tensor>& sampler
+        ) const;
 
 
-        //- Write
-        virtual void print(Ostream&) const;
+    // Interpolate
+
+        //- Interpolate boundary of volume field onto surface points
+        virtual tmp<scalarField> interpolate
+        (
+            const interpolation<scalar>& interpolator
+        ) const;
+
+        //- Interpolate boundary of volume field onto surface points
+        virtual tmp<vectorField> interpolate
+        (
+            const interpolation<vector>& interpolator
+        ) const;
+
+        //- Interpolate boundary of volume field onto surface points
+        virtual tmp<sphericalTensorField> interpolate
+        (
+            const interpolation<sphericalTensor>& interpolator
+        ) const;
+
+        //- Interpolate boundary of volume field onto surface points
+        virtual tmp<symmTensorField> interpolate
+        (
+            const interpolation<symmTensor>& interpolator
+        ) const;
+
+        //- Interpolate boundary of volume field onto surface points
+        virtual tmp<tensorField> interpolate
+        (
+            const interpolation<tensor>& interpolator
+        ) const;
+
+
+    // Output
+
+        //- Print information
+        virtual void print(Ostream& os) const;
 };
 
 

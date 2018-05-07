@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfMeshPlaneSampler.H"
+#include "surfMeshSamplePlane.H"
 #include "dictionary.H"
 #include "polyMesh.H"
 #include "volFields.H"
@@ -34,31 +34,20 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(surfMeshPlaneSampler, 0);
+    defineTypeNameAndDebug(surfMeshSamplePlane, 0);
     addNamedToRunTimeSelectionTable
     (
-        surfMeshSampler,
-        surfMeshPlaneSampler,
+        surfMeshSample,
+        surfMeshSamplePlane,
         word,
         plane
     );
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::surfMeshPlaneSampler::transferContent()
-{
-    SurfaceSource& src = static_cast<SurfaceSource&>(*this);
-    surfMesh& dst = getOrCreateSurfMesh();
-
-    dst.transfer(src);
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfMeshPlaneSampler::surfMeshPlaneSampler
+Foam::surfMeshSamplePlane::surfMeshSamplePlane
 (
     const word& name,
     const polyMesh& mesh,
@@ -67,7 +56,7 @@ Foam::surfMeshPlaneSampler::surfMeshPlaneSampler
     const bool triangulate
 )
 :
-    surfMeshSampler(name, mesh),
+    surfMeshSample(name, mesh),
     SurfaceSource(planeDesc),
     zoneKey_(zoneKey),
     bounds_(),
@@ -82,14 +71,14 @@ Foam::surfMeshPlaneSampler::surfMeshPlaneSampler
 }
 
 
-Foam::surfMeshPlaneSampler::surfMeshPlaneSampler
+Foam::surfMeshSamplePlane::surfMeshSamplePlane
 (
     const word& name,
     const polyMesh& mesh,
     const dictionary& dict
 )
 :
-    surfMeshSampler(name, mesh, dict),
+    surfMeshSample(name, mesh, dict),
     SurfaceSource(plane(dict)),
     zoneKey_(dict.lookupOrDefault<keyType>("zone", keyType::null)),
     bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox)),
@@ -119,13 +108,13 @@ Foam::surfMeshPlaneSampler::surfMeshPlaneSampler
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::surfMeshPlaneSampler::needsUpdate() const
+bool Foam::surfMeshSamplePlane::needsUpdate() const
 {
     return needsUpdate_;
 }
 
 
-bool Foam::surfMeshPlaneSampler::expire()
+bool Foam::surfMeshSamplePlane::expire()
 {
     // Already marked as expired
     if (needsUpdate_)
@@ -138,7 +127,7 @@ bool Foam::surfMeshPlaneSampler::expire()
 }
 
 
-bool Foam::surfMeshPlaneSampler::update()
+bool Foam::surfMeshSamplePlane::update()
 {
     if (!needsUpdate_)
     {
@@ -243,32 +232,37 @@ bool Foam::surfMeshPlaneSampler::update()
         Pout<< endl;
     }
 
-    transferContent();
+    // Transfer content
+    getOrCreateSurfMesh().transfer
+    (
+        static_cast<SurfaceSource&>(*this)
+    );
 
     needsUpdate_ = false;
     return true;
 }
 
 
-bool Foam::surfMeshPlaneSampler::sample
+bool Foam::surfMeshSamplePlane::sample
 (
-    const word& fieldName
+    const word& fieldName,
+    const word& sampleScheme
 ) const
 {
     return
     (
-        sampleType<scalar>(fieldName)
-     || sampleType<vector>(fieldName)
-     || sampleType<sphericalTensor>(fieldName)
-     || sampleType<symmTensor>(fieldName)
-     || sampleType<tensor>(fieldName)
+        sampleType<scalar>(fieldName, sampleScheme)
+     || sampleType<vector>(fieldName, sampleScheme)
+     || sampleType<sphericalTensor>(fieldName, sampleScheme)
+     || sampleType<symmTensor>(fieldName, sampleScheme)
+     || sampleType<tensor>(fieldName, sampleScheme)
     );
 }
 
 
-void Foam::surfMeshPlaneSampler::print(Ostream& os) const
+void Foam::surfMeshSamplePlane::print(Ostream& os) const
 {
-    os  << "surfMeshPlaneSampler: " << name() << " :"
+    os  << "surfMeshSamplePlane: " << name() << " :"
         << "  base:" << cuttingPlane::refPoint()
         << "  normal:" << cuttingPlane::normal()
         << "  triangulate:" << triangulate_

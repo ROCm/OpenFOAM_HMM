@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfMeshSampler.H"
+#include "surfMeshSample.H"
 #include "MeshedSurfaces.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -31,15 +31,15 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(surfMeshSampler, 0);
-    defineRunTimeSelectionTable(surfMeshSampler, word);
+    defineTypeNameAndDebug(surfMeshSample, 0);
+    defineRunTimeSelectionTable(surfMeshSample, word);
 }
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 Foam::surfMesh&
-Foam::surfMeshSampler::getOrCreateSurfMesh() const
+Foam::surfMeshSample::getOrCreateSurfMesh() const
 {
     if (!mesh().foundObject<surfMesh>(name()))
     {
@@ -67,8 +67,8 @@ Foam::surfMeshSampler::getOrCreateSurfMesh() const
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::surfMeshSampler>
-Foam::surfMeshSampler::New
+Foam::autoPtr<Foam::surfMeshSample>
+Foam::surfMeshSample::New
 (
     const word& name,
     const polyMesh& mesh,
@@ -89,13 +89,13 @@ Foam::surfMeshSampler::New
             << exit(FatalError);
     }
 
-    return autoPtr<surfMeshSampler>(cstrIter()(name, mesh, dict));
+    return autoPtr<surfMeshSample>(cstrIter()(name, mesh, dict));
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfMeshSampler::surfMeshSampler
+Foam::surfMeshSample::surfMeshSample
 (
     const word& name,
     const polyMesh& mesh
@@ -106,7 +106,7 @@ Foam::surfMeshSampler::surfMeshSampler
 {}
 
 
-Foam::surfMeshSampler::surfMeshSampler
+Foam::surfMeshSample::surfMeshSample
 (
     const word& name,
     const polyMesh& mesh,
@@ -122,20 +122,21 @@ Foam::surfMeshSampler::surfMeshSampler
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::surfMeshSampler::create() const
+void Foam::surfMeshSample::create() const
 {
     getOrCreateSurfMesh();
 }
 
 
-const Foam::surfMesh& Foam::surfMeshSampler::surface() const
+const Foam::surfMesh& Foam::surfMeshSample::surface() const
 {
     return mesh().lookupObject<surfMesh>(name());
 }
 
 
 // Demonstration of using separate tmp registry
-// Foam::label Foam::surfMeshSampler::sample
+//
+// Foam::label Foam::surfMeshSample::sample
 // (
 //     const objectRegistry& store,
 //     const UList<word>& fields
@@ -168,15 +169,16 @@ const Foam::surfMesh& Foam::surfMeshSampler::surface() const
 // }
 
 
-Foam::label Foam::surfMeshSampler::sample
+Foam::label Foam::surfMeshSample::sample
 (
-    const UList<word>& fieldNames
+    const UList<word>& fieldNames,
+    const word& sampleScheme
 ) const
 {
     label count = 0;
     for (const word& fieldName : fieldNames)
     {
-        if (sample(fieldName))
+        if (sample(fieldName, sampleScheme))
         {
             ++count;
         }
@@ -186,7 +188,7 @@ Foam::label Foam::surfMeshSampler::sample
 }
 
 
-Foam::label Foam::surfMeshSampler::write(const wordRes& select) const
+Foam::label Foam::surfMeshSample::write(const wordRes& select) const
 {
     label count =
     (
@@ -207,7 +209,7 @@ Foam::label Foam::surfMeshSampler::write(const wordRes& select) const
 
 
 
-void Foam::surfMeshSampler::print(Ostream& os) const
+void Foam::surfMeshSample::print(Ostream& os) const
 {
     os << type();
 }

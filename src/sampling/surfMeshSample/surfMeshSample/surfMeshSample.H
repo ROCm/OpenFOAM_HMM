@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::surfMeshSampler
+    Foam::surfMeshSample
 
 Group
     grpUtilitiesFunctionObjects
@@ -31,13 +31,13 @@ Description
     An abstract class for surfMesh with sampling.
 
 SourceFiles
-    surfMeshSampler.C
-    surfMeshSamplerTemplates.C
+    surfMeshSample.C
+    surfMeshSampleTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfMeshSampler_H
-#define surfMeshSampler_H
+#ifndef surfMeshSample_H
+#define surfMeshSample_H
 
 #include "surfMesh.H"
 #include "surfFields.H"
@@ -61,13 +61,13 @@ SourceFiles
 namespace Foam
 {
 
-class surfMeshSampler;
+class surfMeshSample;
 
 /*---------------------------------------------------------------------------*\
-                       Class surfMeshSampler Declaration
+                       Class surfMeshSample Declaration
 \*---------------------------------------------------------------------------*/
 
-class surfMeshSampler
+class surfMeshSample
 {
     // Private data
 
@@ -78,14 +78,20 @@ class surfMeshSampler
         const polyMesh& mesh_;
 
 
-    // Private Member Functions
-
-    // Service methods
-
-
 protected:
 
     // Protected Member Functions
+
+        //- General loop for sampling elements to faces
+        template<class Type>
+        static tmp<Field<Type>> sampleOnFaces
+        (
+            const interpolation<Type>& sampler,
+            const labelUList& elements,
+            const faceList& fcs,
+            const pointField& pts
+        );
+
 
         //- Get existing or create new surfMesh
         surfMesh& getOrCreateSurfMesh() const;
@@ -116,14 +122,14 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("surfMeshSampler");
+    TypeName("surfMeshSample");
 
 
     //- Declare run-time constructor selection table
     declareRunTimeSelectionTable
     (
         autoPtr,
-        surfMeshSampler,
+        surfMeshSample,
         word,
         (
             const word& name,
@@ -149,12 +155,12 @@ public:
                 mesh_(mesh)
             {}
 
-            autoPtr<surfMeshSampler> operator()(Istream& is) const
+            autoPtr<surfMeshSample> operator()(Istream& is) const
             {
                 word name(is);
                 dictionary dict(is);
 
-                return surfMeshSampler::New(name, mesh_, dict);
+                return surfMeshSample::New(name, mesh_, dict);
             }
         };
 
@@ -162,14 +168,14 @@ public:
     // Constructors
 
         //- Construct from name, mesh
-        surfMeshSampler
+        surfMeshSample
         (
             const word& name,
             const polyMesh& mesh
         );
 
         //- Construct from dictionary
-        surfMeshSampler
+        surfMeshSample
         (
             const word& name,
             const polyMesh& mesh,
@@ -178,7 +184,7 @@ public:
 
 
         //- Clone
-        autoPtr<surfMeshSampler> clone() const
+        autoPtr<surfMeshSample> clone() const
         {
             NotImplemented;
             return nullptr;
@@ -189,7 +195,7 @@ public:
     // Selectors
 
         //- Return a reference to the selected surface
-        static autoPtr<surfMeshSampler> New
+        static autoPtr<surfMeshSample> New
         (
             const word& name,
             const polyMesh& mesh,
@@ -198,12 +204,12 @@ public:
 
 
     //- Destructor
-    virtual ~surfMeshSampler() = default;
+    virtual ~surfMeshSample() = default;
 
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- Access to the underlying mesh
         const polyMesh& mesh() const
@@ -238,7 +244,7 @@ public:
         virtual bool update() = 0;
 
 
-      // Edit
+    // Edit
 
         //- Rename
         virtual void rename(const word& newName)
@@ -247,16 +253,24 @@ public:
         }
 
 
-      // Execute
+    // Execute
 
-        //- Sample from specified volume field to surface
-        virtual bool sample(const word& fieldName) const = 0;
+        //- Sample from specified volume field to obtain surface field.
+        virtual bool sample
+        (
+            const word& fieldName,
+            const word& sampleScheme = "cell"
+        ) const = 0;
 
-        //- Sample from volume fields to specified surface fields.
-        virtual label sample(const UList<word>& fieldNames) const;
+        //- Sample from specified volume fields to obtain surface fields.
+        virtual label sample
+        (
+            const UList<word>& fieldNames,
+            const word& sampleScheme = "cell"
+        ) const;
 
 
-      // Write
+    // Write
 
         //- Write specified fields
         virtual label write(const wordRes& fieldSelection) const;
@@ -274,7 +288,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "surfMeshSamplerTemplates.C"
+#   include "surfMeshSampleTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

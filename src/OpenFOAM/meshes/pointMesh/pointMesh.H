@@ -60,13 +60,13 @@ class pointMesh
     // Private Member Functions
 
         //- Map all fields
-        void mapFields(const mapPolyMesh&);
+        void mapFields(const mapPolyMesh& mpm);
 
-        //- Disallow default bitwise copy construct
-        pointMesh(const pointMesh&);
+        //- No copy construct
+        pointMesh(const pointMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const pointMesh&);
+        //- No copy assignment
+        void operator=(const pointMesh&) = delete;
 
 
 public:
@@ -86,7 +86,7 @@ public:
 
 
     //- Destructor
-    ~pointMesh();
+    ~pointMesh() = default;
 
 
     // Member Functions
@@ -122,13 +122,13 @@ public:
         }
 
 
-        // Mesh motion
+    // Mesh motion
 
-            //- Move points
-            bool movePoints();
+        //- Move points
+        bool movePoints();
 
-            //- Update the mesh corresponding to given map
-            void updateMesh(const mapPolyMesh& mpm);
+        //- Update the mesh corresponding to given map
+        void updateMesh(const mapPolyMesh& mpm);
 
 
     // Member Operators

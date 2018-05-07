@@ -27,6 +27,24 @@ Class
 Description
     A surfaceWriter for Ensight format.
 
+    \verbatim
+    formatOptions
+    {
+        ensight
+        {
+            format          ascii;
+            collateTimes    true;
+        }
+    }
+    \endverbatim
+
+ Format options:
+    \table
+        Property | Description                             | Required | Default
+        format   | ascii/binary                            | no       | ascii
+        collateTimes | use common geometry for times       | no       | true
+    \endtable
+
 SourceFiles
     ensightSurfaceWriter.C
 
@@ -43,7 +61,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class ensightSurfaceWriter Declaration
+                    Class ensightSurfaceWriter Declaration
 \*---------------------------------------------------------------------------*/
 
 class ensightSurfaceWriter
@@ -55,7 +73,7 @@ class ensightSurfaceWriter
         //- Write option (default: IOstream::ASCII)
         IOstream::streamFormat writeFormat_;
 
-        //- Collate times (default: ASCII)
+        //- Collate times (default: true)
         bool collateTimes_;
 
 

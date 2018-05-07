@@ -23,14 +23,50 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfMeshSampler.H"
+#include "surfMeshSample.H"
 #include "dimensionedType.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>>
+Foam::surfMeshSample::sampleOnFaces
+(
+    const interpolation<Type>& sampler,
+    const labelUList& elements,
+    const faceList& fcs,
+    const pointField& pts
+)
+{
+    const label len = elements.size();
+
+    if (len != fcs.size())
+    {
+        FatalErrorInFunction
+            << "size mismatch: "
+            << "sampled elements (" << len
+            << ") != faces (" << fcs.size() << ')'
+            << exit(FatalError);
+    }
+
+    auto tvalues = tmp<Field<Type>>::New(len);
+    auto& values = tvalues.ref();
+
+    for (label i=0; i < len; ++i)
+    {
+        const label celli = elements[i];
+        const point pt = fcs[i].centre(pts);
+
+        values[i] = sampler.interpolate(pt, celli);
+    }
+
+    return tvalues;
+}
+
 
 template<class Type>
 Foam::DimensionedField<Type, Foam::surfGeoMesh>&
-Foam::surfMeshSampler::getOrCreateSurfField
+Foam::surfMeshSample::getOrCreateSurfField
 (
     const GeometricField<Type, fvPatchField, volMesh>& vField
 ) const
@@ -68,7 +104,7 @@ Foam::surfMeshSampler::getOrCreateSurfField
 // // Older code for transferring an IOField to a surfField between
 // // different registries
 // template<class Type>
-// bool Foam::surfMeshSampler::transferField
+// bool Foam::surfMeshSample::transferField
 // (
 //     const objectRegistry& store,
 //     const word& fieldName
@@ -104,7 +140,7 @@ Foam::surfMeshSampler::getOrCreateSurfField
 
 
 template<class Type>
-Foam::label Foam::surfMeshSampler::writeFields
+Foam::label Foam::surfMeshSample::writeFields
 (
     const wordRes& select
 ) const
@@ -112,7 +148,8 @@ Foam::label Foam::surfMeshSampler::writeFields
     typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
     const surfMesh& s = surface();
 
-    const wordList fieldNames = s.sortedNames<SurfFieldType>(select);
+    const wordList fieldNames(s.sortedNames<SurfFieldType>(select));
+
     for (const word& fieldName : fieldNames)
     {
         s.lookupObject<SurfFieldType>(fieldName).write();

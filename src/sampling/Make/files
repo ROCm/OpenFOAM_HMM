@@ -19,22 +19,24 @@ sampledSet/array/arraySet.C
 sampledSet/shortestPath/shortestPathSet.C
 
 surface/cuttingPlane/cuttingPlane.C
+surface/distanceSurface/distanceSurface.C
 surface/isoSurface/isoSurface.C
 surface/isoSurface/isoSurfaceCell.C
 surface/thresholdCellFaces/thresholdCellFaces.C
 surface/triSurfaceMesh/discreteSurface.C
 
-surfMeshSampler/surfMeshSampler/surfMeshSampler.C
-surfMeshSampler/surfMeshSamplers/surfMeshSamplers.C
-surfMeshSampler/plane/surfMeshPlaneSampler.C
-surfMeshSampler/triSurfaceMesh/surfMeshDiscreteSampler.C
+surfMeshSample/surfMeshSample/surfMeshSample.C
+surfMeshSample/surfMeshSamplers/surfMeshSamplers.C
+surfMeshSample/distanceSurface/surfMeshSampleDistanceSurface.C
+surfMeshSample/plane/surfMeshSamplePlane.C
+surfMeshSample/triSurfaceMesh/surfMeshSampleDiscrete.C
 
 sampledSurface/sampledPatch/sampledPatch.C
 sampledSurface/sampledPatchInternalField/sampledPatchInternalField.C
 sampledSurface/sampledPlane/sampledPlane.C
 sampledSurface/isoSurface/sampledIsoSurface.C
 sampledSurface/isoSurface/sampledIsoSurfaceCell.C
-sampledSurface/distanceSurface/distanceSurface.C
+sampledSurface/distanceSurface/sampledDistanceSurface.C
 sampledSurface/sampledCuttingPlane/sampledCuttingPlane.C
 sampledSurface/sampledSurface/sampledSurface.C
 sampledSurface/sampledSurfaces/sampledSurfaces.C

@@ -44,7 +44,7 @@ namespace Foam
         surfMeshSamplers,
         dictionary
     );
-}
+} // End namespace Foam
 
 
 bool Foam::surfMeshSamplers::verbose_ = false;
@@ -106,9 +106,11 @@ Foam::surfMeshSamplers::surfMeshSamplers
 )
 :
     functionObjects::regionFunctionObject(name, runTime, dict),
-    PtrList<surfMeshSampler>(),
+    PtrList<surfMeshSample>(),
     mesh_(refCast<const fvMesh>(obr_)),
-    fieldSelection_()
+    fieldSelection_(),
+    derivedNames_(),
+    sampleScheme_(word::null)
 {
     read(dict);
 }
@@ -122,10 +124,11 @@ Foam::surfMeshSamplers::surfMeshSamplers
 )
 :
     functionObjects::regionFunctionObject(name, obr, dict),
-    PtrList<surfMeshSampler>(),
+    PtrList<surfMeshSample>(),
     mesh_(refCast<const fvMesh>(obr)),
     fieldSelection_(),
-    derivedNames_()
+    derivedNames_(),
+    sampleScheme_(word::null)
 {
     read(dict);
 }
@@ -141,124 +144,127 @@ void Foam::surfMeshSamplers::verbose(const bool verbosity)
 
 bool Foam::surfMeshSamplers::execute()
 {
-    if (size())
+    if (empty())
     {
-        const objectRegistry& db = mesh_.thisDb();
+        return true;
+    }
 
-        // Manage derived names
-        DynamicList<word> added(derivedNames_.size());
-        DynamicList<word> cleanup(derivedNames_.size());
+    const objectRegistry& db = mesh_.thisDb();
 
-        for (const word& derivedName : derivedNames_)
+    // Manage derived names
+    DynamicList<word> added(derivedNames_.size());
+    DynamicList<word> cleanup(derivedNames_.size());
+
+    for (const word& derivedName : derivedNames_)
+    {
+        if (derivedName == "rhoU")
         {
-            if (derivedName == "rhoU")
+            added.append(derivedName);
+
+            if (!db.foundObject<volVectorField>(derivedName))
             {
-                added.append(derivedName);
+                cleanup.append(derivedName);
 
-                if (!db.foundObject<volVectorField>(derivedName))
+                db.store
+                (
+                    new volVectorField
+                    (
+                        derivedName,
+                        // rhoU = rho * U
+                        (
+                            mesh_.lookupObject<volScalarField>("rho")
+                          * mesh_.lookupObject<volVectorField>("U")
+                        )
+                    )
+                );
+            }
+        }
+        else if (derivedName == "pTotal")
+        {
+            added.append(derivedName);
+
+            if (!db.foundObject<volScalarField>(derivedName))
+            {
+                cleanup.append(derivedName);
+
+                const volScalarField& p =
+                    mesh_.lookupObject<volScalarField>("p");
+
+                if (p.dimensions() == dimPressure)
                 {
-                    cleanup.append(derivedName);
-
                     db.store
                     (
-                        new volVectorField
+                        new volScalarField
                         (
                             derivedName,
-                            // rhoU = rho * U
+                            // pTotal = p + rho U^2 / 2
                             (
-                                mesh_.lookupObject<volScalarField>("rho")
-                              * mesh_.lookupObject<volVectorField>("U")
+                                p
+                              + 0.5
+                              * mesh_.lookupObject<volScalarField>("rho")
+                              * magSqr
+                                (
+                                    mesh_.lookupObject<volVectorField>("U")
+                                )
+                            )
+                        )
+                    );
+                }
+                else
+                {
+                    db.store
+                    (
+                        new volScalarField
+                        (
+                            derivedName,
+                            // pTotal = p + U^2 / 2
+                            (
+                                p
+                              + 0.5
+                              * magSqr
+                                (
+                                    mesh_.lookupObject<volVectorField>("U")
+                                )
                             )
                         )
                     );
                 }
             }
-            else if (derivedName == "pTotal")
-            {
-                added.append(derivedName);
-
-                if (!db.foundObject<volScalarField>(derivedName))
-                {
-                    cleanup.append(derivedName);
-
-                    const volScalarField& p =
-                        mesh_.lookupObject<volScalarField>("p");
-
-                    if (p.dimensions() == dimPressure)
-                    {
-                        db.store
-                        (
-                            new volScalarField
-                            (
-                                derivedName,
-                                // pTotal = p + rho U^2 / 2
-                                (
-                                    p
-                                  + 0.5
-                                  * mesh_.lookupObject<volScalarField>("rho")
-                                  * magSqr
-                                    (
-                                        mesh_.lookupObject<volVectorField>("U")
-                                    )
-                                )
-                            )
-                        );
-                    }
-                    else
-                    {
-                        db.store
-                        (
-                            new volScalarField
-                            (
-                                derivedName,
-                                // pTotal = p + U^2 / 2
-                                (
-                                    p
-                                  + 0.5
-                                  * magSqr
-                                    (
-                                        mesh_.lookupObject<volVectorField>("U")
-                                    )
-                                )
-                            )
-                        );
-                    }
-                }
-            }
-            else
-            {
-                WarningInFunction
-                    << "unknown derived name: " << derivedName << nl
-                    << "Use one of 'rhoU', 'pTotal'" << nl
-                    << endl;
-            }
         }
-
-        // The acceptable fields
-        wordHashSet acceptable(added);
-        acceptable.insertMany(acceptType<scalar>());
-        acceptable.insertMany(acceptType<vector>());
-        acceptable.insertMany(acceptType<sphericalTensor>());
-        acceptable.insertMany(acceptType<symmTensor>());
-        acceptable.insertMany(acceptType<tensor>());
-
-        const wordList fields = acceptable.sortedToc();
-        if (!fields.empty())
+        else
         {
-            for (surfMeshSampler& s : surfaces())
-            {
-                // Potentially monitor the update for writing geometry?
-                if (s.needsUpdate())
-                {
-                    s.update();
-                }
-
-                s.sample(fields);
-            }
+            WarningInFunction
+                << "unknown derived name: " << derivedName << nl
+                << "Use one of 'rhoU', 'pTotal'" << nl
+                << endl;
         }
-
-        checkOutNames(db, cleanup);
     }
+
+
+    // The acceptable fields
+    wordHashSet acceptable(added);
+    acceptable.insertMany(acceptType<scalar>());
+    acceptable.insertMany(acceptType<vector>());
+    acceptable.insertMany(acceptType<sphericalTensor>());
+    acceptable.insertMany(acceptType<symmTensor>());
+    acceptable.insertMany(acceptType<tensor>());
+
+    const wordList fields = acceptable.sortedToc();
+    if (!fields.empty())
+    {
+        for (surfMeshSample& s : surfaces())
+        {
+            // Potentially monitor the update for writing geometry?
+            if (s.needsUpdate())
+            {
+                s.update();
+            }
+
+            s.sample(fields, sampleScheme_);
+        }
+    }
+
+    checkOutNames(db, cleanup);
 
     return true;
 }
@@ -287,7 +293,7 @@ bool Foam::surfMeshSamplers::write()
     // Avoid duplicate entries
     select.uniq();
 
-    for (const surfMeshSampler& s : surfaces())
+    for (const surfMeshSample& s : surfaces())
     {
         s.write(select);
     }
@@ -305,6 +311,8 @@ bool Foam::surfMeshSamplers::read(const dictionary& dict)
 
     if (dict.found("surfaces"))
     {
+        sampleScheme_ = dict.lookupOrDefault<word>("sampleScheme", "cell");
+
         dict.lookup("fields") >> fieldSelection_;
         fieldSelection_.uniq();
 
@@ -316,10 +324,10 @@ bool Foam::surfMeshSamplers::read(const dictionary& dict)
         }
         Info<< nl;
 
-        PtrList<surfMeshSampler> newList
+        PtrList<surfMeshSample> newList
         (
             dict.lookup("surfaces"),
-            surfMeshSampler::iNew(mesh_)
+            surfMeshSample::iNew(mesh_)
         );
         transfer(newList);
 
@@ -332,7 +340,7 @@ bool Foam::surfMeshSamplers::read(const dictionary& dict)
         if (this->size())
         {
             Info<< "Reading surface description:" << nl;
-            for (surfMeshSampler& s : surfaces())
+            for (surfMeshSample& s : surfaces())
             {
                 Info<< "    " << s.name() << nl;
                 if (createOnRead)
@@ -383,7 +391,7 @@ void Foam::surfMeshSamplers::readUpdate(const polyMesh::readUpdateState state)
 
 bool Foam::surfMeshSamplers::needsUpdate() const
 {
-    for (const surfMeshSampler& s : surfaces())
+    for (const surfMeshSample& s : surfaces())
     {
         if (s.needsUpdate())
         {
@@ -399,7 +407,7 @@ bool Foam::surfMeshSamplers::expire()
 {
     bool justExpired = false;
 
-    for (surfMeshSampler& s : surfaces())
+    for (surfMeshSample& s : surfaces())
     {
         if (s.expire())
         {
@@ -420,7 +428,7 @@ bool Foam::surfMeshSamplers::update()
     }
 
     bool updated = false;
-    for (surfMeshSampler& s : surfaces())
+    for (surfMeshSample& s : surfaces())
     {
         if (s.update())
         {

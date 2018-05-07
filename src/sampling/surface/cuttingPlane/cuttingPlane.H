@@ -55,7 +55,7 @@ namespace Foam
 class primitiveMesh;
 
 /*---------------------------------------------------------------------------*\
-                       Class cuttingPlane Declaration
+                        Class cuttingPlane Declaration
 \*---------------------------------------------------------------------------*/
 
 class cuttingPlane
@@ -98,7 +98,7 @@ class cuttingPlane
             const primitiveMesh&,
             const labelUList& edgePoint,
             const label celli,
-            const label startEdgeI,
+            const label startEdgei,
             DynamicList<label>& faceVerts
         );
 
@@ -138,7 +138,7 @@ public:
     // Constructors
 
         //- Construct from plane and mesh reference,
-        //  possibly restricted to a list of cells
+        //- possibly restricted to a list of cells
         cuttingPlane
         (
             const plane& pln,
@@ -150,30 +150,29 @@ public:
 
     // Member Functions
 
-        //- Return plane used
+        //- Return the plane used
         const plane& planeDesc() const
         {
             return static_cast<const plane&>(*this);
         }
 
-        //- Return List of cells cut by the plane
+        //- The mesh cells cut by the plane
         const labelList& meshCells() const
         {
             return meshCells_;
         }
 
-        //- Return true or false to question: have any cells been cut?
+        //- The mesh cells cut by the plane
+        labelList& meshCells()
+        {
+            return meshCells_;
+        }
+
+        //- Have any cells been cut?
         bool cut() const
         {
             return meshCells_.size();
         }
-
-        //- Sample the cell field
-        template<class Type>
-        tmp<Field<Type>> sample(const Field<Type>&) const;
-
-        template<class Type>
-        tmp<Field<Type>> sample(const tmp<Field<Type>>&) const;
 
 
     // Member Operators
@@ -186,12 +185,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "cuttingPlaneTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

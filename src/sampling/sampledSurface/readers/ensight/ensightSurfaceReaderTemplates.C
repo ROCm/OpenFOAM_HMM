@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -164,21 +164,16 @@ Foam::tmp<Foam::Field<Type>> Foam::ensightSurfaceReader::readField
         }
     }
 
-    tmp<Field<Type>> tField(new Field<Type>(n, pTraits<Type>::zero));
-    Field<Type>& field = tField.ref();
+    auto tfield = tmp<Field<Type>>::New(n, Zero);
+    auto& field = tfield.ref();
 
-    for
-    (
-        direction cmptI=0;
-        cmptI < pTraits<Type>::nComponents;
-        ++cmptI
-    )
+    for (direction cmpti=0; cmpti < pTraits<Type>::nComponents; ++cmpti)
     {
-        field.replace(cmptI, values[cmptI]);
-        values[cmptI].clear();
+        field.replace(cmpti, values[cmpti]);
+        values[cmpti].clear();
     }
 
-    return tField;
+    return tfield;
 }
 
 

@@ -43,7 +43,7 @@ Description
             // Optional format
             format  free;    // short, long, free
         }
-    };
+    }
     \endverbatim
 
 SourceFiles

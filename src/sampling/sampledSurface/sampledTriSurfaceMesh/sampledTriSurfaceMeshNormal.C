@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,28 +77,24 @@ Foam::sampledTriSurfaceMeshNormal::sampledTriSurfaceMeshNormal
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::sampledTriSurfaceMeshNormal::~sampledTriSurfaceMeshNormal()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::Field<Foam::vector>>
 Foam::sampledTriSurfaceMeshNormal::sample
 (
-    const GeometricField<vector, fvPatchField, volMesh>& vField
+    const interpolation<vector>& sampler
 ) const
 {
-    tmp<Field<vector>> tfld(new Field<vector>(size(), vector::zero));
-    tfld.ref().replace
+    auto tvalues = tmp<Field<vector>>::New(size(), Zero);
+
+    tvalues.ref().replace
     (
         0,
         meshedSurface::faceNormals()
-       &sampledTriSurfaceMesh::sample(vField)
+       &sampledTriSurfaceMesh::sample(sampler)
     );
-    return tfld;
+
+    return tvalues;
 }
 
 
@@ -108,26 +104,19 @@ Foam::sampledTriSurfaceMeshNormal::interpolate
     const interpolation<vector>& interpolator
 ) const
 {
-    // One value per vertex
-    tmp<vectorField> tn
-    (
-        new vectorField
-        (
-            points().size(),
-            vector::zero
-        )
-    );
+    auto tvalues = tmp<Field<vector>>::New(points().size(), Zero);
 
-    pointField allNormals(tn().size(), vector::zero);
+    pointField allNormals(points().size(), Zero);
     UIndirectList<vector>(allNormals, meshPoints()) = pointNormals();
 
-    tn.ref().replace
+    tvalues.ref().replace
     (
         0,
         allNormals
        &sampledTriSurfaceMesh::interpolate(interpolator)
     );
-    return tn;
+
+    return tvalues;
 }
 
 

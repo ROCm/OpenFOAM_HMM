@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfMeshDiscreteSampler.H"
+#include "surfMeshSampleDiscrete.H"
 #include "MeshedSurfaces.H"
 
 #include "addToRunTimeSelectionTable.H"
@@ -32,14 +32,14 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(surfMeshDiscreteSampler, 0);
+    defineTypeNameAndDebug(surfMeshSampleDiscrete, 0);
 
     // Add under name "sampledTriSurfaceMesh"
-    // for symmetry with normal sampledSurface
+    // for symmetry with regular sampledSurface
     addNamedToRunTimeSelectionTable
     (
-        surfMeshSampler,
-        surfMeshDiscreteSampler,
+        surfMeshSample,
+        surfMeshSampleDiscrete,
         word,
         sampledTriSurfaceMesh
     );
@@ -48,18 +48,18 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::surfMeshDiscreteSampler::transferContent()
+void Foam::surfMeshSampleDiscrete::transferContent()
 {
-    SurfaceSource& src = static_cast<SurfaceSource&>(*this);
-    surfMesh& dst = getOrCreateSurfMesh();
-
-    dst.transfer(src);
+    getOrCreateSurfMesh().transfer
+    (
+        static_cast<SurfaceSource&>(*this)
+    );
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfMeshDiscreteSampler::surfMeshDiscreteSampler
+Foam::surfMeshSampleDiscrete::surfMeshSampleDiscrete
 (
     const word& name,
     const polyMesh& mesh,
@@ -67,24 +67,24 @@ Foam::surfMeshDiscreteSampler::surfMeshDiscreteSampler
     const discreteSurface::samplingSource sampleSource
 )
 :
-    surfMeshSampler(name, mesh),
+    surfMeshSample(name, mesh),
     SurfaceSource(mesh, surfaceName, sampleSource, false) // no interpolate
 {}
 
 
-Foam::surfMeshDiscreteSampler::surfMeshDiscreteSampler
+Foam::surfMeshSampleDiscrete::surfMeshSampleDiscrete
 (
     const word& name,
     const polyMesh& mesh,
     const dictionary& dict
 )
 :
-    surfMeshSampler(name, mesh),
+    surfMeshSample(name, mesh),
     SurfaceSource(mesh, dict, false) // no interpolate
 {}
 
 
-Foam::surfMeshDiscreteSampler::surfMeshDiscreteSampler
+Foam::surfMeshSampleDiscrete::surfMeshSampleDiscrete
 (
     const word& name,
     const polyMesh& mesh,
@@ -92,32 +92,26 @@ Foam::surfMeshDiscreteSampler::surfMeshDiscreteSampler
     const word& sampleSourceName
 )
 :
-    surfMeshSampler(name, mesh),
+    surfMeshSample(name, mesh),
     SurfaceSource(name, mesh, surface, sampleSourceName, false)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::surfMeshDiscreteSampler::~surfMeshDiscreteSampler()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::surfMeshDiscreteSampler::needsUpdate() const
+bool Foam::surfMeshSampleDiscrete::needsUpdate() const
 {
     return SurfaceSource::needsUpdate();
 }
 
 
-bool Foam::surfMeshDiscreteSampler::expire()
+bool Foam::surfMeshSampleDiscrete::expire()
 {
     return SurfaceSource::expire();
 }
 
 
-bool Foam::surfMeshDiscreteSampler::update()
+bool Foam::surfMeshSampleDiscrete::update()
 {
     if (SurfaceSource::update())
     {
@@ -129,7 +123,7 @@ bool Foam::surfMeshDiscreteSampler::update()
 }
 
 
-bool Foam::surfMeshDiscreteSampler::update(const treeBoundBox& bb)
+bool Foam::surfMeshSampleDiscrete::update(const treeBoundBox& bb)
 {
     if (SurfaceSource::update(bb))
     {
@@ -141,18 +135,19 @@ bool Foam::surfMeshDiscreteSampler::update(const treeBoundBox& bb)
 }
 
 
-bool Foam::surfMeshDiscreteSampler::sample
+bool Foam::surfMeshSampleDiscrete::sample
 (
-    const word& fieldName
+    const word& fieldName,
+    const word& sampleScheme
 ) const
 {
     return
     (
-        sampleType<scalar>(fieldName)
-     || sampleType<vector>(fieldName)
-     || sampleType<sphericalTensor>(fieldName)
-     || sampleType<symmTensor>(fieldName)
-     || sampleType<tensor>(fieldName)
+        sampleType<scalar>(fieldName, sampleScheme)
+     || sampleType<vector>(fieldName, sampleScheme)
+     || sampleType<sphericalTensor>(fieldName, sampleScheme)
+     || sampleType<symmTensor>(fieldName, sampleScheme)
+     || sampleType<tensor>(fieldName, sampleScheme)
     );
 }
 

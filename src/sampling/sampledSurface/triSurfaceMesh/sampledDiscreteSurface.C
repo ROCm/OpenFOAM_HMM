@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +30,6 @@ License
 #include "treeDataCell.H"
 #include "treeDataFace.H"
 #include "meshTools.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -138,45 +137,45 @@ bool Foam::sampledDiscreteSurface::sampleAndStore
 
 Foam::tmp<Foam::scalarField> Foam::sampledDiscreteSurface::sample
 (
-    const volScalarField& vField
+    const interpolation<scalar>& sampler
 ) const
 {
-    return SurfaceSource::sampleField(vField);
+    return SurfaceSource::sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::vectorField> Foam::sampledDiscreteSurface::sample
 (
-    const volVectorField& vField
+    const interpolation<vector>& sampler
 ) const
 {
-    return SurfaceSource::sampleField(vField);
+    return SurfaceSource::sampleOnFaces(sampler);
 }
 
 Foam::tmp<Foam::sphericalTensorField> Foam::sampledDiscreteSurface::sample
 (
-    const volSphericalTensorField& vField
+    const interpolation<sphericalTensor>& sampler
 ) const
 {
-    return SurfaceSource::sampleField(vField);
+    return SurfaceSource::sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::symmTensorField> Foam::sampledDiscreteSurface::sample
 (
-    const volSymmTensorField& vField
+    const interpolation<symmTensor>& sampler
 ) const
 {
-    return SurfaceSource::sampleField(vField);
+    return SurfaceSource::sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::tensorField> Foam::sampledDiscreteSurface::sample
 (
-    const volTensorField& vField
+    const interpolation<tensor>& sampler
 ) const
 {
-    return SurfaceSource::sampleField(vField);
+    return SurfaceSource::sampleOnFaces(sampler);
 }
 
 
@@ -185,7 +184,7 @@ Foam::tmp<Foam::scalarField> Foam::sampledDiscreteSurface::interpolate
     const interpolation<scalar>& interpolator
 ) const
 {
-    return SurfaceSource::interpolateField(interpolator);
+    return SurfaceSource::sampleOnPoints(interpolator);
 }
 
 
@@ -194,7 +193,7 @@ Foam::tmp<Foam::vectorField> Foam::sampledDiscreteSurface::interpolate
     const interpolation<vector>& interpolator
 ) const
 {
-    return SurfaceSource::interpolateField(interpolator);
+    return SurfaceSource::sampleOnPoints(interpolator);
 }
 
 Foam::tmp<Foam::sphericalTensorField> Foam::sampledDiscreteSurface::interpolate
@@ -202,7 +201,7 @@ Foam::tmp<Foam::sphericalTensorField> Foam::sampledDiscreteSurface::interpolate
     const interpolation<sphericalTensor>& interpolator
 ) const
 {
-    return SurfaceSource::interpolateField(interpolator);
+    return SurfaceSource::sampleOnPoints(interpolator);
 }
 
 
@@ -211,7 +210,7 @@ Foam::tmp<Foam::symmTensorField> Foam::sampledDiscreteSurface::interpolate
     const interpolation<symmTensor>& interpolator
 ) const
 {
-    return SurfaceSource::interpolateField(interpolator);
+    return SurfaceSource::sampleOnPoints(interpolator);
 }
 
 
@@ -220,7 +219,7 @@ Foam::tmp<Foam::tensorField> Foam::sampledDiscreteSurface::interpolate
     const interpolation<tensor>& interpolator
 ) const
 {
-    return SurfaceSource::interpolateField(interpolator);
+    return SurfaceSource::sampleOnPoints(interpolator);
 }
 
 

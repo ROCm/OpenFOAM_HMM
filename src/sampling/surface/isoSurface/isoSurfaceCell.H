@@ -57,6 +57,8 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+
 class polyMesh;
 class triSurface;
 
@@ -337,13 +339,20 @@ public:
 
     // Member Functions
 
-        //- For every face, the original cell in mesh
+        //- For each face, the original cell in mesh
         const labelList& meshCells() const
         {
             return meshCells_;
         }
 
-        //- Interpolates cCoords,pCoords.
+        //- For each face, the original cell in mesh
+        labelList& meshCells()
+        {
+            return meshCells_;
+        }
+
+
+        //- Interpolates cCoords, pCoords.
         template<class Type>
         tmp<Field<Type>> interpolate
         (

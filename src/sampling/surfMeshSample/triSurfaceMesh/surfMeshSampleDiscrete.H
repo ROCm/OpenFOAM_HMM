@@ -22,58 +22,68 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::surfMeshPlaneSampler
+    Foam::surfMeshSampleDiscrete
 
 Description
-    Sampling surfFields onto a surfMesh based on a plane.
-    The cuttingPlane algorithm 'cuts' the mesh.
-    The plane is triangulated by default.
+    Sampling surfFields onto a surfMesh based on a triSurfaceMesh.
 
-Note
-    Does not actually cut until update() called.
+    This is often embedded as part of a surfMeshSamplers function object.
+
+Usage
+    Example of function object partial specification:
+    \verbatim
+    surfaces
+    (
+        surface1
+        {
+            type    sampledTriSurfaceMesh;
+            surface something.obj;
+            source  cells;
+        }
+    );
+    \endverbatim
+
+    Where the sub-entries comprise:
+    \table
+        Property | Description                             | Required | Default
+        type     | sampledTriSurfaceMesh                   | yes      |
+        surface  | surface name in triSurface/             | yes      |
+        source   | cells/insideCells/boundaryFaces         | yes      |
+    \endtable
+
+See Also
+    discreteSurface, surfMeshSample
 
 SourceFiles
-    surfMeshPlaneSampler.C
-    surfMeshPlaneSamplerTemplates.C
+    surfMeshSampleDiscrete.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfMeshPlaneSampler_H
-#define surfMeshPlaneSampler_H
+#ifndef surfMeshSampleDiscrete_H
+#define surfMeshSampleDiscrete_H
 
-#include "surfMeshSampler.H"
-#include "cuttingPlane.H"
+#include "surfMeshSample.H"
+#include "discreteSurface.H"
+#include "triSurfaceMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+class surfMeshSampleDiscrete;
+
 /*---------------------------------------------------------------------------*\
-                    Class surfMeshPlaneSampler Declaration
+                       Class surfMeshSampleDiscrete Declaration
 \*---------------------------------------------------------------------------*/
 
-class surfMeshPlaneSampler
+class surfMeshSampleDiscrete
 :
-    public surfMeshSampler,
-    private cuttingPlane
+    public surfMeshSample,
+    private discreteSurface
 {
     // Private typedefs for convenience
-    typedef cuttingPlane SurfaceSource;
-
-    // Private data
-
-        //- If restricted to zones, name of this zone or a regular expression
-        const keyType zoneKey_;
-
-        //- Optional bounding box to trim triangles against
-        const boundBox bounds_;
-
-        //- Triangulated faces or keep faces as is
-        const bool triangulate_;
-
-        //- Track if the surface needs an update
-        mutable bool needsUpdate_;
+    typedef discreteSurface SurfaceSource;
 
 
     // Private Member Functions
@@ -81,52 +91,52 @@ class surfMeshPlaneSampler
         //- Transfer mesh content from SurfaceSource to surfMesh
         void transferContent();
 
-
         //- Sample field on surface.
         template<class Type>
         bool sampleType
         (
-            const word& fieldName
-        ) const;
-
-
-        //- Sample field on surface
-        template<class Type>
-        tmp<Field<Type>> sampleField
-        (
-            const GeometricField<Type, fvPatchField, volMesh>& vField
+            const word& fieldName,
+            const word& sampleScheme
         ) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("surfMeshPlaneSampler");
+    TypeName("surfMeshSampleDiscrete");
 
 
     // Constructors
 
         //- Construct from components
-        surfMeshPlaneSampler
+        surfMeshSampleDiscrete
         (
             const word& name,
             const polyMesh& mesh,
-            const plane& planeDesc,
-            const keyType& zoneKey = word::null,
-            const bool triangulate = true
+            const word& surfaceName,
+            const discreteSurface::samplingSource sampleSource
         );
 
         //- Construct from dictionary
-        surfMeshPlaneSampler
+        surfMeshSampleDiscrete
         (
             const word& name,
             const polyMesh& mesh,
             const dictionary& dict
         );
 
+        //- Construct from triSurface
+        surfMeshSampleDiscrete
+        (
+            const word& name,
+            const polyMesh& mesh,
+            const triSurface& surface,
+            const word& sampleSourceName
+        );
+
 
     //- Destructor
-    virtual ~surfMeshPlaneSampler() = default;
+    virtual ~surfMeshSampleDiscrete() = default;
 
 
     // Member Functions
@@ -143,12 +153,18 @@ public:
         //  Do nothing (and return false) if no update was needed
         virtual bool update();
 
+        //- Update the surface using a bound box to limit the searching.
+        //  For direct use, i.e. not through sample.
+        //  Do nothing (and return false) if no update was needed
+        bool update(const treeBoundBox& bb);
+
         //- Sample the volume field onto surface
-        virtual bool sample(const word& fieldName) const;
+        virtual bool sample
+        (
+            const word& fieldName,
+            const word& sampleScheme = "cell"
+        ) const;
 
-
-        //- Write
-        virtual void print(Ostream&) const;
 };
 
 
@@ -159,7 +175,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "surfMeshPlaneSamplerTemplates.C"
+    #include "surfMeshSampleDiscreteTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

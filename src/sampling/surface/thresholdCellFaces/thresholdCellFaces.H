@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,14 +59,15 @@ class thresholdCellFaces
         //- Reference to mesh
         const polyMesh& mesh_;
 
-        //- For every face the original cell in mesh
+        //- For each face, the original cell in mesh
         labelList meshCells_;
+
 
     // Private Member Functions
 
         void calculate
         (
-            const scalarField&,
+            const scalarField& field,
             const scalar lowerThreshold,
             const scalar upperThreshold,
             const bool triangulate
@@ -80,11 +81,11 @@ public:
 
     // Constructors
 
-        //- Construct from mesh, field and threshold value
+        //- Construct from mesh, field and threshold values
         thresholdCellFaces
         (
-            const polyMesh&,
-            const scalarField&,
+            const polyMesh& mesh,
+            const scalarField& field,
             const scalar lowerThreshold,
             const scalar upperThreshold,
             const bool triangulate = false
@@ -93,14 +94,14 @@ public:
 
     // Member Functions
 
-        //- For every face original cell in mesh
-        labelList& meshCells()
+        //- For each face, the original cell in mesh
+        const labelList& meshCells() const
         {
             return meshCells_;
         }
 
-        //- For every face original cell in mesh
-        const labelList& meshCells() const
+        //- For each face, the original cell in mesh
+        labelList& meshCells()
         {
             return meshCells_;
         }

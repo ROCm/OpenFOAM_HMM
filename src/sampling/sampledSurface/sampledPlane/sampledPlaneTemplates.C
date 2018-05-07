@@ -29,40 +29,50 @@ License
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::sampledPlane::sampleField
+Foam::sampledPlane::sampleOnFaces
 (
-    const GeometricField<Type, fvPatchField, volMesh>& vField
+    const interpolation<Type>& sampler
 ) const
 {
-    return tmp<Field<Type>>::New(vField, meshCells());
+    return sampledSurface::sampleOnFaces
+    (
+        sampler,
+        meshCells(),
+        faces(),
+        points()
+    );
 }
 
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::sampledPlane::interpolateField
+Foam::sampledPlane::sampleOnPoints
 (
     const interpolation<Type>& interpolator
 ) const
 {
+    // elements to sample
+    const labelList& elements = meshCells();
+
     // One value per point.
     // Initialize with Zero to handle missed/degenerate faces
 
-    tmp<Field<Type>> tvalues(new Field<Type>(points().size(), Zero));
-    Field<Type>& values = tvalues.ref();
+    auto tvalues = tmp<Field<Type>>::New(points().size(), Zero);
+    auto& values = tvalues.ref();
 
-    boolList pointDone(points().size(), false);
+    bitSet pointDone(points().size());
 
-    forAll(faces(), cutFacei)
+    const faceList& fcs = faces();
+
+    forAll(fcs, facei)
     {
-        const face& f = faces()[cutFacei];
-        const label celli = meshCells()[cutFacei];
+        const face& f = fcs[facei];
+        const label celli = elements[facei];
 
         for (const label pointi : f)
         {
-            if (!pointDone[pointi])
+            if (pointDone.set(pointi))
             {
-                pointDone[pointi] = true;
                 values[pointi] = interpolator.interpolate
                 (
                     points()[pointi],

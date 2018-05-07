@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,66 +32,55 @@ License
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::sampledCuttingPlane::sampleField
+Foam::sampledCuttingPlane::sampleOnFaces
 (
-    const GeometricField<Type, fvPatchField, volMesh>& vField
+    const interpolation<Type>& sampler
 ) const
 {
-    return tmp<Field<Type>>::New(vField, surface().meshCells());
+    return sampledSurface::sampleOnFaces
+    (
+        sampler,
+        meshCells(),
+        faces(),
+        points()
+    );
 }
 
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::sampledCuttingPlane::interpolateField
+Foam::sampledCuttingPlane::sampleOnPoints
 (
     const interpolation<Type>& interpolator
 ) const
 {
-    // Get fields to sample. Assume volPointInterpolation!
-    const GeometricField<Type, fvPatchField, volMesh>& volFld =
-        interpolator.psi();
+    // Assume volPointInterpolation for the point field!
+    const auto& volFld = interpolator.psi();
 
     if (subMeshPtr_.valid())
     {
-        tmp<GeometricField<Type, fvPatchField, volMesh>> tvolSubFld =
-            subMeshPtr_().interpolate(volFld);
+        auto tvolSubFld = subMeshPtr_().interpolate(volFld);
+        const auto& volSubFld = tvolSubFld();
 
-        const GeometricField<Type, fvPatchField, volMesh>& volSubFld =
-            tvolSubFld();
-
-        tmp<GeometricField<Type, pointPatchField, pointMesh>> tpointSubFld =
+        auto tpointFld =
             volPointInterpolation::New(volSubFld.mesh()).interpolate(volSubFld);
 
-        // Sample.
         return surface().interpolate
         (
-            (
-                average_
-              ? pointAverage(tpointSubFld())()
-              : volSubFld
-            ),
-            tpointSubFld()
-        );
-    }
-    else
-    {
-        tmp<GeometricField<Type, pointPatchField, pointMesh>> tpointFld
-        (
-            volPointInterpolation::New(volFld.mesh()).interpolate(volFld)
-        );
-
-        // Sample.
-        return surface().interpolate
-        (
-            (
-                average_
-              ? pointAverage(tpointFld())()
-              : volFld
-            ),
+            (average_ ? pointAverage(tpointFld())() : volSubFld),
             tpointFld()
         );
     }
+
+
+    auto tpointFld =
+        volPointInterpolation::New(volFld.mesh()).interpolate(volFld);
+
+    return surface().interpolate
+    (
+        (average_ ? pointAverage(tpointFld())() : volFld),
+        tpointFld()
+    );
 }
 
 

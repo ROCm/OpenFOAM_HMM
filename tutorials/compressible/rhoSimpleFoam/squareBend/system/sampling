@@ -54,6 +54,19 @@ UI2
 }
 
 
+// Uniformity on sampled surface
+UI3
+{
+    ${__surfaceFieldValue}
+
+    regionType      surface;
+    name            plane3;
+
+    operation       uniformity;
+    fields          ( U T );
+}
+
+
 // Inflow uniformity, but use a scalar field for weighting
 // Since this field is quite uniform, there should be no difference
 T_UI1
@@ -95,5 +108,6 @@ rhoU_UI2
     weightField     rhoU;
     fields          ( p rho U rhoU );
 }
+
 
 // ************************************************************************* //

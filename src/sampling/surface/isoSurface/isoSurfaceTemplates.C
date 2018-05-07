@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,31 +53,27 @@ Foam::isoSurface::adaptPatchFields
         volMesh
     > FieldType;
 
-    tmp<FieldType> tsliceFld
+    auto tslice = tmp<FieldType>::New
     (
-        new FieldType
+        IOobject
         (
-            IOobject
-            (
-                fld.name(),
-                fld.instance(),
-                fld.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            fld,        // internal field
-            true        // preserveCouples
-        )
+            fld.name(),
+            fld.instance(),
+            fld.db(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        fld,        // internal field
+        true        // preserveCouples
     );
-    FieldType& sliceFld = tsliceFld.ref();
+    auto& sliceFld = tslice.ref();
 
     const fvMesh& mesh = fld.mesh();
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    typename FieldType::Boundary& sliceFldBf =
-        sliceFld.boundaryFieldRef();
+    auto& sliceFldBf = sliceFld.boundaryFieldRef();
 
     forAll(patches, patchi)
     {
@@ -146,7 +142,7 @@ Foam::isoSurface::adaptPatchFields
             }
         }
     }
-    return tsliceFld;
+    return tslice;
 }
 
 
@@ -164,11 +160,11 @@ Type Foam::isoSurface::generatePoint
     const Type& snapP1
 ) const
 {
-    scalar d = s1-s0;
+    const scalar d = s1-s0;
 
     if (mag(d) > VSMALL)
     {
-        scalar s = (iso_-s0)/d;
+        const scalar s = (iso_-s0)/d;
 
         if (hasSnap1 && s >= 0.5 && s <= 1)
         {
@@ -215,7 +211,7 @@ void Foam::isoSurface::generateTriPoints
     const bool hasSnap3,
     const Type& snapP3,
 
-    DynamicList<Type>& points
+    DynamicList<Type>& pts
 ) const
 {
     // Note: cannot use simpler isoSurfaceCell::generateTriPoints since
@@ -248,185 +244,196 @@ void Foam::isoSurface::generateTriPoints
 
         case 0x01:
         case 0x0E:
-            points.append
+        {
+            pts.append
             (
                 generatePoint(s0,p0,hasSnap0,snapP0,s1,p1,hasSnap1,snapP1)
             );
-            points.append
+            pts.append
             (
                 generatePoint(s0,p0,hasSnap0,snapP0,s2,p2,hasSnap2,snapP2)
             );
-            points.append
+            pts.append
             (
                 generatePoint(s0,p0,hasSnap0,snapP0,s3,p3,hasSnap3,snapP3)
             );
             if (triIndex == 0x0E)
             {
                 // Flip normals
-                label sz = points.size();
-                Swap(points[sz-2], points[sz-1]);
+                const label sz = pts.size();
+                Swap(pts[sz-2], pts[sz-1]);
             }
+        }
         break;
 
         case 0x02:
         case 0x0D:
-            points.append
+        {
+            pts.append
             (
                 generatePoint(s1,p1,hasSnap1,snapP1,s0,p0,hasSnap0,snapP0)
             );
-            points.append
+            pts.append
             (
                 generatePoint(s1,p1,hasSnap1,snapP1,s3,p3,hasSnap3,snapP3)
             );
-            points.append
+            pts.append
             (
                 generatePoint(s1,p1,hasSnap1,snapP1,s2,p2,hasSnap2,snapP2)
             );
             if (triIndex == 0x0D)
             {
                 // Flip normals
-                label sz = points.size();
-                Swap(points[sz-2], points[sz-1]);
+                const label sz = pts.size();
+                Swap(pts[sz-2], pts[sz-1]);
             }
+        }
         break;
 
         case 0x03:
         case 0x0C:
-            {
-                Type p0p2 =
-                    generatePoint(s0,p0,hasSnap0,snapP0,s2,p2,hasSnap2,snapP2);
-                Type p1p3 =
-                    generatePoint(s1,p1,hasSnap1,snapP1,s3,p3,hasSnap3,snapP3);
+        {
+            Type p0p2 =
+                generatePoint(s0,p0,hasSnap0,snapP0,s2,p2,hasSnap2,snapP2);
+            Type p1p3 =
+                generatePoint(s1,p1,hasSnap1,snapP1,s3,p3,hasSnap3,snapP3);
 
-                points.append
-                (
-                    generatePoint(s0,p0,hasSnap0,snapP0,s3,p3,hasSnap3,snapP3)
-                );
-                points.append(p1p3);
-                points.append(p0p2);
+            pts.append
+            (
+                generatePoint(s0,p0,hasSnap0,snapP0,s3,p3,hasSnap3,snapP3)
+            );
+            pts.append(p1p3);
+            pts.append(p0p2);
 
-                points.append(p1p3);
-                points.append
-                (
-                    generatePoint(s1,p1,hasSnap1,snapP1,s2,p2,hasSnap2,snapP2)
-                );
-                points.append(p0p2);
-            }
+            pts.append(p1p3);
+            pts.append
+            (
+                generatePoint(s1,p1,hasSnap1,snapP1,s2,p2,hasSnap2,snapP2)
+            );
+            pts.append(p0p2);
+
             if (triIndex == 0x0C)
             {
                 // Flip normals
-                label sz = points.size();
-                Swap(points[sz-5], points[sz-4]);
-                Swap(points[sz-2], points[sz-1]);
+                const label sz = pts.size();
+                Swap(pts[sz-5], pts[sz-4]);
+                Swap(pts[sz-2], pts[sz-1]);
             }
+        }
         break;
 
         case 0x04:
         case 0x0B:
-            {
-                points.append
-                (
-                    generatePoint(s2,p2,hasSnap2,snapP2,s0,p0,hasSnap0,snapP0)
-                );
-                points.append
-                (
-                    generatePoint(s2,p2,hasSnap2,snapP2,s1,p1,hasSnap1,snapP1)
-                );
-                points.append
-                (
-                    generatePoint(s2,p2,hasSnap2,snapP2,s3,p3,hasSnap3,snapP3)
-                );
-            }
+        {
+            pts.append
+            (
+                generatePoint(s2,p2,hasSnap2,snapP2,s0,p0,hasSnap0,snapP0)
+            );
+            pts.append
+            (
+                generatePoint(s2,p2,hasSnap2,snapP2,s1,p1,hasSnap1,snapP1)
+            );
+            pts.append
+            (
+                generatePoint(s2,p2,hasSnap2,snapP2,s3,p3,hasSnap3,snapP3)
+            );
+
             if (triIndex == 0x0B)
             {
                 // Flip normals
-                label sz = points.size();
-                Swap(points[sz-2], points[sz-1]);
+                const label sz = pts.size();
+                Swap(pts[sz-2], pts[sz-1]);
             }
+        }
         break;
 
         case 0x05:
         case 0x0A:
-            {
-                Type p0p1 =
-                    generatePoint(s0,p0,hasSnap0,snapP0,s1,p1,hasSnap1,snapP1);
-                Type p2p3 =
-                    generatePoint(s2,p2,hasSnap2,snapP2,s3,p3,hasSnap3,snapP3);
+        {
+            Type p0p1 =
+                generatePoint(s0,p0,hasSnap0,snapP0,s1,p1,hasSnap1,snapP1);
+            Type p2p3 =
+                generatePoint(s2,p2,hasSnap2,snapP2,s3,p3,hasSnap3,snapP3);
 
-                points.append(p0p1);
-                points.append(p2p3);
-                points.append
-                (
-                    generatePoint(s0,p0,hasSnap0,snapP0,s3,p3,hasSnap3,snapP3)
-                );
+            pts.append(p0p1);
+            pts.append(p2p3);
+            pts.append
+            (
+                generatePoint(s0,p0,hasSnap0,snapP0,s3,p3,hasSnap3,snapP3)
+            );
 
-                points.append(p0p1);
-                points.append
-                (
-                    generatePoint(s1,p1,hasSnap1,snapP1,s2,p2,hasSnap2,snapP2)
-                );
-                points.append(p2p3);
-            }
+            pts.append(p0p1);
+            pts.append
+            (
+                generatePoint(s1,p1,hasSnap1,snapP1,s2,p2,hasSnap2,snapP2)
+            );
+            pts.append(p2p3);
+
             if (triIndex == 0x0A)
             {
                 // Flip normals
-                label sz = points.size();
-                Swap(points[sz-5], points[sz-4]);
-                Swap(points[sz-2], points[sz-1]);
+                const label sz = pts.size();
+                Swap(pts[sz-5], pts[sz-4]);
+                Swap(pts[sz-2], pts[sz-1]);
             }
+        }
         break;
 
         case 0x06:
         case 0x09:
-            {
-                Type p0p1 =
-                    generatePoint(s0,p0,hasSnap0,snapP0,s1,p1,hasSnap1,snapP1);
-                Type p2p3 =
-                    generatePoint(s2,p2,hasSnap2,snapP2,s3,p3,hasSnap3,snapP3);
+        {
+            Type p0p1 =
+                generatePoint(s0,p0,hasSnap0,snapP0,s1,p1,hasSnap1,snapP1);
+            Type p2p3 =
+                generatePoint(s2,p2,hasSnap2,snapP2,s3,p3,hasSnap3,snapP3);
 
-                points.append(p0p1);
-                points.append
-                (
-                    generatePoint(s1,p1,hasSnap1,snapP1,s3,p3,hasSnap3,snapP3)
-                );
-                points.append(p2p3);
+            pts.append(p0p1);
+            pts.append
+            (
+                generatePoint(s1,p1,hasSnap1,snapP1,s3,p3,hasSnap3,snapP3)
+            );
+            pts.append(p2p3);
 
-                points.append(p0p1);
-                points.append(p2p3);
-                points.append
-                (
-                    generatePoint(s0,p0,hasSnap0,snapP0,s2,p2,hasSnap2,snapP2)
-                );
-            }
+            pts.append(p0p1);
+            pts.append(p2p3);
+            pts.append
+            (
+                generatePoint(s0,p0,hasSnap0,snapP0,s2,p2,hasSnap2,snapP2)
+            );
+
             if (triIndex == 0x09)
             {
                 // Flip normals
-                label sz = points.size();
-                Swap(points[sz-5], points[sz-4]);
-                Swap(points[sz-2], points[sz-1]);
+                label sz = pts.size();
+                Swap(pts[sz-5], pts[sz-4]);
+                Swap(pts[sz-2], pts[sz-1]);
             }
+        }
         break;
 
         case 0x08:
         case 0x07:
-            points.append
+        {
+            pts.append
             (
                 generatePoint(s3,p3,hasSnap3,snapP3,s0,p0,hasSnap0,snapP0)
             );
-            points.append
+            pts.append
             (
                 generatePoint(s3,p3,hasSnap3,snapP3,s2,p2,hasSnap2,snapP2)
             );
-            points.append
+            pts.append
             (
                 generatePoint(s3,p3,hasSnap3,snapP3,s1,p1,hasSnap1,snapP1)
             );
+
             if (triIndex == 0x07)
             {
                 // Flip normals
-                label sz = points.size();
-                Swap(points[sz-2], points[sz-1]);
+                label sz = pts.size();
+                Swap(pts[sz-2], pts[sz-1]);
             }
+        }
         break;
     }
 }
@@ -565,7 +572,7 @@ void Foam::isoSurface::generateTriPoints
     triPoints.clear();
     triMeshCells.clear();
 
-    for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
+    for (label facei = 0; facei < mesh_.nInternalFaces(); ++facei)
     {
         if (faceCutType_[facei] != NOTCUT)
         {
@@ -601,10 +608,8 @@ void Foam::isoSurface::generateTriPoints
     // Determine neighbouring snap status
     boolList neiSnapped(mesh_.nFaces()-mesh_.nInternalFaces(), false);
     List<Type> neiSnappedPoint(neiSnapped.size(), Type(Zero));
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        const polyPatch& pp = patches[patchi];
-
         if (pp.coupled())
         {
             label facei = pp.start();
@@ -624,7 +629,6 @@ void Foam::isoSurface::generateTriPoints
     }
     syncTools::swapBoundaryFaceList(mesh_, neiSnapped);
     syncTools::swapBoundaryFaceList(mesh_, neiSnappedPoint);
-
 
 
     forAll(patches, patchi)
@@ -748,8 +752,8 @@ Foam::isoSurface::interpolate
 )
 {
     // One value per point
-    tmp<Field<Type>> tvalues(new Field<Type>(nPoints, Type(Zero)));
-    Field<Type>& values = tvalues.ref();
+    auto tvalues = tmp<Field<Type>>::New(nPoints, Type(Zero));
+    auto& values = tvalues.ref();
 
 
     // Pass1: unweighted average of merged point values

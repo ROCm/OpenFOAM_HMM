@@ -57,7 +57,7 @@ template<class Face> class MeshedSurface;
 class surfMesh
 :
     public  surfaceRegistry,
-    private MeshedSurfaceIOAllocator,
+    private Detail::MeshedSurfaceIOAllocator,
     public  PrimitivePatch<face, ::Foam::UList, ::Foam::SubField<point>, point>
 {
 public:
@@ -80,7 +80,7 @@ private:
 
     // Private Typedefs
 
-        typedef MeshedSurfaceIOAllocator Allocator;
+        typedef Detail::MeshedSurfaceIOAllocator Allocator;
 
         typedef PrimitivePatch
         <
@@ -94,10 +94,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow copy construct
+        //- No copy construct
         surfMesh(const surfMesh&) = delete;
 
-        //- Disallow copy assignment
+        //- No copy assignment
         void operator=(const surfMesh&) = delete;
 
 

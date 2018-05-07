@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "distanceSurface.H"
+#include "sampledDistanceSurface.H"
 #include "volFieldsFwd.H"
 #include "pointFields.H"
 #include "volPointInterpolation.H"
@@ -32,71 +32,39 @@ License
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::distanceSurface::sampleField
+Foam::sampledDistanceSurface::sampleOnFaces
 (
-    const GeometricField<Type, fvPatchField, volMesh>& vField
+    const interpolation<Type>& sampler
 ) const
 {
-    if (cell_)
-    {
-        return tmp<Field<Type>>
-        (
-            new Field<Type>(vField, isoSurfCellPtr_().meshCells())
-        );
-    }
-    else
-    {
-        return tmp<Field<Type>>
-        (
-            new Field<Type>(vField, isoSurfPtr_().meshCells())
-        );
-    }
+    return sampledSurface::sampleOnFaces
+    (
+        sampler,
+        meshCells(),
+        faces(),
+        points()
+    );
 }
 
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::distanceSurface::interpolateField
+Foam::sampledDistanceSurface::sampleOnPoints
 (
     const interpolation<Type>& interpolator
 ) const
 {
-    const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
+    // Assume volPointInterpolation for the point field!
+    const auto& volFld = interpolator.psi();
 
-    // Get fields to sample. Assume volPointInterpolation!
-    const GeometricField<Type, fvPatchField, volMesh>& volFld =
-        interpolator.psi();
+    auto tpointFld =
+        volPointInterpolation::New(volFld.mesh()).interpolate(volFld);
 
-    tmp<GeometricField<Type, pointPatchField, pointMesh>> pointFld
+    return distanceSurface::interpolate
     (
-        volPointInterpolation::New(fvm).interpolate(volFld)
+        (average_ ? pointAverage(tpointFld())() : volFld),
+        tpointFld()
     );
-
-    // Sample.
-    if (cell_)
-    {
-        return isoSurfCellPtr_().interpolate
-        (
-            (
-                average_
-              ? pointAverage(pointFld())()
-              : volFld
-            ),
-            pointFld()
-        );
-    }
-    else
-    {
-        return isoSurfPtr_().interpolate
-        (
-            (
-                average_
-              ? pointAverage(pointFld())()
-              : volFld
-            ),
-            pointFld()
-        );
-    }
 }
 
 

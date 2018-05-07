@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,14 +31,16 @@ License
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::sampledPatchInternalField::sampleField
+Foam::sampledPatchInternalField::sampleOnFaces
 (
-    const GeometricField<Type, fvPatchField, volMesh>& vField
+    const interpolation<Type>& sampler
 ) const
 {
+    const auto& vField = sampler.psi();
+
     // One value per face
-    tmp<Field<Type>> tvalues(new Field<Type>(patchFaceLabels().size()));
-    Field<Type>& values = tvalues.ref();
+    auto tvalues = tmp<Field<Type>>::New(patchFaceLabels().size());
+    auto& values = tvalues.ref();
 
     forAll(patchStart(), i)
     {
@@ -66,7 +68,7 @@ Foam::sampledPatchInternalField::sampleField
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::sampledPatchInternalField::interpolateField
+Foam::sampledPatchInternalField::sampleOnPoints
 (
     const interpolation<Type>& interpolator
 ) const
@@ -118,9 +120,9 @@ Foam::sampledPatchInternalField::interpolateField
 
     labelList meshFaceLabels(allPatchVals.size());
     sz = 0;
-    forAll(patchIDs(), i)
+    for (const label patchId : patchIDs())
     {
-        const polyPatch& pp = mesh().boundaryMesh()[patchIDs()[i]];
+        const polyPatch& pp = mesh().boundaryMesh()[patchId];
         forAll(pp, i)
         {
             meshFaceLabels[sz++] = pp.start()+i;

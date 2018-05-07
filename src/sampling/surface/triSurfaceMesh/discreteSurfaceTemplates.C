@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,20 +32,25 @@ template<class Type>
 bool Foam::discreteSurface::sampleType
 (
     const objectRegistry& obr,
-    const word& fieldName
+    const word& fieldName,
+    const word& sampleScheme
 ) const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
     typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
     typedef IOField<Type> TmpFieldType;
 
-    if (!mesh().foundObject<VolFieldType>(fieldName))
+    const auto* volFldPtr = mesh().lookupObjectPtr<VolFieldType>(fieldName);
+
+    if (!volFldPtr)
     {
         return false;
     }
 
-    const VolFieldType& fld = mesh().lookupObject<VolFieldType>(fieldName);
-    tmp<Field<Type>> tfield = sampleField(fld);
+    const auto& volFld = *volFldPtr;
+    auto samplerPtr = interpolation<Type>::New(sampleScheme, *volFldPtr);
+
+    tmp<Field<Type>> tfield = sampleOnFaces(*samplerPtr);
 
     // The rest could be moved into a separate helper
     if (isA<surfMesh>(obr))
@@ -67,7 +72,7 @@ bool Foam::discreteSurface::sampleType
                     IOobject::NO_WRITE
                 ),
                 surf,
-                dimensioned<Type>(fld.dimensions(), Zero)
+                dimensioned<Type>(volFld.dimensions(), Zero)
             );
             ptr->writeOpt() = IOobject::NO_WRITE;
 
@@ -110,15 +115,18 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::discreteSurface::sampleType
 (
-    const word& fieldName
+    const word& fieldName,
+    const word& sampleScheme
 ) const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
-    if (mesh().foundObject<VolFieldType>(fieldName))
+    const auto* volFldPtr = mesh().lookupObjectPtr<VolFieldType>(fieldName);
+
+    if (volFldPtr)
     {
-        const VolFieldType& fld = mesh().lookupObject<VolFieldType>(fieldName);
-        return sampleField(fld);
+        auto samplerPtr = interpolation<Type>::New(sampleScheme, *volFldPtr);
+        return sampleOnFaces(*samplerPtr);
     }
 
     return nullptr;
@@ -127,22 +135,33 @@ Foam::discreteSurface::sampleType
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::discreteSurface::sampleField
+Foam::discreteSurface::sampleOnFaces
 (
-    const GeometricField<Type, fvPatchField, volMesh>& vField
+    const interpolation<Type>& sampler
 ) const
 {
+    const labelList& elements = sampleElements_;
+
+    const auto& vField = sampler.psi();
+    const label len = elements.size();
+
     // One value per face
-    tmp<Field<Type>> tvalues(new Field<Type>(sampleElements_.size()));
-    Field<Type>& values = tvalues.ref();
+    auto tvalues = tmp<Field<Type>>::New(len);
+    auto& values = tvalues.ref();
 
     if (!onBoundary())
     {
         // Sample cells
 
-        forAll(sampleElements_, triI)
+        const faceList& fcs = this->surfFaces();
+        const pointField& pts = points();
+
+        for (label i=0; i < len; ++i)
         {
-            values[triI] = vField[sampleElements_[triI]];
+            const label celli = elements[i];
+            const point pt = fcs[i].centre(pts);
+
+            values[i] = sampler.interpolate(pt, celli);
         }
     }
     else
@@ -170,10 +189,10 @@ Foam::discreteSurface::sampleField
 
         // Sample in flat boundary field
 
-        forAll(sampleElements_, triI)
+        for (label i=0; i < len; ++i)
         {
-            label facei = sampleElements_[triI];
-            values[triI] = bVals[facei-mesh().nInternalFaces()];
+            label facei = elements[i];
+            values[i] = bVals[facei-mesh().nInternalFaces()];
         }
     }
 
@@ -183,14 +202,14 @@ Foam::discreteSurface::sampleField
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::discreteSurface::interpolateField
+Foam::discreteSurface::sampleOnPoints
 (
     const interpolation<Type>& interpolator
 ) const
 {
     // One value per vertex
-    tmp<Field<Type>> tvalues(new Field<Type>(sampleElements_.size()));
-    Field<Type>& values = tvalues.ref();
+    auto tvalues = tmp<Field<Type>>::New(sampleElements_.size());
+    auto& values = tvalues.ref();
 
     if (!onBoundary())
     {

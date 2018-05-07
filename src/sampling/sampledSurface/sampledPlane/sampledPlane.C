@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +35,13 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(sampledPlane, 0);
-    addNamedToRunTimeSelectionTable(sampledSurface, sampledPlane, word, plane);
+    addNamedToRunTimeSelectionTable
+    (
+        sampledSurface,
+        sampledPlane,
+        word,
+        plane
+    );
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -170,6 +176,7 @@ bool Foam::sampledPlane::update()
             << nl << endl;
     }
 
+
     labelList selectedCells(mesh().cellZones().findMatching(zoneKey_).toc());
 
     bool fullMesh = returnReduce(selectedCells.empty(), andOp<bool>());
@@ -234,46 +241,46 @@ bool Foam::sampledPlane::update()
 
 Foam::tmp<Foam::scalarField> Foam::sampledPlane::sample
 (
-    const volScalarField& vField
+    const interpolation<scalar>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::vectorField> Foam::sampledPlane::sample
 (
-    const volVectorField& vField
+    const interpolation<vector>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::sphericalTensorField> Foam::sampledPlane::sample
 (
-    const volSphericalTensorField& vField
+    const interpolation<sphericalTensor>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::symmTensorField> Foam::sampledPlane::sample
 (
-    const volSymmTensorField& vField
+    const interpolation<symmTensor>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
 Foam::tmp<Foam::tensorField> Foam::sampledPlane::sample
 (
-    const volTensorField& vField
+    const interpolation<tensor>& sampler
 ) const
 {
-    return sampleField(vField);
+    return sampleOnFaces(sampler);
 }
 
 
@@ -282,7 +289,7 @@ Foam::tmp<Foam::scalarField> Foam::sampledPlane::interpolate
     const interpolation<scalar>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 
@@ -291,7 +298,7 @@ Foam::tmp<Foam::vectorField> Foam::sampledPlane::interpolate
     const interpolation<vector>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 Foam::tmp<Foam::sphericalTensorField> Foam::sampledPlane::interpolate
@@ -299,7 +306,7 @@ Foam::tmp<Foam::sphericalTensorField> Foam::sampledPlane::interpolate
     const interpolation<sphericalTensor>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 
@@ -308,7 +315,7 @@ Foam::tmp<Foam::symmTensorField> Foam::sampledPlane::interpolate
     const interpolation<symmTensor>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 
@@ -317,7 +324,7 @@ Foam::tmp<Foam::tensorField> Foam::sampledPlane::interpolate
     const interpolation<tensor>& interpolator
 ) const
 {
-    return interpolateField(interpolator);
+    return sampleOnPoints(interpolator);
 }
 
 

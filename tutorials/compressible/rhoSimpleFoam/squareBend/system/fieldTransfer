@@ -45,7 +45,19 @@ fieldTransfer
             ${_plane}
             bounds (-1 -1 -1) (0 0 1);
         }
+
+        // Angled plane - for general testing
+        plane3
+        {
+            type        distanceSurface;
+            distance    0;
+            signed      true;
+
+            surfaceType triSurfaceMesh;
+            surfaceName angledPlane.obj;
+        }
     );
 }
+
 
 // ************************************************************************* //

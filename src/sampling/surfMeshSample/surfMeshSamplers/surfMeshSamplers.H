@@ -47,6 +47,9 @@ Description
         // Fields to be sampled
         fields          (p U);
 
+        // Scheme to obtain face centre value
+        sampleScheme    cell;
+
         // Optional: pre-defined derived fields to be sampled
         derived         (rhoU pTotal);
 
@@ -79,7 +82,7 @@ SourceFiles
 #define surfMeshSamplers_H
 
 #include "regionFunctionObject.H"
-#include "surfMeshSampler.H"
+#include "surfMeshSample.H"
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "wordRes.H"
@@ -102,7 +105,7 @@ class dictionary;
 class surfMeshSamplers
 :
     public functionObjects::regionFunctionObject,
-    public PtrList<surfMeshSampler>
+    public PtrList<surfMeshSample>
 {
     // Static data members
 
@@ -124,6 +127,9 @@ class surfMeshSamplers
         //- Names of derived fields to create and sample
         wordList derivedNames_;
 
+        //- Sample scheme to obtain face values
+        word sampleScheme_;
+
 
     // Private Member Functions
 
@@ -135,15 +141,15 @@ class surfMeshSamplers
         );
 
         //- Access the sampling surfaces
-        inline const PtrList<surfMeshSampler>& surfaces() const
+        inline const PtrList<surfMeshSample>& surfaces() const
         {
-            return static_cast<const PtrList<surfMeshSampler>&>(*this);
+            return static_cast<const PtrList<surfMeshSample>&>(*this);
         }
 
         //- Access the sampling surfaces
-        inline PtrList<surfMeshSampler>& surfaces()
+        inline PtrList<surfMeshSample>& surfaces()
         {
-            return static_cast<PtrList<surfMeshSampler>&>(*this);
+            return static_cast<PtrList<surfMeshSample>&>(*this);
         }
 
 
@@ -152,8 +158,10 @@ class surfMeshSamplers
         wordList acceptType() const;
 
 
-        //- Disallow default bitwise copy construct and assignment
+        //- No copy construct
         surfMeshSamplers(const surfMeshSamplers&) = delete;
+
+        //- No copy assignment
         void operator=(const surfMeshSamplers&) = delete;
 
 

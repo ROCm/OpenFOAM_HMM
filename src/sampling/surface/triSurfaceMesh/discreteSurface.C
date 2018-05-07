@@ -81,9 +81,8 @@ void Foam::discreteSurface::setZoneMap
 )
 {
     label sz = 0;
-    forAll(zoneLst, zonei)
+    for (const surfZone& zn : zoneLst)
     {
-        const surfZone& zn = zoneLst[zonei];
         sz += zn.size();
     }
 
@@ -113,9 +112,8 @@ Foam::discreteSurface::nonCoupledboundaryTree() const
 
         labelList bndFaces(mesh().nFaces()-mesh().nInternalFaces());
         label bndI = 0;
-        forAll(patches, patchi)
+        for (const polyPatch& pp : patches)
         {
-            const polyPatch& pp = patches[patchi];
             if (!pp.coupled())
             {
                 forAll(pp, i)
@@ -841,23 +839,24 @@ bool Foam::discreteSurface::update(const treeBoundBox& bb)
 bool Foam::discreteSurface::sampleAndStore
 (
     const objectRegistry& store,
-    const word& fieldName
+    const word& fieldName,
+    const word& sampleScheme
 ) const
 {
     return
     (
-        sampleType<scalar>(store, fieldName)
-     || sampleType<vector>(store, fieldName)
-     || sampleType<sphericalTensor>(store, fieldName)
-     || sampleType<symmTensor>(store, fieldName)
-     || sampleType<tensor>(store, fieldName)
+        sampleType<scalar>(store, fieldName, sampleScheme)
+     || sampleType<vector>(store, fieldName, sampleScheme)
+     || sampleType<sphericalTensor>(store, fieldName, sampleScheme)
+     || sampleType<symmTensor>(store, fieldName, sampleScheme)
+     || sampleType<tensor>(store, fieldName, sampleScheme)
     );
 }
 
 
 void Foam::discreteSurface::print(Ostream& os) const
 {
-    os  << "discreteSurface: "
+    os  << "discreteSurface:"
         << " surface:" << surface_.objectRegistry::name()
         << " faces:"   << this->surfFaces().size()
         << " points:"  << this->points().size()
