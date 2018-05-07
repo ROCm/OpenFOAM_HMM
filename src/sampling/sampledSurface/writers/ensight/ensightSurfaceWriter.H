@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,6 +79,23 @@ class ensightSurfaceWriter
 
     // Private Member Functions
 
+        //- Print time-set for ensight case file
+        static void printTimeset
+        (
+            OSstream& os,
+            const label ts,
+            const scalar& timeValue
+        );
+
+        //- Print time-set for ensight case file
+        static void printTimeset
+        (
+            OSstream& os,
+            const label ts,
+            const UList<scalar>& times
+        );
+
+
         //- Templated write operation - one file per timestep
         template<class Type>
         fileName writeCollated
@@ -144,6 +161,13 @@ public:
         //  False if geometry and field must be in a single file
         virtual bool separateGeometry() const;
 
+        //- Trigger for geometry changes.
+        //  \note this is a stop-gap solution
+        virtual void updateMesh
+        (
+            const fileName& outputDir,
+            const fileName& surfaceName
+        ) const; // override
 
         //- Write single surface geometry to file.
         virtual fileName write

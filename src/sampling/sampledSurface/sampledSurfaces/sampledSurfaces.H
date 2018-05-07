@@ -151,6 +151,9 @@ class sampledSurfaces
         //- Merged meshed surfaces (parallel only)
         List<mergedSurf> mergedList_;
 
+        //- Track which surfaces have changed
+        List<bool> changedGeom_;
+
 
     // Calculated
 

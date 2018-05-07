@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,6 @@ License
 #include "ensightPartFaces.H"
 #include "ensightSerialOutput.H"
 #include "ensightPTraits.H"
-#include "StringStream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -63,14 +62,12 @@ Foam::fileName Foam::ensightSurfaceWriter::writeUncollated
 
     const fileName baseDir = outputDir/varName;
     const fileName timeDir = outputDir.name();
+    const scalar timeValue = readScalar(timeDir);
 
     if (!isDir(baseDir))
     {
         mkDir(baseDir);
     }
-
-    // const scalar timeValue = Foam::name(this->mesh().time().timeValue());
-    const scalar timeValue = readScalar(timeDir);
 
     OFstream osCase(baseDir/surfName + ".case");
     ensightGeoFile osGeom
@@ -109,14 +106,10 @@ Foam::fileName Foam::ensightSurfaceWriter::writeUncollated
         << setw(15) << varName
         << "   " << surfName.c_str() << ".********." << varName << nl
         << nl
-        << "TIME" << nl
-        << "time set:               1" << nl
-        << "number of steps:        1" << nl
-        << "filename start number:  0" << nl
-        << "filename increment:     1" << nl
-        << "time values:" << nl
-        << "    " << timeValue
-        << nl << nl << "# end" << nl;
+        << "TIME" << nl;
+
+    printTimeset(osCase, 1, timeValue);
+    osCase << "# end" << nl;
 
     ensightPartFaces ensPart
     (
@@ -171,20 +164,22 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
 
     const fileName baseDir = outputDir.path()/surfName;
     const fileName timeDir = outputDir.name();
+    const scalar timeValue = readScalar(timeDir);
+    scalar meshValue = 0;
 
     if (!isDir(baseDir))
     {
         mkDir(baseDir);
     }
 
-    // surfName already validated
-    const fileName meshFile(baseDir/surfName + ".000000.mesh");
-    const scalar timeValue = readScalar(timeDir);
-    label timeIndex = 0;
+    label meshIndex = 0, timeIndex = 0;
+
+    fileName meshFile;
 
     // Do case file
     {
         dictionary dict;
+        scalarList meshes;
         scalarList times;
         bool stateChanged = false;
 
@@ -193,26 +188,56 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
             IFstream is(baseDir/"fieldsDict");
             if (is.good() && dict.read(is))
             {
-                dict.lookup("times") >> times;
-                const scalar timeValue = readScalar(timeDir);
-                label index = findLower(times, timeValue);
-                timeIndex = index+1;
+                dict.readIfPresent("meshes", meshes);
+                dict.readIfPresent("times", times);
+
+                timeIndex = 1+findLower(times, timeValue);
+
+                if (dict.readIfPresent("updateMesh", meshValue))
+                {
+                    meshIndex = 1+findLower(meshes, meshValue);
+
+                    dict.remove("updateMesh");
+                    stateChanged = true;
+                }
+                else if (meshes.size())
+                {
+                    meshIndex = meshes.size()-1;
+                    meshValue = meshes.last();
+                }
+                else
+                {
+                    meshIndex = 0;
+                }
             }
         }
 
-
         // Update stored times list
-        times.setSize(timeIndex+1, -1);
+        meshes.resize(meshIndex+1, -1);
+        times.resize(timeIndex+1, -1);
 
+        if (meshes[meshIndex] != meshValue)
+        {
+            stateChanged = true;
+        }
         if (times[timeIndex] != timeValue)
         {
             stateChanged = true;
         }
+
+        meshes[meshIndex] = meshValue;
         times[timeIndex] = timeValue;
+
+        // surfName already validated
+        meshFile =
+        (
+            baseDir/"data"/word::printf("%06d", meshIndex)/"geometry"
+        );
 
 
         // Add my information to dictionary
         {
+            dict.set("meshes", meshes);
             dict.set("times", times);
             if (dict.found("fields"))
             {
@@ -252,7 +277,7 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
             }
             {
                 OFstream os(baseDir/"fieldsDict");
-                os << "// summary of ensight times/fields" << nl << nl;
+                os << "// Summary of Ensight fields, times" << nl << nl;
                 dict.write(os, false);
             }
 
@@ -268,7 +293,8 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
                 << "type: ensight gold" << nl
                 << nl
                 << "GEOMETRY" << nl
-                << "model:  1   " << meshFile.name() << nl
+                << "model:  2  " // time-set 2
+                << " data/******/geometry" << nl
                 << nl
                 << "VARIABLE" << nl;
 
@@ -298,24 +324,12 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
             osCase << nl;
 
             osCase
-                << "TIME" << nl
-                << "time set:               1" << nl
-                << "number of steps:        " << timeIndex+1 << nl
-                << "filename start number:  0" << nl
-                << "filename increment:     1" << nl
-                << "time values:" << nl;
+                << "TIME" << nl;
 
-            label count = 0;
-            forAll(times, timei)
-            {
-                osCase << ' ' << setw(12) << times[timei];
+            printTimeset(osCase, 1, times);
+            printTimeset(osCase, 2, meshes);
 
-                if (!(++count % 6))
-                {
-                    osCase << nl;
-                }
-            }
-            osCase << nl << nl << "# end" << nl;
+            osCase << "# end" << nl;
         }
     }
 
@@ -341,16 +355,8 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
     }
 
 
-    // Get string representation
-    string timeString;
-    {
-        OStringStream os;
-        os.stdStream().fill('0');
-        os << setw(6) << timeIndex;
-        timeString = os.str();
-    }
-
-    fileName dataDir = baseDir/"data"/timeString;
+    // Location for data
+    fileName dataDir = baseDir/"data"/word::printf("%06d", timeIndex);
 
     // As per mkdir -p "data/000000"
     mkDir(dataDir);

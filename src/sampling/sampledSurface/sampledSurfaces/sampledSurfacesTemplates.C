@@ -42,6 +42,13 @@ void Foam::sampledSurfaces::writeSurface
 {
     const sampledSurface& s = operator[](surfi);
 
+    if (changedGeom_[surfi])
+    {
+        // Trigger any changes
+        formatter_->updateMesh(outputDir, s.name());
+        changedGeom_[surfi] = false;
+    }
+
     if (Pstream::parRun())
     {
         // Collect values from all processors

@@ -113,6 +113,16 @@ public:
             return false;
         }
 
+        //- Trigger for geometry changes.
+        //  \note this is a stop-gap solution until the writing infrastructure
+        //  is improved.
+        virtual void updateMesh
+        (
+            const fileName& outputDir,
+            const fileName& surfaceName
+        ) const
+        {}
+
         //- Write single surface geometry to file.
         virtual fileName write
         (

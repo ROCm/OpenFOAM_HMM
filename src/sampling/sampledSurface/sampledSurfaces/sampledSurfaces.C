@@ -135,6 +135,7 @@ Foam::sampledSurfaces::sampledSurfaces
     sampleFaceScheme_(word::null),
     sampleNodeScheme_(word::null),
     mergedList_(),
+    changedGeom_(),
     formatter_(nullptr)
 {
     if (Pstream::parRun())
@@ -168,6 +169,7 @@ Foam::sampledSurfaces::sampledSurfaces
     sampleFaceScheme_(word::null),
     sampleNodeScheme_(word::null),
     mergedList_(),
+    changedGeom_(),
     formatter_(nullptr)
 {
     read(dict);
@@ -219,11 +221,12 @@ bool Foam::sampledSurfaces::write()
 
     const label nFields = classifyFields();
 
-    // write geometry first if required,
+    // Write geometry first if required,
     // or when no fields would otherwise be written
-    if (nFields == 0 || formatter_->separateGeometry())
+    if (formatter_->separateGeometry() || !nFields)
     {
         writeGeometry();
+        changedGeom_ = false;
     }
 
     const IOobjectList objects(obr_, obr_.time().timeName());
@@ -246,9 +249,7 @@ bool Foam::sampledSurfaces::write()
 
 bool Foam::sampledSurfaces::read(const dictionary& dict)
 {
-    bool surfacesFound = dict.found("surfaces");
-
-    if (surfacesFound)
+    if (dict.found("surfaces"))
     {
         sampleFaceScheme_ = dict.lookupOrDefault<word>("sampleScheme", "cell");
 
@@ -303,6 +304,10 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
         }
         Pout<< ")" << endl;
     }
+
+    // New geometry
+    changedGeom_.resize(size());
+    changedGeom_ = true;
 
     return true;
 }
@@ -369,6 +374,8 @@ bool Foam::sampledSurfaces::expire()
         }
     }
 
+    changedGeom_ = true;
+
     // true if any surfaces just expired
     return justExpired;
 }
@@ -388,9 +395,12 @@ bool Foam::sampledSurfaces::update()
     {
         forAll(*this, surfi)
         {
-            if (operator[](surfi).update())
+            sampledSurface& s = operator[](surfi);
+
+            if (s.update())
             {
                 updated = true;
+                changedGeom_[surfi] = true;
             }
         }
 
@@ -414,6 +424,7 @@ bool Foam::sampledSurfaces::update()
         if (s.update())
         {
             updated = true;
+            changedGeom_[surfi] = true;
             mergedList_[surfi].merge(s, mergeDim);
         }
     }

@@ -106,7 +106,7 @@ private:
         //- Record time indices when geometry is written.
         //  These values will be used to decide if timeset 1
         //  or a separate timeset are used.
-        //  The special index '-1' is used static geometry.
+        //  The special index '-1' is used for static geometry.
         mutable labelHashSet geomTimes_;
 
         //- Record time indices when clouds are written.

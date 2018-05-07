@@ -138,7 +138,7 @@ Foam::scalar Foam::ensightCase::writeTimeset() const
 {
     const label ts = 1;
 
-    const labelList indices = timesUsed_.sortedToc();
+    const labelList indices(timesUsed_.sortedToc());
     label count = indices.size();
 
     // correct for negative starting values
