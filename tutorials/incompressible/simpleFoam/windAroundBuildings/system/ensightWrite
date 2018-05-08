@@ -7,6 +7,8 @@ ensightWrite
     libs    ("libutilityFunctionObjects.so");
     log     true;
 
+    nodeValues  true;
+
     // Fields to output (words or regex)
     fields  (U p "(k|epsilon|omega)");
 

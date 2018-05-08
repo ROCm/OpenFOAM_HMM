@@ -66,6 +66,7 @@ Description
         patches      | Select patches to write      | no        |
         faceZones    | Select faceZones to write    | no        |
         consecutive  | Consecutive output numbering | no        | false
+        nodeValues   | Write values at nodes        | no        | false
     \endtable
 
     Note that if the \c patches entry is an empty list, this will select all

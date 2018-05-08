@@ -111,29 +111,31 @@ bool Foam::functionObjects::ensightWrite::read(const dictionary& dict)
 
     if (dict.found("patches"))
     {
-        wordRes lst(dict.lookup("patches"));
-        lst.uniq();
+        wordRes list(dict.lookup("patches"));
+        list.uniq();
 
-        writeOpts_.patchSelection(lst);
+        writeOpts_.patchSelection(list);
     }
 
     if (dict.found("faceZones"))
     {
-        wordRes lst(dict.lookup("faceZones"));
-        lst.uniq();
+        wordRes list(dict.lookup("faceZones"));
+        list.uniq();
 
-        writeOpts_.faceZoneSelection(lst);
+        writeOpts_.faceZoneSelection(list);
     }
 
 
     //
     // case options
     //
+
+    caseOpts_.nodeValues(dict.lookupOrDefault("nodeValues", false));
+
     caseOpts_.width(dict.lookupOrDefault<label>("width", 8));
 
     // remove existing output directory
     caseOpts_.overwrite(dict.lookupOrDefault("overwrite", false));
-
 
     //
     // other options
