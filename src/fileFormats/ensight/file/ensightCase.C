@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -171,9 +171,9 @@ Foam::scalar Foam::ensightCase::writeTimeset() const
             << "filename numbers:" << nl;
 
         count = 0;
-        forAll(indices, idx)
+        for (const label idx : indices)
         {
-            *os_ << " " << setw(12) << indices[idx];
+            *os_ << ' ' << setw(12) << idx;
 
             if (++count % 6 == 0)
             {
@@ -191,9 +191,9 @@ Foam::scalar Foam::ensightCase::writeTimeset() const
     *os_ << "time values:" << nl;
 
     count = 0;
-    forAll(indices, idx)
+    for (const label idx : indices)
     {
-        *os_ << " " << setw(12) << timesUsed_[indices[idx]] + timeCorrection;
+        *os_ << ' ' << setw(12) << timesUsed_[idx] + timeCorrection;
 
         if (++count % 6 == 0)
         {
@@ -220,7 +220,7 @@ void Foam::ensightCase::writeTimeset
     labelHashSet hashed(lookup);
     hashed.erase(-1);
 
-    const labelList indices = hashed.sortedToc();
+    const labelList indices(hashed.sortedToc());
     label count = indices.size();
 
     *os_
@@ -229,9 +229,9 @@ void Foam::ensightCase::writeTimeset
         << "filename numbers:" << nl;
 
     count = 0;
-    forAll(indices, idx)
+    for (const label idx : indices)
     {
-        *os_ << " " << setw(12) << indices[idx];
+        *os_ << ' ' << setw(12) << idx;
 
         if (++count % 6 == 0)
         {
@@ -247,9 +247,9 @@ void Foam::ensightCase::writeTimeset
     *os_ << "time values:" << nl;
 
     count = 0;
-    forAll(indices, idx)
+    for (const label idx : indices)
     {
-        *os_ << " " << setw(12) << timesUsed_[indices[idx]] + timeCorrection;
+        *os_ << ' ' << setw(12) << timesUsed_[idx] + timeCorrection;
 
         if (++count % 6 == 0)
         {
@@ -333,19 +333,17 @@ Foam::ensightCase::createDataFile
     const word& name
 ) const
 {
-    autoPtr<ensightFile> output;
-
     if (Pstream::master())
     {
-        // the data/ITER subdirectory must exist
+        // The data/ITER subdirectory must exist
         // Note that data/ITER is indeed a valid ensight::FileName
         const fileName outdir = dataDir()/padded(timeIndex_);
         mkDir(outdir);
 
-        output.reset(new ensightFile(outdir, name, format()));
+        return autoPtr<ensightFile>::New(outdir, name, format());
     }
 
-    return output;
+    return nullptr;
 }
 
 
@@ -356,8 +354,6 @@ Foam::ensightCase::createCloudFile
     const word& name
 ) const
 {
-    autoPtr<Foam::ensightFile> output;
-
     if (Pstream::master())
     {
         // Write
@@ -373,10 +369,10 @@ Foam::ensightCase::createCloudFile
 
         mkDir(outdir); // should be unnecessary after newCloud()
 
-        output.reset(new ensightFile(outdir, name, format()));
+        return autoPtr<ensightFile>::New(outdir, name, format());
     }
 
-    return output;
+    return nullptr;
 }
 
 
@@ -490,7 +486,7 @@ void Foam::ensightCase::write() const
     if (!os_) return; // master only
 
     // geometry timeset
-    bool staticGeom = (geomTimes_.size() == 1 && geomTimes_.found(-1));
+    const bool staticGeom = (geomTimes_.size() == 1 && geomTimes_.found(-1));
     label tsGeom = staticGeom ? 0 : checkTimeset(geomTimes_);
 
     // cloud timeset
@@ -684,12 +680,12 @@ Foam::ensightCase::newGeometry
             path = ensightDir_;
         }
 
-        output.reset(new ensightGeoFile(path, geometryName, format()));
-
         noteGeometry(moving);   // note for later use
+
+        return autoPtr<ensightGeoFile>::New(path, geometryName, format());
     }
 
-    return output;
+    return nullptr;
 }
 
 

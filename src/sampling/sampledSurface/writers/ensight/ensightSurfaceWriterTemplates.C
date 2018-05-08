@@ -26,6 +26,7 @@ License
 #include "IOmanip.H"
 #include "Fstream.H"
 #include "OSspecific.H"
+#include "ensightCase.H"
 #include "ensightPartFaces.H"
 #include "ensightSerialOutput.H"
 #include "ensightPTraits.H"
@@ -69,7 +70,13 @@ Foam::fileName Foam::ensightSurfaceWriter::writeUncollated
         mkDir(baseDir);
     }
 
-    OFstream osCase(baseDir/surfName + ".case");
+    OFstream osCase(baseDir/surfName + ".case", IOstream::ASCII);
+
+    // Format options
+    osCase.setf(ios_base::left);
+    osCase.setf(ios_base::scientific, ios_base::floatfield);
+    osCase.precision(5);
+
     ensightGeoFile osGeom
     (
         baseDir,
@@ -103,13 +110,16 @@ Foam::fileName Foam::ensightSurfaceWriter::writeUncollated
           ? " per node:    1  "  // time-set 1
           : " per element: 1  "  // time-set 1
         )
-        << setw(15) << varName
-        << "   " << surfName.c_str() << ".********." << varName << nl
+        << setw(15) << varName << ' '
+        << surfName.c_str() << ".********." << varName << nl;
+
+    osCase
         << nl
         << "TIME" << nl;
 
     printTimeset(osCase, 1, timeValue);
     osCase << "# end" << nl;
+
 
     ensightPartFaces ensPart
     (
@@ -153,14 +163,18 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
     // use surface name as sub-directory for results
     // eg, something like this:
     // - SURF1/SURF1.case
-    // - SURF1/SURF1.0000.mesh
-    // - SURF1/SURF1/data/0000/VAR1
-    // - SURF1/SURF1/data/0000/VAR2
+    // - SURF1/SURF1/data/00000000/geometry
+    // - SURF1/SURF1/data/00000000/VAR1
+    // - SURF1/SURF1/data/00000000/VAR2
     // and
     // - SURF2/SURF2.case
-    // - SURF2/SURF2.0000.mesh
-    // - SURF2/SURF2/data/0000/VAR1
-    // - SURF2/SURF2/data/0000/VAR2
+    // - SURF2/SURF2/data/00000000/geometry
+    // - SURF2/SURF2/data/00000000/VAR1
+    // - SURF2/SURF2/data/00000000/VAR2
+
+    // Names "data" and "geometry" as per ensightCase:
+    const char* fmt  = "%08d";
+    const char* mask = "data/********/";
 
     const fileName baseDir = outputDir.path()/surfName;
     const fileName timeDir = outputDir.name();
@@ -172,9 +186,10 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
         mkDir(baseDir);
     }
 
-    label meshIndex = 0, timeIndex = 0;
+    label meshIndex = 0;
+    label timeIndex = 0;
 
-    fileName meshFile;
+    fileName geometryName;
 
     // Do case file
     {
@@ -228,11 +243,8 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
         meshes[meshIndex] = meshValue;
         times[timeIndex] = timeValue;
 
-        // surfName already validated
-        meshFile =
-        (
-            baseDir/"data"/word::printf("%06d", meshIndex)/"geometry"
-        );
+        geometryName =
+            "data"/word::printf(fmt, meshIndex)/ensightCase::geometryName;
 
 
         // Add my information to dictionary
@@ -281,20 +293,49 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
                 dict.write(os, false);
             }
 
-            OFstream osCase(baseDir/surfName + ".case");
+            OFstream osCase(baseDir/surfName + ".case", IOstream::ASCII);
+
+            // Format options
+            osCase.setf(ios_base::left);
+            osCase.setf(ios_base::scientific, ios_base::floatfield);
+            osCase.precision(5);
 
             if (verbose)
             {
                 Info<< "Writing case file to " << osCase.name() << endl;
             }
 
+            // The geometry can be any of the following:
+            // 0: constant/static
+            // 1: moving, with the same frequency as the data
+            // 2: moving, with different frequency as the data
+
+            const label tsGeom =
+                (meshes.size() == 1 ? 0 : meshes == times ? 1 : 2);
+
             osCase
                 << "FORMAT" << nl
                 << "type: ensight gold" << nl
                 << nl
-                << "GEOMETRY" << nl
-                << "model:  2  " // time-set 2
-                << " data/******/geometry" << nl
+                << "GEOMETRY" << nl;
+
+
+            if (tsGeom)
+            {
+                // moving
+                osCase
+                    << "model:  " << tsGeom << "   " // time-set (1|2)
+                    << mask << geometryName.name() << nl;
+            }
+            else
+            {
+                // steady
+                osCase
+                    << "model:  "
+                    << geometryName.c_str() << nl;
+            }
+
+            osCase
                 << nl
                 << "VARIABLE" << nl;
 
@@ -317,22 +358,33 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
                       ? " per node:    1  "  // time-set 1
                       : " per element: 1  "  // time-set 1
                     )
-                    << setw(15) << varName
-                    << "   data/******/" << varName
-                    << nl;
+                    << setw(15) << varName << ' '
+                    << mask << varName << nl;
             }
-            osCase << nl;
 
             osCase
+                << nl
                 << "TIME" << nl;
 
             printTimeset(osCase, 1, times);
-            printTimeset(osCase, 2, meshes);
+            if (tsGeom == 2)
+            {
+                printTimeset(osCase, 2, meshes);
+            }
 
             osCase << "# end" << nl;
         }
     }
 
+
+    // Location for data (and possibly the geometry as well)
+    fileName dataDir = baseDir/"data"/word::printf(fmt, timeIndex);
+
+    // As per mkdir -p "data/00000000"
+    mkDir(dataDir);
+
+
+    const fileName meshFile(baseDir/geometryName);
 
     // Write geometry
     ensightPartFaces ensPart
@@ -353,13 +405,6 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
         ensightGeoFile osGeom(meshFile.path(), meshFile.name(), writeFormat_);
         osGeom << ensPart;
     }
-
-
-    // Location for data
-    fileName dataDir = baseDir/"data"/word::printf("%06d", timeIndex);
-
-    // As per mkdir -p "data/000000"
-    mkDir(dataDir);
 
     // Write field
     ensightFile osField

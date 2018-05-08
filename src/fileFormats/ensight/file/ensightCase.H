@@ -183,15 +183,14 @@ private:
         ) const;
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         ensightCase(const ensightCase&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const ensightCase&) = delete;
 
 
 public:
-
 
     // Constructors
 
