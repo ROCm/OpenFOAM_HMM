@@ -98,19 +98,6 @@ Foam::functionObjects::ensightWrite::ensightWrite
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::ensightWrite::~ensightWrite()
-{
-    if (ensCase_.valid())
-    {
-        // finalize case
-        ensCase().write();
-        ensCase_.clear();
-    }
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::ensightWrite::read(const dictionary& dict)
@@ -271,19 +258,14 @@ bool Foam::functionObjects::ensightWrite::write()
             << "Unprocessed field " << ignored << endl;
     }
 
+    ensCase().write();  // Flush case information
+
     return true;
 }
 
 
 bool Foam::functionObjects::ensightWrite::end()
 {
-    if (ensCase_.valid())
-    {
-        // finalize case
-        ensCase().write();
-        ensCase_.clear();
-    }
-
     return true;
 }
 
@@ -294,7 +276,7 @@ void Foam::functionObjects::ensightWrite::updateMesh(const mapPolyMesh& mpm)
 
     if (ensMesh_.valid())
     {
-        ensMesh_().expire();
+        ensMesh_->expire();
     }
 }
 
@@ -305,7 +287,7 @@ void Foam::functionObjects::ensightWrite::movePoints(const polyMesh& mpm)
 
     if (ensMesh_.valid())
     {
-        ensMesh_().expire();
+        ensMesh_->expire();
     }
 }
 
