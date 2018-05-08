@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,15 +104,14 @@ void Foam::wallDistData<TransferType>::correct()
 
     field_.transfer(wave.cellData());
 
-    typename GeometricField<Type, fvPatchField, volMesh>::
-        Boundary& bf = boundaryFieldRef();
+    volScalarField::Boundary& bf = boundaryFieldRef();
 
     // Transfer values on patches into boundaryField of *this and field_
     forAll(bf, patchi)
     {
         scalarField& waveFld = wave.patchDistance()[patchi];
 
-        if (!isA<emptyFvPatchScalarField>(boundaryField()[patchi]))
+        if (!isA<emptyFvPatchScalarField>(bf[patchi]))
         {
             bf[patchi].transfer(waveFld);
             Field<Type>& wavePatchData = wave.patchData()[patchi];
