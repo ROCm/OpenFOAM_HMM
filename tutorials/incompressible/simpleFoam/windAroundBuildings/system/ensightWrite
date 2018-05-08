@@ -10,8 +10,9 @@ ensightWrite
     // Fields to output (words or regex)
     fields  (U p "(k|epsilon|omega)");
 
-    writeControl    writeTime;
-    writeInterval   1;
+    //- Write more frequent than fields
+    writeControl    timeStep;
+    writeInterval   5;
 }
 
 // ************************************************************************* //

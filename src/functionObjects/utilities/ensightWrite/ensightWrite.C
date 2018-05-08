@@ -85,6 +85,15 @@ Foam::functionObjects::ensightWrite::ensightWrite
     dirName_("ensightWrite"),
     consecutive_(false)
 {
+    if (postProcess)
+    {
+        // Disable for post-process mode.
+        // Emit as FatalError for the try/catch in the caller.
+        FatalError
+            << type() << " disabled in post-process mode"
+            << exit(FatalError);
+    }
+
     read(dict);
 }
 
