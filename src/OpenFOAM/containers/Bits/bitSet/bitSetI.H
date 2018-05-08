@@ -72,7 +72,7 @@ inline Foam::label Foam::bitSet::first_not_block() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline constexpr Foam::bitSet::bitSet() noexcept
+inline Foam::bitSet::bitSet() noexcept
 :
     PackedList<1>()
 {}

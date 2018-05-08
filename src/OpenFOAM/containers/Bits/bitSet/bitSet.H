@@ -136,7 +136,7 @@ public:
     // Constructors
 
         //- Construct an empty, zero-sized set
-        inline constexpr bitSet() noexcept;
+        inline bitSet() noexcept;
 
         //- Construct from Istream
         explicit bitSet(Istream& is);
