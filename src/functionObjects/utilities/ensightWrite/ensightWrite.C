@@ -85,20 +85,16 @@ Foam::functionObjects::ensightWrite::ensightWrite
     dirName_("ensightWrite"),
     consecutive_(false)
 {
-    read(dict);
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::ensightWrite::~ensightWrite()
-{
-    if (ensCase_.valid())
+    if (postProcess)
     {
-        // finalize case
-        ensCase().write();
-        ensCase_.clear();
+        // Disable for post-process mode.
+        // Emit as FatalError for the try/catch in the caller.
+        FatalError
+            << type() << " disabled in post-process mode"
+            << exit(FatalError);
     }
+
+    read(dict);
 }
 
 
@@ -115,29 +111,31 @@ bool Foam::functionObjects::ensightWrite::read(const dictionary& dict)
 
     if (dict.found("patches"))
     {
-        wordRes lst(dict.lookup("patches"));
-        lst.uniq();
+        wordRes list(dict.lookup("patches"));
+        list.uniq();
 
-        writeOpts_.patchSelection(lst);
+        writeOpts_.patchSelection(list);
     }
 
     if (dict.found("faceZones"))
     {
-        wordRes lst(dict.lookup("faceZones"));
-        lst.uniq();
+        wordRes list(dict.lookup("faceZones"));
+        list.uniq();
 
-        writeOpts_.faceZoneSelection(lst);
+        writeOpts_.faceZoneSelection(list);
     }
 
 
     //
     // case options
     //
+
+    caseOpts_.nodeValues(dict.lookupOrDefault("nodeValues", false));
+
     caseOpts_.width(dict.lookupOrDefault<label>("width", 8));
 
     // remove existing output directory
     caseOpts_.overwrite(dict.lookupOrDefault("overwrite", false));
-
 
     //
     // other options
@@ -189,30 +187,6 @@ bool Foam::functionObjects::ensightWrite::write()
         );
     }
 
-    if (!ensMesh_.valid())
-    {
-        ensMesh_.reset(new ensightMesh(mesh_, writeOpts_));
-
-        if (ensMesh_().needsUpdate())
-        {
-            ensMesh_().correct();
-        }
-
-        // assume static geometry - need to fix later
-        autoPtr<ensightGeoFile> os = ensCase_().newGeometry(false);
-        ensMesh_().write(os);
-    }
-    else if (ensMesh_().needsUpdate())
-    {
-        // appears to have moved
-        ensMesh_().correct();
-
-        autoPtr<ensightGeoFile> os = ensCase_().newGeometry(true);
-        ensMesh_().write(os);
-    }
-
-    Log << type() << " " << name() << " write: (";
-
     if (consecutive_)
     {
         ensCase().nextTime(t.value());
@@ -221,6 +195,28 @@ bool Foam::functionObjects::ensightWrite::write()
     {
         ensCase().setTime(t.value(), t.timeIndex());
     }
+
+    bool writeGeom = false;
+    if (!ensMesh_.valid())
+    {
+        writeGeom = true;
+        ensMesh_.reset(new ensightMesh(mesh_, writeOpts_));
+    }
+    if (ensMesh_().needsUpdate())
+    {
+        writeGeom = true;
+        ensMesh_().correct();
+    }
+
+    if (writeGeom)
+    {
+        // Treat all geometry as moving, since we do not know a priori
+        // if the simulation has mesh motion later on.
+        autoPtr<ensightGeoFile> os = ensCase_().newGeometry(true);
+        ensMesh_().write(os);
+    }
+
+    Log << type() << " " << name() << " write: (";
 
     wordHashSet candidates(subsetStrings(selectFields_, mesh_.names()));
     DynamicList<word> missing(selectFields_.size());
@@ -262,19 +258,14 @@ bool Foam::functionObjects::ensightWrite::write()
             << "Unprocessed field " << ignored << endl;
     }
 
+    ensCase().write();  // Flush case information
+
     return true;
 }
 
 
 bool Foam::functionObjects::ensightWrite::end()
 {
-    if (ensCase_.valid())
-    {
-        // finalize case
-        ensCase().write();
-        ensCase_.clear();
-    }
-
     return true;
 }
 
@@ -285,7 +276,7 @@ void Foam::functionObjects::ensightWrite::updateMesh(const mapPolyMesh& mpm)
 
     if (ensMesh_.valid())
     {
-        ensMesh_().expire();
+        ensMesh_->expire();
     }
 }
 
@@ -296,7 +287,7 @@ void Foam::functionObjects::ensightWrite::movePoints(const polyMesh& mpm)
 
     if (ensMesh_.valid())
     {
-        ensMesh_().expire();
+        ensMesh_->expire();
     }
 }
 

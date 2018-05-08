@@ -26,8 +26,7 @@ License
 #include "cloud.H"
 #include "ensightPTraits.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::autoPtr<Foam::ensightFile>
@@ -54,7 +53,7 @@ Foam::ensightCase::newData
         );
         output().newline();
 
-        // note variable for later use
+        // note field variable for later use
         noteVariable(varName, ensightPTraits<Type>::typeName);
     }
 

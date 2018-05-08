@@ -257,7 +257,7 @@ inline spatialTransform Xrx(const scalar& omega)
     return spatialTransform(Rx(omega), Zero);
 }
 
-//- Rotational spatial transformation tensor about the x-axis by omega radians
+//- Rotational spatial transformation tensor about the y-axis by omega radians
 inline spatialTransform Xry(const scalar& omega)
 {
     return spatialTransform(Ry(omega), Zero);

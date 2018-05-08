@@ -148,13 +148,13 @@ private:
         ) const;
 
 
-        //- Note geometry being used
+        //- Note the geometry being used
         void noteGeometry(const bool moving) const;
 
-        //- Note cloud being used
+        //- Note the cloud being used
         void noteCloud(const word& cloudName) const;
 
-        //- Note cloud/variable being used
+        //- Note the cloud/variable being used
         void noteCloud
         (
             const word& cloudName,
@@ -162,7 +162,7 @@ private:
             const char* ensightType
         ) const;
 
-        //- Note field variable being used
+        //- Note the field variable being used
         void noteVariable
         (
             const word& varName,
@@ -172,7 +172,7 @@ private:
 
         //- Open stream for new data file (on master), using the current index.
         //  File is without initial description lines.
-        autoPtr<ensightFile> createDataFile(const word&) const;
+        autoPtr<ensightFile> createDataFile(const word& name) const;
 
         //- Open stream for new cloud file (on master).
         //  File is without initial description lines.
@@ -183,15 +183,14 @@ private:
         ) const;
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         ensightCase(const ensightCase&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const ensightCase&) = delete;
 
 
 public:
-
 
     // Constructors
 
@@ -212,7 +211,6 @@ public:
         );
 
 
-
     //- Destructor
     ~ensightCase();
 
@@ -224,7 +222,7 @@ public:
         //- Reference to the case options
         inline const ensightCase::options& option() const;
 
-        //- Ascii/Binary file output
+        //- The output file format (ascii/binary)
         inline IOstream::streamFormat format() const;
 
         //- The nominal path to the case file
@@ -257,12 +255,12 @@ public:
 
         //- Set current index and time for time-set 1.
         //  Create corresponding sub-directory
-        //  Do not mix between nextTime and setTime in an application.
+        //  \note do not mix between nextTime and setTime in an application.
         void setTime(const scalar t, const label index);
 
         //- Set current index and time for time-set 1.
         //  Create corresponding sub-directory
-        //  Do not mix between nextTime and setTime in an application.
+        //  \note do not mix between nextTime and setTime in an application.
         void setTime(const instant& t, const label index);
 
 
@@ -306,7 +304,7 @@ public:
         inline Ostream& operator()() const;
 
         //- Print some general information.
-        Ostream& printInfo(Ostream&) const;
+        Ostream& printInfo(Ostream& os) const;
 };
 
 

@@ -60,12 +60,13 @@ Description
         writeControl | Output control               | recommended | timeStep
         directory    | The output directory name    | no        | "ensightWrite"
         overwrite    | Remove existing directory    | no        | false
-        format       | ASCII or binary format       | no        | same as simulation
+        format       | Either ascii or binary       | no        | same as simulation
         width        | Mask width for \c data/XXXX  | no        | 8
         noPatches    | Suppress writing patches     | no        | false
         patches      | Select patches to write      | no        |
         faceZones    | Select faceZones to write    | no        |
         consecutive  | Consecutive output numbering | no        | false
+        nodeValues   | Write values at nodes        | no        | false
     \endtable
 
     Note that if the \c patches entry is an empty list, this will select all
@@ -99,7 +100,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class dictionary;
 
 namespace functionObjects
@@ -154,16 +155,15 @@ class ensightWrite
         template<class Type>
         int writeVolField(const word& inputName, int& state);
 
-
         //- Process by trying to apply for various volume field types.
         int process(const word& inputName);
 
-
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         ensightWrite(const ensightWrite&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const ensightWrite&) = delete;
+
 
 public:
 
@@ -183,28 +183,28 @@ public:
 
 
     //- Destructor
-    virtual ~ensightWrite();
+    virtual ~ensightWrite() = default;
 
 
     // Member Functions
 
         //- Read the ensightWrite specification
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Do nothing
         virtual bool execute();
 
-        //- Write fields
+        //- Write fields, flush case file
         virtual bool write();
 
-        //- Execute at the final time-loop, flush case file
+        //- Do nothing at the final time-loop
         virtual bool end();
 
         //- Update for changes of mesh
-        virtual void updateMesh(const mapPolyMesh&);
+        virtual void updateMesh(const mapPolyMesh& mpm);
 
         //- Update for mesh point-motion
-        virtual void movePoints(const polyMesh&);
+        virtual void movePoints(const polyMesh& mpm);
 };
 
 

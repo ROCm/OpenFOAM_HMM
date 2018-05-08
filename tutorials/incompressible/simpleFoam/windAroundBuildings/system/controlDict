@@ -50,6 +50,7 @@ runTimeModifiable true;
 
 functions
 {
+    #include "ensightWrite"
     #include "vtkWrite"
 }
 

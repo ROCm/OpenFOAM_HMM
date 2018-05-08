@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,40 +23,52 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Time.H"
-#include "ensightOutput.H"
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+#include "interpolation.H"
 
 template<class Type>
-int Foam::functionObjects::ensightWrite::writeVolField
-(
-    const word& inputName,
-    int& state
-)
+bool Foam::functionObjects::reference::calcType()
 {
-    // State: return 0 (not-processed), -1 (skip), +1 ok
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
-    // Already done, or not available
-    if (state || !foundObject<VolFieldType>(inputName))
+    const VolFieldType* vfPtr = lookupObjectPtr<VolFieldType>(fieldName_);
+
+    if (vfPtr && celli_ != -1)
     {
-        return state;
+        const VolFieldType& vf = *vfPtr;
+
+        autoPtr<interpolation<Type>> interpolator
+        (
+            interpolation<Type>::New(interpolationScheme_, vf)
+        );
+
+        const dimensioned<Type> value
+        (
+            "value",
+            vf.dimensions(),
+            interpolator().interpolate(position_, celli_, -1)
+        );
+
+        dimensioned<Type> offset
+        (
+            dimensioned<Type>::lookupOrDefault
+            (
+                "offset",
+                localDict_,
+                vf.dimensions(),
+                Zero
+            )
+        );
+
+        Log << "    sampled value: " << value.value() << endl;
+
+        return store
+        (
+            resultName_,
+            scale_*(vf - value + offset)
+        );
     }
 
-    autoPtr<ensightFile> os = ensCase().newData<Type>(inputName);
-    ensightOutput::writeField<Type>
-    (
-        lookupObject<VolFieldType>(inputName),
-        ensMesh(),
-        os,
-        caseOpts_.nodeValues()
-    );
-
-    Log << " " << inputName;
-
-    state = +1;
-    return state;
+    return false;
 }
 
 

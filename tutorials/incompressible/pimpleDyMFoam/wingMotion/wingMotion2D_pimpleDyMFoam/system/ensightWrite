@@ -1,0 +1,20 @@
+// -*- C++ -*-
+
+ensightWrite
+{
+    type        ensightWrite;
+    libs        ("libutilityFunctionObjects.so");
+    log         true;
+
+    fields      (U p);
+
+    format      ascii;
+
+    overwrite   true;
+
+    writeControl writeTime;
+
+    consecutive false;
+}
+
+// ************************************************************************* //

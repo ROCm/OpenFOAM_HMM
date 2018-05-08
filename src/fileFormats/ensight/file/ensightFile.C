@@ -335,15 +335,15 @@ void Foam::ensightFile::writeList
     const UList<scalar>& field
 )
 {
-    forAll(field, i)
+    for (const scalar& val : field)
     {
-        if (std::isnan(field[i]))
+        if (std::isnan(val))
         {
             writeUndef();
         }
         else
         {
-            write(field[i]);
+            write(val);
         }
 
         newline();
@@ -359,15 +359,15 @@ void Foam::ensightFile::writeList
 {
     if (notNull(idList))
     {
-        forAll(idList, i)
+        for (const label idx : idList)
         {
-            if (idList[i] >= field.size() || std::isnan(field[idList[i]]))
+            if (idx >= field.size() || std::isnan(field[idx]))
             {
                 writeUndef();
             }
             else
             {
-                write(field[idList[i]]);
+                write(field[idx]);
             }
 
             newline();
@@ -375,7 +375,7 @@ void Foam::ensightFile::writeList
     }
     else
     {
-        // no idList => perNode
+        // No idList => perNode
         writeList(field);
     }
 }

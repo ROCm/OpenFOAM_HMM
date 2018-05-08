@@ -60,6 +60,7 @@ blendingFactor/blendingFactor.C
 pressure/pressure.C
 MachNo/MachNo.C
 Curle/Curle.C
+reference/reference.C
 
 fieldsExpression/fieldsExpression.C
 add/add.C
