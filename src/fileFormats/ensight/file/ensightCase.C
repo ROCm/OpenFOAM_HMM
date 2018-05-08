@@ -103,14 +103,13 @@ Foam::label Foam::ensightCase::checkTimeset(const labelHashSet& lookup) const
     }
     else if (tsTimes.size() == timesUsed_.size())
     {
-        forAllConstIter(Map<scalar>, timesUsed_, iter)
+        forAllConstIters(timesUsed_, iter)
         {
             tsTimes.erase(iter.key());
         }
 
         // OR
-        // tsTimes -= timesUsed_.toc();
-        // tsTimes -= timesUsed_;
+        // tsTimes.unsetMany(timesUsed_.toc());
 
         if (tsTimes.empty())
         {
@@ -489,17 +488,27 @@ void Foam::ensightCase::write() const
     const bool staticGeom = (geomTimes_.size() == 1 && geomTimes_.found(-1));
     label tsGeom = staticGeom ? 0 : checkTimeset(geomTimes_);
 
+    // geometry index, when mesh is not moving but stored under data/XXX/
+    label meshIndex = -1;
+
     // cloud timeset
     label tsCloud = checkTimeset(cloudTimes_);
 
-    // increment time-sets to the correct indices
+    // Increment time-sets to the correct indices
     if (tsGeom < 0)
     {
-        tsGeom = 2;             // next available timeset
+        tsGeom = 2; // Next available timeset
+
+        // Saved under data/XXX/geometry, but not actually moving
+        if (geomTimes_.size() == 1)
+        {
+            tsGeom = 0;
+            meshIndex = *(geomTimes_.begin());
+        }
     }
     if (tsCloud < 0)
     {
-        tsCloud = tsGeom + 1;   // next available timeset
+        tsCloud = 1 + std::max(1, tsGeom);  // Next available timeset
     }
 
     writeHeader();
@@ -521,27 +530,34 @@ void Foam::ensightCase::write() const
 
     if (staticGeom)
     {
-        // steady
+        // Steady
         *os_
             << setw(16)  << "model:"
             << geometryName
             << nl;
     }
+    else if (meshIndex >= 0)
+    {
+        // Not really moving, but stored under data/XXXX/geometry
+        *os_
+            << setw(16)  << "model:"
+            << (dataDirName/padded(meshIndex)/geometryName).c_str()
+            << nl;
+    }
     else if (!geomTimes_.empty())
     {
-        // moving
+        // Moving
         *os_
             << word::printf("model: %-9d", tsGeom) // width 16 (no quotes)
             << (dataMask/geometryName).c_str()
             << nl;
     }
 
-    // clouds and cloud variables
-    const wordList cloudNames = cloudVars_.sortedToc();
-    forAll(cloudNames, cloudNo)
-    {
-        const word& cloudName = cloudNames[cloudNo];
+    // Clouds and cloud variables
+    const wordList cloudNames(cloudVars_.sortedToc());
 
+    for (const word& cloudName : cloudNames)
+    {
         const fileName masked =
         (
             separateCloud()
@@ -568,11 +584,11 @@ void Foam::ensightCase::write() const
     }
 
 
-    // field variables (always use timeset 1)
-    const wordList varNames = variables_.sortedToc();
-    forAll(varNames, vari)
+    // Field variables (always use timeset 1)
+    const wordList varNames(variables_.sortedToc());
+
+    for (const word& varName : varNames)
     {
-        const word&   varName = varNames[vari];
         const string& ensType = variables_[varName];
 
         *os_
@@ -588,13 +604,14 @@ void Foam::ensightCase::write() const
     }
 
 
-    // clouds and cloud variables (using cloud timeset)
+    // Clouds and cloud variables (using cloud timeset)
     // Write
     // as -> "data/********/lagrangian/<cloudName>/positions"
     // or -> "lagrangian/<cloudName>/********/positions"
-    forAll(cloudNames, cloudNo)
+
+    label cloudNo = 0;
+    for (const word& cloudName : cloudNames)
     {
-        const word& cloudName = cloudNames[cloudNo];
         const fileName masked =
         (
             separateCloud()
@@ -603,11 +620,9 @@ void Foam::ensightCase::write() const
         );
 
         const HashTable<string>& vars = cloudVars_[cloudName];
-        const wordList tocVars = vars.sortedToc();
 
-        forAll(tocVars, vari)
+        for (const word& varName : vars.sortedToc())
         {
-            const word&   varName = tocVars[vari];
             const string& ensType = vars[varName];
 
             // prefix variables with 'c' (cloud) and cloud index
@@ -619,6 +634,8 @@ void Foam::ensightCase::write() const
                 << (masked/varName).c_str()
                 << nl;
         }
+
+        ++cloudNo;
     }
 
 
@@ -665,7 +682,7 @@ Foam::ensightCase::newGeometry
 
     if (Pstream::master())
     {
-        // set the path of the ensight file
+        // Set the path of the ensight file
         fileName path;
 
         if (moving)
@@ -701,10 +718,10 @@ Foam::ensightCase::newCloud
     {
         output = createCloudFile(cloudName, "positions");
 
-        // tag binary format (just like geometry files)
+        // Tag binary format (just like geometry files)
         output().writeBinaryHeader();
 
-        // description
+        // Description
         output().write(cloud::prefix/cloudName);
         output().newline();
 

@@ -187,30 +187,6 @@ bool Foam::functionObjects::ensightWrite::write()
         );
     }
 
-    if (!ensMesh_.valid())
-    {
-        ensMesh_.reset(new ensightMesh(mesh_, writeOpts_));
-
-        if (ensMesh_().needsUpdate())
-        {
-            ensMesh_().correct();
-        }
-
-        // assume static geometry - need to fix later
-        autoPtr<ensightGeoFile> os = ensCase_().newGeometry(false);
-        ensMesh_().write(os);
-    }
-    else if (ensMesh_().needsUpdate())
-    {
-        // appears to have moved
-        ensMesh_().correct();
-
-        autoPtr<ensightGeoFile> os = ensCase_().newGeometry(true);
-        ensMesh_().write(os);
-    }
-
-    Log << type() << " " << name() << " write: (";
-
     if (consecutive_)
     {
         ensCase().nextTime(t.value());
@@ -219,6 +195,28 @@ bool Foam::functionObjects::ensightWrite::write()
     {
         ensCase().setTime(t.value(), t.timeIndex());
     }
+
+    bool writeGeom = false;
+    if (!ensMesh_.valid())
+    {
+        writeGeom = true;
+        ensMesh_.reset(new ensightMesh(mesh_, writeOpts_));
+    }
+    if (ensMesh_().needsUpdate())
+    {
+        writeGeom = true;
+        ensMesh_().correct();
+    }
+
+    if (writeGeom)
+    {
+        // Treat all geometry as moving, since we do not know a priori
+        // if the simulation has mesh motion later on.
+        autoPtr<ensightGeoFile> os = ensCase_().newGeometry(true);
+        ensMesh_().write(os);
+    }
+
+    Log << type() << " " << name() << " write: (";
 
     wordHashSet candidates(subsetStrings(selectFields_, mesh_.names()));
     DynamicList<word> missing(selectFields_.size());

@@ -90,7 +90,6 @@ void Foam::ensightCase::options::width(const label n)
 }
 
 
-
 bool Foam::ensightCase::options::overwrite() const
 {
     return overwrite_;

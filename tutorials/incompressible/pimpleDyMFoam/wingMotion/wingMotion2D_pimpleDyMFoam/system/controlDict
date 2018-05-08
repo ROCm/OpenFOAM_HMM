@@ -57,6 +57,8 @@ functions
         libs           ("libsixDoFRigidBodyState.so");
         angleFormat    degrees;
     }
+
+    #include "ensightWrite"
 }
 
 // ************************************************************************* //
