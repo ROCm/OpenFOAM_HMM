@@ -99,8 +99,18 @@ bool Foam::functionObjects::reference::read(const dictionary& dict)
     {
         localDict_ = dict;
 
+        Log << type() << " " << name() << nl
+            << "    field: " << fieldName_ << nl;
+
+        if (dict.readIfPresent("scale", scale_))
+        {
+            Log << "    scale: " << scale_ << nl;
+        }
+
         if (dict.readIfPresent("position", position_))
         {
+            Log << "    sample position: " << position_ << nl;
+
             positionIsSet_ = true;
 
             celli_ = mesh_.findCell(position_);
@@ -109,24 +119,16 @@ bool Foam::functionObjects::reference::read(const dictionary& dict)
 
             if (celli == -1)
             {
-                FatalErrorInFunction
-                    << "Sample cell could not be found at position " << position_
-                    << exit(FatalError);
+                FatalIOErrorInFunction(dict)
+                    << "Sample cell could not be found at position "
+                    << position_ << exit(FatalIOError);
             }
 
             interpolationScheme_ =
                 dict.lookupOrDefault<word>("interpolationScheme", "cell");
         }
 
-
-        dict.readIfPresent("scale", scale_);
-
-
-        Log << type() << " " << name() << nl
-            << "    field: " << fieldName_ << nl
-            << "    sample position: " << position_ << nl
-            << "    scale: " << scale_ << nl
-            << endl;
+        Log << endl;
 
         return true;
     }
