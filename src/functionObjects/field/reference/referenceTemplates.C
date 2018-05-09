@@ -32,21 +32,9 @@ bool Foam::functionObjects::reference::calcType()
 
     const VolFieldType* vfPtr = lookupObjectPtr<VolFieldType>(fieldName_);
 
-    if (vfPtr && celli_ != -1)
+    if (vfPtr)
     {
         const VolFieldType& vf = *vfPtr;
-
-        autoPtr<interpolation<Type>> interpolator
-        (
-            interpolation<Type>::New(interpolationScheme_, vf)
-        );
-
-        const dimensioned<Type> value
-        (
-            "value",
-            vf.dimensions(),
-            interpolator().interpolate(position_, celli_, -1)
-        );
 
         dimensioned<Type> offset
         (
@@ -59,12 +47,32 @@ bool Foam::functionObjects::reference::calcType()
             )
         );
 
-        Log << "    sampled value: " << value.value() << endl;
+        dimensioned<Type> cellValue("value", vf.dimensions(), Zero);
+
+        if (positionIsSet_)
+        {
+            cellValue.value() = -pTraits<Type>::one*GREAT;
+
+            if (celli_ != -1)
+            {
+                autoPtr<interpolation<Type>> interpolator
+                (
+                    interpolation<Type>::New(interpolationScheme_, vf)
+                );
+
+                cellValue.value() =
+                    interpolator().interpolate(position_, celli_, -1);
+            }
+
+            reduce(cellValue.value(), maxOp<Type>());
+
+            Log << "    sampled value: " << cellValue.value() << endl;
+        }
 
         return store
         (
             resultName_,
-            scale_*(vf - value + offset)
+            scale_*(vf - cellValue + offset)
         );
     }
 

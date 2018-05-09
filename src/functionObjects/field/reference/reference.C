@@ -75,6 +75,7 @@ Foam::functionObjects::reference::reference
     fieldExpression(name, runTime, dict),
     localDict_(dict),
     position_(point::zero),
+    positionIsSet_(false),
     celli_(-1),
     interpolationScheme_("cell"),
     scale_(1)
@@ -98,24 +99,28 @@ bool Foam::functionObjects::reference::read(const dictionary& dict)
     {
         localDict_ = dict;
 
-        dict.lookup("position") >> position_;
+        if (dict.readIfPresent("position", position_))
+        {
+            positionIsSet_ = true;
 
-        interpolationScheme_ =
-            dict.lookupOrDefault<word>("interpolationScheme", "cell");
+            celli_ = mesh_.findCell(position_);
+
+            label celli = returnReduce(celli_, maxOp<label>());
+
+            if (celli == -1)
+            {
+                FatalErrorInFunction
+                    << "Sample cell could not be found at position " << position_
+                    << exit(FatalError);
+            }
+
+            interpolationScheme_ =
+                dict.lookupOrDefault<word>("interpolationScheme", "cell");
+        }
 
 
         dict.readIfPresent("scale", scale_);
 
-        celli_ = mesh_.findCell(position_);
-
-        label celli = returnReduce(celli_, maxOp<label>());
-
-        if (celli == -1)
-        {
-            FatalErrorInFunction
-                << "Sample cell could not be found at position " << position_
-                << exit(FatalError);
-        }
 
         Log << type() << " " << name() << nl
             << "    field: " << fieldName_ << nl

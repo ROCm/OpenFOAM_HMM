@@ -34,16 +34,16 @@ Description
     The field values are calculated using:
 
     \f[
-        f_c = s(f_{c,t} - f_p + f_{off})
+        ref_c = s(f_{c}(t) - f_p + f_{off})
     \f]
 
     where
     \vartable
-        f_c     | field values at cell
-        s       | optional scale factor (default = 1)
-        f_{c,t} | current field values at cell at this time
-        f_p     | field value at position
-        f_{off} | offset field value (default = 0)
+        ref_c    | field values at cell
+        s        | optional scale factor (default = 1)
+        f_{c}(t) | current field values at cell at this time
+        f_p      | field value at position
+        f_{off}  | offset field value (default = 0)
     \endvartable
 
 Usage
@@ -66,12 +66,11 @@ Usage
     \table
         Property     | Description             | Required | Default value
         type         | Type name: reference    | yes      |
-        position     | Position to sample      | yes      |
         field        | Name of field           | yes      |
-        reult        | Name of result field    | no       | reference(<field>)
+        result       | Name of result field    | no       | reference(<field>)
+        position     | Position to sample      | no       | <not used>
         scale        | Scale value             | no       | 1
         offset       | Offset value            | no       | zero
-        result       | Name of result field    | no       | <function name>
         log          | Log to standard output  | no       | yes
     \endtable
 
@@ -113,6 +112,9 @@ class reference
 
         //- Sample location
         point position_;
+
+        //- Flag to indicate that the position is set
+        bool positionIsSet_;
 
         //- Sample cell
         label celli_;
