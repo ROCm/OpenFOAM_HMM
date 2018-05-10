@@ -5,7 +5,7 @@ Info<< "Mean u':"
     << (sqrt((2.0/3.0)*turbulence->k()))().weightedAverage(mesh.V()).value()
     << endl;
 
-logSummaryFile
+logSummaryFile()
     << runTime.theta() << tab
     << p.weightedAverage(mesh.V()).value() << tab
     << thermo.T().weightedAverage(mesh.V()).value() << tab

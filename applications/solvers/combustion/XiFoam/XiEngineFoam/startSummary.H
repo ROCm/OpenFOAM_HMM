@@ -4,10 +4,13 @@ autoPtr<OFstream> logSummaryFile;
 
 if (Pstream::master())
 {
-    logSummaryFile = new OFstream
+    logSummaryFile.reset
     (
-        runTime.rootPath()/runTime.globalCaseName()
-       /("logSummary." + runTime.timeName() + ".dat")
+        new OFstream
+        (
+            runTime.rootPath()/runTime.globalCaseName()
+           /("logSummary." + runTime.timeName() + ".dat")
+        )
     );
 
     logSummaryFile()

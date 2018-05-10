@@ -177,13 +177,13 @@ void standardPhaseChange::correctModel
                 const scalar Dab = filmThermo.D(pc, Tloc);
 
                 // Schmidt number
-                const scalar Sc = muInfc/(rhoInfc*(Dab + rootVSmall));
+                const scalar Sc = muInfc/(rhoInfc*(Dab + ROOTVSMALL));
 
                 // Sherwood number
                 const scalar Sh = this->Sh(Re, Sc);
 
                 // Mass transfer coefficient [m/s]
-                const scalar hm = Sh*Dab/(L_ + rootVSmall);
+                const scalar hm = Sh*Dab/(L_ + ROOTVSMALL);
 
                 // Add mass contribution to source
                 dm = dt*magSf[celli]*rhoInfc*hm*(Ys - YInf[celli])/(1.0 - Ys);

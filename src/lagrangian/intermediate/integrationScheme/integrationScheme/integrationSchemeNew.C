@@ -39,16 +39,16 @@ Foam::autoPtr<Foam::integrationScheme> Foam::integrationScheme::New
     Info<< "Selecting " << phiName << " integration scheme "
         << schemeName << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(schemeName);
+    auto cstrIter = wordConstructorTablePtr_->cfind(schemeName);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
+        FatalIOErrorInFunction(dict)
             << "Unknown integration scheme type "
             << schemeName << nl << nl
             << "Valid integration scheme types are:" << nl
             << wordConstructorTablePtr_->sortedToc() << nl
-            << exit(FatalError);
+            << exit(FatalIOError);
     }
 
     return autoPtr<integrationScheme>(cstrIter()());
