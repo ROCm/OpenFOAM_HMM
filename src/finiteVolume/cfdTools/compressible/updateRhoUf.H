@@ -37,17 +37,20 @@ if (mesh.changing())
     {
         Info<< "Constructing face momentum rhoUf" << endl;
 
-        rhoUf = new surfaceVectorField
+        rhoUf.reset
         (
-            IOobject
+            new surfaceVectorField
             (
-                "rhoUf",
-                runTime.timeName(),
-                mesh,
-                IOobject::READ_IF_PRESENT,
-                IOobject::AUTO_WRITE
-            ),
-            fvc::interpolate(rho*U)
+                IOobject
+                (
+                    "rhoUf",
+                    runTime.timeName(),
+                    mesh,
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::AUTO_WRITE
+                ),
+                fvc::interpolate(rho*U)
+            )
         );
     }
 }

@@ -233,6 +233,9 @@ public:
             const label patchi
         ) const;
 
+        //- Molecular weight [kg/kmol]
+        virtual tmp<volScalarField> W() const;
+
         //- Thermal diffusivity for temperature of mixture [J/m/s/K]
         virtual tmp<volScalarField> kappa() const;
 

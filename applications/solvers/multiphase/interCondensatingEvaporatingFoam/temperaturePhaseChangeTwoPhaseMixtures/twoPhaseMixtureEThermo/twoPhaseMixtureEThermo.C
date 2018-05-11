@@ -396,7 +396,7 @@ Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::gamma() const
 {
     return tmp<volScalarField>
     (
-       (alpha1_*Cp1() + alpha2_*Cp2()) / (alpha1_*Cv1() + alpha2_*Cv2())
+        (alpha1_*Cp1() + alpha2_*Cp2())/(alpha1_*Cv1() + alpha2_*Cv2())
     );
 }
 
@@ -429,12 +429,19 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::Cpv
     const label patchi
 ) const
 {
-    // This is a e thermo (Cpv = Cv)
+    // This is an e thermo (Cpv = Cv)
     return Cv(p, T, patchi);
 }
 
 
 Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::CpByCpv() const
+{
+    NotImplemented;
+    return nullptr;
+}
+
+
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::W() const
 {
     NotImplemented;
     return nullptr;

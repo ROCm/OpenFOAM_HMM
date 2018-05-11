@@ -45,7 +45,7 @@ IOobject UfHeader
 if (UfHeader.typeHeaderOk<surfaceVectorField>(true))
 {
     Info<< "Reading face velocity Uf\n" << endl;
-    Uf = new surfaceVectorField(UfHeader, mesh);
+    Uf.reset(new surfaceVectorField(UfHeader, mesh));
 }
 
 // ************************************************************************* //

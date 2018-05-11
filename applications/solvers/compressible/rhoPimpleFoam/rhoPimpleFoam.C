@@ -87,10 +87,13 @@ int main(int argc, char *argv[])
             autoPtr<volScalarField> divrhoU;
             if (correctPhi)
             {
-                divrhoU = new volScalarField
+                divrhoU.reset
                 (
-                    "divrhoU",
-                    fvc::div(fvc::absolute(phi, rho, U))
+                    new volScalarField
+                    (
+                        "divrhoU",
+                        fvc::div(fvc::absolute(phi, rho, U))
+                    )
                 );
             }
 
@@ -112,7 +115,7 @@ int main(int argc, char *argv[])
             autoPtr<volVectorField> rhoU;
             if (rhoUf.valid())
             {
-                rhoU = new volVectorField("rhoU", rho*U);
+                rhoU.reset(new volVectorField("rhoU", rho*U));
             }
 
             // Do any mesh changes

@@ -37,17 +37,20 @@ if (mesh.changing())
     {
         Info<< "Constructing face velocity Uf" << endl;
 
-        Uf = new surfaceVectorField
+        Uf.reset
         (
-            IOobject
+            new surfaceVectorField
             (
-                "Uf",
-                runTime.timeName(),
-                mesh,
-                IOobject::READ_IF_PRESENT,
-                IOobject::AUTO_WRITE
-            ),
-            fvc::interpolate(U)
+                IOobject
+                (
+                    "Uf",
+                    runTime.timeName(),
+                    mesh,
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::AUTO_WRITE
+                ),
+                fvc::interpolate(U)
+            )
         );
     }
 }

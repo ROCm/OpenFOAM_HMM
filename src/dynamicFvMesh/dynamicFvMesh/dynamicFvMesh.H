@@ -38,8 +38,6 @@ SourceFiles
 
 #include "fvMesh.H"
 
-#define MOVING_MESH
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam

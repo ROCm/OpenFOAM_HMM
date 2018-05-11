@@ -45,7 +45,7 @@ IOobject rhoUfHeader
 if (rhoUfHeader.typeHeaderOk<surfaceVectorField>(true))
 {
     Info<< "Reading face momentum rhoUf\n" << endl;
-    rhoUf = new surfaceVectorField(rhoUfHeader, mesh);
+    rhoUf.reset(new surfaceVectorField(rhoUfHeader, mesh));
 }
 
 // ************************************************************************* //
