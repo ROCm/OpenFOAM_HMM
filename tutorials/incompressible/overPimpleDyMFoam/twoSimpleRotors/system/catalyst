@@ -4,19 +4,23 @@ functions
 {
     catalyst
     {
-        #includeEtc "caseDicts/postProcessing/catalyst/default.cfg"
-
-        mkdir "<case>/insitu";
-
-        // Selected fields (words or regex). Must have cellMask for overset!
-        fields      ( cellMask U p );
+        #includeEtc "caseDicts/insitu/catalyst/catalyst.cfg"
 
         scripts
         (
-            "<system>/scripts/overset.py"
-            "<system>/scripts/writeOverset.py"
+            "<system>/scripts/pressure.py"
+            // "<system>/scripts/vorticity.py"
+            // "<etc>/caseDicts/insitu/catalyst/writeMesh.py"
         );
 
+        inputs
+        {
+            region
+            {
+                // Selected fields (words or regex).
+                fields      ( U p );
+            }
+        }
     }
 }
 
