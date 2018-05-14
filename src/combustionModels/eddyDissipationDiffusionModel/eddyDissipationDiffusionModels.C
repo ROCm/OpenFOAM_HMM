@@ -26,8 +26,8 @@ License
 #include "makeCombustionTypes.H"
 
 #include "thermoPhysicsTypes.H"
-#include "psiThermoCombustion.H"
-#include "rhoThermoCombustion.H"
+#include "psiReactionThermo.H"
+#include "rhoReactionThermo.H"
 
 #include "eddyDissipationDiffusionModel.H"
 #include "eddyDissipationModelBase.H"
@@ -35,37 +35,37 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+namespace Foam
+{
+
 makeCombustionTypesThermo
 (
     eddyDissipationDiffusionModel,
-    psiThermoCombustion,
-    gasHThermoPhysics,
-    psiCombustionModel
+    psiReactionThermo,
+    gasHThermoPhysics
 );
 
 makeCombustionTypesThermo
 (
     eddyDissipationDiffusionModel,
-    psiThermoCombustion,
-    constGasHThermoPhysics,
-    psiCombustionModel
+    psiReactionThermo,
+    constGasHThermoPhysics
 );
 
 makeCombustionTypesThermo
 (
     eddyDissipationDiffusionModel,
-    rhoThermoCombustion,
-    gasHThermoPhysics,
-    rhoCombustionModel
+    rhoReactionThermo,
+    gasHThermoPhysics
 );
 
 makeCombustionTypesThermo
 (
     eddyDissipationDiffusionModel,
-    rhoThermoCombustion,
-    constGasHThermoPhysics,
-    rhoCombustionModel
+    rhoReactionThermo,
+    constGasHThermoPhysics
 );
 
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

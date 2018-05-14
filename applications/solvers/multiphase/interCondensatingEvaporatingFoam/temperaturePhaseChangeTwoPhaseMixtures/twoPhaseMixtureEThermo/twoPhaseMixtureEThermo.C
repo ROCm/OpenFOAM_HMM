@@ -147,6 +147,13 @@ void Foam::twoPhaseMixtureEThermo::correct()
 }
 
 
+Foam::word Foam::twoPhaseMixtureEThermo::thermoName() const
+{
+    NotImplemented;
+    return word::null;
+}
+
+
 Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::he
 (
     const volScalarField& p,

@@ -72,6 +72,7 @@ SourceFiles
 #ifndef diffusionMulticomponent_H
 #define diffusionMulticomponent_H
 
+#include "ChemistryCombustion.H"
 #include "scalarList.H"
 #include "tmp.H"
 #include "Reaction.H"
@@ -87,10 +88,10 @@ namespace combustionModels
                     Class diffusionMulticomponent Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CombThermoType, class ThermoType>
+template<class ReactionThermo, class ThermoType>
 class diffusionMulticomponent
 :
-    public CombThermoType
+    public ChemistryCombustion<ReactionThermo>
 {
     // Private data
 
@@ -170,9 +171,9 @@ public:
         diffusionMulticomponent
         (
             const word& modelType,
-            const fvMesh& mesh,
-            const word& combustionProperties,
-            const word& phaseName
+            ReactionThermo& thermo,
+            const compressibleTurbulenceModel& turb,
+            const word& combustionProperties
         );
 
 

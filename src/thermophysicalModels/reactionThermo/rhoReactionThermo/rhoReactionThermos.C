@@ -275,7 +275,7 @@ makeThermoPhysicsReactionThermos
     icoPoly8TranspJanafEThermoPhysics
 );
 
-makeReactionMixtureThermos
+makeThermoPhysicsReactionThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -511,7 +511,7 @@ makeThermoPhysicsReactionThermos
     icoPoly8TranspJanafHThermoPhysics
 );
 
-makeReactionMixtureThermos
+makeThermoPhysicsReactionThermos
 (
     rhoThermo,
     rhoReactionThermo,

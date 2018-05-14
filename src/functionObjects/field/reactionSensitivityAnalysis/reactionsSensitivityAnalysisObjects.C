@@ -24,8 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "reactionsSensitivityAnalysis.H"
-#include "psiChemistryModel.H"
-#include "rhoChemistryModel.H"
+#include "BasicChemistryModel.H"
+#include "psiReactionThermo.H"
+#include "rhoReactionThermo.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -33,7 +34,13 @@ License
 namespace Foam
 {
 // Psi-based chemistry
-typedef functionObjects::reactionsSensitivityAnalysis<psiChemistryModel>
+typedef functionObjects::reactionsSensitivityAnalysis
+    <
+        BasicChemistryModel
+        <
+            psiReactionThermo
+        >
+    >
     psiReactionsSensitivityAnalysisFunctionObject;
 
 defineTemplateTypeNameAndDebugWithName
@@ -44,7 +51,13 @@ defineTemplateTypeNameAndDebugWithName
 );
 
 // Rho-based chemistry
-typedef functionObjects::reactionsSensitivityAnalysis<rhoChemistryModel>
+typedef functionObjects::reactionsSensitivityAnalysis
+    <
+        BasicChemistryModel
+        <
+            rhoReactionThermo
+        >
+    >
     rhoReactionsSensitivityAnalysisFunctionObject;
 
 defineTemplateTypeNameAndDebugWithName

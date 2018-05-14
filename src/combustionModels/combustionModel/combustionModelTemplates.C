@@ -35,15 +35,12 @@ Foam::autoPtr<CombustionModel> Foam::combustionModel::New
 {
     IOobject combIO
     (
-        IOobject
-        (
-            thermo.phasePropertyName(combustionProperties),
-            thermo.db().time().constant(),
-            thermo.db(),
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        )
+        thermo.phasePropertyName(combustionProperties),
+        thermo.db().time().constant(),
+        thermo.db(),
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false
     );
 
     word combModelName("none");
@@ -83,13 +80,11 @@ Foam::autoPtr<CombustionModel> Foam::combustionModel::New
         combModelName + '<' + CombustionModel::reactionThermo::typeName + ','
       + thermo.thermoName() + '>';
 
-    typename cstrTableType::iterator compCstrIter =
-        cstrTable->find(compCombModelName);
+    auto compCstrIter = cstrTable->cfind(compCombModelName);
 
-    typename cstrTableType::iterator thermoCstrIter =
-        cstrTable->find(thermoCombModelName);
+    auto thermoCstrIter = cstrTable->cfind(thermoCombModelName);
 
-    if (compCstrIter == cstrTable->end() && thermoCstrIter == cstrTable->end())
+    if (!compCstrIter.found() && !thermoCstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown " << combustionModel::typeName << " type "
@@ -170,7 +165,7 @@ Foam::autoPtr<CombustionModel> Foam::combustionModel::New
 
     return autoPtr<CombustionModel>
     (
-        thermoCstrIter != cstrTable->end()
+        thermoCstrIter.found()
       ? thermoCstrIter()(combModelName, thermo, turb, combustionProperties)
       : compCstrIter()(combModelName, thermo, turb, combustionProperties)
     );

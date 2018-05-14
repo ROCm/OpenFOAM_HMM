@@ -32,21 +32,21 @@ namespace combustionModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class CombThermoType, class ThermoType>
-eddyDissipationModelBase<CombThermoType, ThermoType>::eddyDissipationModelBase
+template<class ReactionThermo, class ThermoType>
+eddyDissipationModelBase<ReactionThermo, ThermoType>::eddyDissipationModelBase
 (
     const word& modelType,
-    const fvMesh& mesh,
-    const word& combustionProperties,
-    const word& phaseName
+    ReactionThermo& thermo,
+    const compressibleTurbulenceModel& turb,
+    const word& combustionProperties
 )
 :
-    singleStepCombustion<CombThermoType, ThermoType>
+    singleStepCombustion<ReactionThermo, ThermoType>
     (
         modelType,
-        mesh,
-        combustionProperties,
-        phaseName
+        thermo,
+        turb,
+        combustionProperties
     ),
     CEDC_(readScalar(this->coeffs().lookup("CEDC")))
 {}
@@ -54,17 +54,17 @@ eddyDissipationModelBase<CombThermoType, ThermoType>::eddyDissipationModelBase
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class CombThermoType, class ThermoType>
-eddyDissipationModelBase<CombThermoType, ThermoType>::
+template<class ReactionThermo, class ThermoType>
+eddyDissipationModelBase<ReactionThermo, ThermoType>::
 ~eddyDissipationModelBase()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-template<class CombThermoType, class ThermoType>
+template<class ReactionThermo, class ThermoType>
 Foam::tmp<Foam::volScalarField>
-eddyDissipationModelBase<CombThermoType, ThermoType>::rtTurb() const
+eddyDissipationModelBase<ReactionThermo, ThermoType>::rtTurb() const
 {
     return
         CEDC_*this->turbulence().epsilon()
@@ -76,8 +76,8 @@ eddyDissipationModelBase<CombThermoType, ThermoType>::rtTurb() const
 }
 
 
-template<class CombThermoType, class ThermoType>
-void eddyDissipationModelBase<CombThermoType, ThermoType>::correct()
+template<class ReactionThermo, class ThermoType>
+void eddyDissipationModelBase<ReactionThermo, ThermoType>::correct()
 {
     this->wFuel_ == dimensionedScalar(dimMass/dimVolume/dimTime, Zero);
 
@@ -87,15 +87,13 @@ void eddyDissipationModelBase<CombThermoType, ThermoType>::correct()
 
         const label fuelI = this->singleMixturePtr_->fuelIndex();
 
-        const volScalarField& YFuel =
-            this->thermoPtr_->composition().Y()[fuelI];
+        const volScalarField& YFuel = this->thermo_.composition().Y()[fuelI];
 
         const dimensionedScalar s = this->singleMixturePtr_->s();
 
-        if (this->thermoPtr_->composition().contains("O2"))
+        if (this->thermo_.composition().contains("O2"))
         {
-            const volScalarField& YO2 =
-                this->thermoPtr_->composition().Y("O2");
+            const volScalarField& YO2 = this->thermo_.composition().Y("O2");
 
             this->wFuel_ ==
                   this->rho()
@@ -113,10 +111,10 @@ void eddyDissipationModelBase<CombThermoType, ThermoType>::correct()
 }
 
 
-template<class CombThermoType, class ThermoType>
-bool eddyDissipationModelBase<CombThermoType, ThermoType>::read()
+template<class ReactionThermo, class ThermoType>
+bool eddyDissipationModelBase<ReactionThermo, ThermoType>::read()
 {
-    if (singleStepCombustion<CombThermoType, ThermoType>::read())
+    if (singleStepCombustion<ReactionThermo, ThermoType>::read())
     {
         this->coeffs().lookup("CEDC") >> CEDC_;
         return true;

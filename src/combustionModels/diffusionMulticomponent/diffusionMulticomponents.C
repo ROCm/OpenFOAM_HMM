@@ -25,37 +25,45 @@ License
 
 #include "makeCombustionTypes.H"
 
+#include "psiReactionThermo.H"
+#include "rhoReactionThermo.H"
 #include "thermoPhysicsTypes.H"
-#include "psiChemistryCombustion.H"
-#include "rhoChemistryCombustion.H"
+
 #include "diffusionMulticomponent.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Combustion models based on sensibleEnthalpy
+namespace Foam
+{
 
 makeCombustionTypesThermo
 (
     diffusionMulticomponent,
-    psiChemistryCombustion,
-    gasHThermoPhysics,
-    psiCombustionModel
+    psiReactionThermo,
+    gasHThermoPhysics
 );
 
 makeCombustionTypesThermo
 (
     diffusionMulticomponent,
-    rhoChemistryCombustion,
-    gasHThermoPhysics,
-    rhoCombustionModel
+    psiReactionThermo,
+    constGasHThermoPhysics
 );
 
 makeCombustionTypesThermo
 (
     diffusionMulticomponent,
-    rhoChemistryCombustion,
-    incompressibleGasHThermoPhysics,
-    rhoCombustionModel
+    rhoReactionThermo,
+    gasHThermoPhysics
 );
+
+makeCombustionTypesThermo
+(
+    diffusionMulticomponent,
+    rhoReactionThermo,
+    constGasHThermoPhysics
+);
+
+}
 
 // ************************************************************************* //

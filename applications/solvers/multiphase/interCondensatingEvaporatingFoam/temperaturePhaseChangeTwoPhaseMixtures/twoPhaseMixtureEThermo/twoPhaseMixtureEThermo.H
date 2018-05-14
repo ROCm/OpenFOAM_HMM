@@ -278,6 +278,9 @@ public:
         //- Correct the thermo fields
         virtual void correct();
 
+        //- Return the name of the thermo physics
+        virtual word thermoName() const;
+
         //- Read properties
         virtual bool read();
 

@@ -31,9 +31,9 @@ License
 
 // * * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * //
 
-template<class CombThermoType, class ThermoType>
+template<class ReactionThermo, class ThermoType>
 void Foam::combustionModels::
-diffusionMulticomponent<CombThermoType, ThermoType>::init()
+diffusionMulticomponent<ReactionThermo, ThermoType>::init()
 {
     // Load default values
     this->coeffs().readIfPresent("Ci", Ci_);
@@ -121,25 +121,31 @@ diffusionMulticomponent<CombThermoType, ThermoType>::init()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class CombThermoType, class ThermoType>
-Foam::combustionModels::diffusionMulticomponent<CombThermoType, ThermoType>::
+template<class ReactionThermo, class ThermoType>
+Foam::combustionModels::diffusionMulticomponent<ReactionThermo, ThermoType>::
 diffusionMulticomponent
 (
     const word& modelType,
-    const fvMesh& mesh,
-    const word& combustionProperties,
-    const word& phaseName
+    ReactionThermo& thermo,
+    const compressibleTurbulenceModel& turb,
+    const word& combustionProperties
 )
 :
-    CombThermoType(modelType, mesh, combustionProperties, phaseName),
+    ChemistryCombustion<ReactionThermo>
+    (
+        modelType,
+        thermo,
+        turb,
+        combustionProperties
+    ),
     reactions_
     (
-        dynamic_cast<const reactingMixture<ThermoType>&>(this->thermo())
+        dynamic_cast<const reactingMixture<ThermoType>&>(thermo)
     ),
     specieThermo_
     (
-        dynamic_cast<const reactingMixture<ThermoType>&>
-           (this->thermo()).speciesData()
+        dynamic_cast<const reactingMixture<ThermoType>&>(thermo).
+            speciesData()
     ),
     RijPtr_(reactions_.size()),
     Ci_(reactions_.size(), 1.0),
@@ -162,17 +168,17 @@ diffusionMulticomponent
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-template<class CombThermoType, class ThermoType>
+template<class ReactionThermo, class ThermoType>
 Foam::tmp<Foam::volScalarField> Foam::combustionModels::
-diffusionMulticomponent<CombThermoType, ThermoType>::tc() const
+diffusionMulticomponent<ReactionThermo, ThermoType>::tc() const
 {
     return this->chemistryPtr_->tc();
 }
 
 
-template<class CombThermoType, class ThermoType>
+template<class ReactionThermo, class ThermoType>
 void Foam::combustionModels::
-diffusionMulticomponent<CombThermoType, ThermoType>::correct()
+diffusionMulticomponent<ReactionThermo, ThermoType>::correct()
 {
     if (this->active())
     {
@@ -359,9 +365,9 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
 }
 
 
-template<class CombThermoType, class ThermoType>
+template<class ReactionThermo, class ThermoType>
 Foam::tmp<Foam::fvScalarMatrix>
-Foam::combustionModels::diffusionMulticomponent<CombThermoType, ThermoType>::R
+Foam::combustionModels::diffusionMulticomponent<ReactionThermo, ThermoType>::R
 (
     volScalarField& Y
 ) const
@@ -382,10 +388,10 @@ Foam::combustionModels::diffusionMulticomponent<CombThermoType, ThermoType>::R
 }
 
 
-template<class CombThermoType, class ThermoType>
+template<class ReactionThermo, class ThermoType>
 Foam::tmp<Foam::volScalarField>
-Foam::combustionModels::diffusionMulticomponent<CombThermoType, ThermoType>::
-Qdot() const
+Foam::combustionModels::
+diffusionMulticomponent<ReactionThermo, ThermoType>::Qdot() const
 {
     tmp<volScalarField> tQdot
     (
@@ -416,11 +422,11 @@ Qdot() const
 }
 
 
-template<class CombThermoType, class ThermoType>
+template<class ReactionThermo, class ThermoType>
 bool Foam::combustionModels::
-diffusionMulticomponent<CombThermoType, ThermoType>::read()
+diffusionMulticomponent<ReactionThermo, ThermoType>::read()
 {
-    if (CombThermoType::read())
+    if (ChemistryCombustion<ReactionThermo>::read())
     {
         this->coeffs().readIfPresent("Ci", Ci_);
         this->coeffs().readIfPresent("sigma", sigma_);

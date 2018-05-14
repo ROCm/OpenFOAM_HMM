@@ -51,10 +51,10 @@ namespace combustionModels
                   Class eddyDissipationModelBase Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CombThermoType, class ThermoType>
+template<class ReactionThermo, class ThermoType>
 class eddyDissipationModelBase
 :
-    public singleStepCombustion<CombThermoType, ThermoType>
+    public singleStepCombustion<ReactionThermo, ThermoType>
 {
     // Private data
 
@@ -79,9 +79,9 @@ public:
         eddyDissipationModelBase
         (
             const word& modelType,
-            const fvMesh& mesh,
-            const word& combustionProperties,
-            const word& phaseName
+            ReactionThermo& thermo,
+            const compressibleTurbulenceModel& turb,
+            const word& combustionProperties
         );
 
 
