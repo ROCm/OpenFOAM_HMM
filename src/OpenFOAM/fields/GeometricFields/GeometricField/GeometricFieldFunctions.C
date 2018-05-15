@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,6 +85,7 @@ void pow
     pow(gf.boundaryFieldRef(), gf1.boundaryField(), r);
     gf.oriented() = pow(gf1.oriented(), r);
 }
+
 
 template
 <
@@ -181,6 +182,7 @@ void sqr
     gf.oriented() = sqr(gf1.oriented());
 }
 
+
 template<class Type, template<class> class PatchField, class GeoMesh>
 tmp
 <
@@ -216,6 +218,7 @@ sqr(const GeometricField<Type, PatchField, GeoMesh>& gf)
 
     return tSqr;
 }
+
 
 template<class Type, template<class> class PatchField, class GeoMesh>
 tmp
@@ -269,6 +272,7 @@ void magSqr
     magSqr(gsf.boundaryFieldRef(), gf.boundaryField());
     gsf.oriented() = magSqr(gf.oriented());
 }
+
 
 template<class Type, template<class> class PatchField, class GeoMesh>
 tmp<GeometricField<scalar, PatchField, GeoMesh>> magSqr
@@ -342,6 +346,7 @@ void mag
     mag(gsf.boundaryFieldRef(), gf.boundaryField());
     gsf.oriented() = mag(gf.oriented());
 }
+
 
 template<class Type, template<class> class PatchField, class GeoMesh>
 tmp<GeometricField<scalar, PatchField, GeoMesh>> mag
@@ -458,6 +463,7 @@ cmptAv(const GeometricField<Type, PatchField, GeoMesh>& gf)
     return CmptAv;
 }
 
+
 template<class Type, template<class> class PatchField, class GeoMesh>
 tmp
 <
@@ -500,7 +506,7 @@ cmptAv(const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf)
 }
 
 
-#define UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(returnType, func, gFunc)        \
+#define UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(returnType, func, binaryOp)     \
                                                                                \
 template<class Type, template<class> class PatchField, class GeoMesh>          \
 dimensioned<returnType> func                                                   \
@@ -512,7 +518,15 @@ dimensioned<returnType> func                                                   \
     (                                                                          \
         #func "(" + gf.name() + ')',                                           \
         gf.dimensions(),                                                       \
-        Foam::func(gFunc(gf.primitiveField()), gFunc(gf.boundaryField()))      \
+        returnReduce                                                           \
+        (                                                                      \
+            Foam::func                                                         \
+            (                                                                  \
+                Foam::func(gf.primitiveField()),                               \
+                Foam::func(gf.boundaryField())                                 \
+            ),                                                                 \
+            binaryOp<Type>()                                                   \
+        )                                                                      \
     );                                                                         \
 }                                                                              \
                                                                                \
@@ -527,8 +541,8 @@ dimensioned<returnType> func                                                   \
     return res;                                                                \
 }
 
-UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(Type, max, gMax)
-UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(Type, min, gMin)
+UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(Type, max, maxOp)
+UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(Type, min, minOp)
 
 #undef UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY
 
