@@ -175,12 +175,28 @@ tmp<surfaceScalarField> ddtScheme<Type>::fvcDdtPhiCoeff
 
     if (ddtPhiCoeff_ < 0)
     {
+        // v1712 and earlier
+        // ddtCouplingCoeff -= min
+        // (
+        //     mag(phiCorr)
+        //    /(mag(phi) + dimensionedScalar("small", phi.dimensions(), SMALL)),
+        //     scalar(1)
+        // );
+
+        // See note below re: commented code
         ddtCouplingCoeff -= min
         (
+            // mag(phiCorr)
+            //*mesh().time().deltaT()*mag(mesh().deltaCoeffs())/mesh().magSf(),
+            // scalar(1)
             mag(phiCorr)
            *mesh().time().deltaT()*mesh().deltaCoeffs()/mesh().magSf(),
             scalar(1)
         );
+
+        // Note: setting oriented to false to avoid having to use mag(deltaCoeffs)
+        // - the deltaCoeffs field is always positive (scalars)
+        ddtCouplingCoeff.setOriented(false);
     }
     else
     {

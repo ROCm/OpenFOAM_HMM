@@ -268,18 +268,19 @@ void Foam::singleCellFvMesh::agglomerateMesh
     }
     addFvPatches(newPatches);
 
+    const label nFace = patchFaces.size();
+
     // Actually change the mesh. // Owner, neighbour is trivial
     resetPrimitives
     (
         autoPtr<pointField>::New(std::move(boundaryPoints)),
         autoPtr<faceList>::New(std::move(patchFaces)),
-        autoPtr<labelList>::New(patchFaces.size(), Zero),  // owner
-        autoPtr<labelList>::New(),                         // neighbour
+        autoPtr<labelList>::New(nFace, Zero),   // owner
+        autoPtr<labelList>::New(),              // neighbour
         patchSizes,
         patchStarts,
-        true                //syncPar
+        true                                    // syncPar
     );
-
 
     // Adapt the zones
     cellZones().clear();
