@@ -2,7 +2,7 @@
 # ADIOS2 includes/libraries
 
 sinclude $(GENERAL_RULES)/mplib$(WM_MPLIB)
-sinclude $(RULES)/mplib$(WM_MPLIB)
+sinclude $(DEFAULT_RULES)/mplib$(WM_MPLIB)
 
 # Obtain prefix and library information via adios2-config
 ADIOS_PREFIX := $(shell $(ADIOS2_ARCH_PATH)/bin/adios2-config --prefix)
