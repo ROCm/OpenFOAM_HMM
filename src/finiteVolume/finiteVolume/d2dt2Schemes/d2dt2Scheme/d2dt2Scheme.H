@@ -25,7 +25,7 @@ Class
     Foam::fv::d2dt2Scheme
 
 Description
-    Abstract base class for d2dt2 schemes.
+    Abstract base class for finite volume d2dt2 schemes.
 
 SourceFiles
     d2dt2Scheme.C
@@ -64,7 +64,7 @@ namespace fv
 template<class Type>
 class d2dt2Scheme
 :
-    public tmp<d2dt2Scheme<Type>>::refCount
+    public refCount
 {
 
 protected:
@@ -76,11 +76,11 @@ protected:
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        d2dt2Scheme(const d2dt2Scheme&);
+        //- No copy construct
+        d2dt2Scheme(const d2dt2Scheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const d2dt2Scheme&);
+        //- No copy assignment
+        void operator=(const d2dt2Scheme&) = delete;
 
 
 public:
@@ -127,7 +127,7 @@ public:
 
 
     //- Destructor
-    virtual ~d2dt2Scheme();
+    virtual ~d2dt2Scheme() = default;
 
 
     // Member Functions

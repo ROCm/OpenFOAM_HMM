@@ -68,7 +68,7 @@ namespace fv
 template<class Type, class GType>
 class laplacianScheme
 :
-    public tmp<laplacianScheme<Type, GType>>::refCount
+    public refCount
 {
 
 protected:
@@ -84,11 +84,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        laplacianScheme(const laplacianScheme&);
+        //- No copy construct
+        laplacianScheme(const laplacianScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const laplacianScheme&);
+        //- No copy assignment
+        void operator=(const laplacianScheme&) = delete;
 
 
 public:
@@ -162,7 +162,7 @@ public:
 
 
     //- Destructor
-    virtual ~laplacianScheme();
+    virtual ~laplacianScheme() = default;
 
 
     // Member Functions

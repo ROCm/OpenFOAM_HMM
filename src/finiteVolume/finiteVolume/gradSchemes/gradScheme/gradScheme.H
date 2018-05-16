@@ -60,7 +60,7 @@ namespace fv
 template<class Type>
 class gradScheme
 :
-    public tmp<gradScheme<Type>>::refCount
+    public refCount
 {
     // Private data
 
@@ -69,11 +69,11 @@ class gradScheme
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        gradScheme(const gradScheme&);
+        //- No copy construct
+        gradScheme(const gradScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const gradScheme&);
+        //- No copy assignment
+        void operator=(const gradScheme&) = delete;
 
 
 public:
@@ -114,7 +114,7 @@ public:
 
 
     //- Destructor
-    virtual ~gradScheme();
+    virtual ~gradScheme() = default;
 
 
     // Member Functions

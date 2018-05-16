@@ -123,13 +123,6 @@ Foam::surfaceInterpolationScheme<Type>::New
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::surfaceInterpolationScheme<Type>::~surfaceInterpolationScheme()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
@@ -147,8 +140,7 @@ Foam::surfaceInterpolationScheme<Type>::interpolate
             << "Interpolating "
             << vf.type() << " "
             << vf.name()
-            << " from cells to faces "
-               "without explicit correction"
+            << " from cells to faces without explicit correction"
             << endl;
     }
 

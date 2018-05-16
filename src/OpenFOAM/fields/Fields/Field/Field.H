@@ -47,6 +47,7 @@ SourceFiles
 #include "VectorSpace.H"
 #include "scalarList.H"
 #include "labelList.H"
+#include "FieldBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,7 +74,7 @@ Ostream& operator<<(Ostream&, const tmp<Field<Type>>&);
 template<class Type>
 class Field
 :
-    public tmp<Field<Type>>::refCount,
+    public FieldBase,
     public List<Type>
 {
 
@@ -84,11 +85,6 @@ public:
 
     //- Declare type of subField
     typedef SubField<Type> subField;
-
-
-    // Static data members
-
-        static const char* const typeName;
 
 
     // Static Member Functions
