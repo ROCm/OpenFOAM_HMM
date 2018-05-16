@@ -574,7 +574,8 @@ void Foam::vtk::vtuSizing::populateArrays
             if (output == contentType::LEGACY)
             {
                 // Update size for legacy face stream
-                faceOutput[startLabel] = (faceIndexer - startLabel);
+                // (subtract 1 to avoid counting the storage location)
+                faceOutput[startLabel] = (faceIndexer - 1 - startLabel);
             }
             else
             {
