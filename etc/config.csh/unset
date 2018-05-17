@@ -111,6 +111,7 @@ unsetenv ParaView_INCLUDE_DIR
 unsetenv ParaView_VERSION
 unsetenv PV_PLUGIN_PATH
 unsetenv VTK_DIR
+unsetenv Qt5_DIR  # Perhaps only unset if it is in WM_THIRD_PARTY_DIR?
 
 #------------------------------------------------------------------------------
 # Unset other ThirdParty environment variables

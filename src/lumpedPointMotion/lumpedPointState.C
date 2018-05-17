@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -94,8 +94,8 @@ void Foam::lumpedPointState::readDict(const dictionary& dict)
 
 Foam::lumpedPointState::lumpedPointState()
 :
-    points_(0),
-    angles_(0),
+    points_(),
+    angles_(),
     degrees_(false),
     rotationPtr_(nullptr)
 {}
@@ -110,10 +110,7 @@ Foam::lumpedPointState::lumpedPointState(const lumpedPointState& rhs)
 {}
 
 
-Foam::lumpedPointState::lumpedPointState
-(
-    const pointField& pts
-)
+Foam::lumpedPointState::lumpedPointState(const pointField& pts)
 :
     points_(pts),
     angles_(points_.size(), Zero),
@@ -122,10 +119,7 @@ Foam::lumpedPointState::lumpedPointState
 {}
 
 
-Foam::lumpedPointState::lumpedPointState
-(
-    tmp<pointField>& pts
-)
+Foam::lumpedPointState::lumpedPointState(tmp<pointField>& pts)
 :
     points_(pts),
     angles_(points_.size(), Zero),
@@ -134,13 +128,10 @@ Foam::lumpedPointState::lumpedPointState
 {}
 
 
-Foam::lumpedPointState::lumpedPointState
-(
-    const dictionary& dict
-)
+Foam::lumpedPointState::lumpedPointState(const dictionary& dict)
 :
-    points_(0),
-    angles_(0),
+    points_(),
+    angles_(),
     degrees_(false),
     rotationPtr_(nullptr)
 {
@@ -165,6 +156,15 @@ void Foam::lumpedPointState::operator=(const lumpedPointState& rhs)
     degrees_ = rhs.degrees_;
 
     deleteDemandDrivenData(rotationPtr_);
+}
+
+
+void Foam::lumpedPointState::scalePoints(const scalar scaleFactor)
+{
+    if (scaleFactor > 0)
+    {
+        points_ *= scaleFactor;
+    }
 }
 
 
@@ -273,19 +273,17 @@ void Foam::lumpedPointState::writePlain(Ostream& os) const
     {
         const vector& pt = points_[i];
 
-        os  << pt.x() << ' '
-            << pt.y() << ' '
-            << pt.z() << ' ';
+        os  << pt.x() << ' ' << pt.y() << ' ' << pt.z();
 
         if (i < angles_.size())
         {
-            os  << angles_[i].x() << ' '
-                << angles_[i].y() << ' '
-                << angles_[i].z() << '\n';
+            os  << ' ' << angles_[i].x()
+                << ' ' << angles_[i].y()
+                << ' ' << angles_[i].z() << '\n';
         }
         else
         {
-            os  << "0 0 0\n";
+            os  << " 0 0 0\n";
         }
     }
 }

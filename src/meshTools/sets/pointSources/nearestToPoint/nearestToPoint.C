@@ -32,13 +32,9 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(nearestToPoint, 0);
-
-addToRunTimeSelectionTable(topoSetSource, nearestToPoint, word);
-
-addToRunTimeSelectionTable(topoSetSource, nearestToPoint, istream);
-
+    defineTypeNameAndDebug(nearestToPoint, 0);
+    addToRunTimeSelectionTable(topoSetSource, nearestToPoint, word);
+    addToRunTimeSelectionTable(topoSetSource, nearestToPoint, istream);
 }
 
 
@@ -104,7 +100,6 @@ void Foam::nearestToPoint::combine(topoSet& set, const bool add) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::nearestToPoint::nearestToPoint
 (
     const polyMesh& mesh,
@@ -116,7 +111,6 @@ Foam::nearestToPoint::nearestToPoint
 {}
 
 
-// Construct from dictionary
 Foam::nearestToPoint::nearestToPoint
 (
     const polyMesh& mesh,
@@ -128,7 +122,6 @@ Foam::nearestToPoint::nearestToPoint
 {}
 
 
-// Construct from Istream
 Foam::nearestToPoint::nearestToPoint
 (
     const polyMesh& mesh,

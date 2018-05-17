@@ -52,6 +52,7 @@ SourceFiles
 
 #include "point.H"
 #include "vector.H"
+#include "ListOps.H"
 #include "coordinateRotation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -85,7 +86,7 @@ class cylindrical
         void init
         (
             const objectRegistry& obr,
-            const List<label>& cells = List<label>()
+            const labelUList& cells = Foam::emptyLabelList
         );
 
 

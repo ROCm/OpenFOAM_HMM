@@ -25,20 +25,15 @@ License
 
 #include "patchToFace.H"
 #include "polyMesh.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(patchToFace, 0);
-
-addToRunTimeSelectionTable(topoSetSource, patchToFace, word);
-
-addToRunTimeSelectionTable(topoSetSource, patchToFace, istream);
-
+    defineTypeNameAndDebug(patchToFace, 0);
+    addToRunTimeSelectionTable(topoSetSource, patchToFace, word);
+    addToRunTimeSelectionTable(topoSetSource, patchToFace, istream);
 }
 
 
@@ -90,7 +85,6 @@ void Foam::patchToFace::combine(topoSet& set, const bool add) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::patchToFace::patchToFace
 (
     const polyMesh& mesh,
@@ -102,7 +96,6 @@ Foam::patchToFace::patchToFace
 {}
 
 
-// Construct from dictionary
 Foam::patchToFace::patchToFace
 (
     const polyMesh& mesh,
@@ -114,7 +107,6 @@ Foam::patchToFace::patchToFace
 {}
 
 
-// Construct from Istream
 Foam::patchToFace::patchToFace
 (
     const polyMesh& mesh,

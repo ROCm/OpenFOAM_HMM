@@ -76,6 +76,7 @@ Usage
         devReff     | Deviatoric part of the effective Reynolds stress
         devRhoReff  | Divergence of the Reynolds stress
         L           | turbulence length scale
+        I           | turbulence intensity
     \endplaintable
 
 See also
@@ -125,7 +126,8 @@ public:
         cfAlphaEff,
         cfR,
         cfDevRhoReff,
-        cfL
+        cfL,
+        cfI
     };
     static const Enum<compressibleField> compressibleFieldNames_;
 
@@ -139,7 +141,8 @@ public:
         ifNuEff,
         ifR,
         ifDevReff,
-        ifL
+        ifL,
+        ifI
     };
     static const Enum<incompressibleField> incompressibleFieldNames_;
 
@@ -178,6 +181,10 @@ protected:
         //- Return L calculated from k and epsilon
         template<class Model>
         tmp<volScalarField> L(const Model& model) const;
+
+        //- Return I calculated from k and U
+        template<class Model>
+        tmp<volScalarField> I(const Model& model) const;
 
 
 private:

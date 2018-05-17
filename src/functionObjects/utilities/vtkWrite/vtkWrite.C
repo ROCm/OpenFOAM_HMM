@@ -108,6 +108,7 @@ bool Foam::functionObjects::vtkWrite::read(const dictionary& dict)
     //
     dict.readIfPresent("directory", dirName_);
 
+    decompose_ = dict.lookupOrDefault("decompose", false);
     writeIds_ = dict.lookupOrDefault("writeIds", false);
 
 
@@ -185,7 +186,7 @@ bool Foam::functionObjects::vtkWrite::write()
         (
             mesh_,
             writeOpts_,
-            true  // decompose
+            decompose_
         );
 
         // Write mesh

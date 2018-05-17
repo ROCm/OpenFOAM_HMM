@@ -61,7 +61,8 @@ Foam::functionObjects::turbulenceFields::compressibleFieldNames_
     { compressibleField::cfAlphaEff, "alphaEff" },
     { compressibleField::cfR, "R" },
     { compressibleField::cfDevRhoReff, "devRhoReff" },
-    { compressibleField::cfL, "L" }
+    { compressibleField::cfL, "L" },
+    { compressibleField::cfI, "I" }
 };
 
 
@@ -80,6 +81,7 @@ Foam::functionObjects::turbulenceFields::incompressibleFieldNames_
     { incompressibleField::ifR, "R" },
     { incompressibleField::ifDevReff, "devReff" },
     { incompressibleField::ifL, "L" },
+    { incompressibleField::ifI, "I" }
 };
 
 
@@ -236,6 +238,11 @@ bool Foam::functionObjects::turbulenceFields::execute()
                     processField<scalar>(f, L(model));
                     break;
                 }
+                case cfI:
+                {
+                    processField<scalar>(f, I(model));
+                    break;
+                }
                 default:
                 {
                     FatalErrorInFunction
@@ -296,6 +303,11 @@ bool Foam::functionObjects::turbulenceFields::execute()
                 case ifL:
                 {
                     processField<scalar>(f, L(model));
+                    break;
+                }
+                case ifI:
+                {
+                    processField<scalar>(f, I(model));
                     break;
                 }
                 default:

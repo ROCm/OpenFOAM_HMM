@@ -120,8 +120,16 @@ if ( $?ParaView_VERSION ) then
         #OBSOLETE? endif
 
         # QT libraries as required
+        # Set Qt5_DIR to root directory.
+        # Another possibility: "qtpaths --qt-version"
+
         set qtDir="$archDir/$ParaView_QT"
         if ( -d "$qtDir" ) then
+            switch ($ParaView_QT)
+            case *-qt*:
+                setenv Qt5_DIR $qtDir
+                breaksw
+            endsw
             foreach qtLibDir ("$qtDir/lib$WM_COMPILER_LIB_ARCH" "$qtDir/lib")
                 if ( -d "$qtLibDir" ) then
                     setenv LD_LIBRARY_PATH "${qtLibDir}:${LD_LIBRARY_PATH}"

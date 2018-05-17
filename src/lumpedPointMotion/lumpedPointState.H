@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -143,12 +143,15 @@ public:
         //- The local-to-global transformation for each point
         inline const tensorField& rotations() const;
 
+        //- Scale points by given factor.
+        //  Zero and negative values are ignored.
+        void scalePoints(const scalar scaleFactor);
+
         //- Relax the state
         //  alpha = 1 : no relaxation
         //  alpha < 1 : relaxation
         //  alpha = 0 : do nothing
         void relax(const scalar alpha, const lumpedPointState& prev);
-
 
         //- Read input as dictionary content
         bool readData(Istream& is);

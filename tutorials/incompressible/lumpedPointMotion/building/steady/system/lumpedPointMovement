@@ -66,10 +66,33 @@ communication
     // Output file of forces, written by OpenFOAM
     outputName      forces.out;
 
+    // Log of points/forces/moments during the simulation
+    logName         movement.log;
+
     inputFormat     dictionary;
     outputFormat    dictionary;
 
     debugTable      "<case>/output.txt";
+
+    // Scaling applied to values read from 'inputName'
+    scaleInput
+    {
+        //- Length multiplier (to metres). Eg 0.001 for [mm] -> [m]
+        length      1;
+    }
+
+    // Scaling applied to values written to 'outputName'
+    scaleOutput
+    {
+        //- Length multiplier (from metres). Eg 1000 for [m] -> [mm]
+        length      1;
+
+        //- Force units multiplier (from Pa)
+        force       1;
+
+        //- Moment units multiplier (from N.m)
+        moment      1;
+    }
 }
 
 // ************************************************************************* //

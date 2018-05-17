@@ -44,20 +44,6 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    // Avoid detecting change if the cells have been marked as GREAT
-    // (ie, ignore them)
-    static inline constexpr bool ignoreValue(const scalar val)
-    {
-        return (val >= 0.5*Foam::GREAT);
-    }
-
-} // End namespace Foam
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::scalar Foam::isoSurfaceCell::isoFraction
@@ -99,11 +85,6 @@ Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
     const label celli
 ) const
 {
-    if (ignoreValue(cellValues[celli]))
-    {
-        return NOTCUT;
-    }
-
     const cell& cFaces = mesh_.cells()[celli];
 
     if (isTet.test(celli))
@@ -137,11 +118,7 @@ Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
         // Check pyramids cut
         for (const label labi : f)
         {
-            if
-            (
-                !ignoreValue(pointValues[labi])
-             && cellLower != (pointValues[labi] < iso_)
-            )
+            if (cellLower != (pointValues[labi] < iso_))
             {
                 edgeCut = true;
                 break;
@@ -187,11 +164,7 @@ Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
 
         for (const label pointi : cPoints)
         {
-            if
-            (
-                !ignoreValue(pointValues[pointi])
-             && cellLower != (pointValues[pointi] < iso_)
-            )
+            if (cellLower != (pointValues[pointi] < iso_))
             {
                 ++nCuts;
             }
@@ -201,7 +174,7 @@ Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
         {
             return SPHERE;
         }
-        else if (nCuts > 1)
+        else
         {
             return CUT;
         }

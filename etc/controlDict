@@ -39,8 +39,8 @@ InfoSwitches
     writeDictionaries 0;
     writeOptionalEntries 0;
 
-    // Write lagrangian "positions" file in v1706 format (at earlier)
-    writeLagrangianPositions 0;
+    // Write lagrangian "positions" file in v1706 format (and earlier)
+    writeLagrangianPositions 1;
 
     // Report hosts used (parallel)
     // - 0 = none
