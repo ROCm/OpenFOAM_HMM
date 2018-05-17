@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -212,7 +212,7 @@ tmp
 cmptAv(const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf);
 
 
-#define UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(returnType, func, gFunc)        \
+#define UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(returnType, func, binaryOp)     \
                                                                                \
 template<class Type, template<class> class PatchField, class GeoMesh>          \
 dimensioned<returnType> func                                                   \
@@ -226,8 +226,8 @@ dimensioned<returnType> func                                                   \
     const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf1                 \
 );
 
-UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(Type, max, gMax)
-UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(Type, min, gMin)
+UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(Type, max, maxOp)
+UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(Type, min, minOp)
 
 #undef UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY
 

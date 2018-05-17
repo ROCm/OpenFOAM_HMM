@@ -127,10 +127,16 @@ then
         #OBSOLETE?    export PYTHONPATH=$PYTHONPATH:${PYTHONPATH:+:}$pvPython:$pvLibDir
         #OBSOLETE? fi
 
-        # QT libraries as required
+        # QT libraries as required, and Qt5_DIR for the root directory.
+        # Another possibility: "qtpaths --qt-version"
         qtDir="$archDir/$ParaView_QT"
         if [ -d "$qtDir" ]
         then
+            case "$ParaView_QT" in
+            *-5*)
+                export Qt5_DIR=$qtDir
+                ;;
+            esac
             for qtLibDir in $qtDir/lib$WM_COMPILER_LIB_ARCH $qtDir/lib
             do
                 if [ -d "$qtLibDir" ]

@@ -44,6 +44,7 @@ Description
         writeInterval   1;
         format          binary;
         legacy          false;
+        decompose       false;
         ...
         fields          (U p);
     }
@@ -51,14 +52,15 @@ Description
 
 Usage
     \table
-        Property     | Description             | Required    | Default value
-        type         | Type name: vtkWrite     | yes         |
-        fields       | Fields to output        | yes         |
-        writeControl | Output control          | recommended | timeStep
-        directory    | The output directory name | no        | "VTK"
-        format       | ASCII or binary format  | no          | binary
-        legacy       | Legacy VTK output       | no          | false
-        writeIds     | Write cell ids as field | no          | true
+        Property     | Description                      | Required    | Default
+        type         | Type name: vtkWrite              | yes         |
+        fields       | Fields to output                 | yes         |
+        writeControl | Output control                   | recommended | timeStep
+        directory    | The output directory name        | no          | "VTK"
+        format       | ASCII or binary format           | no          | binary
+        legacy       | Legacy VTK output                | no          | false
+        decompose    | decompose polyhedra              | no          | false
+        writeIds     | Write cell ids as field          | no          | true
     \endtable
 
 See also
@@ -106,6 +108,9 @@ class vtkWrite
         //- Output directory name
         fileName dirName_;
 
+        //- Decompose polyhedra
+        bool decompose_;
+
         //- Write cell ids field
         bool writeIds_;
 
@@ -119,7 +124,11 @@ class vtkWrite
 
         //- Write selected fields for GeoField type.
         template<class GeoField>
-        label writeFields(vtk::internalWriter& writer, bool verbose=true) const;
+        label writeFields
+        (
+            vtk::internalWriter& writer,
+            bool verbose=true
+        ) const;
 
 
         //- Write selected fields for GeoField type.
@@ -131,10 +140,10 @@ class vtkWrite
         ) const;
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         vtkWrite(const vtkWrite&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const vtkWrite&) = delete;
 
 
@@ -150,7 +159,7 @@ public:
         vtkWrite
         (
             const word& name,
-            const Time& t,
+            const Time& runTime,
             const dictionary& dict
         );
 

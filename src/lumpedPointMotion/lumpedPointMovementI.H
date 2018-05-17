@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -130,6 +130,12 @@ inline const Foam::word& Foam::lumpedPointMovement::inputName() const
 inline const Foam::word& Foam::lumpedPointMovement::outputName() const
 {
     return outputName_;
+}
+
+
+inline const Foam::word& Foam::lumpedPointMovement::logName() const
+{
+    return logName_;
 }
 
 

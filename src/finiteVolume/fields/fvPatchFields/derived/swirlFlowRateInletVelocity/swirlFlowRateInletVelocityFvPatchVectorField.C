@@ -75,7 +75,7 @@ swirlFlowRateInletVelocityFvPatchVectorField
         dict.lookupOrDefault
         (
             "axis",
-            patch().size()
+            returnReduce(patch().size(), maxOp<label>())
           ? -gSum(patch().Sf())/gSum(patch().magSf())
           : Zero
         )
@@ -145,48 +145,53 @@ void Foam::swirlFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
     {
         return;
     }
-
-    const scalar t = this->db().time().timeOutputValue();
-    const scalar flowRate = flowRate_->value(t);
-    const scalar rpm = rpm_->value(t);
-
     const scalar totArea = gSum(patch().magSf());
-    const scalar avgU = -flowRate/totArea;
 
-    const vector axisHat = axis_/mag(axis_);
-
-    // Update angular velocity - convert [rpm] to [rad/s]
-    tmp<vectorField> tangentialVelocity
-    (
-        axisHat ^ (rpm*constant::mathematical::pi/30.0)*(patch().Cf() - origin_)
-    );
-
-    tmp<vectorField> n = patch().nf();
-
-    const surfaceScalarField& phi =
-        db().lookupObject<surfaceScalarField>(phiName_);
-
-    if (phi.dimensions() == dimVelocity*dimArea)
+    if (totArea > ROOTVSMALL && axis_ != vector(Zero))
     {
-        // volumetric flow-rate
-        operator==(tangentialVelocity + n*avgU);
-    }
-    else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
-    {
-        const fvPatchField<scalar>& rhop =
-            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        const scalar t = this->db().time().timeOutputValue();
+        const scalar flowRate = flowRate_->value(t);
+        const scalar rpm = rpm_->value(t);
 
-        // mass flow-rate
-        operator==(tangentialVelocity + n*avgU/rhop);
-    }
-    else
-    {
-        FatalErrorInFunction
-            << "dimensions of " << phiName_ << " are incorrect" << nl
-            << "    on patch " << this->patch().name()
-            << " of field " << this->internalField().name()
-            << " in file " << this->internalField().objectPath()
-            << nl << exit(FatalError);
+        const scalar avgU = -flowRate/totArea;
+
+        const vector axisHat = axis_/mag(axis_);
+
+        // Update angular velocity - convert [rpm] to [rad/s]
+        tmp<vectorField> tangentialVelocity
+        (
+            axisHat
+           ^(rpm*constant::mathematical::pi/30.0)
+           *(patch().Cf() - origin_)
+        );
+
+        tmp<vectorField> n = patch().nf();
+
+        const surfaceScalarField& phi =
+            db().lookupObject<surfaceScalarField>(phiName_);
+
+        if (phi.dimensions() == dimVelocity*dimArea)
+        {
+            // volumetric flow-rate
+            operator==(tangentialVelocity + n*avgU);
+        }
+        else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+        {
+            const fvPatchField<scalar>& rhop =
+                patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+
+            // mass flow-rate
+            operator==(tangentialVelocity + n*avgU/rhop);
+        }
+        else
+        {
+            FatalErrorInFunction
+                << "dimensions of " << phiName_ << " are incorrect" << nl
+                << "    on patch " << this->patch().name()
+                << " of field " << this->internalField().name()
+                << " in file " << this->internalField().objectPath()
+                << nl << exit(FatalError);
+        }
     }
 
     fixedValueFvPatchField<vector>::updateCoeffs();

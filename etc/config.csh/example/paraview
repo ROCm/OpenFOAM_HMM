@@ -13,8 +13,8 @@
 #     config.csh/example/paraview
 #
 # Description
-#     Example of defining a different ParaView_VERSION but retaining
-#     the standard config.csh/paraview mechanism
+#     Example of defining a different ParaView_VERSION but retaining the
+#     standard config.csh/paraview mechanism
 #
 # Note
 #     This file could be copied to a user or site location, but should never
@@ -25,7 +25,8 @@
 
 set pv=5.5.0
 set pv=5.5.0-mpipy
+set qt=qt-5.9.0
 
-eval `foamEtcFile -csh -config -mode=o paraview -- ParaView_VERSION=$pv`
+eval `foamEtcFile -csh -config -mode=o paraview -- ParaView_VERSION=$pv ParaView_QT=$qt`
 
 #------------------------------------------------------------------------------

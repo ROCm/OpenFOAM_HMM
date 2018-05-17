@@ -54,7 +54,7 @@ namespace Foam
 void Foam::cylindrical::init
 (
     const objectRegistry& obr,
-    const List<label>& cells
+    const labelUList& cells
 )
 {
     const polyMesh& mesh = refCast<const polyMesh>(obr);
@@ -196,7 +196,7 @@ void Foam::cylindrical::updateCells
 
     forAll(cells, i)
     {
-        label celli = cells[i];
+        const label celli = cells[i];
         vector dir = cc[celli] - origin_;
         dir /= mag(dir) + VSMALL;
 
