@@ -12,8 +12,8 @@ if have_cgal
 then
     wmake $targetType conformalVoronoiMesh
     wmake $targetType conformalVoronoi2DMesh
-    wmake foamyQuadMesh
-    wmake foamyHexMesh
+    wmake $targetType foamyQuadMesh
+    wmake $targetType foamyHexMesh
     # wmake foamyHexMeshBackgroundMesh
     # (cd foamyHexMeshSurfaceSimplify && ./Allwmake)
     # wmake cellSizeAndAlignmentGrid
