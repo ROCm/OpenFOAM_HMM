@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +45,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 class IOobjectList;
 Ostream& operator<<(Ostream& os, const IOobjectList& list);
 
@@ -58,18 +58,21 @@ class IOobjectList
 :
     public HashPtrTable<IOobject>
 {
-    // Private Member Functions
-
-        //- No copy assignment
-        void operator=(const IOobjectList&) = delete;
-
-
 public:
 
     // Constructors
 
-        //- Construct given an initial estimate for the number of entries
-        explicit IOobjectList(const label nIoObjects = 128);
+        //- Construct null with default (128) table capacity
+        IOobjectList();
+
+        //- Construct given initial table capacity
+        explicit IOobjectList(const label nObjects);
+
+        //- Copy construct
+        IOobjectList(const IOobjectList& list);
+
+        //- Move construct
+        IOobjectList(IOobjectList&& list);
 
         //- Construct from objectRegistry and instance path
         IOobjectList
@@ -82,12 +85,9 @@ public:
             bool registerObject = true
         );
 
-        //- Construct as copy
-        IOobjectList(const IOobjectList& iolist);
-
 
     //- Destructor
-    ~IOobjectList();
+    ~IOobjectList() = default;
 
 
     // Member functions
@@ -95,10 +95,16 @@ public:
     // Basic methods
 
         //- Add an IOobject to the list
-        bool add(IOobject& io);
+        bool add(autoPtr<IOobject>& objectPtr);
+
+        //- Add an IOobject to the list
+        bool add(autoPtr<IOobject>&& objectPtr);
+
+        //- Remove an IOobject from the list, by iterator
+        using HashPtrTable<IOobject>::remove;
 
         //- Remove an IOobject from the list
-        bool remove(IOobject& io);
+        bool remove(const IOobject& io);
 
 
     // Lookup
@@ -228,6 +234,15 @@ public:
         //- The sorted names of IOobjects with the given class name that also
         //  have a name satisfying the input matcher
         wordList sortedNames(const word& clsName, const wordRes& matcher) const;
+
+
+    // Member Operators
+
+        //- No copy assignment
+        void operator=(const IOobjectList&) = delete;
+
+        //- Move assignment
+        void operator=(IOobjectList&& list);
 
 
     // Ostream Operator

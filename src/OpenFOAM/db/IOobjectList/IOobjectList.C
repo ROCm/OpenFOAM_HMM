@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ namespace Foam
                     InfoInFunction << "Found " << iter.key() << endl;
                 }
 
-                results.insert
+                results.set
                 (
                     iter.key(),
                     new IOobject(*(iter.object()))
@@ -123,9 +123,27 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::IOobjectList::IOobjectList(const label nIoObjects)
+Foam::IOobjectList::IOobjectList()
 :
-    HashPtrTable<IOobject>(nIoObjects)
+    HashPtrTable<IOobject>()
+{}
+
+
+Foam::IOobjectList::IOobjectList(const label nObjects)
+:
+    HashPtrTable<IOobject>(nObjects)  // Could also use 2*nObjects instead
+{}
+
+
+Foam::IOobjectList::IOobjectList(const IOobjectList& list)
+:
+    HashPtrTable<IOobject>(list)
+{}
+
+
+Foam::IOobjectList::IOobjectList(IOobjectList&& list)
+:
+    HashPtrTable<IOobject>(std::move(list))
 {}
 
 
@@ -142,7 +160,7 @@ Foam::IOobjectList::IOobjectList
     HashPtrTable<IOobject>()
 {
     word newInstance;
-    fileNameList ObjectNames = fileHandler().readObjects
+    fileNameList objNames = fileHandler().readObjects
     (
         db,
         instance,
@@ -150,9 +168,9 @@ Foam::IOobjectList::IOobjectList
         newInstance
     );
 
-    for (const auto& objName : ObjectNames)
+    for (const auto& objName : objNames)
     {
-        IOobject* objectPtr = new IOobject
+        auto objectPtr = autoPtr<IOobject>::New
         (
             objName,
             newInstance,
@@ -183,35 +201,35 @@ Foam::IOobjectList::IOobjectList
         {
             insert(objectPtr->name(), objectPtr);
         }
-        else
-        {
-            delete objectPtr;
-        }
     }
 }
 
 
-Foam::IOobjectList::IOobjectList(const IOobjectList& iolist)
-:
-    HashPtrTable<IOobject>(iolist)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::IOobjectList::~IOobjectList()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::IOobjectList::add(IOobject& io)
+bool Foam::IOobjectList::add(autoPtr<IOobject>& objectPtr)
 {
-    return insert(io.name(), &io);
+    if (objectPtr.valid())
+    {
+        return insert(objectPtr->name(), objectPtr);
+    }
+
+    return false;
 }
 
 
-bool Foam::IOobjectList::remove(IOobject& io)
+bool Foam::IOobjectList::add(autoPtr<IOobject>&& objectPtr)
+{
+    if (objectPtr.valid())
+    {
+        return insert(objectPtr->name(), objectPtr);
+    }
+
+    return false;
+}
+
+
+bool Foam::IOobjectList::remove(const IOobject& io)
 {
     return erase(io.name());
 }
@@ -219,7 +237,7 @@ bool Foam::IOobjectList::remove(IOobject& io)
 
 Foam::IOobject* Foam::IOobjectList::lookup(const word& name) const
 {
-    const_iterator iter = find(name);
+    const_iterator iter = cfind(name);
 
     if (iter.found())
     {
@@ -267,7 +285,7 @@ Foam::IOobjectList Foam::IOobjectList::lookupClass(const word& clsName) const
                 InfoInFunction << "Found " << iter.key() << endl;
             }
 
-            results.insert
+            results.set
             (
                 iter.key(),
                 new IOobject(*(iter.object()))
@@ -366,6 +384,14 @@ Foam::wordList Foam::IOobjectList::sortedNames
 ) const
 {
     return namesImpl(*this, clsName, matcher, true);
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+void Foam::IOobjectList::operator=(IOobjectList&& list)
+{
+    transfer(list);
 }
 
 

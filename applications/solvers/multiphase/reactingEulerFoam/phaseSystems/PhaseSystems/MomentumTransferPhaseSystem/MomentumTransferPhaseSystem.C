@@ -87,7 +87,7 @@ MomentumTransferPhaseSystem
         const phasePair& pair =
             *(this->phasePairs_[dragModelIter.key()]);
 
-        Kds_.insert
+        Kds_.set
         (
             pair,
             new volScalarField
@@ -103,7 +103,7 @@ MomentumTransferPhaseSystem
         const phasePair& pair =
             *(this->phasePairs_[virtualMassModelIter.key()]);
 
-        Vms_.insert
+        Vms_.set
         (
             pair,
             new volScalarField
@@ -373,18 +373,12 @@ Foam::autoPtr<Foam::phaseSystem::momentumTransferTable>
 Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::momentumTransfer() const
 {
     // Create a momentum transfer matrix for each phase
-    autoPtr<phaseSystem::momentumTransferTable> eqnsPtr
-    (
-        new phaseSystem::momentumTransferTable()
-    );
+    auto eqnsPtr = autoPtr<phaseSystem::momentumTransferTable>::New();
+    auto& eqns = *eqnsPtr;
 
-    phaseSystem::momentumTransferTable& eqns = eqnsPtr();
-
-    forAll(this->phaseModels_, phasei)
+    for (const phaseModel& phase : this->phaseModels_)
     {
-        const phaseModel& phase = this->phaseModels_[phasei];
-
-        eqns.insert
+        eqns.set
         (
             phase.name(),
             new fvVectorMatrix(phase.U(), dimMass*dimVelocity/dimTime)
@@ -492,11 +486,8 @@ template<class BasePhaseSystem>
 Foam::autoPtr<Foam::PtrList<Foam::volVectorField>>
 Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::Fs() const
 {
-    autoPtr<PtrList<volVectorField>> tFs
-    (
-        new PtrList<volVectorField>(this->phases().size())
-    );
-    PtrList<volVectorField>& Fs = tFs();
+    auto tFs = autoPtr<PtrList<volVectorField>>::New(this->phases().size());
+    auto& Fs = *tFs;
 
     // Add the lift force
     forAllConstIters(liftModels_, modelIter)
@@ -570,11 +561,9 @@ Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::phiDs
     const PtrList<volScalarField>& rAUs
 ) const
 {
-    autoPtr<PtrList<surfaceScalarField>> tphiDs
-    (
-        new PtrList<surfaceScalarField>(this->phases().size())
-    );
-    PtrList<surfaceScalarField>& phiDs = tphiDs();
+    auto tphiDs =
+        autoPtr<PtrList<surfaceScalarField>>::New(this->phases().size());
+    auto& phiDs = *tphiDs;
 
     // Add the turbulent dispersion force
     forAllConstIters(turbulentDispersionModels_, turbulentDispersionModelIter)

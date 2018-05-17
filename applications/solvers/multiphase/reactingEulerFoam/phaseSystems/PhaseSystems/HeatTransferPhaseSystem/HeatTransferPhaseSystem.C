@@ -107,18 +107,12 @@ template<class BasePhaseSystem>
 Foam::autoPtr<Foam::phaseSystem::heatTransferTable>
 Foam::HeatTransferPhaseSystem<BasePhaseSystem>::heatTransfer() const
 {
-    autoPtr<phaseSystem::heatTransferTable> eqnsPtr
-    (
-        new phaseSystem::heatTransferTable()
-    );
+    auto eqnsPtr = autoPtr<phaseSystem::heatTransferTable>::New();
+    auto& eqns = *eqnsPtr;
 
-    phaseSystem::heatTransferTable& eqns = eqnsPtr();
-
-    forAll(this->phaseModels_, phasei)
+    for (const phaseModel& phase : this->phaseModels_)
     {
-        const phaseModel& phase = this->phaseModels_[phasei];
-
-        eqns.insert
+        eqns.set
         (
             phase.name(),
             new fvScalarMatrix(phase.thermo().he(), dimEnergy/dimTime)

@@ -1460,7 +1460,7 @@ Foam::instantList Foam::fileOperations::masterUncollatedFileOperation::findTimes
 
         instantList* tPtr = new instantList(std::move(times));
 
-        times_.insert(directory, tPtr);
+        times_.set(directory, tPtr);
 
         if (debug)
         {

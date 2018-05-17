@@ -600,7 +600,7 @@ bool finishReaction = false;
         speciesThermo_.insert
         (
             currentSpecieName,
-            new gasHThermoPhysics
+            autoPtr<gasHThermoPhysics>::New
             (
                 janafThermo<perfectGas<specie>>
                 (

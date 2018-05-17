@@ -87,7 +87,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                             scalarFields_.insert
                             (
                                 iter().keyword(),
-                                new scalarField(0)
+                                autoPtr<scalarField>::New()
                             );
                         }
                         else
@@ -111,7 +111,8 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                      == token::Compound<List<scalar>>::typeName
                     )
                     {
-                        scalarField* fPtr = new scalarField;
+                        auto fPtr = autoPtr<scalarField>::New();
+
                         fPtr->transfer
                         (
                             dynamicCast<token::Compound<List<scalar>>>
@@ -145,7 +146,8 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                      == token::Compound<List<vector>>::typeName
                     )
                     {
-                        vectorField* fPtr = new vectorField;
+                        auto fPtr = autoPtr<vectorField>::New();
+
                         fPtr->transfer
                         (
                             dynamicCast<token::Compound<List<vector>>>
@@ -179,7 +181,8 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                      == token::Compound<List<sphericalTensor>>::typeName
                     )
                     {
-                        sphericalTensorField* fPtr = new sphericalTensorField;
+                        auto fPtr = autoPtr<sphericalTensorField>::New();
+
                         fPtr->transfer
                         (
                             dynamicCast
@@ -216,7 +219,8 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                      == token::Compound<List<symmTensor>>::typeName
                     )
                     {
-                        symmTensorField* fPtr = new symmTensorField;
+                        auto fPtr = autoPtr<symmTensorField>::New();
+
                         fPtr->transfer
                         (
                             dynamicCast
@@ -253,7 +257,8 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                      == token::Compound<List<tensor>>::typeName
                     )
                     {
-                        tensorField* fPtr = new tensorField;
+                        auto fPtr = autoPtr<tensorField>::New();
+
                         fPtr->transfer
                         (
                             dynamicCast<token::Compound<List<tensor>>>
@@ -325,7 +330,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
         scalarFields_.insert
         (
             iter.key(),
-            new scalarField(*iter(), mapper)
+            autoPtr<scalarField>::New(*iter(), mapper)
         );
     }
 
@@ -339,7 +344,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
         vectorFields_.insert
         (
             iter.key(),
-            new vectorField(*iter(), mapper)
+            autoPtr<vectorField>::New(*iter(), mapper)
         );
     }
 
@@ -353,7 +358,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
         sphericalTensorFields_.insert
         (
             iter.key(),
-            new sphericalTensorField(*iter(), mapper)
+            autoPtr<sphericalTensorField>::New(*iter(), mapper)
         );
     }
 
@@ -367,7 +372,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
         symmTensorFields_.insert
         (
             iter.key(),
-            new symmTensorField(*iter(), mapper)
+            autoPtr<symmTensorField>::New(*iter(), mapper)
         );
     }
 
@@ -381,7 +386,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
         tensorFields_.insert
         (
             iter.key(),
-            new tensorField(*iter(), mapper)
+            autoPtr<tensorField>::New(*iter(), mapper)
         );
     }
 }

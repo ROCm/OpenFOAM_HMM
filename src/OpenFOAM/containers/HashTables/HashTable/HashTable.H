@@ -165,8 +165,10 @@ class HashTable
             }
 
         private:
-            //- Disallow default bitwise copy construct / assignment
+            //- No copy construct
             pair_entry(const pair_entry&) = delete;
+
+            //- No copy assignment
             void operator=(const pair_entry&) = delete;
         };
 
@@ -214,8 +216,10 @@ class HashTable
 
 
         private:
-            //- Disallow default bitwise copy construct / assignment
+            //- No copy construct
             unary_entry(const unary_entry&) = delete;
+
+            //- No copy assignment
             void operator=(const unary_entry&) = delete;
         };
 
@@ -249,7 +253,7 @@ class HashTable
 
         //- Assign a new hash-entry to a possibly already existing key.
         //  \return True if the new entry was set.
-        bool set(const Key& key, const T& obj, const bool overwrite);
+        bool setEntry(const Key& key, const T& obj, const bool overwrite);
 
 
 public:
@@ -606,10 +610,10 @@ public:
         //- Return existing entry or insert a new entry.
         inline T& operator()(const Key& key, const T& deflt);
 
-        //- Copy assignment
+        //- Copy assign
         void operator=(const HashTable<T, Key, Hash>& rhs);
 
-        //- Copy assignment from an initializer list
+        //- Copy assign from an initializer list
         void operator=(std::initializer_list<std::pair<Key, T>> rhs);
 
         //- Move assign
@@ -640,7 +644,7 @@ protected:
         class Iterator
         {
         public:
-          // Typedefs
+        // Typedefs
             using iterator_category = std::forward_iterator_tag;
             using difference_type = this_type::difference_type;
 
@@ -672,7 +676,7 @@ protected:
             >::type;
 
 
-          // Member Functions
+        // Member Functions
 
             //- True if iterator points to an entry
             //  This can be used directly instead of comparing to end()
@@ -681,7 +685,7 @@ protected:
             //- The key associated with the iterator
             inline const Key& key() const;
 
-          // Member Operators
+        // Member Operators
 
             //- Compare hash-entry element pointers.
             //  Independent of const/non-const access
@@ -695,7 +699,7 @@ protected:
         protected:
             friend class HashTable;  // For begin/find constructors
 
-          // Protected Data
+        // Protected Data
 
             //- The selected entry.
             //  MUST be the first member for easy comparison between iterators
@@ -712,7 +716,7 @@ protected:
             label index_;
 
 
-          // Protected Constructors
+        // Protected Constructors
 
             //- Construct null (end iterator)
             inline Iterator();
@@ -724,7 +728,7 @@ protected:
             Iterator(table_type* tbl, const Key& key);
 
 
-          // Protected Member Functions
+        // Protected Member Functions
 
             //- Increment to the next position
             inline void increment();
@@ -756,7 +760,7 @@ public:
             public Iterator<false>
         {
         public:
-          // Typedefs
+        // Typedefs
             using iterator_category = std::forward_iterator_tag;
             using difference_type   = this_type::difference_type;
 
@@ -766,7 +770,7 @@ public:
             using pointer     = this_type::pointer;
             using reference   = this_type::reference;
 
-          // Constructors
+        // Constructors
 
             //- Construct null (end iterator)
             inline iterator() = default;
@@ -778,7 +782,7 @@ public:
             {}
 
 
-          // Member functions/operators
+        // Member functions/operators
 
             //- Non-const access to referenced object
             using Iterator<false>::object;
@@ -800,7 +804,7 @@ public:
             public Iterator<true>
         {
         public:
-          // Typedefs
+        // Typedefs
             using iterator_category = std::forward_iterator_tag;
             using difference_type   = this_type::difference_type;
 
@@ -810,7 +814,7 @@ public:
             using pointer     = this_type::const_pointer;
             using reference   = this_type::const_reference;
 
-          // Constructors
+        // Constructors
 
             //- Construct null (end iterator)
             inline const_iterator() = default;
@@ -837,7 +841,7 @@ public:
             {}
 
 
-          // Member functions/operators
+        // Member functions/operators
 
             //- Const access to referenced object
             using Iterator<true>::object;
@@ -849,7 +853,7 @@ public:
             inline const_iterator& operator++();
             inline const_iterator operator++(int);
 
-          // Assignment
+        // Assignment
 
             const_iterator& operator=(const const_iterator&) = default;
 
