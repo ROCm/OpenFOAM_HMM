@@ -198,12 +198,12 @@ Foam::label Foam::ConeInjection<CloudType>::parcelsToInject
     {
         const scalar targetVolume = flowRateProfile_.integrate(0, time1);
 
+        const scalar volumeFraction = targetVolume/this->volumeTotal_;
+
         const label targetParcels =
-            parcelsPerInjector_*targetVolume/this->volumeTotal_;
+            ceil(positionAxis_.size()*parcelsPerInjector_*volumeFraction);
 
-        const label nToInject = targetParcels - nInjected_;
-
-        return positionAxis_.size()*nToInject;
+        return targetParcels - nInjected_;
     }
     else
     {

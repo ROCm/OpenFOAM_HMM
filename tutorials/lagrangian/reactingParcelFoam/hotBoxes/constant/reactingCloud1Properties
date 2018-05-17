@@ -85,7 +85,6 @@ subModels
 
             massTotal       10;
             parcelsPerInjector 20000;
-            parcelsPerSecond 500;
             parcelBasisType mass;
             flowRateProfile constant 0.1;
             Umag            constant 3.0;
