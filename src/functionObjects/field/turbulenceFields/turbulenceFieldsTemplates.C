@@ -85,19 +85,16 @@ Foam::functionObjects::turbulenceFields::omega
     const volScalarField k(model.k());
     const volScalarField epsilon(model.epsilon());
 
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "omega.tmp",
-                k.mesh().time().timeName(),
-                k.mesh()
-            ),
-            epsilon/(Cmu*k),
-            epsilon.boundaryField().types()
-        )
+            "omega.tmp",
+            k.mesh().time().timeName(),
+            k.mesh()
+        ),
+        epsilon/(Cmu*k),
+        epsilon.boundaryField().types()
     );
 }
 
@@ -109,9 +106,10 @@ Foam::functionObjects::turbulenceFields::nuTilda
     const Model& model
 ) const
 {
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField("nuTilda.tmp", model.k()/omega(model))
+        "nuTilda.tmp",
+        model.k()/omega(model)
     );
 }
 
@@ -130,15 +128,30 @@ Foam::functionObjects::turbulenceFields::L
     const volScalarField epsilon(model.epsilon());
     const dimensionedScalar eps0("eps0", epsilon.dimensions(), SMALL);
 
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
-        (
-            "L.tmp",
-            pow(Cmu, 0.75)*pow(k, 1.5)/(epsilon + eps0)
-        )
+        "L.tmp",
+        pow(Cmu, 0.75)*pow(k, 1.5)/(epsilon + eps0)
     );
 }
 
+
+template<class Model>
+Foam::tmp<Foam::volScalarField>
+Foam::functionObjects::turbulenceFields::I
+(
+    const Model& model
+) const
+{
+    // Assume k is available
+    const volScalarField uPrime(sqrt((2.0/3.0)*model.k()));
+    const dimensionedScalar U0("U0", dimVelocity, SMALL);
+
+    return tmp<volScalarField>::New
+    (
+        "I.tmp",
+        uPrime/max(max(uPrime, mag(model.U())), U0)
+    );
+}
 
 // ************************************************************************* //
