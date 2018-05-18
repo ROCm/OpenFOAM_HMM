@@ -266,7 +266,7 @@ Foam::faceZone::faceZone
 (
     const word& name,
     const labelUList& addr,
-    const boolList& fm,
+    const boolUList& fm,
     const label index,
     const faceZoneMesh& zm
 )
@@ -328,7 +328,7 @@ Foam::faceZone::faceZone
 (
     const faceZone& origZone,
     const labelUList& addr,
-    const boolList& fm,
+    const boolUList& fm,
     const label index,
     const faceZoneMesh& zm
 )
@@ -468,7 +468,7 @@ void Foam::faceZone::resetAddressing
 void Foam::faceZone::resetAddressing
 (
     const labelUList& addr,
-    const boolList& flipMap
+    const boolUList& flipMap
 )
 {
     clearAddressing();

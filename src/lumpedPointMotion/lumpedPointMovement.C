@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,29 +48,65 @@ Foam::lumpedPointMovement::formatNames
 };
 
 
+const Foam::Enum
+<
+    Foam::lumpedPointMovement::scalingType
+>
+Foam::lumpedPointMovement::scalingNames
+{
+    { scalingType::LENGTH, "plain" },
+    { scalingType::FORCE, "force" },
+    { scalingType::MOMENT, "moment" }
+};
+
+
 const Foam::word
 Foam::lumpedPointMovement::dictionaryName("lumpedPointMovement");
 
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
 namespace Foam
 {
+
+//! \cond fileScope
+//- Space-separated vector value (ASCII)
+static inline Ostream& putPlain(Ostream& os, const vector& val)
+{
+    os  << val.x() << ' ' << val.y() << ' ' << val.z();
+    return os;
+}
+
+
+//! \cond fileScope
+//- Space-separated vector value (ASCII)
+static inline Ostream& putTime(Ostream& os, const Time& t)
+{
+    os  <<"Time index=" << t.timeIndex()
+        << " value=" << t.timeOutputValue();
+
+    return os;
+}
+
+
 //! \cond fileScope
 //- Write list content with size, bracket, content, bracket one-per-line.
 //  This makes for consistent for parsing, regardless of the list length.
 template <class T>
-static void writeList(Ostream& os, const string& header, const UList<T>& lst)
+static void writeList(Ostream& os, const string& header, const UList<T>& list)
 {
+    const label len = list.size();
+
     // Header string
     os  << header.c_str() << nl;
 
     // Write size and start delimiter
-    os  << lst.size() << nl
-        << token::BEGIN_LIST << nl;
+    os  << len << nl << token::BEGIN_LIST << nl;
 
     // Write contents
-    forAll(lst, i)
+    for (label i=0; i < len; ++i)
     {
-        os << lst[i] << nl;
+        os << list[i] << nl;
     }
 
     // Write end delimiter
@@ -165,8 +201,11 @@ Foam::lumpedPointMovement::lumpedPointMovement()
     coupler_(),
     inputName_("positions.in"),
     outputName_("forces.out"),
+    logName_("movement.log"),
     inputFormat_(lumpedPointState::inputFormatType::DICTIONARY),
     outputFormat_(outputFormatType::DICTIONARY),
+    scaleInput_(-1.0),
+    scaleOutput_(-1.0),
     state0_(),
     state_(),
     thresholdPtr_(0),
@@ -198,6 +237,11 @@ Foam::lumpedPointMovement::lumpedPointMovement
     autoCentre_(true),
     forcesDict_(),
     coupler_(),
+    inputName_("positions.in"),
+    outputName_("forces.out"),
+    logName_("movement.log"),
+    scaleInput_(-1.0),
+    scaleOutput_(-1.0),
     state0_(),
     state_(),
     thresholdPtr_(0),
@@ -262,6 +306,7 @@ void Foam::lumpedPointMovement::readDict(const dictionary& dict)
 
     commDict.lookup("inputName")  >> inputName_;
     commDict.lookup("outputName") >> outputName_;
+    commDict.readIfPresent("logName", logName_);
 
     inputFormat_ = lumpedPointState::formatNames.lookup
     (
@@ -274,6 +319,47 @@ void Foam::lumpedPointMovement::readDict(const dictionary& dict)
         "outputFormat",
         commDict
     );
+
+    scaleInput_  = -1;
+    scaleOutput_ = -1;
+
+    const dictionary* scaleDict = nullptr;
+
+    if ((scaleDict = commDict.subDictPtr("scaleInput")))
+    {
+        for (int i=0; i < scaleInput_.size(); ++i)
+        {
+            const word& key = scalingNames[scalingType(i)];
+
+            if
+            (
+                scaleDict->readIfPresent(key, scaleInput_[i])
+             && scaleInput_[i] > 0
+            )
+            {
+                Info<<"Using input " << key << " multiplier: "
+                    << scaleInput_[i] << nl;
+            }
+        }
+    }
+
+    if ((scaleDict = commDict.subDictPtr("scaleOutput")))
+    {
+        for (int i=0; i < scaleOutput_.size(); ++i)
+        {
+            const word& key = scalingNames[scalingType(i)];
+
+            if
+            (
+                scaleDict->readIfPresent(key, scaleOutput_[i])
+             && scaleOutput_[i] > 0
+            )
+            {
+                Info<<"Using output " << key << " multiplier: "
+                    << scaleOutput_[i] << nl;
+            }
+        }
+    }
 }
 
 
@@ -638,6 +724,8 @@ bool Foam::lumpedPointMovement::readState()
         coupler().resolveFile(inputName_)
     );
 
+    state_.scalePoints(scaleInput_[scalingType::LENGTH]);
+
     state_.relax(relax_, prev);
 
     return status;
@@ -646,45 +734,114 @@ bool Foam::lumpedPointMovement::readState()
 
 bool Foam::lumpedPointMovement::writeData
 (
-    const UList<vector>& forces
+    Ostream& os,
+    const UList<vector>& forces,
+    const UList<vector>& moments,
+    const outputFormatType fmt,
+    const Time* timeinfo
 ) const
 {
-    if (!Pstream::master())
+    const bool writeMoments = (moments.size() == forces.size());
+
+    if (fmt == outputFormatType::PLAIN)
     {
-        return false;
-    }
-
-    const fileName output(coupler().resolveFile(outputName_));
-    OFstream os(output); // ASCII
-
-    if (outputFormat_ == outputFormatType::PLAIN)
-    {
-        os  <<"# output from OpenFOAM" << nl
-            <<"# N, points, forces" << nl
-            << this->size() << nl;
-
-        const char* zeroVector = "0 0 0";
-
-        forAll(locations_, i)
+        os  <<"########" << nl;
+        if (timeinfo)
         {
-            const vector pos = locations_[i] * axis_;
+            os <<"# ";
+            putTime(os, *timeinfo) << nl;
+        }
+        os  <<"# size=" << this->size() << nl
+            <<"# columns (points) (forces)";
 
-            os  << pos.x() << ' '
-                << pos.y() << ' '
-                << pos.z() << ' ';
+        if (writeMoments)
+        {
+            os << " (moments)";
+        }
 
-            if (i < forces.size())
+        os << nl;
+
+        bool report = false;
+        scalar scaleLength = scaleOutput_[scalingType::LENGTH];
+        scalar scaleForce  = scaleOutput_[scalingType::FORCE];
+        scalar scaleMoment = scaleOutput_[scalingType::MOMENT];
+
+        if (scaleLength > 0)
+        {
+            report = true;
+        }
+        else
+        {
+            scaleLength = 1.0;
+        }
+
+        if (scaleForce > 0)
+        {
+            report = true;
+        }
+        else
+        {
+            scaleForce = 1.0;
+        }
+
+        if (writeMoments)
+        {
+            if (scaleMoment > 0)
             {
-                os  << forces[i].x() << ' '
-                    << forces[i].y() << ' '
-                    << forces[i].z();
+                report = true;
             }
             else
             {
-                os << zeroVector;
+                scaleMoment = 1.0;
+            }
+        }
+
+        if (report)
+        {
+            os  <<"# scaling points=" << scaleLength
+                <<" forces=" << scaleForce;
+
+            if (writeMoments)
+            {
+                os  <<" moments=" << scaleMoment;
             }
 
-            os  << nl;
+            os << nl;
+        }
+
+        os <<"########" << nl;
+
+        forAll(locations_, i)
+        {
+            const vector pos = scaleLength * (locations_[i] * axis_);
+
+            putPlain(os, pos) << ' ';
+
+            if (i < forces.size())
+            {
+                const vector val(scaleForce * forces[i]);
+                putPlain(os, val);
+            }
+            else
+            {
+                putPlain(os, vector::zero);
+            }
+
+            if (writeMoments)
+            {
+                os << ' ';
+                if (i < moments.size())
+                {
+                    const vector val(scaleMoment * moments[i]);
+                    putPlain(os, val);
+                }
+                else
+                {
+                    putPlain(os, vector::zero);
+                }
+            }
+
+            os << nl;
         }
     }
     else
@@ -693,10 +850,21 @@ bool Foam::lumpedPointMovement::writeData
         // - exclude the usual OpenFOAM 'FoamFile' header
         // - ensure lists have consistent format
 
-        os  <<"// output from OpenFOAM" << nl << nl;
+        os  <<"////////" << nl;
+        if (timeinfo)
+        {
+            os <<"// ";
+            putTime(os, *timeinfo) << nl;
+        }
+        os  << nl;
 
         writeList(os, "points", (locations_*axis_)());
         writeList(os, "forces", forces);
+
+        if (writeMoments)
+        {
+            writeList(os, "moments", moments);
+        }
     }
 
     return true;
@@ -706,7 +874,8 @@ bool Foam::lumpedPointMovement::writeData
 bool Foam::lumpedPointMovement::writeData
 (
     const UList<vector>& forces,
-    const UList<vector>& moments
+    const UList<vector>& moments,
+    const Time* timeinfo
 ) const
 {
     if (!Pstream::master())
@@ -714,60 +883,28 @@ bool Foam::lumpedPointMovement::writeData
         return false;
     }
 
-    const fileName output(coupler().resolveFile(outputName_));
-    OFstream os(output); // ASCII
-
-    if (outputFormat_ == outputFormatType::PLAIN)
+    // Regular output
     {
-        os  <<"# output from OpenFOAM" << nl
-            <<"# N, points, forces, moments" << nl
-            << this->size() << nl;
+        const fileName output(coupler().resolveFile(outputName_));
+        OFstream os(output, IOstream::ASCII);
 
-        const char* zeroVector = "0 0 0";
-
-        forAll(locations_, i)
-        {
-            const vector pos = locations_[i] * axis_;
-
-            os  << pos.x() << ' '
-                << pos.y() << ' '
-                << pos.z() << ' ';
-
-            if (i < forces.size())
-            {
-                os  << forces[i].x() << ' '
-                    << forces[i].y() << ' '
-                    << forces[i].z() << ' ';
-            }
-            else
-            {
-                os << zeroVector << ' ';
-            }
-
-            if (i < moments.size())
-            {
-                os  << moments[i].x() << ' '
-                    << moments[i].y() << ' '
-                    << moments[i].z();
-            }
-            else
-            {
-                os  << zeroVector;
-            }
-            os  << nl;
-        }
+        writeData(os, forces, moments, outputFormat_, timeinfo);
     }
-    else
+
+    // Log output
     {
-        // Make it easier for external programs to parse
-        // - exclude the usual OpenFOAM 'FoamFile' header
-        // - ensure lists have consistent format
+        const fileName output(coupler().resolveFile(logName_));
 
-        os  <<"// output from OpenFOAM" << nl << nl;
+        OFstream os
+        (
+            output,
+            IOstream::ASCII,
+            IOstream::currentVersion,
+            IOstream::UNCOMPRESSED,
+            true // append mode
+        );
 
-        writeList(os, "points", (locations_*axis_)());
-        writeList(os, "forces", forces);
-        writeList(os, "moments", moments);
+        writeData(os, forces, moments, outputFormatType::PLAIN, timeinfo);
     }
 
     return true;

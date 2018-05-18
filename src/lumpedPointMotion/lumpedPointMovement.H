@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,8 +60,10 @@ SourceFiles
 
 namespace Foam
 {
+
 // Forward declarations
 class polyMesh;
+class Time;
 
 /*---------------------------------------------------------------------------*\
                      Class lumpedPointMovement Declaration
@@ -78,10 +80,21 @@ public:
         DICTIONARY
     };
 
+    //- Output format types
+    enum scalingType
+    {
+        LENGTH = 0,
+        FORCE,
+        MOMENT
+    };
+
     // Static data
 
     //- Names for the output format types
     static const Enum<outputFormatType> formatNames;
+
+    //- Names for the scaling types
+    static const Enum<scalingType> scalingNames;
 
 
 private:
@@ -125,8 +138,14 @@ private:
         //- File io
         word inputName_;
         word outputName_;
+        word logName_;
+
         lumpedPointState::inputFormatType inputFormat_;
         outputFormatType outputFormat_;
+
+        //- Optional scale factors for input/output files
+        FixedList<scalar, 1> scaleInput_;
+        FixedList<scalar, 3> scaleOutput_;
 
 
     // Demand-driven private data
@@ -246,6 +265,9 @@ public:
         //- The output (forces) file name
         inline const word& outputName() const;
 
+        //- The log file name
+        inline const word& logName() const;
+
         //- The input (state) file format
         inline lumpedPointState::inputFormatType inputFormat() const;
 
@@ -324,20 +346,23 @@ public:
         //- Write axis, locations, division as a dictionary
         void writeDict(Ostream& os) const;
 
-
-        //- Write points, forces
+        //- Write points, forces, moments. Only call from the master process
         bool writeData
         (
-            const UList<vector>& forces
+            Ostream& os,
+            const UList<vector>& forces,
+            const UList<vector>& moments,
+            const outputFormatType fmt = outputFormatType::PLAIN,
+            const Time* timeinfo = nullptr
         ) const;
 
         //- Write points, forces, moments
         bool writeData
         (
             const UList<vector>& forces,
-            const UList<vector>& moments
+            const UList<vector>& moments = List<vector>(),
+            const Time* timeinfo = nullptr
         ) const;
-
 
         //- Read state from file, applying relaxation as requested
         bool readState();

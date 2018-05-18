@@ -29,7 +29,6 @@ License
 #include "volPointInterpolation.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
-#include "volumeType.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -134,8 +133,6 @@ void Foam::distanceSurface::createGeometry()
 
     const fvMesh& fvm = static_cast<const fvMesh&>(mesh_);
 
-    const labelList& own = fvm.faceOwner();
-
     // Distance to cell centres
     // ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -173,35 +170,14 @@ void Foam::distanceSurface::createGeometry()
 
         if (signed_)
         {
-            List<volumeType> volType;
+            vectorField norms;
+            surfPtr_().getNormal(nearest, norms);
 
-            surfPtr_().getVolumeType(cc, volType);
-
-            forAll(volType, i)
+            forAll(norms, i)
             {
-                volumeType vT = volType[i];
+                const point diff(cc[i] - nearest[i].hitPoint());
 
-                if (vT == volumeType::OUTSIDE)
-                {
-                    fld[i] = Foam::mag(cc[i] - nearest[i].hitPoint());
-                }
-                else if (vT == volumeType::INSIDE)
-                {
-                    fld[i] = -Foam::mag(cc[i] - nearest[i].hitPoint());
-                }
-                else if (vT == volumeType::UNKNOWN)
-                {
-                    // Treat as very far outside
-                    fld[i] = GREAT;
-                }
-                else
-                {
-                    FatalErrorInFunction
-                        << "getVolumeType failure:"
-                        << " neither INSIDE or OUTSIDE but "
-                        << volumeType::names[vT]
-                        << exit(FatalError);
-                }
+                fld[i] = sign(diff & norms[i]) * Foam::mag(diff);
             }
         }
         else
@@ -223,9 +199,6 @@ void Foam::distanceSurface::createGeometry()
             const pointField& cc = fvm.C().boundaryField()[patchi];
             fvPatchScalarField& fld = cellDistanceBf[patchi];
 
-            const label patchStarti = fvm.boundaryMesh()[patchi].start();
-
-
             List<pointIndexHit> nearest;
             surfPtr_().findNearest
             (
@@ -236,41 +209,14 @@ void Foam::distanceSurface::createGeometry()
 
             if (signed_)
             {
-                List<volumeType> volType;
+                vectorField norms;
+                surfPtr_().getNormal(nearest, norms);
 
-                surfPtr_().getVolumeType(cc, volType);
-
-                forAll(volType, i)
+                forAll(norms, i)
                 {
-                    volumeType vT = volType[i];
+                    const point diff(cc[i] - nearest[i].hitPoint());
 
-                    if (vT == volumeType::OUTSIDE)
-                    {
-                        fld[i] = Foam::mag(cc[i] - nearest[i].hitPoint());
-                    }
-                    else if (vT == volumeType::INSIDE)
-                    {
-                        fld[i] = -Foam::mag(cc[i] - nearest[i].hitPoint());
-                    }
-                    else if (vT == volumeType::UNKNOWN)
-                    {
-                        // Nothing known, so use the cell value.
-                        // - this avoids spurious changes on the boundary
-
-                        // The cell value
-                        const label meshFacei = i+patchStarti;
-                        const scalar& cellVal = cellDistance[own[meshFacei]];
-
-                        fld[i] = cellVal;
-                    }
-                    else
-                    {
-                        FatalErrorInFunction
-                            << "getVolumeType failure:"
-                            << " neither INSIDE or OUTSIDE but "
-                            << volumeType::names[vT]
-                            << exit(FatalError);
-                    }
+                    fld[i] = sign(diff & norms[i]) * Foam::mag(diff);
                 }
             }
             else
@@ -303,44 +249,21 @@ void Foam::distanceSurface::createGeometry()
 
         if (signed_)
         {
-            List<volumeType> volType;
+            vectorField norms;
+            surfPtr_().getNormal(nearest, norms);
 
-            surfPtr_().getVolumeType(pts, volType);
-
-            forAll(volType, i)
+            forAll(norms, i)
             {
-                volumeType vT = volType[i];
+                const point diff(pts[i] - nearest[i].hitPoint());
 
-                if (vT == volumeType::OUTSIDE)
-                {
-                    pointDistance_[i] =
-                        Foam::mag(pts[i] - nearest[i].hitPoint());
-                }
-                else if (vT == volumeType::INSIDE)
-                {
-                    pointDistance_[i] =
-                        -Foam::mag(pts[i] - nearest[i].hitPoint());
-                }
-                else if (vT == volumeType::UNKNOWN)
-                {
-                    // Treat as very far outside
-                    pointDistance_[i] = GREAT;
-                }
-                else
-                {
-                    FatalErrorInFunction
-                        << "getVolumeType failure:"
-                        << " neither INSIDE or OUTSIDE but "
-                        << volumeType::names[vT]
-                        << exit(FatalError);
-                }
+                pointDistance_[i] = sign(diff & norms[i]) * Foam::mag(diff);
             }
         }
         else
         {
             forAll(nearest, i)
             {
-                pointDistance_[i] = Foam::mag(pts[i]-nearest[i].hitPoint());
+                pointDistance_[i] = Foam::mag(pts[i] - nearest[i].hitPoint());
             }
         }
     }

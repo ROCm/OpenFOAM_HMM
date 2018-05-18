@@ -216,6 +216,9 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
+    // Warn fileHandler of number of processors
+    const_cast<fileOperation&>(fileHandler()).setNProcs(nProcs);
+
     // Create the processor databases
     PtrList<Time> databases(nProcs);
 

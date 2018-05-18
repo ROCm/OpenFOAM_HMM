@@ -37,17 +37,12 @@ writeFormat     binary;
 
 writePrecision  6;
 
-writeCompression uncompressed;
+writeCompression false;
 
 timeFormat      general;
 
 timePrecision   6;
 
 runTimeModifiable yes;
-
-// OptimisationSwitches
-// {
-//     fileHandler collated;
-// }
 
 // ************************************************************************* //

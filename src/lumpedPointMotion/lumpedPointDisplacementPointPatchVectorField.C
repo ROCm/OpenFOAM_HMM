@@ -250,7 +250,7 @@ void Foam::lumpedPointDisplacementPointPatchVectorField::updateCoeffs()
 
             if (Pstream::master())
             {
-                movement().writeData(forces, moments);
+                movement().writeData(forces, moments, &(db().time()));
 
                 // Signal external source to execute
                 movement().coupler().useSlave();

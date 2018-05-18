@@ -177,7 +177,7 @@ public:
         (
             const word& name,
             const labelUList& addr,
-            const boolList& fm,
+            const boolUList& fm,
             const label index,
             const faceZoneMesh& zm
         );
@@ -208,7 +208,7 @@ public:
         (
             const faceZone& origZone,
             const labelUList& addr,
-            const boolList& fm,
+            const boolUList& fm,
             const label index,
             const faceZoneMesh& zm
         );
@@ -236,7 +236,7 @@ public:
         virtual autoPtr<faceZone> clone
         (
             const labelUList& addr,
-            const boolList& fm,
+            const boolUList& fm,
             const label index,
             const faceZoneMesh& zm
         ) const
@@ -309,7 +309,7 @@ public:
         virtual void resetAddressing
         (
             const labelUList& addr,
-            const boolList& flipMap
+            const boolUList& flipMap
         );
 
         //- Move reset addressing - use uniform flip map value

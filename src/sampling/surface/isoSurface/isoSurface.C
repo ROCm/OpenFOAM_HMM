@@ -60,14 +60,6 @@ namespace Foam
         }
     };
 
-
-    // Avoid detecting change if the cells have been marked as GREAT
-    // (ie, ignore them)
-    static inline constexpr bool ignoreValue(const scalar val)
-    {
-        return (val >= 0.5*Foam::GREAT);
-    }
-
 } // End namespace Foam
 
 
@@ -165,7 +157,7 @@ void Foam::isoSurface::syncUnseparatedPoints
 
                 forAll(nbrPts, pointi)
                 {
-                    label nbrPointi = nbrPts[pointi];
+                    const label nbrPointi = nbrPts[pointi];
                     patchInfo[nbrPointi] = pointValues[meshPts[pointi]];
                 }
 
@@ -314,39 +306,19 @@ bool Foam::isoSurface::isEdgeOfFaceCut
     const bool neiLower
 ) const
 {
-    // Could also count number of edges cut and return when they are > 1
-    // but doesn't appear to improve anything
-
     forAll(f, fp)
     {
-        const scalar& pt0Value = pVals[f[fp]];
+        const bool fpLower = (pVals[f[fp]] < iso_);
 
-        if (ignoreValue(pt0Value))
+        if
+        (
+            fpLower != ownLower
+         || fpLower != neiLower
+         || fpLower != (pVals[f[f.fcIndex(fp)]] < iso_)
+        )
         {
-            continue;
-        }
-
-        const bool fpLower = (pt0Value < iso_);
-
-        if (fpLower != ownLower || fpLower != neiLower)
-        {
-            // ++ncut;
             return true;
         }
-        else
-        {
-            const scalar& pt1Value = pVals[f[f.fcIndex(fp)]];
-
-            if (!ignoreValue(pt1Value) && (fpLower != (pt1Value < iso_)))
-            {
-                // ++ncut;
-                return true;
-            }
-        }
-        // if (ncut > 1)
-        // {
-        //     return true;
-        // }
     }
 
     return false;
@@ -401,17 +373,9 @@ void Foam::isoSurface::calcCutTypes
     faceCutType_.setSize(mesh_.nFaces());
     faceCutType_ = NOTCUT;
 
-    // Avoid detecting change if the cells have been marked as GREAT
-    // (ie, ignore them)
-
     for (label facei = 0; facei < mesh_.nInternalFaces(); ++facei)
     {
         const scalar& ownValue = cVals[own[facei]];
-        if (ignoreValue(ownValue))
-        {
-            continue;
-        }
-
         const bool ownLower = (ownValue < iso_);
 
         scalar nbrValue;
@@ -426,11 +390,6 @@ void Foam::isoSurface::calcCutTypes
             nbrValue,
             nbrPoint
         );
-
-        if (ignoreValue(nbrValue))
-        {
-            continue;
-        }
 
         const bool neiLower = (nbrValue < iso_);
 
@@ -503,7 +462,6 @@ void Foam::isoSurface::calcCutTypes
 
 
     // Propagate internal face cuts into the cells.
-    // For cells marked as ignore (eg, GREAT) - skip this.
 
     for (label facei = 0; facei < mesh_.nInternalFaces(); ++facei)
     {
@@ -512,20 +470,12 @@ void Foam::isoSurface::calcCutTypes
             continue;
         }
 
-        if
-        (
-            cellCutType_[own[facei]] == NOTCUT
-         && !ignoreValue(cVals[own[facei]])
-        )
+        if (cellCutType_[own[facei]] == NOTCUT)
         {
             cellCutType_[own[facei]] = CUT;
             ++nCutCells_;
         }
-        if
-        (
-            cellCutType_[nei[facei]] == NOTCUT
-         && !ignoreValue(cVals[nei[facei]])
-        )
+        if (cellCutType_[nei[facei]] == NOTCUT)
         {
             cellCutType_[nei[facei]] = CUT;
             ++nCutCells_;
@@ -534,8 +484,6 @@ void Foam::isoSurface::calcCutTypes
 
 
     // Propagate boundary face cuts into the cells.
-    // For cells marked as ignore (eg, GREAT) - skip this and
-    // also suppress the boundary face cut to prevent dangling face cuts.
 
     for (label facei = mesh_.nInternalFaces(); facei < mesh_.nFaces(); ++facei)
     {
@@ -544,12 +492,7 @@ void Foam::isoSurface::calcCutTypes
             continue;
         }
 
-        if (ignoreValue(cVals[own[facei]]))
-        {
-            // Suppress dangling boundary face cut
-            faceCutType_[facei] = NOTCUT;
-        }
-        else if (cellCutType_[own[facei]] == NOTCUT)
+        if (cellCutType_[own[facei]] == NOTCUT)
         {
             cellCutType_[own[facei]] = CUT;
             ++nCutCells_;
@@ -774,10 +717,8 @@ void Foam::isoSurface::calcSnappedPoint
 
         bool anyCut = false;
 
-        forAll(pFaces, i)
+        for (const label facei : pFaces)
         {
-            label facei = pFaces[i];
-
             if (faceCutType_[facei] == CUT)
             {
                 anyCut = true;
@@ -795,12 +736,10 @@ void Foam::isoSurface::calcSnappedPoint
         label nOther = 0;
         point otherPointSum = Zero;
 
-        forAll(pFaces, pFacei)
+        for (const label facei : pFaces)
         {
             // Create points for all intersections close to point
             // (i.e. from pyramid edges)
-
-            label facei = pFaces[pFacei];
             const face& f = mesh_.faces()[facei];
             label own = mesh_.faceOwner()[facei];
 

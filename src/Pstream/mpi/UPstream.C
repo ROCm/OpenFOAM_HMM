@@ -101,7 +101,7 @@ bool Foam::UPstream::initNull()
 }
 
 
-bool Foam::UPstream::init(int& argc, char**& argv)
+bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
 {
     int flag = 0;
 
@@ -129,17 +129,16 @@ bool Foam::UPstream::init(int& argc, char**& argv)
 
 
     //MPI_Init(&argc, &argv);
-    int wanted_thread_support = MPI_THREAD_SINGLE;
-    if (fileOperations::collatedFileOperation::maxThreadFileBufferSize > 0)
-    {
-        wanted_thread_support = MPI_THREAD_MULTIPLE;
-    }
     int provided_thread_support;
     MPI_Init_thread
     (
         &argc,
         &argv,
-        wanted_thread_support,
+        (
+            needsThread
+          ? MPI_THREAD_MULTIPLE
+          : MPI_THREAD_SINGLE
+        ),
         &provided_thread_support
     );
 

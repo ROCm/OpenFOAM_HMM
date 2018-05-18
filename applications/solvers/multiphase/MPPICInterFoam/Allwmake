@@ -3,7 +3,7 @@ cd ${0%/*} || exit 1                            # Run from this directory
 
 #------------------------------------------------------------------------------
 
-wmake libso CompressibleTwoPhaseMixtureTurbulenceModels
-wmake
+wmake $targetType CompressibleTwoPhaseMixtureTurbulenceModels
+wmake $targetType
 
 #------------------------------------------------------------------------------

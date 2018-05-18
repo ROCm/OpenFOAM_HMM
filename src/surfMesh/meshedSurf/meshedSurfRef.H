@@ -54,10 +54,10 @@ class meshedSurfRef
 
     // Private Member Functions
 
-        //- Disallow construct as copy
+        //- No copy construct
         meshedSurfRef(const meshedSurfRef&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy construct assignment
         void operator=(const meshedSurfRef&) = delete;
 
 public:
@@ -69,7 +69,7 @@ public:
         (
             const pointField& pts,
             const faceList& faces,
-            const labelList& ids = Foam::emptyLabelList
+            const labelUList& ids = Foam::emptyLabelList
         )
         :
             points_(pts),

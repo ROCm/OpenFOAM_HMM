@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,6 @@ License
 #include "pointToCell.H"
 #include "polyMesh.H"
 #include "pointSet.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -105,7 +104,6 @@ void Foam::pointToCell::combine(topoSet& set, const bool add) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::pointToCell::pointToCell
 (
     const polyMesh& mesh,
@@ -119,7 +117,6 @@ Foam::pointToCell::pointToCell
 {}
 
 
-// Construct from dictionary
 Foam::pointToCell::pointToCell
 (
     const polyMesh& mesh,
@@ -132,7 +129,6 @@ Foam::pointToCell::pointToCell
 {}
 
 
-// Construct from Istream
 Foam::pointToCell::pointToCell
 (
     const polyMesh& mesh,
