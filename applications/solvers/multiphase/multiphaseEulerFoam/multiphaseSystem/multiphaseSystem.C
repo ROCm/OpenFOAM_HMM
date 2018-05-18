@@ -426,7 +426,7 @@ Foam::multiphaseSystem::multiphaseSystem
                 iter(),
                 *phases_.lookup(iter.key().first()),
                 *phases_.lookup(iter.key().second())
-            ).ptr()
+            )
         );
     }
 
@@ -664,7 +664,7 @@ Foam::tmp<Foam::volVectorField> Foam::multiphaseSystem::Svm
 Foam::autoPtr<Foam::multiphaseSystem::dragCoeffFields>
 Foam::multiphaseSystem::dragCoeffs() const
 {
-    autoPtr<dragCoeffFields> dragCoeffsPtr(new dragCoeffFields);
+    auto dragCoeffsPtr = autoPtr<dragCoeffFields>::New();
 
     forAllConstIter(dragModelTable, dragModels_, iter)
     {
@@ -706,7 +706,7 @@ Foam::multiphaseSystem::dragCoeffs() const
             }
         }
 
-        dragCoeffsPtr().insert(iter.key(), Kptr);
+        dragCoeffsPtr().set(iter.key(), Kptr);
     }
 
     return dragCoeffsPtr;

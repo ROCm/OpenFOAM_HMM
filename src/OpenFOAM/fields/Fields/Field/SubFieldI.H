@@ -74,7 +74,7 @@ inline Foam::SubField<Type>::SubField
     const SubField<Type>& sfield
 )
 :
-    tmp<SubField<Type>>::refCount(),
+    refCount(),
     SubList<Type>(sfield)
 {}
 

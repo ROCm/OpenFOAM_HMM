@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,20 +29,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
-Foam::HashPtrTable<T, Key, Hash>::HashPtrTable()
-:
-    parent_type()
-{}
-
-
-template<class T, class Key, class Hash>
-Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(const label size)
-:
-    parent_type(size)
-{}
-
-
-template<class T, class Key, class Hash>
 Foam::HashPtrTable<T, Key, Hash>::HashPtrTable
 (
     const HashPtrTable<T, Key, Hash>& ht
@@ -55,14 +41,24 @@ Foam::HashPtrTable<T, Key, Hash>::HashPtrTable
         const T* ptr = iter.object();
         if (ptr)
         {
-            this->insert(iter.key(), new T(*ptr));
+            this->set(iter.key(), new T(*ptr));
         }
         else
         {
-            this->insert(iter.key(), nullptr);
+            this->set(iter.key(), nullptr);
         }
     }
 }
+
+
+template<class T, class Key, class Hash>
+Foam::HashPtrTable<T, Key, Hash>::HashPtrTable
+(
+    HashPtrTable<T, Key, Hash>&& ht
+)
+:
+    parent_type(std::move(ht))
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -77,13 +73,13 @@ Foam::HashPtrTable<T, Key, Hash>::~HashPtrTable()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
-T* Foam::HashPtrTable<T, Key, Hash>::remove(iterator& iter)
+Foam::autoPtr<T> Foam::HashPtrTable<T, Key, Hash>::remove(iterator& iter)
 {
     if (iter.found())
     {
-        T* ptr = iter.object();
+        autoPtr<T> aptr(iter.object());
         this->parent_type::erase(iter);
-        return ptr;
+        return aptr;
     }
 
     return nullptr;
@@ -140,11 +136,10 @@ void Foam::HashPtrTable<T, Key, Hash>::operator=
     const HashPtrTable<T, Key, Hash>& rhs
 )
 {
-    // Check for assignment to self
     if (this == &rhs)
     {
         FatalErrorInFunction
-            << "attempted assignment to self"
+            << "attempted copy assignment to self"
             << abort(FatalError);
     }
 
@@ -155,13 +150,31 @@ void Foam::HashPtrTable<T, Key, Hash>::operator=
         const T* ptr = iter.object();
         if (ptr)
         {
-            this->insert(iter.key(), new T(*ptr));
+            this->set(iter.key(), new T(*ptr));
         }
         else
         {
-            this->insert(iter.key(), nullptr);
+            this->set(iter.key(), nullptr);
         }
     }
+}
+
+
+template<class T, class Key, class Hash>
+void Foam::HashPtrTable<T, Key, Hash>::operator=
+(
+    HashPtrTable<T, Key, Hash>&& rhs
+)
+{
+    if (this == &rhs)
+    {
+        FatalErrorInFunction
+            << "attempted move assignment to self"
+            << abort(FatalError);
+    }
+
+    this->clear();
+    this->transfer(rhs);
 }
 
 

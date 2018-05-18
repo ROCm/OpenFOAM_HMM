@@ -321,7 +321,7 @@ Foam::fvMatrix<Type>::fvMatrix
 template<class Type>
 Foam::fvMatrix<Type>::fvMatrix(const fvMatrix<Type>& fvm)
 :
-    tmp<fvMatrix<Type>>::refCount(),
+    refCount(),
     lduMatrix(fvm),
     psi_(fvm.psi_),
     dimensions_(fvm.dimensions_),

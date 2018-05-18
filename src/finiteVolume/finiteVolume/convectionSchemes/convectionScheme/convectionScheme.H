@@ -67,7 +67,7 @@ namespace fv
 template<class Type>
 class convectionScheme
 :
-    public tmp<convectionScheme<Type>>::refCount
+    public refCount
 {
     // Private data
 

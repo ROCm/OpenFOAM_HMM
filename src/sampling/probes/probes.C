@@ -217,13 +217,13 @@ Foam::label Foam::probes::prepare()
         probeDir.clean();  // Remove unneeded ".."
 
         // ignore known fields, close streams for fields that no longer exist
-        forAllIter(HashPtrTable<OFstream>, probeFilePtrs_, iter)
+        forAllIters(probeFilePtrs_, iter)
         {
             if (!currentFields.erase(iter.key()))
             {
                 DebugInfo<< "close probe stream: " << iter()->name() << endl;
 
-                delete probeFilePtrs_.remove(iter);
+                probeFilePtrs_.remove(iter);
             }
         }
 
@@ -233,9 +233,8 @@ Foam::label Foam::probes::prepare()
             // Create directory if does not exist.
             mkDir(probeDir);
 
-            OFstream* fPtr = new OFstream(probeDir/fieldName);
-
-            OFstream& fout = *fPtr;
+            auto fPtr = autoPtr<OFstream>::New(probeDir/fieldName);
+            auto& fout = *fPtr;
 
             DebugInfo<< "open probe stream: " << fout.name() << endl;
 
@@ -426,9 +425,8 @@ void Foam::probes::updateMesh(const mapPolyMesh& mpm)
             DynamicList<label> elems(faceList_.size());
 
             const labelList& reverseMap = mpm.reverseFaceMap();
-            forAll(faceList_, i)
+            for (const label facei : faceList_)
             {
-                label facei = faceList_[i];
                 if (facei != -1)
                 {
                     label newFacei = reverseMap[facei];

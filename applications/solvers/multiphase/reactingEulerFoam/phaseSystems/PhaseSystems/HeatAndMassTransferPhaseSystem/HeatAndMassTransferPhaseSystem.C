@@ -70,7 +70,7 @@ HeatAndMassTransferPhaseSystem
 
         // Initially assume no mass transfer
 
-        dmdt_.insert
+        dmdt_.set
         (
             pair,
             new volScalarField
@@ -88,7 +88,7 @@ HeatAndMassTransferPhaseSystem
             )
         );
 
-        dmdtExplicit_.insert
+        dmdtExplicit_.set
         (
             pair,
             new volScalarField
@@ -107,7 +107,7 @@ HeatAndMassTransferPhaseSystem
         volScalarField H1(heatTransferModels_[pair][pair.first()]->K());
         volScalarField H2(heatTransferModels_[pair][pair.second()]->K());
 
-        Tf_.insert
+        Tf_.set
         (
             pair,
             new volScalarField
@@ -257,18 +257,12 @@ template<class BasePhaseSystem>
 Foam::autoPtr<Foam::phaseSystem::heatTransferTable>
 Foam::HeatAndMassTransferPhaseSystem<BasePhaseSystem>::heatTransfer() const
 {
-    autoPtr<phaseSystem::heatTransferTable> eqnsPtr
-    (
-        new phaseSystem::heatTransferTable()
-    );
+    auto eqnsPtr = autoPtr<phaseSystem::heatTransferTable>::New();
+    auto& eqns = *eqnsPtr;
 
-    phaseSystem::heatTransferTable& eqns = eqnsPtr();
-
-    forAll(this->phaseModels_, phasei)
+    for (const phaseModel& phase : this->phaseModels_)
     {
-        const phaseModel& phase = this->phaseModels_[phasei];
-
-        eqns.insert
+        eqns.set
         (
             phase.name(),
             new fvScalarMatrix(phase.thermo().he(), dimEnergy/dimTime)

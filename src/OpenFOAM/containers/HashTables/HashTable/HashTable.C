@@ -298,7 +298,7 @@ Foam::label Foam::HashTable<T, Key, Hash>::countEntries
 
 
 template<class T, class Key, class Hash>
-bool Foam::HashTable<T, Key, Hash>::set
+bool Foam::HashTable<T, Key, Hash>::setEntry
 (
     const Key& key,
     const T& obj,

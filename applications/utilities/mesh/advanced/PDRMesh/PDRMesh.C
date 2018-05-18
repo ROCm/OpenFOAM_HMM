@@ -813,28 +813,33 @@ int main(int argc, char *argv[])
 
     // Read all fields in time and constant directories
     IOobjectList objects(mesh, runTime.timeName());
-    IOobjectList timeObjects(IOobjectList(mesh, mesh.facesInstance()));
-    forAllConstIter(IOobjectList, timeObjects, iter)
     {
-        if
-        (
-            iter()->headerClassName() == volScalarField::typeName
-         || iter()->headerClassName() == volVectorField::typeName
-         || iter()->headerClassName() == volSphericalTensorField::typeName
-         || iter()->headerClassName() == volTensorField::typeName
-         || iter()->headerClassName() == volSymmTensorField::typeName
-         || iter()->headerClassName() == surfaceScalarField::typeName
-         || iter()->headerClassName() == surfaceVectorField::typeName
-         || iter()->headerClassName()
-            == surfaceSphericalTensorField::typeName
-         || iter()->headerClassName() == surfaceSymmTensorField::typeName
-         || iter()->headerClassName() == surfaceTensorField::typeName
-        )
+        IOobjectList timeObjects(mesh, mesh.facesInstance());
+
+        // Transfer specific types
+        forAllIters(timeObjects, iter)
         {
-            objects.add(*iter());
+            autoPtr<IOobject> objPtr(timeObjects.remove(iter));
+            const auto& obj = *objPtr;
+
+            if
+            (
+                obj.headerClassName() == volScalarField::typeName
+             || obj.headerClassName() == volVectorField::typeName
+             || obj.headerClassName() == volSphericalTensorField::typeName
+             || obj.headerClassName() == volTensorField::typeName
+             || obj.headerClassName() == volSymmTensorField::typeName
+             || obj.headerClassName() == surfaceScalarField::typeName
+             || obj.headerClassName() == surfaceVectorField::typeName
+             || obj.headerClassName() == surfaceSphericalTensorField::typeName
+             || obj.headerClassName() == surfaceSymmTensorField::typeName
+             || obj.headerClassName() == surfaceTensorField::typeName
+            )
+            {
+                objects.add(objPtr);
+            }
         }
     }
-
     // Read vol fields and subset.
 
     wordList scalarNames(objects.names(volScalarField::typeName));

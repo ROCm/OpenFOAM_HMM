@@ -21,9 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Generic fieldField type.
-
 \*---------------------------------------------------------------------------*/
 
 #include "FieldField.H"
@@ -137,7 +134,7 @@ FieldField<Field, Type>::FieldField
 template<template<class> class Field, class Type>
 FieldField<Field, Type>::FieldField(const FieldField<Field, Type>& f)
 :
-    tmp<FieldField<Field, Type>>::refCount(),
+    refCount(),
     PtrList<Field<Type>>(f)
 {}
 

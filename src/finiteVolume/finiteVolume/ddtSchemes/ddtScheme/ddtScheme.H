@@ -30,7 +30,6 @@ Group
 Description
     Abstract base class for ddt schemes.
 
-
 SourceFiles
     ddtScheme.C
 
@@ -68,7 +67,7 @@ namespace fv
 template<class Type>
 class ddtScheme
 :
-    public tmp<ddtScheme<Type>>::refCount
+    public refCount
 {
 
 protected:
@@ -83,11 +82,11 @@ protected:
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        ddtScheme(const ddtScheme&);
+        //- No copy construct
+        ddtScheme(const ddtScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const ddtScheme&);
+        //- No copy assignment
+        void operator=(const ddtScheme&) = delete;
 
 
 public:
@@ -136,7 +135,7 @@ public:
 
 
     //- Destructor
-    virtual ~ddtScheme();
+    virtual ~ddtScheme() = default;
 
 
     // Member Functions

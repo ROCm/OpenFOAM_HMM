@@ -114,7 +114,7 @@ template<class T> class UIndirectList;
 template<class Type>
 class fvMatrix
 :
-    public tmp<fvMatrix<Type>>::refCount,
+    public refCount,
     public lduMatrix
 {
     // Private data

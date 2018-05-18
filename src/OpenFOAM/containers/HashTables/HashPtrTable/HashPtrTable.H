@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,11 +43,12 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+
 class Istream;
 class Ostream;
 
-// Forward declaration of friend functions and operators
-
+template<class T> class autoPtr;
 template<class T, class Key, class Hash> class HashPtrTable;
 
 template<class T, class Key, class Hash>
@@ -92,10 +93,10 @@ public:
     // Constructors
 
         //- Construct null with default table capacity
-        HashPtrTable();
+        inline HashPtrTable();
 
         //- Construct given initial table capacity
-        explicit HashPtrTable(const label size);
+        explicit inline HashPtrTable(const label size);
 
         //- Construct from Istream using given Istream constructor class
         template<class INew>
@@ -107,8 +108,11 @@ public:
         //- Construct from dictionary with default dictionary constructor class
         explicit HashPtrTable(const dictionary& dict);
 
-        //- Construct as copy
+        //- Copy construct
         HashPtrTable(const this_type& ht);
+
+        //- Move construct
+        HashPtrTable(this_type&& ht);
 
 
     //- Destructor
@@ -117,20 +121,22 @@ public:
 
     // Member Functions
 
-      // Edit
+    // Edit
 
         //- Remove and return the pointer specified by given iterator.
         //  Includes a safeguard against the end-iterator.
-        T* remove(iterator& iter);
+        autoPtr<T> remove(iterator& iter);
 
-        //- Erase an entry specified by given iterator.
+        //- Erase an entry specified by given iterator and delete the
+        //- allocated pointer.
         //  Includes a safeguard against the end-iterator.
         bool erase(iterator& iter);
 
-        //- Erase an entry specified by the given key
+        //- Erase an entry specified by the given key and delete the
+        //- allocated pointer.
         bool erase(const Key& key);
 
-        //- Clear all entries from table and deleting any allocated pointers
+        //- Clear all entries from table and delete any allocated pointers
         void clear();
 
         //- Write
@@ -141,6 +147,9 @@ public:
 
         //- Copy assignment
         void operator=(const this_type& rhs);
+
+        //- Move assignment
+        void operator=(this_type&& rhs);
 
 
     // IOstream Operators
@@ -156,12 +165,41 @@ public:
             Ostream& os,
             const HashPtrTable<T, Key, Hash>& tbl
         );
+
+
+    // Housekeeping
+
+        //- No insert() with raw pointers (potential memory leaks)
+        //  Use insert() with autoPtr or set()
+        inline bool insert(const Key&, T*) = delete;
+
+        //- Insert a new entry, not overwriting existing entries.
+        //  \return True if the entry inserted, which means that it did
+        //  not previously exist in the table.
+        inline bool insert(const Key& key, autoPtr<T>& aptr);
+
+        //- Insert a new entry, not overwriting existing entries.
+        inline bool insert(const Key& key, autoPtr<T>&& aptr);
+
+        //- Use set(), not insert() to avoid potential memory leaks
+        //- Assign a new entry, overwriting existing entries.
+        inline bool set(const Key& key, T* ptr);
+
+        //- Assign a new entry, overwriting existing entries.
+        inline bool set(const Key& key, autoPtr<T>& aptr);
+
+        //- Assign a new entry, overwriting existing entries.
+        inline bool set(const Key& key, autoPtr<T>&& aptr);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "HashPtrTableI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
