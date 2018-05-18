@@ -133,7 +133,7 @@ void atmBoundaryLayerInletKFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
     atmBoundaryLayer::write(os);
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     writeEntry("value", os);
 }
 

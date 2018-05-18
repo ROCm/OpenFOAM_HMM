@@ -123,7 +123,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-       Class atmBoundaryLayer Declaration
+                      Class atmBoundaryLayer Declaration
 \*---------------------------------------------------------------------------*/
 
 class atmBoundaryLayer
@@ -168,8 +168,7 @@ public:
         //- Construct from the coordinates field and dictionary
         atmBoundaryLayer(const vectorField& p, const dictionary&);
 
-        //- Construct by mapping given
-        // atmBoundaryLayer onto a new patch
+        //- Construct by mapping given atmBoundaryLayer onto a new patch
         atmBoundaryLayer
         (
             const atmBoundaryLayer&,

@@ -16,4 +16,5 @@ EXE_LIBS = \
     -lfiniteVolume \
     -lsampling \
     -lmeshTools \
-    -lfvOptions
+    -lfvOptions \
+    -latmosphericModels

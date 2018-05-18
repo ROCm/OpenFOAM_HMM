@@ -22,4 +22,5 @@ EXE_LIBS = \
     -lfvOptions \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
-    -ldynamicMesh
+    -ldynamicMesh \
+    -latmosphericModels
