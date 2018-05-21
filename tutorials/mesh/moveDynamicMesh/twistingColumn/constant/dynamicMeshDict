@@ -1,0 +1,77 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      dynamicMeshDict;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dynamicFvMesh   dynamicMotionSolverFvMesh;
+
+motionSolver    coded;
+name            myMotion;
+
+codeInclude
+#{
+    #include "transformField.H"
+#};
+
+localCode
+#{
+    // Generate new set of points
+    tmp<pointField> twistColumn
+    (
+        const scalar& maxRotAngle,
+        const pointField& points
+    )
+    {
+        tmp<pointField> tnewPoints(new pointField(points));
+        pointField& newPoints = tnewPoints.ref();
+
+        const boundBox bb(points, true);
+        const scalar zMin = bb.min()[vector::Z];
+        const scalar zSpan = bb.span()[vector::Z];
+
+        forAll(points, pointI)
+        {
+            const scalar x = points[pointI].component(0);
+            const scalar y = points[pointI].component(1);
+            const scalar z = points[pointI].component(2);
+
+            // Scale the angle by height
+            const scalar localAngle = maxRotAngle*(z-zMin)/zSpan;
+
+            const scalar xr = x*cos(localAngle)-y*sin(localAngle);
+            const scalar yr = x*sin(localAngle)+y*cos(localAngle);
+            newPoints[pointI] = vector(xr, yr, z);
+        }
+        return tnewPoints;
+    }
+#};
+
+code
+#{
+    const Time& tm = mesh().time();
+    const pointField& p0 = points0();
+
+    // Max twist pi at t=10
+    const scalar maxRotAngle =
+        constant::mathematical::pi*Foam::sin(degToRad(90.0/10.0*tm.value()));
+
+    tmp<pointField> tnewPoints(twistColumn(maxRotAngle, p0));
+
+    return tnewPoints;
+#};
+
+
+// ************************************************************************* //
