@@ -119,12 +119,8 @@ int main(int argc, char *argv[])
                     ghf = (g & mesh.Cf()) - ghRef;
                 }
 
-                if ((mesh.changing() && correctPhi) || mesh.topoChanging())
+                if ((mesh.changing() && correctPhi))
                 {
-                    // Calculate absolute flux from the mapped surface velocity
-                    // Note: temporary fix until mapped Uf is assessed
-                    Uf = fvc::interpolate(U);
-
                     // Calculate absolute flux from the mapped surface velocity
                     phi = mesh.Sf() & Uf;
 

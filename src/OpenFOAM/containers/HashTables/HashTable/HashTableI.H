@@ -121,7 +121,7 @@ inline bool Foam::HashTable<T, Key, Hash>::insert
     const T& obj
 )
 {
-    return this->set(key, obj, false);  // No overwrite
+    return this->setEntry(key, obj, false);  // No overwrite
 }
 
 
@@ -132,7 +132,7 @@ inline bool Foam::HashTable<T, Key, Hash>::set
     const T& obj
 )
 {
-    return this->set(key, obj, true);   // Overwrite
+    return this->setEntry(key, obj, true);   // Overwrite
 }
 
 

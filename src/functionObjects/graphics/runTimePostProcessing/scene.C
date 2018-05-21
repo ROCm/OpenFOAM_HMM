@@ -122,11 +122,10 @@ void Foam::functionObjects::runTimePostPro::scene::readColours
     const dictionary& dict
 )
 {
-    const wordList colours = dict.toc();
-    forAll(colours, i)
+    const wordList colours(dict.toc());
+    for (const word& c : colours)
     {
-        const word& c = colours[i];
-        colours_.insert(c, Function1<vector>::New(c, dict).ptr());
+        colours_.insert(c, Function1<vector>::New(c, dict));
     }
 }
 

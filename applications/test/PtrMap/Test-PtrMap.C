@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,12 +27,12 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include <iostream>
-#include "HashPtrTable.H"
+#include "PtrMap.H"
 
 using namespace Foam;
 
 template<class T>
-void printTable(const HashPtrTable<T>& table)
+void printTable(const PtrMap<T>& table)
 {
     Info<< table.size() << nl << "(" << nl;
 
@@ -42,7 +42,7 @@ void printTable(const HashPtrTable<T>& table)
         Info<< iter.key() << " = ";
         if (ptr)
         {
-            Info<< *ptr;
+            Info<< *ptr << " (" << long(ptr) << ")";
         }
         else
         {
@@ -76,17 +76,17 @@ void printTable(const HashPtrTable<T>& table)
 
 int main()
 {
-    HashPtrTable<double> myTable;
-    myTable.insert("abc", new double(42.1));
-    myTable.insert("def", nullptr);
-    myTable.insert("pi", new double(3.14159));
-    myTable.insert("natlog", new double(2.718282));
-    myTable.insert("sqrt2", new double(1.414214));
+    PtrMap<double> myTable;
+    myTable.set(1, new double(42.1));
+    myTable.set(2, nullptr);
+    myTable.set(3, new double(3.14159));
+    myTable.set(4, new double(2.718282));
+    myTable.set(4, new double(1.414214));
 
     // Info<< myTable << endl;
     printTable(myTable);
 
-    HashPtrTable<double> copy(myTable);
+    PtrMap<double> copy(myTable);
 
     // Info<< copy << endl;
     printTable(copy);
@@ -94,16 +94,35 @@ int main()
 
     Info<<"\nerase some existing and non-existing entries" << nl;
 
-    auto iter = myTable.find("pi");
+    auto iter = myTable.find(3);
     myTable.erase(iter);
 
-    iter = myTable.find("unknownKey");
+    iter = myTable.find(1000);  // unknown key
     myTable.erase(iter);
 
-    myTable.erase("abc");
-    myTable.erase("unknownKey");
+    myTable.erase(1);
+    iter = myTable.find(100000);  // unknown key
 
     printTable(myTable);
+
+    PtrMap<double> moved(std::move(copy));
+
+    Info<< nl << "test movable" << nl;
+    Info<<"input:" << nl;
+    printTable(copy);
+
+    Info<<"output:" << nl;
+    printTable(moved);
+
+    PtrMap<double> other;
+
+    Info<<"move assign" << nl;
+
+    other = std::move(moved);
+    printTable(other);
+
+    Info<<"old" << nl;
+    printTable(moved);
 
     return 0;
 }

@@ -29,12 +29,6 @@ License
 #include "contiguous.H"
 #include "mapDistributeBase.H"
 
-// * * * * * * * * * * * * * * * Static Members  * * * * * * * * * * * * * * //
-
-template<class Type>
-const char* const Foam::Field<Type>::typeName("Field");
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>

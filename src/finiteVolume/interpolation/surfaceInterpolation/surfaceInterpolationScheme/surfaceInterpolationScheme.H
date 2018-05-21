@@ -55,7 +55,7 @@ class fvMesh;
 template<class Type>
 class surfaceInterpolationScheme
 :
-    public tmp<surfaceInterpolationScheme<Type>>::refCount
+    public refCount
 {
     // Private data
 
@@ -65,11 +65,11 @@ class surfaceInterpolationScheme
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        surfaceInterpolationScheme(const surfaceInterpolationScheme&);
+        //- No copy construct
+        surfaceInterpolationScheme(const surfaceInterpolationScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const surfaceInterpolationScheme&);
+        //- No copy assignment
+        void operator=(const surfaceInterpolationScheme&) = delete;
 
 
 public:
@@ -134,7 +134,7 @@ public:
 
 
     //- Destructor
-    virtual ~surfaceInterpolationScheme();
+    virtual ~surfaceInterpolationScheme() = default;
 
 
     // Member Functions

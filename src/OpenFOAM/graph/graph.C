@@ -66,7 +66,7 @@ void Foam::graph::readCurves(Istream& is)
         y[i] = xyData[i].y_;
     }
 
-    insert
+    set
     (
         wordify(yName_),
         new curve(wordify(yName_), curve::curveStyle::CONTINUOUS, y)
@@ -105,7 +105,11 @@ Foam::graph::graph
     yName_(yName),
     x_(x)
 {
-    insert(wordify(yName), new curve(yName, curve::curveStyle::CONTINUOUS, y));
+    set
+    (
+        wordify(yName),
+        new curve(yName, curve::curveStyle::CONTINUOUS, y)
+    );
 }
 
 

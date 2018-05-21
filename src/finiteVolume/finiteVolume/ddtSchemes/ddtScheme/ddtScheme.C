@@ -84,13 +84,6 @@ tmp<ddtScheme<Type>> ddtScheme<Type>::New
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-ddtScheme<Type>::~ddtScheme()
-{}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -120,14 +113,11 @@ tmp<fvMatrix<Type>> ddtScheme<Type>::fvmDdt
 {
     NotImplemented;
 
-    return tmp<fvMatrix<Type>>
+    return tmp<fvMatrix<Type>>::New
     (
-        new fvMatrix<Type>
-        (
-            vf,
-            alpha.dimensions()*rho.dimensions()
-            *vf.dimensions()*dimVol/dimTime
-        )
+        vf,
+        alpha.dimensions()*rho.dimensions()
+        *vf.dimensions()*dimVol/dimTime
     );
 }
 

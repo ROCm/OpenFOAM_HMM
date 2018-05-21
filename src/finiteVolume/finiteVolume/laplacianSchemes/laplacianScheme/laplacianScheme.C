@@ -83,13 +83,6 @@ tmp<laplacianScheme<Type, GType>> laplacianScheme<Type, GType>::New
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type, class GType>
-laplacianScheme<Type, GType>::~laplacianScheme()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type, class GType>

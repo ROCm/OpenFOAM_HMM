@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,11 +80,32 @@ public:
             parent_type(is)
         {}
 
-        //- Construct as copy
+        //- Copy construct
         PtrMap(const this_type& map)
         :
             parent_type(map)
         {}
+
+        //- Move construct
+        PtrMap(this_type&& map)
+        :
+            parent_type(std::move(map))
+        {}
+
+
+    // Member Operators
+
+        //- Copy assignment
+        void operator=(const this_type& rhs)
+        {
+            parent_type::operator=(rhs);
+        }
+
+        //- Move assignment
+        void operator=(this_type&& rhs)
+        {
+            parent_type::operator=(std::move(rhs));
+        }
 };
 
 

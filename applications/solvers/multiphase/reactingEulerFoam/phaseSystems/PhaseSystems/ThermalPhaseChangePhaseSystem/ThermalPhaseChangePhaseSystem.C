@@ -52,7 +52,7 @@ ThermalPhaseChangePhaseSystem
         }
 
         // Initially assume no mass transfer
-        iDmdt_.insert
+        iDmdt_.set
         (
             pair,
             new volScalarField
@@ -186,22 +186,16 @@ Foam::autoPtr<Foam::phaseSystem::massTransferTable>
 Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::massTransfer() const
 {
     // Create a mass transfer matrix for each species of each phase
-    autoPtr<phaseSystem::massTransferTable> eqnsPtr
-    (
-        new phaseSystem::massTransferTable()
-    );
+    auto eqnsPtr = autoPtr<phaseSystem::massTransferTable>::New();
+    auto& eqns = *eqnsPtr;
 
-    phaseSystem::massTransferTable& eqns = eqnsPtr();
-
-    forAll(this->phaseModels_, phasei)
+    for (const phaseModel& phase : this->phaseModels_)
     {
-        const phaseModel& phase = this->phaseModels_[phasei];
-
         const PtrList<volScalarField>& Yi = phase.Y();
 
         forAll(Yi, i)
         {
-            eqns.insert
+            eqns.set
             (
                 Yi[i].name(),
                 new fvScalarMatrix(Yi[i], dimMass/dimTime)

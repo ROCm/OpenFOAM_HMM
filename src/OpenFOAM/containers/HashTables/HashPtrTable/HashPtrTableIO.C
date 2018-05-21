@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +65,7 @@ void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inew)
                 {
                     Key key;
                     is >> key;
-                    this->insert(key, inew(key, is).ptr());
+                    this->set(key, inew(key, is).ptr());
 
                     is.fatalCheck
                     (
@@ -110,7 +110,7 @@ void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inew)
             is.putBack(lastToken);
             Key key;
             is >> key;
-            this->insert(key, inew(key, is).ptr());
+            this->set(key, inew(key, is).ptr());
 
             is.fatalCheck
             (
@@ -147,7 +147,7 @@ void Foam::HashPtrTable<T, Key, Hash>::read
     {
         const word& k = iter().keyword();
 
-        this->insert(k, inew(dict.subDict(k)).ptr());
+        this->set(k, inew(dict.subDict(k)).ptr());
     }
 }
 
