@@ -1684,8 +1684,7 @@ Foam::label Foam::snappyRefineDriver::directionalShellRefine
                     const_cast<Time&>(mesh.time())++;
                 }
 
-                PackedBoolList isRefineCell(mesh.nCells());
-                isRefineCell.set(cellsToRefine);
+                const bitSet isRefineCell(mesh.nCells(), cellsToRefine);
 
                 autoPtr<mapPolyMesh> map
                 (
