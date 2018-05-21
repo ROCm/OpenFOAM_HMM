@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -207,6 +207,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
         if (boundaryChanged)
         {
             WarningInFunction
+                << "Number of patches has changed.  This may have "
                 << "unexpected consequences.  Proceed with care." << endl;
 
             boundary_.clear();

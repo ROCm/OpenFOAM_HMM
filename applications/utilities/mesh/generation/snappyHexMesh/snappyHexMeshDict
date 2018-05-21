@@ -268,6 +268,12 @@ castellatedMeshControls
         //    // All three settings can be overridden on a surface by
         //    // surface basis in the refinementSurfaces section.
         //    gapLevel (<numGapCells> <minLevel> <maxlevel>);
+        //    // Optional: when doing the gapLevel refinement directly remove
+        //    //           based on orientation w.r.t. gap. This limits the
+        //    //           amount of cells before doing the 'locationInMesh'
+        //    //           cell selection. Default is 'mixed' i.e. keep cells
+        //    //           whilst doing the gap-level refinement.
+        //    //gapMode inside;  // inside/outside/mixed
         //}
     }
 
