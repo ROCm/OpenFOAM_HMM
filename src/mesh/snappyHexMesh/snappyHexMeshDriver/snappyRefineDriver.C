@@ -40,6 +40,7 @@ License
 #include "IOmanip.H"
 #include "labelVector.H"
 #include "profiling.H"
+#include "searchableSurfaces.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1573,6 +1574,217 @@ Foam::label Foam::snappyRefineDriver::shellRefine
 }
 
 
+Foam::label Foam::snappyRefineDriver::directionalShellRefine
+(
+    const refinementParameters& refineParams,
+    const label maxIter
+)
+{
+    addProfiling(shell, "snappyHexMesh::refine::directionalShell");
+    const fvMesh& mesh = meshRefiner_.mesh();
+    const shellSurfaces& shells = meshRefiner_.shells();
+
+    labelList& cellLevel =
+        const_cast<labelIOList&>(meshRefiner_.meshCutter().cellLevel());
+    labelList& pointLevel =
+        const_cast<labelIOList&>(meshRefiner_.meshCutter().pointLevel());
+
+
+    // Determine the minimum and maximum cell levels that are candidates for
+    // directional refinement
+    const labelPairList dirSelect(shells.directionalSelectLevel());
+    label overallMinLevel = labelMax;
+    label overallMaxLevel = labelMin;
+    forAll(dirSelect, shelli)
+    {
+        overallMinLevel = min(dirSelect[shelli].first(), overallMinLevel);
+        overallMaxLevel = max(dirSelect[shelli].second(), overallMaxLevel);
+    }
+
+    if (overallMinLevel > overallMaxLevel)
+    {
+        return 0;
+    }
+
+    // Maintain directional refinement levels
+    List<labelVector> dirCellLevel(cellLevel.size());
+    forAll(cellLevel, celli)
+    {
+        label l = cellLevel[celli];
+        dirCellLevel[celli] = labelVector(l, l, l);
+    }
+
+    label iter;
+    for (iter = 0; iter < maxIter; iter++)
+    {
+        Info<< nl
+            << "Directional shell refinement iteration " << iter << nl
+            << "----------------------------------------" << nl
+            << endl;
+
+        label nAllRefine = 0;
+
+        for (direction dir = 0; dir < vector::nComponents; dir++)
+        {
+            // Select the cells that need to be refined in certain direction:
+            // 
+            // - cell inside/outside shell
+            // - original cellLevel (using mapping) mentioned in levelIncrement
+            // - dirCellLevel not yet up to cellLevel+levelIncrement
+
+
+            // Extract component of directional level
+            labelList currentLevel(dirCellLevel.size());
+            forAll(dirCellLevel, celli)
+            {
+                currentLevel[celli] = dirCellLevel[celli][dir];
+            }
+
+            labelList candidateCells
+            (
+                meshRefiner_.directionalRefineCandidates
+                (
+                    refineParams.maxGlobalCells(),
+                    refineParams.maxLocalCells(),
+                    currentLevel,
+                    dir
+                )
+            );
+
+            // Extend to keep 2:1 ratio
+            labelList cellsToRefine
+            (
+                meshRefiner_.meshCutter().consistentRefinement
+                (
+                    currentLevel,
+                    candidateCells,
+                    true
+                )
+            );
+
+            Info<< "Determined cells to refine in = "
+                << mesh.time().cpuTimeIncrement() << " s" << endl;
+
+            label nCellsToRefine = cellsToRefine.size();
+            reduce(nCellsToRefine, sumOp<label>());
+
+            Info<< "Selected for direction " << vector::componentNames[dir]
+                << " refinement : " << nCellsToRefine
+                << " cells (out of " << mesh.globalData().nTotalCells()
+                << ')' << endl;
+
+            nAllRefine += nCellsToRefine;
+
+            // Stop when no cells to refine or have done minimum necessary
+            // iterations and not enough cells to refine.
+            if (nCellsToRefine > 0)
+            {
+                if (debug)
+                {
+                    const_cast<Time&>(mesh.time())++;
+                }
+
+                const bitSet isRefineCell(mesh.nCells(), cellsToRefine);
+
+                autoPtr<mapPolyMesh> map
+                (
+                    meshRefiner_.directionalRefine
+                    (
+                        "directional refinement iteration " + name(iter),
+                        dir,
+                        cellsToRefine
+                    )
+                );
+
+                Info<< "Refined mesh in = "
+                    << mesh.time().cpuTimeIncrement() << " s" << endl;
+
+                meshRefinement::updateList
+                (
+                    map().cellMap(),
+                    labelVector(0, 0, 0),
+                    dirCellLevel
+                );
+
+                // Note: edges will have been split. The points might have
+                // inherited pointLevel from either side of the edge which
+                // might not be the same for coupled edges so sync
+                syncTools::syncPointList
+                (
+                    mesh,
+                    pointLevel,
+                    maxEqOp<label>(),
+                    labelMin
+                );
+
+                forAll(map().cellMap(), celli)
+                {
+                    if (isRefineCell[map().cellMap()[celli]])
+                    {
+                        dirCellLevel[celli][dir]++;
+                    }
+                }
+
+                // Do something with the pointLevel. See discussion about the
+                // cellLevel. Do we keep min/max ?
+                forAll(map().pointMap(), pointi)
+                {
+                    label oldPointi = map().pointMap()[pointi];
+                    if (map().reversePointMap()[oldPointi] != pointi)
+                    {
+                        // Is added point (splitting an edge)
+                        pointLevel[pointi]++;
+                    }
+                }
+            }
+        }
+
+
+        if (nAllRefine == 0)
+        {
+            Info<< "Stopping refining since no cells selected."
+                << nl << endl;
+            break;
+        }
+
+        meshRefiner_.printMeshInfo
+        (
+            debug,
+            "After directional refinement iteration " + name(iter)
+        );
+
+        if (debug&meshRefinement::MESH)
+        {
+            Pout<< "Writing directional refinement iteration "
+                << iter << " mesh to time " << meshRefiner_.timeName() << endl;
+            meshRefiner_.write
+            (
+                meshRefinement::debugType(debug),
+                meshRefinement::writeType
+                (
+                    meshRefinement::writeLevel()
+                  | meshRefinement::WRITEMESH
+                ),
+                mesh.time().path()/meshRefiner_.timeName()
+            );
+        }
+    }
+
+    // Adjust cellLevel from dirLevel? As max? Or the min?
+    // For now: use max. The idea is that if there is a wall
+    // any directional refinement is likely to be aligned with
+    // the wall (wall layers) so any snapping/layering would probably
+    // want to use this highest refinement level.
+
+    forAll(cellLevel, celli)
+    {
+        cellLevel[celli] = cmptMax(dirCellLevel[celli]);
+    }
+
+    return iter;
+}
+
+
 void Foam::snappyRefineDriver::baffleAndSplitMesh
 (
     const refinementParameters& refineParams,
@@ -2063,6 +2275,13 @@ void Foam::snappyRefineDriver::doRefine
     (
         refineParams,
         10      // maxIter
+    );
+
+    // Directional shell refinement
+    directionalShellRefine
+    (
+        refineParams,
+        100    // maxIter
     );
 
     // Introduce baffles at surface intersections. Remove sections unreachable

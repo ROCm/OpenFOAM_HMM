@@ -49,6 +49,14 @@ geometry
         max (3.5 2 0.5);
     }
 
+    // Shell for directional refinement
+    wakeBox
+    {
+        type searchableBox;
+        min (1.5 1 -0.5);
+        max (3.5 2 0.5);
+    }
+
     sphere.stl
     {
         type triSurfaceMesh;
@@ -257,8 +265,8 @@ castellatedMeshControls
         //    mode inside;
         //    levels ((1.0 4));
         //    // Optional override of uniform refinement level such
-        //    //  that in small gaps we're getting more cells.
-        //    //  The specification is
+        //    // that in small gaps we're getting more cells.
+        //    // The specification is
         //    //  - numGapCells : minimum number of cells in the gap
         //    //                  (usually >3; lower than this might not
         //    //                   resolve correctly)
@@ -275,7 +283,31 @@ castellatedMeshControls
         //    //           whilst doing the gap-level refinement.
         //    //gapMode inside;  // inside/outside/mixed
         //}
+
+        //wakeBox
+        //{
+        //    mode        inside;
+        //    // Dummy base level
+        //    levels      ((10000 0));
+        //
+        //    // Optional directional refinement (after all other refinement)
+        //    // Directional refinement
+        //    // for all cells according to 'mode' ('inside' or 'outside';
+        //    // 'distance' not supported) and within certain range. E.g.
+        //    //  - for all cells with level 2-5
+        //    //  - do one split in x direction
+        //    levelIncrement  (2 5 (1 0 0));
+        //
+        //    // Note
+        //    // - ignores 'levels' and gap* settings.
+        //    // - the cellLevel/pointLevels files are no longer consistent
+        //    //   with the mesh, the resulting mesh is no longer compatible
+        //    //   with e.g. dynamic refinement/unrefinement.
+        //    // - cellLevel will include any directional refinement
+        //    //   (i.e. it will be the maximum of all three directions)
+        //}
     }
+
 
 
     // Optionally limit refinement in geometric region. This limits all

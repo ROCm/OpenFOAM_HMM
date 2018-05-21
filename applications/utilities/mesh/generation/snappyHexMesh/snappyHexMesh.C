@@ -1082,7 +1082,7 @@ int main(int argc, char *argv[])
 
     if (!limitDict.empty())
     {
-        Info<< "Read refinement shells in = "
+        Info<< "Read limit shells in = "
             << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
     }
 
