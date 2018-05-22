@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,6 +62,21 @@ class PairModel
 
         //- The coefficients dictionary
         const dictionary coeffDict_;
+
+        //- Time to bleed-in collision forces; default = 0 (no delay)
+        scalar forceRampTime_;
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Return the force coefficient based on the forceRampTime_
+        scalar forceCoeff
+        (
+            typename CloudType::parcelType& pA,
+            typename CloudType::parcelType& pB
+        ) const;
 
 
 public:

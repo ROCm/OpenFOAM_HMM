@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -193,7 +193,10 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
 
     if (normalOverlapMag > 0)
     {
-        //Particles in collision
+        // Particles in collision
+
+        // Force coefficient
+        scalar forceCoeff = this->forceCoeff(pA, pB);
 
         vector rHat_AB = r_AB/(r_AB_mag + VSMALL);
 
@@ -223,6 +226,8 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
                 *overlapArea(dAEff/2.0, dBEff/2.0, r_AB_mag)
                 *rHat_AB;
         }
+
+        fN_AB *= forceCoeff;
 
         pA.f() += fN_AB;
         pB.f() += -fN_AB;
@@ -277,6 +282,8 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
             {
                 fT_AB = - kT*tangentialOverlap_AB - etaT*USlip_AB;
             }
+
+            fT_AB *= forceCoeff;
 
             pA.f() += fT_AB;
             pB.f() += -fT_AB;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +37,11 @@ Foam::PairModel<CloudType>::PairModel
 :
     dict_(dict),
     owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs"))
+    coeffDict_(dict.subDict(type + "Coeffs")),
+    forceRampTime_
+    (
+        this->coeffDict().template lookupOrDefault<scalar>("forceRampTime", -1)
+    )
 {}
 
 
@@ -66,10 +70,25 @@ const Foam::dictionary& Foam::PairModel<CloudType>::dict() const
 
 
 template<class CloudType>
-const Foam::dictionary&
-Foam::PairModel<CloudType>::coeffDict() const
+const Foam::dictionary& Foam::PairModel<CloudType>::coeffDict() const
 {
     return coeffDict_;
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::PairModel<CloudType>::forceCoeff
+(
+    typename CloudType::parcelType& pA,
+    typename CloudType::parcelType& pB
+) const
+{
+    if (forceRampTime_ < 0)
+    {
+        return 1;
+    }
+
+    return min(min(pA.age(), pB.age())/forceRampTime_, 1);
 }
 
 
