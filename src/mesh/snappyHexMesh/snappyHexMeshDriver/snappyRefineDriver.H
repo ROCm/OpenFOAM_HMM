@@ -36,6 +36,8 @@ SourceFiles
 
 #include "wordPairHashTable.H"
 #include "labelList.H"
+#include "PackedBoolList.H"
+#include "labelVector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -135,12 +137,21 @@ class snappyRefineDriver
             const label nBufferLayers
         );
 
-        //- Remove all cells inside/outside shell
+        //- Refine all cells inside/outside shell
         label shellRefine
         (
             const refinementParameters& refineParams,
             const label maxIter
         );
+
+        // Directional refinement
+
+            //- Refine (directional) all cells inside/outside shell
+            label directionalShellRefine
+            (
+                const refinementParameters& refineParams,
+                const label maxIter
+            );
 
         //- Add baffles and remove unreachable cells
         void baffleAndSplitMesh

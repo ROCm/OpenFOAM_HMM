@@ -21,9 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Abstract base class for finite volume calculus d2dt2 schemes.
-
 \*---------------------------------------------------------------------------*/
 
 #include "fv.H"
@@ -82,13 +79,6 @@ tmp<d2dt2Scheme<Type>> d2dt2Scheme<Type>::New
 
     return cstrIter()(mesh, schemeData);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-d2dt2Scheme<Type>::~d2dt2Scheme()
-{}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

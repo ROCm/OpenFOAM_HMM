@@ -807,8 +807,8 @@ public:
             const bool overwrite,
             const refinementSurfaces&,
             const refinementFeatures&,
-            const shellSurfaces&,
-            const shellSurfaces&
+            const shellSurfaces&,   // omnidirectional refinement
+            const shellSurfaces&    // limit refinement
         );
 
 
@@ -1035,6 +1035,24 @@ public:
                 fvMeshDistribute& distributor,
                 const labelList& cellsToRefine,
                 const scalar maxLoadUnbalance
+            );
+
+
+            //- Calculate list of cells to directionally refine
+            labelList directionalRefineCandidates
+            (
+                const label maxGlobalCells,
+                const label maxLocalCells,
+                const labelList& currentLevel,
+                const direction dir
+            ) const;
+
+            //- Directionally refine in direction cmpt
+            autoPtr<mapPolyMesh> directionalRefine
+            (
+                const string& msg,
+                const direction cmpt,
+                const labelList& cellsToRefine
             );
 
 

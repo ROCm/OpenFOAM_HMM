@@ -61,11 +61,11 @@ template<class Type> Ostream& operator<<(Ostream&, const Function1<Type>&);
 template<class Type>
 class Function1
 :
-    public tmp<Function1<Type>>::refCount
+    public refCount
 {
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const Function1<Type>&) = delete;
 
 
@@ -119,7 +119,7 @@ public:
 
 
     //- Destructor
-    virtual ~Function1();
+    virtual ~Function1() = default;
 
 
     // Member Functions
@@ -194,8 +194,7 @@ public:
 
 
     //- Destructor
-    virtual ~FieldFunction1()
-    {}
+    virtual ~FieldFunction1() = default;
 
 
     // Member Functions

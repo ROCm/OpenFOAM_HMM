@@ -41,6 +41,11 @@ License
 #include "cellSet.H"
 #include "treeDataCell.H"
 
+#include "cellCuts.H"
+#include "refineCell.H"
+#include "hexCellLooper.H"
+#include "meshCutter.H"
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -2073,7 +2078,7 @@ Foam::labelList Foam::meshRefinement::refineCandidates
         label nAllowRefine = labelMax / Pstream::nProcs();
 
         // Marked for refinement (>= 0) or not (-1). Actual value is the
-        // index of the surface it intersects.
+        // index of the surface it intersects / shell it is inside.
         labelList refineCell(mesh_.nCells(), -1);
         label nRefine = 0;
 
@@ -2621,6 +2626,165 @@ Foam::meshRefinement::balanceAndRefine
     printMeshInfo(debug, "After refinement " + msg);
 
     return distMap;
+}
+
+
+Foam::labelList Foam::meshRefinement::directionalRefineCandidates
+(
+    const label maxGlobalCells,
+    const label maxLocalCells,
+    const labelList& currentLevel,
+    const direction dir
+) const
+{
+    const labelList& cellLevel = meshCutter_.cellLevel();
+    const pointField& cellCentres = mesh_.cellCentres();
+
+    label totNCells = mesh_.globalData().nTotalCells();
+
+    labelList cellsToRefine;
+
+    if (totNCells >= maxGlobalCells)
+    {
+        Info<< "No cells marked for refinement since reached limit "
+            << maxGlobalCells << '.' << endl;
+    }
+    else
+    {
+        // Disable refinement shortcut. nAllowRefine is per processor limit.
+        label nAllowRefine = labelMax / Pstream::nProcs();
+
+        // Marked for refinement (>= 0) or not (-1). Actual value is the
+        // index of the surface it intersects / shell it is inside
+        labelList refineCell(mesh_.nCells(), -1);
+        label nRefine = 0;
+
+        // Find cells inside the shells with directional levels
+        labelList insideShell;
+        shells_.findDirectionalLevel
+        (
+            cellCentres,
+            cellLevel,
+            currentLevel,  // current directional level
+            dir,
+            insideShell
+        );
+
+        // Mark for refinement
+        forAll(insideShell, celli)
+        {
+            if (insideShell[celli] >= 0)
+            {
+                bool reachedLimit = !markForRefine
+                (
+                    insideShell[celli],    // mark with any positive value
+                    nAllowRefine,
+                    refineCell[celli],
+                    nRefine
+                );
+
+                if (reachedLimit)
+                {
+                    if (debug)
+                    {
+                        Pout<< "Stopped refining cells"
+                            << " since reaching my cell limit of "
+                            << mesh_.nCells()+nAllowRefine << endl;
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Limit refinement
+        // ~~~~~~~~~~~~~~~~
+
+        {
+            label nUnmarked = unmarkInternalRefinement(refineCell, nRefine);
+            if (nUnmarked > 0)
+            {
+                Info<< "Unmarked for refinement due to limit shells"
+                    << "                : " << nUnmarked << " cells."  << endl;
+            }
+        }
+
+
+
+        // Pack cells-to-refine
+        // ~~~~~~~~~~~~~~~~~~~~
+
+        cellsToRefine.setSize(nRefine);
+        nRefine = 0;
+
+        forAll(refineCell, cellI)
+        {
+            if (refineCell[cellI] != -1)
+            {
+                cellsToRefine[nRefine++] = cellI;
+            }
+        }
+    }
+
+    return cellsToRefine;
+}
+
+
+Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::directionalRefine
+(
+    const string& msg,
+    const direction cmpt,
+    const labelList& cellsToRefine
+)
+{
+    // Set splitting direction
+    vector refDir(Zero);
+    refDir[cmpt] = 1;
+    List<refineCell> refCells(cellsToRefine.size());
+    forAll(cellsToRefine, i)
+    {
+        refCells[i] = refineCell(cellsToRefine[i], refDir);
+    }
+
+    // How to walk circumference of cells
+    hexCellLooper cellWalker(mesh_);
+
+    // Analyse cuts
+    cellCuts cuts(mesh_, cellWalker, refCells);
+
+    // Cell cutter
+    Foam::meshCutter meshRefiner(mesh_);
+
+    polyTopoChange meshMod(mesh_);
+
+    // Insert mesh refinement into polyTopoChange.
+    meshRefiner.setRefinement(cuts, meshMod);
+
+    autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh_, false);
+
+    // Update fields
+    mesh_.updateMesh(morphMap);
+
+    // Move mesh (since morphing does not do this)
+    if (morphMap().hasMotionPoints())
+    {
+        mesh_.movePoints(morphMap().preMotionPoints());
+    }
+    else
+    {
+        // Delete mesh volumes.
+        mesh_.clearOut();
+    }
+
+    // Reset the instance for if in overwrite mode
+    mesh_.setInstance(timeName());
+
+    // Update stored refinement pattern
+    meshRefiner.updateMesh(morphMap);
+
+    // Update intersection info
+    updateMesh(morphMap, getChangedFaces(morphMap, cellsToRefine));
+
+    return morphMap;
 }
 
 

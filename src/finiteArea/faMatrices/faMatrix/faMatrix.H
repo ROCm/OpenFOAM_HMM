@@ -71,7 +71,7 @@ Ostream& operator<<(Ostream&, const faMatrix<Type>&);
 template<class Type>
 class faMatrix
 :
-    public tmp<faMatrix<Type>>::refCount,
+    public refCount,
     public lduMatrix
 {
     // Private data

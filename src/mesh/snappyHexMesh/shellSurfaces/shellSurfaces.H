@@ -39,6 +39,7 @@ SourceFiles
 #include "searchableSurface.H"
 #include "Enum.H"
 #include "Tuple2.H"
+#include "labelVector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -84,6 +85,9 @@ private:
 
         //- Per shell per distance the refinement level
         labelListList levels_;
+
+        //- Per shell any additional directional refinement
+        List<Tuple2<labelPair,labelVector>> dirLevels_;
 
 
         // Gap level refinement
@@ -171,7 +175,6 @@ public:
                 return shells_;
             }
 
-
         // Query
 
             //- Highest shell level
@@ -179,6 +182,9 @@ public:
 
             //- Highest shell gap level
             labelList maxGapLevel() const;
+
+            //- Min and max cell level for directional refinement
+            labelPairList directionalSelectLevel() const;
 
             //- Find shell level higher than ptLevel
             void findHigherLevel
@@ -213,6 +219,16 @@ public:
             (
                 const pointField& pt,
                 const labelList& ptLevel,
+                labelList& shell
+            ) const;
+
+            //- Find any shell (or -1) with higher wanted directional level
+            void findDirectionalLevel
+            (
+                const pointField& pt,
+                const labelList& ptLevel,   // omnidirectional level
+                const labelList& dirLevel,  // directional level
+                const direction dir,
                 labelList& shell
             ) const;
 };

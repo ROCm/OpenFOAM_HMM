@@ -21,9 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Abstract base class for surface interpolation schemes.
-
 \*---------------------------------------------------------------------------*/
 
 #include "fv.H"
@@ -83,14 +80,6 @@ Foam::multivariateSurfaceInterpolationScheme<Type>::New
 
     return cstrIter()(mesh, vtfs, faceFlux, schemeData);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::multivariateSurfaceInterpolationScheme<Type>::
-~multivariateSurfaceInterpolationScheme()
-{}
 
 
 // ************************************************************************* //

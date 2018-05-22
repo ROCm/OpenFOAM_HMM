@@ -63,7 +63,7 @@ namespace fv
 template<class Type>
 class snGradScheme
 :
-    public tmp<snGradScheme<Type>>::refCount
+    public refCount
 {
     // Private data
 
@@ -73,11 +73,11 @@ class snGradScheme
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        snGradScheme(const snGradScheme&);
+        //- No copy construct
+        snGradScheme(const snGradScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const snGradScheme&);
+        //- No copy assignment
+        void operator=(const snGradScheme&) = delete;
 
 
 public:
@@ -118,7 +118,7 @@ public:
 
 
     //- Destructor
-    virtual ~snGradScheme();
+    virtual ~snGradScheme() = default;
 
 
     // Member Functions

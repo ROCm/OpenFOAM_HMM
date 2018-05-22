@@ -584,6 +584,7 @@ Foam::shellSurfaces::shellSurfaces
     modes_.setSize(shellI);
     distances_.setSize(shellI);
     levels_.setSize(shellI);
+    dirLevels_.setSize(shellI);
 
     extendedGapLevel_.setSize(shellI);
     extendedGapMode_.setSize(shellI);
@@ -613,6 +614,52 @@ Foam::shellSurfaces::shellSurfaces
 
             // Read pairs of distance+level
             setAndCheckLevels(shellI, dict.lookup("levels"));
+
+
+            // Directional refinement
+            // ~~~~~~~~~~~~~~~~~~~~~~
+
+            dirLevels_[shellI] = Tuple2<labelPair,labelVector>
+            (
+                labelPair(labelMax, labelMin),
+                labelVector::zero
+            );
+            const entry* levelPtr = dict.lookupEntryPtr
+            (
+                "levelIncrement",
+                false,
+                true
+            );
+            if (levelPtr)
+            {
+                // Do reading ourselves since using labelPair would require
+                // additional bracket pair
+                Istream& is = levelPtr->stream();
+
+                is.readBegin("levelIncrement");
+                is  >> dirLevels_[shellI].first().first()
+                    >> dirLevels_[shellI].first().second()
+                    >> dirLevels_[shellI].second();
+                is.readEnd("levelIncrement");
+
+                if (modes_[shellI] == INSIDE)
+                {
+                    Info<< "Additional directional refinement level"
+                        << " for all cells inside " << geomName << endl;
+                }
+                else if (modes_[shellI] == OUTSIDE)
+                {
+                    Info<< "Additional directional refinement level"
+                        << " for all cells outside " << geomName << endl;
+                }
+                else
+                {
+                    FatalIOErrorInFunction(shellsDict)
+                        << "Unsupported mode "
+                        << refineModeNames_[modes_[shellI]]
+                        << exit(FatalIOError);
+                }
+            }
 
 
 
@@ -745,6 +792,17 @@ Foam::labelList Foam::shellSurfaces::maxGapLevel() const
 }
 
 
+Foam::labelPairList Foam::shellSurfaces::directionalSelectLevel() const
+{
+    labelPairList levels(dirLevels_.size());
+    forAll(dirLevels_, shelli)
+    {
+        levels[shelli] = dirLevels_[shelli].first();
+    }
+    return levels;
+}
+
+
 void Foam::shellSurfaces::findHigherLevel
 (
     const pointField& pt,
@@ -820,6 +878,74 @@ void Foam::shellSurfaces::findLevel
     forAll(shells_, shelli)
     {
         findLevel(pt, shelli, minLevel, shell);
+    }
+}
+
+
+void Foam::shellSurfaces::findDirectionalLevel
+(
+    const pointField& pt,
+    const labelList& ptLevel,
+    const labelList& dirLevel,  // directional level
+    const direction dir,
+    labelList& shell
+) const
+{
+    shell.setSize(pt.size());
+    shell = -1;
+
+    List<volumeType> volType;
+
+    // Current back to original
+    DynamicList<label> candidateMap(pt.size());
+
+    forAll(shells_, shelli)
+    {
+        if (modes_[shelli] == INSIDE || modes_[shelli] == OUTSIDE)
+        {
+            const labelPair& selectLevels = dirLevels_[shelli].first();
+            const label addLevel = dirLevels_[shelli].second()[dir];
+
+            // Collect the cells that are of the right original level
+            candidateMap.clear();
+            forAll(ptLevel, celli)
+            {
+                label level = ptLevel[celli];
+
+                if
+                (
+                    level >= selectLevels.first()
+                 && level <= selectLevels.second()
+                 && dirLevel[celli] < level+addLevel
+                )
+                {
+                    candidateMap.append(celli);
+                }
+            }
+
+            // Do geometric test
+            pointField candidatePt(pt, candidateMap);
+            allGeometry_[shells_[shelli]].getVolumeType(candidatePt, volType);
+
+            // Extract selected cells
+            forAll(candidateMap, i)
+            {
+                if
+                (
+                    (
+                        modes_[shelli] == INSIDE
+                     && volType[i] == volumeType::INSIDE
+                    )
+                 || (
+                        modes_[shelli] == OUTSIDE
+                     && volType[i] == volumeType::OUTSIDE
+                    )
+                )
+                {
+                    shell[candidateMap[i]] = shelli;
+                }
+            }
+        }
     }
 }
 
