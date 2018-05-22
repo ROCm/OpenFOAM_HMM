@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -407,7 +407,7 @@ diffusionMulticomponent<ReactionThermo, ThermoType>::Qdot() const
                 false
             ),
             this->mesh(),
-            dimensionedScalar(dimEnergy/dimTime, Zero),
+            dimensionedScalar(dimEnergy/dimTime/dimVolume, Zero),
             zeroGradientFvPatchScalarField::typeName
         )
     );
