@@ -102,6 +102,10 @@ class ZoneMesh
 
 public:
 
+    //- Debug switch to disallow the use of generic zones
+    static int disallowGenericZones;
+
+
     // Constructors
 
         //- Read constructor given IOobject and a MeshType reference

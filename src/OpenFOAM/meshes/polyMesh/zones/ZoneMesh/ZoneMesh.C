@@ -29,6 +29,18 @@ License
 #include "stringListOps.H"
 #include "Pstream.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    template<class ZoneType, class MeshType>
+    int Foam::ZoneMesh<ZoneType, MeshType>::disallowGenericZones
+    (
+        debug::debugSwitch("disallowGenericZones", 0)
+    );
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class ZoneType, class MeshType>
@@ -429,8 +441,40 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findZoneID
             << "List of available zone names: " << names() << endl;
     }
 
-    // Not found
-    return -1;
+    if (disallowGenericZones != 0)
+    {
+        // Create a new ...
+        Info<< "Creating dummy zone " << zoneName << endl;
+        dictionary dict;
+        dict.set("type", ZoneType::typeName);
+        dict.set(ZoneType::labelsName, labelList());
+
+        // flipMap only really applicable for face zones, but should not get
+        // in the way for cell- and point-zones...
+        dict.set("flipMap", boolList());
+        label newZonei = zones.size();
+
+        ZoneMesh<ZoneType, MeshType>& zm =
+            const_cast<ZoneMesh<ZoneType, MeshType>&>(*this);
+
+        zm.append
+        (
+            new ZoneType
+            (
+                zoneName,
+                dict,
+                newZonei,
+                zm
+            )
+        );
+
+        return newZonei;
+    }
+    else
+    {
+        // Not found
+        return -1;
+    }
 }
 
 

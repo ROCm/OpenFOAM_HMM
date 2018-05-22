@@ -142,6 +142,9 @@ public:
         //- Name of file set will use.
         static fileName localPath(const polyMesh& mesh, const word& name);
 
+        //- Debug switch to disallow the use of generic sets
+        static int disallowGenericSets;
+
 
     // Declare run-time constructor selection table
 

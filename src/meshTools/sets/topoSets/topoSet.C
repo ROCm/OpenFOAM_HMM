@@ -37,6 +37,11 @@ namespace Foam
     defineRunTimeSelectionTable(topoSet, word);
     defineRunTimeSelectionTable(topoSet, size);
     defineRunTimeSelectionTable(topoSet, set);
+
+    int Foam::topoSet::disallowGenericSets
+    (
+        debug::debugSwitch("disallowGenericSets", 0)
+    );
 }
 
 
@@ -297,14 +302,14 @@ Foam::IOobject Foam::topoSet::findIOobject
     writeOption w
 )
 {
-    return IOobject
+    IOobject io
     (
         name,
         mesh.time().findInstance
         (
             mesh.dbDir()/polyMesh::meshSubDir/"sets",
             word::null,
-            r,
+            IOobject::READ_IF_PRESENT,
             mesh.facesInstance()
         ),
         polyMesh::meshSubDir/"sets",
@@ -312,6 +317,14 @@ Foam::IOobject Foam::topoSet::findIOobject
         r,
         w
     );
+
+    if (!io.typeHeaderOk<topoSet>(false) && disallowGenericSets != 0)
+    {
+        DebugInfo<< "Setting no read for set " << name << endl;
+        io.readOpt() = IOobject::NO_READ;
+    }
+
+    return io;
 }
 
 
