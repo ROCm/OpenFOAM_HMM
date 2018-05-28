@@ -212,7 +212,7 @@ dep: $(DEPENDENCIES)
 updatedep: dep
 
 ifeq ($(findstring lnInclude,$(MAKECMDGOALS))$(findstring updatedep,$(MAKECMDGOALS)),)
--include $(DEPENDENCIES)
+sinclude $(DEPENDENCIES)
 endif
 
 
