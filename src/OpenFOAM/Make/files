@@ -231,7 +231,6 @@ $(functionEntries)/functionEntry/functionEntry.C
 $(functionEntries)/includeEntry/includeEntry.C
 $(functionEntries)/includeEtcEntry/includeEtcEntry.C
 $(functionEntries)/includeFuncEntry/includeFuncEntry.C
-$(functionEntries)/includeIfPresentEntry/includeIfPresentEntry.C
 $(functionEntries)/inputMode/inputMode.C
 $(functionEntries)/removeEntry/removeEntry.C
 

@@ -96,7 +96,7 @@ bool Foam::functionEntries::includeEtcEntry::execute
     const fileName fName(resolveEtcFile(rawName, parentDict));
 
     autoPtr<ISstream> ifsPtr(fileHandler().NewIFstream(fName));
-    ISstream& ifs = ifsPtr();
+    auto& ifs = *ifsPtr;
 
     if (ifs)
     {
@@ -131,7 +131,7 @@ bool Foam::functionEntries::includeEtcEntry::execute
     const fileName fName(resolveEtcFile(rawName, parentDict));
 
     autoPtr<ISstream> ifsPtr(fileHandler().NewIFstream(fName));
-    ISstream& ifs = ifsPtr();
+    auto& ifs = *ifsPtr;
 
     if (ifs)
     {

@@ -59,7 +59,7 @@ Usage
         the resulting dictionary to standard output.
 
       - \par -includes
-        List the \c \#include and \c \#includeIfPresent files to standard output
+        List the \c \#include and \c \#sinclude files to standard output
 
       - \par -disableFunctionEntries
         Do not expand macros or directives (\#include etc)
@@ -307,7 +307,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "includes",
-        "List the #include/#includeIfPresent files to standard output"
+        "List the #include/#sinclude files to standard output"
     );
     argList::addBoolOption
     (

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,19 +25,25 @@ Class
     Foam::functionEntries::includeEntry
 
 Description
-    Specify an include file when reading dictionaries, expects a
-    single string to follow.
+    A dictionary directive for including a file, expects a single string
+    to follow.
 
-    An example of the \c \#include directive:
+    An example of the \c \#include directive to include a file:
     \verbatim
-        #include "includeFile"
+        #include "includeFileMustExist"
     \endverbatim
 
-    The usual expansion of environment variables and other constructs
-    (eg, the \c ~OpenFOAM/ expansion) is retained.
+    An example of the \c \#sinclude directive to conditionally include a file
+    when it exists.
+    \verbatim
+        #sinclude "includeFileCanBeMissing"
+    \endverbatim
+
+    The usual expansion of environment variables and other expansions
+    (eg, a leading "<case>/", "<system>/", "<etc>/", ...) are retained.
 
 See also
-    fileName, string::expand()
+    fileName, string::expand(), functionEntries::sincludeEntry
 
 SourceFiles
     includeEntry.C
@@ -97,7 +103,35 @@ public:
             primitiveEntry& entry,
             Istream& is
         );
+};
 
+
+/*---------------------------------------------------------------------------*\
+                        Class sincludeEntry Declaration
+\*---------------------------------------------------------------------------*/
+
+//- A dictionary directive for conditionally including a file,
+//- expects a single string to follow.
+//
+//  The \c \#sinclude directive (and the \c \#includeIfPresent alias) behaves
+//  identically to the \c \#include directive, but does not generate an error
+//  if the file does not exist.
+class sincludeEntry
+:
+    public includeEntry
+{
+public:
+
+    //- Include file (if it exists) in a sub-dict context
+    static bool execute(dictionary& parentDict, Istream& is);
+
+    //- Include file (if it exists) in a primitiveEntry context
+    static bool execute
+    (
+        const dictionary& parentDict,
+        primitiveEntry& entry,
+        Istream& is
+    );
 };
 
 
