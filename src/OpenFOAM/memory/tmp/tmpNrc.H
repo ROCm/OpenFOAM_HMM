@@ -85,6 +85,26 @@ public:
     typedef Foam::refCount::zero refCount;
 
 
+    // Factory Methods
+
+        //- Construct tmpNrc of T with forwarding arguments
+        //  \param args list of arguments with which an instance of T
+        //      will be constructed.
+        //
+        //  \note Similar to std::make_shared, but the overload for
+        //      array types is not disabled.
+        template<class... Args>
+        inline static tmpNrc<T> New(Args&&... args);
+
+        //- Construct tmpNrc from derived type with forwarding arguments
+        //  \param args list of arguments with which an instance of U
+        //      will be constructed.
+        //
+        //  \note Similar to New but for derived types
+        template<class U, class... Args>
+        inline static tmpNrc<T> NewFrom(Args&&... args);
+
+
     // Constructors
 
         //- Construct with no managed pointer.
@@ -98,6 +118,9 @@ public:
 
         //- Construct for a const reference to an object.
         inline tmpNrc(const T& obj) noexcept;
+
+        //- Move construct
+        inline tmpNrc(tmpNrc<T>&& t);
 
         //- Copy construct
         inline tmpNrc(const tmpNrc<T>& t);
@@ -159,6 +182,13 @@ public:
         //- If object pointer points to valid object:
         //- delete object and set pointer to nullptr
         inline void clear() const;
+
+        //- Release ownership of managed temporary object.
+        //  After this call no object is managed.
+        inline void reset();
+
+        //- Delete managed temporary object and set to new given pointer
+        inline void reset(T* p);
 
         //- Swaps the managed object with other tmpNrc.
         inline void swap(tmpNrc<T>& other) noexcept;

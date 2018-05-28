@@ -26,6 +26,24 @@ License
 #include "error.H"
 #include <typeinfo>
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+template<class T>
+template<class... Args>
+inline Foam::tmpNrc<T> Foam::tmpNrc<T>::New(Args&&... args)
+{
+    return tmpNrc<T>(new T(std::forward<Args>(args)...));
+}
+
+
+template<class T>
+template<class U, class... Args>
+inline Foam::tmpNrc<T> Foam::tmpNrc<T>::NewFrom(Args&&... args)
+{
+    return tmpNrc<T>(new U(std::forward<Args>(args)...));
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
@@ -58,6 +76,17 @@ inline Foam::tmpNrc<T>::tmpNrc(const T& obj) noexcept
     ptr_(const_cast<T*>(&obj)),
     type_(CREF)
 {}
+
+
+template<class T>
+inline Foam::tmpNrc<T>::tmpNrc(tmpNrc<T>&& t)
+:
+    ptr_(t.ptr_),
+    type_(t.type_)
+{
+    t.ptr_ = nullptr;
+    t.type_ = PTR;
+}
 
 
 template<class T>
@@ -240,6 +269,24 @@ inline void Foam::tmpNrc<T>::clear() const
         delete ptr_;
         ptr_ = nullptr;
     }
+}
+
+
+template<class T>
+inline void Foam::tmpNrc<T>::reset()
+{
+    clear();
+    ptr_ = nullptr;
+    type_ = PTR;
+}
+
+
+template<class T>
+inline void Foam::tmpNrc<T>::reset(T* p)
+{
+    clear();
+    ptr_ = p;
+    type_ = PTR;
 }
 
 
