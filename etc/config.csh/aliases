@@ -49,6 +49,11 @@ alias util 'cd $FOAM_UTILITIES'
 alias tut 'cd $FOAM_TUTORIALS'
 alias run 'cd $FOAM_RUN'
 
+alias ufoam 'cd $WM_PROJECT_USER_DIR'
+alias uapp 'cd $WM_PROJECT_USER_DIR/applications'
+alias usol 'cd $WM_PROJECT_USER_DIR/applications/solvers'
+alias uutil 'cd $WM_PROJECT_USER_DIR/applications/utilities'
+
 
 # Refresh the environment
 # ~~~~~~~~~~~~~~~~~~~~~~~

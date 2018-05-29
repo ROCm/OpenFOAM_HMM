@@ -175,6 +175,11 @@ unalias util
 unalias tut
 unalias run
 
+unalias ufoam
+unalias uapp
+unalias usol
+unalias uutil
+
 unalias wmRefresh
 unalias foamVersion
 unalias foamPV

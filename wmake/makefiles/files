@@ -31,7 +31,7 @@ FILES           = $(OBJECTS_DIR)/files
 VARS            = $(OBJECTS_DIR)/variables
 SFILES          = $(OBJECTS_DIR)/sourceFiles
 
--include $(OPTIONS)
+sinclude $(OPTIONS)
 
 
 #------------------------------------------------------------------------------

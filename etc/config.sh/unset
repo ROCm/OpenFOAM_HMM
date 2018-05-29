@@ -170,9 +170,18 @@ unalias util        2>/dev/null
 unalias tut         2>/dev/null
 unalias run         2>/dev/null
 
+unalias ufoam       2>/dev/null
+unalias uapp        2>/dev/null
+unalias usol        2>/dev/null
+unalias uutil       2>/dev/null
+
 unset -f wmRefresh  2>/dev/null
+unset -f foamPwd    2>/dev/null
 unset -f foamVersion 2>/dev/null
 unset -f foamPV     2>/dev/null
+
+# NB: no good way to remove foamPwd reference in PS1.
+
 
 # Remove old completions, which look like
 #     "complete ... -F _of_complete_ APPNAME
