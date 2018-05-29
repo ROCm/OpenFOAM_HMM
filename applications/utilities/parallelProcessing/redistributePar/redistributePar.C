@@ -2396,7 +2396,10 @@ int main(int argc, char *argv[])
         instantList timeDirs;
         if (Pstream::master())
         {
+            const bool oldParRun = Pstream::parRun();
+            Pstream::parRun() = false;
             timeDirs = Time::findTimes(args.path(), "constant");
+            Pstream::parRun() = oldParRun;
         }
         Pstream::scatter(timeDirs);
         for (const instant& t : timeDirs)
@@ -2432,7 +2435,10 @@ int main(int argc, char *argv[])
 
         if (Pstream::master())
         {
+            const bool oldParRun = Pstream::parRun();
+            Pstream::parRun() = false;
             timeDirs = Time::findTimes(basePath, "constant");
+            Pstream::parRun() = oldParRun;
         }
         Pstream::scatter(timeDirs);
         for (const instant& t : timeDirs)

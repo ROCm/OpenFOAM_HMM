@@ -50,7 +50,9 @@ class uncollatedFileOperation
 :
     public fileOperation
 {
-    // Private Member Functions
+protected:
+
+    // Protected Member Functions
 
         //- Search for an object.
         //    checkGlobal : also check undecomposed case
@@ -61,6 +63,13 @@ class uncollatedFileOperation
             const bool isFile,
             const IOobject& io,
             const bool search
+        ) const;
+
+        //- Lookup name of processorsDDD using cache. Return empty fileName
+        //  if not found. Do not use any parallel synchronisation
+        virtual tmpNrc<dirIndexList> lookupProcessorsPath
+        (
+            const fileName&
         ) const;
 
 

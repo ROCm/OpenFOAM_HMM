@@ -238,7 +238,11 @@ bool Foam::fileOperation::isFileOrDir(const bool isFile, const fileName& f)
 
 
 Foam::tmpNrc<Foam::fileOperation::dirIndexList>
-Foam::fileOperation::lookupProcessorsPath(const fileName& fName) const
+Foam::fileOperation::lookupAndCacheProcessorsPath
+(
+    const fileName& fName,
+    const bool syncPar
+) const
 {
     // If path is local to a processor (e.g. contains 'processor2')
     // find the corresponding actual processor directory (e.g. 'processors4')
@@ -344,7 +348,11 @@ Foam::fileOperation::lookupProcessorsPath(const fileName& fName) const
             }
         }
 
-        if (returnReduce(procDirs.size(), sumOp<label>()))
+        if
+        (
+            (syncPar && returnReduce(procDirs.size(), sumOp<label>()))
+         || (!syncPar && procDirs.size())
+        )
         {
             procsDirs_.insert(procPath, procDirs);
 
@@ -359,6 +367,14 @@ Foam::fileOperation::lookupProcessorsPath(const fileName& fName) const
         }
     }
     return tmpNrc<dirIndexList>(new dirIndexList(0, dirIndex()));
+}
+
+
+Foam::tmpNrc<Foam::fileOperation::dirIndexList>
+Foam::fileOperation::lookupProcessorsPath(const fileName& fName) const
+{
+    // Use parallel synchronisation
+    return lookupAndCacheProcessorsPath(fName, true);
 }
 
 

@@ -131,12 +131,20 @@ protected:
         //- Helper: check for file (isFile) or directory (!isFile)
         static bool isFileOrDir(const bool isFile, const fileName&);
 
-        //- Detect presence of processorsDDD
-        void cacheProcessorsPath(const fileName& fName) const;
+        //- Lookup name of processorsDDD using cache. Return empty fileName
+        //  if not found.
+        tmpNrc<dirIndexList> lookupAndCacheProcessorsPath
+        (
+            const fileName&,
+            const bool syncPar
+        ) const;
 
         //- Lookup name of processorsDDD using cache. Return empty fileName
-        //  if not found
-        tmpNrc<dirIndexList> lookupProcessorsPath(const fileName&) const;
+        //  if not found. To be called on all processors
+        virtual tmpNrc<dirIndexList> lookupProcessorsPath
+        (
+            const fileName&
+        ) const;
 
         //- Does ioobject exist. Is either a directory (empty name()) or
         //  a file
