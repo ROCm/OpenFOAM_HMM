@@ -508,7 +508,7 @@ void Foam::ensightCase::write() const
     }
     if (tsCloud < 0)
     {
-        tsCloud = 1 + std::max(1, tsGeom);  // Next available timeset
+        tsCloud = 1 + std::max(label(1), tsGeom);  // Next available timeset
     }
 
     writeHeader();
