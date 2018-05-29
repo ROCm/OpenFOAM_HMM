@@ -695,7 +695,7 @@ void Foam::isoSurfaceCell::calcSnappedPoint
             {
                 const face& f = mesh_.faces()[facei++];
 
-                isBoundaryPoint.setMany(f);
+                isBoundaryPoint.set(f);
             }
         }
     }

@@ -445,7 +445,7 @@ Foam::bitSet Foam::ZoneMesh<ZoneType, MeshType>::findMatching
     const labelList indices = this->findIndices(key);
     forAll(indices, i)
     {
-        bitset.setMany
+        bitset.set
         (
             static_cast<const labelList&>(this->operator[](indices[i]))
         );

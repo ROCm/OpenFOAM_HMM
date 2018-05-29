@@ -339,7 +339,7 @@ void Foam::triSurface::writeStats(Ostream& os) const
         forAll(f, fp)
         {
             const label pointi = f[fp];
-            if (pointIsUsed.set(pointi, 1))
+            if (pointIsUsed.set(pointi))
             {
                 bb.add(points()[pointi]);
                 ++nPoints;

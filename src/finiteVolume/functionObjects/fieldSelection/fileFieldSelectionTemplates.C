@@ -38,7 +38,7 @@ void Foam::functionObjects::fileFieldSelection::addFromFile
 {
     for (const wordRe& fieldName : *this)
     {
-        set.insertMany(allFileObjects.names(Type::typeName, fieldName));
+        set.insert(allFileObjects.names(Type::typeName, fieldName));
     }
 }
 

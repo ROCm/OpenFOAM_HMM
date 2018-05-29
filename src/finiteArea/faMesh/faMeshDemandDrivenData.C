@@ -1455,7 +1455,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
                     procPatch.neighbPoints()[nonGlobalPatchPoints[pointI]];
 
                 labelHashSet faceSet;
-                faceSet.insertMany(pointFaces[curPoint]);
+                faceSet.insert(pointFaces[curPoint]);
 
                 labelList curFaces = faceSet.toc();
 

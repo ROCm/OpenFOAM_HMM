@@ -36,7 +36,7 @@ void Foam::functionObjects::fieldSelection::addRegistered
 {
     for (const wordRe& name : *this)
     {
-        set.insertMany(obr_.names<Type>(name));
+        set.insert(obr_.names<Type>(name));
     }
 }
 

@@ -795,7 +795,7 @@ int main(int argc, char *argv[])
             forAll(addedCells, facei)
             {
                 const labelList& aCells = addedCells[facei];
-                addedCellsSet.insertMany(aCells);
+                addedCellsSet.insert(aCells);
             }
         }
     }

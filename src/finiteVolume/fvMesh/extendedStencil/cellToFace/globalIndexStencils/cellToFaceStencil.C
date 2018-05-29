@@ -243,7 +243,7 @@ void Foam::cellToFaceStencil::unionEqOp::operator()
         else
         {
             labelHashSet set(x);
-            set.insertMany(y);
+            set.insert(y);
             x = set.toc();
         }
     }
@@ -382,11 +382,11 @@ void Foam::cellToFaceStencil::calcFaceStencil
 
         const labelList& ownCCells = globalCellCells[own[facei]];
         label globalOwn = ownCCells[0];
-        faceStencilSet.insertMany(ownCCells);  // Insert cellCells
+        faceStencilSet.insert(ownCCells);  // Insert cellCells
 
         const labelList& neiCCells = globalCellCells[nei[facei]];
         label globalNei = neiCCells[0];
-        faceStencilSet.insertMany(neiCCells);  // Insert cellCells
+        faceStencilSet.insert(neiCCells);  // Insert cellCells
 
         // Guarantee owner first, neighbour second.
         faceStencil[facei].setSize(faceStencilSet.size());
@@ -416,13 +416,13 @@ void Foam::cellToFaceStencil::calcFaceStencil
 
                 const labelList& ownCCells = globalCellCells[own[facei]];
                 label globalOwn = ownCCells[0];
-                faceStencilSet.insertMany(ownCCells);
+                faceStencilSet.insert(ownCCells);
 
                 // And the neighbours of the coupled cell
                 const labelList& neiCCells =
                     neiGlobalCellCells[facei-mesh_.nInternalFaces()];
                 label globalNei = neiCCells[0];
-                faceStencilSet.insertMany(neiCCells);
+                faceStencilSet.insert(neiCCells);
 
                 // Guarantee owner first, neighbour second.
                 faceStencil[facei].setSize(faceStencilSet.size());
@@ -452,7 +452,7 @@ void Foam::cellToFaceStencil::calcFaceStencil
 
                 const labelList& ownCCells = globalCellCells[own[facei]];
                 label globalOwn = ownCCells[0];
-                faceStencilSet.insertMany(ownCCells);
+                faceStencilSet.insert(ownCCells);
 
                 // Guarantee owner first
                 faceStencil[facei].setSize(faceStencilSet.size());

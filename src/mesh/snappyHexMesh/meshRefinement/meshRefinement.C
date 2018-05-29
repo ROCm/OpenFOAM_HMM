@@ -1021,7 +1021,7 @@ Foam::label Foam::meshRefinement::splitFacesUndo
         {
             const labelList grownFaces(growFaceCellFace(errorFaces));
             errorFaces.clear();
-            errorFaces.insertMany(grownFaces);
+            errorFaces.insert(grownFaces);
         }
 
 

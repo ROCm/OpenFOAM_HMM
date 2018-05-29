@@ -507,11 +507,11 @@ public:
         //- Remove table entries given by the listed keys
         //  \return The number of items removed
         template<unsigned Size>
-        inline label eraseMany(const FixedList<Key, Size>& keys);
+        inline label erase(const FixedList<Key, Size>& keys);
 
         //- Remove table entries given by the listed keys
         //  \return The number of items removed
-        inline label eraseMany(const UList<Key>& keys);
+        inline label erase(const UList<Key>& keys);
 
         //- Retain table entries given by keys of the other hash-table.
         //

@@ -33,13 +33,9 @@ License
 
 namespace Foam
 {
-
 defineTypeNameAndDebug(normalToFace, 0);
-
 addToRunTimeSelectionTable(topoSetSource, normalToFace, word);
-
 addToRunTimeSelectionTable(topoSetSource, normalToFace, istream);
-
 }
 
 
@@ -160,7 +156,7 @@ void Foam::normalToFace::applyToSet
             }
         }
 
-        set.eraseMany(toBeRemoved);
+        set.erase(toBeRemoved);
     }
 }
 

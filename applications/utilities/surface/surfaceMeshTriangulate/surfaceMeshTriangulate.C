@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
             for (const wordRe& zoneName : zoneNames)
             {
                 labelList zoneIDs = findStrings(zoneName, allZoneNames);
-                includeFaceZones.insertMany(zoneIDs);
+                includeFaceZones.insert(zoneIDs);
 
                 if (zoneIDs.empty())
                 {

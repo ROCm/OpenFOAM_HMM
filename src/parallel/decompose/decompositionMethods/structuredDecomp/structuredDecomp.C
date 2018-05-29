@@ -85,7 +85,7 @@ Foam::labelList Foam::structuredDecomp::decompose
     labelHashSet patchCells(2*nFaces);
     for (const label patchi : patchIDs)
     {
-        patchCells.insertMany(pbm[patchi].faceCells());
+        patchCells.insert(pbm[patchi].faceCells());
     }
 
     // Subset the layer of cells next to the patch

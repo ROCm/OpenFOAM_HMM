@@ -311,7 +311,7 @@ int main(int argc, char *argv[])
         wordHashSet names;
         forAllConstIters(rp, iter)
         {
-            names.insertMany(iter.object());
+            names.insert(iter.object());
         }
 
         regionNames = names.sortedToc();

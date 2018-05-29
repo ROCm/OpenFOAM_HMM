@@ -531,27 +531,27 @@ inline void Foam::bitSet::set(const bitSet& bitset)
 }
 
 
-inline void Foam::bitSet::setMany(const labelUList& locations)
+inline Foam::label Foam::bitSet::set(const labelUList& locations)
 {
-    setMany(locations.begin(), locations.end());
+    return setMany(locations.begin(), locations.end());
 }
 
 
-inline void Foam::bitSet::setMany(const labelUIndList& locations)
+inline Foam::label Foam::bitSet::set(const labelUIndList& locations)
 {
-    setMany(locations.begin(), locations.end());
+    return setMany(locations.begin(), locations.end());
 }
 
 
-inline void Foam::bitSet::unsetMany(const labelUList& locations)
+inline Foam::label Foam::bitSet::unset(const labelUList& locations)
 {
-    unsetMany(locations.begin(), locations.end());
+    return unset(locations.begin(), locations.end());
 }
 
 
-inline void Foam::bitSet::unsetMany(const labelUIndList& locations)
+inline Foam::label Foam::bitSet::unset(const labelUIndList& locations)
 {
-    unsetMany(locations.begin(), locations.end());
+    return unset(locations.begin(), locations.end());
 }
 
 

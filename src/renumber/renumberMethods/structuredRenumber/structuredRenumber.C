@@ -160,7 +160,7 @@ Foam::labelList Foam::structuredRenumber::renumber
     labelHashSet patchCells(2*nFaces);
     for (const label patchId : patchIDs)
     {
-        patchCells.insertMany(pbm[patchId].faceCells());
+        patchCells.insert(pbm[patchId].faceCells());
     }
 
     label nTotalSeeds = returnReduce(patchCells.size(), sumOp<label>());

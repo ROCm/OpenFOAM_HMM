@@ -336,7 +336,7 @@ void Foam::isoAdvection::timeIntegratedFlux()
                         // 1 - neighbours of neighbours
                         // 2 - ...
                         const labelList& nNeighbourCells = cellCells[otherCell];
-                        checkBounding_.setMany(nNeighbourCells);
+                        checkBounding_.set(nNeighbourCells);
                     }
                     else
                     {
@@ -1040,7 +1040,7 @@ void Foam::isoAdvection::writeSurfaceCells() const
             )
         );
 
-        cSet.insertMany(surfCells_);
+        cSet.insert(surfCells_);
 
         cSet.write();
     }

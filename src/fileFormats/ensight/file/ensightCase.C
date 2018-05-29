@@ -109,7 +109,7 @@ Foam::label Foam::ensightCase::checkTimeset(const labelHashSet& lookup) const
         }
 
         // OR
-        // tsTimes.unsetMany(timesUsed_.toc());
+        // tsTimes.unset(timesUsed_.toc());
 
         if (tsTimes.empty())
         {

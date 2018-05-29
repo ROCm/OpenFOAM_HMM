@@ -444,7 +444,7 @@ inline Foam::label Foam::HashTable<T, Key, Hash>::erase
 
 template<class T, class Key, class Hash>
 template<unsigned Size>
-inline Foam::label Foam::HashTable<T, Key, Hash>::eraseMany
+inline Foam::label Foam::HashTable<T, Key, Hash>::erase
 (
     const FixedList<Key, Size>& keys
 )
@@ -454,7 +454,7 @@ inline Foam::label Foam::HashTable<T, Key, Hash>::eraseMany
 
 
 template<class T, class Key, class Hash>
-inline Foam::label Foam::HashTable<T, Key, Hash>::eraseMany
+inline Foam::label Foam::HashTable<T, Key, Hash>::erase
 (
     const UList<Key>& keys
 )
@@ -766,9 +766,9 @@ void Foam::HashTable<T, Key, Hash>::operator=
             << abort(FatalError);
     }
 
-    // Could be zero-sized from a previous transfer()
     if (!capacity_)
     {
+        // Zero-sized from a previous transfer()?
         resize(rhs.capacity_);
     }
     else
@@ -789,9 +789,9 @@ void Foam::HashTable<T, Key, Hash>::operator=
     std::initializer_list<std::pair<Key, T>> rhs
 )
 {
-    // Could be zero-sized from a previous transfer()
     if (!capacity_)
     {
+        // Zero-sized from a previous transfer()?
         resize(2*rhs.size());
     }
     else

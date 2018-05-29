@@ -1053,7 +1053,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
                 nInvalidPolyhedra++;
 
-                wrongFaces.insertMany(cells[cI]);
+                wrongFaces.insert(cells[cI]);
             }
         }
 
@@ -1093,7 +1093,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
             if (nInternalFaces[cI] <= 1)
             {
                 oneInternalFaceCells++;
-                wrongFaces.insertMany(cells[cI]);
+                wrongFaces.insert(cells[cI]);
             }
         }
 
@@ -1109,7 +1109,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
     {
         const face f = pMesh.faces()[facei];
 
-        ptToBeLimited.setMany(f);
+        ptToBeLimited.set(f);
     }
 
     // // Limit connected cells
@@ -1126,7 +1126,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
     //     {
     //         label ptI = f[fPtI];
     //         const labelList& pC = ptCells[ptI];
-    //         limitCells.insertMany(pC);
+    //         limitCells.insert(pC);
     //     }
     // }
 
@@ -1136,7 +1136,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
     // {
     //     const labelList& cP = cellPts[celli];
 
-    //     ptToBeLimited.setMany(cP);
+    //     ptToBeLimited.set(cP);
     // }
 
 
@@ -2537,7 +2537,7 @@ void Foam::conformalVoronoiMesh::removeUnusedPoints
     {
         const face& f = faces[fI];
 
-        ptUsed.setMany(f);
+        ptUsed.set(f);
     }
 
     label pointi = 0;
@@ -2587,8 +2587,8 @@ Foam::labelList Foam::conformalVoronoiMesh::removeUnusedCells
 
     // Scan all faces to find all of the cells that are used
 
-    cellUsed.setMany(owner);
-    cellUsed.setMany(neighbour);
+    cellUsed.set(owner);
+    cellUsed.set(neighbour);
 
     label celli = 0;
 

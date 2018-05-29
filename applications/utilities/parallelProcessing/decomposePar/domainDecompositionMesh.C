@@ -451,7 +451,7 @@ void Foam::domainDecomposition::decomposeMesh()
             const labelList& facePoints = fcs[mag(facei) - 1];
 
             // Mark the face points as being used
-            pointsInUse.setMany(facePoints);
+            pointsInUse.set(facePoints);
         }
 
         procPointAddressing_[proci] = pointsInUse.sortedToc();

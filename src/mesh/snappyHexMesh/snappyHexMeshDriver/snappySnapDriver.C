@@ -150,13 +150,13 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothInternalDisplacement
     //        {
     //            label own = mesh.faceOwner()[facei];
     //            const cell& ownFaces = mesh.cells()[own];
-    //            newIsFront.setMany(ownFaces);
+    //            newIsFront.set(ownFaces);
     //
     //            if (mesh.isInternalFace(facei))
     //            {
     //                label nei = mesh.faceNeighbour()[facei];
     //                const cell& neiFaces = mesh.cells()[nei];
-    //                newIsFront.setMany(neiFaces);
+    //                newIsFront.set(neiFaces);
     //            }
     //        }
     //    }
@@ -186,7 +186,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothInternalDisplacement
         if (!isFront[facei] && ownLevel != neiLevel)
         {
             const face& f = mesh.faces()[facei];
-            isMovingPoint.setMany(f);
+            isMovingPoint.set(f);
 
             ++nInterface;
         }
@@ -203,7 +203,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothInternalDisplacement
         if (!isFront[facei] && ownLevel != neiLevel)
         {
             const face& f = mesh.faces()[facei];
-            isMovingPoint.setMany(f);
+            isMovingPoint.set(f);
 
             ++nInterface;
         }
@@ -2265,7 +2265,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::snappySnapDriver::repatchToSurface
             const label zoneSurfi = zonedSurfaces[i];
             const faceZone& fZone = fZones[surfZones[zoneSurfi].faceZoneName()];
 
-            isZonedFace.setMany(fZone);
+            isZonedFace.set(fZone);
         }
     }
 

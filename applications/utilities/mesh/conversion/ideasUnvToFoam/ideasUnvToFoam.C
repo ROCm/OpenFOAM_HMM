@@ -956,7 +956,7 @@ int main(int argc, char *argv[])
         forAll(dofVertIndices, patchi)
         {
             const labelList& foamVerts = dofVertIndices[patchi];
-            dofGroups[patchi].insertMany(foamVerts);
+            dofGroups[patchi].insert(foamVerts);
         }
 
         List<DynamicList<face>> dynPatchFaces(dofVertIndices.size());

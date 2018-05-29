@@ -92,7 +92,7 @@ Foam::ParticleErosion<CloudType>::ParticleErosion
                 << endl;
         }
 
-        uniqIds.insertMany(ids);
+        uniqIds.insert(ids);
     }
 
     patchIDs_ = uniqIds.sortedToc();

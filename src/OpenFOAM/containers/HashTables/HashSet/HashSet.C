@@ -42,7 +42,7 @@ inline Foam::label Foam::HashSet<Key, Hash>::assignMany
 {
     if (!this->capacity())
     {
-        // Could be zero-sized from a previous transfer()?
+        // Zero-sized from a previous transfer()?
         this->resize(2*nItems);
     }
     else
@@ -155,7 +155,7 @@ inline Foam::label Foam::HashSet<Key, Hash>::insert
 
 template<class Key, class Hash>
 template<unsigned Size>
-inline Foam::label Foam::HashSet<Key, Hash>::insertMany
+inline Foam::label Foam::HashSet<Key, Hash>::insert
 (
     const FixedList<Key, Size>& list
 )
@@ -165,7 +165,7 @@ inline Foam::label Foam::HashSet<Key, Hash>::insertMany
 
 
 template<class Key, class Hash>
-inline Foam::label Foam::HashSet<Key, Hash>::insertMany
+inline Foam::label Foam::HashSet<Key, Hash>::insert
 (
     const UList<Key>& list
 )
@@ -175,7 +175,7 @@ inline Foam::label Foam::HashSet<Key, Hash>::insertMany
 
 
 template<class Key, class Hash>
-inline  Foam::label Foam::HashSet<Key, Hash>::insertMany
+inline  Foam::label Foam::HashSet<Key, Hash>::insert
 (
     const UIndirectList<Key>& list
 )
@@ -208,7 +208,7 @@ inline Foam::label Foam::HashSet<Key, Hash>::unset
 
 template<class Key, class Hash>
 template<unsigned Size>
-inline Foam::label Foam::HashSet<Key, Hash>::unsetMany
+inline Foam::label Foam::HashSet<Key, Hash>::unset
 (
     const FixedList<Key, Size>& list
 )
@@ -218,7 +218,7 @@ inline Foam::label Foam::HashSet<Key, Hash>::unsetMany
 
 
 template<class Key, class Hash>
-inline Foam::label Foam::HashSet<Key, Hash>::unsetMany
+inline Foam::label Foam::HashSet<Key, Hash>::unset
 (
     const UList<Key>& list
 )
@@ -228,7 +228,7 @@ inline Foam::label Foam::HashSet<Key, Hash>::unsetMany
 
 
 template<class Key, class Hash>
-inline Foam::label Foam::HashSet<Key, Hash>::unsetMany
+inline Foam::label Foam::HashSet<Key, Hash>::unset
 (
     const UIndirectList<Key>& list
 )

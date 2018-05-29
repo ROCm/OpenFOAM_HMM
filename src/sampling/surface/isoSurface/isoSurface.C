@@ -1572,7 +1572,7 @@ Foam::isoSurface::isoSurface
                     {
                         const face& f = mesh_.faces()[cpp.start()+i];
 
-                        isBoundaryPoint.setMany(f);
+                        isBoundaryPoint.set(f);
                     }
                 }
             }
@@ -1584,7 +1584,7 @@ Foam::isoSurface::isoSurface
                 {
                     const face& f = mesh_.faces()[pp.start()+i];
 
-                    isBoundaryPoint.setMany(f);
+                    isBoundaryPoint.set(f);
                 }
             }
         }

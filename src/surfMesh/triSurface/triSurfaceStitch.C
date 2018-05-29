@@ -109,7 +109,7 @@ bool Foam::triSurface::stitchTriangles
             {
                 for (const label pointi : f)
                 {
-                    if (pointIsUsed.set(pointi, 1))
+                    if (pointIsUsed.set(pointi))
                     {
                         ++nPoints;
                     }

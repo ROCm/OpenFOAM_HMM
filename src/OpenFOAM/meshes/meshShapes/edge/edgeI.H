@@ -300,13 +300,13 @@ inline Foam::label Foam::edge::insert(std::initializer_list<label> list)
 
 
 template<unsigned Size>
-inline Foam::label Foam::edge::insertMany(const FixedList<label, Size>& list)
+inline Foam::label Foam::edge::insert(const FixedList<label, Size>& list)
 {
     return insert(list.begin(), list.end());
 }
 
 
-inline Foam::label Foam::edge::insertMany(const labelUList& list)
+inline Foam::label Foam::edge::insert(const labelUList& list)
 {
     return insert(list.begin(), list.end());
 }
@@ -366,13 +366,13 @@ inline Foam::label Foam::edge::erase(std::initializer_list<label> list)
 
 
 template<unsigned Size>
-inline Foam::label Foam::edge::eraseMany(const FixedList<label, Size>& list)
+inline Foam::label Foam::edge::erase(const FixedList<label, Size>& list)
 {
     return erase(list.begin(), list.end());
 }
 
 
-inline Foam::label Foam::edge::eraseMany(const labelUList& list)
+inline Foam::label Foam::edge::erase(const labelUList& list)
 {
     return erase(list.begin(), list.end());
 }

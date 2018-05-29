@@ -891,7 +891,7 @@ void Foam::meshDualiser::setRefinement
     {
         const labelList& fEdges = mesh_.faceEdges()[facei];
 
-        isBoundaryEdge.setMany(fEdges);
+        isBoundaryEdge.set(fEdges);
     }
 
 
