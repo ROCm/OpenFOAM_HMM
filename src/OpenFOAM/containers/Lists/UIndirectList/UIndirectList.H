@@ -190,6 +190,12 @@ public:
 
         public:
 
+            using difference_type = label;
+            using value_type = T;
+            using pointer = T*;
+            using reference = T&;
+            using iterator_category = std::forward_iterator_tag;
+
             iterator
             (
                 UList<T>& list,
@@ -231,6 +237,12 @@ public:
 
         public:
 
+            using difference_type = label;
+            using value_type = const T;
+            using pointer = const T*;
+            using reference = const T&;
+            using iterator_category = std::forward_iterator_tag;
+
             const_iterator
             (
                 const UList<T>& list,
@@ -241,7 +253,7 @@ public:
                 base_(baseIter)
             {}
 
-            const_reference operator*() const
+            reference operator*() const
             {
                 return data_[*base_];
             }
