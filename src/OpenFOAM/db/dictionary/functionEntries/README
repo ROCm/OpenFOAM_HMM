@@ -10,8 +10,9 @@
   #remove           | dict              | keyType or List<keyType>
                     |                   |
   #include          | dict/primitive    | string
-  #includeEtc       | dict/primitive    | string
+  #sinclude         | dict/primitive    | string
   #includeIfPresent | dict/primitive    | string
+  #includeEtc       | dict/primitive    | string
   #includeFunc      | dict              | word
                     |                   |
   #calc             | dict/primitive    | string
@@ -27,4 +28,4 @@ Pending future extensions
   #undef            | dict              | keyType or List<keyType>
 
 
-2017-11-26
+2018-05-28

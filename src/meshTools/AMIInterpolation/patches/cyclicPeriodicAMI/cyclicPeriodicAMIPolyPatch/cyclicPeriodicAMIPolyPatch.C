@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -548,10 +548,13 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
         if (nFace)
         {
             scalarField srcWghtSum(size(), 0);
-            scalarField tgtWghtSum(size(), 0);
-            forAll(*this, faceI)
+            forAll(srcWghtSum, faceI)
             {
                 srcWghtSum[faceI] = sum(AMIPtr_->srcWeights()[faceI]);
+            }
+            scalarField tgtWghtSum(neighbPatch().size(), 0);
+            forAll(tgtWghtSum, faceI)
+            {
                 tgtWghtSum[faceI] = sum(AMIPtr_->tgtWeights()[faceI]);
             }
 

@@ -25,6 +25,9 @@ Class
     Foam::functionEntries::includeEtcEntry
 
 Description
+    A dictionary directive for including a file found using the findEtcFile()
+    mechanism.
+
     Specify an etc file to include when reading dictionaries, expects a
     single string to follow.
 

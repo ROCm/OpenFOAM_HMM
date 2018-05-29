@@ -47,6 +47,11 @@ alias util='cd $FOAM_UTILITIES'
 alias tut='cd $FOAM_TUTORIALS'
 alias run='cd $FOAM_RUN'
 
+alias ufoam='cd $WM_PROJECT_USER_DIR'
+alias uapp='cd $WM_PROJECT_USER_DIR/applications'
+alias usol='cd $WM_PROJECT_USER_DIR/applications/solvers'
+alias uutil='cd $WM_PROJECT_USER_DIR/applications/utilities'
+
 
 # Refresh the environment
 # ~~~~~~~~~~~~~~~~~~~~~~~
@@ -103,6 +108,24 @@ foamPV()
     . $WM_PROJECT_DIR/etc/config.sh/paraview "${@+ParaView_VERSION=$@}"
     local pvdir="${ParaView_DIR##*/}"
     echo "${pvdir:-ParaView_DIR not set}" 1>&2
+}
+
+
+# OpenFOAM working directory with basic env replacements
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~
+unset -f foamPwd 2>/dev/null
+foamPwd()
+{
+    if [ -d "$WM_PROJECT_DIR" ]
+    then
+        echo $PWD | sed \
+        -e "s#^${FOAM_RUN}#\$FOAM_RUN#;" \
+        -e "s#^${WM_PROJECT_DIR}#\$WM_PROJECT_DIR#;" \
+        -e "s#^${WM_PROJECT_USER_DIR}#\$WM_PROJECT_USER_DIR#;" \
+        -e "s#^${HOME}#\$HOME#";
+    else
+        echo $PWD | sed -e "s#^${HOME}#\$HOME#;"
+    fi
 }
 
 

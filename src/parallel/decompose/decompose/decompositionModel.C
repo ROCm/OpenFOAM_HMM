@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,7 +58,7 @@ Foam::decompositionModel::decompositionModel
                 "decomposeParDict",
                 mesh.time().system(),
                 mesh.local(),
-                mesh.db(),
+                mesh.thisDb(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
                 false,  //io.registerObject(),
@@ -92,7 +92,7 @@ Foam::decompositionModel::decompositionModel
                 "decomposeParDict",
                 mesh.time().system(),
                 mesh.local(),
-                mesh.db(),
+                mesh.thisDb(),
                 (dict.size() ? IOobject::NO_READ : IOobject::MUST_READ),
                 IOobject::NO_WRITE,
                 false,  //io.registerObject(),

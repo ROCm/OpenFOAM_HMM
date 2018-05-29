@@ -53,13 +53,15 @@ bool Foam::functionObjects::reference::calcType()
         {
             cellValue.value() = -pTraits<Type>::one*GREAT;
 
+            // Might trigger parallel comms (e.g. volPointInterpolation, if
+            // result is not yet cached) so have all processors do it
+            autoPtr<interpolation<Type>> interpolator
+            (
+                interpolation<Type>::New(interpolationScheme_, vf)
+            );
+
             if (celli_ != -1)
             {
-                autoPtr<interpolation<Type>> interpolator
-                (
-                    interpolation<Type>::New(interpolationScheme_, vf)
-                );
-
                 cellValue.value() =
                     interpolator().interpolate(position_, celli_, -1);
             }
