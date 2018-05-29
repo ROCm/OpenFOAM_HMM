@@ -180,7 +180,7 @@ Foam::scalar Foam::COxidationIntrinsicRate<CloudType>::calculate
         max(0.5*d*sqrt(Sb_*rhop*Ag_*ki*ppO2/(De*rhoO2)), ROOTVSMALL);
 
     // Effectiveness factor []
-    const scalar eta = max(3.0*sqr(phi)*(phi/tanh(phi) - 1.0), 0.0);
+    const scalar eta = max(3.0/sqr(phi)*(phi/tanh(phi) - 1.0), 0.0);
 
     // Chemical rate [kmol/m2/s]
     const scalar R = eta*d/6.0*rhop*Ag_*ki;
