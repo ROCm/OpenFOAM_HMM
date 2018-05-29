@@ -11,4 +11,5 @@ EXE_INC = \
     -I../decompositionMethods/lnInclude
 
 LIB_LIBS = \
-    -L$(SCOTCH_LIB_DIR) -lscotch -lscotcherrexit -lrt
+    -L$(SCOTCH_LIB_DIR) \
+    -lscotch -lscotcherrexit -lrt
