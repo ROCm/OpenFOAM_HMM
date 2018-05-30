@@ -76,10 +76,10 @@ class NASsurfaceFormat
             label elementId
         );
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         NASsurfaceFormat(const NASsurfaceFormat<Face>&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const NASsurfaceFormat<Face>&) = delete;
 
 

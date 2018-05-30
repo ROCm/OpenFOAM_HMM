@@ -120,8 +120,8 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const IntegrationScheme&);
+        //- No copy assignment
+        void operator=(const IntegrationScheme&) = delete;
 
 
 public:

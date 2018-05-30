@@ -94,7 +94,7 @@ protected:
 
 private:
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const TableBase<Type>&) = delete;
 
 

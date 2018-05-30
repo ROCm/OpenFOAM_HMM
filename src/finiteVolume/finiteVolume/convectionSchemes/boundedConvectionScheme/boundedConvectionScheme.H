@@ -73,11 +73,11 @@ class boundedConvectionScheme
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        boundedConvectionScheme(const boundedConvectionScheme&);
+        //- No copy construct
+        boundedConvectionScheme(const boundedConvectionScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const boundedConvectionScheme&);
+        //- No copy assignment
+        void operator=(const boundedConvectionScheme&) = delete;
 
 
 public:

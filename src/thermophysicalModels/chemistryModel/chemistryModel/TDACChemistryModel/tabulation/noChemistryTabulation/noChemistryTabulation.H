@@ -51,8 +51,8 @@ class none
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        none(const none&);
+        //- No copy construct
+        none(const none&) = delete;
 
 
 public:

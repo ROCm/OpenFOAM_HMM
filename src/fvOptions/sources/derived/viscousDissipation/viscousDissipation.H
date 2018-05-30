@@ -80,10 +80,10 @@ class viscousDissipation
         //- Return the viscosity field
         tmp<volSymmTensorField> devRhoReff() const;
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         viscousDissipation(const viscousDissipation&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const viscousDissipation&) = delete;
 
 private:

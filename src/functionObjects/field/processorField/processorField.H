@@ -85,11 +85,11 @@ class processorField
         Switch log_;
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        processorField(const processorField&);
+        //- No copy construct
+        processorField(const processorField&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const processorField&);
+        //- No copy assignment
+        void operator=(const processorField&) = delete;
 
 
 public:

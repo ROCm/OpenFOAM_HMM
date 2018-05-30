@@ -62,11 +62,11 @@ class LUST
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        LUST(const LUST&);
+        //- No copy construct
+        LUST(const LUST&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const LUST&);
+        //- No copy assignment
+        void operator=(const LUST&) = delete;
 
 
 public:

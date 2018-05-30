@@ -78,11 +78,11 @@ class tabulated6DoFMotion
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        tabulated6DoFMotion(const tabulated6DoFMotion&);
+        //- No copy construct
+        tabulated6DoFMotion(const tabulated6DoFMotion&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const tabulated6DoFMotion&);
+        //- No copy assignment
+        void operator=(const tabulated6DoFMotion&) = delete;
 
 
 public:

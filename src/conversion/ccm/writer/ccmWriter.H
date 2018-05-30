@@ -147,10 +147,10 @@ class writer
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         writer(const writer&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const writer&) = delete;
 
 

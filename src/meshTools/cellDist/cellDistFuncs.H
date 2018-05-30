@@ -73,11 +73,11 @@ class cellDistFuncs
         static label findIndex(const label n, const labelList&, const label);
 
 
-        //- Disallow default bitwise copy construct
-        cellDistFuncs(const cellDistFuncs&);
+        //- No copy construct
+        cellDistFuncs(const cellDistFuncs&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cellDistFuncs&);
+        //- No copy assignment
+        void operator=(const cellDistFuncs&) = delete;
 
 public:
 

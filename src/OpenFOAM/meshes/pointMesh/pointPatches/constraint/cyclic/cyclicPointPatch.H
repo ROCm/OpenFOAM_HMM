@@ -60,11 +60,11 @@ class cyclicPointPatch
 
     // Private Member Functions
 
-        //- Disallow default construct as copy
-        cyclicPointPatch(const cyclicPointPatch&);
+        //- No copy construct
+        cyclicPointPatch(const cyclicPointPatch&) = delete;
 
-        //- Disallow default assignment
-        void operator=(const cyclicPointPatch&);
+        //- No copy assignment
+        void operator=(const cyclicPointPatch&) = delete;
 
 
     // Demand driven private data

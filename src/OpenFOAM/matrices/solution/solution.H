@@ -79,9 +79,11 @@ class solution
         //- Read settings from the dictionary
         void read(const dictionary&);
 
-        //- Disallow default bitwise copy construct and assignment
-        solution(const solution&);
-        void operator=(const solution&);
+        //- No copy construct
+        solution(const solution&) = delete;
+
+        //- No copy assignment
+        void operator=(const solution&) = delete;
 
 
 public:

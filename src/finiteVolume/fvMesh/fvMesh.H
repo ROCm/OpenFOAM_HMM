@@ -159,10 +159,10 @@ class fvMesh
             void makeCf() const;
 
 
-        //- Disallow construct as copy
+        //- No copy construct
         fvMesh(const fvMesh&) = delete;
 
-        //- Disallow assignment
+        //- No copy assignment
         void operator=(const fvMesh&) = delete;
 
 

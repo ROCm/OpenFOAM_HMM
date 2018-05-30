@@ -91,11 +91,11 @@ class smoothAlignmentSolver
             triad& t
         ) const;
 
-        //- Disallow default bitwise copy construct
-        smoothAlignmentSolver(const smoothAlignmentSolver&);
+        //- No copy construct
+        smoothAlignmentSolver(const smoothAlignmentSolver&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const smoothAlignmentSolver&);
+        //- No copy assignment
+        void operator=(const smoothAlignmentSolver&) = delete;
 
 
 public:

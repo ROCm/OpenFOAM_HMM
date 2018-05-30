@@ -108,8 +108,8 @@ class cloudSolution
 
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const cloudSolution&);
+        //- No copy assignment
+        void operator=(const cloudSolution&) = delete;
 
 
 public:

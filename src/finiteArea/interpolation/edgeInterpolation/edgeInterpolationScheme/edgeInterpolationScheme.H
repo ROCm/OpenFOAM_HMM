@@ -67,7 +67,7 @@ class edgeInterpolationScheme
 
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const edgeInterpolationScheme&) = delete;
 
 

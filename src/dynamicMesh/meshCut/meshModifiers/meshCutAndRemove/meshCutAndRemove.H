@@ -176,11 +176,11 @@ class meshCutAndRemove
 
 
 
-        //- Disallow default bitwise copy construct
-        meshCutAndRemove(const meshCutAndRemove&);
+        //- No copy construct
+        meshCutAndRemove(const meshCutAndRemove&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const meshCutAndRemove&);
+        //- No copy assignment
+        void operator=(const meshCutAndRemove&) = delete;
 
 public:
 

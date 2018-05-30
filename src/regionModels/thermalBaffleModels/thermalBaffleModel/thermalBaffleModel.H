@@ -64,11 +64,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        thermalBaffleModel(const thermalBaffleModel&);
+        //- No copy construct
+        thermalBaffleModel(const thermalBaffleModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const thermalBaffleModel&);
+        //- No copy assignment
+        void operator=(const thermalBaffleModel&) = delete;
 
         //- Initialize thermal Baffle
         void init();

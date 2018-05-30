@@ -72,9 +72,11 @@ class kOmegaSSTDES
 {
     // Private Member Functions
 
-        // Disallow default bitwise copy construct and assignment
-        kOmegaSSTDES(const kOmegaSSTDES&);
-        void operator=(const kOmegaSSTDES&);
+        //- No copy construct
+        kOmegaSSTDES(const kOmegaSSTDES&) = delete;
+
+        //- No copy assignment
+        void operator=(const kOmegaSSTDES&) = delete;
 
 
 protected:

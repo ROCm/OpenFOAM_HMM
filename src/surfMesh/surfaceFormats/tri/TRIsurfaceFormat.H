@@ -69,10 +69,10 @@ class TRIsurfaceFormat
             const label zoneI
         );
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         TRIsurfaceFormat(const TRIsurfaceFormat<Face>&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const TRIsurfaceFormat<Face>&) = delete;
 
 

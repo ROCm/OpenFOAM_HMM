@@ -95,11 +95,11 @@ private:
             const point& end
         ) const;
 
-        //- Disallow default bitwise copy construct
-        searchablePlate(const searchablePlate&);
+        //- No copy construct
+        searchablePlate(const searchablePlate&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const searchablePlate&);
+        //- No copy assignment
+        void operator=(const searchablePlate&) = delete;
 
 
 public:

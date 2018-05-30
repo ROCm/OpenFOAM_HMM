@@ -58,11 +58,11 @@ class dummyAgglomeration
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        dummyAgglomeration(const dummyAgglomeration&);
+        //- No copy construct
+        dummyAgglomeration(const dummyAgglomeration&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const dummyAgglomeration&);
+        //- No copy assignment
+        void operator=(const dummyAgglomeration&) = delete;
 
 
 public:

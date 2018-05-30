@@ -69,11 +69,11 @@ protected:
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        phaseChangeTwoPhaseMixture(const phaseChangeTwoPhaseMixture&);
+        //- No copy construct
+        phaseChangeTwoPhaseMixture(const phaseChangeTwoPhaseMixture&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const phaseChangeTwoPhaseMixture&);
+        //- No copy assignment
+        void operator=(const phaseChangeTwoPhaseMixture&) = delete;
 
 
 public:

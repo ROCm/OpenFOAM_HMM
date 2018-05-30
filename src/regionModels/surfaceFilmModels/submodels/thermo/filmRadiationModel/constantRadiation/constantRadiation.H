@@ -80,11 +80,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        constantRadiation(const constantRadiation&);
+        //- No copy construct
+        constantRadiation(const constantRadiation&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const constantRadiation&);
+        //- No copy assignment
+        void operator=(const constantRadiation&) = delete;
 
 
 public:

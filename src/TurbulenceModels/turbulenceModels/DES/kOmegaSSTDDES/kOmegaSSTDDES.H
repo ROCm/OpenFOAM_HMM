@@ -70,9 +70,11 @@ class kOmegaSSTDDES
 
         tmp<volScalarField> rd(const volScalarField& magGradU) const;
 
-        // Disallow default bitwise copy construct and assignment
-        kOmegaSSTDDES(const kOmegaSSTDDES&);
-        void operator=(const kOmegaSSTDDES&);
+        //- No copy construct
+        kOmegaSSTDDES(const kOmegaSSTDDES&) = delete;
+
+        //- No copy assignment
+        void operator=(const kOmegaSSTDDES&) = delete;
 
 
 protected:

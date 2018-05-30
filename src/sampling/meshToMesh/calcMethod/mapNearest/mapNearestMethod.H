@@ -111,11 +111,11 @@ protected:
             const List<DynamicList<label>>& tgtToSrc
         ) const;
 
-        //- Disallow default bitwise copy construct
-        mapNearestMethod(const mapNearestMethod&);
+        //- No copy construct
+        mapNearestMethod(const mapNearestMethod&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const mapNearestMethod&);
+        //- No copy assignment
+        void operator=(const mapNearestMethod&) = delete;
 
 
 public:

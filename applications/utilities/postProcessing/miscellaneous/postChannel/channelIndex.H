@@ -93,9 +93,11 @@ class channelIndex
             const labelList& startFaces
         );
 
-        //- Disallow default bitwise copy construct and assignment
-        channelIndex(const channelIndex&);
-        void operator=(const channelIndex&);
+        //- No copy construct
+        channelIndex(const channelIndex&) = delete;
+
+        //- No copy assignment
+        void operator=(const channelIndex&) = delete;
 
 
 public:

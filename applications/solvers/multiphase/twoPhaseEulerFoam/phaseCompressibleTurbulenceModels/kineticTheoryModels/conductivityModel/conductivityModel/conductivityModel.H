@@ -52,11 +52,11 @@ class conductivityModel
 {
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        conductivityModel(const conductivityModel&);
+        //- No copy construct
+        conductivityModel(const conductivityModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const conductivityModel&);
+        //- No copy assignment
+        void operator=(const conductivityModel&) = delete;
 
 
 protected:

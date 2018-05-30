@@ -81,12 +81,6 @@ standardPhaseChange::standardPhaseChange
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-standardPhaseChange::~standardPhaseChange()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void standardPhaseChange::correctModel

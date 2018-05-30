@@ -116,7 +116,7 @@ class Sine
         //- Read the coefficients from the given dictionary
         void read(const dictionary& coeffs);
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const Sine<Type>&) = delete;
 
 

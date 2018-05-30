@@ -193,22 +193,4 @@ void Foam::PrintTable<KeyType, DataType>::print
 }
 
 
-// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
-
-template<class KeyType, class DataType>
-void Foam::PrintTable<KeyType, DataType>::operator=
-(
-    const PrintTable<KeyType, DataType>& rhs
-)
-{
-    // Check for assignment to self
-    if (this == &rhs)
-    {
-        FatalErrorInFunction
-            << "Attempted assignment to self"
-            << abort(FatalError);
-    }
-}
-
-
 // ************************************************************************* //

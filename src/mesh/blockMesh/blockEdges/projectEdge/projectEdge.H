@@ -66,11 +66,11 @@ class projectEdge
         //- Single point find nearest
         void findNearest(const point&, point& near, pointConstraint&) const;
 
-        //- Disallow default bitwise copy construct
-        projectEdge(const projectEdge&);
+        //- No copy construct
+        projectEdge(const projectEdge&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const projectEdge&);
+        //- No copy assignment
+        void operator=(const projectEdge&) = delete;
 
 
 public:

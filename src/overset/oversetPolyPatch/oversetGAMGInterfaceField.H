@@ -64,11 +64,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        oversetGAMGInterfaceField(const oversetGAMGInterfaceField&);
+        //- No copy construct
+        oversetGAMGInterfaceField(const oversetGAMGInterfaceField&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const oversetGAMGInterfaceField&);
+        //- No copy assignment
+        void operator=(const oversetGAMGInterfaceField&) = delete;
 
 
 public:

@@ -127,11 +127,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        dynamicOversetFvMesh(const dynamicOversetFvMesh&);
+        //- No copy construct
+        dynamicOversetFvMesh(const dynamicOversetFvMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const dynamicOversetFvMesh&);
+        //- No copy assignment
+        void operator=(const dynamicOversetFvMesh&) = delete;
 
 
 public:

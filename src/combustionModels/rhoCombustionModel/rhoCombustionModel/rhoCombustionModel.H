@@ -63,8 +63,8 @@ class rhoCombustionModel
         //- Construct as copy (not implemented)
         rhoCombustionModel(const rhoCombustionModel&);
 
-        //- Disallow default bitwise assignment
-        void operator=(const rhoCombustionModel&);
+        //- No copy assignment
+        void operator=(const rhoCombustionModel&) = delete;
 
 
 public:

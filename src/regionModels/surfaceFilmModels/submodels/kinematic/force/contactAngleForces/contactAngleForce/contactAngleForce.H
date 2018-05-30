@@ -71,11 +71,11 @@ class contactAngleForce
         //- Initialise
         void initialise();
 
-        //- Disallow default bitwise copy construct
-        contactAngleForce(const contactAngleForce&);
+        //- No copy construct
+        contactAngleForce(const contactAngleForce&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const contactAngleForce&);
+        //- No copy assignment
+        void operator=(const contactAngleForce&) = delete;
 
 
 protected:

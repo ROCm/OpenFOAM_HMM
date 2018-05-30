@@ -170,11 +170,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        AMIInterpolation(const AMIInterpolation&);
+        //- No copy construct
+        AMIInterpolation(const AMIInterpolation&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const AMIInterpolation&);
+        //- No copy assignment
+        void operator=(const AMIInterpolation&) = delete;
 
 
         // Parallel functionality

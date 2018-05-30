@@ -82,11 +82,11 @@ class edgeLimitedGrad
         ) const;
 
 
-        //- Disallow default bitwise copy construct
-        edgeLimitedGrad(const edgeLimitedGrad&);
+        //- No copy construct
+        edgeLimitedGrad(const edgeLimitedGrad&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const edgeLimitedGrad&);
+        //- No copy assignment
+        void operator=(const edgeLimitedGrad&) = delete;
 
 
 public:

@@ -129,11 +129,11 @@ class TDACChemistryModel
 
     // Private Member Functions
 
-        //- Disallow copy constructor
-        TDACChemistryModel(const TDACChemistryModel&);
+        //- No copy construct
+        TDACChemistryModel(const TDACChemistryModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const TDACChemistryModel&);
+        //- No copy assignment
+        void operator=(const TDACChemistryModel&) = delete;
 
         //- Solve the reaction system for the given time step
         //  of given type and return the characteristic time

@@ -132,10 +132,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow copy construct
+        //- No copy construct
         profiling(const profiling&) = delete;
 
-        //- Disallow copy assignment
+        //- No copy assignment
         void operator=(const profiling&) = delete;
 
 

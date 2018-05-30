@@ -50,11 +50,11 @@ class DSMCBaseCloud
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        DSMCBaseCloud(const DSMCBaseCloud&);
+        //- No copy construct
+        DSMCBaseCloud(const DSMCBaseCloud&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const DSMCBaseCloud&);
+        //- No copy assignment
+        void operator=(const DSMCBaseCloud&) = delete;
 
 
 public:

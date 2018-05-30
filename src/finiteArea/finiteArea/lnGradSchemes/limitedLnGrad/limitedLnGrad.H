@@ -76,8 +76,8 @@ class limitedLnGrad
 
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const limitedLnGrad&);
+        //- No copy assignment
+        void operator=(const limitedLnGrad&) = delete;
 
 
 public:

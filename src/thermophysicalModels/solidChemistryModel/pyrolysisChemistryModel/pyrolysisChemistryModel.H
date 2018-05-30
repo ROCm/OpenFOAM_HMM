@@ -60,8 +60,8 @@ class pyrolysisChemistryModel
 {
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const pyrolysisChemistryModel&);
+        //- No copy assignment
+        void operator=(const pyrolysisChemistryModel&) = delete;
 
 
 protected:

@@ -269,10 +269,10 @@ class energyTransport
         //- Return kappa
         tmp<volScalarField> kappa() const;
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         energyTransport(const energyTransport&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const energyTransport&) = delete;
 
 

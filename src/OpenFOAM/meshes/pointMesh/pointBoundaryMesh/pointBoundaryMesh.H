@@ -65,11 +65,11 @@ class pointBoundaryMesh
         //- Calculate the geometry for the patches (transformation tensors etc.)
         void calcGeometry();
 
-        //- Disallow default bitwise copy construct
-        pointBoundaryMesh(const pointBoundaryMesh&);
+        //- No copy construct
+        pointBoundaryMesh(const pointBoundaryMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const pointBoundaryMesh&);
+        //- No copy assignment
+        void operator=(const pointBoundaryMesh&) = delete;
 
 
 public:

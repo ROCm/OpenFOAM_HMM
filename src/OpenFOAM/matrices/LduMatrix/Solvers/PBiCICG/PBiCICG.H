@@ -54,11 +54,11 @@ class PBiCICG
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        PBiCICG(const PBiCICG&);
+        //- No copy construct
+        PBiCICG(const PBiCICG&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const PBiCICG&);
+        //- No copy assignment
+        void operator=(const PBiCICG&) = delete;
 
 
 public:

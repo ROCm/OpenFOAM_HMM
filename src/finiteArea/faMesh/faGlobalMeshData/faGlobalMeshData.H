@@ -75,11 +75,11 @@ class faGlobalMeshData
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        faGlobalMeshData(const faGlobalMeshData&);
+        //- No copy construct
+        faGlobalMeshData(const faGlobalMeshData&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const faGlobalMeshData&);
+        //- No copy assignment
+        void operator=(const faGlobalMeshData&) = delete;
 
 
 public:

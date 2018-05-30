@@ -66,10 +66,10 @@ class AC3DsurfaceFormat
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         AC3DsurfaceFormat(const AC3DsurfaceFormat<Face>&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const AC3DsurfaceFormat<Face>&) = delete;
 
 

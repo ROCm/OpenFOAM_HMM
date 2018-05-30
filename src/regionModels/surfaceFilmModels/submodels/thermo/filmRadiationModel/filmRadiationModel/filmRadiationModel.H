@@ -60,11 +60,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        filmRadiationModel(const filmRadiationModel&);
+        //- No copy construct
+        filmRadiationModel(const filmRadiationModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const filmRadiationModel&);
+        //- No copy assignment
+        void operator=(const filmRadiationModel&) = delete;
 
 
 public:

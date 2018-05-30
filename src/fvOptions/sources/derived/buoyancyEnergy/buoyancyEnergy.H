@@ -71,11 +71,11 @@ class buoyancyEnergy
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        buoyancyEnergy(const buoyancyEnergy&);
+        //- No copy construct
+        buoyancyEnergy(const buoyancyEnergy&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const buoyancyEnergy&);
+        //- No copy assignment
+        void operator=(const buoyancyEnergy&) = delete;
 
 
 public:

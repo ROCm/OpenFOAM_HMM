@@ -75,11 +75,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        GAMGInterface(const GAMGInterface&);
+        //- No copy construct
+        GAMGInterface(const GAMGInterface&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const GAMGInterface&);
+        //- No copy assignment
+        void operator=(const GAMGInterface&) = delete;
 
 
 public:

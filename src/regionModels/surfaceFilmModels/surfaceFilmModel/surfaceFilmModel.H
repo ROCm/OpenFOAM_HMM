@@ -55,11 +55,11 @@ class surfaceFilmModel
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        surfaceFilmModel(const surfaceFilmModel&);
+        //- No copy construct
+        surfaceFilmModel(const surfaceFilmModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const surfaceFilmModel&);
+        //- No copy assignment
+        void operator=(const surfaceFilmModel&) = delete;
 
 
 public:

@@ -91,10 +91,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         triSurfaceLoader(const triSurfaceLoader&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const triSurfaceLoader&) = delete;
 
 public:

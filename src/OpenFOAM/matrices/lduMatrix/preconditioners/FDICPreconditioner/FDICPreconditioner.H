@@ -67,11 +67,11 @@ class FDICPreconditioner
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        FDICPreconditioner(const FDICPreconditioner&);
+        //- No copy construct
+        FDICPreconditioner(const FDICPreconditioner&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const FDICPreconditioner&);
+        //- No copy assignment
+        void operator=(const FDICPreconditioner&) = delete;
 
 
 public:

@@ -78,10 +78,10 @@ class TRIReader
 
         bool readFile(const fileName& filename);
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         TRIReader(const TRIReader&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         TRIReader& operator=(const TRIReader&) = delete;
 
 

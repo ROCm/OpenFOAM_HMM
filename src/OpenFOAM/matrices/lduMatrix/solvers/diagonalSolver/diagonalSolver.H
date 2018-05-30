@@ -55,11 +55,11 @@ class diagonalSolver
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        diagonalSolver(const diagonalSolver&);
+        //- No copy construct
+        diagonalSolver(const diagonalSolver&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const diagonalSolver&);
+        //- No copy assignment
+        void operator=(const diagonalSolver&) = delete;
 
 
 public:

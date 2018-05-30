@@ -88,8 +88,10 @@ class decompositionInformation
             const label nDomains
         );
 
-        //- Disallow default bitwise copy construct and assignment
+        //- No copy construct
         decompositionInformation(const decompositionInformation&) = delete;
+
+        //- No copy assignment
         void operator=(const decompositionInformation&) = delete;
 
 

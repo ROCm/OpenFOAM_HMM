@@ -123,11 +123,11 @@ class FSD
         //- Calculate the normalised fuel source term
         void calculateSourceNorm();
 
-        //- Disallow copy construct
-        FSD(const FSD&);
+        //- No copy construct
+        FSD(const FSD&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const FSD&);
+        //- No copy assignment
+        void operator=(const FSD&) = delete;
 
 
 public:

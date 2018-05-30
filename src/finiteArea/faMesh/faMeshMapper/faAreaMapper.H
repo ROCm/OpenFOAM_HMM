@@ -104,11 +104,11 @@ class faAreaMapper
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        faAreaMapper(const faAreaMapper&);
+        //- No copy construct
+        faAreaMapper(const faAreaMapper&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const faAreaMapper&);
+        //- No copy assignment
+        void operator=(const faAreaMapper&) = delete;
 
         //- Calculate addressing
         void calcAddressing() const;

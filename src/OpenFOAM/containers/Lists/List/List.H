@@ -251,11 +251,7 @@ public:
             inline T& newElmt(const label i);
 
 
-        //- Disallow implicit shallowCopy
-        void shallowCopy(const UList<T>&) = delete;
-
-
-    // Member operators
+    // Member Operators
 
         //- Assignment to UList operator. Takes linear time
         void operator=(const UList<T>& a);
@@ -295,7 +291,7 @@ public:
         void operator=(SLList<T>&& lst);
 
 
-    // Istream operator
+    // Istream Operator
 
         //- Read List from Istream, discarding contents of existing List
         friend Istream& operator>> <T>
@@ -304,6 +300,11 @@ public:
             List<T>& L
         );
 
+
+    // Housekeeping
+
+        //- No shallowCopy permitted
+        void shallowCopy(const UList<T>&) = delete;
 };
 
 

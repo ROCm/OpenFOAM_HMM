@@ -151,11 +151,11 @@ class diffusionMulticomponent
         //- Initialize
         void init();
 
-        //- Disallow copy construct
-        diffusionMulticomponent(const diffusionMulticomponent&);
+        //- No copy construct
+        diffusionMulticomponent(const diffusionMulticomponent&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const diffusionMulticomponent&);
+        //- No copy assignment
+        void operator=(const diffusionMulticomponent&) = delete;
 
 
 public:

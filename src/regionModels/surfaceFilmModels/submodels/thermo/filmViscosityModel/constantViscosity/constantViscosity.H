@@ -56,11 +56,11 @@ class constantViscosity
 {
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        constantViscosity(const constantViscosity&);
+        //- No copy construct
+        constantViscosity(const constantViscosity&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const constantViscosity&);
+        //- No copy assignment
+        void operator=(const constantViscosity&) = delete;
 
 
 protected:

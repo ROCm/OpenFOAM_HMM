@@ -53,11 +53,11 @@ class indexedParticleCloud
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        indexedParticleCloud(const indexedParticleCloud&);
+        //- No copy construct
+        indexedParticleCloud(const indexedParticleCloud&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const indexedParticleCloud&);
+        //- No copy assignment
+        void operator=(const indexedParticleCloud&) = delete;
 
 
 public:

@@ -71,11 +71,11 @@ class CentredFitSnGradScheme
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        CentredFitSnGradScheme(const CentredFitSnGradScheme&);
+        //- No copy construct
+        CentredFitSnGradScheme(const CentredFitSnGradScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const CentredFitSnGradScheme&);
+        //- No copy assignment
+        void operator=(const CentredFitSnGradScheme&) = delete;
 
 
 public:

@@ -137,10 +137,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         writeObjects(const writeObjects&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const writeObjects&) = delete;
 
 

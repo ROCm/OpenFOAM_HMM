@@ -91,11 +91,11 @@ class faceShading
             const pointField& myFc
         );
 
-        //- Disallow default bitwise copy construct
-        faceShading(const faceShading&);
+        //- No copy construct
+        faceShading(const faceShading&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const faceShading&);
+        //- No copy assignment
+        void operator=(const faceShading&) = delete;
 
 
 public:

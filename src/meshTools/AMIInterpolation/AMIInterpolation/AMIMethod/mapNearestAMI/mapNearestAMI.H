@@ -56,11 +56,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        mapNearestAMI(const mapNearestAMI&);
+        //- No copy construct
+        mapNearestAMI(const mapNearestAMI&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const mapNearestAMI&);
+        //- No copy assignment
+        void operator=(const mapNearestAMI&) = delete;
 
         // Marching front
 

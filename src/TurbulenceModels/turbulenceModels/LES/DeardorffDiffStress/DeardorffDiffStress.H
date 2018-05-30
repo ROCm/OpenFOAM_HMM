@@ -86,9 +86,11 @@ class DeardorffDiffStress
 {
     // Private Member Functions
 
-        // Disallow default bitwise copy construct and assignment
-        DeardorffDiffStress(const DeardorffDiffStress&);
-        void operator=(const DeardorffDiffStress&);
+        //- No copy construct
+        DeardorffDiffStress(const DeardorffDiffStress&) = delete;
+
+        //- No copy assignment
+        void operator=(const DeardorffDiffStress&) = delete;
 
 
 protected:

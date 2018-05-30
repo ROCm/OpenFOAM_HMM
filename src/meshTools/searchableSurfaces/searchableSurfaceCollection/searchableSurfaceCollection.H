@@ -108,11 +108,14 @@ class searchableSurfaceCollection
         ) const;
 
 
-        //- Disallow default bitwise copy construct
-        searchableSurfaceCollection(const searchableSurfaceCollection&);
+        //- No copy construct
+        searchableSurfaceCollection
+        (
+            const searchableSurfaceCollection&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const searchableSurfaceCollection&);
+        //- No copy assignment
+        void operator=(const searchableSurfaceCollection&) = delete;
 
 
 public:

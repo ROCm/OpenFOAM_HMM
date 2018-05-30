@@ -80,9 +80,11 @@ class WALE
 {
     // Private Member Functions
 
-        // Disallow default bitwise copy construct and assignment
-        WALE(const WALE&);
-        void operator=(const WALE&);
+        //- No copy construct
+        WALE(const WALE&) = delete;
+
+        //- No copy assignment
+        void operator=(const WALE&) = delete;
 
 
 protected:

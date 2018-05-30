@@ -61,11 +61,11 @@ class cellAspectRatioControl
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        cellAspectRatioControl(const cellAspectRatioControl&);
+        //- No copy construct
+        cellAspectRatioControl(const cellAspectRatioControl&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cellAspectRatioControl&);
+        //- No copy assignment
+        void operator=(const cellAspectRatioControl&) = delete;
 
 
 public:

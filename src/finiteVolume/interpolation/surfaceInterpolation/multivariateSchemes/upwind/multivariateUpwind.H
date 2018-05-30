@@ -59,11 +59,11 @@ class multivariateUpwind
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        multivariateUpwind(const multivariateUpwind&);
+        //- No copy construct
+        multivariateUpwind(const multivariateUpwind&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const multivariateUpwind&);
+        //- No copy assignment
+        void operator=(const multivariateUpwind&) = delete;
 
 
 public:

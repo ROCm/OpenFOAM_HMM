@@ -258,11 +258,11 @@ class meshCutter
 
 
 
-        //- Disallow default bitwise copy construct
-        meshCutter(const meshCutter&);
+        //- No copy construct
+        meshCutter(const meshCutter&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const meshCutter&);
+        //- No copy assignment
+        void operator=(const meshCutter&) = delete;
 
 
 public:

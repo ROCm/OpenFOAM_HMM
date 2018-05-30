@@ -133,11 +133,11 @@ class engineValve
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        engineValve(const engineValve&);
+        //- No copy construct
+        engineValve(const engineValve&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const engineValve&);
+        //- No copy assignment
+        void operator=(const engineValve&) = delete;
 
 
         //- Adjust crank angle to drop within the limits of the lift profile

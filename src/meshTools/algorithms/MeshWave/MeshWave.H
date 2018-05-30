@@ -71,11 +71,11 @@ class MeshWave
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        MeshWave(const MeshWave&);
+        //- No copy construct
+        MeshWave(const MeshWave&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const MeshWave&);
+        //- No copy assignment
+        void operator=(const MeshWave&) = delete;
 
       // Private static data
 

@@ -140,11 +140,11 @@ protected:
             scalarSquareMatrix& matrix
         );
 
-        //- Disallow default bitwise copy construct
-        viewFactor(const viewFactor&);
+        //- No copy construct
+        viewFactor(const viewFactor&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const viewFactor&);
+        //- No copy assignment
+        void operator=(const viewFactor&) = delete;
 
 
 public:

@@ -79,11 +79,11 @@ class pairPotentialList
             const polyMesh& mesh
         );
 
-        //- Disallow default bitwise assignment
-        void operator=(const pairPotentialList&);
+        //- No copy construct
+        pairPotentialList(const pairPotentialList&) = delete;
 
-        //- Disallow default bitwise copy construct
-        pairPotentialList(const pairPotentialList&);
+        //- No copy assignment
+        void operator=(const pairPotentialList&) = delete;
 
 
 public:

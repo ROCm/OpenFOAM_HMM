@@ -67,7 +67,7 @@ class IrreversibleReaction
 
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=
         (
             const IrreversibleReaction
@@ -76,7 +76,7 @@ class IrreversibleReaction
                 ReactionThermo,
                 ReactionRate
             >&
-        );
+        ) = delete;
 
 
 public:

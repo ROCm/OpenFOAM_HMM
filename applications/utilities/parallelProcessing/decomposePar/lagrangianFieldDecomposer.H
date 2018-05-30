@@ -68,11 +68,11 @@ class lagrangianFieldDecomposer
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        lagrangianFieldDecomposer(const lagrangianFieldDecomposer&);
+        //- No copy construct
+        lagrangianFieldDecomposer(const lagrangianFieldDecomposer&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const lagrangianFieldDecomposer&);
+        //- No copy assignment
+        void operator=(const lagrangianFieldDecomposer&) = delete;
 
 
 public:

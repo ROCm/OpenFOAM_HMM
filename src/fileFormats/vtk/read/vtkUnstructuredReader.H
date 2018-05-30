@@ -204,8 +204,8 @@ private:
 
         void read(ISstream& inFile);
 
-        //- Disallow assignment
-        void operator=(const vtkUnstructuredReader&);
+        //- No copy assignment
+        void operator=(const vtkUnstructuredReader&) = delete;
 
 
 public:

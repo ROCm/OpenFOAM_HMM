@@ -107,11 +107,11 @@ class attachDetach
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        attachDetach(const attachDetach&);
+        //- No copy construct
+        attachDetach(const attachDetach&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const attachDetach&);
+        //- No copy assignment
+        void operator=(const attachDetach&) = delete;
 
         //- Check validity of construction data
         void checkDefinition();

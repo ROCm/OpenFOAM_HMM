@@ -104,8 +104,8 @@ class polynomialFunction
         );
 
 
-        //- Disallow default bitwise assignment
-        void operator=(const polynomialFunction&);
+        //- No copy assignment
+        void operator=(const polynomialFunction&) = delete;
 
 
 

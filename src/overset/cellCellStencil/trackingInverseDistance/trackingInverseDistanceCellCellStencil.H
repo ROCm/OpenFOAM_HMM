@@ -120,11 +120,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        trackingInverseDistance(const trackingInverseDistance&);
+        //- No copy construct
+        trackingInverseDistance(const trackingInverseDistance&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const trackingInverseDistance&);
+        //- No copy assignment
+        void operator=(const trackingInverseDistance&) = delete;
 
 
 public:

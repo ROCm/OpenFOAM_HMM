@@ -220,9 +220,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        smoothDelta(const smoothDelta&);
-        void operator=(const smoothDelta&);
+        //- No copy construct and assignment
+        smoothDelta(const smoothDelta&) = delete;
+
+        //- No copy assignment
+        void operator=(const smoothDelta&) = delete;
 
         // Calculate the delta values
         void calcDelta();

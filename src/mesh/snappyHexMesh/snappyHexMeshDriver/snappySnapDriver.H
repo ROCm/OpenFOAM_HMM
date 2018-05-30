@@ -650,11 +650,11 @@ class snappySnapDriver
                 ) const;
 
 
-        //- Disallow default bitwise copy construct
-        snappySnapDriver(const snappySnapDriver&);
+        //- No copy construct
+        snappySnapDriver(const snappySnapDriver&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const snappySnapDriver&);
+        //- No copy assignment
+        void operator=(const snappySnapDriver&) = delete;
 
 
 public:

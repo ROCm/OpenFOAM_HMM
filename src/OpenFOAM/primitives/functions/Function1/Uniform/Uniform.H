@@ -63,8 +63,8 @@ class Uniform
 {
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const Uniform<Type>&);
+        //- No copy assignment
+        void operator=(const Uniform<Type>&) = delete;
 
 
 public:

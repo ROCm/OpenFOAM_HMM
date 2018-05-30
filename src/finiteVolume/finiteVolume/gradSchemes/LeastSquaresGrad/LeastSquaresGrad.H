@@ -94,11 +94,11 @@ class LeastSquaresGrad
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        LeastSquaresGrad(const LeastSquaresGrad&);
+        //- No copy construct
+        LeastSquaresGrad(const LeastSquaresGrad&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const LeastSquaresGrad&);
+        //- No copy assignment
+        void operator=(const LeastSquaresGrad&) = delete;
 
 
 public:

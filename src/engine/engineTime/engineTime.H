@@ -86,11 +86,11 @@ class engineTime
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        engineTime(const engineTime&);
+        //- No copy construct
+        engineTime(const engineTime&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const engineTime&);
+        //- No copy assignment
+        void operator=(const engineTime&) = delete;
 
         //- Adjust read time values
         void timeAdjustment();

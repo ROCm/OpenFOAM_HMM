@@ -71,11 +71,11 @@ protected:
             const scalarField& faceWeights
         );
 
-        //- Disallow default bitwise copy construct
-        pairGAMGAgglomeration(const pairGAMGAgglomeration&);
+        //- No copy construct
+        pairGAMGAgglomeration(const pairGAMGAgglomeration&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const pairGAMGAgglomeration&);
+        //- No copy assignment
+        void operator=(const pairGAMGAgglomeration&) = delete;
 
 
 public:

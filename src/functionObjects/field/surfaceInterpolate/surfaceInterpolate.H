@@ -117,11 +117,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        surfaceInterpolate(const surfaceInterpolate&);
+        //- No copy construct
+        surfaceInterpolate(const surfaceInterpolate&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const surfaceInterpolate&);
+        //- No copy assignment
+        void operator=(const surfaceInterpolate&) = delete;
 
 
 public:

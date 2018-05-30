@@ -78,11 +78,11 @@ class lduPrimitiveMesh
         //- Get size of all meshes
         static label totalSize(const PtrList<lduPrimitiveMesh>&);
 
-        //- Disallow default bitwise copy construct
-        lduPrimitiveMesh(const lduPrimitiveMesh&);
+        //- No copy construct
+        lduPrimitiveMesh(const lduPrimitiveMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const lduPrimitiveMesh&);
+        //- No copy assignment
+        void operator=(const lduPrimitiveMesh&) = delete;
 
 
 public:

@@ -127,11 +127,11 @@ private:
             const vectorField& U
         ) const;
 
-        //- Disallow default bitwise copy construct
-        actuationDiskSource(const actuationDiskSource&);
+        //- No copy construct
+        actuationDiskSource(const actuationDiskSource&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const actuationDiskSource&);
+        //- No copy assignment
+        void operator=(const actuationDiskSource&) = delete;
 
 
 public:

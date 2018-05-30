@@ -50,11 +50,11 @@ class regularWaveModel
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        regularWaveModel(const regularWaveModel&);
+        //- No copy construct
+        regularWaveModel(const regularWaveModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const regularWaveModel&);
+        //- No copy assignment
+        void operator=(const regularWaveModel&) = delete;
 
 
 protected:

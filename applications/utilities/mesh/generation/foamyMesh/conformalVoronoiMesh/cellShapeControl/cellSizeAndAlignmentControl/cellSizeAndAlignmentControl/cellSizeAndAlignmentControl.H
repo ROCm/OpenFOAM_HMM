@@ -71,11 +71,14 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        cellSizeAndAlignmentControl(const cellSizeAndAlignmentControl&);
+        //- No copy construct
+        cellSizeAndAlignmentControl
+        (
+            const cellSizeAndAlignmentControl&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cellSizeAndAlignmentControl&);
+        //- No copy assignment
+        void operator=(const cellSizeAndAlignmentControl&) = delete;
 
 
 public:

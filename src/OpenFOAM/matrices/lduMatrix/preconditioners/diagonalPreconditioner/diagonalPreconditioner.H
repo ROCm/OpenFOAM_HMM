@@ -64,11 +64,11 @@ class diagonalPreconditioner
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        diagonalPreconditioner(const diagonalPreconditioner&);
+        //- No copy construct
+        diagonalPreconditioner(const diagonalPreconditioner&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const diagonalPreconditioner&);
+        //- No copy assignment
+        void operator=(const diagonalPreconditioner&) = delete;
 
 
 public:

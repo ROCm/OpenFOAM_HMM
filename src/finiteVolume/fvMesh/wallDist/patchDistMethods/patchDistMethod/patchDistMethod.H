@@ -71,11 +71,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        patchDistMethod(const patchDistMethod&);
+        //- No copy construct
+        patchDistMethod(const patchDistMethod&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const patchDistMethod&);
+        //- No copy assignment
+        void operator=(const patchDistMethod&) = delete;
 
 public:
 

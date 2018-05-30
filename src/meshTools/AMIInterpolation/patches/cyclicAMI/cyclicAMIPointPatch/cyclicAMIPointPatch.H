@@ -60,11 +60,11 @@ class cyclicAMIPointPatch
 
     // Private Member Functions
 
-        //- Disallow default construct as copy
-        cyclicAMIPointPatch(const cyclicAMIPointPatch&);
+        //- No copy construct
+        cyclicAMIPointPatch(const cyclicAMIPointPatch&) = delete;
 
-        //- Disallow default assignment
-        void operator=(const cyclicAMIPointPatch&);
+        //- No copy assignment
+        void operator=(const cyclicAMIPointPatch&) = delete;
 
 
 protected:

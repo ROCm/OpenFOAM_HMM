@@ -172,11 +172,11 @@ class boundaryMesh
         ) const;
 
 
-        //- Disallow default bitwise copy construct
-        boundaryMesh(const boundaryMesh&);
+        //- No copy construct
+        boundaryMesh(const boundaryMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const boundaryMesh&);
+        //- No copy assignment
+        void operator=(const boundaryMesh&) = delete;
 
 
 public:

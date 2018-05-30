@@ -70,11 +70,11 @@ class cv2DControls
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        cv2DControls(const cv2DControls&);
+        //- No copy construct
+        cv2DControls(const cv2DControls&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cv2DControls&);
+        //- No copy assignment
+        void operator=(const cv2DControls&) = delete;
 
 
 public:

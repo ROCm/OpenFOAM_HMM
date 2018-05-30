@@ -67,7 +67,7 @@ class pointZone
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         pointZone(const pointZone&) = delete;
 
 

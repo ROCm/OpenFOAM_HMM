@@ -227,10 +227,10 @@ private:
         template<class Type>
         void sampleAndWriteSurfaceFields(const fieldGroup<Type>&);
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         probes(const probes&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const probes&) = delete;
 
 

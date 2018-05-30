@@ -71,8 +71,8 @@ class procLduInterface
 
     // Private Member Functions
 
-        //- Dissallow construction as copy
-        procLduInterface(const procLduInterface&);
+        //- No copy construct
+        procLduInterface(const procLduInterface&) = delete;
 
 
 public:

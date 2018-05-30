@@ -73,9 +73,15 @@ class threePhaseInterfaceProperties
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        threePhaseInterfaceProperties(const threePhaseInterfaceProperties&);
-        void operator=(const threePhaseInterfaceProperties&);
+        //- No copy construct
+        threePhaseInterfaceProperties
+        (
+            const threePhaseInterfaceProperties&
+        ) = delete;
+
+        //- No copy assignment
+        void operator=(const threePhaseInterfaceProperties&) = delete;
+
 
         //- Correction for the boundary condition on the unit normal nHat on
         //  walls to produce the correct contact dynamic angle.

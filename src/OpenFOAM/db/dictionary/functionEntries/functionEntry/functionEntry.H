@@ -67,10 +67,10 @@ class functionEntry
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         functionEntry(const functionEntry&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const functionEntry&) = delete;
 
 

@@ -61,10 +61,10 @@ class legacyAsciiFormatter
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         legacyAsciiFormatter(const legacyAsciiFormatter&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const legacyAsciiFormatter&) = delete;
 
 

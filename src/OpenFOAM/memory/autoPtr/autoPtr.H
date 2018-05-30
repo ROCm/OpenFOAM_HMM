@@ -256,7 +256,7 @@ public:
 
     // Housekeeping
 
-        //- Disallow assignment from plain pointer
+        //- No copy assignment from plain pointer
         //  \deprecated Convenient, but uncontrolled access (FEB-2018)
         void operator=(T* p) = delete;
 };

@@ -135,10 +135,10 @@ class ddt2
         int process(const word& inputName);
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         ddt2(const ddt2&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const ddt2&) = delete;
 
 

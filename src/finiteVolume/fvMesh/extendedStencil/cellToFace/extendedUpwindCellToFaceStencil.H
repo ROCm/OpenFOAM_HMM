@@ -113,11 +113,14 @@ class extendedUpwindCellToFaceStencil
         );
 
 
-        //- Disallow default bitwise copy construct
-        extendedUpwindCellToFaceStencil(const extendedUpwindCellToFaceStencil&);
+        //- No copy construct
+        extendedUpwindCellToFaceStencil
+        (
+            const extendedUpwindCellToFaceStencil&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const extendedUpwindCellToFaceStencil&);
+        //- No copy assignment
+        void operator=(const extendedUpwindCellToFaceStencil&) = delete;
 
 
 public:

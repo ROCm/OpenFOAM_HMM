@@ -151,11 +151,11 @@ class timeControl
             const bool rampDirectionUp
         );
 
-        //- Disallow default bitwise copy construct
-        timeControl(const timeControl&);
+        //- No copy construct
+        timeControl(const timeControl&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const timeControl&);
+        //- No copy assignment
+        void operator=(const timeControl&) = delete;
 
 
 public:

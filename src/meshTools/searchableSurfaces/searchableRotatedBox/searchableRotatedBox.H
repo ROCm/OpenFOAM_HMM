@@ -80,11 +80,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        searchableRotatedBox(const searchableRotatedBox&);
+        //- No copy construct
+        searchableRotatedBox(const searchableRotatedBox&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const searchableRotatedBox&);
+        //- No copy assignment
+        void operator=(const searchableRotatedBox&) = delete;
 
 
 public:

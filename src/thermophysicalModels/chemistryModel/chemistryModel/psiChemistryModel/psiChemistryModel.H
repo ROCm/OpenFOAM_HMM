@@ -63,8 +63,8 @@ class psiChemistryModel
         //- Construct as copy (not implemented)
         psiChemistryModel(const psiChemistryModel&);
 
-        //- Disallow default bitwise assignment
-        void operator=(const psiChemistryModel&);
+        //- No copy assignment
+        void operator=(const psiChemistryModel&) = delete;
 
 
 protected:

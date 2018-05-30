@@ -67,11 +67,11 @@ class reactingMixture
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        reactingMixture(const reactingMixture&);
+        //- No copy construct
+        reactingMixture(const reactingMixture&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const reactingMixture&);
+        //- No copy assignment
+        void operator=(const reactingMixture&) = delete;
 
 
 public:

@@ -67,11 +67,11 @@ class algebraic
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        algebraic(const algebraic&);
+        //- No copy construct
+        algebraic(const algebraic&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const algebraic&);
+        //- No copy assignment
+        void operator=(const algebraic&) = delete;
 
 
 public:

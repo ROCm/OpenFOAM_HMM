@@ -87,11 +87,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        initialPointsMethod(const initialPointsMethod&);
+        //- No copy construct
+        initialPointsMethod(const initialPointsMethod&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const initialPointsMethod&);
+        //- No copy assignment
+        void operator=(const initialPointsMethod&) = delete;
 
 
 public:

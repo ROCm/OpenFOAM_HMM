@@ -66,11 +66,11 @@ class Histogram
 
         void count(const List& bins, const List& l);
 
-        //- Disallow default bitwise copy construct
-        Histogram(const Histogram&);
+        //- No copy construct
+        Histogram(const Histogram&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const Histogram&);
+        //- No copy assignment
+        void operator=(const Histogram&) = delete;
 
 
 public:

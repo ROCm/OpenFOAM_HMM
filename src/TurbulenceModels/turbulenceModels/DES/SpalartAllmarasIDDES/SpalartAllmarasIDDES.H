@@ -84,9 +84,11 @@ class SpalartAllmarasIDDES
         //- Delay function
         tmp<volScalarField> fdt(const volScalarField& magGradU) const;
 
-        // Disallow default bitwise copy construct and assignment
-        SpalartAllmarasIDDES(const SpalartAllmarasIDDES&);
-        void operator=(const SpalartAllmarasIDDES&);
+        //- No copy construct
+        SpalartAllmarasIDDES(const SpalartAllmarasIDDES&) = delete;
+
+        //- No copy assignment
+        void operator=(const SpalartAllmarasIDDES&) = delete;
 
 
 protected:

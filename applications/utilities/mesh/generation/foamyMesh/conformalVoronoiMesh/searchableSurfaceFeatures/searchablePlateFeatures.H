@@ -63,11 +63,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        searchablePlateFeatures(const searchablePlateFeatures&);
+        //- No copy construct
+        searchablePlateFeatures(const searchablePlateFeatures&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const searchablePlateFeatures&);
+        //- No copy assignment
+        void operator=(const searchablePlateFeatures&) = delete;
 
 
 public:

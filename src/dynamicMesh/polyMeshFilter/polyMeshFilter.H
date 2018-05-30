@@ -186,11 +186,11 @@ class polyMeshFilter
             labelList& origToCurrentPointMap
         ) const;
 
-        //- Disallow default bitwise copy construct
-        polyMeshFilter(const polyMeshFilter&);
+        //- No copy construct
+        polyMeshFilter(const polyMeshFilter&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const polyMeshFilter&);
+        //- No copy assignment
+        void operator=(const polyMeshFilter&) = delete;
 
 
 public:

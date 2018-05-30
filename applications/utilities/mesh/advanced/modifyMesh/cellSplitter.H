@@ -91,11 +91,11 @@ class cellSplitter
             const Map<labelList>& cellToCells
         ) const;
 
-        //- Disallow default bitwise copy construct
-        cellSplitter(const cellSplitter&);
+        //- No copy construct
+        cellSplitter(const cellSplitter&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cellSplitter&);
+        //- No copy assignment
+        void operator=(const cellSplitter&) = delete;
 
 public:
 

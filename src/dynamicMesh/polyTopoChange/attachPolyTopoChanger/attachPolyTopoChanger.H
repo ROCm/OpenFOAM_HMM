@@ -65,11 +65,11 @@ class attachPolyTopoChanger
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        attachPolyTopoChanger(const attachPolyTopoChanger&);
+        //- No copy construct
+        attachPolyTopoChanger(const attachPolyTopoChanger&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const attachPolyTopoChanger&);
+        //- No copy assignment
+        void operator=(const attachPolyTopoChanger&) = delete;
 
 
 public:

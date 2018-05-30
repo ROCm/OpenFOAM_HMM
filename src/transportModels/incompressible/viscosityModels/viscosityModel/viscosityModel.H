@@ -78,11 +78,11 @@ protected:
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        viscosityModel(const viscosityModel&);
+        //- No copy construct
+        viscosityModel(const viscosityModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const viscosityModel&);
+        //- No copy assignment
+        void operator=(const viscosityModel&) = delete;
 
 
 public:

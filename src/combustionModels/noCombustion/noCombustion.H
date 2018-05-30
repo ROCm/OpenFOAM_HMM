@@ -55,11 +55,11 @@ class noCombustion
     public CombThermoType
 {
 
-    //- Disallow copy construct
-    noCombustion(const noCombustion&);
+    //- No copy construct
+    noCombustion(const noCombustion&) = delete;
 
-    //- Disallow default bitwise assignment
-    void operator=(const noCombustion&);
+    //- No copy assignment
+    void operator=(const noCombustion&) = delete;
 
 
 public:

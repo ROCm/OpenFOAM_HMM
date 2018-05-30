@@ -147,11 +147,11 @@ class kineticTheoryModel
         void correctNut()
         {}
 
-        //- Disallow default bitwise copy construct
-        kineticTheoryModel(const kineticTheoryModel&);
+        //- No copy construct
+        kineticTheoryModel(const kineticTheoryModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const kineticTheoryModel&);
+        //- No copy assignment
+        void operator=(const kineticTheoryModel&) = delete;
 
 
 public:

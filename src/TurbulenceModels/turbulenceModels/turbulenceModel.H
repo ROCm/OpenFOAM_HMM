@@ -82,11 +82,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        turbulenceModel(const turbulenceModel&);
+        //- No copy construct
+        turbulenceModel(const turbulenceModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const turbulenceModel&);
+        //- No copy assignment
+        void operator=(const turbulenceModel&) = delete;
 
 
 public:

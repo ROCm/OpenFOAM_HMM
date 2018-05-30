@@ -63,11 +63,11 @@ class projectCurveEdge
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        projectCurveEdge(const projectCurveEdge&);
+        //- No copy construct
+        projectCurveEdge(const projectCurveEdge&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const projectCurveEdge&);
+        //- No copy assignment
+        void operator=(const projectCurveEdge&) = delete;
 
 
 public:

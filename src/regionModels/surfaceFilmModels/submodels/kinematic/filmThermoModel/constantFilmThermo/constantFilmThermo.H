@@ -122,11 +122,11 @@ private:
         //- Initialise thermoData object
         void init(thermoData& td);
 
-        //- Disallow default bitwise copy construct
-        constantFilmThermo(const constantFilmThermo&);
+        //- No copy construct
+        constantFilmThermo(const constantFilmThermo&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const constantFilmThermo&);
+        //- No copy assignment
+        void operator=(const constantFilmThermo&) = delete;
 
 
 public:

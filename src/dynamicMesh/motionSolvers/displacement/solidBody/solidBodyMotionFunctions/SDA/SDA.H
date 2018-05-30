@@ -96,11 +96,11 @@ class SDA
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        SDA(const SDA&);
+        //- No copy construct
+        SDA(const SDA&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const SDA&);
+        //- No copy assignment
+        void operator=(const SDA&) = delete;
 
 
 public:

@@ -59,9 +59,11 @@ class tolerances
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        tolerances(const tolerances&);
-        void operator=(const tolerances&);
+        //- No copy construct
+        tolerances(const tolerances&) = delete;
+
+        //- No copy assignment
+        void operator=(const tolerances&) = delete;
 
 
 public:

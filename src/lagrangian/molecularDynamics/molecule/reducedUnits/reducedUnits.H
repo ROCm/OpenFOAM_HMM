@@ -44,7 +44,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 class reducedUnits;
 
@@ -59,44 +59,36 @@ class reducedUnits
 {
     // Private data
 
-        // Reduced units
+        // Fundamental values
 
-            // Fundamental values
+            scalar refLength_;
 
-                scalar refLength_;
+            scalar refTime_;
 
-                scalar refTime_;
+            scalar refMass_;
 
-                scalar refMass_;
+        // Derived values
 
-            // Derived values
+            scalar refEnergy_;
 
-                scalar refEnergy_;
+            scalar refTemp_;
 
-                scalar refTemp_;
+            scalar refForce_;
 
-                scalar refForce_;
+            scalar refVelocity_;
 
-                scalar refVelocity_;
+            scalar refVolume_;
 
-                scalar refVolume_;
+            scalar refPressure_;
 
-                scalar refPressure_;
+            scalar refMassDensity_;
 
-                scalar refMassDensity_;
-
-                scalar refNumberDensity_;
+            scalar refNumberDensity_;
 
 
     // Private Member Functions
 
         void calcRefValues();
-
-        //- Disallow default bitwise copy construct
-        reducedUnits(const reducedUnits&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const reducedUnits&);
 
 
 public:
@@ -128,7 +120,7 @@ public:
 
 
     //- Destructor
-    ~reducedUnits();
+    ~reducedUnits() = default;
 
 
     // Member Functions

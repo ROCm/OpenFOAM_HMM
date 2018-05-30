@@ -112,8 +112,11 @@ private:
         //- Calculate displacement (w.r.t. points0()) to project onto surface
         void calcProjection(vectorField& displacement) const;
 
-        //- Disallow default bitwise assignment
-        void operator=(const surfaceSlipDisplacementPointPatchVectorField&);
+        //- No copy assignment
+        void operator=
+        (
+            const surfaceSlipDisplacementPointPatchVectorField&
+        ) = delete;
 
 
 public:

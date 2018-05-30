@@ -82,14 +82,14 @@ class displacementLaplacianFvMotionSolver
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         displacementLaplacianFvMotionSolver
         (
             const displacementLaplacianFvMotionSolver&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const displacementLaplacianFvMotionSolver&);
+        //- No copy assignment
+        void operator=(const displacementLaplacianFvMotionSolver&) = delete;
 
 
 public:

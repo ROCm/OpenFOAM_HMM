@@ -107,7 +107,7 @@ private:
         //- Use temporarily stored sizes to redimension the element lists
         void resizeAll();
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const ensightFaces&) = delete;
 
 

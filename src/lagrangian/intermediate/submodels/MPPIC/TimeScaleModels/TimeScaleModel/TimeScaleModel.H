@@ -59,8 +59,8 @@ private:
 
     //- Private member functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const TimeScaleModel&);
+        //- No copy assignment
+        void operator=(const TimeScaleModel&) = delete;
 
 
 protected:

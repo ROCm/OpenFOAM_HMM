@@ -115,14 +115,14 @@ class rigidBodyMeshMotionSolver
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         rigidBodyMeshMotionSolver
         (
             const rigidBodyMeshMotionSolver&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const rigidBodyMeshMotionSolver&);
+        //- No copy assignment
+        void operator=(const rigidBodyMeshMotionSolver&) = delete;
 
 
 public:

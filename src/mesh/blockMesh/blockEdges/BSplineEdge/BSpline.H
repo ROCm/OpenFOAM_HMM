@@ -77,11 +77,11 @@ class BSpline
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        BSpline(const BSpline&);
+        //- No copy construct
+        BSpline(const BSpline&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const BSpline&);
+        //- No copy assignment
+        void operator=(const BSpline&) = delete;
 
 
 public:

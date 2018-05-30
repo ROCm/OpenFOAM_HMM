@@ -67,14 +67,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        velocityMotionSolver
-        (
-            const velocityMotionSolver&
-        );
+        //- No copy construct
+        velocityMotionSolver(const velocityMotionSolver&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const velocityMotionSolver&);
+        //- No copy assignment
+        void operator=(const velocityMotionSolver&) = delete;
 
 public:
 

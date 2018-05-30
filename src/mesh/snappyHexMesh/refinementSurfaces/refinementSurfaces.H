@@ -111,11 +111,11 @@ class refinementSurfaces
             const labelList& surfaceLevel
         ) const;
 
-        //- Disallow default bitwise copy construct
-        refinementSurfaces(const refinementSurfaces&);
+        //- No copy construct
+        refinementSurfaces(const refinementSurfaces&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const refinementSurfaces&);
+        //- No copy assignment
+        void operator=(const refinementSurfaces&) = delete;
 
 
 public:

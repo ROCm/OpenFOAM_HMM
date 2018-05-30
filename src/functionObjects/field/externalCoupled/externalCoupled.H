@@ -288,10 +288,10 @@ private:
         //- Perform the coupling with necessary initialization etc.
         void performCoupling();
 
-        //- Disallow default bitwise copy constructor
+        //- No copy construct
         externalCoupled(const externalCoupled&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const externalCoupled&) = delete;
 
 

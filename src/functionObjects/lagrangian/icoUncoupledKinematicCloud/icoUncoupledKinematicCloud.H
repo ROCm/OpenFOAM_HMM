@@ -124,11 +124,11 @@ class icoUncoupledKinematicCloud
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        icoUncoupledKinematicCloud(const icoUncoupledKinematicCloud&);
+        //- No copy construct
+        icoUncoupledKinematicCloud(const icoUncoupledKinematicCloud&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator==(const icoUncoupledKinematicCloud&);
+        //- No copy assignment
+        void operator==(const icoUncoupledKinematicCloud&) = delete;
 
 
 public:

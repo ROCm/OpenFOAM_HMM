@@ -70,11 +70,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        kinematicSingleLayer(const kinematicSingleLayer&);
+        //- No copy construct
+        kinematicSingleLayer(const kinematicSingleLayer&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const kinematicSingleLayer&);
+        //- No copy assignment
+        void operator=(const kinematicSingleLayer&) = delete;
 
 
 protected:

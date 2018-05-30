@@ -66,11 +66,11 @@ class injectionModel
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        injectionModel(const injectionModel&);
+        //- No copy construct
+        injectionModel(const injectionModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const injectionModel&);
+        //- No copy assignment
+        void operator=(const injectionModel&) = delete;
 
 
 protected:

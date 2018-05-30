@@ -74,14 +74,14 @@ class displacementSBRStressFvMotionSolver
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         displacementSBRStressFvMotionSolver
         (
             const displacementSBRStressFvMotionSolver&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const displacementSBRStressFvMotionSolver&);
+        //- No copy assignment
+        void operator=(const displacementSBRStressFvMotionSolver&) = delete;
 
 
 public:

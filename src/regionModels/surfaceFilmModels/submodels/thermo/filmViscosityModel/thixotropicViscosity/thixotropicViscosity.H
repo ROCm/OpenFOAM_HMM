@@ -91,11 +91,11 @@ class thixotropicViscosity
 {
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        thixotropicViscosity(const thixotropicViscosity&);
+        //- No copy construct
+        thixotropicViscosity(const thixotropicViscosity&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const thixotropicViscosity&);
+        //- No copy assignment
+        void operator=(const thixotropicViscosity&) = delete;
 
 
 protected:

@@ -61,11 +61,11 @@ class fourthGrad
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        fourthGrad(const fourthGrad&);
+        //- No copy construct
+        fourthGrad(const fourthGrad&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const fourthGrad&);
+        //- No copy assignment
+        void operator=(const fourthGrad&) = delete;
 
 
 public:

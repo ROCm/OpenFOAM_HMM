@@ -71,11 +71,14 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        mappedConvectiveHeatTransfer(const mappedConvectiveHeatTransfer&);
+        //- No copy construct
+        mappedConvectiveHeatTransfer
+        (
+            const mappedConvectiveHeatTransfer&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const mappedConvectiveHeatTransfer&);
+        //- No copy assignment
+        void operator=(const mappedConvectiveHeatTransfer&) = delete;
 
 
 public:

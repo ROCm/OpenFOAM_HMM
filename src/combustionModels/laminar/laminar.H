@@ -71,11 +71,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        laminar(const laminar&);
+        //- No copy construct
+        laminar(const laminar&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const laminar&);
+        //- No copy assignment
+        void operator=(const laminar&) = delete;
 
 
 public:

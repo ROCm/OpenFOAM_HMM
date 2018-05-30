@@ -75,11 +75,11 @@ class fvMeshMapper
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        fvMeshMapper(const fvMeshMapper&);
+        //- No copy construct
+        fvMeshMapper(const fvMeshMapper&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const fvMeshMapper&);
+        //- No copy assignment
+        void operator=(const fvMeshMapper&) = delete;
 
 
 public:

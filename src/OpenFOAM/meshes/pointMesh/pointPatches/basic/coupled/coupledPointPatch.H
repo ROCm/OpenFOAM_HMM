@@ -53,11 +53,11 @@ class coupledPointPatch
 {
     // Private Member Functions
 
-        //- Disallow default construct as copy
-        coupledPointPatch(const coupledPointPatch&);
+        //- No copy construct
+        coupledPointPatch(const coupledPointPatch&) = delete;
 
-        //- Disallow default assignment
-        void operator=(const coupledPointPatch&);
+        //- No copy assignment
+        void operator=(const coupledPointPatch&) = delete;
 
 
 protected:

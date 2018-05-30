@@ -71,10 +71,10 @@ class faceZone
         //- Set flip-map to uniform value
         void setFlipMap(const bool val);
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         faceZone(const faceZone&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const faceZone&) = delete;
 
 

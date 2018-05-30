@@ -262,11 +262,11 @@ class globalPoints
             const bool mergeSeparated
         );
 
-        //- Disallow default bitwise copy construct
-        globalPoints(const globalPoints&);
+        //- No copy construct
+        globalPoints(const globalPoints&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const globalPoints&);
+        //- No copy assignment
+        void operator=(const globalPoints&) = delete;
 
 
 public:

@@ -82,11 +82,11 @@ class block
         //- Creates boundary patch faces for the block
         void createBoundary();
 
-        //- Disallow default bitwise copy construct
-        block(const block&);
+        //- No copy construct
+        block(const block&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const block&);
+        //- No copy assignment
+        void operator=(const block&) = delete;
 
 
 public:

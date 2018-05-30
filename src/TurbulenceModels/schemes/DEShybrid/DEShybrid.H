@@ -167,11 +167,11 @@ class DEShybrid
         scalar CH2_;
         scalar CH3_;
 
-        //- Disallow default bitwise copy construct
-        DEShybrid(const DEShybrid&);
+        //- No copy construct
+        DEShybrid(const DEShybrid&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const DEShybrid&);
+        //- No copy assignment
+        void operator=(const DEShybrid&) = delete;
 
 
     // Private Member Functions

@@ -73,10 +73,10 @@ class STARCDsurfaceFormat
             const label cellTableId
         );
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         STARCDsurfaceFormat(const STARCDsurfaceFormat<Face>&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const STARCDsurfaceFormat<Face>&) = delete;
 
 

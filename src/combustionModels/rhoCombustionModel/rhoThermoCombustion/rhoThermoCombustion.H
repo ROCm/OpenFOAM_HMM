@@ -59,8 +59,8 @@ class rhoThermoCombustion
         //- Construct as copy (not implemented)
         rhoThermoCombustion(const rhoThermoCombustion&);
 
-        //- Disallow default bitwise assignment
-        void operator=(const rhoThermoCombustion&);
+        //- No copy assignment
+        void operator=(const rhoThermoCombustion&) = delete;
 
 
 protected:

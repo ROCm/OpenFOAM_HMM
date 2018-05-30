@@ -58,11 +58,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        noPhaseChange(const noPhaseChange&);
+        //- No copy construct
+        noPhaseChange(const noPhaseChange&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const noPhaseChange&);
+        //- No copy assignment
+        void operator=(const noPhaseChange&) = delete;
 
 
 public:

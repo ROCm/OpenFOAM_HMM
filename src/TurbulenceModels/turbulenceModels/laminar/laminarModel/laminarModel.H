@@ -76,11 +76,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        laminarModel(const laminarModel&);
+        //- No copy construct
+        laminarModel(const laminarModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const laminarModel&);
+        //- No copy assignment
+        void operator=(const laminarModel&) = delete;
 
 
 public:

@@ -75,11 +75,11 @@ class cpuInfo
         //- Parse /proc/cpuinfo
         void parse();
 
-        //- Disallow default bitwise assignment
-        void operator=(const cpuInfo&) = delete;
-
-        //- Disallow default copy constructor
+        //- No copy construct
         cpuInfo(const cpuInfo&) = delete;
+
+        //- No copy assignment
+        void operator=(const cpuInfo&) = delete;
 
 public:
 

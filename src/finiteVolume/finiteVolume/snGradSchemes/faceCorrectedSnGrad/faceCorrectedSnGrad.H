@@ -61,8 +61,8 @@ class faceCorrectedSnGrad
 {
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const faceCorrectedSnGrad&);
+        //- No copy assignment
+        void operator=(const faceCorrectedSnGrad&) = delete;
 
 
 public:

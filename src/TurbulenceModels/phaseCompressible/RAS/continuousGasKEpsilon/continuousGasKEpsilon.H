@@ -89,9 +89,11 @@ class continuousGasKEpsilon
 
     // Private Member Functions
 
-        // Disallow default bitwise copy construct and assignment
-        continuousGasKEpsilon(const continuousGasKEpsilon&);
-        void operator=(const continuousGasKEpsilon&);
+        //- No copy construct
+        continuousGasKEpsilon(const continuousGasKEpsilon&) = delete;
+
+        //- No copy assignment
+        void operator=(const continuousGasKEpsilon&) = delete;
 
 
 protected:

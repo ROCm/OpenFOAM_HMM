@@ -58,8 +58,8 @@ private:
 
     //- Private member functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const ParticleStressModel&);
+        //- No copy assignment
+        void operator=(const ParticleStressModel&) = delete;
 
 
 protected:

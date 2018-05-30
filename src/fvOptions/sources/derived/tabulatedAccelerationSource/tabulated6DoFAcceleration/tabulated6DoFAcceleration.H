@@ -74,11 +74,11 @@ class tabulated6DoFAcceleration
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        tabulated6DoFAcceleration(const tabulated6DoFAcceleration&);
+        //- No copy construct
+        tabulated6DoFAcceleration(const tabulated6DoFAcceleration&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const tabulated6DoFAcceleration&);
+        //- No copy assignment
+        void operator=(const tabulated6DoFAcceleration&) = delete;
 
 
 public:

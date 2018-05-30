@@ -50,11 +50,11 @@ class sprayCloud
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        sprayCloud(const sprayCloud&);
+        //- No copy construct
+        sprayCloud(const sprayCloud&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const sprayCloud&);
+        //- No copy assignment
+        void operator=(const sprayCloud&) = delete;
 
 
 public:

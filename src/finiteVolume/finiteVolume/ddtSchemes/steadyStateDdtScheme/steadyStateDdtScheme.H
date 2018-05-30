@@ -61,11 +61,11 @@ class steadyStateDdtScheme
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        steadyStateDdtScheme(const steadyStateDdtScheme&);
+        //- No copy construct
+        steadyStateDdtScheme(const steadyStateDdtScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const steadyStateDdtScheme&);
+        //- No copy assignment
+        void operator=(const steadyStateDdtScheme&) = delete;
 
 
 public:

@@ -64,14 +64,14 @@ class eagerGAMGProcAgglomeration
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         eagerGAMGProcAgglomeration
         (
             const eagerGAMGProcAgglomeration&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const eagerGAMGProcAgglomeration&);
+        //- No copy assignment
+        void operator=(const eagerGAMGProcAgglomeration&) = delete;
 
 
 public:

@@ -65,11 +65,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        constantHeatTransfer(const constantHeatTransfer&);
+        //- No copy construct
+        constantHeatTransfer(const constantHeatTransfer&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const constantHeatTransfer&);
+        //- No copy assignment
+        void operator=(const constantHeatTransfer&) = delete;
 
 
 public:

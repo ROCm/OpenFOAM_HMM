@@ -65,7 +65,7 @@ class dictionaryListEntry
 {
     // Private Member Functions
 
-        //- Disallow bitwise copy
+        //- No copy construct
         dictionaryListEntry(const dictionaryListEntry&) = delete;
 
 

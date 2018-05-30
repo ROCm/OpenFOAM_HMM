@@ -66,11 +66,11 @@ class infinitelyFastChemistry
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        infinitelyFastChemistry(const infinitelyFastChemistry&);
+        //- No copy construct
+        infinitelyFastChemistry(const infinitelyFastChemistry&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const infinitelyFastChemistry&);
+        //- No copy assignment
+        void operator=(const infinitelyFastChemistry&) = delete;
 
 
 public:

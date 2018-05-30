@@ -100,11 +100,11 @@ class rigidBodyMotion
         //- Initialize the body-state
         void initialize();
 
-        //- Disallow copy construct
-        rigidBodyMotion(const rigidBodyMotion&);
+        //- No copy construct
+        rigidBodyMotion(const rigidBodyMotion&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const rigidBodyMotion&);
+        //- No copy assignment
+        void operator=(const rigidBodyMotion&) = delete;
 
 
 public:

@@ -140,9 +140,11 @@ class kOmegaSSTSato
         gasTurbulence() const;
 
 
-        // Disallow default bitwise copy construct and assignment
-        kOmegaSSTSato(const kOmegaSSTSato&);
-        void operator=(const kOmegaSSTSato&);
+        //- No copy construct
+        kOmegaSSTSato(const kOmegaSSTSato&) = delete;
+
+        //- No copy assignment
+        void operator=(const kOmegaSSTSato&) = delete;
 
 
 protected:

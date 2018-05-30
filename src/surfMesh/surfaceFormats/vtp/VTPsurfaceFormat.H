@@ -69,10 +69,10 @@ class VTPsurfaceFormat
         );
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         VTPsurfaceFormat(const VTPsurfaceFormat<Face>&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const VTPsurfaceFormat<Face>&) = delete;
 
 

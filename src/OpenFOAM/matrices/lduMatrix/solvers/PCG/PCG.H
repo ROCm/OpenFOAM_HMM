@@ -56,11 +56,11 @@ class PCG
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        PCG(const PCG&);
+        //- No copy construct
+        PCG(const PCG&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const PCG&);
+        //- No copy assignment
+        void operator=(const PCG&) = delete;
 
 
 public:

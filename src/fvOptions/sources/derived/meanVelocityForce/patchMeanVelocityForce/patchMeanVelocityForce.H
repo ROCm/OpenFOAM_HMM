@@ -87,11 +87,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        patchMeanVelocityForce(const patchMeanVelocityForce&);
+        //- No copy construct
+        patchMeanVelocityForce(const patchMeanVelocityForce&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const patchMeanVelocityForce&);
+        //- No copy assignment
+        void operator=(const patchMeanVelocityForce&) = delete;
 
 
 public:

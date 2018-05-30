@@ -182,11 +182,11 @@ class isoAdvection
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        isoAdvection(const isoAdvection&);
+        //- No copy construct
+        isoAdvection(const isoAdvection&) = delete;
 
-        //- Disallow default bitwise copy assignment
-        void operator=(const isoAdvection&);
+        //- No copy assignment
+        void operator=(const isoAdvection&) = delete;
 
 
         // Advection functions

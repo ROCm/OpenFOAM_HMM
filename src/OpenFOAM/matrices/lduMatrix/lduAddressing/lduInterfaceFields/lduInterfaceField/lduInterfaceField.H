@@ -67,11 +67,11 @@ class lduInterfaceField
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        lduInterfaceField(const lduInterfaceField&);
+        //- No copy construct
+        lduInterfaceField(const lduInterfaceField&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const lduInterfaceField&);
+        //- No copy assignment
+        void operator=(const lduInterfaceField&) = delete;
 
 
 public:

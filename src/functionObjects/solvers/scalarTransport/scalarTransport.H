@@ -221,10 +221,10 @@ class scalarTransport
             const surfaceScalarField& phi
         ) const;
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         scalarTransport(const scalarTransport&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const scalarTransport&) = delete;
 
 

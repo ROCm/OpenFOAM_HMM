@@ -115,11 +115,11 @@ class combineFaces
 
 
 
-        //- Disallow default bitwise copy construct
-        combineFaces(const combineFaces&);
+        //- No copy construct
+        combineFaces(const combineFaces&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const combineFaces&);
+        //- No copy assignment
+        void operator=(const combineFaces&) = delete;
 
 public:
 

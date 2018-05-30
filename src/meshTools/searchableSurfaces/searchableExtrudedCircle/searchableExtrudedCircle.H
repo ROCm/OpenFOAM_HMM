@@ -73,11 +73,11 @@ class searchableExtrudedCircle
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        searchableExtrudedCircle(const searchableExtrudedCircle&);
+        //- No copy construct
+        searchableExtrudedCircle(const searchableExtrudedCircle&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const searchableExtrudedCircle&);
+        //- No copy assignment
+        void operator=(const searchableExtrudedCircle&) = delete;
 
 
 public:

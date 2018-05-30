@@ -62,8 +62,8 @@ class orthogonalSnGrad
 {
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const orthogonalSnGrad&);
+        //- No copy assignment
+        void operator=(const orthogonalSnGrad&) = delete;
 
 
 public:

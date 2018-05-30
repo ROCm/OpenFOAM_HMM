@@ -163,10 +163,10 @@ class CrankNicolsonDdtScheme
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         CrankNicolsonDdtScheme(const CrankNicolsonDdtScheme&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const CrankNicolsonDdtScheme&) = delete;
 
         template<class GeoField>

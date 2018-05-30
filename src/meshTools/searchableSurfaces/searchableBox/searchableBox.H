@@ -83,11 +83,11 @@ private:
         ) const;
 
 
-        //- Disallow default bitwise copy construct
-        searchableBox(const searchableBox&);
+        //- No copy construct
+        searchableBox(const searchableBox&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const searchableBox&);
+        //- No copy assignment
+        void operator=(const searchableBox&) = delete;
 
 
 public:

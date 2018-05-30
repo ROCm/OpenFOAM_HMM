@@ -80,11 +80,11 @@ class parFvFieldReconstructor
         //- Construct per-patch addressing
         void createPatchFaceMaps();
 
-        //- Disallow default bitwise copy construct
-        parFvFieldReconstructor(const parFvFieldReconstructor&);
+        //- No copy construct
+        parFvFieldReconstructor(const parFvFieldReconstructor&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const parFvFieldReconstructor&);
+        //- No copy assignment
+        void operator=(const parFvFieldReconstructor&) = delete;
 
 
 public:

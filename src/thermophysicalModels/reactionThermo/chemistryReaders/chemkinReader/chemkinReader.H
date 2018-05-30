@@ -284,11 +284,11 @@ private:
             const fileName& transportFileName
         );
 
-        //- Disallow default bitwise copy construct
-        chemkinReader(const chemkinReader&);
+        //- No copy construct
+        chemkinReader(const chemkinReader&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const chemkinReader&);
+        //- No copy assignment
+        void operator=(const chemkinReader&) = delete;
 
 
 public:

@@ -54,11 +54,14 @@ class extendedFeatureEdgeMeshFormat
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        extendedFeatureEdgeMeshFormat(const extendedFeatureEdgeMeshFormat&);
+        //- No copy construct
+        extendedFeatureEdgeMeshFormat
+        (
+            const extendedFeatureEdgeMeshFormat&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const extendedFeatureEdgeMeshFormat&);
+        //- No copy assignment
+        void operator=(const extendedFeatureEdgeMeshFormat&) = delete;
 
 
 public:

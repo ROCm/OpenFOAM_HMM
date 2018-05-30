@@ -77,11 +77,11 @@ class parLagrangianRedistributor
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        parLagrangianRedistributor(const parLagrangianRedistributor&);
+        //- No copy construct
+        parLagrangianRedistributor(const parLagrangianRedistributor&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const parLagrangianRedistributor&);
+        //- No copy assignment
+        void operator=(const parLagrangianRedistributor&) = delete;
 
 
 public:

@@ -56,11 +56,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        partialFaceAreaWeightAMI(const partialFaceAreaWeightAMI&);
+        //- No copy construct
+        partialFaceAreaWeightAMI(const partialFaceAreaWeightAMI&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const partialFaceAreaWeightAMI&);
+        //- No copy assignment
+        void operator=(const partialFaceAreaWeightAMI&) = delete;
 
         // Marching front
 

@@ -56,11 +56,11 @@ class fieldSmoother
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        fieldSmoother(const fieldSmoother&);
+        //- No copy construct
+        fieldSmoother(const fieldSmoother&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const fieldSmoother&);
+        //- No copy assignment
+        void operator=(const fieldSmoother&) = delete;
 
 
 public:

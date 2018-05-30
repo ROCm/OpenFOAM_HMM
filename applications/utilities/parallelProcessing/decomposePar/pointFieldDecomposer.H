@@ -125,11 +125,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        pointFieldDecomposer(const pointFieldDecomposer&);
+        //- No copy construct
+        pointFieldDecomposer(const pointFieldDecomposer&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const pointFieldDecomposer&);
+        //- No copy assignment
+        void operator=(const pointFieldDecomposer&) = delete;
 
 
 public:

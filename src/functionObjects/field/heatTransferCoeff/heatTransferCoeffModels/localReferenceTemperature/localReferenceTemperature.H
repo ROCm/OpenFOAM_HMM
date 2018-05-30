@@ -81,10 +81,10 @@ class localReferenceTemperature
 {
     // Private Member Functions
 
-        //- Disallow copy construct
+        //- No copy construct
         localReferenceTemperature(const localReferenceTemperature&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const localReferenceTemperature&) = delete;
 
 

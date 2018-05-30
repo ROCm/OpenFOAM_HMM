@@ -83,9 +83,11 @@ class kOmegaSSTIDDES
         //- Delay function
         tmp<volScalarField> fdt(const volScalarField& magGradU) const;
 
-        // Disallow default bitwise copy construct and assignment
-        kOmegaSSTIDDES(const kOmegaSSTIDDES&);
-        void operator=(const kOmegaSSTIDDES&);
+        //- No copy construct
+        kOmegaSSTIDDES(const kOmegaSSTIDDES&) = delete;
+
+        //- No copy assignment
+        void operator=(const kOmegaSSTIDDES&) = delete;
 
 
 protected:

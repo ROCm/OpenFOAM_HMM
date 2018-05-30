@@ -90,8 +90,8 @@ private:
         //- Return string representation of the right of the reaction
         void solidReactionStrRight(OStringStream&) const;
 
-        //- Disallow default bitwise assignment
-        void operator=(const solidReaction&);
+        //- No copy assignment
+        void operator=(const solidReaction&) = delete;
 
 
 public:

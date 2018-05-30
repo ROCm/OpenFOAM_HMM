@@ -303,11 +303,11 @@ class globalMeshData
             void calcGlobalCoPointSlaves() const;
 
 
-        //- Disallow default bitwise copy construct
-        globalMeshData(const globalMeshData&);
+        //- No copy construct
+        globalMeshData(const globalMeshData&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const globalMeshData&);
+        //- No copy assignment
+        void operator=(const globalMeshData&) = delete;
 
 
 public:

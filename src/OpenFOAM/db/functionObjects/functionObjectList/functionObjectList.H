@@ -104,10 +104,10 @@ class functionObjectList
         //- configuration files, add to the given map and recurse
         static void listDir(const fileName& dir, wordHashSet& foMap);
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         functionObjectList(const functionObjectList&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const functionObjectList&) = delete;
 
 

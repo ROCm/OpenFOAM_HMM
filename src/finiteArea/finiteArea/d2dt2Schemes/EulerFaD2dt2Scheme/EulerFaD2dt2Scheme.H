@@ -68,11 +68,11 @@ class EulerFaD2dt2Scheme
 		//- Return the previous time-step
 		scalar deltaT0_() const;
 
-        //- Disallow default bitwise copy construct
-        EulerFaD2dt2Scheme(const EulerFaD2dt2Scheme&);
+        //- No copy construct
+        EulerFaD2dt2Scheme(const EulerFaD2dt2Scheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const EulerFaD2dt2Scheme&);
+        //- No copy assignment
+        void operator=(const EulerFaD2dt2Scheme&) = delete;
 
 
 public:

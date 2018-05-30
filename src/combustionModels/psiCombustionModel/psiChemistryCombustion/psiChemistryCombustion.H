@@ -59,8 +59,8 @@ class psiChemistryCombustion
         //- Construct as copy (not implemented)
         psiChemistryCombustion(const psiChemistryCombustion&);
 
-        //- Disallow default bitwise assignment
-        void operator=(const psiChemistryCombustion&);
+        //- No copy assignment
+        void operator=(const psiChemistryCombustion&) = delete;
 
 
 protected:

@@ -77,10 +77,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         text(const text&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const text&) = delete;
 
 

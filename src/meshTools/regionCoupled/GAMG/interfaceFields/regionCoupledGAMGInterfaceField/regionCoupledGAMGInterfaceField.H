@@ -60,14 +60,14 @@ class regionCoupledGAMGInterfaceField
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         regionCoupledGAMGInterfaceField
         (
             const regionCoupledGAMGInterfaceField&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const regionCoupledGAMGInterfaceField&);
+        //- No copy assignment
+        void operator=(const regionCoupledGAMGInterfaceField&) = delete;
 
 
 public:

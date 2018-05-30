@@ -101,7 +101,7 @@ class mapDistributePolyMesh
 
         void calcPatchSizes();
 
-        //- Disallow copy construct
+        //- No copy construct
         mapDistributePolyMesh(const mapDistributePolyMesh&) = delete;
 
 

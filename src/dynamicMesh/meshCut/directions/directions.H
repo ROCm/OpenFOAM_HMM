@@ -126,11 +126,11 @@ private:
             const vector& defaultDir
         );
 
-        //- Disallow default bitwise copy construct
-        directions(const directions&);
+        //- No copy construct
+        directions(const directions&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const directions&);
+        //- No copy assignment
+        void operator=(const directions&) = delete;
 
 
 public:

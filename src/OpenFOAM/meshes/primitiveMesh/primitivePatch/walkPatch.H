@@ -94,11 +94,11 @@ class walkPatch
         );
 
 
-        //- Disallow default bitwise copy construct
-        walkPatch(const walkPatch&);
+        //- No copy construct
+        walkPatch(const walkPatch&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const walkPatch&);
+        //- No copy assignment
+        void operator=(const walkPatch&) = delete;
 
 public:
 

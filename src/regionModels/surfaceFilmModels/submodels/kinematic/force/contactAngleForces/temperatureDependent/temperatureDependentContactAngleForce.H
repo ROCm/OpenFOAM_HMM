@@ -70,14 +70,14 @@ class temperatureDependentContactAngleForce
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         temperatureDependentContactAngleForce
         (
             const temperatureDependentContactAngleForce&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const temperatureDependentContactAngleForce&);
+        //- No copy assignment
+        void operator=(const temperatureDependentContactAngleForce&) = delete;
 
 
 protected:

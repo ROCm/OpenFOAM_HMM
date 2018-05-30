@@ -112,11 +112,11 @@ class faMeshMapper
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        faMeshMapper(const faMeshMapper&);
+        //- No copy construct
+        faMeshMapper(const faMeshMapper&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const faMeshMapper&);
+        //- No copy assignment
+        void operator=(const faMeshMapper&) = delete;
 
 
 public:

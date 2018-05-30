@@ -62,8 +62,8 @@ class psiCombustionModel
         //- Construct as copy (not implemented)
         psiCombustionModel(const psiCombustionModel&);
 
-        //- Disallow default bitwise assignment
-        void operator=(const psiCombustionModel&);
+        //- No copy assignment
+        void operator=(const psiCombustionModel&) = delete;
 
 
 public:

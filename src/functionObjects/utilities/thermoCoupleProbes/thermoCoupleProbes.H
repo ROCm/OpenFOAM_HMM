@@ -146,11 +146,11 @@ protected:
 
 private:
 
-        //- Disallow default bitwise copy construct
-        thermoCoupleProbes(const thermoCoupleProbes&);
+        //- No copy construct
+        thermoCoupleProbes(const thermoCoupleProbes&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const thermoCoupleProbes&);
+        //- No copy assignment
+        void operator=(const thermoCoupleProbes&) = delete;
 
 
 public:

@@ -59,11 +59,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        functionObjectBase(const functionObjectBase&);
+        //- No copy construct
+        functionObjectBase(const functionObjectBase&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const functionObjectBase&);
+        //- No copy assignment
+        void operator=(const functionObjectBase&) = delete;
 
 
 protected:

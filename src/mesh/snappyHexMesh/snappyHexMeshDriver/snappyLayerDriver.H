@@ -599,11 +599,11 @@ private:
 
 
 
-        //- Disallow default bitwise copy construct
-        snappyLayerDriver(const snappyLayerDriver&);
+        //- No copy construct
+        snappyLayerDriver(const snappyLayerDriver&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const snappyLayerDriver&);
+        //- No copy assignment
+        void operator=(const snappyLayerDriver&) = delete;
 
 
 public:

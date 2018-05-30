@@ -78,11 +78,11 @@ class BrunDrippingInjection
 {
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        BrunDrippingInjection(const BrunDrippingInjection&);
+        //- No copy construct
+        BrunDrippingInjection(const BrunDrippingInjection&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const BrunDrippingInjection&);
+        //- No copy assignment
+        void operator=(const BrunDrippingInjection&) = delete;
 
 
 protected:

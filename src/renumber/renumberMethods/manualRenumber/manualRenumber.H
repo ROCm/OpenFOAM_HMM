@@ -55,10 +55,11 @@ class manualRenumber
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        void operator=(const manualRenumber&);
-        manualRenumber(const manualRenumber&);
+        //- No copy construct
+        manualRenumber(const manualRenumber&) = delete;
 
+        //- No copy assignment
+        void operator=(const manualRenumber&) = delete;
 
 public:
 
@@ -73,8 +74,7 @@ public:
 
 
     //- Destructor
-    virtual ~manualRenumber()
-    {}
+    virtual ~manualRenumber() = default;
 
 
     // Member Functions

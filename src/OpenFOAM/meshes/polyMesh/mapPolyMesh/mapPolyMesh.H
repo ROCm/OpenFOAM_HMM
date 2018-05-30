@@ -272,11 +272,11 @@ class mapPolyMesh
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        mapPolyMesh(const mapPolyMesh&);
+        //- No copy construct
+        mapPolyMesh(const mapPolyMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const mapPolyMesh&);
+        //- No copy assignment
+        void operator=(const mapPolyMesh&) = delete;
 
 
 public:

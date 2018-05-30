@@ -60,11 +60,11 @@ class KTS
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        KTS(const KTS&);
+        //- No copy construct
+        KTS(const KTS&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const KTS&);
+        //- No copy assignment
+        void operator=(const KTS&) = delete;
 
 
 public:

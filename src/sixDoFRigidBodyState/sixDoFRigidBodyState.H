@@ -96,11 +96,11 @@ class sixDoFRigidBodyState
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        sixDoFRigidBodyState(const sixDoFRigidBodyState&);
+        //- No copy construct
+        sixDoFRigidBodyState(const sixDoFRigidBodyState&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const sixDoFRigidBodyState&);
+        //- No copy assignment
+        void operator=(const sixDoFRigidBodyState&) = delete;
 
 
 protected:

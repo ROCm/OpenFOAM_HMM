@@ -118,11 +118,11 @@ class DarcyForchheimer
             const vectorField& U
         ) const;
 
-        //- Disallow default bitwise copy construct
-        DarcyForchheimer(const DarcyForchheimer&);
+        //- No copy construct
+        DarcyForchheimer(const DarcyForchheimer&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const DarcyForchheimer&);
+        //- No copy assignment
+        void operator=(const DarcyForchheimer&) = delete;
 
 
 public:

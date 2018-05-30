@@ -76,11 +76,11 @@ class faceLimitedGrad
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        faceLimitedGrad(const faceLimitedGrad&);
+        //- No copy construct
+        faceLimitedGrad(const faceLimitedGrad&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const faceLimitedGrad&);
+        //- No copy assignment
+        void operator=(const faceLimitedGrad&) = delete;
 
 
 public:

@@ -172,11 +172,11 @@ class forceCoeffs
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        forceCoeffs(const forceCoeffs&);
+        //- No copy construct
+        forceCoeffs(const forceCoeffs&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const forceCoeffs&);
+        //- No copy assignment
+        void operator=(const forceCoeffs&) = delete;
 
 
 protected:

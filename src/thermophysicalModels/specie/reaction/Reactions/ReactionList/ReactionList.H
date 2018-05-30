@@ -70,8 +70,8 @@ class ReactionList
 
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const ReactionList&);
+        //- No copy assignment
+        void operator=(const ReactionList&) = delete;
 
 
 public:

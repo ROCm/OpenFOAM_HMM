@@ -145,11 +145,11 @@ class meshSearch
             ) const;
 
 
-        //- Disallow default bitwise copy construct
-        meshSearch(const meshSearch&);
+        //- No copy construct
+        meshSearch(const meshSearch&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const meshSearch&);
+        //- No copy assignment
+        void operator=(const meshSearch&) = delete;
 
 
 public:

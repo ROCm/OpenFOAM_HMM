@@ -97,10 +97,10 @@ class ReynoldsAnalogy
 {
     // Private Member Functions
 
-        //- Disallow copy construct
+        //- No copy construct
         ReynoldsAnalogy(const ReynoldsAnalogy&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const ReynoldsAnalogy&) = delete;
 
 

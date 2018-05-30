@@ -132,10 +132,10 @@ class enrichedPatch
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         enrichedPatch(const enrichedPatch&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const enrichedPatch&) = delete;
 
         // Creation of demand-driven private data

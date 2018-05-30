@@ -74,11 +74,11 @@ class hexBlock
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        hexBlock(const hexBlock&);
+        //- No copy construct
+        hexBlock(const hexBlock&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const hexBlock&);
+        //- No copy assignment
+        void operator=(const hexBlock&) = delete;
 
         //- Vertex addressing inside the block
         inline label vtxLabel(label i, label j, label k) const;

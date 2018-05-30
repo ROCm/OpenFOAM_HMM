@@ -54,11 +54,11 @@ class singleLayerRegion
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        singleLayerRegion(const singleLayerRegion&);
+        //- No copy construct
+        singleLayerRegion(const singleLayerRegion&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const singleLayerRegion&);
+        //- No copy assignment
+        void operator=(const singleLayerRegion&) = delete;
 
         //- Construct region mesh and fields
         void constructMeshObjects();

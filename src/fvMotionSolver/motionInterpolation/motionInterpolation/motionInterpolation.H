@@ -58,11 +58,11 @@ class motionInterpolation
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        motionInterpolation(const motionInterpolation&);
+        //- No copy construct
+        motionInterpolation(const motionInterpolation&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const motionInterpolation&);
+        //- No copy assignment
+        void operator=(const motionInterpolation&) = delete;
 
 
 public:

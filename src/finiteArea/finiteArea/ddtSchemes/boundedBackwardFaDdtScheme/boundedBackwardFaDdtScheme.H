@@ -83,11 +83,11 @@ class boundedBackwardFaDdtScheme
         }
 
 
-        //- Disallow default bitwise copy construct
-        boundedBackwardFaDdtScheme(const boundedBackwardFaDdtScheme&);
+        //- No copy construct
+        boundedBackwardFaDdtScheme(const boundedBackwardFaDdtScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const boundedBackwardFaDdtScheme&);
+        //- No copy assignment
+        void operator=(const boundedBackwardFaDdtScheme&) = delete;
 
 
 public:

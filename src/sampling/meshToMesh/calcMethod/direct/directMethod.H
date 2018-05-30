@@ -103,11 +103,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        directMethod(const directMethod&);
+        //- No copy construct
+        directMethod(const directMethod&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const directMethod&);
+        //- No copy assignment
+        void operator=(const directMethod&) = delete;
 
 
 public:

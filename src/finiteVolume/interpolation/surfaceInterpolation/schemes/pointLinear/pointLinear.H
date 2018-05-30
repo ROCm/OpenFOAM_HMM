@@ -59,11 +59,11 @@ class pointLinear
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        pointLinear(const pointLinear&);
+        //- No copy construct
+        pointLinear(const pointLinear&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const pointLinear&);
+        //- No copy assignment
+        void operator=(const pointLinear&) = delete;
 
 
 public:

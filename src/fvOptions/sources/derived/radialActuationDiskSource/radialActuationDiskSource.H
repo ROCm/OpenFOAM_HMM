@@ -112,11 +112,11 @@ class radialActuationDiskSource
             const vectorField& U
         ) const;
 
-        //- Disallow default bitwise copy construct
-        radialActuationDiskSource(const radialActuationDiskSource&);
+        //- No copy construct
+        radialActuationDiskSource(const radialActuationDiskSource&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const radialActuationDiskSource&);
+        //- No copy assignment
+        void operator=(const radialActuationDiskSource&) = delete;
 
 
 public:

@@ -88,9 +88,11 @@ class LaunderSharmaKE
 {
     // Private Member Functions
 
-        // Disallow default bitwise copy construct and assignment
-        LaunderSharmaKE(const LaunderSharmaKE&);
-        void operator=(const LaunderSharmaKE&);
+        //- No copy construct
+        LaunderSharmaKE(const LaunderSharmaKE&) = delete;
+
+        //- No copy assignment
+        void operator=(const LaunderSharmaKE&) = delete;
 
 
 protected:

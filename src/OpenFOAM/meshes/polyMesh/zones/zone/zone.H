@@ -64,7 +64,7 @@ class zone
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         zone(const zone&) = delete;
 
 

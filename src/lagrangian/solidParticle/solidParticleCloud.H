@@ -70,11 +70,11 @@ class solidParticleCloud
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        solidParticleCloud(const solidParticleCloud&);
+        //- No copy construct
+        solidParticleCloud(const solidParticleCloud&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const solidParticleCloud&);
+        //- No copy assignment
+        void operator=(const solidParticleCloud&) = delete;
 
 
 public:

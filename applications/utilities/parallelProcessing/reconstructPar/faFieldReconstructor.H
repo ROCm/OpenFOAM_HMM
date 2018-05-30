@@ -80,11 +80,11 @@ class faFieldReconstructor
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        faFieldReconstructor(const faFieldReconstructor&);
+        //- No copy construct
+        faFieldReconstructor(const faFieldReconstructor&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const faFieldReconstructor&);
+        //- No copy assignment
+        void operator=(const faFieldReconstructor&) = delete;
 
 
 public:

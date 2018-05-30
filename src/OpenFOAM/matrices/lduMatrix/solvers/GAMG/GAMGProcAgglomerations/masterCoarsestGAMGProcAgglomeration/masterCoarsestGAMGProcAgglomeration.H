@@ -59,14 +59,14 @@ class masterCoarsestGAMGProcAgglomeration
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         masterCoarsestGAMGProcAgglomeration
         (
             const masterCoarsestGAMGProcAgglomeration&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const masterCoarsestGAMGProcAgglomeration&);
+        //- No copy assignment
+        void operator=(const masterCoarsestGAMGProcAgglomeration&) = delete;
 
 
 public:

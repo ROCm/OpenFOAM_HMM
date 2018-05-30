@@ -86,11 +86,11 @@ class twoDPointCorrector
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        twoDPointCorrector(const twoDPointCorrector&);
+        //- No copy construct
+        twoDPointCorrector(const twoDPointCorrector&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const twoDPointCorrector&);
+        //- No copy assignment
+        void operator=(const twoDPointCorrector&) = delete;
 
 
         //- Calculate addressing

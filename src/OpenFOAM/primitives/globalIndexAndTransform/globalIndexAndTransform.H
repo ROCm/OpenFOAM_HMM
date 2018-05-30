@@ -150,11 +150,11 @@ private:
             const labelPair& patchTrafo
         ) const;
 
-        //- Disallow default bitwise copy construct
-        globalIndexAndTransform(const globalIndexAndTransform&);
+        //- No copy construct
+        globalIndexAndTransform(const globalIndexAndTransform&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const globalIndexAndTransform&);
+        //- No copy assignment
+        void operator=(const globalIndexAndTransform&) = delete;
 
 
 public:

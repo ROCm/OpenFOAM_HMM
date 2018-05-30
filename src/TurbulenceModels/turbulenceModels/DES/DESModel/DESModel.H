@@ -59,11 +59,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        DESModel(const DESModel&);
+        //- No copy construct
+        DESModel(const DESModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const DESModel&);
+        //- No copy assignment
+        void operator=(const DESModel&) = delete;
 
 
 public:

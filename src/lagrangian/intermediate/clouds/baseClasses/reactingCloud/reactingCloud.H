@@ -50,11 +50,11 @@ class reactingCloud
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        reactingCloud(const reactingCloud&);
+        //- No copy construct
+        reactingCloud(const reactingCloud&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const reactingCloud&);
+        //- No copy assignment
+        void operator=(const reactingCloud&) = delete;
 
 
 public:

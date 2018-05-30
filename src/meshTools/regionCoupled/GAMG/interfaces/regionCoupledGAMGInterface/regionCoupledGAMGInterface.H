@@ -53,11 +53,11 @@ class regionCoupledGAMGInterface
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        regionCoupledGAMGInterface(const regionCoupledGAMGInterface&);
+        //- No copy construct
+        regionCoupledGAMGInterface(const regionCoupledGAMGInterface&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const regionCoupledGAMGInterface&);
+        //- No copy assignment
+        void operator=(const regionCoupledGAMGInterface&) = delete;
 
 
 public:

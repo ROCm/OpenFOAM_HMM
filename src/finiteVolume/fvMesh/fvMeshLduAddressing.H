@@ -68,11 +68,11 @@ class fvMeshLduAddressing
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        fvMeshLduAddressing(const fvMeshLduAddressing&);
+        //- No copy construct
+        fvMeshLduAddressing(const fvMeshLduAddressing&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const fvMeshLduAddressing&);
+        //- No copy assignment
+        void operator=(const fvMeshLduAddressing&) = delete;
 
 
 public:

@@ -785,11 +785,11 @@ private:
             ) const;
 
 
-        //- Disallow default bitwise copy construct
-        meshRefinement(const meshRefinement&);
+        //- No copy construct
+        meshRefinement(const meshRefinement&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const meshRefinement&);
+        //- No copy assignment
+        void operator=(const meshRefinement&) = delete;
 
 public:
 

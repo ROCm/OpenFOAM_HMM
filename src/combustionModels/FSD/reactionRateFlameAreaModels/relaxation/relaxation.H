@@ -67,11 +67,11 @@ class relaxation
 
      // Private Member Functions
 
-        //- Disallow copy construct
-        relaxation(const relaxation&);
+        //- No copy construct
+        relaxation(const relaxation&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const relaxation&);
+        //- No copy assignment
+        void operator=(const relaxation&) = delete;
 
 
 public:

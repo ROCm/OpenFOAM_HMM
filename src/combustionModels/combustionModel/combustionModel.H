@@ -56,11 +56,11 @@ class combustionModel
 {
     // Private Member Functions
 
-        //- Disallow copy construct
-        combustionModel(const combustionModel&);
+        //- No copy construct
+        combustionModel(const combustionModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const combustionModel&);
+        //- No copy assignment
+        void operator=(const combustionModel&) = delete;
 
 
 protected:

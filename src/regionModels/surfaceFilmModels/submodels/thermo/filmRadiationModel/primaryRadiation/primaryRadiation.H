@@ -66,11 +66,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        primaryRadiation(const primaryRadiation&);
+        //- No copy construct
+        primaryRadiation(const primaryRadiation&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const primaryRadiation&);
+        //- No copy assignment
+        void operator=(const primaryRadiation&) = delete;
 
 
 public:

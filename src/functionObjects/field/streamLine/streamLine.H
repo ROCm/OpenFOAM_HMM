@@ -138,10 +138,10 @@ class streamLine
 
    // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         streamLine(const streamLine&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const streamLine&) = delete;
 
 

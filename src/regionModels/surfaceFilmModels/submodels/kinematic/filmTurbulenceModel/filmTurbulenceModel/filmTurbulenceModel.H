@@ -62,11 +62,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        filmTurbulenceModel(const filmTurbulenceModel&);
+        //- No copy construct
+        filmTurbulenceModel(const filmTurbulenceModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const filmTurbulenceModel&);
+        //- No copy assignment
+        void operator=(const filmTurbulenceModel&) = delete;
 
 
 public:

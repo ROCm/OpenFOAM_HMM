@@ -68,11 +68,11 @@ class chemistryModel
         template<class DeltaTType>
         scalar solve(const DeltaTType& deltaT);
 
-        //- Disallow copy constructor
-        chemistryModel(const chemistryModel&);
+        //- No copy construct
+        chemistryModel(const chemistryModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const chemistryModel&);
+        //- No copy assignment
+        void operator=(const chemistryModel&) = delete;
 
 
 protected:

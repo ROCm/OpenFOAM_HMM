@@ -241,7 +241,7 @@ public:
 
     // Housekeeping
 
-        //- Disallow assignment from literal nullptr.
+        //- No assignment from literal nullptr.
         //  Consistent with run-time check for nullptr on assignment.
         void operator=(std::nullptr_t) = delete;
 };

@@ -84,14 +84,14 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         externalDisplacementMeshMover
         (
             const externalDisplacementMeshMover&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const externalDisplacementMeshMover&);
+        //- No copy assignment
+        void operator=(const externalDisplacementMeshMover&) = delete;
 
 
 public:

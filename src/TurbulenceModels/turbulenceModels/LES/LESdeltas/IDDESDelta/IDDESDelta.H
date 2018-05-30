@@ -65,9 +65,11 @@ class IDDESDelta
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        IDDESDelta(const IDDESDelta&);
-        void operator=(const IDDESDelta&);
+        //- No copy construct
+        IDDESDelta(const IDDESDelta&) = delete;
+
+        //- No copy assignment
+        void operator=(const IDDESDelta&) = delete;
 
         //- Calculate the delta values
         void calcDelta();

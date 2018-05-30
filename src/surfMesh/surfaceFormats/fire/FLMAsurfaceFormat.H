@@ -61,10 +61,10 @@ class FLMAsurfaceFormat
         static inline void writeShell(OSstream& os, const Face& f);
         static inline void writeType(OSstream& os, const Face& f);
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         FLMAsurfaceFormat(const FLMAsurfaceFormat<Face>&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const FLMAsurfaceFormat<Face>&) = delete;
 
 
@@ -138,10 +138,10 @@ class FLMAZsurfaceFormat
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         FLMAZsurfaceFormat(const FLMAZsurfaceFormat<Face>&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const FLMAZsurfaceFormat<Face>&) = delete;
 
 

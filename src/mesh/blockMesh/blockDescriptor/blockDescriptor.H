@@ -129,8 +129,8 @@ class blockDescriptor
 
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const blockDescriptor&);
+        //- No copy assignment
+        void operator=(const blockDescriptor&) = delete;
 
 
 public:

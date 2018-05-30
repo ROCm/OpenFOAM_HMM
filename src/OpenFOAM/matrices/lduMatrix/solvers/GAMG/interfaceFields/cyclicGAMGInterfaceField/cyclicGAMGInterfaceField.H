@@ -67,11 +67,11 @@ class cyclicGAMGInterfaceField
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        cyclicGAMGInterfaceField(const cyclicGAMGInterfaceField&);
+        //- No copy construct
+        cyclicGAMGInterfaceField(const cyclicGAMGInterfaceField&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cyclicGAMGInterfaceField&);
+        //- No copy assignment
+        void operator=(const cyclicGAMGInterfaceField&) = delete;
 
 
 public:

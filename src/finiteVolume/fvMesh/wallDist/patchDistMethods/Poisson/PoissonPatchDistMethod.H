@@ -127,11 +127,11 @@ class Poisson
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        Poisson(const Poisson&);
+        //- No copy construct
+        Poisson(const Poisson&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const Poisson&);
+        //- No copy assignment
+        void operator=(const Poisson&) = delete;
 
 
 public:

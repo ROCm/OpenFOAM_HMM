@@ -56,14 +56,14 @@ class limitedSurfaceInterpolationScheme
 {
     // Private Member Functions
 
-        //- Disallow copy construct
+        //- No copy construct
         limitedSurfaceInterpolationScheme
         (
             const limitedSurfaceInterpolationScheme&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const limitedSurfaceInterpolationScheme&);
+        //- No copy assignment
+        void operator=(const limitedSurfaceInterpolationScheme&) = delete;
 
 
 protected:

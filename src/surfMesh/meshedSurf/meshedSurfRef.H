@@ -57,7 +57,7 @@ class meshedSurfRef
         //- No copy construct
         meshedSurfRef(const meshedSurfRef&) = delete;
 
-        //- No copy construct assignment
+        //- No copy assignment
         void operator=(const meshedSurfRef&) = delete;
 
 public:

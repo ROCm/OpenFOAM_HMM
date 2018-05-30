@@ -70,10 +70,10 @@ class NullObject
         content{nullptr}
     {}
 
-    //- Disallow default bitwise copy construct
+    //- No copy construct
     NullObject(const NullObject&) = delete;
 
-    //- Disallow default bitwise assignment
+    //- No copy assignment
     void operator=(const NullObject&) = delete;
 
 public:

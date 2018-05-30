@@ -105,11 +105,11 @@ class cellFeatures
         void calcSuperFaces() const;
 
 
-        //- Disallow default bitwise copy construct
-        cellFeatures(const cellFeatures&);
+        //- No copy construct
+        cellFeatures(const cellFeatures&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cellFeatures&);
+        //- No copy assignment
+        void operator=(const cellFeatures&) = delete;
 
 public:
 

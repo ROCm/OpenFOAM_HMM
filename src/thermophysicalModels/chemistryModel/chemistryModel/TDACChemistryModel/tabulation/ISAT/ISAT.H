@@ -118,8 +118,8 @@ class ISAT
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        ISAT(const ISAT&);
+        //- No copy construct
+        ISAT(const ISAT&) = delete;
 
         //- Add a chemPoint to the MRU list
         void addToMRU(chemPointISAT<CompType, ThermoType>* phi0);

@@ -62,10 +62,10 @@ class data
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         data(const data&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const data&) = delete;
 
 

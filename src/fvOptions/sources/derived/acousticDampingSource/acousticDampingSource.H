@@ -106,10 +106,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        acousticDampingSource(const acousticDampingSource&);
+        //- No copy construct
+        acousticDampingSource(const acousticDampingSource&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const acousticDampingSource&) = delete;
 
 

@@ -77,11 +77,11 @@ class searchableSurface
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        searchableSurface(const searchableSurface&);
+        //- No copy construct
+        searchableSurface(const searchableSurface&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const searchableSurface&);
+        //- No copy assignment
+        void operator=(const searchableSurface&) = delete;
 
 
 public:

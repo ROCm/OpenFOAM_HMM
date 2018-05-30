@@ -59,8 +59,8 @@ class reverseLinear
 {
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const reverseLinear&);
+        //- No copy assignment
+        void operator=(const reverseLinear&) = delete;
 
 
 public:

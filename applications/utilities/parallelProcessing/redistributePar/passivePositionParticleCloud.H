@@ -53,11 +53,14 @@ class passivePositionParticleCloud
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        passivePositionParticleCloud(const passivePositionParticleCloud&);
+        //- No copy construct
+        passivePositionParticleCloud
+        (
+            const passivePositionParticleCloud&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const passivePositionParticleCloud&);
+        //- No copy assignment
+        void operator=(const passivePositionParticleCloud&) = delete;
 
 
 public:

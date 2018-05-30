@@ -55,11 +55,11 @@ class lduInterface
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        lduInterface(const lduInterface&);
+        //- No copy construct
+        lduInterface(const lduInterface&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const lduInterface&);
+        //- No copy assignment
+        void operator=(const lduInterface&) = delete;
 
 
 public:

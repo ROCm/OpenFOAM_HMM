@@ -62,11 +62,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        AMIMethod(const AMIMethod&);
+        //- No copy construct
+        AMIMethod(const AMIMethod&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const AMIMethod&);
+        //- No copy assignment
+        void operator=(const AMIMethod&) = delete;
 
 
 protected:

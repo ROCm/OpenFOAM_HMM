@@ -55,11 +55,11 @@ class polyLine
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        polyLine(const polyLine&);
+        //- No copy construct
+        polyLine(const polyLine&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const polyLine&);
+        //- No copy assignment
+        void operator=(const polyLine&) = delete;
 
 
 protected:

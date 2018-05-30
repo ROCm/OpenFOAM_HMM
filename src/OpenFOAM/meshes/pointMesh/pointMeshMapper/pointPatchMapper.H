@@ -88,14 +88,11 @@ class pointPatchMapper
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        pointPatchMapper
-        (
-            const pointPatchMapper&
-        );
+        //- No copy construct
+        pointPatchMapper(const pointPatchMapper&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const pointPatchMapper&);
+        //- No copy assignment
+        void operator=(const pointPatchMapper&) = delete;
 
 
         //- Calculate addressing for mapping with inserted cells

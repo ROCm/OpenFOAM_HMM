@@ -64,11 +64,11 @@ class pyrolysisModelCollection
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        pyrolysisModelCollection(const pyrolysisModelCollection&);
+        //- No copy construct
+        pyrolysisModelCollection(const pyrolysisModelCollection&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const pyrolysisModelCollection&);
+        //- No copy assignment
+        void operator=(const pyrolysisModelCollection&) = delete;
 
 
 public:

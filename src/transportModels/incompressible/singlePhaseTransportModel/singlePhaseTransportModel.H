@@ -65,11 +65,11 @@ class singlePhaseTransportModel
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        singlePhaseTransportModel(const singlePhaseTransportModel&);
+        //- No copy construct
+        singlePhaseTransportModel(const singlePhaseTransportModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const singlePhaseTransportModel&);
+        //- No copy assignment
+        void operator=(const singlePhaseTransportModel&) = delete;
 
 
 public:

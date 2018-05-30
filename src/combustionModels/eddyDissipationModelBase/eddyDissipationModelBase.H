@@ -64,11 +64,11 @@ class eddyDissipationModelBase
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        eddyDissipationModelBase(const eddyDissipationModelBase&);
+        //- No copy construct
+        eddyDissipationModelBase(const eddyDissipationModelBase&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const eddyDissipationModelBase&);
+        //- No copy assignment
+        void operator=(const eddyDissipationModelBase&) = delete;
 
 
 public:

@@ -58,11 +58,11 @@ class setUpdater
         template<class Type>
         void updateSets(const mapPolyMesh& morphMap) const;
 
-        //- Disallow default bitwise copy construct
-        setUpdater(const setUpdater&);
+        //- No copy construct
+        setUpdater(const setUpdater&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const setUpdater&);
+        //- No copy assignment
+        void operator=(const setUpdater&) = delete;
 
 
 public:

@@ -228,14 +228,14 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         effectivenessHeatExchangerSource
         (
             const effectivenessHeatExchangerSource&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const effectivenessHeatExchangerSource&);
+        //- No copy assignment
+        void operator=(const effectivenessHeatExchangerSource&) = delete;
 
         //- Initialise heat exchanger source model
         void initialise();

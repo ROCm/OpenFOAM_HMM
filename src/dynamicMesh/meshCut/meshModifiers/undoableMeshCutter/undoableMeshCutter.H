@@ -128,11 +128,11 @@ class undoableMeshCutter
         static void updateLabels(const labelList& map, Map<splitCell*>&);
 
 
-        //- Disallow default bitwise copy construct
-        undoableMeshCutter(const undoableMeshCutter&);
+        //- No copy construct
+        undoableMeshCutter(const undoableMeshCutter&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const undoableMeshCutter&);
+        //- No copy assignment
+        void operator=(const undoableMeshCutter&) = delete;
 
 
 public:

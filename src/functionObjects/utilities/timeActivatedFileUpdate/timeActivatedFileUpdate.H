@@ -115,11 +115,11 @@ class timeActivatedFileUpdate
         //- Update file
         void updateFile();
 
-        //- Disallow default bitwise copy construct
-        timeActivatedFileUpdate(const timeActivatedFileUpdate&);
+        //- No copy construct
+        timeActivatedFileUpdate(const timeActivatedFileUpdate&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const timeActivatedFileUpdate&);
+        //- No copy assignment
+        void operator=(const timeActivatedFileUpdate&) = delete;
 
 
 public:

@@ -156,11 +156,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        cellVolumeWeight(const cellVolumeWeight&);
+        //- No copy construct
+        cellVolumeWeight(const cellVolumeWeight&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cellVolumeWeight&);
+        //- No copy assignment
+        void operator=(const cellVolumeWeight&) = delete;
 
 
 public:

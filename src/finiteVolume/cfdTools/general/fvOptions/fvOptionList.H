@@ -88,11 +88,11 @@ protected:
         //- Check that all sources have been applied
         void checkApplied() const;
 
-        //- Disallow default bitwise copy construct
-        optionList(const optionList&);
+        //- No copy construct
+        optionList(const optionList&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const optionList&);
+        //- No copy assignment
+        void operator=(const optionList&) = delete;
 
 
 public:

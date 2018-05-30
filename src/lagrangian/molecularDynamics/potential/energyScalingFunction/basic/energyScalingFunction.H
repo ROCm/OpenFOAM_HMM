@@ -66,11 +66,11 @@ protected:
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        energyScalingFunction(const energyScalingFunction&);
+        //- No copy construct
+        energyScalingFunction(const energyScalingFunction&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const energyScalingFunction&);
+        //- No copy assignment
+        void operator=(const energyScalingFunction&) = delete;
 
 
 public:

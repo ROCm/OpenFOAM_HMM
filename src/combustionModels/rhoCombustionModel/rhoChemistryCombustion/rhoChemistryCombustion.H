@@ -59,8 +59,8 @@ class rhoChemistryCombustion
         //- Construct as copy (not implemented)
         rhoChemistryCombustion(const rhoChemistryCombustion&);
 
-        //- Disallow default bitwise assignment
-        void operator=(const rhoChemistryCombustion&);
+        //- No copy assignment
+        void operator=(const rhoChemistryCombustion&) = delete;
 
 
 protected:

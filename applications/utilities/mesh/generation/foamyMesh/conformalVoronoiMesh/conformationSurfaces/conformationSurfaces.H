@@ -125,11 +125,11 @@ class conformationSurfaces
             label& featureIndex
         );
 
-        //- Disallow default bitwise copy construct
-        conformationSurfaces(const conformationSurfaces&);
+        //- No copy construct
+        conformationSurfaces(const conformationSurfaces&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const conformationSurfaces&);
+        //- No copy assignment
+        void operator=(const conformationSurfaces&) = delete;
 
 
 public:

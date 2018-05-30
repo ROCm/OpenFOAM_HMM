@@ -292,11 +292,11 @@ private:
             void distributeFields(const mapDistribute& map);
 
 
-        //- Disallow default bitwise copy construct
-        distributedTriSurfaceMesh(const distributedTriSurfaceMesh&);
+        //- No copy construct
+        distributedTriSurfaceMesh(const distributedTriSurfaceMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const distributedTriSurfaceMesh&);
+        //- No copy assignment
+        void operator=(const distributedTriSurfaceMesh&) = delete;
 
 
 public:

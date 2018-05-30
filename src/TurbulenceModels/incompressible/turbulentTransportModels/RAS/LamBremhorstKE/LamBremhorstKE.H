@@ -68,9 +68,11 @@ class LamBremhorstKE
 {
     // Private Member Functions
 
-        // Disallow default bitwise copy construct and assignment
-        LamBremhorstKE(const LamBremhorstKE&);
-        void operator=(const LamBremhorstKE&);
+        //- No copy construct
+        LamBremhorstKE(const LamBremhorstKE&) = delete;
+
+        //- No copy assignment
+        void operator=(const LamBremhorstKE&) = delete;
 
         tmp<volScalarField> Rt() const;
         tmp<volScalarField> fMu(const volScalarField& Rt) const;

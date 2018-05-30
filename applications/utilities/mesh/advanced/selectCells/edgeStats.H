@@ -68,11 +68,11 @@ class edgeStats
         direction getNormalDir(const twoDPointCorrector*) const;
 
 
-        //- Disallow default bitwise copy construct
-        edgeStats(const edgeStats&);
+        //- No copy construct
+        edgeStats(const edgeStats&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const edgeStats&);
+        //- No copy assignment
+        void operator=(const edgeStats&) = delete;
 
 
 public:

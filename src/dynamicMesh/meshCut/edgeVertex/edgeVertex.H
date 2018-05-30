@@ -60,11 +60,11 @@ class edgeVertex
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        edgeVertex(const edgeVertex&);
+        //- No copy construct
+        edgeVertex(const edgeVertex&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const edgeVertex&);
+        //- No copy assignment
+        void operator=(const edgeVertex&) = delete;
 
 
 public:

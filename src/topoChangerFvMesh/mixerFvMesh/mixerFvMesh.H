@@ -70,11 +70,11 @@ class mixerFvMesh
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        mixerFvMesh(const mixerFvMesh&);
+        //- No copy construct
+        mixerFvMesh(const mixerFvMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const mixerFvMesh&);
+        //- No copy assignment
+        void operator=(const mixerFvMesh&) = delete;
 
 
         //- Add mixer zones and modifiers

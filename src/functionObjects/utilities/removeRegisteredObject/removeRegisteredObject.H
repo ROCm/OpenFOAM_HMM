@@ -86,11 +86,11 @@ class removeRegisteredObject
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        removeRegisteredObject(const removeRegisteredObject&);
+        //- No copy construct
+        removeRegisteredObject(const removeRegisteredObject&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const removeRegisteredObject&);
+        //- No copy assignment
+        void operator=(const removeRegisteredObject&) = delete;
 
 
 public:

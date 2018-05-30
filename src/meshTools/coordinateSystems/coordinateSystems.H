@@ -76,10 +76,10 @@ class coordinateSystems
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         coordinateSystems(const coordinateSystems&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const coordinateSystems&) = delete;
 
 

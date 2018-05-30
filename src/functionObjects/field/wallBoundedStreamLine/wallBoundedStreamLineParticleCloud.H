@@ -53,14 +53,14 @@ class wallBoundedStreamLineParticleCloud
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         wallBoundedStreamLineParticleCloud
         (
             const wallBoundedStreamLineParticleCloud&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const wallBoundedStreamLineParticleCloud&);
+        //- No copy assignment
+        void operator=(const wallBoundedStreamLineParticleCloud&) = delete;
 
 
 public:

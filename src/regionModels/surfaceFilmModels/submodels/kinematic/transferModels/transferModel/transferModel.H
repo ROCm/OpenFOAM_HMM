@@ -66,11 +66,11 @@ class transferModel
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        transferModel(const transferModel&);
+        //- No copy construct
+        transferModel(const transferModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const transferModel&);
+        //- No copy assignment
+        void operator=(const transferModel&) = delete;
 
 
 protected:

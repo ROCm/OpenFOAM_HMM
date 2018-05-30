@@ -63,10 +63,10 @@ class tetWedgeMatcher
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         tetWedgeMatcher(const tetWedgeMatcher&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         tetWedgeMatcher& operator=(const tetWedgeMatcher&) = delete;
 
 

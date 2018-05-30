@@ -98,11 +98,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        fieldsExpression(const fieldsExpression&);
+        //- No copy construct
+        fieldsExpression(const fieldsExpression&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const fieldsExpression&);
+        //- No copy assignment
+        void operator=(const fieldsExpression&) = delete;
 
 
 public:

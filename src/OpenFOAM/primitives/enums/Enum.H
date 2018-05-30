@@ -85,10 +85,10 @@ class Enum
         const word& getName(const EnumType e) const;
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         Enum(const Enum&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const Enum&) = delete;
 
 

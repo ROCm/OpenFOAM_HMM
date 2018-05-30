@@ -92,9 +92,11 @@ class SmagorinskyZhang
         >&
         gasTurbulence() const;
 
-        // Disallow default bitwise copy construct and assignment
-        SmagorinskyZhang(const SmagorinskyZhang&);
-        void operator=(const SmagorinskyZhang&);
+        //- No copy construct
+        SmagorinskyZhang(const SmagorinskyZhang&) = delete;
+
+        //- No copy assignment
+        void operator=(const SmagorinskyZhang&) = delete;
 
 
 protected:

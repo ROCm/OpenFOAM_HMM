@@ -62,11 +62,11 @@ class fvBoundaryMesh
 
     // Private Member Functions
 
-        //- Disallow default copy construct
-        fvBoundaryMesh(const fvBoundaryMesh&);
+        //- No copy construct
+        fvBoundaryMesh(const fvBoundaryMesh&) = delete;
 
-        //- Disallow assignment
-        void operator=(const fvBoundaryMesh&);
+        //- No copy assignment
+        void operator=(const fvBoundaryMesh&) = delete;
 
         //- Add fvPatches corresponding to the given polyBoundaryMesh
         void addPatches(const polyBoundaryMesh&);

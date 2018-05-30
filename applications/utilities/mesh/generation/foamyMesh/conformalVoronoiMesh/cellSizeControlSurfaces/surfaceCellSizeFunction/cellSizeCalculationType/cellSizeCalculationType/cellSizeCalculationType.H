@@ -67,11 +67,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        cellSizeCalculationType(const cellSizeCalculationType&);
+        //- No copy construct
+        cellSizeCalculationType(const cellSizeCalculationType&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cellSizeCalculationType&);
+        //- No copy assignment
+        void operator=(const cellSizeCalculationType&) = delete;
 
 
 public:

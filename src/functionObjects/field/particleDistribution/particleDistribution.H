@@ -133,10 +133,10 @@ protected:
             const List<DynamicList<label>>& addr
         );
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         particleDistribution(const particleDistribution&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const particleDistribution&) = delete;
 
 

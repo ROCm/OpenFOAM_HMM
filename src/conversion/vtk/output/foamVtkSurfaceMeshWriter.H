@@ -89,10 +89,10 @@ class surfaceMeshWriter
         void writeMesh();
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         surfaceMeshWriter(const surfaceMeshWriter&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const surfaceMeshWriter&) = delete;
 
 public:

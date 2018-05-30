@@ -247,10 +247,10 @@ private:
         ) const;
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         ensightMesh(const ensightMesh&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const ensightMesh&) = delete;
 
 

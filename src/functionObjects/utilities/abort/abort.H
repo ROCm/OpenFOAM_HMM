@@ -89,10 +89,10 @@ class abort
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         abort(const abort&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const abort&) = delete;
 
 

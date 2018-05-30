@@ -61,10 +61,10 @@ class appendBase64Formatter
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         appendBase64Formatter(const appendBase64Formatter&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const appendBase64Formatter&) = delete;
 
 

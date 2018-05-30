@@ -80,11 +80,11 @@ class correlationFunction
 
         void setTimesAndSizes(const label);
 
-        //- Disallow default bitwise copy construct
-        correlationFunction(const correlationFunction<Type>&);
+        //- No copy construct
+        correlationFunction(const correlationFunction<Type>&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const correlationFunction<Type>&);
+        //- No copy assignment
+        void operator=(const correlationFunction<Type>&) = delete;
 
 
 public:

@@ -73,11 +73,11 @@ class outletStabilised
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        outletStabilised(const outletStabilised&);
+        //- No copy construct
+        outletStabilised(const outletStabilised&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const outletStabilised&);
+        //- No copy assignment
+        void operator=(const outletStabilised&) = delete;
 
 
 public:

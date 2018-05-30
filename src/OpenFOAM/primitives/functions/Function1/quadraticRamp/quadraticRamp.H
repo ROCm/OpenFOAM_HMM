@@ -58,7 +58,7 @@ class quadraticRamp
 {
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const quadraticRamp&) = delete;
 
 

@@ -287,11 +287,11 @@ class motionSmootherAlgo
             bitSet& isAffectedPoint
         ) const;
 
-        //- Disallow default bitwise copy construct
-        motionSmootherAlgo(const motionSmootherAlgo&);
+        //- No copy construct
+        motionSmootherAlgo(const motionSmootherAlgo&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const motionSmootherAlgo&);
+        //- No copy assignment
+        void operator=(const motionSmootherAlgo&) = delete;
 
 
 public:

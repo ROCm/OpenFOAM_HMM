@@ -52,11 +52,11 @@ class granularPressureModel
 {
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        granularPressureModel(const granularPressureModel&);
+        //- No copy construct
+        granularPressureModel(const granularPressureModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const granularPressureModel&);
+        //- No copy assignment
+        void operator=(const granularPressureModel&) = delete;
 
 
 protected:

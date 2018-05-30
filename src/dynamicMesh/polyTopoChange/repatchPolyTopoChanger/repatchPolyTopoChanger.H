@@ -65,11 +65,11 @@ class repatchPolyTopoChanger
         //- Demand driven access to polyTopoChange
         polyTopoChange& meshMod();
 
-        //- Disallow default bitwise copy construct
-        repatchPolyTopoChanger(const repatchPolyTopoChanger&);
+        //- No copy construct
+        repatchPolyTopoChanger(const repatchPolyTopoChanger&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const repatchPolyTopoChanger&);
+        //- No copy assignment
+        void operator=(const repatchPolyTopoChanger&) = delete;
 
 
 public:

@@ -68,11 +68,14 @@ class cellSizeAndAlignmentControls
             label& maxPriority
         ) const;
 
-        //- Disallow default bitwise copy construct
-        cellSizeAndAlignmentControls(const cellSizeAndAlignmentControls&);
+        //- No copy construct
+        cellSizeAndAlignmentControls
+        (
+            const cellSizeAndAlignmentControls&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cellSizeAndAlignmentControls&);
+        //- No copy assignment
+        void operator=(const cellSizeAndAlignmentControls&) = delete;
 
 
 public:

@@ -57,11 +57,11 @@ class directionalDiffusivity
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        directionalDiffusivity(const directionalDiffusivity&);
+        //- No copy construct
+        directionalDiffusivity(const directionalDiffusivity&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const directionalDiffusivity&);
+        //- No copy assignment
+        void operator=(const directionalDiffusivity&) = delete;
 
 
 public:

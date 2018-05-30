@@ -56,9 +56,11 @@ class CuthillMcKeeRenumber
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        void operator=(const CuthillMcKeeRenumber&);
-        CuthillMcKeeRenumber(const CuthillMcKeeRenumber&);
+        //- No copy construct
+        CuthillMcKeeRenumber(const CuthillMcKeeRenumber&) = delete;
+
+        //- No copy assignment
+        void operator=(const CuthillMcKeeRenumber&) = delete;
 
 
 public:
@@ -74,8 +76,7 @@ public:
 
 
     //- Destructor
-    virtual ~CuthillMcKeeRenumber()
-    {}
+    virtual ~CuthillMcKeeRenumber() = default;
 
 
     // Member Functions

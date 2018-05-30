@@ -94,9 +94,11 @@ class NicenoKEqn
         >&
         gasTurbulence() const;
 
-        // Disallow default bitwise copy construct and assignment
-        NicenoKEqn(const NicenoKEqn&);
-        void operator=(const NicenoKEqn&);
+        //- No copy construct
+        NicenoKEqn(const NicenoKEqn&) = delete;
+
+        //- No copy assignment
+        void operator=(const NicenoKEqn&) = delete;
 
 
 protected:

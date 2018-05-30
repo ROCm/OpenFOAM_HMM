@@ -56,11 +56,11 @@ class dlLibraryTable
         DynamicList<fileName> libNames_;
 
 
-        //- Disallow default bitwise copy construct
-        dlLibraryTable(const dlLibraryTable&);
+        //- No copy construct
+        dlLibraryTable(const dlLibraryTable&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const dlLibraryTable&);
+        //- No copy assignment
+        void operator=(const dlLibraryTable&) = delete;
 
 
 public:

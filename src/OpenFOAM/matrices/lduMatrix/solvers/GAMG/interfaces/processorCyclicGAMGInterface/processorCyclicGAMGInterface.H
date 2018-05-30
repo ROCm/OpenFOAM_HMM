@@ -53,11 +53,14 @@ class processorCyclicGAMGInterface
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        processorCyclicGAMGInterface(const processorCyclicGAMGInterface&);
+        //- No copy construct
+        processorCyclicGAMGInterface
+        (
+            const processorCyclicGAMGInterface&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const processorCyclicGAMGInterface&);
+        //- No copy assignment
+        void operator=(const processorCyclicGAMGInterface&) = delete;
 
 
 public:

@@ -63,10 +63,10 @@ class pyrMatcher
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         pyrMatcher(const pyrMatcher&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         pyrMatcher& operator=(const pyrMatcher&) = delete;
 
 

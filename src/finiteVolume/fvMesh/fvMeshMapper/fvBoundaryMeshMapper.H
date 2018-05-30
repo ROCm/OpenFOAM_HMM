@@ -50,11 +50,11 @@ class fvBoundaryMeshMapper
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        fvBoundaryMeshMapper(const fvBoundaryMeshMapper&);
+        //- No copy construct
+        fvBoundaryMeshMapper(const fvBoundaryMeshMapper&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const fvBoundaryMeshMapper&);
+        //- No copy assignment
+        void operator=(const fvBoundaryMeshMapper&) = delete;
 
 
 public:

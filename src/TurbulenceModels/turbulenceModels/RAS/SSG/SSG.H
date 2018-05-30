@@ -99,9 +99,11 @@ class SSG
 {
     // Private Member Functions
 
-        // Disallow default bitwise copy construct and assignment
-        SSG(const SSG&);
-        void operator=(const SSG&);
+        //- No copy construct
+        SSG(const SSG&) = delete;
+
+        //- No copy assignment
+        void operator=(const SSG&) = delete;
 
 
 protected:

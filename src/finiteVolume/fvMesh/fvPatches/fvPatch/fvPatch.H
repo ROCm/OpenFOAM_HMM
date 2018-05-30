@@ -72,11 +72,11 @@ class fvPatch
 
     // Private Member Functions
 
-        //- Disallow construct as copy
-        fvPatch(const fvPatch&);
+        //- No copy construct
+        fvPatch(const fvPatch&) = delete;
 
-        //- Disallow assignment
-        void operator=(const fvPatch&);
+        //- No copy assignment
+        void operator=(const fvPatch&) = delete;
 
 
 protected:

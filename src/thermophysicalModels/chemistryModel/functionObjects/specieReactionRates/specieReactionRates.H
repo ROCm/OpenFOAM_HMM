@@ -76,11 +76,11 @@ class specieReactionRates
         //- File header information
         virtual void writeFileHeader(Ostream& os) const;
 
-        //- Disallow default bitwise copy construct
-        specieReactionRates(const specieReactionRates&);
+        //- No copy construct
+        specieReactionRates(const specieReactionRates&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const specieReactionRates&);
+        //- No copy assignment
+        void operator=(const specieReactionRates&) = delete;
 
 
 public:

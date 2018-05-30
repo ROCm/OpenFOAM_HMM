@@ -103,10 +103,10 @@ class mapFields
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         mapFields(const mapFields&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const mapFields&) = delete;
 
         //- Helper function to create the mesh-to-mesh interpolation

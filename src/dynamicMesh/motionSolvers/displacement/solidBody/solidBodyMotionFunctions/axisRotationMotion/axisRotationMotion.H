@@ -66,11 +66,11 @@ class axisRotationMotion
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        axisRotationMotion(const axisRotationMotion&);
+        //- No copy construct
+        axisRotationMotion(const axisRotationMotion&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const axisRotationMotion&);
+        //- No copy assignment
+        void operator=(const axisRotationMotion&) = delete;
 
 
 public:

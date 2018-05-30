@@ -63,8 +63,8 @@ class rhoChemistryModel
         //- Construct as copy (not implemented)
         rhoChemistryModel(const rhoChemistryModel&);
 
-        //- Disallow default bitwise assignment
-        void operator=(const rhoChemistryModel&);
+        //- No copy assignment
+        void operator=(const rhoChemistryModel&) = delete;
 
 
 protected:

@@ -79,11 +79,11 @@ class CatmullRomSpline
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        CatmullRomSpline(const CatmullRomSpline&);
+        //- No copy construct
+        CatmullRomSpline(const CatmullRomSpline&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const CatmullRomSpline&);
+        //- No copy assignment
+        void operator=(const CatmullRomSpline&) = delete;
 
 
 public:

@@ -72,9 +72,11 @@ class SpalartAllmarasDDES
 
         tmp<volScalarField> rd(const volScalarField& magGradU) const;
 
-        // Disallow default bitwise copy construct and assignment
-        SpalartAllmarasDDES(const SpalartAllmarasDDES&);
-        void operator=(const SpalartAllmarasDDES&);
+        //- No copy construct
+        SpalartAllmarasDDES(const SpalartAllmarasDDES&) = delete;
+
+        //- No copy assignment
+        void operator=(const SpalartAllmarasDDES&) = delete;
 
 
 protected:

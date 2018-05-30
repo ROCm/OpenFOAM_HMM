@@ -55,11 +55,11 @@ class noPreconditioner
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        noPreconditioner(const noPreconditioner&);
+        //- No copy construct
+        noPreconditioner(const noPreconditioner&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const noPreconditioner&);
+        //- No copy assignment
+        void operator=(const noPreconditioner&) = delete;
 
 
 public:

@@ -52,11 +52,11 @@ class radialModel
 {
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        radialModel(const radialModel&);
+        //- No copy construct
+        radialModel(const radialModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const radialModel&);
+        //- No copy assignment
+        void operator=(const radialModel&) = delete;
 
 
 protected:

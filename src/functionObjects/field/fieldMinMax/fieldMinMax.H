@@ -150,10 +150,10 @@ protected:
         //- Output file header information
         virtual void writeFileHeader(Ostream& os);
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         fieldMinMax(const fieldMinMax&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const fieldMinMax&) = delete;
 
         //- Calculate the field min/max

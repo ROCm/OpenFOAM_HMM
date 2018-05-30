@@ -62,14 +62,14 @@ class extendedCentredFaceToCellStencil
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         extendedCentredFaceToCellStencil
         (
             const extendedCentredFaceToCellStencil&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const extendedCentredFaceToCellStencil&);
+        //- No copy assignment
+        void operator=(const extendedCentredFaceToCellStencil&) = delete;
 
 
 public:

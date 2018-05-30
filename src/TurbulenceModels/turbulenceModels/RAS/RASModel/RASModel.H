@@ -88,11 +88,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        RASModel(const RASModel&);
+        //- No copy construct
+        RASModel(const RASModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const RASModel&);
+        //- No copy assignment
+        void operator=(const RASModel&) = delete;
 
 
 public:

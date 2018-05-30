@@ -176,8 +176,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
+        //- No copy construct
         cellMatcher(const cellMatcher&) = delete;
+
+        //- No copy assignment
         cellMatcher& operator=(const cellMatcher&) = delete;
 
 

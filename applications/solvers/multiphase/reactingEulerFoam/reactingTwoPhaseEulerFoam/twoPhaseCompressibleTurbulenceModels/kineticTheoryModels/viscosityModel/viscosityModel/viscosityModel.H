@@ -54,11 +54,11 @@ class viscosityModel
 {
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        viscosityModel(const viscosityModel&);
+        //- No copy construct
+        viscosityModel(const viscosityModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const viscosityModel&);
+        //- No copy assignment
+        void operator=(const viscosityModel&) = delete;
 
 
 protected:

@@ -84,11 +84,11 @@ class processorFaMeshes
         //- Read all meshes
         void read();
 
-        //- Disallow default bitwise copy construct
-        processorFaMeshes(const processorFaMeshes&);
+        //- No copy construct
+        processorFaMeshes(const processorFaMeshes&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const processorFaMeshes&);
+        //- No copy assignment
+        void operator=(const processorFaMeshes&) = delete;
 
 
 public:

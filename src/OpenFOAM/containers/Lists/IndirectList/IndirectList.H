@@ -61,10 +61,10 @@ class IndirectListAddressing
 
     // Private Member Functions
 
-        //- Disallow copy construct
+        //- No copy construct
         IndirectListAddressing(const IndirectListAddressing&) = delete;
 
-        //- Disallow copy assignment
+        //- No copy assignment
         void operator=(const IndirectListAddressing&) = delete;
 
 
@@ -105,10 +105,10 @@ class IndirectList
 {
     // Private Member Functions
 
-        //- Disallow copy construct
+        //- No copy assignment
         void operator=(const IndirectList<T>&) = delete;
 
-        //- Disallow copy assignment
+        //- No copy assignment from UIndirectList
         void operator=(const UIndirectList<T>&) = delete;
 
 

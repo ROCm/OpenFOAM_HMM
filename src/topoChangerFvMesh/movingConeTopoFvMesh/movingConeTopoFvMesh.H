@@ -83,11 +83,11 @@ class movingConeTopoFvMesh
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        movingConeTopoFvMesh(const movingConeTopoFvMesh&);
+        //- No copy construct
+        movingConeTopoFvMesh(const movingConeTopoFvMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const movingConeTopoFvMesh&);
+        //- No copy assignment
+        void operator=(const movingConeTopoFvMesh&) = delete;
 
 
         //- Add mixer zones and modifiers

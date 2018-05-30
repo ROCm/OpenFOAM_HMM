@@ -90,9 +90,11 @@ class kEpsilon
 {
     // Private Member Functions
 
-        // Disallow default bitwise copy construct and assignment
-        kEpsilon(const kEpsilon&);
-        void operator=(const kEpsilon&);
+        //- No copy construct
+        kEpsilon(const kEpsilon&) = delete;
+
+        //- No copy assignment
+        void operator=(const kEpsilon&) = delete;
 
 
 protected:

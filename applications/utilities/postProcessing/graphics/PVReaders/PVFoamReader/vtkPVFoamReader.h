@@ -222,10 +222,10 @@ protected:
 
 private:
 
-    //- Disallow default bitwise copy construct
+    //- No copy construct
     vtkPVFoamReader(const vtkPVFoamReader&) = delete;
 
-    //- Disallow default bitwise assignment
+    //- No copy assignment
     void operator=(const vtkPVFoamReader&) = delete;
 
     //- Add/remove patch names to/from the view

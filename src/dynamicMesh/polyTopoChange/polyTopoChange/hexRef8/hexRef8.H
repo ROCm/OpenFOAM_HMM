@@ -341,11 +341,11 @@ class hexRef8
             ) const;
 
 
-        //- Disallow default bitwise copy construct
-        hexRef8(const hexRef8&);
+        //- No copy construct
+        hexRef8(const hexRef8&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const hexRef8&);
+        //- No copy assignment
+        void operator=(const hexRef8&) = delete;
 
 
 public:

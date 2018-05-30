@@ -74,11 +74,14 @@ protected:
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        barotropicCompressibilityModel(const barotropicCompressibilityModel&);
+        //- No copy construct
+        barotropicCompressibilityModel
+        (
+            const barotropicCompressibilityModel&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const barotropicCompressibilityModel&);
+        //- No copy assignment
+        void operator=(const barotropicCompressibilityModel&) = delete;
 
 
 public:

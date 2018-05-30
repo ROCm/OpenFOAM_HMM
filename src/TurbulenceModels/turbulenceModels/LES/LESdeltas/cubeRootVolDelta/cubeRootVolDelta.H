@@ -59,9 +59,11 @@ class cubeRootVolDelta
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        cubeRootVolDelta(const cubeRootVolDelta&);
-        void operator=(const cubeRootVolDelta&);
+        //- No copy construct
+        cubeRootVolDelta(const cubeRootVolDelta&) = delete;
+
+        //- No copy assignment
+        void operator=(const cubeRootVolDelta&) = delete;
 
 
 public:
@@ -82,12 +84,10 @@ public:
 
 
     //- Destructor
-    virtual ~cubeRootVolDelta()
-    {}
+    virtual ~cubeRootVolDelta() = default;
 
 
     // Member Functions
-
 
         //- Calculate the delta values
         void calcDelta();

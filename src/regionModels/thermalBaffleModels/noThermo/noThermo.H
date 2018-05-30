@@ -59,11 +59,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        noThermo(const noThermo&);
+        //- No copy construct
+        noThermo(const noThermo&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const noThermo&);
+        //- No copy assignment
+        void operator=(const noThermo&) = delete;
 
 
 protected:

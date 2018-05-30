@@ -147,11 +147,11 @@ protected:
 
 private:
 
-        //- Disallow default bitwise copy construct
-        patchProbes(const patchProbes&);
+        //- No copy construct
+        patchProbes(const patchProbes&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const patchProbes&);
+        //- No copy assignment
+        void operator=(const patchProbes&) = delete;
 
 
 public:

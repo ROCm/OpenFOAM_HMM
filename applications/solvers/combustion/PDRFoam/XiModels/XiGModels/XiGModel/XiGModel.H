@@ -70,11 +70,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        XiGModel(const XiGModel&);
+        //- No copy construct
+        XiGModel(const XiGModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const XiGModel&);
+        //- No copy assignment
+        void operator=(const XiGModel&) = delete;
 
 
 public:

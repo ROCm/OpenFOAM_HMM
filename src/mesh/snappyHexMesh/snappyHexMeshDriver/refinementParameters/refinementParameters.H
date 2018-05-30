@@ -111,11 +111,11 @@ class refinementParameters
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        refinementParameters(const refinementParameters&);
+        //- No copy construct
+        refinementParameters(const refinementParameters&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const refinementParameters&);
+        //- No copy assignment
+        void operator=(const refinementParameters&) = delete;
 
 
 public:

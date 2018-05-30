@@ -190,11 +190,14 @@ private:
         template<class RhoFieldType>
         void apply(const RhoFieldType& rho, fvMatrix<scalar>& eqn);
 
-        //- Disallow default bitwise copy construct
-        solidificationMeltingSource(const solidificationMeltingSource&);
+        //- No copy construct
+        solidificationMeltingSource
+        (
+            const solidificationMeltingSource&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const solidificationMeltingSource&);
+        //- No copy assignment
+        void operator=(const solidificationMeltingSource&) = delete;
 
 
 public:

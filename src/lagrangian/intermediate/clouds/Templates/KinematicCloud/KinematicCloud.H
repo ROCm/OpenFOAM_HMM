@@ -133,11 +133,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        KinematicCloud(const KinematicCloud&);
+        //- No copy construct
+        KinematicCloud(const KinematicCloud&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const KinematicCloud&);
+        //- No copy assignment
+        void operator=(const KinematicCloud&) = delete;
 
 
 protected:

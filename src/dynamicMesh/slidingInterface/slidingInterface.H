@@ -209,11 +209,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        slidingInterface(const slidingInterface&);
+        //- No copy construct
+        slidingInterface(const slidingInterface&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const slidingInterface&);
+        //- No copy assignment
+        void operator=(const slidingInterface&) = delete;
 
         //- Clear out
         void clearOut() const;
