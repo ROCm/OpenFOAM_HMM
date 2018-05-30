@@ -110,7 +110,7 @@ public:
         inline constexpr UPtrList() noexcept;
 
         //- Construct with specified size, each element initialized to nullptr
-        explicit inline UPtrList(const label len);
+        inline explicit UPtrList(const label len);
 
         //- Copy construct (shallow copies addresses)
         inline UPtrList(const UPtrList<T>& list);
@@ -129,7 +129,7 @@ public:
         //- Construct from UList, taking the address of each list element
         //  The argument is non-const to reflect that the UPtrList can change
         //  the values of the original list.
-        explicit inline UPtrList(UList<T>& list);
+        inline explicit UPtrList(UList<T>& list);
 
 
     // Member functions

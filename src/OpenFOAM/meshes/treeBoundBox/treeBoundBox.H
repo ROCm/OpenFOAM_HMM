@@ -162,10 +162,10 @@ public:
         inline treeBoundBox();
 
         //- Construct from a boundBox
-        explicit inline treeBoundBox(const boundBox& bb);
+        inline explicit treeBoundBox(const boundBox& bb);
 
         //- Construct a bounding box containing a single initial point
-        explicit inline treeBoundBox(const point& pt);
+        inline explicit treeBoundBox(const point& pt);
 
         //- Construct from components
         inline treeBoundBox(const point& min, const point& max);

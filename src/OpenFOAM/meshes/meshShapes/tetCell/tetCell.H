@@ -81,7 +81,7 @@ public:
         inline tetCell(const FixedList<label, 4>& lst);
 
         //- Construct from an initializer list of four point labels
-        explicit inline tetCell(std::initializer_list<label> lst);
+        inline explicit tetCell(std::initializer_list<label> lst);
 
         //- Construct from Istream
         inline tetCell(Istream& is);

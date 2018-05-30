@@ -148,20 +148,20 @@ public:
         inline face();
 
         //- Construct given size, with invalid point labels (-1)
-        explicit inline face(const label sz);
+        inline explicit face(const label sz);
 
         //- Copy construct from list of labels
-        explicit inline face(const labelUList& lst);
+        inline explicit face(const labelUList& lst);
 
         //- Copy construct from list of labels
         template<unsigned Size>
-        explicit inline face(const FixedList<label, Size>& lst);
+        inline explicit face(const FixedList<label, Size>& lst);
 
         //- Copy construct from an initializer list of labels
-        explicit inline face(std::initializer_list<label> lst);
+        inline explicit face(std::initializer_list<label> lst);
 
         //- Move construct from list of labels
-        explicit inline face(labelList&& lst);
+        inline explicit face(labelList&& lst);
 
         //- Copy construct from triFace
         face(const triFace& f);

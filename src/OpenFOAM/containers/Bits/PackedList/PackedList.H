@@ -229,7 +229,7 @@ public:
         inline constexpr PackedList() noexcept;
 
         //- Construct for given number of elements, initializes values to 0
-        explicit inline PackedList(const label numElem);
+        inline explicit PackedList(const label numElem);
 
         //- Construct for given number of elements, and the specified
         //- value for each element
@@ -245,10 +245,10 @@ public:
         inline PackedList(PackedList<Width>&& rhs);
 
         //- Construct from a list of values
-        explicit inline PackedList(const labelUList& values);
+        inline explicit PackedList(const labelUList& values);
 
         //- Construct from a list of values
-        explicit inline PackedList(const labelUIndList& values);
+        inline explicit PackedList(const labelUIndList& values);
 
         //- Clone
         inline autoPtr<PackedList<Width>> clone() const;

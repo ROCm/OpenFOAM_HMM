@@ -92,7 +92,7 @@ public:
         //  This also handles a wordHashSet, which is derived from a HashTable.
         //  The result is similar to a HashTable::sortedToc.
         template<class AnyType, class AnyHash>
-        explicit inline hashedWordList
+        inline explicit hashedWordList
         (
             const HashTable<AnyType, word, AnyHash>& tbl
         );

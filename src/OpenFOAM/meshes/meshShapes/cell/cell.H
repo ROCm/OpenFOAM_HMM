@@ -67,13 +67,13 @@ public:
         inline cell();
 
         //- Construct given size, with invalid point labels (-1)
-        explicit inline cell(const label sz);
+        inline explicit cell(const label sz);
 
         //- Copy construct from list of labels
-        explicit inline cell(const labelUList& lst);
+        inline explicit cell(const labelUList& lst);
 
         //- Move construct from list of labels
-        explicit inline cell(labelList&& lst);
+        inline explicit cell(labelList&& lst);
 
         //- Construct from Istream
         inline cell(Istream& is);

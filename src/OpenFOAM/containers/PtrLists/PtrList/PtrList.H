@@ -88,7 +88,7 @@ public:
         inline constexpr PtrList() noexcept;
 
         //- Construct with specified size, each element initialized to nullptr
-        explicit inline PtrList(const label len);
+        inline explicit PtrList(const label len);
 
         //- Copy construct using 'clone()' method on each element
         inline PtrList(const PtrList<T>& list);

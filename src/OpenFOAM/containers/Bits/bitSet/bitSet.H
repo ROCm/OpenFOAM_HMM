@@ -142,7 +142,7 @@ public:
         explicit bitSet(Istream& is);
 
         //- Construct with given size, with all bits set to 0
-        explicit inline bitSet(const label n);
+        inline explicit bitSet(const label n);
 
         //- Construct with given size and value for all elements
         inline bitSet(const label n, const bool val);
@@ -154,7 +154,7 @@ public:
         inline bitSet(bitSet&& bitset);
 
         //- Construct from a list of bools
-        explicit inline bitSet(const UList<bool>& bools);
+        inline explicit bitSet(const UList<bool>& bools);
 
         //- Construct with given size with all bits set to 0,
         //- subsequently add specified locations as 1.
@@ -170,11 +170,11 @@ public:
 
         //- Construct with automatic sizing (filled with 0),
         //- and populate with specified locations as 1.
-        explicit inline bitSet(const labelUList& locations);
+        inline explicit bitSet(const labelUList& locations);
 
         //- Construct with automatic sizing (filled with 0),
         //- and populate with specified locations as 1.
-        explicit inline bitSet(const labelUIndList& locations);
+        inline explicit bitSet(const labelUIndList& locations);
 
         //- Clone
         inline autoPtr<bitSet> clone() const;

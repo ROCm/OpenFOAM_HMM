@@ -75,7 +75,7 @@ public:
         inline constexpr PtrDynList() noexcept;
 
         //- Construct with given capacity.
-        explicit inline PtrDynList(const label len);
+        inline explicit PtrDynList(const label len);
 
         //- Copy construct using 'clone()' method on each element
         inline PtrDynList(const PtrDynList<T, SizeMin>& list);

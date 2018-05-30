@@ -96,7 +96,7 @@ public:
         inline HashPtrTable();
 
         //- Construct given initial table capacity
-        explicit inline HashPtrTable(const label size);
+        inline explicit HashPtrTable(const label size);
 
         //- Construct from Istream using given Istream constructor class
         template<class INew>

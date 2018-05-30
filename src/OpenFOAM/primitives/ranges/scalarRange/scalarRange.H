@@ -92,7 +92,7 @@ public:
         inline scalarRange();
 
         //- Construct an exact value matcher
-        explicit inline scalarRange(const scalar value);
+        inline explicit scalarRange(const scalar value);
 
         //- Construct a range from min-value to max-value
         inline scalarRange(const scalar minVal, const scalar maxVal);
