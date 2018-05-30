@@ -84,9 +84,11 @@ class kEpsilonLopesdaCosta
 {
     // Private Member Functions
 
-        // Disallow default bitwise copy construct and assignment
-        kEpsilonLopesdaCosta(const kEpsilonLopesdaCosta&);
-        void operator=(const kEpsilonLopesdaCosta&);
+        //- No copy construct
+        kEpsilonLopesdaCosta(const kEpsilonLopesdaCosta&) = delete;
+
+        //- No copy assignment
+        void operator=(const kEpsilonLopesdaCosta&) = delete;
 
 
 protected:
@@ -175,8 +177,7 @@ public:
 
 
     //- Destructor
-    virtual ~kEpsilonLopesdaCosta()
-    {}
+    virtual ~kEpsilonLopesdaCosta() = default;
 
 
     // Member Functions

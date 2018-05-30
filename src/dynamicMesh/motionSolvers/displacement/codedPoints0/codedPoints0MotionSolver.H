@@ -117,13 +117,11 @@ protected:
         virtual const dictionary& codeDict() const;
 
 
-private:
+        //- No copy assignment construct
+        codedPoints0MotionSolver(const codedPoints0MotionSolver&) = delete;
 
-        //- Disallow default bitwise copy construct
-        codedPoints0MotionSolver(const codedPoints0MotionSolver&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const codedPoints0MotionSolver&);
+        //- No copy assignment
+        void operator=(const codedPoints0MotionSolver&) = delete;
 
 
 public:

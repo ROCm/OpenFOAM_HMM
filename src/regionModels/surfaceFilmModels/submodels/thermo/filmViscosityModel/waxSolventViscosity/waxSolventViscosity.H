@@ -59,10 +59,10 @@ class waxSolventViscosity
         //- Correct the mixture viscosity
         void correctMu();
 
-        //- Disallow default bitwise copy construct
-        waxSolventViscosity(const waxSolventViscosity&);
+        //- No copy construct
+        waxSolventViscosity(const waxSolventViscosity&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const waxSolventViscosity&) = delete;
 
 
@@ -101,7 +101,7 @@ public:
 
 
     //- Destructor
-    virtual ~waxSolventViscosity();
+    virtual ~waxSolventViscosity() = default;
 
 
     // Member Functions

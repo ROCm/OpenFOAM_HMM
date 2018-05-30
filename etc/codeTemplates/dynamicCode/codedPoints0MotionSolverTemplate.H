@@ -54,11 +54,14 @@ class ${typeName}Points0MotionSolver
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        ${typeName}Points0MotionSolver(const ${typeName}Points0MotionSolver&);
+        //- No copy construct
+        ${typeName}Points0MotionSolver
+        (
+            const ${typeName}Points0MotionSolver&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const ${typeName}Points0MotionSolver&);
+        //- No copy assignment
+        void operator=(const ${typeName}Points0MotionSolver&) = delete;
 
 
 public:
@@ -88,7 +91,7 @@ public:
 
         //- Solve for motion
         virtual void solve()
-        {};
+        {}
 };
 
 

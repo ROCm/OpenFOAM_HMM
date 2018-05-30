@@ -66,8 +66,7 @@ public:
 
 
     //- Destructor
-    virtual ~simpleRegIOobject()
-    {};
+    virtual ~simpleRegIOobject() = default;
 
 
     // Member Functions

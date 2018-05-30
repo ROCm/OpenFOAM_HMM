@@ -146,11 +146,12 @@ class powerLawLopesdaCosta
             const vectorField& U
         ) const;
 
-        //- Disallow default bitwise copy construct
-        powerLawLopesdaCosta(const powerLawLopesdaCosta&);
 
-        //- Disallow default bitwise assignment
-        void operator=(const powerLawLopesdaCosta&);
+        //- No copy construct
+        powerLawLopesdaCosta(const powerLawLopesdaCosta&) = delete;
+
+        //- No copy assignment
+        void operator=(const powerLawLopesdaCosta&) = delete;
 
 
 public:

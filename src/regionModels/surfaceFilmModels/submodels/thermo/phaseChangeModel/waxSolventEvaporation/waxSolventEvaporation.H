@@ -58,11 +58,11 @@ class waxSolventEvaporation
 {
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        waxSolventEvaporation(const waxSolventEvaporation&);
+        //- No copy construct
+        waxSolventEvaporation(const waxSolventEvaporation&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const waxSolventEvaporation&);
+        //- No copy assignment
+        void operator=(const waxSolventEvaporation&) = delete;
 
 
 protected:
@@ -92,7 +92,7 @@ protected:
         const scalar TbFactor_;
 
         //- Switch to treat YInf as zero
-        Switch YInfZero_;
+        bool YInfZero_;
 
         //- Activity coefficient as a function of solvent mole fraction
         autoPtr<Function1<scalar>> activityCoeff_;

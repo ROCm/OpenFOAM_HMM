@@ -108,8 +108,7 @@ public:
 
 
     //- Destructor
-    virtual ~OppositeFaceCellWave()
-    {};
+    virtual ~OppositeFaceCellWave() = default;
 
 
     // Member Functions

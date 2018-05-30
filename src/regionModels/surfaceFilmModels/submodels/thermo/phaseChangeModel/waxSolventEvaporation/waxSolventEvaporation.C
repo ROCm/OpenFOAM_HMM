@@ -127,7 +127,7 @@ waxSolventEvaporation::waxSolventEvaporation
     deltaMin_(readScalar(coeffDict_.lookup("deltaMin"))),
     L_(readScalar(coeffDict_.lookup("L"))),
     TbFactor_(coeffDict_.lookupOrDefault<scalar>("TbFactor", 1.1)),
-    YInfZero_(coeffDict_.lookupOrDefault<Switch>("YInfZero", false)),
+    YInfZero_(coeffDict_.lookupOrDefault("YInfZero", false)),
     activityCoeff_
     (
         Function1<scalar>::New("activityCoeff", coeffDict_)

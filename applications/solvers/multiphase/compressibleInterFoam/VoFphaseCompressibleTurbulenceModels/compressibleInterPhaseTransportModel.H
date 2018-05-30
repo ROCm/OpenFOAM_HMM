@@ -92,14 +92,14 @@ class compressibleInterPhaseTransportModel
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         compressibleInterPhaseTransportModel
         (
             const compressibleInterPhaseTransportModel&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const compressibleInterPhaseTransportModel&);
+        //- No copy assignment
+        void operator=(const compressibleInterPhaseTransportModel&) = delete;
 
 
 public:

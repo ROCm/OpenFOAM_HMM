@@ -111,7 +111,7 @@ public:
 
 
     //- Destructor
-    ~polyMeshFilterSettings(){};
+    ~polyMeshFilterSettings() = default;
 
 
     // Member Functions

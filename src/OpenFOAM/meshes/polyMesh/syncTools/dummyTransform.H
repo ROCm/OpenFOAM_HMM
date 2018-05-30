@@ -51,10 +51,12 @@ public:
         const bool forward,
         List<T>& fld
     ) const
-    {};
+    {}
+
     template<class T>
     void operator()(const coupledPolyPatch& cpp, Field<T>& fld) const
     {}
+
     template<class T, template<class> class Container>
     void operator()(const coupledPolyPatch& cpp, Container<T>& map) const
     {}
