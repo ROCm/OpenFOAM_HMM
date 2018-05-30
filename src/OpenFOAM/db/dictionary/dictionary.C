@@ -44,6 +44,31 @@ bool Foam::dictionary::writeOptionalEntries
 );
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::dictionary::excessTokens
+(
+    OSstream& msg,
+    const word& keyword,
+    const ITstream& is
+) const
+{
+    const label nExcess = is.nRemainingTokens();
+
+    if (!nExcess)
+    {
+        return;
+    }
+
+    msg << "entry '" << keyword << "' has "
+        << nExcess << " excess tokens, near line: " << is.lineNumber() << nl
+        << "dictionary: " << name() << nl
+        << "stream:  ";
+    is.writeList(msg, 0);
+    msg << nl;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::dictionary::dictionary()

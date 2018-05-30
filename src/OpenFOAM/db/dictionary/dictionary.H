@@ -100,7 +100,7 @@ SeeAlso
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 class regExp;
 class dictionary;
 class SHA1Digest;
@@ -383,6 +383,15 @@ private:
         ) const;
 
 
+        //- Add report of excess tokens to the messageStream
+        void excessTokens
+        (
+            OSstream& msg,
+            const word& keyword,
+            const ITstream& is
+        ) const;
+
+
 public:
 
     // Declare name of the class and its debug switch
@@ -446,7 +455,7 @@ public:
 
     // Member functions
 
-      // Access
+    // Access
 
         //- Return the parent dictionary
         const dictionary& parent() const
@@ -470,7 +479,7 @@ public:
         tokenList tokens() const;
 
 
-      // Search and lookup
+    // Search and lookup
 
         //- Search dictionary for given keyword.
         //  Default search: non-recursive with patterns.
@@ -518,6 +527,20 @@ public:
             bool patternMatch
         ) const;
 
+        //- Find and return a T.
+        //- FatalError if not found, or if there are excess tokens.
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        template<class T>
+        T get
+        (
+            const word& keyword,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const;
+
         //- Find and return an entry data stream.
         //  Default search: non-recursive with patterns.
         //
@@ -530,11 +553,14 @@ public:
             bool patternMatch = true
         ) const;
 
-        //- Find and return a T. FatalError if not found.
+        //- Find and return a T.
+        //- FatalError if not found, or if there are excess tokens.
         //  Default search: non-recursive with patterns.
         //
         //  \param recursive search parent dictionaries
         //  \param patternMatch use regular expressions
+        //
+        //  \note same as get()
         template<class T>
         T lookupType
         (
@@ -544,6 +570,7 @@ public:
         ) const;
 
         //- Find and return a T, or return the given default value
+        //- FatalError if it is found and there are excess tokens.
         //  Default search: non-recursive with patterns.
         //
         //  \param recursive search parent dictionaries
@@ -557,8 +584,9 @@ public:
             bool patternMatch = true
         ) const;
 
-        //- Find and return a T, if not found return the default value
-        //  and add it to dictionary.
+        //- Find and return a T, or return the given default value
+        //- and add it to dictionary.
+        //- FatalError if it is found and there are excess tokens.
         //  Default search: non-recursive with patterns.
         //
         //  \param recursive search parent dictionaries
@@ -573,6 +601,7 @@ public:
         );
 
         //- Find an entry if present, and assign to T val.
+        //- FatalError if it is found and there are excess tokens.
         //  Default search: non-recursive with patterns.
         //
         //  \param val the value to read
@@ -663,7 +692,7 @@ public:
         List<keyType> keys(bool patterns = false) const;
 
 
-      // Editing
+    // Editing
 
         //- Substitute the given keyword (which is prefixed by '$')
         //  with the corresponding sub-dictionary entries
@@ -775,7 +804,7 @@ public:
         void transfer(dictionary& dict);
 
 
-      // Read
+    // Read
 
         //- Read dictionary from Istream
         bool read(Istream& is);
@@ -784,7 +813,7 @@ public:
         bool read(Istream& is, bool keepHeader);
 
 
-      // Write
+    // Write
 
         //- Write sub-dictionary with the keyword as its header
         void writeEntry(const keyType& keyword, Ostream& os) const;
@@ -798,7 +827,7 @@ public:
         void write(Ostream& os, const bool subDict=true) const;
 
 
-      // Searching
+    // Searching
 
         //- Search dictionary for given keyword
         //  Default search: non-recursive with patterns.
@@ -941,7 +970,7 @@ public:
         ) const;
 
         //- Find and return an entry pointer if present, or return a nullptr,
-        //- using any compatibility names it needed.
+        //- using any compatibility names if needed.
         //
         //  \param compat list of old compatibility keywords and the last
         //      OpenFOAM version for which they were used.
@@ -956,7 +985,7 @@ public:
         ) const;
 
         //- Find and return an entry if present otherwise error,
-        //- using any compatibility names it needed.
+        //- using any compatibility names if needed.
         //
         //  \param compat list of old compatibility keywords and the last
         //      OpenFOAM version for which they were used.
@@ -971,7 +1000,7 @@ public:
         ) const;
 
         //- Find and return an entry data stream,
-        //- using any compatibility names it needed.
+        //- using any compatibility names if needed.
         //  Default search: non-recursive with patterns.
         //
         //  \param compat list of old compatibility keywords and the last
@@ -987,7 +1016,7 @@ public:
         ) const;
 
         //- Find and return a T, or return the given default value
-        //- using any compatibility names it needed.
+        //- using any compatibility names if needed.
         //  Default search: non-recursive with patterns.
         //
         //  \param compat list of old compatibility keywords and the last
@@ -1005,7 +1034,7 @@ public:
         ) const;
 
         //- Find an entry if present, and assign to T val
-        //- using any compatibility names it needed.
+        //- using any compatibility names if needed.
         //  Default search: non-recursive with patterns.
         //
         //  \param compat list of old compatibility keywords and the last

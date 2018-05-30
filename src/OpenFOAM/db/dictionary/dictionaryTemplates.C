@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +50,7 @@ Foam::entry* Foam::dictionary::set(const keyType& k, const T& v)
 
 
 template<class T>
-T Foam::dictionary::lookupType
+T Foam::dictionary::get
 (
     const word& keyword,
     bool recursive,
@@ -61,15 +61,36 @@ T Foam::dictionary::lookupType
 
     if (!finder.found())
     {
-        FatalIOErrorInFunction
-        (
-            *this
-        )   << "keyword " << keyword << " is undefined in dictionary "
+        FatalIOErrorInFunction(*this)
+            << "keyword " << keyword << " is undefined in dictionary "
             << name()
             << exit(FatalIOError);
     }
 
-    return pTraits<T>(finder.ptr()->stream());
+    T val;
+    ITstream& is = finder.ptr()->stream();
+    is >> val;
+
+    if (!is.eof())
+    {
+        auto err = FatalIOErrorInFunction(*this);
+        excessTokens(err, keyword, is);
+        err << exit(FatalIOError);
+    }
+
+    return val;
+}
+
+
+template<class T>
+T Foam::dictionary::lookupType
+(
+    const word& keyword,
+    bool recursive,
+    bool patternMatch
+) const
+{
+    return get<T>(keyword, recursive, patternMatch);
 }
 
 
@@ -86,7 +107,19 @@ T Foam::dictionary::lookupOrDefault
 
     if (finder.found())
     {
-        return pTraits<T>(finder.ptr()->stream());
+        T val;
+
+        ITstream& is = finder.ptr()->stream();
+        is >> val;
+
+        if (!is.eof())
+        {
+            auto err = FatalIOErrorInFunction(*this);
+            excessTokens(err, keyword, is);
+            err << exit(FatalIOError);
+        }
+
+        return val;
     }
 
     if (writeOptionalEntries)
@@ -114,7 +147,19 @@ T Foam::dictionary::lookupOrAddDefault
 
     if (finder.found())
     {
-        return pTraits<T>(finder.ptr()->stream());
+        T val;
+
+        ITstream& is = finder.ptr()->stream();
+        is >> val;
+
+        if (!is.eof())
+        {
+            auto err = FatalIOErrorInFunction(*this);
+            excessTokens(err, keyword, is);
+            err << exit(FatalIOError);
+        }
+
+        return val;
     }
 
     if (writeOptionalEntries)
@@ -143,7 +188,16 @@ bool Foam::dictionary::readIfPresent
 
     if (finder.found())
     {
-        finder.ptr()->stream() >> val;
+        ITstream& is = finder.ptr()->stream();
+        is >> val;
+
+        if (!is.eof())
+        {
+            auto err = FatalIOErrorInFunction(*this);
+            excessTokens(err, keyword, is);
+            err << exit(FatalIOError);
+        }
+
         return true;
     }
 
@@ -174,7 +228,19 @@ T Foam::dictionary::lookupOrDefaultCompat
 
     if (finder.found())
     {
-        return pTraits<T>(finder.ptr()->stream());
+        T val;
+
+        ITstream& is = finder.ptr()->stream();
+        is >> val;
+
+        if (!is.eof())
+        {
+            auto err = FatalIOErrorInFunction(*this);
+            excessTokens(err, keyword, is);
+            err << exit(FatalIOError);
+        }
+
+        return val;
     }
 
     if (writeOptionalEntries)
@@ -204,7 +270,16 @@ bool Foam::dictionary::readIfPresentCompat
 
     if (finder.found())
     {
-        finder.ptr()->stream() >> val;
+        ITstream& is = finder.ptr()->stream();
+        is >> val;
+
+        if (!is.eof())
+        {
+            auto err = FatalIOErrorInFunction(*this);
+            excessTokens(err, keyword, is);
+            err << exit(FatalIOError);
+        }
+
         return true;
     }
 
