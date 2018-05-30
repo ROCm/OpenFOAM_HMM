@@ -91,12 +91,28 @@ have_scotch()
         )
     elif isSystem "$SCOTCH_ARCH_PATH"
     then
-        header=$(findFirstFile /usr/include/$header /usr/include/scotch/$header)
-
-        library=$(findFirstFile \
-            /usr/lib/$library \
-            /usr/lib$WM_COMPILER_LIB_ARCH/$library \
+        header=$(findFirstFile \
+            /usr/local/include/$header \
+            /usr/local/include/scotch/$header \
+            /usr/include/$header \
+            /usr/include/scotch/$header \
         )
+
+        case "$header" in
+        /usr/local/*)
+            library=$(findFirstFile \
+                /usr/local/lib/$library \
+                /usr/local/lib$WM_COMPILER_LIB_ARCH/$library \
+            )
+            ;;
+
+        *)
+            library=$(findFirstFile \
+                /usr/lib/$library \
+                /usr/lib$WM_COMPILER_LIB_ARCH/$library \
+            )
+            ;;
+        esac
     else
         unset header library
     fi
