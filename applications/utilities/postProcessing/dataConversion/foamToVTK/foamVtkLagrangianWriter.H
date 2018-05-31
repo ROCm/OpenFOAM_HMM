@@ -92,10 +92,10 @@ class lagrangianWriter
         void writeVerts();
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         lagrangianWriter(const lagrangianWriter&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const lagrangianWriter&) = delete;
 
 

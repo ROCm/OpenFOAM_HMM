@@ -57,11 +57,11 @@ class cellQuality
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        cellQuality(const cellQuality&);
+        //- No copy construct
+        cellQuality(const cellQuality&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cellQuality&);
+        //- No copy assignment
+        void operator=(const cellQuality&) = delete;
 
 
 public:

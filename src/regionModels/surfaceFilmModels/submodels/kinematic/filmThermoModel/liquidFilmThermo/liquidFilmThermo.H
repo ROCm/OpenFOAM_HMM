@@ -89,11 +89,11 @@ protected:
         //- Initialise the liquid pointer
         void initLiquid(const dictionary& dict);
 
-        //- Disallow default bitwise copy construct
-        liquidFilmThermo(const liquidFilmThermo&);
+        //- No copy construct
+        liquidFilmThermo(const liquidFilmThermo&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const liquidFilmThermo&);
+        //- No copy assignment
+        void operator=(const liquidFilmThermo&) = delete;
 
 
 public:

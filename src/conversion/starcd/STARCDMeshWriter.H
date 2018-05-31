@@ -78,10 +78,10 @@ class STARCDMeshWriter
         label findDefaultBoundary() const;
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         STARCDMeshWriter(const STARCDMeshWriter&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const STARCDMeshWriter&) = delete;
 
 

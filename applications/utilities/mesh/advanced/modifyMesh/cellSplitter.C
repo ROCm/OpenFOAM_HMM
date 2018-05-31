@@ -374,7 +374,7 @@ void Foam::cellSplitter::setRefinement
 
         const cell& cFaces = mesh_.cells()[celli];
 
-        faceUpToDate.unsetMany(cFaces);
+        faceUpToDate.unset(cFaces);
     }
 
     forAll(faceUpToDate, facei)

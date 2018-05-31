@@ -78,8 +78,8 @@ class clippedLinear
         }
 
 
-        //- Disallow default bitwise assignment
-        void operator=(const clippedLinear&);
+        //- No copy assignment
+        void operator=(const clippedLinear&) = delete;
 
 
 public:

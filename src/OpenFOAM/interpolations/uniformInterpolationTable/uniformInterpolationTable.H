@@ -95,8 +95,8 @@ class uniformInterpolationTable
         //- Check that the table is valid
         void checkTable() const;
 
-        //- Disallow default bitwise assignment
-        void operator=(const uniformInterpolationTable&);
+        //- No copy assignment
+        void operator=(const uniformInterpolationTable&) = delete;
 
 
 public:

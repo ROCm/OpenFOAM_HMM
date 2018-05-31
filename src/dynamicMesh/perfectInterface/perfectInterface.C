@@ -262,7 +262,7 @@ void Foam::perfectInterface::setRefinement
         {
             const labelList& pFaces = mesh.pointFaces()[meshPointi];
 
-            affectedFaces.insertMany(pFaces);
+            affectedFaces.insert(pFaces);
         }
     }
     forAll(pp1, i)

@@ -114,14 +114,14 @@ class displacementLayeredMotionMotionSolver
         );
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         displacementLayeredMotionMotionSolver
         (
             const displacementLayeredMotionMotionSolver&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const displacementLayeredMotionMotionSolver&);
+        //- No copy assignment
+        void operator=(const displacementLayeredMotionMotionSolver&) = delete;
 
 
 public:

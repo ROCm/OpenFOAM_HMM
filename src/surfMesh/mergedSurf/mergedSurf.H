@@ -55,7 +55,7 @@ class mergedSurf
     labelList  zones_;
     labelList  pointsMap_;
 
-    //- Disallow default bitwise copy construct
+    //- No copy construct
     mergedSurf(const mergedSurf&) = delete;
 
     // Assignment is needed for lists

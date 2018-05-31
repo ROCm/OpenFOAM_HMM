@@ -114,11 +114,11 @@ class PatchToPatchInterpolation
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        PatchToPatchInterpolation(const PatchToPatchInterpolation&);
+        //- No copy construct
+        PatchToPatchInterpolation(const PatchToPatchInterpolation&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const PatchToPatchInterpolation&);
+        //- No copy assignment
+        void operator=(const PatchToPatchInterpolation&) = delete;
 
         //- Calculate point weights
         void calcPointAddressing() const;

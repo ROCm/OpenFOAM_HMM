@@ -84,9 +84,11 @@ class buoyantKEpsilon
 {
     // Private Member Functions
 
-        // Disallow default bitwise copy construct and assignment
-        buoyantKEpsilon(const buoyantKEpsilon&);
-        void operator=(const buoyantKEpsilon&);
+        //- No copy construct
+        buoyantKEpsilon(const buoyantKEpsilon&) = delete;
+
+        //- No copy assignment
+        void operator=(const buoyantKEpsilon&) = delete;
 
 
 protected:

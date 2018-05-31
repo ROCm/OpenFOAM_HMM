@@ -58,11 +58,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        liquidViscosity(const liquidViscosity&);
+        //- No copy construct
+        liquidViscosity(const liquidViscosity&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const liquidViscosity&);
+        //- No copy assignment
+        void operator=(const liquidViscosity&) = delete;
 
 
 protected:

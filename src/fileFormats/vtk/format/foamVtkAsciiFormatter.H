@@ -72,10 +72,10 @@ class asciiFormatter
         inline void done();
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         asciiFormatter(const asciiFormatter&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const asciiFormatter&) = delete;
 
 

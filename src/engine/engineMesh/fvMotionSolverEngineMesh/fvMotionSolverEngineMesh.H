@@ -63,11 +63,11 @@ class fvMotionSolverEngineMesh
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        fvMotionSolverEngineMesh(const fvMotionSolverEngineMesh&);
+        //- No copy construct
+        fvMotionSolverEngineMesh(const fvMotionSolverEngineMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const fvMotionSolverEngineMesh&);
+        //- No copy assignment
+        void operator=(const fvMotionSolverEngineMesh&) = delete;
 
 
 public:

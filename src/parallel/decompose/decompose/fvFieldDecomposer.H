@@ -229,11 +229,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        fvFieldDecomposer(const fvFieldDecomposer&);
+        //- No copy construct
+        fvFieldDecomposer(const fvFieldDecomposer&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const fvFieldDecomposer&);
+        //- No copy assignment
+        void operator=(const fvFieldDecomposer&) = delete;
 
 
 public:

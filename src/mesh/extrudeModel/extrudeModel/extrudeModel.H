@@ -66,11 +66,11 @@ protected:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        extrudeModel(const extrudeModel&);
+        //- No copy construct
+        extrudeModel(const extrudeModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const extrudeModel&);
+        //- No copy assignment
+        void operator=(const extrudeModel&) = delete;
 
 
 public:

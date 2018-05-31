@@ -73,11 +73,11 @@ class zoneCombustion
         //- Filter the given field on the cellZones
         tmp<volScalarField> filter(const tmp<volScalarField>& tS) const;
 
-        //- Disallow copy construct
-        zoneCombustion(const zoneCombustion&);
+        //- No copy construct
+        zoneCombustion(const zoneCombustion&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const zoneCombustion&);
+        //- No copy assignment
+        void operator=(const zoneCombustion&) = delete;
 
 
 public:

@@ -71,10 +71,10 @@ class polyTopoChanger
 
         void readModifiers();
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         polyTopoChanger(const polyTopoChanger&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const polyTopoChanger&) = delete;
 
 

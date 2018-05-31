@@ -67,11 +67,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        injectionModelList(const injectionModelList&);
+        //- No copy construct
+        injectionModelList(const injectionModelList&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const injectionModelList&);
+        //- No copy assignment
+        void operator=(const injectionModelList&) = delete;
 
 
 public:

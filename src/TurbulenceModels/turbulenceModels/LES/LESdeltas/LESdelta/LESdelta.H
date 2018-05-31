@@ -60,13 +60,13 @@ protected:
         volScalarField delta_;
 
 
-private:
+    // Protected Member Functions
 
-    // Private Member Functions
+        //- No copy construct
+        LESdelta(const LESdelta&) = delete;
 
-        // Disallow default bitwise copy construct and assignment
-        LESdelta(const LESdelta&);
-        void operator=(const LESdelta&);
+        //- No copy assignment
+        void operator=(const LESdelta&) = delete;
 
 
 public:

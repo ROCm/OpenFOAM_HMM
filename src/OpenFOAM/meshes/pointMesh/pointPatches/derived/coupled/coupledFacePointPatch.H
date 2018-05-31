@@ -63,11 +63,11 @@ class coupledFacePointPatch
 
     // Private Member Functions
 
-        //- Disallow default construct as copy
-        coupledFacePointPatch(const coupledFacePointPatch&);
+        //- No copy construct
+        coupledFacePointPatch(const coupledFacePointPatch&) = delete;
 
-        //- Disallow default assignment
-        void operator=(const coupledFacePointPatch&);
+        //- No copy assignment
+        void operator=(const coupledFacePointPatch&) = delete;
 
 
 protected:

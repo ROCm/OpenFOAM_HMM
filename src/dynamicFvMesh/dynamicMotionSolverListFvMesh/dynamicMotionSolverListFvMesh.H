@@ -59,11 +59,14 @@ class dynamicMotionSolverListFvMesh
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        dynamicMotionSolverListFvMesh(const dynamicMotionSolverListFvMesh&);
+        //- No copy construct
+        dynamicMotionSolverListFvMesh
+        (
+            const dynamicMotionSolverListFvMesh&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const dynamicMotionSolverListFvMesh&);
+        //- No copy assignment
+        void operator=(const dynamicMotionSolverListFvMesh&) = delete;
 
 
 public:

@@ -90,11 +90,11 @@ class removePoints
         ) const;
 
 
-        //- Disallow default bitwise copy construct
-        removePoints(const removePoints&);
+        //- No copy construct
+        removePoints(const removePoints&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const removePoints&);
+        //- No copy assignment
+        void operator=(const removePoints&) = delete;
 
 public:
 

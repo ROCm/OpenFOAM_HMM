@@ -65,11 +65,11 @@ class oscillatingLinearMotion
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        oscillatingLinearMotion(const oscillatingLinearMotion&);
+        //- No copy construct
+        oscillatingLinearMotion(const oscillatingLinearMotion&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const oscillatingLinearMotion&);
+        //- No copy assignment
+        void operator=(const oscillatingLinearMotion&) = delete;
 
 
 public:

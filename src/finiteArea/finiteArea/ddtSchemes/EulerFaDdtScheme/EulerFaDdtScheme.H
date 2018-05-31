@@ -61,11 +61,11 @@ class EulerFaDdtScheme
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        EulerFaDdtScheme(const EulerFaDdtScheme&);
+        //- No copy construct
+        EulerFaDdtScheme(const EulerFaDdtScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const EulerFaDdtScheme&);
+        //- No copy assignment
+        void operator=(const EulerFaDdtScheme&) = delete;
 
 
 public:

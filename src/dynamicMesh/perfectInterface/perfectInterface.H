@@ -78,11 +78,11 @@ class perfectInterface
         static pointField calcFaceCentres(const indirectPrimitivePatch&);
 
 
-        //- Disallow default bitwise copy construct
-        perfectInterface(const perfectInterface&);
+        //- No copy construct
+        perfectInterface(const perfectInterface&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const perfectInterface&);
+        //- No copy assignment
+        void operator=(const perfectInterface&) = delete;
 
 
 public:

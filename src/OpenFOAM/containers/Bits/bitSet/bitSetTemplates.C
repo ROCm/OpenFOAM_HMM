@@ -28,11 +28,13 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class InputIter>
-void Foam::bitSet::setMany(InputIter first, InputIter last)
+Foam::label Foam::bitSet::setMany(InputIter first, InputIter last)
 {
     // Check the max expected value first
     const auto max = std::max_element(first, last);
     const label len = (max != last ? (1 + *max) : 0);
+
+    label changed = 0;
 
     if (len > 0)
     {
@@ -40,19 +42,31 @@ void Foam::bitSet::setMany(InputIter first, InputIter last)
 
         for (; first != last; ++first)
         {
-            set(*first);
+            if (set(*first))
+            {
+                ++changed;
+            }
         }
     }
+
+    return changed;
 }
 
 
 template<class InputIter>
-void Foam::bitSet::unsetMany(InputIter first, InputIter last)
+Foam::label Foam::bitSet::unset(InputIter first, InputIter last)
 {
+    label changed = 0;
+
     for (; first != last; ++first)
     {
-        unset(*first);
+        if (unset(*first))
+        {
+            ++changed;
+        }
     }
+
+    return changed;
 }
 
 

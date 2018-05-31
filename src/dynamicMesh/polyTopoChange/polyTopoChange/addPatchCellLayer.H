@@ -279,11 +279,11 @@ class addPatchCellLayer
             bool& zoneFlip
         );
 
-        //- Disallow default bitwise copy construct
-        addPatchCellLayer(const addPatchCellLayer&);
+        //- No copy construct
+        addPatchCellLayer(const addPatchCellLayer&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const addPatchCellLayer&);
+        //- No copy assignment
+        void operator=(const addPatchCellLayer&) = delete;
 
 
 public:

@@ -56,10 +56,10 @@ class regionProperties
     public HashTable<wordList>
 {
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         regionProperties(const regionProperties&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const regionProperties&) = delete;
 
 public:

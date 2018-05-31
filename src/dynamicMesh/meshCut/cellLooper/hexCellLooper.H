@@ -97,11 +97,11 @@ private:
         ) const;
 
 
-        //- Disallow default bitwise copy construct
-        hexCellLooper(const hexCellLooper&);
+        //- No copy construct
+        hexCellLooper(const hexCellLooper&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const hexCellLooper&);
+        //- No copy assignment
+        void operator=(const hexCellLooper&) = delete;
 
 
 public:

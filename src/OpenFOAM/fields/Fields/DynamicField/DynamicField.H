@@ -103,7 +103,7 @@ public:
         inline constexpr DynamicField() noexcept;
 
         //- Construct empty field with given reserve size.
-        explicit inline DynamicField(const label len);
+        inline explicit DynamicField(const label len);
 
         //- Construct given size and initial value
         inline DynamicField(const label len, const T& val);
@@ -120,13 +120,13 @@ public:
 
         //- Copy construct from UList. Size set to UList size.
         //  Also constructs from DynamicField with different sizing parameters.
-        explicit inline DynamicField(const UList<T>& list);
+        inline explicit DynamicField(const UList<T>& list);
 
         //- Copy construct from UIndirectList
-        explicit inline DynamicField(const UIndirectList<T>& list);
+        inline explicit DynamicField(const UIndirectList<T>& list);
 
         //- Move construct from List contents
-        explicit inline DynamicField(List<T>&& content);
+        inline explicit DynamicField(List<T>&& content);
 
         //- Move construct from dynamic Field contents
         inline DynamicField(DynamicField<T, SizeMin>&& content);

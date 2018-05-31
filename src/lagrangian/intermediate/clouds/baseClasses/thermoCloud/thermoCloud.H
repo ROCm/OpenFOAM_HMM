@@ -50,11 +50,11 @@ class thermoCloud
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        thermoCloud(const thermoCloud&);
+        //- No copy construct
+        thermoCloud(const thermoCloud&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const thermoCloud&);
+        //- No copy assignment
+        void operator=(const thermoCloud&) = delete;
 
 
 public:

@@ -59,11 +59,11 @@ class singleStepCombustion
 {
     // Private Member Functions
 
-        //- Disallow copy construct
-        singleStepCombustion(const singleStepCombustion&);
+        //- No copy construct
+        singleStepCombustion(const singleStepCombustion&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const singleStepCombustion&);
+        //- No copy assignment
+        void operator=(const singleStepCombustion&) = delete;
 
 
 protected:

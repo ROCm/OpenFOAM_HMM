@@ -73,11 +73,11 @@ class boundedDdtScheme
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        boundedDdtScheme(const boundedDdtScheme&);
+        //- No copy construct
+        boundedDdtScheme(const boundedDdtScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const boundedDdtScheme&);
+        //- No copy assignment
+        void operator=(const boundedDdtScheme&) = delete;
 
 
 public:

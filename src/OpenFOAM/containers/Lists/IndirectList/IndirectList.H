@@ -61,10 +61,10 @@ class IndirectListAddressing
 
     // Private Member Functions
 
-        //- Disallow copy construct
+        //- No copy construct
         IndirectListAddressing(const IndirectListAddressing&) = delete;
 
-        //- Disallow copy assignment
+        //- No copy assignment
         void operator=(const IndirectListAddressing&) = delete;
 
 
@@ -73,10 +73,10 @@ protected:
     // Constructors
 
         //- Copy construct from addressing array
-        explicit inline IndirectListAddressing(const labelUList& addr);
+        inline explicit IndirectListAddressing(const labelUList& addr);
 
         //- Move construct from addressing array
-        explicit inline IndirectListAddressing(List<label>&& addr);
+        inline explicit IndirectListAddressing(List<label>&& addr);
 
 
     // Member Functions
@@ -105,10 +105,10 @@ class IndirectList
 {
     // Private Member Functions
 
-        //- Disallow copy construct
+        //- No copy assignment
         void operator=(const IndirectList<T>&) = delete;
 
-        //- Disallow copy assignment
+        //- No copy assignment from UIndirectList
         void operator=(const UIndirectList<T>&) = delete;
 
 
@@ -127,7 +127,7 @@ public:
 
         //- Copy construct addressing, shallow copy values list reference
         //- from UIndirectList
-        explicit inline IndirectList(const UIndirectList<T>& list);
+        inline explicit IndirectList(const UIndirectList<T>& list);
 
 
     // Member Functions

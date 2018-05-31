@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
 
     Info<< "\nclear/assign from labelList\n";
     list4.clear();
-    list4.setMany(labelList{0, 1, 2, 3, 12, 13, 14, 19, 20, 21});
+    list4.set(labelList{0, 1, 2, 3, 12, 13, 14, 19, 20, 21});
 
     report(list4, true);
 

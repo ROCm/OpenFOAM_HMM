@@ -66,10 +66,10 @@ class mirrorFvMesh
 
     // Private Member Functions
 
-        //- Disallow copy construct
+        //- No copy construct
         mirrorFvMesh(const mirrorFvMesh&) = delete;
 
-        //- Disallow copy assignment
+        //- No copy assignment
         void operator=(const mirrorFvMesh&) = delete;
 
 

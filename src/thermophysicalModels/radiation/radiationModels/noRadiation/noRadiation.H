@@ -58,11 +58,11 @@ class noRadiation
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        noRadiation(const noRadiation&);
+        //- No copy construct
+        noRadiation(const noRadiation&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const noRadiation&);
+        //- No copy assignment
+        void operator=(const noRadiation&) = delete;
 
 
 public:

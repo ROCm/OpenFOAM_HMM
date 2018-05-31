@@ -74,7 +74,7 @@ class boundaryRegion
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         boundaryRegion(const boundaryRegion&) = delete;
 
 

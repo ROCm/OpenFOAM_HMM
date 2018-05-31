@@ -52,11 +52,11 @@ class staticFvMesh
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        staticFvMesh(const staticFvMesh&);
+        //- No copy construct
+        staticFvMesh(const staticFvMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const staticFvMesh&);
+        //- No copy assignment
+        void operator=(const staticFvMesh&) = delete;
 
 
 public:

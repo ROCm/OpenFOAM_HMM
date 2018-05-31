@@ -57,11 +57,11 @@ class departureDiameterModel
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        departureDiameterModel(const departureDiameterModel&);
+        //- No copy construct
+        departureDiameterModel(const departureDiameterModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const departureDiameterModel&);
+        //- No copy assignment
+        void operator=(const departureDiameterModel&) = delete;
 
 
 public:

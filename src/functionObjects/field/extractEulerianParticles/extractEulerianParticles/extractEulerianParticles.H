@@ -238,11 +238,11 @@ protected:
             const label globalFaceI
         ) const;
 
-        //- Disallow default bitwise copy construct
-        extractEulerianParticles(const extractEulerianParticles&);
+        //- No copy construct
+        extractEulerianParticles(const extractEulerianParticles&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const extractEulerianParticles&);
+        //- No copy assignment
+        void operator=(const extractEulerianParticles&) = delete;
 
 
 public:

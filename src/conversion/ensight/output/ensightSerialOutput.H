@@ -64,9 +64,9 @@ class ensightSerialOutput
         ensightFile& os
     );
 
-
-    //- Disallow null constructor
+    //- No null constructor
     ensightSerialOutput() = delete;
+
 
 public:
 

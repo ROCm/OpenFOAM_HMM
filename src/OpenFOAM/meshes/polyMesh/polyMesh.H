@@ -189,10 +189,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow construct as copy
+        //- No copy construct
         polyMesh(const polyMesh&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const polyMesh&) = delete;
 
         //- Initialise the polyMesh from the primitive data

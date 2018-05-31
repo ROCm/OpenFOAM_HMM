@@ -147,11 +147,11 @@ class polyDualMesh
         );
 
 
-        //- Disallow default bitwise copy construct
-        polyDualMesh(const polyDualMesh&);
+        //- No copy construct
+        polyDualMesh(const polyDualMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const polyDualMesh&);
+        //- No copy assignment
+        void operator=(const polyDualMesh&) = delete;
 
 
 public:

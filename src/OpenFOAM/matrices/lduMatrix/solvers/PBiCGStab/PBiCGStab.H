@@ -68,11 +68,11 @@ class PBiCGStab
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        PBiCGStab(const PBiCGStab&);
+        //- No copy construct
+        PBiCGStab(const PBiCGStab&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const PBiCGStab&);
+        //- No copy assignment
+        void operator=(const PBiCGStab&) = delete;
 
 
 public:

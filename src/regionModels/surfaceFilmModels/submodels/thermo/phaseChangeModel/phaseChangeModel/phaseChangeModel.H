@@ -61,11 +61,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        phaseChangeModel(const phaseChangeModel&);
+        //- No copy construct
+        phaseChangeModel(const phaseChangeModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const phaseChangeModel&);
+        //- No copy assignment
+        void operator=(const phaseChangeModel&) = delete;
 
 
 protected:

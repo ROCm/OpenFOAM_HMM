@@ -329,7 +329,7 @@ void Foam::attachDetach::detachInterface
     { // Protection and memory management
         // Make a map of master cells for quick reject
         labelHashSet mcMap(2*mc.size());
-        mcMap.insertMany(mc);
+        mcMap.insert(mc);
 
         // Go through all the faces in the masterCellFaceMap.  If the
         // cells around them are not already used, add all of their
@@ -345,7 +345,7 @@ void Foam::attachDetach::detachInterface
             {
                 // Cell not found. Add its faces to the map
                 const cell& curFaces = cells[ownCell];
-                masterCellFaceMap.insertMany(curFaces);
+                masterCellFaceMap.insert(curFaces);
             }
 
             // Do the neighbour side if face is internal
@@ -357,7 +357,7 @@ void Foam::attachDetach::detachInterface
                 {
                     // Cell not found. Add its faces to the map
                     const cell& curFaces = cells[neiCell];
-                    masterCellFaceMap.insertMany(curFaces);
+                    masterCellFaceMap.insert(curFaces);
                 }
             }
         }

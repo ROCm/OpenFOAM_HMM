@@ -136,10 +136,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         meshReader(const meshReader&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const meshReader&) = delete;
 
         //- Calculate pointCells

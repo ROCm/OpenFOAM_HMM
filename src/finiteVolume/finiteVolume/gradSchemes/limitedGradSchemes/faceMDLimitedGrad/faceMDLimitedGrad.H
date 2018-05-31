@@ -83,11 +83,11 @@ class faceMDLimitedGrad
         ) const;
 
 
-        //- Disallow default bitwise copy construct
-        faceMDLimitedGrad(const faceMDLimitedGrad&);
+        //- No copy construct
+        faceMDLimitedGrad(const faceMDLimitedGrad&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const faceMDLimitedGrad&);
+        //- No copy assignment
+        void operator=(const faceMDLimitedGrad&) = delete;
 
 
 public:

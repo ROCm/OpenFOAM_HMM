@@ -63,8 +63,8 @@ class basicChemistryModel
         //- Construct as copy (not implemented)
         basicChemistryModel(const basicChemistryModel&);
 
-        //- Disallow default bitwise assignment
-        void operator=(const basicChemistryModel&);
+        //- No copy assignment
+        void operator=(const basicChemistryModel&) = delete;
 
 
 protected:

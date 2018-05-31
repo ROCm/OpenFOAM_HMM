@@ -74,11 +74,11 @@ class faMeshLduAddressing
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        faMeshLduAddressing(const faMeshLduAddressing&);
+        //- No copy construct
+        faMeshLduAddressing(const faMeshLduAddressing&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const faMeshLduAddressing&);
+        //- No copy assignment
+        void operator=(const faMeshLduAddressing&) = delete;
 
 
 public:

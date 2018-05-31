@@ -67,11 +67,11 @@ class PureUpwindFitScheme
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        PureUpwindFitScheme(const PureUpwindFitScheme&);
+        //- No copy construct
+        PureUpwindFitScheme(const PureUpwindFitScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const PureUpwindFitScheme&);
+        //- No copy assignment
+        void operator=(const PureUpwindFitScheme&) = delete;
 
 
 public:

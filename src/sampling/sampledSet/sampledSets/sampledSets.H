@@ -240,8 +240,10 @@ class sampledSets
         void sampleAndWrite(fieldGroup<Type>& fields);
 
 
-        //- Disallow default bitwise copy construct and assignment
+        //- No copy construct
         sampledSets(const sampledSets&) = delete;
+
+        //- No copy assignment
         void operator=(const sampledSets&) = delete;
 
 

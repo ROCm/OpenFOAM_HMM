@@ -99,7 +99,7 @@ Foam::labelHashSet Foam::motionSmootherAlgo::getPoints
 
     for (const label faceId : faceLabels)
     {
-        usedPoints.insertMany(mesh_.faces()[faceId]);
+        usedPoints.insert(mesh_.faces()[faceId]);
     }
 
     return usedPoints;
@@ -115,7 +115,7 @@ Foam::labelHashSet Foam::motionSmootherAlgo::getPoints
 
     for (const label faceId : faceLabels)
     {
-        usedPoints.insertMany(mesh_.faces()[faceId]);
+        usedPoints.insert(mesh_.faces()[faceId]);
     }
 
     return usedPoints;
@@ -328,7 +328,7 @@ void Foam::motionSmootherAlgo::getAffectedFacesAndPoints
             {
                 const cell& cFaces = mesh_.cells()[pCells[pCelli]];
 
-                nbrFaces.insertMany(cFaces);
+                nbrFaces.insert(cFaces);
             }
         }
         nbrFaces.sync(mesh_);
@@ -338,7 +338,7 @@ void Foam::motionSmootherAlgo::getAffectedFacesAndPoints
             for (const label facei : nbrFaces)
             {
                 const face& f = mesh_.faces()[facei];
-                isAffectedPoint.setMany(f);
+                isAffectedPoint.set(f);
             }
         }
     }
@@ -944,14 +944,14 @@ bool Foam::motionSmootherAlgo::scaleMesh
                 const label own = mesh_.faceOwner()[facei];
                 const cell& ownFaces = mesh_.cells()[own];
 
-                newWrongFaces.insertMany(ownFaces);
+                newWrongFaces.insert(ownFaces);
 
                 if (facei < mesh_.nInternalFaces())
                 {
                     const label nei = mesh_.faceNeighbour()[facei];
                     const cell& neiFaces = mesh_.cells()[nei];
 
-                    newWrongFaces.insertMany(neiFaces);
+                    newWrongFaces.insert(neiFaces);
                 }
             }
             wrongFaces.transfer(newWrongFaces);

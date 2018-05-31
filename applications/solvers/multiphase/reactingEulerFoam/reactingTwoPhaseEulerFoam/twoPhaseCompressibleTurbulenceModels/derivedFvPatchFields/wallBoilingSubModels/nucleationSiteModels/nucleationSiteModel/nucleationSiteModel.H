@@ -57,11 +57,11 @@ class nucleationSiteModel
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        nucleationSiteModel(const nucleationSiteModel&);
+        //- No copy construct
+        nucleationSiteModel(const nucleationSiteModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const nucleationSiteModel&);
+        //- No copy assignment
+        void operator=(const nucleationSiteModel&) = delete;
 
 
 public:

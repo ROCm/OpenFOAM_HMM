@@ -250,11 +250,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        inverseDistance(const inverseDistance&);
+        //- No copy construct
+        inverseDistance(const inverseDistance&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const inverseDistance&);
+        //- No copy assignment
+        void operator=(const inverseDistance&) = delete;
 
 
 public:

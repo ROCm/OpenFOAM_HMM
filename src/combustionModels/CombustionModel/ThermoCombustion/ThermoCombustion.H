@@ -52,6 +52,15 @@ class ThermoCombustion
 :
     public CombustionModel<ReactionThermo>
 {
+    // Private Member Functions
+
+        //- Construct as copy (not implemented)
+        ThermoCombustion(const ThermoCombustion&) = delete;
+
+        //- No copy assignment
+        void operator=(const ThermoCombustion&) = delete;
+
+
 protected:
 
     // Protected data

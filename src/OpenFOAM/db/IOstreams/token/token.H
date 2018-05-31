@@ -145,10 +145,10 @@ public:
     {
         bool empty_;
 
-        //- No default copy construct
+        //- No copy construct
         compound(const compound&) = delete;
 
-        //- No default assign operator
+        //- No copy assignment
         compound& operator=(const compound&) = delete;
 
     public:

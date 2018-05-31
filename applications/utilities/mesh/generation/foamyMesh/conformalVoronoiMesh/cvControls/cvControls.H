@@ -209,11 +209,11 @@ class cvControls
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        cvControls(const cvControls&);
+        //- No copy construct
+        cvControls(const cvControls&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cvControls&);
+        //- No copy assignment
+        void operator=(const cvControls&) = delete;
 
 
 public:

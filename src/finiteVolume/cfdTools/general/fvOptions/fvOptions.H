@@ -60,11 +60,11 @@ class options
         //- Create IO object if dictionary is present
         IOobject createIOobject(const fvMesh& mesh) const;
 
-        //- Disallow default bitwise copy construct
-        options(const options&);
+        //- No copy construct
+        options(const options&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const options&);
+        //- No copy assignment
+        void operator=(const options&) = delete;
 
 
 public:

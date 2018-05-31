@@ -78,11 +78,11 @@ protected:
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        faDdtScheme(const faDdtScheme&);
+        //- No copy construct
+        faDdtScheme(const faDdtScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const faDdtScheme&);
+        //- No copy assignment
+        void operator=(const faDdtScheme&) = delete;
 
 
 public:

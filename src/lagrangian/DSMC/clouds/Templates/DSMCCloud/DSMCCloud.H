@@ -182,11 +182,11 @@ class DSMCCloud
         //- Calculate the volume field data
         void calculateFields();
 
-        //- Disallow default bitwise copy construct
-        DSMCCloud(const DSMCCloud&);
+        //- No copy construct
+        DSMCCloud(const DSMCCloud&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const DSMCCloud&);
+        //- No copy assignment
+        void operator=(const DSMCCloud&) = delete;
 
 
 public:

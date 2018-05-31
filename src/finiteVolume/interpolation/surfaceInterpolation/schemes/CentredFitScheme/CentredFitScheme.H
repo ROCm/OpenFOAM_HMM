@@ -66,11 +66,11 @@ class CentredFitScheme
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        CentredFitScheme(const CentredFitScheme&);
+        //- No copy construct
+        CentredFitScheme(const CentredFitScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const CentredFitScheme&);
+        //- No copy assignment
+        void operator=(const CentredFitScheme&) = delete;
 
 
 public:

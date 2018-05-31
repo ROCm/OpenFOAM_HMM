@@ -77,11 +77,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        standardRadiation(const standardRadiation&);
+        //- No copy construct
+        standardRadiation(const standardRadiation&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const standardRadiation&);
+        //- No copy assignment
+        void operator=(const standardRadiation&) = delete;
 
 
 public:
@@ -101,7 +101,7 @@ public:
 
 
     //- Destructor
-    virtual ~standardRadiation();
+    virtual ~standardRadiation() = default;
 
 
     // Member Functions

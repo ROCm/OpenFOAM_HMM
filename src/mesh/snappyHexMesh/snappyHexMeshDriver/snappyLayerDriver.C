@@ -616,7 +616,7 @@ void Foam::snappyLayerDriver::handleNonManifolds
         bitSet isCoupledEdge(mesh.nEdges());
 
         const labelList& cpEdges = mesh.globalData().coupledPatchMeshEdges();
-        isCoupledEdge.setMany(cpEdges);
+        isCoupledEdge.set(cpEdges);
 
         syncTools::syncEdgeList
         (
@@ -4663,7 +4663,7 @@ void Foam::snappyLayerDriver::doLayers
 
                     if (numLayers[mpi] > 0 || numLayers[spi])
                     {
-                        isExtrudedZoneFace.setMany(fZone);
+                        isExtrudedZoneFace.set(fZone);
                     }
                 }
             }

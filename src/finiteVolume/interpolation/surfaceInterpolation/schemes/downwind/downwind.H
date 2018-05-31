@@ -63,8 +63,8 @@ class downwind
 
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const downwind&);
+        //- No copy assignment
+        void operator=(const downwind&) = delete;
 
 
 public:

@@ -83,12 +83,6 @@ standardPhaseChange::standardPhaseChange
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-standardPhaseChange::~standardPhaseChange()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class YInfType>

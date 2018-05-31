@@ -53,10 +53,10 @@ class dynamicFvMesh
 {
     // Private Member Functions
 
-        //- Disallow copy construct
+        //- No copy construct
         dynamicFvMesh(const dynamicFvMesh&) = delete;
 
-        //- Disallow copy assignment
+        //- No copy assignment
         void operator=(const dynamicFvMesh&) = delete;
 
 

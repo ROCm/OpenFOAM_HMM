@@ -108,10 +108,10 @@ public:
         inline SHA1();
 
         //- Construct null and append initial std::string
-        explicit inline SHA1(const std::string&);
+        inline explicit SHA1(const std::string&);
 
         //- Construct null and append initial string
-        explicit inline SHA1(const char*);
+        inline explicit SHA1(const char*);
 
     // Member Functions
 

@@ -323,9 +323,11 @@ public:
         {
             label comm_;
 
-            //- Disallow copy and assignment
-            communicator(const communicator&);
-            void operator=(const communicator&);
+            //- No copy construct
+            communicator(const communicator&) = delete;
+
+            //- No copy assignment
+            void operator=(const communicator&) = delete;
 
         public:
 

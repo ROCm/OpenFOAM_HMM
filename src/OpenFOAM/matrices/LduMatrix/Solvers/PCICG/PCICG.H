@@ -54,11 +54,11 @@ class PCICG
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        PCICG(const PCICG&);
+        //- No copy construct
+        PCICG(const PCICG&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const PCICG&);
+        //- No copy assignment
+        void operator=(const PCICG&) = delete;
 
 
 public:

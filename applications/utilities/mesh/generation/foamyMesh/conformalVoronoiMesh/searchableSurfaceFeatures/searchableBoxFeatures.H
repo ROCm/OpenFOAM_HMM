@@ -59,11 +59,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        searchableBoxFeatures(const searchableBoxFeatures&);
+        //- No copy construct
+        searchableBoxFeatures(const searchableBoxFeatures&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const searchableBoxFeatures&);
+        //- No copy assignment
+        void operator=(const searchableBoxFeatures&) = delete;
 
 
 public:

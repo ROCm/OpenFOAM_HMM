@@ -127,11 +127,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        wallShearStress(const wallShearStress&);
+        //- No copy construct
+        wallShearStress(const wallShearStress&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const wallShearStress&);
+        //- No copy assignment
+        void operator=(const wallShearStress&) = delete;
 
 
 public:

@@ -64,11 +64,11 @@ class cyclicACMIGAMGInterface
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        cyclicACMIGAMGInterface(const cyclicACMIGAMGInterface&);
+        //- No copy construct
+        cyclicACMIGAMGInterface(const cyclicACMIGAMGInterface&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cyclicACMIGAMGInterface&);
+        //- No copy assignment
+        void operator=(const cyclicACMIGAMGInterface&) = delete;
 
 
 public:

@@ -126,11 +126,11 @@ private:
         //- Work out triangle index given the starting vertex in the face
         label triIndex(const label facei, const label fp) const;
 
-        //- Disallow default bitwise copy construct
-        tetDecomposer(const tetDecomposer&);
+        //- No copy construct
+        tetDecomposer(const tetDecomposer&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const tetDecomposer&);
+        //- No copy assignment
+        void operator=(const tetDecomposer&) = delete;
 
 
 public:

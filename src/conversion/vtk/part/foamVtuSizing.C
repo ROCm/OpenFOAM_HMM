@@ -165,7 +165,7 @@ void Foam::vtk::vtuSizing::reset
                 const face& f = mesh.faces()[facei];
                 nFaceLabels_ += f.size();
 
-                hashUniqId.insertMany(f);
+                hashUniqId.insert(f);
             }
 
             // Legacy format only uses the face-stream.

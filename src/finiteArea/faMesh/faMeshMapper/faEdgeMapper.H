@@ -83,11 +83,11 @@ class faEdgeMapper
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        faEdgeMapper(const faEdgeMapper&);
+        //- No copy construct
+        faEdgeMapper(const faEdgeMapper&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const faEdgeMapper&);
+        //- No copy assignment
+        void operator=(const faEdgeMapper&) = delete;
 
         //- Calculate addressing
         void calcAddressing() const;

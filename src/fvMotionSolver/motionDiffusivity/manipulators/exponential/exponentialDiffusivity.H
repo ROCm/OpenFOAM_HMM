@@ -59,11 +59,11 @@ class exponentialDiffusivity
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        exponentialDiffusivity(const exponentialDiffusivity&);
+        //- No copy construct
+        exponentialDiffusivity(const exponentialDiffusivity&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const exponentialDiffusivity&);
+        //- No copy assignment
+        void operator=(const exponentialDiffusivity&) = delete;
 
 
 public:

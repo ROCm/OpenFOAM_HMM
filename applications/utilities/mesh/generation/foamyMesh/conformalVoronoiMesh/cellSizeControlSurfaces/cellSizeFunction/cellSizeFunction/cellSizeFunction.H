@@ -110,11 +110,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        cellSizeFunction(const cellSizeFunction&);
+        //- No copy construct
+        cellSizeFunction(const cellSizeFunction&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cellSizeFunction&);
+        //- No copy assignment
+        void operator=(const cellSizeFunction&) = delete;
 
 
 public:

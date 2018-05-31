@@ -81,10 +81,10 @@ class meshWriter
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         meshWriter(const meshWriter&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const meshWriter&) = delete;
 
 

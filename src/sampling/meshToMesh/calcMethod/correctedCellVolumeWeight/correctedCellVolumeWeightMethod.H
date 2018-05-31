@@ -72,11 +72,14 @@ protected:
             label& startSeedI
         );
 
-        //- Disallow default bitwise copy construct
-        correctedCellVolumeWeightMethod(const correctedCellVolumeWeightMethod&);
+        //- No copy construct
+        correctedCellVolumeWeightMethod
+        (
+            const correctedCellVolumeWeightMethod&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const correctedCellVolumeWeightMethod&);
+        //- No copy assignment
+        void operator=(const correctedCellVolumeWeightMethod&) = delete;
 
 
 public:

@@ -54,11 +54,11 @@ class closedTriSurfaceMesh
 {
 private:
 
-        //- Disallow default bitwise copy construct
-        closedTriSurfaceMesh(const closedTriSurfaceMesh&);
+        //- No copy construct
+        closedTriSurfaceMesh(const closedTriSurfaceMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const closedTriSurfaceMesh&);
+        //- No copy assignment
+        void operator=(const closedTriSurfaceMesh&) = delete;
 
 
 public:

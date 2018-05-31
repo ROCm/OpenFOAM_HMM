@@ -95,11 +95,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        timeControl(const timeControl&);
+        //- No copy construct
+        timeControl(const timeControl&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const timeControl&);
+        //- No copy assignment
+        void operator=(const timeControl&) = delete;
 
 
 public:

@@ -93,10 +93,10 @@ class internalWriter
         void writeMesh();
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         internalWriter(const internalWriter&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const internalWriter&) = delete;
 
 

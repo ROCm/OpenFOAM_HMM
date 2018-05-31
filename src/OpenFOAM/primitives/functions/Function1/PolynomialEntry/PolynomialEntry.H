@@ -76,7 +76,7 @@ class Polynomial
 
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const Polynomial<Type>&) = delete;
 
 

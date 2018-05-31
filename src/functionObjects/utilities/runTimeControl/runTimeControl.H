@@ -83,11 +83,11 @@ class runTimeControl
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        runTimeControl(const runTimeControl&);
+        //- No copy construct
+        runTimeControl(const runTimeControl&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const runTimeControl&);
+        //- No copy assignment
+        void operator=(const runTimeControl&) = delete;
 
 
 public:

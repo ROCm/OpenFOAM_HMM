@@ -143,11 +143,11 @@ private:
             const scalar totalOverFirst
         ) const;
 
-        //- Disallow default bitwise copy construct
-        layerParameters(const layerParameters&);
+        //- No copy construct
+        layerParameters(const layerParameters&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const layerParameters&);
+        //- No copy assignment
+        void operator=(const layerParameters&) = delete;
 
 
 public:

@@ -144,8 +144,8 @@ void Foam::CV2D::insertSurfaceNearestPointPairs()
     label nSurfacePointsEst =
         min
         (
-            number_of_vertices(),
-            size_t(10*sqrt(scalar(number_of_vertices())))
+            label(number_of_vertices()),
+            label(10*sqrt(scalar(number_of_vertices())))
         );
 
     DynamicList<point2D> nearSurfacePoints(nSurfacePointsEst);

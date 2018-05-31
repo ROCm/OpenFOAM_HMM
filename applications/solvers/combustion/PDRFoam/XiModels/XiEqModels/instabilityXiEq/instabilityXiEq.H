@@ -65,11 +65,11 @@ class instability
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        instability(const instability&);
+        //- No copy construct
+        instability(const instability&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const instability&);
+        //- No copy assignment
+        void operator=(const instability&) = delete;
 
 
 public:

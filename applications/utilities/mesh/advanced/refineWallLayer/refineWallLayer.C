@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
         {
             const labelList& pCells = mesh.pointCells()[meshPointi];
 
-            cutCells.insertMany(pCells);
+            cutCells.insert(pCells);
         }
     }
 
@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
         const polyPatch& pp = mesh.boundaryMesh()[patchi];
         const labelList& meshPoints = pp.meshPoints();
 
-        vertOnPatch.setMany(meshPoints);
+        vertOnPatch.set(meshPoints);
     }
 
     for (const label patchi : patchSet)

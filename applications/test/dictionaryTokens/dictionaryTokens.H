@@ -113,8 +113,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow bitwise copy/assignment
+        //- No copy construct
         dictionaryTokens(const dictionaryTokens&) = delete;
+
+        //- No copy assignment
         void operator=(const dictionaryTokens&) = delete;
 
 
@@ -181,8 +183,10 @@ class dictionaryTokens::primitive_iterator
 
     // Private Member Functions
 
-        //- Disallow bitwise copy/assignment
+        //- No copy construct
         primitive_iterator(const primitive_iterator&) = delete;
+
+        //- No copy assignment
         void operator=(const primitive_iterator&) = delete;
 
 public:
@@ -251,8 +255,10 @@ class dictionaryTokens::dictionary_iterator
 
     // Private Member Functions
 
-        //- Disallow bitwise copy/assignment
+        //- No copy construct
         dictionary_iterator(const dictionary_iterator&) = delete;
+
+        //- No copy assignment
         void operator=(const dictionary_iterator&) = delete;
 
 

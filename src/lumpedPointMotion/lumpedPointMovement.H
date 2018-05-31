@@ -176,10 +176,10 @@ private:
         label threshold(scalar pos) const;
 
 
-        //- Disallow default bitwise copy constructor
+        //- No copy construct
         lumpedPointMovement(const lumpedPointMovement&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const lumpedPointMovement&) = delete;
 
 public:

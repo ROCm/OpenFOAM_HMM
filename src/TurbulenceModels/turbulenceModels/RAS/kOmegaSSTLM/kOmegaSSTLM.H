@@ -108,9 +108,11 @@ class kOmegaSSTLM
 {
     // Private Member Functions
 
-        // Disallow default bitwise copy construct and assignment
-        kOmegaSSTLM(const kOmegaSSTLM&);
-        void operator=(const kOmegaSSTLM&);
+        //- No copy construct
+        kOmegaSSTLM(const kOmegaSSTLM&) = delete;
+
+        //- No copy assignment
+        void operator=(const kOmegaSSTLM&) = delete;
 
 
 protected:

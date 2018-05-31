@@ -129,9 +129,11 @@ class kOmegaSSTBase
 {
     // Private Member Functions
 
-        // Disallow default bitwise copy construct and assignment
-        kOmegaSSTBase(const kOmegaSSTBase&);
-        void operator=(const kOmegaSSTBase&);
+        //- No copy construct
+        kOmegaSSTBase(const kOmegaSSTBase&) = delete;
+
+        //- No copy assignment
+        void operator=(const kOmegaSSTBase&) = delete;
 
 
 protected:

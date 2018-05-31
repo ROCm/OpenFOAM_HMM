@@ -131,11 +131,11 @@ class lduAddressing
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        lduAddressing(const lduAddressing&);
+        //- No copy construct
+        lduAddressing(const lduAddressing&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const lduAddressing&);
+        //- No copy assignment
+        void operator=(const lduAddressing&) = delete;
 
         //- Calculate losort
         void calcLosort() const;

@@ -141,14 +141,14 @@ class surfaceAlignedSBRStressFvMotionSolver
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         surfaceAlignedSBRStressFvMotionSolver
         (
             const surfaceAlignedSBRStressFvMotionSolver&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const surfaceAlignedSBRStressFvMotionSolver&);
+        //- No copy assignment
+        void operator=(const surfaceAlignedSBRStressFvMotionSolver&) = delete;
 
         //- Calculate cellRot
         void calculateCellRot();

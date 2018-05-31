@@ -181,12 +181,6 @@ public:
         //  Similar to a HashTable::insert().
         inline bool insert(const label index);
 
-        //- Fill open slots with the indices if they did not previously exist.
-        //  Returns true on success. Negative labels never insert.
-        //  Return the number of slots filled.
-        //  Similar to a HashTable::insert().
-        inline label insert(std::initializer_list<label> list);
-
         //- Insert values, using begin/end iterators.
         template<class InputIter>
         inline label insert(InputIter begIter, InputIter endIter);
@@ -194,15 +188,21 @@ public:
         //- Fill open slots with the indices if they did not previously exist.
         //  Returns true on success. Negative labels never insert.
         //  Return the number of slots filled.
-        //  Similar to a HashTable::insertMany().
-        template<unsigned Size>
-        inline label insertMany(const FixedList<label, Size>& list);
+        //  Similar to a HashTable::insert().
+        inline label insert(std::initializer_list<label> list);
 
         //- Fill open slots with the indices if they did not previously exist.
         //  Returns true on success. Negative labels never insert.
         //  Return the number of slots filled.
-        //  Similar to a HashTable::insertMany().
-        inline label insertMany(const labelUList& list);
+        //  Similar to a HashTable::insert().
+        template<unsigned Size>
+        inline label insert(const FixedList<label, Size>& list);
+
+        //- Fill open slots with the indices if they did not previously exist.
+        //  Returns true on success. Negative labels never insert.
+        //  Return the number of slots filled.
+        //  Similar to a HashTable::insert().
+        inline label insert(const labelUList& list);
 
 
         //- Remove an existing index from the edge and set its location to '-1'.
@@ -210,22 +210,22 @@ public:
         //  Similar to a HashTable::erase().
         inline label erase(const label index);
 
-        //- Remove existing indices from the edge and set locations to '-1'.
-        //  Returns the number of changes.
-        inline label erase(std::initializer_list<label> list);
-
         //- Remove values, using begin/end iterators.
         template<class InputIter>
         inline label erase(InputIter begIter, InputIter endIter);
 
         //- Remove existing indices from the edge and set locations to '-1'.
         //  Returns the number of changes.
-        template<unsigned Size>
-        inline label eraseMany(const FixedList<label, Size>& list);
+        inline label erase(std::initializer_list<label> list);
 
         //- Remove existing indices from the edge and set locations to '-1'.
         //  Returns the number of changes.
-        inline label eraseMany(const labelUList& list);
+        template<unsigned Size>
+        inline label erase(const FixedList<label, Size>& list);
+
+        //- Remove existing indices from the edge and set locations to '-1'.
+        //  Returns the number of changes.
+        inline label erase(const labelUList& list);
 
 
     // Geometric functions

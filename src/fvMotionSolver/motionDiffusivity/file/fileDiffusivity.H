@@ -63,11 +63,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        fileDiffusivity(const fileDiffusivity&);
+        //- No copy construct
+        fileDiffusivity(const fileDiffusivity&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const fileDiffusivity&);
+        //- No copy assignment
+        void operator=(const fileDiffusivity&) = delete;
 
 
 public:

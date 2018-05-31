@@ -111,11 +111,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        fixedTemperatureConstraint(const fixedTemperatureConstraint&);
+        //- No copy construct
+        fixedTemperatureConstraint(const fixedTemperatureConstraint&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const fixedTemperatureConstraint&);
+        //- No copy assignment
+        void operator=(const fixedTemperatureConstraint&) = delete;
 
 
 public:

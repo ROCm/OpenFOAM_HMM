@@ -73,11 +73,11 @@ class rotatingMotion
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        rotatingMotion(const rotatingMotion&);
+        //- No copy construct
+        rotatingMotion(const rotatingMotion&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const rotatingMotion&);
+        //- No copy assignment
+        void operator=(const rotatingMotion&) = delete;
 
 
 public:

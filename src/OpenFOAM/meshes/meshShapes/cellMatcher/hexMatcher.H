@@ -63,10 +63,10 @@ class hexMatcher
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         hexMatcher(const hexMatcher&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         hexMatcher& operator=(const hexMatcher&) = delete;
 
 

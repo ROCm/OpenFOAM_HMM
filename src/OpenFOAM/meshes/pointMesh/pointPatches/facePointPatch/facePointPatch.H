@@ -89,11 +89,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        facePointPatch(const facePointPatch&);
+        //- No copy construct
+        facePointPatch(const facePointPatch&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const facePointPatch&);
+        //- No copy assignment
+        void operator=(const facePointPatch&) = delete;
 
 
 public:

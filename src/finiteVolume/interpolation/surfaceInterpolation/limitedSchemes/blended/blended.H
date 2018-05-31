@@ -63,11 +63,11 @@ class blended
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        blended(const blended&);
+        //- No copy construct
+        blended(const blended&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const blended&);
+        //- No copy assignment
+        void operator=(const blended&) = delete;
 
 
 public:

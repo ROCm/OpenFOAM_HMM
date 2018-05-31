@@ -57,9 +57,14 @@ class maxDeltaxyzCubeRootLESDelta
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        maxDeltaxyzCubeRootLESDelta(const maxDeltaxyzCubeRootLESDelta&);
-        void operator=(const maxDeltaxyzCubeRootLESDelta&);
+        //- No copy construct
+        maxDeltaxyzCubeRootLESDelta
+        (
+            const maxDeltaxyzCubeRootLESDelta&
+        ) = delete;
+
+        //- No copy assignment
+        void operator=(const maxDeltaxyzCubeRootLESDelta&) = delete;
 
         // Calculate the delta values
         void calcDelta();
@@ -89,8 +94,7 @@ public:
 
 
     //- Destructor
-    virtual ~maxDeltaxyzCubeRootLESDelta()
-    {}
+    virtual ~maxDeltaxyzCubeRootLESDelta() = default;
 
 
     // Member Functions

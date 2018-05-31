@@ -58,11 +58,11 @@ class layeredEngineMesh
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        layeredEngineMesh(const layeredEngineMesh&);
+        //- No copy construct
+        layeredEngineMesh(const layeredEngineMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const layeredEngineMesh&);
+        //- No copy assignment
+        void operator=(const layeredEngineMesh&) = delete;
 
 
 public:

@@ -83,11 +83,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        cellShapeControlMesh(const cellShapeControlMesh&);
+        //- No copy construct
+        cellShapeControlMesh(const cellShapeControlMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cellShapeControlMesh&);
+        //- No copy assignment
+        void operator=(const cellShapeControlMesh&) = delete;
 
 
 public:

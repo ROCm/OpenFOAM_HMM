@@ -522,6 +522,16 @@ private:
                 labelList& neiPatch
             ) const;
 
+            autoPtr<mapPolyMesh> splitMesh
+            (
+                const label nBufferLayers,
+                const labelList& globalToMasterPatch,
+                const labelList& globalToSlavePatch,
+                labelList& cellRegion,
+                labelList& ownPatch,
+                labelList& neiPatch
+            );
+
             //- Repatches external face or creates baffle for internal face
             //  with user specified patches (might be different for both sides).
             //  Returns label of added face.
@@ -785,11 +795,11 @@ private:
             ) const;
 
 
-        //- Disallow default bitwise copy construct
-        meshRefinement(const meshRefinement&);
+        //- No copy construct
+        meshRefinement(const meshRefinement&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const meshRefinement&);
+        //- No copy assignment
+        void operator=(const meshRefinement&) = delete;
 
 public:
 
@@ -859,6 +869,12 @@ public:
             const shellSurfaces& shells() const
             {
                 return shells_;
+            }
+
+            //- Reference to limit shells (regions)
+            const shellSurfaces& limitShells() const
+            {
+                return limitShells_;
             }
 
             //- Reference to meshcutting engine
@@ -1106,6 +1122,17 @@ public:
                 const pointField& locationsInMesh,
                 const wordList& regionsInMesh,
                 const pointField& locationsOutsideMesh
+            );
+
+            //- Remove cells from limitRegions if level -1
+            autoPtr<mapPolyMesh> removeLimitShells
+            (
+                const label nBufferLayers,
+                const label nErodeCellZones,
+                const labelList& globalToMasterPatch,
+                const labelList& globalToSlavePatch,
+                const pointField& locationsInMesh,
+                const wordList& regionsInMesh
             );
 
             //- Find boundary points that connect to more than one cell

@@ -70,11 +70,11 @@ class duplicatePoints
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        duplicatePoints(const duplicatePoints&);
+        //- No copy construct
+        duplicatePoints(const duplicatePoints&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const duplicatePoints&);
+        //- No copy assignment
+        void operator=(const duplicatePoints&) = delete;
 
 public:
 

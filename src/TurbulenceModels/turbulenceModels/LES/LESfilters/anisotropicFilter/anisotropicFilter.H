@@ -66,9 +66,11 @@ class anisotropicFilter
 
     // Private Member Functions
 
-        // Disallow default bitwise copy construct and assignment
-        anisotropicFilter(const anisotropicFilter&);
-        void operator=(const anisotropicFilter&);
+        //- No copy construct
+        anisotropicFilter(const anisotropicFilter&) = delete;
+
+        //- No copy assignment
+        void operator=(const anisotropicFilter&) = delete;
 
 
 public:

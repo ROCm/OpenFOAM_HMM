@@ -112,11 +112,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        cloudInfo(const cloudInfo&);
+        //- No copy construct
+        cloudInfo(const cloudInfo&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cloudInfo&);
+        //- No copy assignment
+        void operator=(const cloudInfo&) = delete;
 
 
 public:

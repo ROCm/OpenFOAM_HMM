@@ -191,14 +191,17 @@ private:
         //- Correct driving force for a constant mass flow rate
         void update(fvMatrix<vector>& eqn);
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         directionalPressureGradientExplicitSource
         (
             const directionalPressureGradientExplicitSource&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const directionalPressureGradientExplicitSource&);
+        //- No copy assignment
+        void operator=
+        (
+            const directionalPressureGradientExplicitSource&
+        ) = delete;
 
 
 public:

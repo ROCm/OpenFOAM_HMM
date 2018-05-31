@@ -73,10 +73,10 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         simpleControl(const simpleControl&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const simpleControl&) = delete;
 
 

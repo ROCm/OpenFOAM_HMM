@@ -3,9 +3,9 @@ sinclude $(DEFAULT_RULES)/mplib$(WM_MPLIB)
 
 EXE_INC = \
     $(PFLAGS) $(PINC) \
-    -I../decompositionMethods/lnInclude \
+    -I$(SCOTCH_INC_DIR) \
     -I$(SCOTCH_ARCH_PATH)/include/$(FOAM_MPI) \
-    -I$(SCOTCH_INC_DIR)
+    -I../decompositionMethods/lnInclude
 
 /*
  * The '-lscotch' is a slight hack:
@@ -15,7 +15,5 @@ LIB_LIBS = \
     -L$(SCOTCH_LIB_DIR) \
     -L$(FOAM_EXT_LIBBIN) \
     -L$(FOAM_EXT_LIBBIN)/$(FOAM_MPI) \
-    -lptscotch \
-    -lptscotcherrexit \
-    -lscotch \
-    -lrt
+    -lptscotch -lptscotcherrexit \
+    -lscotch -lrt

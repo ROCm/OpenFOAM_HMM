@@ -55,11 +55,11 @@ class fixed
 {
     // Private Member Functions
 
-        //- Disallow copy construct
-        fixed(const fixed&);
+        //- No copy construct
+        fixed(const fixed&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const fixed&);
+        //- No copy assignment
+        void operator=(const fixed&) = delete;
 
 
 public:

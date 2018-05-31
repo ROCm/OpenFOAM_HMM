@@ -454,11 +454,11 @@ class cellCuts
             void check() const;
 
 
-        //- Disallow default bitwise copy construct
-        cellCuts(const cellCuts&);
+        //- No copy construct
+        cellCuts(const cellCuts&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cellCuts&);
+        //- No copy assignment
+        void operator=(const cellCuts&) = delete;
 
 
 public:

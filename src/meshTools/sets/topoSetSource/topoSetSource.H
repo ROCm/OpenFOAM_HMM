@@ -139,10 +139,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         topoSetSource(const topoSetSource&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const topoSetSource&) = delete;
 
 

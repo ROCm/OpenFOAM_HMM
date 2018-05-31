@@ -69,10 +69,10 @@ class VTKsurfaceFormat
         );
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         VTKsurfaceFormat(const VTKsurfaceFormat<Face>&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const VTKsurfaceFormat<Face>&) = delete;
 
 

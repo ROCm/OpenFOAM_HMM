@@ -59,11 +59,11 @@ class opaqueSolid
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        opaqueSolid(const opaqueSolid&);
+        //- No copy construct
+        opaqueSolid(const opaqueSolid&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const opaqueSolid&);
+        //- No copy assignment
+        void operator=(const opaqueSolid&) = delete;
 
 
 public:

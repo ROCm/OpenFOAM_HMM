@@ -349,7 +349,7 @@ int main(int argc, char *argv[])
     forAll(oldToNew, oldCelli)
     {
         const labelList& added = oldToNew[oldCelli];
-        newCells.insertMany(added);
+        newCells.insert(added);
     }
 
     Info<< "Writing refined cells ("

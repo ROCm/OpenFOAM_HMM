@@ -108,8 +108,8 @@ private:
         //- Return Istream
         Istream& readStream(const bool valid = true);
 
-        //- Dissallow assignment
-        void operator=(const regIOobject&);
+        //- No copy assignment
+        void operator=(const regIOobject&) = delete;
 
 
 public:

@@ -90,11 +90,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        ThermoCloud(const ThermoCloud&);
+        //- No copy construct
+        ThermoCloud(const ThermoCloud&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const ThermoCloud&);
+        //- No copy assignment
+        void operator=(const ThermoCloud&) = delete;
 
 
 protected:

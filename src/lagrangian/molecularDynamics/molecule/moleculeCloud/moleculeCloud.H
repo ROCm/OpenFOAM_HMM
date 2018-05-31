@@ -134,11 +134,11 @@ private:
             const molecule::constantProperties& cP
         );
 
-        //- Disallow default bitwise copy construct
-        moleculeCloud(const moleculeCloud&);
+        //- No copy construct
+        moleculeCloud(const moleculeCloud&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const moleculeCloud&);
+        //- No copy assignment
+        void operator=(const moleculeCloud&) = delete;
 
 
 public:

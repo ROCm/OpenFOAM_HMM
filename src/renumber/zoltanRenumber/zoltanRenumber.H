@@ -56,9 +56,11 @@ class zoltanRenumber
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        void operator=(const zoltanRenumber&);
-        zoltanRenumber(const zoltanRenumber&);
+        //- No copy construct
+        zoltanRenumber(const zoltanRenumber&) = delete;
+
+        //- No copy assignment
+        void operator=(const zoltanRenumber&) = delete;
 
 
 public:
@@ -74,8 +76,7 @@ public:
 
 
     //- Destructor
-    virtual ~zoltanRenumber()
-    {}
+    virtual ~zoltanRenumber() = default;
 
 
     // Member Functions

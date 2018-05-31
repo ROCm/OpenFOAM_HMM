@@ -61,8 +61,8 @@ class harmonic
 {
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const harmonic&);
+        //- No copy assignment
+        void operator=(const harmonic&) = delete;
 
 
 public:

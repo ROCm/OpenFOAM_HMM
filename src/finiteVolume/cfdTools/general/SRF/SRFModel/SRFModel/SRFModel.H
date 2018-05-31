@@ -92,11 +92,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        SRFModel(const SRFModel&);
+        //- No copy construct
+        SRFModel(const SRFModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const SRFModel&);
+        //- No copy assignment
+        void operator=(const SRFModel&) = delete;
 
 
 public:

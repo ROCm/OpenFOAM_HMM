@@ -82,11 +82,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        geometryBase(const geometryBase&);
+        //- No copy construct
+        geometryBase(const geometryBase&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const geometryBase&);
+        //- No copy assignment
+        void operator=(const geometryBase&) = delete;
 
 
 protected:

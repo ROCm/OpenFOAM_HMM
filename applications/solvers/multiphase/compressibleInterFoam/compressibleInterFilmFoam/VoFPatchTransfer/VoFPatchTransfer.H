@@ -56,11 +56,11 @@ class VoFPatchTransfer
 {
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        VoFPatchTransfer(const VoFPatchTransfer&);
+        //- No copy construct
+        VoFPatchTransfer(const VoFPatchTransfer&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const VoFPatchTransfer&);
+        //- No copy assignment
+        void operator=(const VoFPatchTransfer&) = delete;
 
 
 protected:

@@ -71,9 +71,11 @@ class springRenumber
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        void operator=(const springRenumber&);
-        springRenumber(const springRenumber&);
+        //- No copy construct
+        springRenumber(const springRenumber&) = delete;
+
+        //- No copy assignment
+        void operator=(const springRenumber&) = delete;
 
 
 public:
@@ -89,8 +91,7 @@ public:
 
 
     //- Destructor
-    virtual ~springRenumber()
-    {}
+    virtual ~springRenumber() = default;
 
 
     // Member Functions

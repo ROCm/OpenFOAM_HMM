@@ -26,7 +26,7 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class KeyType, class DataType>
-void Foam::PrintTable<KeyType, DataType>::add
+inline void Foam::PrintTable<KeyType, DataType>::add
 (
     const KeyType& K,
     const DataType& D
@@ -34,9 +34,5 @@ void Foam::PrintTable<KeyType, DataType>::add
 {
     table_.set(K, D);
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 // ************************************************************************* //

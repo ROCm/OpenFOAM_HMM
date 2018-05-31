@@ -119,11 +119,14 @@ private:
             labelPairHashSet& receivedVertices
         );
 
-        //- Disallow default bitwise copy construct
-        DistributedDelaunayMesh(const DistributedDelaunayMesh<Triangulation>&);
+        //- No copy construct
+        DistributedDelaunayMesh
+        (
+            const DistributedDelaunayMesh&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const DistributedDelaunayMesh<Triangulation>&);
+        //- No copy assignment
+        void operator=(const DistributedDelaunayMesh<Triangulation>&) = delete;
 
 
 public:

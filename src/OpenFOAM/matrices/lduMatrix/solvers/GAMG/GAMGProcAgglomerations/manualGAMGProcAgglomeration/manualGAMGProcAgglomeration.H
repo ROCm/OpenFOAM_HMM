@@ -89,14 +89,14 @@ class manualGAMGProcAgglomeration
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         manualGAMGProcAgglomeration
         (
             const manualGAMGProcAgglomeration&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const manualGAMGProcAgglomeration&);
+        //- No copy assignment
+        void operator=(const manualGAMGProcAgglomeration&) = delete;
 
 
 public:

@@ -72,10 +72,10 @@ class backwardFaDdtScheme
         template<class GeoField>
         scalar deltaT0_(const GeoField&) const;
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         backwardFaDdtScheme(const backwardFaDdtScheme&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const backwardFaDdtScheme&) = delete;
 
 

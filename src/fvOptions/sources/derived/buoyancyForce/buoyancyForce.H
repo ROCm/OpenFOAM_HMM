@@ -70,11 +70,11 @@ class buoyancyForce
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        buoyancyForce(const buoyancyForce&);
+        //- No copy construct
+        buoyancyForce(const buoyancyForce&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const buoyancyForce&);
+        //- No copy assignment
+        void operator=(const buoyancyForce&) = delete;
 
 
 public:

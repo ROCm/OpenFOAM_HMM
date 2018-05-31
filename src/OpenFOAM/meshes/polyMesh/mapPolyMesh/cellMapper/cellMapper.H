@@ -88,11 +88,11 @@ class cellMapper
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        cellMapper(const cellMapper&);
+        //- No copy construct
+        cellMapper(const cellMapper&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cellMapper&);
+        //- No copy assignment
+        void operator=(const cellMapper&) = delete;
 
 
         //- Calculate addressing for mapping with inserted cells

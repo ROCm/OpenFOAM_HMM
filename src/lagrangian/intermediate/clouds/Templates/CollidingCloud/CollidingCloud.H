@@ -89,11 +89,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        CollidingCloud(const CollidingCloud&);
+        //- No copy construct
+        CollidingCloud(const CollidingCloud&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const CollidingCloud&);
+        //- No copy assignment
+        void operator=(const CollidingCloud&) = delete;
 
 
 protected:

@@ -1351,7 +1351,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::findRemainingProtrusionSet
     for (const label pointi : protrudingBoundaryPoints)
     {
         const labelList& pCells = mesh.pointCells()[pointi];
-        protrudingCells.insertMany(pCells);
+        protrudingCells.insert(pCells);
     }
 
     label protrudingCellsSize = protrudingCells.size();

@@ -55,11 +55,11 @@ class relativeVelocityModel
         //- Return the list of patchFieldTypes for Udm derived from U
         wordList UdmPatchFieldTypes() const;
 
-        //- Disallow default bitwise copy construct
-        relativeVelocityModel(const relativeVelocityModel&);
+        //- No copy construct
+        relativeVelocityModel(const relativeVelocityModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const relativeVelocityModel&);
+        //- No copy assignment
+        void operator=(const relativeVelocityModel&) = delete;
 
 
 protected:

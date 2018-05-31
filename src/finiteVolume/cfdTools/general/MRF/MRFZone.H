@@ -146,11 +146,11 @@ class MRFZone
             surfaceScalarField& phi
         ) const;
 
-        //- Disallow default bitwise copy construct
-        MRFZone(const MRFZone&);
+        //- No copy construct
+        MRFZone(const MRFZone&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const MRFZone&);
+        //- No copy assignment
+        void operator=(const MRFZone&) = delete;
 
 
 public:

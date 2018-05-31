@@ -57,8 +57,8 @@ class linear
 {
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const linear&);
+        //- No copy assignment
+        void operator=(const linear&) = delete;
 
 
 public:

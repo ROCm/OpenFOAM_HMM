@@ -83,11 +83,11 @@ protected:
 
         void scaleEnergy(scalar& e, const scalar r) const;
 
-        //- Disallow copy construct
-        pairPotential(const pairPotential&);
+        //- No copy construct
+        pairPotential(const pairPotential&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const pairPotential&);
+        //- No copy assignment
+        void operator=(const pairPotential&) = delete;
 
 
 public:

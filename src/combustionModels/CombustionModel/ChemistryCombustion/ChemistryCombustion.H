@@ -53,6 +53,16 @@ class ChemistryCombustion
 :
     public CombustionModel<ReactionThermo>
 {
+    // Private Member Functions
+
+        //- Construct as copy (not implemented)
+        ChemistryCombustion(const ChemistryCombustion<ReactionThermo>&) =
+            delete;
+
+        //- No copy assignment
+        void operator=(const ChemistryCombustion<ReactionThermo>&) = delete;
+
+
 protected:
 
     // Protected data

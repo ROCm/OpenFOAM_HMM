@@ -104,7 +104,7 @@ class CSV
         //- Read the next value from the splitted string
         Type readValue(const List<string>&);
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const CSV<Type>&) = delete;
 
 

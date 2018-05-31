@@ -58,11 +58,11 @@ class wallDependentModel
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        wallDependentModel(const wallDependentModel&);
+        //- No copy construct
+        wallDependentModel(const wallDependentModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const wallDependentModel&);
+        //- No copy assignment
+        void operator=(const wallDependentModel&) = delete;
 
 
 public:

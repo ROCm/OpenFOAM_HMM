@@ -90,12 +90,6 @@ standardRadiation::standardRadiation
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-standardRadiation::~standardRadiation()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void standardRadiation::correct()

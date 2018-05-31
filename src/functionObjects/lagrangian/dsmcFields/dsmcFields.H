@@ -85,11 +85,11 @@ class dsmcFields
         Switch log_;
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        dsmcFields(const dsmcFields&);
+        //- No copy construct
+        dsmcFields(const dsmcFields&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const dsmcFields&);
+        //- No copy assignment
+        void operator=(const dsmcFields&) = delete;
 
 
 public:

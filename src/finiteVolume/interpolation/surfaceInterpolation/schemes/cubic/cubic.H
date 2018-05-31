@@ -58,11 +58,11 @@ class cubic
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        cubic(const cubic&);
+        //- No copy construct
+        cubic(const cubic&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cubic&);
+        //- No copy assignment
+        void operator=(const cubic&) = delete;
 
 
 public:

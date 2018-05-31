@@ -188,11 +188,11 @@ class jouleHeatingSource
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        jouleHeatingSource(const jouleHeatingSource&);
+        //- No copy construct
+        jouleHeatingSource(const jouleHeatingSource&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const jouleHeatingSource&);
+        //- No copy assignment
+        void operator=(const jouleHeatingSource&) = delete;
 
         //- Return the co-ordinate system for anisotropic electrical
         //  conductivity

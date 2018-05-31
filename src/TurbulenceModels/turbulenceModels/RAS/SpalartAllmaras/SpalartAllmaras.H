@@ -92,9 +92,11 @@ class SpalartAllmaras
 {
     // Private Member Functions
 
-        // Disallow default bitwise copy construct and assignment
-        SpalartAllmaras(const SpalartAllmaras&);
-        void operator=(const SpalartAllmaras&);
+        //- No copy construct
+        SpalartAllmaras(const SpalartAllmaras&) = delete;
+
+        //- No copy assignment
+        void operator=(const SpalartAllmaras&) = delete;
 
 
 protected:

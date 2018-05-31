@@ -207,11 +207,11 @@ class advectionDiffusion
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        advectionDiffusion(const advectionDiffusion&);
+        //- No copy construct
+        advectionDiffusion(const advectionDiffusion&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const advectionDiffusion&);
+        //- No copy assignment
+        void operator=(const advectionDiffusion&) = delete;
 
 
 public:

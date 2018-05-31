@@ -58,11 +58,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        thermocapillaryForce(const thermocapillaryForce&);
+        //- No copy construct
+        thermocapillaryForce(const thermocapillaryForce&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const thermocapillaryForce&);
+        //- No copy assignment
+        void operator=(const thermocapillaryForce&) = delete;
 
 
 public:

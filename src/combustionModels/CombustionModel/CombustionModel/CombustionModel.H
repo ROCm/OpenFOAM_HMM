@@ -55,6 +55,15 @@ class CombustionModel
 :
     public combustionModel
 {
+    // Private Member Functions
+
+        //- Construct as copy (not implemented)
+        CombustionModel(const CombustionModel&) = delete;
+
+        //- No copy assignment
+        void operator=(const CombustionModel&) = delete;
+
+
 public:
 
     //- Thermo type

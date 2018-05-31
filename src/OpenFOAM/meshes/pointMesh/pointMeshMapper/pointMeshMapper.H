@@ -68,11 +68,11 @@ class pointMeshMapper
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        pointMeshMapper(const pointMeshMapper&);
+        //- No copy construct
+        pointMeshMapper(const pointMeshMapper&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const pointMeshMapper&);
+        //- No copy assignment
+        void operator=(const pointMeshMapper&) = delete;
 
 
 public:

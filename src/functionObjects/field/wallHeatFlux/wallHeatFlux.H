@@ -121,11 +121,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        wallHeatFlux(const wallHeatFlux&);
+        //- No copy construct
+        wallHeatFlux(const wallHeatFlux&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const wallHeatFlux&);
+        //- No copy assignment
+        void operator=(const wallHeatFlux&) = delete;
 
 
 public:

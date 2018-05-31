@@ -88,11 +88,11 @@ class layerAdditionRemoval
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        layerAdditionRemoval(const layerAdditionRemoval&);
+        //- No copy construct
+        layerAdditionRemoval(const layerAdditionRemoval&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const layerAdditionRemoval&);
+        //- No copy assignment
+        void operator=(const layerAdditionRemoval&) = delete;
 
         //- Check validity of construction data
         void checkDefinition();

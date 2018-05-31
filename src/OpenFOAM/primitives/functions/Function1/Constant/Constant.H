@@ -66,7 +66,7 @@ class Constant
 
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const Constant<Type>&) = delete;
 
 

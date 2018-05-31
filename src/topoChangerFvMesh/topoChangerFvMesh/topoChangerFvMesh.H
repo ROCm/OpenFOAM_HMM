@@ -54,11 +54,11 @@ class topoChangerFvMesh
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        topoChangerFvMesh(const topoChangerFvMesh&);
+        //- No copy construct
+        topoChangerFvMesh(const topoChangerFvMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const topoChangerFvMesh&);
+        //- No copy assignment
+        void operator=(const topoChangerFvMesh&) = delete;
 
 
 protected:

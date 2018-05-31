@@ -56,7 +56,7 @@ class motionDiffusivity;
 class solidBodyMotionFunction;
 
 /*---------------------------------------------------------------------------*\
-             Class solidBodyDisplacementLaplacianFvMotionSolver Declaration
+        Class solidBodyDisplacementLaplacianFvMotionSolver Declaration
 \*---------------------------------------------------------------------------*/
 
 class solidBodyDisplacementLaplacianFvMotionSolver
@@ -89,14 +89,17 @@ class solidBodyDisplacementLaplacianFvMotionSolver
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         solidBodyDisplacementLaplacianFvMotionSolver
         (
             const solidBodyDisplacementLaplacianFvMotionSolver&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const solidBodyDisplacementLaplacianFvMotionSolver&);
+        //- No copy assignment
+        void operator=
+        (
+            const solidBodyDisplacementLaplacianFvMotionSolver&
+        ) = delete;
 
 
 public:

@@ -61,11 +61,11 @@ class chemistryReader
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        chemistryReader(const chemistryReader&);
+        //- No copy construct
+        chemistryReader(const chemistryReader&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const chemistryReader&);
+        //- No copy assignment
+        void operator=(const chemistryReader&) = delete;
 
 
 public:

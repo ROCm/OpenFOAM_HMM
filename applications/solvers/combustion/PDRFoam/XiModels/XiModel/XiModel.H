@@ -130,11 +130,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        XiModel(const XiModel&);
+        //- No copy construct
+        XiModel(const XiModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const XiModel&);
+        //- No copy assignment
+        void operator=(const XiModel&) = delete;
 
 
 public:

@@ -98,7 +98,7 @@ class cellTable
 
         void setEntry(const label id, const word& keyWord, const word& value);
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         cellTable(const cellTable&) = delete;
 
 

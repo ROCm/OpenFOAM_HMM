@@ -73,11 +73,11 @@ protected:
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        mixtureViscosityModel(const mixtureViscosityModel&);
+        //- No copy construct
+        mixtureViscosityModel(const mixtureViscosityModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const mixtureViscosityModel&);
+        //- No copy assignment
+        void operator=(const mixtureViscosityModel&) = delete;
 
 
 public:

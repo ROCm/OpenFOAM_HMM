@@ -63,11 +63,11 @@ class fileControl
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        fileControl(const fileControl&);
+        //- No copy construct
+        fileControl(const fileControl&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const fileControl&);
+        //- No copy assignment
+        void operator=(const fileControl&) = delete;
 
 
 public:

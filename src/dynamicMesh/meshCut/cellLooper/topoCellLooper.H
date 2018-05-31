@@ -144,11 +144,11 @@ class topoCellLooper
         ) const;
 
 
-        //- Disallow default bitwise copy construct
-        topoCellLooper(const topoCellLooper&);
+        //- No copy construct
+        topoCellLooper(const topoCellLooper&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const topoCellLooper&);
+        //- No copy assignment
+        void operator=(const topoCellLooper&) = delete;
 
 
 public:

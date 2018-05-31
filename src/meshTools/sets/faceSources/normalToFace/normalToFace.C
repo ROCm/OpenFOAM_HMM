@@ -152,7 +152,7 @@ void Foam::normalToFace::applyToSet
             }
         }
 
-        set.eraseMany(toBeRemoved);
+        set.erase(toBeRemoved);
     }
 }
 

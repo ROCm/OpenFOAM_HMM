@@ -74,11 +74,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        PDRDragModel(const PDRDragModel&);
+        //- No copy construct
+        PDRDragModel(const PDRDragModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const PDRDragModel&);
+        //- No copy assignment
+        void operator=(const PDRDragModel&) = delete;
 
 
 public:

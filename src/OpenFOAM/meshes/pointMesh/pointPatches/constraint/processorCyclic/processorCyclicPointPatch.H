@@ -63,11 +63,11 @@ class processorCyclicPointPatch
 
         const processorCyclicPolyPatch& procCycPolyPatch_;
 
-        //- Disallow default construct as copy
-        processorCyclicPointPatch(const processorCyclicPointPatch&);
+        //- No copy construct
+        processorCyclicPointPatch(const processorCyclicPointPatch&) = delete;
 
-        //- Disallow default assignment
-        void operator=(const processorCyclicPointPatch&);
+        //- No copy assignment
+        void operator=(const processorCyclicPointPatch&) = delete;
 
 public:
 

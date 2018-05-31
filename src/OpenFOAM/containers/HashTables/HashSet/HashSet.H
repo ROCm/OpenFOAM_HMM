@@ -204,15 +204,15 @@ public:
         //- Insert keys from the list of Key
         //  \return The number of new elements inserted
         template<unsigned Size>
-        inline label insertMany(const FixedList<Key, Size>& list);
+        inline label insert(const FixedList<Key, Size>& list);
 
         //- Insert keys from the list of Key
         //  \return The number of new elements inserted
-        inline label insertMany(const UList<Key>& list);
+        inline label insert(const UList<Key>& list);
 
         //- Insert keys from the list of Key
         //  \return The number of new elements inserted
-        inline label insertMany(const UIndirectList<Key>& list);
+        inline label insert(const UIndirectList<Key>& list);
 
         //- Same as insert (no value to overwrite)
         template<class InputIter>
@@ -229,27 +229,35 @@ public:
 
         //- Same as insert (no value to overwrite)
         template<unsigned Size>
-        inline label setMany(const FixedList<Key, Size>& list)
+        inline label set(const FixedList<Key, Size>& list)
         {
-            return insertMany(list);
+            return insert(list);
         }
 
-        //- Same as insertMany (no value to overwrite)
-        inline label setMany(const UList<Key>& list)
+        //- Same as insert (no value to overwrite)
+        inline label set(const UList<Key>& list)
         {
-            return insertMany(list);
+            return insert(list);
         }
 
-        //- Same as insertMany (no value to overwrite)
-        inline label setMany(const UIndirectList<Key>& list)
+        //- Same as insert (no value to overwrite)
+        inline label set(const UIndirectList<Key>& list)
         {
-            return insertMany(list);
+            return insert(list);
+        }
+
+        //- Same as insert (no value to overwrite)
+        //  \note Method name compatibility with bitSet
+        template<class InputIter>
+        inline label setMany(InputIter first, InputIter last)
+        {
+            return insert(first, last);
         }
 
         //- Unset the keys listed in the input iterator range
         //  \return The number of items removed
         template<class InputIter>
-        inline label unset(InputIter first, const InputIter last);
+        inline label unset(InputIter first, InputIter last);
 
         //- Unset the listed keys - same as erase
         //  \return The number of items removed
@@ -258,15 +266,15 @@ public:
         //- Unset the listed keys - same as erase
         //  \return The number of items removed
         template<unsigned Size>
-        inline label unsetMany(const FixedList<Key, Size>& list);
+        inline label unset(const FixedList<Key, Size>& list);
 
         //- Unset the listed keys - same as erase
         //  \return The number of items removed
-        inline label unsetMany(const UList<Key>& list);
+        inline label unset(const UList<Key>& list);
 
         //- Unset the listed keys - same as erase
         //  \return The number of items removed
-        inline label unsetMany(const UIndirectList<Key>& list);
+        inline label unset(const UIndirectList<Key>& list);
 
 
     // STL iterators

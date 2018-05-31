@@ -82,11 +82,11 @@ protected:
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        laplacianScheme(const laplacianScheme&);
+        //- No copy construct
+        laplacianScheme(const laplacianScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const laplacianScheme&);
+        //- No copy assignment
+        void operator=(const laplacianScheme&) = delete;
 
 
 public:

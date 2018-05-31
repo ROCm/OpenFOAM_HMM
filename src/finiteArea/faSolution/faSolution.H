@@ -57,9 +57,11 @@ class faSolution
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        faSolution(const faSolution&);
-        void operator=(const faSolution&);
+        //- No copy construct
+        faSolution(const faSolution&) = delete;
+
+        //- No copy assignment
+        void operator=(const faSolution&) = delete;
 
 
 public:

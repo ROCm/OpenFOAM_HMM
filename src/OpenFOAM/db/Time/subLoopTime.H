@@ -53,10 +53,10 @@ class subLoopTime
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         subLoopTime(const subLoopTime&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const subLoopTime&) = delete;
 
 

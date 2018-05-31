@@ -136,11 +136,11 @@ protected:
 
 private:
 
-        //- Disallow default bitwise copy construct
-        codedFunctionObject(const codedFunctionObject&);
+        //- No copy construct
+        codedFunctionObject(const codedFunctionObject&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const codedFunctionObject&);
+        //- No copy assignment
+        void operator=(const codedFunctionObject&) = delete;
 
 
 public:

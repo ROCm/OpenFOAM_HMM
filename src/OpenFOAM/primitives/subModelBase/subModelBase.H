@@ -53,8 +53,8 @@ class subModelBase
 {
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const subModelBase&);
+        //- No copy assignment
+        void operator=(const subModelBase&) = delete;
 
 
 protected:

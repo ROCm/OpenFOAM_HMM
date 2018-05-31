@@ -73,8 +73,8 @@ class procLduMatrix
 
     // Private Member Functions
 
-        //- Dissallow construction as copy
-        procLduMatrix(const procLduMatrix&);
+        //- No copy construct
+        procLduMatrix(const procLduMatrix&) = delete;
 
 
 public:

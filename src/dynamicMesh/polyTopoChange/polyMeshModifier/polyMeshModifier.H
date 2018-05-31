@@ -86,11 +86,11 @@ class polyMeshModifier
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        polyMeshModifier(const polyMeshModifier&);
+        //- No copy construct
+        polyMeshModifier(const polyMeshModifier&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const polyMeshModifier&);
+        //- No copy assignment
+        void operator=(const polyMeshModifier&) = delete;
 
 
 public:

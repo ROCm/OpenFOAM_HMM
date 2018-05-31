@@ -131,10 +131,10 @@ protected:
         //- Dispatch specified calls
         label dispatch(const stringList& calls);
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         systemCall(const systemCall&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const systemCall&) = delete;
 
 

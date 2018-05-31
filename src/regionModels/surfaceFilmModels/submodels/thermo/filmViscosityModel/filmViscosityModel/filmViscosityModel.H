@@ -61,11 +61,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        filmViscosityModel(const filmViscosityModel&);
+        //- No copy construct
+        filmViscosityModel(const filmViscosityModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const filmViscosityModel&);
+        //- No copy assignment
+        void operator=(const filmViscosityModel&) = delete;
 
 
 protected:

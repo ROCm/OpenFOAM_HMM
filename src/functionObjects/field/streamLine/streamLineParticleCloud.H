@@ -53,11 +53,11 @@ class streamLineParticleCloud
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        streamLineParticleCloud(const streamLineParticleCloud&);
+        //- No copy construct
+        streamLineParticleCloud(const streamLineParticleCloud&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const streamLineParticleCloud&);
+        //- No copy assignment
+        void operator=(const streamLineParticleCloud&) = delete;
 
 
 public:

@@ -177,11 +177,14 @@ class backgroundMeshDecomposition
         //- Build the surface patch and search tree
         void buildPatchAndTree();
 
-        //- Disallow default bitwise copy construct
-        backgroundMeshDecomposition(const backgroundMeshDecomposition&);
+        //- No copy construct
+        backgroundMeshDecomposition
+        (
+            const backgroundMeshDecomposition&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const backgroundMeshDecomposition&);
+        //- No copy assignment
+        void operator=(const backgroundMeshDecomposition&) = delete;
 
 
 public:

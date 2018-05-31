@@ -86,11 +86,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        logFiles(const logFiles&);
+        //- No copy construct
+        logFiles(const logFiles&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const logFiles&);
+        //- No copy assignment
+        void operator=(const logFiles&) = delete;
 
 
 public:

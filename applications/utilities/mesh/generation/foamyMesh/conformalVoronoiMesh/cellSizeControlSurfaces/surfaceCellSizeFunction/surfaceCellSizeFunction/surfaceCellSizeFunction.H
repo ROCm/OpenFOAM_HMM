@@ -75,11 +75,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        surfaceCellSizeFunction(const surfaceCellSizeFunction&);
+        //- No copy construct
+        surfaceCellSizeFunction(const surfaceCellSizeFunction&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const surfaceCellSizeFunction&);
+        //- No copy assignment
+        void operator=(const surfaceCellSizeFunction&) = delete;
 
 
 public:

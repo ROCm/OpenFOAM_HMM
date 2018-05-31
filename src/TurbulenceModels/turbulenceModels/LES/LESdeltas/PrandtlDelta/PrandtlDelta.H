@@ -85,9 +85,11 @@ class PrandtlDelta
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        PrandtlDelta(const PrandtlDelta&);
-        void operator=(const PrandtlDelta&);
+        //- No copy construct
+        PrandtlDelta(const PrandtlDelta&) = delete;
+
+        //- No copy assignment
+        void operator=(const PrandtlDelta&) = delete;
 
         // Calculate the delta values
         void calcDelta();

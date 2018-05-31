@@ -68,14 +68,14 @@ protected:
 
     // Private Member Functions
 
-        //- Disallow copy construct
+        //- No copy construct
         temperaturePhaseChangeTwoPhaseMixture
         (
             const temperaturePhaseChangeTwoPhaseMixture&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const temperaturePhaseChangeTwoPhaseMixture&);
+        //- No copy assignment
+        void operator=(const temperaturePhaseChangeTwoPhaseMixture&) = delete;
 
 
 public:

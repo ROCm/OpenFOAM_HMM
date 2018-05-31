@@ -75,10 +75,10 @@ class base64Layer
         inline unsigned char encode2() const;
         inline unsigned char encode3() const;
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         base64Layer(const base64Layer&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const base64Layer&) = delete;
 
 

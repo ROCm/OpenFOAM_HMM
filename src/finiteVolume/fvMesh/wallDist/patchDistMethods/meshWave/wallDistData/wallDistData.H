@@ -81,11 +81,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        wallDistData(const wallDistData&);
+        //- No copy construct
+        wallDistData(const wallDistData&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const wallDistData&);
+        //- No copy assignment
+        void operator=(const wallDistData&) = delete;
 
 
 public:

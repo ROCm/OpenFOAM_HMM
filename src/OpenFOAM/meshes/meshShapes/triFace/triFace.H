@@ -87,10 +87,10 @@ public:
         );
 
         //- Copy construct from a list of three point labels.
-        explicit inline triFace(const labelUList& lst);
+        inline explicit triFace(const labelUList& lst);
 
         //- Construct from an initializer list of three point labels
-        explicit inline triFace(std::initializer_list<label> lst);
+        inline explicit triFace(std::initializer_list<label> lst);
 
         //- Construct from Istream
         inline triFace(Istream& is);

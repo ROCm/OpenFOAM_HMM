@@ -108,11 +108,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        writeFile(const writeFile&);
+        //- No copy construct
+        writeFile(const writeFile&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const writeFile&);
+        //- No copy assignment
+        void operator=(const writeFile&) = delete;
 
 
 public:

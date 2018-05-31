@@ -63,9 +63,11 @@ class vanDriestDelta
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        vanDriestDelta(const vanDriestDelta&);
-        void operator=(const vanDriestDelta&);
+        //- No copy construct
+        vanDriestDelta(const vanDriestDelta&) = delete;
+
+        //- No copy assignment
+        void operator=(const vanDriestDelta&) = delete;
 
         // Calculate the delta values
         void calcDelta();

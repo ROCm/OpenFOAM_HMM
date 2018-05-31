@@ -80,10 +80,10 @@ class deferredCorrection
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         deferredCorrection(const deferredCorrection&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const deferredCorrection&) = delete;
 
 

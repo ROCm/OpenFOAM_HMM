@@ -52,11 +52,11 @@ class faBoundaryMeshMapper
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        faBoundaryMeshMapper(const faBoundaryMeshMapper&);
+        //- No copy construct
+        faBoundaryMeshMapper(const faBoundaryMeshMapper&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const faBoundaryMeshMapper&);
+        //- No copy assignment
+        void operator=(const faBoundaryMeshMapper&) = delete;
 
 
 public:

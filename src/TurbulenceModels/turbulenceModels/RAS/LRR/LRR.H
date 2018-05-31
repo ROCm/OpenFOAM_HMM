@@ -104,9 +104,11 @@ class LRR
 {
     // Private Member Functions
 
-        // Disallow default bitwise copy construct and assignment
-        LRR(const LRR&);
-        void operator=(const LRR&);
+        //- No copy construct
+        LRR(const LRR&) = delete;
+
+        //- No copy assignment
+        void operator=(const LRR&) = delete;
 
 
 protected:

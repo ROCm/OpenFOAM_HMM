@@ -68,10 +68,10 @@ class STARCDedgeFormat
         static inline void writeLines(Ostream&, const edgeList&);
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         STARCDedgeFormat(const STARCDedgeFormat&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const STARCDedgeFormat&) = delete;
 
 

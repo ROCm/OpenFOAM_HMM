@@ -57,8 +57,8 @@ class midPoint
 {
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const midPoint&);
+        //- No copy assignment
+        void operator=(const midPoint&) = delete;
 
 
 public:

@@ -87,11 +87,11 @@ class processorPointPatch
         virtual void updateMesh(PstreamBuffers&);
 
 
-        //- Disallow default construct as copy
-        processorPointPatch(const processorPointPatch&);
+        //- No copy construct
+        processorPointPatch(const processorPointPatch&) = delete;
 
-        //- Disallow default assignment
-        void operator=(const processorPointPatch&);
+        //- No copy assignment
+        void operator=(const processorPointPatch&) = delete;
 
 public:
 

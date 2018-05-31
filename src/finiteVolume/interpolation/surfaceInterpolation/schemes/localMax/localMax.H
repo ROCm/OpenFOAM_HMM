@@ -61,8 +61,8 @@ class localMax
 {
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const localMax&);
+        //- No copy assignment
+        void operator=(const localMax&) = delete;
 
 
 public:

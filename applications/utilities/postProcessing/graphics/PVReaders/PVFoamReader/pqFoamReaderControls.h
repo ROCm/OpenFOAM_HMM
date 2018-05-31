@@ -82,10 +82,10 @@ class pqFoamReaderControls
     void fireCommand(vtkSMIntVectorProperty* prop, int val);
 
 
-    //- Disallow default bitwise copy construct
+    //- No copy construct
     pqFoamReaderControls(const pqFoamReaderControls&) = delete;
 
-    //- Disallow default bitwise assignment
+    //- No copy assignment
     void operator=(const pqFoamReaderControls&) = delete;
 
 

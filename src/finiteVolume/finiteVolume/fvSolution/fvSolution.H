@@ -51,9 +51,11 @@ class fvSolution
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        fvSolution(const fvSolution&);
-        void operator=(const fvSolution&);
+        //- No copy construct
+        fvSolution(const fvSolution&) = delete;
+
+        //- No copy assignment
+        void operator=(const fvSolution&) = delete;
 
 
 public:

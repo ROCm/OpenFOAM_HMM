@@ -114,11 +114,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        meshToMeshMethod(const meshToMeshMethod&);
+        //- No copy construct
+        meshToMeshMethod(const meshToMeshMethod&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const meshToMeshMethod&);
+        //- No copy assignment
+        void operator=(const meshToMeshMethod&) = delete;
 
 
 public:

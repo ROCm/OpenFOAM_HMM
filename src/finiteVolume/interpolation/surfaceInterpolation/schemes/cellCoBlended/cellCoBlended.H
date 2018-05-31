@@ -114,11 +114,11 @@ class cellCoBlended
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        cellCoBlended(const cellCoBlended&);
+        //- No copy construct
+        cellCoBlended(const cellCoBlended&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cellCoBlended&);
+        //- No copy assignment
+        void operator=(const cellCoBlended&) = delete;
 
 
 public:

@@ -62,8 +62,8 @@ class weighted
 
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const weighted&);
+        //- No copy assignment
+        void operator=(const weighted&) = delete;
 
 
 public:

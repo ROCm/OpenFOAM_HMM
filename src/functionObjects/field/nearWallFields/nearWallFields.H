@@ -175,11 +175,11 @@ protected:
 
 private:
 
-        //- Disallow default bitwise copy construct
-        nearWallFields(const nearWallFields&);
+        //- No copy construct
+        nearWallFields(const nearWallFields&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const nearWallFields&);
+        //- No copy assignment
+        void operator=(const nearWallFields&) = delete;
 
 public:
 

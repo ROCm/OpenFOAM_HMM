@@ -102,11 +102,11 @@ class phasePressureModel
         void correctNut()
         {}
 
-        //- Disallow default bitwise copy construct
-        phasePressureModel(const phasePressureModel&);
+        //- No copy construct
+        phasePressureModel(const phasePressureModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const phasePressureModel&);
+        //- No copy assignment
+        void operator=(const phasePressureModel&) = delete;
 
 
 public:

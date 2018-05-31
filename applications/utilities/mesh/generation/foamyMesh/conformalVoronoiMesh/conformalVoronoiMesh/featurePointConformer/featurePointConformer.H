@@ -133,11 +133,11 @@ class featurePointConformer
         //- Create the points that will conform to the feature
         void createFeaturePoints(DynamicList<Vb>& pts);
 
-        //- Disallow default bitwise copy construct
-        featurePointConformer(const featurePointConformer&);
+        //- No copy construct
+        featurePointConformer(const featurePointConformer&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const featurePointConformer&);
+        //- No copy assignment
+        void operator=(const featurePointConformer&) = delete;
 
 
 public:

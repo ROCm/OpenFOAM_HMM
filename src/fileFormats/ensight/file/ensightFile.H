@@ -73,11 +73,12 @@ class ensightFile
         //- Initialize by setting the ASCII output formatting
         void initialize();
 
-        //- Disallow default bitwise assignment
+        //- No copy construct
+        ensightFile(const ensightFile&) = delete;
+
+        //- No copy assignment
         void operator=(const ensightFile&) = delete;
 
-        //- Disallow default copy constructor
-        ensightFile(const ensightFile&) = delete;
 
 public:
 

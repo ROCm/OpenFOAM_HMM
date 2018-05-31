@@ -142,7 +142,7 @@ public:
         explicit bitSet(Istream& is);
 
         //- Construct with given size, with all bits set to 0
-        explicit inline bitSet(const label n);
+        inline explicit bitSet(const label n);
 
         //- Construct with given size and value for all elements
         inline bitSet(const label n, const bool val);
@@ -154,7 +154,7 @@ public:
         inline bitSet(bitSet&& bitset);
 
         //- Construct from a list of bools
-        explicit inline bitSet(const UList<bool>& bools);
+        inline explicit bitSet(const UList<bool>& bools);
 
         //- Construct with given size with all bits set to 0,
         //- subsequently add specified locations as 1.
@@ -170,11 +170,11 @@ public:
 
         //- Construct with automatic sizing (filled with 0),
         //- and populate with specified locations as 1.
-        explicit inline bitSet(const labelUList& locations);
+        inline explicit bitSet(const labelUList& locations);
 
         //- Construct with automatic sizing (filled with 0),
         //- and populate with specified locations as 1.
-        explicit inline bitSet(const labelUIndList& locations);
+        inline explicit bitSet(const labelUIndList& locations);
 
         //- Clone
         inline autoPtr<bitSet> clone() const;
@@ -262,7 +262,7 @@ public:
 
     // Setting single or multiple values
 
-        //- Single index/value assign
+        //- Assign a single index/value
         using PackedList<1>::set;
 
         //- Set specified bits from another bitset.
@@ -346,29 +346,41 @@ public:
         //  Either increases the size of the bitSet or is a no-op.
         inline bitSet& extend(const bitSet& other);
 
-        //- Set the listed locations to true.
-        //  Does auto-vivify for non-existent entries.
-        inline void setMany(const labelUList& locations);
-
-        //- Set the listed locations to true.
-        //  Does auto-vivify for non-existent entries.
-        inline void setMany(const labelUIndList& locations);
-
         //- Set the locations listed by the iterator range,
         //  auto-vivify entries if needed.
+        //
+        //  \return number of locations changed
         template<class InputIter>
-        void setMany(InputIter first, InputIter last);
+        label setMany(InputIter first, InputIter last);
 
-        //- Unset the listed locations, never auto-vivifies.
-        inline void unsetMany(const labelUList& locations);
+        //- Set the listed locations to true.
+        //  Does auto-vivify for non-existent entries.
+        //
+        //  \return number of locations changed
+        inline label set(const labelUList& locations);
 
-        //- Unset the listed locations, never auto-vivifies.
-        inline void unsetMany(const labelUIndList& locations);
+        //- Set the listed locations to true.
+        //  Does auto-vivify for non-existent entries.
+        //
+        //  \return number of locations changed
+        inline label set(const labelUIndList& locations);
 
         //- Unset the locations listed by the iterator range,
         //- never auto-vivify entries.
+        //
+        //  \return number of locations changed
         template<class InputIter>
-        void unsetMany(InputIter first, InputIter last);
+        label unset(InputIter first, InputIter last);
+
+        //- Unset the listed locations, never auto-vivifies.
+        //
+        //  \return number of locations changed
+        inline label unset(const labelUList& locations);
+
+        //- Unset the listed locations, never auto-vivifies.
+        //
+        //  \return number of locations changed
+        inline label unset(const labelUIndList& locations);
 
 
     // Access helpers

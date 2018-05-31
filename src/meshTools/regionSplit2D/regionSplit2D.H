@@ -67,11 +67,11 @@ class regionSplit2D
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        regionSplit2D(const regionSplit2D&);
+        //- No copy construct
+        regionSplit2D(const regionSplit2D&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const regionSplit2D&);
+        //- No copy assignment
+        void operator=(const regionSplit2D&) = delete;
 
 
 public:

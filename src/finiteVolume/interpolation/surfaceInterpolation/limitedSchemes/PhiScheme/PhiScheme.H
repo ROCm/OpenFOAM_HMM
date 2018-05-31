@@ -67,11 +67,11 @@ class PhiScheme
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        PhiScheme(const PhiScheme&);
+        //- No copy construct
+        PhiScheme(const PhiScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const PhiScheme&);
+        //- No copy assignment
+        void operator=(const PhiScheme&) = delete;
 
 
 public:

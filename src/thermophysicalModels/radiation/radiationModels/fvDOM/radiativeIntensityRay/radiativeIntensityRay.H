@@ -118,11 +118,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        radiativeIntensityRay(const radiativeIntensityRay&);
+        //- No copy construct
+        radiativeIntensityRay(const radiativeIntensityRay&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const radiativeIntensityRay&);
+        //- No copy assignment
+        void operator=(const radiativeIntensityRay&) = delete;
 
 
 public:

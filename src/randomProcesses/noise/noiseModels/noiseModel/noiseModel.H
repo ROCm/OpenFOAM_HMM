@@ -97,11 +97,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        noiseModel(const noiseModel&);
+        //- No copy construct
+        noiseModel(const noiseModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const noiseModel&);
+        //- No copy assignment
+        void operator=(const noiseModel&) = delete;
 
 
 protected:

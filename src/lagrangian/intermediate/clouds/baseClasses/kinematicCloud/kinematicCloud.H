@@ -51,11 +51,11 @@ class kinematicCloud
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        kinematicCloud(const kinematicCloud&);
+        //- No copy construct
+        kinematicCloud(const kinematicCloud&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const kinematicCloud&);
+        //- No copy assignment
+        void operator=(const kinematicCloud&) = delete;
 
 
 public:

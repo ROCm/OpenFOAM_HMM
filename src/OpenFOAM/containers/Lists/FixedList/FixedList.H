@@ -162,13 +162,13 @@ public:
         inline FixedList() = default;
 
         //- Construct and initialize all entries to given value
-        explicit inline FixedList(const T& val);
+        inline explicit FixedList(const T& val);
 
         //- Construct and initialize all entries to zero
-        explicit inline FixedList(const zero);
+        inline explicit FixedList(const zero);
 
         //- Copy construct from C-array
-        explicit inline FixedList(const T list[Size]);
+        inline explicit FixedList(const T list[Size]);
 
         //- Copy constructor
         inline FixedList(const FixedList<T, Size>& list);
@@ -186,10 +186,10 @@ public:
         inline FixedList(std::initializer_list<T> list);
 
         //- Construct from UList
-        explicit inline FixedList(const UList<T>& list);
+        inline explicit FixedList(const UList<T>& list);
 
         //- Construct from SLList
-        explicit inline FixedList(const SLList<T>& list);
+        inline explicit FixedList(const SLList<T>& list);
 
         //- Construct from Istream
         FixedList(Istream& is);

@@ -78,11 +78,11 @@ class searchableSurfaces
         );
 
 
-        //- Disallow default bitwise copy construct
-        searchableSurfaces(const searchableSurfaces&);
+        //- No copy construct
+        searchableSurfaces(const searchableSurfaces&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const searchableSurfaces&);
+        //- No copy assignment
+        void operator=(const searchableSurfaces&) = delete;
 
 
 public:

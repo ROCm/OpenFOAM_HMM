@@ -83,11 +83,11 @@ class SLTSDdtScheme
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        SLTSDdtScheme(const SLTSDdtScheme&);
+        //- No copy construct
+        SLTSDdtScheme(const SLTSDdtScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const SLTSDdtScheme&);
+        //- No copy assignment
+        void operator=(const SLTSDdtScheme&) = delete;
 
         //- Calculate a relaxed diagonal from the given flux field
         void relaxedDiag(scalarField& rD, const surfaceScalarField& phi) const;

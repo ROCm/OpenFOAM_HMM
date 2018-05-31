@@ -59,11 +59,11 @@ class MRFZoneList
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        MRFZoneList(const MRFZoneList&);
+        //- No copy construct
+        MRFZoneList(const MRFZoneList&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const MRFZoneList&);
+        //- No copy assignment
+        void operator=(const MRFZoneList&) = delete;
 
 
 protected:

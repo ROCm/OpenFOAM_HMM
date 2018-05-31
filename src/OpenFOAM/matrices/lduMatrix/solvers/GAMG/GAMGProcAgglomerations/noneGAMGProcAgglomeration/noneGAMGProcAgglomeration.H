@@ -55,14 +55,14 @@ class noneGAMGProcAgglomeration
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         noneGAMGProcAgglomeration
         (
             const noneGAMGProcAgglomeration&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const noneGAMGProcAgglomeration&);
+        //- No copy assignment
+        void operator=(const noneGAMGProcAgglomeration&) = delete;
 
 
 public:

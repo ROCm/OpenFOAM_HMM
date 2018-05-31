@@ -79,11 +79,11 @@ class enginePiston
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        enginePiston(const enginePiston&);
+        //- No copy construct
+        enginePiston(const enginePiston&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const enginePiston&);
+        //- No copy assignment
+        void operator=(const enginePiston&) = delete;
 
 
 public:

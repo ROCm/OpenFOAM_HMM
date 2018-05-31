@@ -93,10 +93,10 @@ class ZoneMesh
         );
 
 
-        //- Disallow construct as copy
+        //- No copy construct
         ZoneMesh(const ZoneMesh&) = delete;
 
-        //- Disallow assignment
+        //- No copy assignment
         void operator=(const ZoneMesh<ZoneType, MeshType>&) = delete;
 
 

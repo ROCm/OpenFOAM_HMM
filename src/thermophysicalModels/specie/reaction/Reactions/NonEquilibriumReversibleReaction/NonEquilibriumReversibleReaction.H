@@ -68,12 +68,14 @@ class NonEquilibriumReversibleReaction
 
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=
         (
             const NonEquilibriumReversibleReaction
-                <ReactionType, ReactionThermo, ReactionRate>&
-        );
+            <
+                ReactionType, ReactionThermo, ReactionRate
+            >&
+        ) = delete;
 
 
 public:

@@ -87,11 +87,14 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        tabulatedAccelerationSource(const tabulatedAccelerationSource&);
+        //- No copy construct
+        tabulatedAccelerationSource
+        (
+            const tabulatedAccelerationSource&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const tabulatedAccelerationSource&);
+        //- No copy assignment
+        void operator=(const tabulatedAccelerationSource&) = delete;
 
 
         //- Source term to momentum equation

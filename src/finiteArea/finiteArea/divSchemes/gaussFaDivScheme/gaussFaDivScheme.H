@@ -61,10 +61,10 @@ class gaussDivScheme
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         gaussDivScheme(const gaussDivScheme&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const gaussDivScheme&) = delete;
 
 

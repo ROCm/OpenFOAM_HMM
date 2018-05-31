@@ -77,9 +77,11 @@ class interfaceProperties
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        interfaceProperties(const interfaceProperties&);
-        void operator=(const interfaceProperties&);
+        //- No copy construct
+        interfaceProperties(const interfaceProperties&) = delete;
+
+        //- No copy assignment
+        void operator=(const interfaceProperties&) = delete;
 
         //- Correction for the boundary condition on the unit normal nHat on
         //  walls to produce the correct contact dynamic angle

@@ -346,11 +346,11 @@ protected:
         //- Write binned data
         void writeBins();
 
-        //- Disallow default bitwise copy construct
-        forces(const forces&);
+        //- No copy construct
+        forces(const forces&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const forces&);
+        //- No copy assignment
+        void operator=(const forces&) = delete;
 
 
 public:

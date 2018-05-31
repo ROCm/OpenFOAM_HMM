@@ -97,7 +97,7 @@ Foam::label Foam::edgeCollapser::checkMeshQuality
     {
         const face& f = mesh.faces()[facei];
 
-        isErrorPoint.setMany(f);
+        isErrorPoint.set(f);
     }
 
     syncTools::syncPointList
@@ -222,7 +222,7 @@ void Foam::edgeCollapser::collapseToEdge
 
     labelList faceEdgesNeg = edgesFromPoints(facei, facePtsNeg);
 
-    collapseEdge.setMany(faceEdgesNeg);
+    collapseEdge.set(faceEdgesNeg);
 
     forAll(facePtsNeg, pI)
     {
@@ -266,7 +266,7 @@ void Foam::edgeCollapser::collapseToEdge
 
     labelList faceEdgesPos = edgesFromPoints(facei, facePtsPos);
 
-    collapseEdge.setMany(faceEdgesPos);
+    collapseEdge.set(faceEdgesPos);
 
     forAll(facePtsPos, pI)
     {
@@ -364,7 +364,7 @@ void Foam::edgeCollapser::collapseToPoint
 
     const labelList& faceEdges = mesh_.faceEdges()[facei];
 
-    collapseEdge.setMany(faceEdges);
+    collapseEdge.set(faceEdges);
 
     forAll(f, pI)
     {
@@ -1511,7 +1511,7 @@ bool Foam::edgeCollapser::setRefinement
             else
             {
                 // Kept face. Mark vertices
-                usedPoint.setMany(f);
+                usedPoint.set(f);
             }
         }
 

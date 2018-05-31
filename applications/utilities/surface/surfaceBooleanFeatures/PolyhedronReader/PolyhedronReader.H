@@ -67,11 +67,11 @@ class PolyhedronReader
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        PolyhedronReader(const PolyhedronReader&);
+        //- No copy construct
+        PolyhedronReader(const PolyhedronReader&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const PolyhedronReader&);
+        //- No copy assignment
+        void operator=(const PolyhedronReader&) = delete;
 
 
 public:

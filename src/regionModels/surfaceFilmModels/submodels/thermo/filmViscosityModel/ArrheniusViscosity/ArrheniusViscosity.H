@@ -65,11 +65,11 @@ class ArrheniusViscosity
 {
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        ArrheniusViscosity(const ArrheniusViscosity&);
+        //- No copy construct
+        ArrheniusViscosity(const ArrheniusViscosity&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const ArrheniusViscosity&);
+        //- No copy assignment
+        void operator=(const ArrheniusViscosity&) = delete;
 
 
 protected:

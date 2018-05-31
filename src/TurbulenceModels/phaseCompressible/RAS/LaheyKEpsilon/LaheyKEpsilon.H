@@ -96,9 +96,11 @@ class LaheyKEpsilon
         >&
         gasTurbulence() const;
 
-        // Disallow default bitwise copy construct and assignment
-        LaheyKEpsilon(const LaheyKEpsilon&);
-        void operator=(const LaheyKEpsilon&);
+        //- No copy construct
+        LaheyKEpsilon(const LaheyKEpsilon&) = delete;
+
+        //- No copy assignment
+        void operator=(const LaheyKEpsilon&) = delete;
 
 
 protected:

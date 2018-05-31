@@ -72,11 +72,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        solidBodyMotionFunction(const solidBodyMotionFunction&);
+        //- No copy construct
+        solidBodyMotionFunction(const solidBodyMotionFunction&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const solidBodyMotionFunction&);
+        //- No copy assignment
+        void operator=(const solidBodyMotionFunction&) = delete;
 
 
 public:

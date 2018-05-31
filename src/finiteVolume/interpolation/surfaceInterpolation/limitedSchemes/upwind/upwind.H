@@ -58,8 +58,8 @@ class upwind
 {
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const upwind&);
+        //- No copy assignment
+        void operator=(const upwind&) = delete;
 
 
 public:

@@ -63,11 +63,11 @@ protected:
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        tetherPotential(const tetherPotential&);
+        //- No copy construct
+        tetherPotential(const tetherPotential&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const tetherPotential&);
+        //- No copy assignment
+        void operator=(const tetherPotential&) = delete;
 
 
 public:

@@ -97,11 +97,11 @@ class snapParameters
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        snapParameters(const snapParameters&);
+        //- No copy construct
+        snapParameters(const snapParameters&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const snapParameters&);
+        //- No copy assignment
+        void operator=(const snapParameters&) = delete;
 
 
 public:

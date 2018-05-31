@@ -64,10 +64,10 @@ class GTSsurfaceFormat
         //  Triangulating on-the-fly is otherwise too annoying
         static bool checkIfTriangulated(const UList<Face>& faceLst);
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         GTSsurfaceFormat(const GTSsurfaceFormat<Face>&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const GTSsurfaceFormat<Face>&) = delete;
 
 

@@ -3764,7 +3764,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
             {
                 const cell& cFaces = mesh_.cells()[celli];
 
-                affectedFace.setMany(cFaces);
+                affectedFace.set(cFaces);
             }
         }
 
@@ -3782,7 +3782,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
             {
                 const labelList& eFaces = mesh_.edgeFaces(edgeI);
 
-                affectedFace.setMany(eFaces);
+                affectedFace.set(eFaces);
             }
         }
     }
@@ -5309,7 +5309,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
             {
                 const labelList& pCells = mesh_.pointCells(pointi);
 
-                unrefineCell.setMany(pCells);
+                unrefineCell.set(pCells);
             }
         }
 
@@ -5534,7 +5534,7 @@ void Foam::hexRef8::setUnrefinement
         {
             const labelList& pCells = mesh_.pointCells(splitPointLabels[i]);
 
-            cSet.insertMany(pCells);
+            cSet.insert(pCells);
         }
         cSet.write();
 
@@ -5558,7 +5558,7 @@ void Foam::hexRef8::setUnrefinement
         {
             const labelList& pFaces = mesh_.pointFaces()[splitPointLabels[i]];
 
-            splitFaces.insertMany(pFaces);
+            splitFaces.insert(pFaces);
         }
 
         // Check with faceRemover what faces will get removed. Note that this

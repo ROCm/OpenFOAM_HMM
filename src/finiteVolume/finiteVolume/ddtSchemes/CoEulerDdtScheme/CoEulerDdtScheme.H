@@ -81,11 +81,11 @@ class CoEulerDdtScheme
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        CoEulerDdtScheme(const CoEulerDdtScheme&);
+        //- No copy construct
+        CoEulerDdtScheme(const CoEulerDdtScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const CoEulerDdtScheme&);
+        //- No copy assignment
+        void operator=(const CoEulerDdtScheme&) = delete;
 
         //- Return the reciprocal of the Courant-number limited time-step
         tmp<volScalarField> CorDeltaT() const;

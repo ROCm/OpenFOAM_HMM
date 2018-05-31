@@ -72,11 +72,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        curvatureSeparation(const curvatureSeparation&);
+        //- No copy construct
+        curvatureSeparation(const curvatureSeparation&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const curvatureSeparation&);
+        //- No copy assignment
+        void operator=(const curvatureSeparation&) = delete;
 
 
 protected:

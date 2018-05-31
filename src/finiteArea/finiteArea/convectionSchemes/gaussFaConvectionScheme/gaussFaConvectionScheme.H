@@ -67,11 +67,11 @@ class gaussConvectionScheme
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        gaussConvectionScheme(const gaussConvectionScheme&);
+        //- No copy construct
+        gaussConvectionScheme(const gaussConvectionScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const gaussConvectionScheme&);
+        //- No copy assignment
+        void operator=(const gaussConvectionScheme&) = delete;
 
 
 public:

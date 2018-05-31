@@ -86,7 +86,7 @@
         //  -  0: different
         //  - +1: identical
         //  - -1: same face, but different orientation
-        static inline int compare(const triFace&, const triFace&);
+        static int compare(const triFace&, const triFace&);
         #+end_src
         or
         #+begin_src C++
@@ -95,7 +95,7 @@
         //  -  0: different
         //  - +1: identical
         //  - -1: same face, but different orientation
-        static inline int compare(const triFace&, const triFace&);
+        static int compare(const triFace&, const triFace&);
         #+end_src
         *not*
         #+begin_src C++
@@ -103,7 +103,7 @@
         //  -  0: different
         //  - +1: identical
         //  - -1: same face, but different orientation
-        static inline int compare(const triFace&, const triFace&);
+        static int compare(const triFace&, const triFace&);
         #+end_src
       + List can be nested for example
         #+begin_src C++

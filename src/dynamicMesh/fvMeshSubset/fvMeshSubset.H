@@ -137,11 +137,11 @@ private:
             const label currentRegion
         ) const;
 
-        //- Disallow default bitwise copy construct
-        fvMeshSubset(const fvMeshSubset&);
+        //- No copy construct
+        fvMeshSubset(const fvMeshSubset&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const fvMeshSubset&);
+        //- No copy assignment
+        void operator=(const fvMeshSubset&) = delete;
 
 public:
 

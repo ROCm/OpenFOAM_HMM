@@ -47,7 +47,7 @@ Foam::treeBoundBox Foam::treeDataFace::calcBb(const label facei) const
 
 void Foam::treeDataFace::update()
 {
-    isTreeFace_.setMany(faceLabels_);
+    isTreeFace_.set(faceLabels_);
 
     if (cacheBb_)
     {

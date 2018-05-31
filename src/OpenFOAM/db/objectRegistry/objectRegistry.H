@@ -94,10 +94,10 @@ class objectRegistry
         );
 
 
-        //- Disallow Copy constructor
+        //- No copy construct
         objectRegistry(const objectRegistry&) = delete;
 
-        //- Disallow default bitwise copy construct and assignment
+        //- No copy assignment
         void operator=(const objectRegistry&) = delete;
 
 

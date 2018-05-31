@@ -68,11 +68,14 @@ class eddyDissipationDiffusionModel
 
     // Private member functions
 
-        //- Disallow copy construct
-        eddyDissipationDiffusionModel(const eddyDissipationDiffusionModel&);
+        //- No copy construct
+        eddyDissipationDiffusionModel
+        (
+            const eddyDissipationDiffusionModel&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const eddyDissipationDiffusionModel&);
+        //- No copy assignment
+        void operator=(const eddyDissipationDiffusionModel&) = delete;
 
 
 public:

@@ -72,10 +72,10 @@ class gradScheme
 
     // Private Member Functions
 
-        //- Disallow copy construct
+        //- No copy construct
         gradScheme(const gradScheme&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const gradScheme&) = delete;
 
 

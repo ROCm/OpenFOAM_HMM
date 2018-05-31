@@ -78,10 +78,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         pathline(const pathline&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const pathline&) = delete;
 
 

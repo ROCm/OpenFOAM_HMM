@@ -85,14 +85,11 @@ class fvPatchMapper
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        fvPatchMapper
-        (
-            const fvPatchMapper&
-        );
+        //- No copy construct
+        fvPatchMapper(const fvPatchMapper&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const fvPatchMapper&);
+        //- No copy assignment
+        void operator=(const fvPatchMapper&) = delete;
 
 
         //- Calculate addressing for mapping with inserted cells

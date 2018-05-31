@@ -52,11 +52,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        valveBank(const valveBank&);
+        //- No copy construct
+        valveBank(const valveBank&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const valveBank&);
+        //- No copy assignment
+        void operator=(const valveBank&) = delete;
 
 
 public:

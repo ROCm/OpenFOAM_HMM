@@ -61,11 +61,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        noPyrolysis(const noPyrolysis&);
+        //- No copy construct
+        noPyrolysis(const noPyrolysis&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const noPyrolysis&);
+        //- No copy assignment
+        void operator=(const noPyrolysis&) = delete;
 
 
 protected:

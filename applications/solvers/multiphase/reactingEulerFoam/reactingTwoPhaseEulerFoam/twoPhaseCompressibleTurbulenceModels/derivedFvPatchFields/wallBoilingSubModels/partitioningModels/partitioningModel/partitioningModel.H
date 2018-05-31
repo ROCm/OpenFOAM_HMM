@@ -55,11 +55,11 @@ class partitioningModel
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        partitioningModel(const partitioningModel&);
+        //- No copy construct
+        partitioningModel(const partitioningModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const partitioningModel&);
+        //- No copy assignment
+        void operator=(const partitioningModel&) = delete;
 
 
 public:

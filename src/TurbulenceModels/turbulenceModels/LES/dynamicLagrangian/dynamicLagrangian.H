@@ -66,9 +66,11 @@ class dynamicLagrangian
 {
     // Private Member Functions
 
-        // Disallow default bitwise copy construct and assignment
-        dynamicLagrangian(const dynamicLagrangian&);
-        void operator=(const dynamicLagrangian&);
+        //- No copy construct
+        dynamicLagrangian(const dynamicLagrangian&) = delete;
+
+        //- No copy assignment
+        void operator=(const dynamicLagrangian&) = delete;
 
 
 protected:

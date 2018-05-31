@@ -66,9 +66,11 @@ class laplaceFilter
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        laplaceFilter(const laplaceFilter&);
-        void operator=(const laplaceFilter&);
+        //- No copy construct
+        laplaceFilter(const laplaceFilter&) = delete;
+
+        //- No copy assignment
+        void operator=(const laplaceFilter&) = delete;
 
 
 public:
@@ -87,8 +89,7 @@ public:
 
 
     //- Destructor
-    virtual ~laplaceFilter()
-    {}
+    virtual ~laplaceFilter() = default;
 
 
     // Member Functions

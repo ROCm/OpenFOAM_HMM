@@ -102,10 +102,10 @@ class CStringList
         int resetContent(const ListType& input);
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         CStringList(const CStringList&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const CStringList&) = delete;
 
 

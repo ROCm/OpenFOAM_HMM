@@ -106,8 +106,8 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const surfaceZonesInfo&);
+        //- No copy assignment
+        void operator=(const surfaceZonesInfo&) = delete;
 
 
 public:

@@ -130,9 +130,11 @@ class kOmegaSST
 {
     // Private Member Functions
 
-        // Disallow default bitwise copy construct and assignment
-        kOmegaSST(const kOmegaSST&);
-        void operator=(const kOmegaSST&);
+        //- No copy construct
+        kOmegaSST(const kOmegaSST&) = delete;
+
+        //- No copy assignment
+        void operator=(const kOmegaSST&) = delete;
 
 
 protected:

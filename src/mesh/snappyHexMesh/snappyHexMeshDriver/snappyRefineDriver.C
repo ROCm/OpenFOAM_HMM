@@ -1348,6 +1348,12 @@ void Foam::snappyRefineDriver::removeInsideCells
     const label nBufferLayers
 )
 {
+    // Skip if no limitRegion and zero bufferLayers
+    if (meshRefiner_.limitShells().shells().size() == 0 && nBufferLayers == 0)
+    {
+        return;
+    }
+
     Info<< nl
         << "Removing mesh beyond surface intersections" << nl
         << "------------------------------------------" << nl
@@ -1360,6 +1366,19 @@ void Foam::snappyRefineDriver::removeInsideCells
        const_cast<Time&>(mesh.time())++;
     }
 
+    // Remove any cells inside limitShells with level -1
+    meshRefiner_.removeLimitShells
+    (
+        nBufferLayers,
+        1,
+        globalToMasterPatch_,
+        globalToSlavePatch_,
+        refineParams.locationsInMesh(),
+        refineParams.zonesInMesh()
+    );
+
+    // Fix any additional (e.g. locationsOutsideMesh). Note: probably not
+    // nessecary.
     meshRefiner_.splitMesh
     (
         nBufferLayers,                  // nBufferLayers
@@ -2254,6 +2273,14 @@ void Foam::snappyRefineDriver::doRefine
     (
         refineParams,
         100    // maxIter
+    );
+
+    // Remove any extra cells from limitRegion with level -1, without
+    // adding any buffer layer this time
+    removeInsideCells
+    (
+        refineParams,
+        0       // nBufferLayers
     );
 
     // Refine any hexes with 5 or 6 faces refined to make smooth edges

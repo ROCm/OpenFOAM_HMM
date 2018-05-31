@@ -71,11 +71,11 @@ class CallbackRegistry
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        CallbackRegistry(const CallbackRegistry&);
+        //- No copy construct
+        CallbackRegistry(const CallbackRegistry&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const CallbackRegistry&);
+        //- No copy assignment
+        void operator=(const CallbackRegistry&) = delete;
 
 
 public:

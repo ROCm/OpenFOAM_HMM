@@ -58,9 +58,11 @@ class SloanRenumber
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        void operator=(const SloanRenumber&);
-        SloanRenumber(const SloanRenumber&);
+        //- No copy construct
+        SloanRenumber(const SloanRenumber&) = delete;
+
+        //- No copy assignment
+        void operator=(const SloanRenumber&) = delete;
 
 
 public:

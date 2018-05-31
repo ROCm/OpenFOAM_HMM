@@ -61,8 +61,8 @@ class correctedSnGrad
 {
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const correctedSnGrad&);
+        //- No copy assignment
+        void operator=(const correctedSnGrad&) = delete;
 
 
 public:

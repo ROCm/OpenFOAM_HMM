@@ -50,9 +50,11 @@ class randomRenumber
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        void operator=(const randomRenumber&);
-        randomRenumber(const randomRenumber&);
+        //- No copy construct
+        randomRenumber(const randomRenumber&) = delete;
+
+        //- No copy assignment
+        void operator=(const randomRenumber&) = delete;
 
 
 public:
@@ -68,8 +70,7 @@ public:
 
 
     //- Destructor
-    virtual ~randomRenumber()
-    {}
+    virtual ~randomRenumber() = default;
 
 
     // Member Functions

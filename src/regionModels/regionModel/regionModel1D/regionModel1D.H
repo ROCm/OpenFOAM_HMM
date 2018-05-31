@@ -56,11 +56,11 @@ class regionModel1D
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        regionModel1D(const regionModel1D&);
+        //- No copy construct
+        regionModel1D(const regionModel1D&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const regionModel1D&);
+        //- No copy assignment
+        void operator=(const regionModel1D&) = delete;
 
         //- Construct region mesh and fields
         void constructMeshObjects();

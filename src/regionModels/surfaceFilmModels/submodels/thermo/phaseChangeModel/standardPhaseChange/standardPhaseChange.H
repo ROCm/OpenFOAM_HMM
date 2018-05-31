@@ -54,17 +54,6 @@ class standardPhaseChange
 :
     public phaseChangeModel
 {
-private:
-
-    // Private member functions
-
-        //- Disallow default bitwise copy construct
-        standardPhaseChange(const standardPhaseChange&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const standardPhaseChange&);
-
-
 protected:
 
     // Protected data
@@ -98,6 +87,12 @@ protected:
             YInfType YInf
         );
 
+        //- No copy construct
+        standardPhaseChange(const standardPhaseChange&) = delete;
+
+        //- No copy assignment
+        void operator=(const standardPhaseChange&) = delete;
+
 
 public:
 
@@ -116,7 +111,7 @@ public:
 
 
     //- Destructor
-    virtual ~standardPhaseChange();
+    virtual ~standardPhaseChange() = default;
 
 
     // Member Functions

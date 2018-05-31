@@ -131,11 +131,14 @@ class reactionsSensitivityAnalysis
         void writeSpeciesRR();
 
 
-        //- Disallow default bitwise copy construct
-        reactionsSensitivityAnalysis(const reactionsSensitivityAnalysis&);
+        //- No copy construct
+        reactionsSensitivityAnalysis
+        (
+            const reactionsSensitivityAnalysis&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const reactionsSensitivityAnalysis&);
+        //- No copy assignment
+        void operator=(const reactionsSensitivityAnalysis&) = delete;
 
 
 public:

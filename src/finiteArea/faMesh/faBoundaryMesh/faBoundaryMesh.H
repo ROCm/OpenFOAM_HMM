@@ -72,11 +72,11 @@ class faBoundaryMesh
         //- Reference to mesh
         const faMesh& mesh_;
 
-        //- Disallow construct as copy
-        faBoundaryMesh(const faBoundaryMesh&);
+        //- No copy construct
+        faBoundaryMesh(const faBoundaryMesh&) = delete;
 
-        //- Disallow assignment
-        void operator=(const faBoundaryMesh&);
+        //- No copy assignment
+        void operator=(const faBoundaryMesh&) = delete;
 
 
 public:

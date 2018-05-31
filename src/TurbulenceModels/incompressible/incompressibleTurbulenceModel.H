@@ -74,11 +74,14 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        incompressibleTurbulenceModel(const incompressibleTurbulenceModel&);
+        //- No copy construct
+        incompressibleTurbulenceModel
+        (
+            const incompressibleTurbulenceModel&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const incompressibleTurbulenceModel&);
+        //- No copy assignment
+        void operator=(const incompressibleTurbulenceModel&) = delete;
 
 
 public:

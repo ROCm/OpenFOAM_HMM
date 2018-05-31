@@ -165,10 +165,10 @@ protected:
 
 private:
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         solutionControl(const solutionControl&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const solutionControl&) = delete;
 
 

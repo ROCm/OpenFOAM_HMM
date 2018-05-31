@@ -81,11 +81,11 @@ class pointConstraints
         //- Make patch-patch constraints
         void makePatchPatchAddressing();
 
-        //- Disallow default bitwise copy construct
-        pointConstraints(const pointConstraints&);
+        //- No copy construct
+        pointConstraints(const pointConstraints&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const pointConstraints&);
+        //- No copy assignment
+        void operator=(const pointConstraints&) = delete;
 
 
 public:

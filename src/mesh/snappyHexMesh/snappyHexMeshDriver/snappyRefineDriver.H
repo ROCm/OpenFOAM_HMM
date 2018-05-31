@@ -185,11 +185,11 @@ class snappyRefineDriver
             const dictionary& motionDict
         );
 
-        //- Disallow default bitwise copy construct
-        snappyRefineDriver(const snappyRefineDriver&);
+        //- No copy construct
+        snappyRefineDriver(const snappyRefineDriver&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const snappyRefineDriver&);
+        //- No copy assignment
+        void operator=(const snappyRefineDriver&) = delete;
 
 
 public:

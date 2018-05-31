@@ -62,14 +62,14 @@ class velocityDisplacementMotionSolver
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         velocityDisplacementMotionSolver
         (
             const velocityDisplacementMotionSolver&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const velocityDisplacementMotionSolver&);
+        //- No copy assignment
+        void operator=(const velocityDisplacementMotionSolver&) = delete;
 
         //- Get the boundary condition types for the point displacement
         wordList pointDisplacementBoundaryTypes() const;

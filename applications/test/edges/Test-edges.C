@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
     e4.start() = e4.end() = -1;
     Info<< "insert from list\n";
     labelHashSet newIndices({2, -1, 2, 1, 4, 1, 2, 3});
-    e4.insertMany(newIndices.toc());
+    e4.insert(newIndices.toc());
     printInfo(e4);
 
     e4.start() = e4.end() = -1;
@@ -105,12 +105,12 @@ int main(int argc, char *argv[])
     FixedList<label, 8> otherIndices{12, 2, -1, 1, 4, 1, 2, 3};
     e4.start() = e4.end() = -1;
     Info<< "insert from list: " << otherIndices << nl;
-    e4.insertMany(otherIndices);
+    e4.insert(otherIndices);
     printInfo(e4);
 
     e4.start() = e4.end();
     Info<< "erase from list: " << otherIndices << nl;
-    Info<< "removed " << e4.eraseMany(otherIndices) << " values" << nl;
+    Info<< "removed " << e4.erase(otherIndices) << " values" << nl;
     printInfo(e4);
 
     for (label i : {-1, 0, 1, 3})

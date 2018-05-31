@@ -65,11 +65,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        drippingInjection(const drippingInjection&);
+        //- No copy construct
+        drippingInjection(const drippingInjection&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const drippingInjection&);
+        //- No copy assignment
+        void operator=(const drippingInjection&) = delete;
 
 
 protected:

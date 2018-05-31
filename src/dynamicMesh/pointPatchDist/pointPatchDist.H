@@ -69,11 +69,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        pointPatchDist(const pointPatchDist&);
+        //- No copy construct
+        pointPatchDist(const pointPatchDist&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const pointPatchDist&);
+        //- No copy assignment
+        void operator=(const pointPatchDist&) = delete;
 
 
 public:

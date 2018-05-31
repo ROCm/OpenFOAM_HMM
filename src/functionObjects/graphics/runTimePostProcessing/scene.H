@@ -111,11 +111,11 @@ class scene
             const bool visible
         ) const;
 
-        //- Disallow default bitwise copy construct
-        scene(const scene&);
+        //- No copy construct
+        scene(const scene&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const scene&);
+        //- No copy assignment
+        void operator=(const scene&) = delete;
 
 
 protected:

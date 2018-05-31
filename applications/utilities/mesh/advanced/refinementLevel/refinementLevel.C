@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
         const DynamicList<label>& bin = bins[binI];
 
         cellSet cells(mesh, "vol" + name(binI), bin.size());
-        cells.insertMany(bin);
+        cells.insert(bin);
 
         Info<< "    " << lowerLimits[binI] << " .. " << upperLimits[binI]
             << "  : writing " << bin.size() << " cells to cellSet "

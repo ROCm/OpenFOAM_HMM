@@ -89,7 +89,7 @@ class UList
 
     // Private Member Functions
 
-        //- Disallow default shallow-copy assignment
+        //- No copy assignment (shallow copy)
         //
         //  Assignment of UList<T> may need to be either shallow (copy pointer)
         //  or deep (copy elements) depending on context or the particular type

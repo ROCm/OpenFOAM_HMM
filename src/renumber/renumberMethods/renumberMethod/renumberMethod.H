@@ -59,9 +59,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        renumberMethod(const renumberMethod&);
-        void operator=(const renumberMethod&);
+        //- No copy construct
+        renumberMethod(const renumberMethod&) = delete;
+
+        //- No copy assignment
+        void operator=(const renumberMethod&) = delete;
 
 
 public:
@@ -103,8 +105,7 @@ public:
 
 
     //- Destructor
-    virtual ~renumberMethod()
-    {}
+    virtual ~renumberMethod() = default;
 
 
     // Member Functions

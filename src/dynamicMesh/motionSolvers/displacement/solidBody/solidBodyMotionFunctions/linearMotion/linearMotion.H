@@ -62,11 +62,11 @@ class linearMotion
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        linearMotion(const linearMotion&);
+        //- No copy construct
+        linearMotion(const linearMotion&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const linearMotion&);
+        //- No copy assignment
+        void operator=(const linearMotion&) = delete;
 
 
 public:

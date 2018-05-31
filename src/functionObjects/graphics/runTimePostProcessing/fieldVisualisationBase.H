@@ -95,11 +95,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        fieldVisualisationBase(const fieldVisualisationBase&);
+        //- No copy construct
+        fieldVisualisationBase(const fieldVisualisationBase&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const fieldVisualisationBase&);
+        //- No copy assignment
+        void operator=(const fieldVisualisationBase&) = delete;
 
 
 protected:

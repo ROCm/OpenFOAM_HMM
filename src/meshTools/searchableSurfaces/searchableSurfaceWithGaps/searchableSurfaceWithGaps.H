@@ -114,11 +114,11 @@ private:
         );
 
 
-        //- Disallow default bitwise copy construct
-        searchableSurfaceWithGaps(const searchableSurfaceWithGaps&);
+        //- No copy construct
+        searchableSurfaceWithGaps(const searchableSurfaceWithGaps&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const searchableSurfaceWithGaps&);
+        //- No copy assignment
+        void operator=(const searchableSurfaceWithGaps&) = delete;
 
 
 public:

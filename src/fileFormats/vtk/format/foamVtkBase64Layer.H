@@ -58,10 +58,10 @@ class foamVtkBase64Layer
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         foamVtkBase64Layer(const foamVtkBase64Layer&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const foamVtkBase64Layer&) = delete;
 
 

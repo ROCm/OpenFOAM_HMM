@@ -125,10 +125,10 @@ class wallBoundedStreamLine
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         wallBoundedStreamLine(const wallBoundedStreamLine&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const wallBoundedStreamLine&) = delete;
 
 

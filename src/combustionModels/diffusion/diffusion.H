@@ -69,11 +69,11 @@ class diffusion
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        diffusion(const diffusion&);
+        //- No copy construct
+        diffusion(const diffusion&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const diffusion&);
+        //- No copy assignment
+        void operator=(const diffusion&) = delete;
 
 
 public:

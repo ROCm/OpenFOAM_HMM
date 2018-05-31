@@ -56,8 +56,8 @@ class linearEdgeInterpolation
 {
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const linearEdgeInterpolation&);
+        //- No copy assignment
+        void operator=(const linearEdgeInterpolation&) = delete;
 
 public:
 

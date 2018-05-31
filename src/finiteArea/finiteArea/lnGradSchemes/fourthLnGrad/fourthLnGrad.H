@@ -60,7 +60,7 @@ class fourthLnGrad
 {
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const fourthLnGrad&) = delete;
 
 

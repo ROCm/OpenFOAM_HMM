@@ -87,11 +87,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        SprayCloud(const SprayCloud&);
+        //- No copy construct
+        SprayCloud(const SprayCloud&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const SprayCloud&);
+        //- No copy assignment
+        void operator=(const SprayCloud&) = delete;
 
 
 protected:

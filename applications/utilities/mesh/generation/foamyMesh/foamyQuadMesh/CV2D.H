@@ -199,11 +199,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        CV2D(const CV2D&);
+        //- No copy construct
+        CV2D(const CV2D&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const CV2D&);
+        //- No copy assignment
+        void operator=(const CV2D&) = delete;
 
 
         //- Insert point and return it's index

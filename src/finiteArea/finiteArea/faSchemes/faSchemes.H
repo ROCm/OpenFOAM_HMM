@@ -89,11 +89,11 @@ class faSchemes
         //- Read settings from the dictionary
         void read(const dictionary&);
 
-        //- Disallow default bitwise copy construct
-        faSchemes(const faSchemes&);
+        //- No copy construct
+        faSchemes(const faSchemes&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const faSchemes&);
+        //- No copy assignment
+        void operator=(const faSchemes&) = delete;
 
 
 public:

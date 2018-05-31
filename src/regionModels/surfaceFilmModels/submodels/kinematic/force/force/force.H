@@ -61,11 +61,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        force(const force&);
+        //- No copy construct
+        force(const force&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const force&);
+        //- No copy assignment
+        void operator=(const force&) = delete;
 
 
 public:

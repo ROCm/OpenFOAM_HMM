@@ -126,10 +126,10 @@ class zeroGradient
         int process(const word& inputName);
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         zeroGradient(const zeroGradient&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const zeroGradient&) = delete;
 
 

@@ -162,7 +162,7 @@ void Foam::cellCellStencils::cellVolumeWeight::walkFront
                                 << " to " << fraction << endl;
                         }
                         allCellTypes[own] = INTERPOLATED;
-                        newIsFront.setMany(mesh_.cells()[own]);
+                        newIsFront.set(mesh_.cells()[own]);
                     }
                 }
                 if (mesh_.isInternalFace(faceI))
@@ -182,7 +182,7 @@ void Foam::cellCellStencils::cellVolumeWeight::walkFront
                             }
 
                             allCellTypes[nei] = INTERPOLATED;
-                            newIsFront.setMany(mesh_.cells()[nei]);
+                            newIsFront.set(mesh_.cells()[nei]);
                         }
                     }
                 }

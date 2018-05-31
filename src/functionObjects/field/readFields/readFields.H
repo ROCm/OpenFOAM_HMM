@@ -103,11 +103,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        readFields(const readFields&);
+        //- No copy construct
+        readFields(const readFields&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const readFields&);
+        //- No copy assignment
+        void operator=(const readFields&) = delete;
 
 
 public:

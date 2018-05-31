@@ -59,10 +59,10 @@ class X3DsurfaceFormat
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         X3DsurfaceFormat(const X3DsurfaceFormat<Face>&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const X3DsurfaceFormat<Face>&) = delete;
 
 public:

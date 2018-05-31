@@ -85,7 +85,7 @@ public:
         inline boundBox();
 
         //- Construct a bounding box containing a single initial point
-        explicit inline boundBox(const point& pt);
+        inline explicit boundBox(const point& pt);
 
         //- Construct from components
         inline boundBox(const point& min, const point& max);

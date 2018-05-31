@@ -111,11 +111,11 @@ class boundaryCutter
         ) const;
 
 
-        //- Disallow default bitwise copy construct
-        boundaryCutter(const boundaryCutter&);
+        //- No copy construct
+        boundaryCutter(const boundaryCutter&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const boundaryCutter&);
+        //- No copy assignment
+        void operator=(const boundaryCutter&) = delete;
 
 public:
 

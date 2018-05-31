@@ -75,7 +75,7 @@ public:
         inline SubField(const SubList<Type>&);
 
         //- Construct from a UList\<Type\>, using the entire size
-        explicit inline SubField(const UList<Type>&);
+        inline explicit SubField(const UList<Type>&);
 
         //- Construct from a UList\<Type\> with a given size
         inline SubField

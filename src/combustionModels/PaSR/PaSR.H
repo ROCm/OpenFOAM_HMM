@@ -71,11 +71,11 @@ class PaSR
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        PaSR(const PaSR&);
+        //- No copy construct
+        PaSR(const PaSR&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const PaSR&);
+        //- No copy assignment
+        void operator=(const PaSR&) = delete;
 
 
 public:

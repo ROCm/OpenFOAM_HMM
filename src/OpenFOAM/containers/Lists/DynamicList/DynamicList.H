@@ -118,7 +118,7 @@ public:
         inline constexpr DynamicList() noexcept;
 
         //- Construct an empty list with given reserve size.
-        explicit inline DynamicList(const label nElem);
+        inline explicit DynamicList(const label nElem);
 
         //- Construct with given size and value for all elements.
         inline DynamicList(const label nElem, const T& val);
@@ -135,7 +135,7 @@ public:
 
         //- Construct from UList. Size set to UList size.
         //  Also constructs from DynamicList with different sizing parameters.
-        explicit inline DynamicList(const UList<T>& lst);
+        inline explicit DynamicList(const UList<T>& lst);
 
         //- Construct from a FixedList
         template<unsigned FixedSize>
@@ -147,10 +147,10 @@ public:
         inline DynamicList(InputIterator begIter, InputIterator endIter);
 
         //- Construct from an initializer list. Size set to list size.
-        explicit inline DynamicList(std::initializer_list<T> lst);
+        inline explicit DynamicList(std::initializer_list<T> lst);
 
         //- Construct from UIndirectList. Size set to UIndirectList size.
-        explicit inline DynamicList(const UIndirectList<T>& lst);
+        inline explicit DynamicList(const UIndirectList<T>& lst);
 
         //- Move construct.
         inline DynamicList(DynamicList<T, SizeMin>&& lst);

@@ -89,9 +89,11 @@ class RNGkEpsilon
 {
     // Private Member Functions
 
-        // Disallow default bitwise copy construct and assignment
-        RNGkEpsilon(const RNGkEpsilon&);
-        void operator=(const RNGkEpsilon&);
+        //- No copy construct
+        RNGkEpsilon(const RNGkEpsilon&) = delete;
+
+        //- No copy assignment
+        void operator=(const RNGkEpsilon&) = delete;
 
 
 protected:

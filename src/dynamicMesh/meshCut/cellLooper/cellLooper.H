@@ -108,11 +108,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        cellLooper(const cellLooper&);
+        //- No copy construct
+        cellLooper(const cellLooper&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cellLooper&);
+        //- No copy assignment
+        void operator=(const cellLooper&) = delete;
 
 
 public:

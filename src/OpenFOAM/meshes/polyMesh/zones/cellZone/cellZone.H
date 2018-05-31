@@ -66,7 +66,7 @@ class cellZone
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         cellZone(const cellZone&) = delete;
 
 

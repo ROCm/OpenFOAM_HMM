@@ -96,11 +96,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        cellCellStencil(const cellCellStencil&);
+        //- No copy construct
+        cellCellStencil(const cellCellStencil&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cellCellStencil&);
+        //- No copy assignment
+        void operator=(const cellCellStencil&) = delete;
 
 
 public:

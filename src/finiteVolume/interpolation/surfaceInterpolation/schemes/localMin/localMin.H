@@ -61,8 +61,8 @@ class localMin
 {
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const localMin&);
+        //- No copy assignment
+        void operator=(const localMin&) = delete;
 
 
 public:

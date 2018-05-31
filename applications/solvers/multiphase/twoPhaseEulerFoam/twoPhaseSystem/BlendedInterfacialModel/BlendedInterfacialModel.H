@@ -81,11 +81,14 @@ class BlendedInterfacialModel
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        BlendedInterfacialModel(const BlendedInterfacialModel<modelType>&);
+        //- No copy construct
+        BlendedInterfacialModel
+        (
+            const BlendedInterfacialModel&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const BlendedInterfacialModel<modelType>&);
+        //- No copy assignment
+        void operator=(const BlendedInterfacialModel<modelType>&) = delete;
 
         //- Correct coeff/value on fixed flux boundary conditions
         template<class GeometricField>

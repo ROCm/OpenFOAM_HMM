@@ -56,10 +56,10 @@ class pimpleControl
 {
     // Private member functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         pimpleControl(const pimpleControl&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const pimpleControl&) = delete;
 
 

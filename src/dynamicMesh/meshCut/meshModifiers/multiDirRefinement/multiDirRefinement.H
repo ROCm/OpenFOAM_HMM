@@ -138,11 +138,11 @@ class multiDirRefinement
         );
 
 
-        //- Disallow default bitwise copy construct
-        multiDirRefinement(const multiDirRefinement&);
+        //- No copy construct
+        multiDirRefinement(const multiDirRefinement&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const multiDirRefinement&);
+        //- No copy assignment
+        void operator=(const multiDirRefinement&) = delete;
 
 
 public:

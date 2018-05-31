@@ -89,11 +89,11 @@ private:
             pointIndexHit&
         ) const;
 
-        //- Disallow default bitwise copy construct
-        searchableDisk(const searchableDisk&);
+        //- No copy construct
+        searchableDisk(const searchableDisk&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const searchableDisk&);
+        //- No copy assignment
+        void operator=(const searchableDisk&) = delete;
 
 public:
 

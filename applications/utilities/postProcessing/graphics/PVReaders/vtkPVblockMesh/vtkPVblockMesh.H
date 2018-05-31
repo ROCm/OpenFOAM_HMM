@@ -141,10 +141,10 @@ class vtkPVblockMesh
         void convertMeshCorners(vtkMultiBlockDataSet*, int& blockNo);
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         vtkPVblockMesh(const vtkPVblockMesh&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const vtkPVblockMesh&) = delete;
 
 

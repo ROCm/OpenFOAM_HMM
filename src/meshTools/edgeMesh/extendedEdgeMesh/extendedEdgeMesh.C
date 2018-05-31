@@ -1531,14 +1531,14 @@ void Foam::extendedEdgeMesh::autoMap
             label pointI = pointMap[subPointI];
             const labelList& pNormals = featurePointNormals()[pointI];
 
-            isSubNormal.setMany(pNormals);
+            isSubNormal.set(pNormals);
         }
         forAll(edgeMap, subEdgeI)
         {
             label edgeI = edgeMap[subEdgeI];
             const labelList& eNormals = edgeNormals()[edgeI];
 
-            isSubNormal.setMany(eNormals);
+            isSubNormal.set(eNormals);
         }
 
         forAll(isSubNormal, normalI)

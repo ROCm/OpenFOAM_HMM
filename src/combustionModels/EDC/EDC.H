@@ -151,11 +151,11 @@ class EDC
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        EDC(const EDC&);
+        //- No copy construct
+        EDC(const EDC&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const EDC&);
+        //- No copy assignment
+        void operator=(const EDC&) = delete;
 
 
 public:

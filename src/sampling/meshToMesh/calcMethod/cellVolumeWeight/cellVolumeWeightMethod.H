@@ -98,11 +98,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        cellVolumeWeightMethod(const cellVolumeWeightMethod&);
+        //- No copy construct
+        cellVolumeWeightMethod(const cellVolumeWeightMethod&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cellVolumeWeightMethod&);
+        //- No copy assignment
+        void operator=(const cellVolumeWeightMethod&) = delete;
 
 
 public:

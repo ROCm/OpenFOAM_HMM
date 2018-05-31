@@ -80,11 +80,11 @@ protected:
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        divScheme(const divScheme&);
+        //- No copy construct
+        divScheme(const divScheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const divScheme&);
+        //- No copy assignment
+        void operator=(const divScheme&) = delete;
 
 
 public:

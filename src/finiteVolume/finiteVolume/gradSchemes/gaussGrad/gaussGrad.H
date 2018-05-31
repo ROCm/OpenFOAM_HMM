@@ -69,11 +69,11 @@ class gaussGrad
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        gaussGrad(const gaussGrad&);
+        //- No copy construct
+        gaussGrad(const gaussGrad&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const gaussGrad&);
+        //- No copy assignment
+        void operator=(const gaussGrad&) = delete;
 
 
 public:

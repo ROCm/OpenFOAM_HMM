@@ -207,11 +207,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        GAMGAgglomeration(const GAMGAgglomeration&);
+        //- No copy construct
+        GAMGAgglomeration(const GAMGAgglomeration&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const GAMGAgglomeration&);
+        //- No copy assignment
+        void operator=(const GAMGAgglomeration&) = delete;
 
 
 public:

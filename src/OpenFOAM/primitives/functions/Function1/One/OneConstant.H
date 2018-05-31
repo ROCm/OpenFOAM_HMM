@@ -60,7 +60,7 @@ class OneConstant
 {
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const OneConstant<Type>&) = delete;
 
 

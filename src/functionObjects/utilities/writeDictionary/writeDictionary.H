@@ -81,11 +81,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        writeDictionary(const writeDictionary&);
+        //- No copy construct
+        writeDictionary(const writeDictionary&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const writeDictionary&);
+        //- No copy assignment
+        void operator=(const writeDictionary&) = delete;
 
 
 public:

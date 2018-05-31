@@ -57,8 +57,8 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const CorrectionLimitingMethod&);
+        //- No copy assignment
+        void operator=(const CorrectionLimitingMethod&) = delete;
 
 
 public:

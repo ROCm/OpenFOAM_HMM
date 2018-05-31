@@ -54,11 +54,11 @@ class VTKedgeFormat
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        VTKedgeFormat(const VTKedgeFormat&);
+        //- No copy construct
+        VTKedgeFormat(const VTKedgeFormat&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const VTKedgeFormat&);
+        //- No copy assignment
+        void operator=(const VTKedgeFormat&) = delete;
 
 
 protected:

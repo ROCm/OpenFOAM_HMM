@@ -81,11 +81,11 @@ class crankConRod
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        crankConRod(const crankConRod&);
+        //- No copy construct
+        crankConRod(const crankConRod&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const crankConRod&);
+        //- No copy assignment
+        void operator=(const crankConRod&) = delete;
 
         //- Adjust read time values
         void timeAdjustment();

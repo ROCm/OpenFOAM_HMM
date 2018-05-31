@@ -63,11 +63,11 @@ class projectVertex
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        projectVertex(const projectVertex&);
+        //- No copy construct
+        projectVertex(const projectVertex&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const projectVertex&);
+        //- No copy assignment
+        void operator=(const projectVertex&) = delete;
 
 
 public:

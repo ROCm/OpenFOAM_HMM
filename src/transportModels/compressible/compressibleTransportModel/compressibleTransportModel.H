@@ -53,11 +53,11 @@ class compressibleTransportModel
 {
     // Private Member Functions
 
-        //- Disallow copy construct
-        compressibleTransportModel(const compressibleTransportModel&);
+        //- No copy construct
+        compressibleTransportModel(const compressibleTransportModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const compressibleTransportModel&);
+        //- No copy assignment
+        void operator=(const compressibleTransportModel&) = delete;
 
 
 public:

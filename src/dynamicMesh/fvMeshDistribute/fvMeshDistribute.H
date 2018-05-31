@@ -328,11 +328,11 @@ class fvMeshDistribute
                 const dictionary& fieldDicts
             );
 
-            //- Disallow default bitwise copy construct
-            fvMeshDistribute(const fvMeshDistribute&);
+            //- No copy construct
+            fvMeshDistribute(const fvMeshDistribute&) = delete;
 
-            //- Disallow default bitwise assignment
-            void operator=(const fvMeshDistribute&);
+            //- No copy assignment
+            void operator=(const fvMeshDistribute&) = delete;
 
 public:
 

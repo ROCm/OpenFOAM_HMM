@@ -102,11 +102,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        explicitPorositySource(const explicitPorositySource&);
+        //- No copy construct
+        explicitPorositySource(const explicitPorositySource&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const explicitPorositySource&);
+        //- No copy assignment
+        void operator=(const explicitPorositySource&) = delete;
 
 
 public:

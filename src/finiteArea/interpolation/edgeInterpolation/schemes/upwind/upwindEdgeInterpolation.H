@@ -62,8 +62,8 @@ class upwindEdgeInterpolation
 
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const upwindEdgeInterpolation&);
+        //- No copy assignment
+        void operator=(const upwindEdgeInterpolation&) = delete;
 
 
 public:

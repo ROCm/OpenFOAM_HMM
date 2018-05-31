@@ -106,7 +106,7 @@ protected:
         ) const;
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         topoSet(const topoSet&) = delete;
 
 

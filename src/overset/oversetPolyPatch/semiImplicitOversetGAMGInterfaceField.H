@@ -52,14 +52,14 @@ class semiImplicitOversetGAMGInterfaceField
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         semiImplicitOversetGAMGInterfaceField
         (
             const semiImplicitOversetGAMGInterfaceField&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const semiImplicitOversetGAMGInterfaceField&);
+        //- No copy assignment
+        void operator=(const semiImplicitOversetGAMGInterfaceField&) = delete;
 
 
 public:

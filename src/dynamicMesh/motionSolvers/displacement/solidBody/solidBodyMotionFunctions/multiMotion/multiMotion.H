@@ -62,11 +62,11 @@ class multiMotion
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        multiMotion(const multiMotion&);
+        //- No copy construct
+        multiMotion(const multiMotion&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const multiMotion&);
+        //- No copy assignment
+        void operator=(const multiMotion&) = delete;
 
 
 public:

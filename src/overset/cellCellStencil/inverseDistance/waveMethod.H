@@ -52,11 +52,11 @@ class waveMethod
 {
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        waveMethod(const waveMethod&);
+        //- No copy construct
+        waveMethod(const waveMethod&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const waveMethod&);
+        //- No copy assignment
+        void operator=(const waveMethod&) = delete;
 
 
 public:

@@ -65,11 +65,11 @@ class solidChemistryModel
 {
     // Private Member Functions
 
-        //- Disallow copy constructor
-        solidChemistryModel(const solidChemistryModel&);
+        //- No copy construct
+        solidChemistryModel(const solidChemistryModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const solidChemistryModel&);
+        //- No copy assignment
+        void operator=(const solidChemistryModel&) = delete;
 
 
 protected:

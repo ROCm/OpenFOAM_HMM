@@ -92,11 +92,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        ReactingCloud(const ReactingCloud&);
+        //- No copy construct
+        ReactingCloud(const ReactingCloud&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const ReactingCloud&);
+        //- No copy assignment
+        void operator=(const ReactingCloud&) = delete;
 
 
 protected:

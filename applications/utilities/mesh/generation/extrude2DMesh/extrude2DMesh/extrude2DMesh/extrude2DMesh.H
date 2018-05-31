@@ -87,11 +87,11 @@ class extrude2DMesh
         //- Find extrusion direction
         //void findExtrudeDirection();
 
-        //- Disallow default bitwise copy construct
-        extrude2DMesh(const extrude2DMesh&);
+        //- No copy construct
+        extrude2DMesh(const extrude2DMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const extrude2DMesh&);
+        //- No copy assignment
+        void operator=(const extrude2DMesh&) = delete;
 
 public:
 

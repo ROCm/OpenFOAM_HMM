@@ -61,10 +61,10 @@ class appendRawFormatter
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         appendRawFormatter(const appendRawFormatter&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const appendRawFormatter&) = delete;
 
 

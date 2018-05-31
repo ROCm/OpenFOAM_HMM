@@ -56,11 +56,11 @@ class BSplineEdge
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        BSplineEdge(const BSplineEdge&);
+        //- No copy construct
+        BSplineEdge(const BSplineEdge&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const BSplineEdge&);
+        //- No copy assignment
+        void operator=(const BSplineEdge&) = delete;
 
 
 public:

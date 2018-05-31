@@ -56,11 +56,11 @@ class faPatchFieldMapperPatchRef
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        faPatchFieldMapperPatchRef(const faPatchFieldMapperPatchRef&);
+        //- No copy construct
+        faPatchFieldMapperPatchRef(const faPatchFieldMapperPatchRef&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const faPatchFieldMapperPatchRef&);
+        //- No copy assignment
+        void operator=(const faPatchFieldMapperPatchRef&) = delete;
 
 
 public:

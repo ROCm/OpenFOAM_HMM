@@ -61,11 +61,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        triSurfaceMeshFeatures(const triSurfaceMeshFeatures&);
+        //- No copy construct
+        triSurfaceMeshFeatures(const triSurfaceMeshFeatures&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const triSurfaceMeshFeatures&);
+        //- No copy assignment
+        void operator=(const triSurfaceMeshFeatures&) = delete;
 
 
 public:

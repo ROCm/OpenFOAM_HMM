@@ -187,11 +187,11 @@ private:
         //- Update absorptivity
         void updateAbsorptivity(const labelHashSet& includePatches);
 
-        //- Disallow default bitwise copy construct
-        solarLoad(const solarLoad&);
+        //- No copy construct
+        solarLoad(const solarLoad&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const solarLoad&);
+        //- No copy assignment
+        void operator=(const solarLoad&) = delete;
 
 
 public:

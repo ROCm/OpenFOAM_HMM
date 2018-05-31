@@ -77,11 +77,11 @@ class writeCellVolumes
 {
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        writeCellVolumes(const writeCellVolumes&);
+        //- No copy construct
+        writeCellVolumes(const writeCellVolumes&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const writeCellVolumes&);
+        //- No copy assignment
+        void operator=(const writeCellVolumes&) = delete;
 
 
 public:

@@ -97,10 +97,10 @@ class ensightPartFaces
         ) const;
 
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         ensightPartFaces(const ensightPartFaces&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const ensightPartFaces&) = delete;
 
 

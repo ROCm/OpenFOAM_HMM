@@ -76,11 +76,11 @@ private:
         //- Create IO object if dictionary is present
         IOobject createIOobject(const fvMesh& mesh) const;
 
-        //- Disallow default bitwise copy construct
-        IOMRFZoneList(const IOMRFZoneList&);
+        //- No copy construct
+        IOMRFZoneList(const IOMRFZoneList&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const IOMRFZoneList&);
+        //- No copy assignment
+        void operator=(const IOMRFZoneList&) = delete;
 
 
 public:

@@ -95,11 +95,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        MPPICCloud(const MPPICCloud&);
+        //- No copy construct
+        MPPICCloud(const MPPICCloud&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const MPPICCloud&);
+        //- No copy assignment
+        void operator=(const MPPICCloud&) = delete;
 
 
 protected:

@@ -60,11 +60,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        interpolationWeights(const interpolationWeights&);
+        //- No copy construct
+        interpolationWeights(const interpolationWeights&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const interpolationWeights&);
+        //- No copy assignment
+        void operator=(const interpolationWeights&) = delete;
 
 protected:
 

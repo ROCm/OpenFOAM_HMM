@@ -104,11 +104,11 @@ private:
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        singleStepReactingMixture(const singleStepReactingMixture&);
+        //- No copy construct
+        singleStepReactingMixture(const singleStepReactingMixture&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const singleStepReactingMixture&);
+        //- No copy assignment
+        void operator=(const singleStepReactingMixture&) = delete;
 
 
 public:

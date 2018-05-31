@@ -78,10 +78,10 @@ class pqFoamBlockMeshControls
     void updateParts();
 
 
-    //- Disallow default bitwise copy construct
+    //- No copy construct
     pqFoamBlockMeshControls(const pqFoamBlockMeshControls&) = delete;
 
-    //- Disallow default bitwise assignment
+    //- No copy assignment
     void operator=(const pqFoamBlockMeshControls&) = delete;
 
 

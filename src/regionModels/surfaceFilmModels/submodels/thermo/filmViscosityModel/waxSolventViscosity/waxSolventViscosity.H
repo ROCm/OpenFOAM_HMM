@@ -63,7 +63,7 @@ class waxSolventViscosity
         waxSolventViscosity(const waxSolventViscosity&);
 
         //- Disallow default bitwise assignment
-        void operator=(const waxSolventViscosity&);
+        void operator=(const waxSolventViscosity&) = delete;
 
 
 protected:

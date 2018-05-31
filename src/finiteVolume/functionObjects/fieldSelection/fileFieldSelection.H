@@ -59,7 +59,7 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         fileFieldSelection(const fileFieldSelection&) = delete;
 
 

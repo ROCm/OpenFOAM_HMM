@@ -160,11 +160,11 @@ class fvDOM
         //- Initialise
         void initialise();
 
-        //- Disallow default bitwise copy construct
-        fvDOM(const fvDOM&);
+        //- No copy construct
+        fvDOM(const fvDOM&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const fvDOM&);
+        //- No copy assignment
+        void operator=(const fvDOM&) = delete;
 
         //- Update black body emission
         void updateBlackBodyEmission();

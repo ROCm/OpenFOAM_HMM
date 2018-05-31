@@ -65,11 +65,11 @@ class transferModelList
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        transferModelList(const transferModelList&);
+        //- No copy construct
+        transferModelList(const transferModelList&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const transferModelList&);
+        //- No copy assignment
+        void operator=(const transferModelList&) = delete;
 
 
 public:

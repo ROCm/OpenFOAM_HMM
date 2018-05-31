@@ -633,7 +633,7 @@ int main(int argc, char *argv[])
         );
 
         cellSet cutSet(mesh, "cutSet", cutCells.size());
-        cutSet.insertMany(cutCells);
+        cutSet.insert(cutCells);
 
         // Gets cuts across cells from cuts through edges.
         Info<< "Writing " << cutSet.size() << " cells to cut to cellSet "

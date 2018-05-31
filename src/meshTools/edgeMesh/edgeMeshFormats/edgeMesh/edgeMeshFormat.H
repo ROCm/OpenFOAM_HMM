@@ -59,11 +59,11 @@ class edgeMeshFormat
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        edgeMeshFormat(const edgeMeshFormat&);
+        //- No copy construct
+        edgeMeshFormat(const edgeMeshFormat&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const edgeMeshFormat&);
+        //- No copy assignment
+        void operator=(const edgeMeshFormat&) = delete;
 
 
 protected:

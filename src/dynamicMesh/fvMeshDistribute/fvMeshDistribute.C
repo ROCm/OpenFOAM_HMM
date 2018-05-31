@@ -229,7 +229,7 @@ Foam::wordList Foam::fvMeshDistribute::mergeWordList(const wordList& procNames)
     wordHashSet mergedNames;
     forAll(allNames, proci)
     {
-        mergedNames.insertMany(allNames[proci]);
+        mergedNames.insert(allNames[proci]);
     }
     return mergedNames.toc();
 }

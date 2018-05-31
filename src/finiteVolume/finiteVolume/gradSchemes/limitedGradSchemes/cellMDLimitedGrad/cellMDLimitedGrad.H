@@ -74,11 +74,11 @@ class cellMDLimitedGrad
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        cellMDLimitedGrad(const cellMDLimitedGrad&);
+        //- No copy construct
+        cellMDLimitedGrad(const cellMDLimitedGrad&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const cellMDLimitedGrad&);
+        //- No copy assignment
+        void operator=(const cellMDLimitedGrad&) = delete;
 
 
 public:

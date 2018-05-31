@@ -78,11 +78,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        faNVDscheme(const faNVDscheme&);
+        //- No copy construct
+        faNVDscheme(const faNVDscheme&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const faNVDscheme&);
+        //- No copy assignment
+        void operator=(const faNVDscheme&) = delete;
 
 
 public:

@@ -63,11 +63,11 @@ protected:
 
     // Protected Member Functions
 
-        //- Disallow default bitwise copy construct
-        faceAreaWeightAMI(const faceAreaWeightAMI&);
+        //- No copy construct
+        faceAreaWeightAMI(const faceAreaWeightAMI&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const faceAreaWeightAMI&);
+        //- No copy assignment
+        void operator=(const faceAreaWeightAMI&) = delete;
 
         // Marching front
 

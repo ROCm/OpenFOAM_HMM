@@ -109,11 +109,11 @@ class wallDist
         //- Construct the normal-to-wall field as required
         void constructn() const;
 
-        //- Disallow default bitwise copy construct
-        wallDist(const wallDist&);
+        //- No copy construct
+        wallDist(const wallDist&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const wallDist&);
+        //- No copy assignment
+        void operator=(const wallDist&) = delete;
 
 
 public:

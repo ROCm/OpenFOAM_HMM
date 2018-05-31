@@ -75,11 +75,14 @@ class lduPrimitiveProcessorInterface
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        lduPrimitiveProcessorInterface(const lduPrimitiveProcessorInterface&);
+        //- No copy construct
+        lduPrimitiveProcessorInterface
+        (
+            const lduPrimitiveProcessorInterface&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const lduPrimitiveProcessorInterface&);
+        //- No copy assignment
+        void operator=(const lduPrimitiveProcessorInterface&) = delete;
 
 
 public:

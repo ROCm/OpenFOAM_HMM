@@ -83,11 +83,14 @@ class processorGAMGInterfaceField
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        processorGAMGInterfaceField(const processorGAMGInterfaceField&);
+        //- No copy construct
+        processorGAMGInterfaceField
+        (
+            const processorGAMGInterfaceField&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const processorGAMGInterfaceField&);
+        //- No copy assignment
+        void operator=(const processorGAMGInterfaceField&) = delete;
 
 
 public:

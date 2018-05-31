@@ -282,11 +282,11 @@ private:
             ) const;
 
 
-        //- Disallow default bitwise copy construct
-        meshToMesh(const meshToMesh&);
+        //- No copy construct
+        meshToMesh(const meshToMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const meshToMesh&);
+        //- No copy assignment
+        void operator=(const meshToMesh&) = delete;
 
 
 public:

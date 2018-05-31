@@ -69,11 +69,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        bezier(const bezier&);
+        //- No copy construct
+        bezier(const bezier&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const bezier&);
+        //- No copy assignment
+        void operator=(const bezier&) = delete;
 
 
 public:

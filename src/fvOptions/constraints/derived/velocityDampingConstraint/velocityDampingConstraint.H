@@ -93,11 +93,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        velocityDampingConstraint(const velocityDampingConstraint&);
+        //- No copy construct
+        velocityDampingConstraint(const velocityDampingConstraint&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const velocityDampingConstraint&);
+        //- No copy assignment
+        void operator=(const velocityDampingConstraint&) = delete;
 
 
 public:

@@ -71,11 +71,14 @@ class distributionContactAngleForce
 
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        distributionContactAngleForce(const distributionContactAngleForce&);
+        //- No copy construct
+        distributionContactAngleForce
+        (
+            const distributionContactAngleForce&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const distributionContactAngleForce&);
+        //- No copy assignment
+        void operator=(const distributionContactAngleForce&) = delete;
 
 
 protected:

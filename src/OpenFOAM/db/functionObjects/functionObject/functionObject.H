@@ -147,10 +147,10 @@ class functionObject
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         functionObject(const functionObject&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const functionObject&) = delete;
 
 

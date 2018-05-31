@@ -56,11 +56,11 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        directAMI(const directAMI&);
+        //- No copy construct
+        directAMI(const directAMI&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const directAMI&);
+        //- No copy assignment
+        void operator=(const directAMI&) = delete;
 
         // Marching front
 

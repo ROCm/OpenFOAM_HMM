@@ -63,11 +63,11 @@ class ignition
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        ignition(const ignition&);
+        //- No copy construct
+        ignition(const ignition&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const ignition&);
+        //- No copy assignment
+        void operator=(const ignition&) = delete;
 
 
 public:

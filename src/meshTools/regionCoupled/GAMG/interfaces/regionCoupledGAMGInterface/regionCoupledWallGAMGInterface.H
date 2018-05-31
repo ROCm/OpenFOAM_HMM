@@ -54,11 +54,14 @@ class regionCoupledWallGAMGInterface
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        regionCoupledWallGAMGInterface(const regionCoupledWallGAMGInterface&);
+        //- No copy construct
+        regionCoupledWallGAMGInterface
+        (
+            const regionCoupledWallGAMGInterface&
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const regionCoupledWallGAMGInterface&);
+        //- No copy assignment
+        void operator=(const regionCoupledWallGAMGInterface&) = delete;
 
 
 public:

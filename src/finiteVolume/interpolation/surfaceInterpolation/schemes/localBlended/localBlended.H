@@ -65,11 +65,11 @@ class localBlended
         tmp<surfaceInterpolationScheme<Type>> tScheme2_;
 
 
-        //- Disallow default bitwise copy construct
-        localBlended(const localBlended&);
+        //- No copy construct
+        localBlended(const localBlended&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const localBlended&);
+        //- No copy assignment
+        void operator=(const localBlended&) = delete;
 
 
 public:

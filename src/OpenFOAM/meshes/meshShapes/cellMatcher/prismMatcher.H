@@ -63,10 +63,10 @@ class prismMatcher
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         prismMatcher(const prismMatcher&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         prismMatcher& operator=(const prismMatcher&) = delete;
 
 

@@ -53,11 +53,11 @@ class frictionalStressModel
 {
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        frictionalStressModel(const frictionalStressModel&);
+        //- No copy construct
+        frictionalStressModel(const frictionalStressModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const frictionalStressModel&);
+        //- No copy assignment
+        void operator=(const frictionalStressModel&) = delete;
 
 
 protected:

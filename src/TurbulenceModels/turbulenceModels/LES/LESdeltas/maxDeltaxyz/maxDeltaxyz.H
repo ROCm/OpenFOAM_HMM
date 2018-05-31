@@ -63,9 +63,11 @@ class maxDeltaxyz
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        maxDeltaxyz(const maxDeltaxyz&);
-        void operator=(const maxDeltaxyz&);
+        //- No copy construct
+        maxDeltaxyz(const maxDeltaxyz&) = delete;
+
+        //- No copy assignment
+        void operator=(const maxDeltaxyz&) = delete;
 
 
 public:
@@ -86,8 +88,7 @@ public:
 
 
     //- Destructor
-    virtual ~maxDeltaxyz()
-    {}
+    virtual ~maxDeltaxyz() = default;
 
 
     // Member Functions
