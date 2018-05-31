@@ -314,8 +314,9 @@ castellatedMeshControls
     // refinement (from features, refinementSurfaces, refinementRegions)
     // in a given geometric region. The syntax is exactly the same as for the
     // refinementRegions; the cell level now specifies the upper limit
-    // for any cell. Note that it does not override the refinement constraints
-    // given by the nCellsBetweenLevels setting.
+    // for any cell. (a special setting is cell level -1 which will remove
+    // any cells inside the region). Note that it does not override the
+    // refinement constraints given by the nCellsBetweenLevels setting.
     limitRegions
     {
     }

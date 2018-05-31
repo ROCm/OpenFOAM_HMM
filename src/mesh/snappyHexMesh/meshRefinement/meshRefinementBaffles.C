@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +48,7 @@ License
 #include "polyMeshAdder.H"
 #include "IOmanip.H"
 #include "refinementParameters.H"
-
+#include "shellSurfaces.H"
 #include "zeroGradientFvPatchFields.H"
 #include "volFields.H"
 
@@ -3874,7 +3874,28 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
         cellRegion
     );
 
+    return splitMesh
+    (
+        nBufferLayers,
+        globalToMasterPatch,
+        globalToSlavePatch,
+        cellRegion,
+        ownPatch,
+        neiPatch
+    );
+}
 
+Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
+(
+    const label nBufferLayers,
+    const labelList& globalToMasterPatch,
+    const labelList& globalToSlavePatch,
+
+    labelList& cellRegion,
+    labelList& ownPatch,
+    labelList& neiPatch
+)
+{
     // Walk out nBufferlayers from region boundary
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // (modifies cellRegion, ownPatch)
@@ -4049,7 +4070,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
     label nCellsToKeep = mesh_.nCells() - cellsToRemove.size();
     reduce(nCellsToKeep, sumOp<label>());
 
-    Info<< "Keeping all cells containing points " << locationsInMesh << endl
+    Info<< "Keeping all cells containing inside points" << endl
         << "Selected for keeping : " << nCellsToKeep << " cells." << endl;
 
 
@@ -4087,6 +4108,90 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
         exposedPatches,
         cellRemover
     );
+}
+
+
+Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::removeLimitShells
+(
+    const label nBufferLayers,
+    const label nErodeCellZones,
+    const labelList& globalToMasterPatch,
+    const labelList& globalToSlavePatch,
+    const pointField& locationsInMesh,
+    const wordList& zonesInMesh
+)
+{
+    // Determine patches to put intersections into
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Swap neighbouring cell centres and cell level
+    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
+    pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+    calcNeighbourData(neiLevel, neiCc);
+
+    // Find intersections with all unnamed(!) surfaces
+    labelList ownPatch, neiPatch;
+    getBafflePatches
+    (
+        nErodeCellZones,
+        globalToMasterPatch,
+
+        locationsInMesh,
+        zonesInMesh,
+
+        neiLevel,
+        neiCc,
+
+        ownPatch,
+        neiPatch
+    );
+
+
+    labelList cellRegion(mesh_.nCells(), 0);
+    // Find any cells inside a limit shell with minLevel -1
+    labelList levelShell;
+    limitShells_.findLevel
+    (
+        mesh_.cellCentres(),
+        labelList(mesh_.nCells(), -1),  // pick up only shells with -1
+        levelShell
+    );
+    forAll(levelShell, celli)
+    {
+        if (levelShell[celli] != -1)
+        {
+            // Mark cell region so it gets deletec
+            cellRegion[celli] = -1;
+        }
+    }
+
+    autoPtr<mapPolyMesh> mapPtr = splitMesh
+    (
+        nBufferLayers,
+        globalToMasterPatch,
+        globalToSlavePatch,
+        cellRegion,
+        ownPatch,
+        neiPatch
+    );
+
+    if (debug&meshRefinement::MESH)
+    {
+        const_cast<Time&>(mesh_.time())++;
+        Pout<< "Writing mesh after removing limitShells "
+            << " to time " << timeName() << endl;
+        write
+        (
+            debugType(debug),
+            writeType
+            (
+                writeLevel()
+              | WRITEMESH
+            ),
+            mesh_.time().path()/timeName()
+        );
+    }
+    return mapPtr;
 }
 
 
