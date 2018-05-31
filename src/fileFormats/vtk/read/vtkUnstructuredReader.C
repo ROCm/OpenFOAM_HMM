@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "stringIOList.H"
 #include "cellModel.H"
 #include "vectorIOField.H"
+#include "triPointRef.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -300,6 +301,7 @@ void Foam::vtkUnstructuredReader::extractCells
                     )   << "Expected size 6 for VTK_WEDGE but found "
                         << nRead << exit(FatalIOError);
                 }
+                //- From mesh description in vtk documentation
                 prismPoints[0] = cellVertData[dataIndex++];
                 prismPoints[2] = cellVertData[dataIndex++];
                 prismPoints[1] = cellVertData[dataIndex++];
@@ -364,94 +366,106 @@ void Foam::vtkUnstructuredReader::readField
     const label size
 ) const
 {
-    switch (vtkDataTypeNames[dataType])
+    if (vtkDataTypeNames.found(dataType))
     {
-        case VTK_INT:
-        case VTK_UINT:
-        case VTK_LONG:
-        case VTK_ULONG:
-        case VTK_ID:
+        switch (vtkDataTypeNames[dataType])
         {
-            autoPtr<labelIOField> fieldVals
-            (
-                new labelIOField
-                (
-                    IOobject
-                    (
-                        arrayName,
-                        "",
-                        obj
-                    ),
-                    size
-                )
-            );
-            readBlock(inFile, fieldVals().size(), fieldVals());
-            regIOobject::store(fieldVals);
-        }
-        break;
-
-        case VTK_FLOAT:
-        case VTK_DOUBLE:
-        {
-            autoPtr<scalarIOField> fieldVals
-            (
-                new scalarIOField
-                (
-                    IOobject
-                    (
-                        arrayName,
-                        "",
-                        obj
-                    ),
-                    size
-                )
-            );
-            readBlock(inFile, fieldVals().size(), fieldVals());
-            regIOobject::store(fieldVals);
-        }
-        break;
-
-        case VTK_STRING:
-        {
-            if (debug)
+            case VTK_INT:
+            case VTK_UINT:
+            case VTK_LONG:
+            case VTK_ULONG:
+            case VTK_ID:
             {
-                Info<< "Reading strings:" << size << endl;
-            }
-            autoPtr<stringIOList> fieldVals
-            (
-                new stringIOList
+                autoPtr<labelIOField> fieldVals
                 (
-                    IOobject
+                    new labelIOField
                     (
-                        arrayName,
-                        "",
-                        obj
-                    ),
-                    size
-                )
-            );
-            // Consume current line.
-            inFile.getLine(fieldVals()[0]);
-
-            // Read without parsing
-            forAll(fieldVals(), i)
-            {
-                inFile.getLine(fieldVals()[i]);
+                        IOobject
+                        (
+                            arrayName,
+                            "",
+                            obj
+                        ),
+                        size
+                    )
+                );
+                readBlock(inFile, fieldVals().size(), fieldVals());
+                regIOobject::store(fieldVals);
             }
-            regIOobject::store(fieldVals);
-        }
-        break;
+            break;
 
-        default:
-        {
-            IOWarningInFunction(inFile)
-                << "Unhandled type " << vtkDataTypeNames[dataType] << endl
-                << "Skipping " << size
-                << " words." << endl;
-            scalarField fieldVals;
-            readBlock(inFile, size, fieldVals);
+            case VTK_FLOAT:
+            case VTK_DOUBLE:
+            {
+                autoPtr<scalarIOField> fieldVals
+                (
+                    new scalarIOField
+                    (
+                        IOobject
+                        (
+                            arrayName,
+                            "",
+                            obj
+                        ),
+                        size
+                    )
+                );
+                readBlock(inFile, fieldVals().size(), fieldVals());
+                regIOobject::store(fieldVals);
+            }
+            break;
+
+            case VTK_STRING:
+            {
+                if (debug)
+                {
+                    Info<< "Reading strings:" << size << endl;
+                }
+                autoPtr<stringIOList> fieldVals
+                (
+                    new stringIOList
+                    (
+                        IOobject
+                        (
+                            arrayName,
+                            "",
+                            obj
+                        ),
+                        size
+                    )
+                );
+                // Consume current line.
+                inFile.getLine(fieldVals()[0]);
+
+                // Read without parsing
+                forAll(fieldVals(), i)
+                {
+                    inFile.getLine(fieldVals()[i]);
+                }
+                regIOobject::store(fieldVals);
+            }
+            break;
+
+            default:
+            {
+                IOWarningInFunction(inFile)
+                    << "Unhandled type " << dataType << endl
+                    << "Skipping " << size
+                    << " words." << endl;
+                scalarField fieldVals;
+                readBlock(inFile, size, fieldVals);
+            }
+            break;
         }
-        break;
+    }
+    else
+    {
+        IOWarningInFunction(inFile)
+            << "Unhandled type " << dataType << endl
+            << "Skipping " << size
+            << " words." << endl;
+        scalarField fieldVals;
+        readBlock(inFile, size, fieldVals);
     }
 }
 
@@ -907,11 +921,81 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
                 }
             }
         }
+        else if (tag == "METADATA")
+        {
+            word infoTag(inFile);
+            if (infoTag != "INFORMATION")
+            {
+                FatalIOErrorInFunction(inFile)
+                    << "Unsupported tag "
+                    << infoTag << exit(FatalIOError);
+            }
+            label nInfo(readLabel(inFile));
+            if (debug)
+            {
+                Info<< "Consuming " << nInfo << " metadata information."
+                    << endl;
+            }
+            string line;
+            // Consume rest of line
+            inFile.getLine(line);
+            for (label i = 0; i < 2*nInfo; i++)
+            {
+                inFile.getLine(line);
+            }
+        }
         else
         {
             FatalIOErrorInFunction(inFile)
                 << "Unsupported tag "
                 << tag << exit(FatalIOError);
+        }
+    }
+
+
+    // There is some problem with orientation of prisms - the point
+    // ordering seems to be different for some exports (e.g. of cgns)
+    {
+        const cellModel& prism = cellModel::ref(cellModel::PRISM);
+
+        label nSwapped = 0;
+
+        forAll(cells_, celli)
+        {
+            cellShape& shape = cells_[celli];
+            if (shape.model() == prism)
+            {
+                const triPointRef bottom
+                (
+                    points_[shape[0]],
+                    points_[shape[1]],
+                    points_[shape[2]]
+                );
+                const triPointRef top
+                (
+                    points_[shape[3]],
+                    points_[shape[4]],
+                    points_[shape[5]]
+                );
+
+                const point bottomCc(bottom.centre());
+                const vector bottomNormal(bottom.normal());
+                const point topCc(top.centre());
+
+                if (((topCc-bottomCc)&bottomNormal) < 0)
+                {
+                    // Flip top and bottom
+                    Swap(shape[0], shape[3]);
+                    Swap(shape[1], shape[4]);
+                    Swap(shape[2], shape[5]);
+                    nSwapped++;
+                }
+            }
+        }
+        if (nSwapped > 0)
+        {
+            WarningInFunction << "Swapped " << nSwapped << " prismatic cells"
+                << endl;
         }
     }
 
