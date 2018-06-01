@@ -64,7 +64,7 @@ bool Foam::MultiInteraction<CloudType>::read(const dictionary& dict)
         }
     }
 
-    oneInteractionOnly_ = Switch(dict.lookup("oneInteractionOnly"));
+    oneInteractionOnly_ = dict.get<bool>("oneInteractionOnly");
 
     if (oneInteractionOnly_)
     {

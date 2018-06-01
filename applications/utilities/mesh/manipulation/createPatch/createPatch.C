@@ -540,8 +540,7 @@ int main(int argc, char *argv[])
     IOdictionary dict(dictIO);
 
     // Whether to synchronise points
-    const Switch pointSync(dict.lookup("pointSync"));
-
+    const bool pointSync(dict.get<bool>("pointSync"));
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 

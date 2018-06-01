@@ -40,7 +40,6 @@ SourceFiles
 #include "backgroundMeshDecomposition.H"
 #include "dictionary.H"
 #include "Random.H"
-#include "Switch.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 
@@ -80,7 +79,7 @@ protected:
         //  the local target cell size.  Store square of value.
         scalar minimumSurfaceDistanceCoeffSqr_;
 
-        Switch fixInitialPoints_;
+        bool fixInitialPoints_;
 
 
 private:
@@ -194,7 +193,7 @@ public:
                 return detailsDict_;
             }
 
-            Switch fixInitialPoints() const
+            bool fixInitialPoints() const
             {
                 return fixInitialPoints_;
             }

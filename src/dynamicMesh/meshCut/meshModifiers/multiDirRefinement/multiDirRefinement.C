@@ -450,7 +450,7 @@ void Foam::multiDirRefinement::refineFromDict
 )
 {
     // How to walk cell circumference.
-    Switch pureGeomCut(dict.lookup("geometricCut"));
+    const bool pureGeomCut(dict.get<bool>("geometricCut"));
 
     autoPtr<cellLooper> cellWalker;
     if (pureGeomCut)
@@ -486,9 +486,9 @@ Foam::multiDirRefinement::multiDirRefinement
     cellLabels_(cellLabels),
     addedCells_(mesh.nCells())
 {
-    Switch useHex(dict.lookup("useHexTopology"));
+    const bool useHex(dict.get<bool>("useHexTopology"));
 
-    Switch writeMesh(dict.lookup("writeMesh"));
+    const bool writeMesh(dict.get<bool>("writeMesh"));
 
     wordList dirNames(dict.lookup("directions"));
 
@@ -529,9 +529,9 @@ Foam::multiDirRefinement::multiDirRefinement
     cellLabels_(cellLabels),
     addedCells_(mesh.nCells())
 {
-    Switch useHex(dict.lookup("useHexTopology"));
+    const bool useHex(dict.get<bool>("useHexTopology"));
 
-    Switch writeMesh(dict.lookup("writeMesh"));
+    const bool writeMesh(dict.get<bool>("writeMesh"));
 
     wordList dirNames(dict.lookup("directions"));
 

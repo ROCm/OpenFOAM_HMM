@@ -70,7 +70,7 @@ Foam::autoPtr<Foam::solidProperties> Foam::solidProperties::New
     {
         // Backward-compatibility
 
-        if (Switch(dict.lookup("defaultCoeffs")))
+        if (dict.get<bool>("defaultCoeffs"))
         {
             return New(solidType);
         }

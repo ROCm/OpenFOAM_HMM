@@ -163,9 +163,7 @@ void tractionDisplacementCorrectionFvPatchVectorField::updateCoeffs()
     scalarField mu(E/(2.0*(1.0 + nu)));
     scalarField lambda(nu*E/((1.0 + nu)*(1.0 - 2.0*nu)));
 
-    Switch planeStress(mechanicalProperties.lookup("planeStress"));
-
-    if (planeStress)
+    if (mechanicalProperties.get<bool>("planeStress"))
     {
         lambda = nu*E/((1.0 + nu)*(1.0 - nu));
     }

@@ -98,11 +98,11 @@ class sampledIsoSurface
         //- Merge tolerance
         const scalar mergeTol_;
 
-        //- Whether to coarse
-        const Switch regularise_;
+        //- Whether to coarsen
+        const bool regularise_;
 
         //- Whether to recalculate cell values as average of point values
-        const Switch average_;
+        const bool average_;
 
         //- Zone name/index (if restricted to zones)
         mutable cellZoneID zoneID_;

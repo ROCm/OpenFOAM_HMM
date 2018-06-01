@@ -84,7 +84,7 @@ class distanceSurface
         const bool cell_;
 
         //- Whether to coarsen
-        const Switch regularise_;
+        const bool regularise_;
 
         //- Optional bounding box to trim triangles against
         const boundBox bounds_;
@@ -131,7 +131,7 @@ public:
             const scalar distance,
             const bool signedDistance,
             const bool cell,
-            const Switch regularise,
+            const bool regularise,
             const boundBox& bounds = boundBox::invertedBox
         );
 

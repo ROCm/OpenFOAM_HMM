@@ -43,7 +43,6 @@ SourceFiles
 
 #include "HeatAndMassTransferPhaseSystem.H"
 #include "saturationModel.H"
-#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,7 +70,7 @@ protected:
         autoPtr<saturationModel> saturationModel_;
 
         // Mass transfer enabled
-        Switch massTransfer_;
+        bool massTransfer_;
 
         //- Interfacial Mass transfer rate
         HashPtrTable<volScalarField, phasePairKey, phasePairKey::hash>

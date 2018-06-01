@@ -68,7 +68,7 @@ Foam::pairPotential::pairPotential
     forceLookup_(0),
     energyLookup_(0),
     esfPtr_(nullptr),
-    writeTables_(Switch(pairPotentialProperties_.lookup("writeTables")))
+    writeTables_(pairPotentialProperties_.get<bool>("writeTables"))
 {}
 
 

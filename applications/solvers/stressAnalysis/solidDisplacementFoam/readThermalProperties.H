@@ -12,7 +12,7 @@ IOdictionary thermalProperties
     )
 );
 
-Switch thermalStress(thermalProperties.lookup("thermalStress"));
+bool thermalStress(thermalProperties.get<bool>("thermalStress"));
 
 volScalarField threeKalpha
 (
@@ -46,7 +46,6 @@ volScalarField DT
 
 if (thermalStress)
 {
-
     autoPtr<volScalarField> CPtr;
 
     IOobject CIO

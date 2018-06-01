@@ -42,43 +42,30 @@ Foam::cvControls::cvControls
         foamyHexMeshDict_.subDict("surfaceConformation")
     );
 
-    pointPairDistanceCoeff_ = readScalar
-    (
-        surfDict.lookup("pointPairDistanceCoeff")
-    );
+    pointPairDistanceCoeff_ =
+        surfDict.get<scalar>("pointPairDistanceCoeff");
 
-    mixedFeaturePointPPDistanceCoeff_ = readScalar
-    (
-        surfDict.lookup("mixedFeaturePointPPDistanceCoeff")
-    );
+    mixedFeaturePointPPDistanceCoeff_ =
+        surfDict.get<scalar>("mixedFeaturePointPPDistanceCoeff");
 
-    featurePointExclusionDistanceCoeff_ = readScalar
-    (
-        surfDict.lookup("featurePointExclusionDistanceCoeff")
-    );
+    featurePointExclusionDistanceCoeff_ =
+        surfDict.get<scalar>("featurePointExclusionDistanceCoeff");
 
-    featureEdgeExclusionDistanceCoeff_ = readScalar
-    (
-        surfDict.lookup("featureEdgeExclusionDistanceCoeff")
-    );
+    featureEdgeExclusionDistanceCoeff_ =
+        surfDict.get<scalar>("featureEdgeExclusionDistanceCoeff");
 
+    surfaceSearchDistanceCoeff_ =
+        surfDict.get<scalar>("surfaceSearchDistanceCoeff");
 
-    surfaceSearchDistanceCoeff_ = readScalar
-    (
-        surfDict.lookup("surfaceSearchDistanceCoeff")
-    );
+    maxSurfaceProtrusionCoeff_ =
+        surfDict.get<scalar>("maxSurfaceProtrusionCoeff");
 
-    maxSurfaceProtrusionCoeff_ = readScalar
-    (
-        surfDict.lookup("maxSurfaceProtrusionCoeff")
-    );
-
-    maxQuadAngle_ = readScalar(surfDict.lookup("maxQuadAngle"));
+    maxQuadAngle_ = surfDict.get<scalar>("maxQuadAngle");
 
     surfaceConformationRebuildFrequency_ = max
     (
         1,
-        readLabel(surfDict.lookup("surfaceConformationRebuildFrequency"))
+        surfDict.get<label>("surfaceConformationRebuildFrequency")
     );
 
 
@@ -87,33 +74,23 @@ Foam::cvControls::cvControls
         surfDict.subDict("featurePointControls")
     );
 
-    specialiseFeaturePoints_ = Switch
-    (
-        featurePointControlsDict.lookup("specialiseFeaturePoints")
-    );
+    specialiseFeaturePoints_ =
+        featurePointControlsDict.get<Switch>("specialiseFeaturePoints");
 
-    guardFeaturePoints_ = Switch
-    (
-        featurePointControlsDict.lookup("guardFeaturePoints")
-    );
+    guardFeaturePoints_ =
+        featurePointControlsDict.get<Switch>("guardFeaturePoints");
 
-    edgeAiming_ = Switch
-    (
-        featurePointControlsDict.lookup("edgeAiming")
-    );
+    edgeAiming_ =
+        featurePointControlsDict.get<Switch>("edgeAiming");
 
     if (!guardFeaturePoints_)
     {
-        snapFeaturePoints_ = Switch
-        (
-            featurePointControlsDict.lookup("snapFeaturePoints")
-        );
+        snapFeaturePoints_ =
+            featurePointControlsDict.get<Switch>("snapFeaturePoints");
     }
 
-    circulateEdges_ = Switch
-    (
-        featurePointControlsDict.lookup("circulateEdges")
-    );
+    circulateEdges_ =
+        featurePointControlsDict.get<Switch>("circulateEdges");
 
     // Controls for coarse surface conformation
 
@@ -122,62 +99,47 @@ Foam::cvControls::cvControls
         surfDict.subDict("conformationControls")
     );
 
-    surfacePtExclusionDistanceCoeff_ = readScalar
-    (
-        conformationControlsDict.lookup("surfacePtExclusionDistanceCoeff")
-    );
+    surfacePtExclusionDistanceCoeff_ =
+        conformationControlsDict.get<scalar>("surfacePtExclusionDistanceCoeff");
 
     edgeSearchDistCoeffSqr_ = sqr
     (
-        readScalar
-        (
-            conformationControlsDict.lookup("edgeSearchDistCoeff")
-        )
+        conformationControlsDict.get<scalar>("edgeSearchDistCoeff")
     );
 
     surfacePtReplaceDistCoeffSqr_ = sqr
     (
-        readScalar
-        (
-            conformationControlsDict.lookup("surfacePtReplaceDistCoeff")
-        )
+        conformationControlsDict.get<scalar>("surfacePtReplaceDistCoeff")
     );
 
-    maxConformationIterations_ = readLabel
-    (
-        conformationControlsDict.lookup("maxIterations")
-    );
+    maxConformationIterations_ =
+        conformationControlsDict.get<label>("maxIterations");
 
-    iterationToInitialHitRatioLimit_ = readScalar
-    (
-        conformationControlsDict.lookup("iterationToInitialHitRatioLimit")
-    );
+    iterationToInitialHitRatioLimit_ =
+        conformationControlsDict.get<scalar>("iterationToInitialHitRatioLimit");
 
 
     // Motion control controls
 
     const dictionary& motionDict(foamyHexMeshDict_.subDict("motionControl"));
 
-    defaultCellSize_ = readScalar(motionDict.lookup("defaultCellSize"));
+    defaultCellSize_ = motionDict.get<scalar>("defaultCellSize");
 
     minimumCellSize_ =
-        readScalar(motionDict.lookup("minimumCellSizeCoeff"))*defaultCellSize_;
+        motionDict.get<scalar>("minimumCellSizeCoeff")*defaultCellSize_;
 
-    objOutput_ = Switch(motionDict.lookupOrDefault<Switch>("objOutput", false));
+    objOutput_ =
+        motionDict.lookupOrDefault<Switch>("objOutput", false);
 
-    timeChecks_ = Switch
-    (
-        motionDict.lookupOrDefault<Switch>("timeChecks", false)
-    );
+    timeChecks_ =
+        motionDict.lookupOrDefault<Switch>("timeChecks", false);
 
-    printVertexInfo_ = Switch
-    (
-        motionDict.lookupOrDefault<Switch>("printVertexInfo", false)
-    );
+    printVertexInfo_ =
+        motionDict.lookupOrDefault<Switch>("printVertexInfo", false);
 
     if (Pstream::parRun())
     {
-        maxLoadUnbalance_ = readScalar(motionDict.lookup("maxLoadUnbalance"));
+        maxLoadUnbalance_ = motionDict.get<scalar>("maxLoadUnbalance");
     }
     else
     {
@@ -186,7 +148,7 @@ Foam::cvControls::cvControls
 
     cosAlignmentAcceptanceAngle_ = cos
     (
-        degToRad(readScalar(motionDict.lookup("alignmentAcceptanceAngle")))
+        degToRad(motionDict.get<scalar>("alignmentAcceptanceAngle"))
     );
 
 
@@ -197,19 +159,15 @@ Foam::cvControls::cvControls
         motionDict.subDict("pointInsertionCriteria")
     );
 
-    insertionDistCoeff_ = readScalar
-    (
-        insertionDict.lookup("cellCentreDistCoeff")
-    );
+    insertionDistCoeff_ =
+        insertionDict.get<scalar>("cellCentreDistCoeff");
 
-    faceAreaRatioCoeff_ = readScalar
-    (
-        insertionDict.lookup("faceAreaRatioCoeff")
-    );
+    faceAreaRatioCoeff_ =
+        insertionDict.get<scalar>("faceAreaRatioCoeff");
 
     cosInsertionAcceptanceAngle_ = cos
     (
-        degToRad(readScalar(insertionDict.lookup("acceptanceAngle")))
+        degToRad(insertionDict.get<scalar>("acceptanceAngle"))
     );
 
     // Point removal criteria
@@ -219,10 +177,8 @@ Foam::cvControls::cvControls
         motionDict.subDict("pointRemovalCriteria")
     );
 
-    removalDistCoeff_ = readScalar
-    (
-        removalDict.lookup("cellCentreDistCoeff")
-    );
+    removalDistCoeff_ =
+        removalDict.get<scalar>("cellCentreDistCoeff");
 
     // polyMesh filtering controls
 
@@ -231,34 +187,31 @@ Foam::cvControls::cvControls
         foamyHexMeshDict_.subDict("polyMeshFiltering")
     );
 
-    filterEdges_ = Switch
-    (
-        filteringDict.lookupOrDefault<Switch>("filterEdges", true)
-    );
+    filterEdges_ =
+        filteringDict.lookupOrDefault<Switch>("filterEdges", true);
 
-    filterFaces_ = Switch
-    (
-        filteringDict.lookupOrDefault<Switch>("filterFaces", false)
-    );
+    filterFaces_ =
+        filteringDict.lookupOrDefault<Switch>("filterFaces", false);
 
     if (filterFaces_)
     {
-        filterEdges_ = Switch::ON;
+        filterEdges_ = filterFaces_;
     }
 
-    writeTetDualMesh_ = Switch(filteringDict.lookup("writeTetDualMesh"));
+    writeTetDualMesh_ =
+        filteringDict.get<Switch>("writeTetDualMesh");
 
     writeCellShapeControlMesh_ =
-        Switch(filteringDict.lookup("writeCellShapeControlMesh"));
+        filteringDict.get<Switch>("writeCellShapeControlMesh");
 
     if (Pstream::parRun())
     {
         writeBackgroundMeshDecomposition_ =
-            Switch(filteringDict.lookup("writeBackgroundMeshDecomposition"));
+            filteringDict.get<Switch>("writeBackgroundMeshDecomposition");
     }
     else
     {
-        writeBackgroundMeshDecomposition_ = Switch(false);
+        writeBackgroundMeshDecomposition_ = Switch::FALSE;
     }
 
 }

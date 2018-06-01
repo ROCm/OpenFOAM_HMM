@@ -39,7 +39,7 @@ ThermalPhaseChangePhaseSystem
     HeatAndMassTransferPhaseSystem<BasePhaseSystem>(mesh),
     volatile_(this->lookup("volatile")),
     saturationModel_(saturationModel::New(this->subDict("saturationModel"))),
-    massTransfer_(this->lookup("massTransfer"))
+    massTransfer_(this->template get<bool>("massTransfer"))
 {
 
     forAllConstIters(this->phasePairs_, phasePairIter)
@@ -357,7 +357,7 @@ void Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::correctThermo()
 
         volScalarField iDmdtNew(iDmdt);
 
-        if (massTransfer_ )
+        if (massTransfer_)
         {
             volScalarField H1
             (

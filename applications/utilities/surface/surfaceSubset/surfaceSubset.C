@@ -37,7 +37,6 @@ Description
 #include "triSurfaceSearch.H"
 #include "argList.H"
 #include "Fstream.H"
-#include "Switch.H"
 #include "IOdictionary.H"
 #include "boundBox.H"
 #include "indexedOctree.H"
@@ -102,10 +101,8 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    Switch addFaceNeighbours
-    (
-        meshSubsetDict.lookup("addFaceNeighbours")
-    );
+    const bool addFaceNeighbours =
+        meshSubsetDict.get<bool>("addFaceNeighbours");
 
     const bool invertSelection =
         meshSubsetDict.lookupOrDefault("invertSelection", false);
@@ -231,7 +228,7 @@ int main(int argc, char *argv[])
 
         fileName surfName(surfDict.lookup("name"));
 
-        Switch outside(surfDict.lookup("outside"));
+        const bool outside(surfDict.get<bool>("outside"));
 
         if (outside)
         {

@@ -25,7 +25,6 @@ License
 
 #include "liquidProperties.H"
 #include "HashTable.H"
-#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -121,38 +120,36 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New
         InfoInFunction << "Constructing liquidProperties" << endl;
     }
 
-    const word& liquidType = dict.dictName();
+    const word liquidType(dict.dictName());
 
     if (dict.found("defaultCoeffs"))
     {
         // Backward-compatibility
 
-        if (Switch(dict.lookup("defaultCoeffs")))
+        if (dict.get<bool>("defaultCoeffs"))
         {
             return New(liquidType);
         }
-        else
+
+        auto cstrIter = dictionaryConstructorTablePtr_->cfind(liquidType);
+
+        if (!cstrIter.found())
         {
-            auto cstrIter = dictionaryConstructorTablePtr_->cfind(liquidType);
-
-            if (!cstrIter.found())
-            {
-                FatalErrorInFunction
-                    << "Unknown liquidProperties type "
-                    << liquidType << nl << nl
-                    << "Valid liquidProperties types :" << nl
-                    << dictionaryConstructorTablePtr_->sortedToc()
-                    << exit(FatalError);
-            }
-
-            return autoPtr<liquidProperties>
-            (
-                cstrIter()
-                (
-                    dict.optionalSubDict(liquidType + "Coeffs")
-                )
-            );
+            FatalErrorInFunction
+                << "Unknown liquidProperties type "
+                << liquidType << nl << nl
+                << "Valid liquidProperties types :" << nl
+                << dictionaryConstructorTablePtr_->sortedToc()
+                << exit(FatalError);
         }
+
+        return autoPtr<liquidProperties>
+        (
+            cstrIter()
+            (
+                dict.optionalSubDict(liquidType + "Coeffs")
+            )
+        );
     }
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(liquidType);

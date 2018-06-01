@@ -58,13 +58,10 @@ Foam::initialPointsMethod::initialPointsMethod
     (
         sqr
         (
-            readScalar
-            (
-                initialPointsDict.lookup("minimumSurfaceDistanceCoeff")
-            )
+            initialPointsDict.get<scalar>("minimumSurfaceDistanceCoeff")
         )
     ),
-    fixInitialPoints_(Switch(initialPointsDict.lookup("fixInitialPoints")))
+    fixInitialPoints_(initialPointsDict.get<bool>("fixInitialPoints"))
 {}
 
 
@@ -80,7 +77,7 @@ Foam::autoPtr<Foam::initialPointsMethod> Foam::initialPointsMethod::New
     const autoPtr<backgroundMeshDecomposition>& decomposition
 )
 {
-    const word methodName(initialPointsDict.lookup("initialPointsMethod"));
+    const word methodName(initialPointsDict.get<word>("initialPointsMethod"));
 
     Info<< nl << "Selecting initialPointsMethod "
         << methodName << endl;

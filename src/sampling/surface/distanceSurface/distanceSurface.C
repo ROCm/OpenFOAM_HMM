@@ -66,7 +66,7 @@ Foam::distanceSurface::distanceSurface
         )
     ),
     distance_(readScalar(dict.lookup("distance"))),
-    signed_(readBool(dict.lookup("signed"))),
+    signed_(dict.get<bool>("signed")),
     cell_(dict.lookupOrDefault("cell", true)),
     regularise_(dict.lookupOrDefault("regularise", true)),
     bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox)),
@@ -85,7 +85,7 @@ Foam::distanceSurface::distanceSurface
     const scalar distance,
     const bool signedDistance,
     const bool cell,
-    const Switch regularise,
+    const bool regularise,
     const boundBox& bounds
 )
 :

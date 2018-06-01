@@ -184,9 +184,7 @@
     volScalarField lambda(nu*E/((1.0 + nu)*(1.0 - 2.0*nu)));
     volScalarField threeK(E/(1.0 - 2.0*nu));
 
-    Switch planeStress(mechanicalProperties.lookup("planeStress"));
-
-    if (planeStress)
+    if (mechanicalProperties.get<bool>("planeStress"))
     {
         Info<< "Plane Stress\n" << endl;
 

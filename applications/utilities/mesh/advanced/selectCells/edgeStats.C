@@ -89,9 +89,7 @@ Foam::edgeStats::edgeStats(const polyMesh& mesh)
 
         IOdictionary motionProperties(motionObj);
 
-        Switch twoDMotion(motionProperties.lookup("twoDMotion"));
-
-        if (twoDMotion)
+        if (motionProperties.get<bool>("twoDMotion"))
         {
             Info<< "Correcting for 2D motion" << endl << endl;
 

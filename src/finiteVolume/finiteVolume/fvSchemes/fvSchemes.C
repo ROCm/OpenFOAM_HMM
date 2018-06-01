@@ -181,10 +181,10 @@ void Foam::fvSchemes::read(const dictionary& dict)
         if
         (
             fluxRequired_.found("default")
-         && word(fluxRequired_.lookup("default")) != "none"
+         && fluxRequired_.get<word>("default") != "none"
         )
         {
-            defaultFluxRequired_ = Switch(fluxRequired_.lookup("default"));
+            defaultFluxRequired_ = fluxRequired_.get<bool>("default");
         }
     }
 }

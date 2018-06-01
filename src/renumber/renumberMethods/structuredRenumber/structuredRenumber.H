@@ -42,7 +42,6 @@ SourceFiles
 
 #include "renumberMethod.H"
 #include "topoDistanceData.H"
-#include "Switch.H"
 
 namespace Foam
 {
@@ -63,7 +62,7 @@ public:
         //  column and layer
         class layerLess
         {
-            const Switch depthFirst_;
+            const bool depthFirst_;
             const labelList& order_;
             const List<topoDistanceData>& distance_;
 
@@ -71,7 +70,7 @@ public:
 
             layerLess
             (
-                const Switch depthFirst,
+                const bool depthFirst,
                 const labelList& order,
                 const List<topoDistanceData>& distance
             )
@@ -93,9 +92,9 @@ public:
 
         const label nLayers_;
 
-        const Switch depthFirst_;
+        const bool depthFirst_;
 
-        const Switch reverse_;
+        const bool reverse_;
 
         const autoPtr<renumberMethod> method_;
 

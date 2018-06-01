@@ -444,16 +444,16 @@ int main(int argc, char *argv[])
     const word dictName("createBafflesDict");
     #include "setSystemMeshDictionaryIO.H"
 
-    Switch internalFacesOnly(false);
+    bool internalFacesOnly(false);
 
-    Switch noFields(false);
+    bool noFields(false);
 
     PtrList<faceSelection> selectors;
     {
         Info<< "Reading baffle criteria from " << dictName << nl << endl;
         IOdictionary dict(dictIO);
 
-        dict.lookup("internalFacesOnly") >> internalFacesOnly;
+        internalFacesOnly = dict.get<bool>("internalFacesOnly");
         noFields = dict.lookupOrDefault("noFields", false);
 
         const dictionary& selectionsDict = dict.subDict("baffles");
@@ -717,10 +717,9 @@ int main(int argc, char *argv[])
                 // master and slave in different groupNames
                 // (ie 3D thermal baffles)
 
-                Switch sameGroup
-                (
-                    patchSource.lookupOrDefault("sameGroup", true)
-                );
+                const bool sameGroup =
+                    patchSource.lookupOrDefault("sameGroup", true);
+
                 if (!sameGroup)
                 {
                     groupNameMaster = groupName + "Group_master";
@@ -798,7 +797,6 @@ int main(int argc, char *argv[])
             const word slaveName = selectors[selectorI].name() + "_slave";
             newSlavePatches.append(pbm.findPatchID(slaveName));
         }
-
 
 
         createFaces
@@ -897,10 +895,8 @@ int main(int argc, char *argv[])
             {
                 const dictionary& patchSource = dict.subDict("patchPairs");
 
-                Switch sameGroup
-                (
-                    patchSource.lookupOrDefault("sameGroup", true)
-                );
+                const bool sameGroup =
+                    patchSource.lookupOrDefault("sameGroup", true);
 
                 const word& groupName = selectors[selectorI].name();
 

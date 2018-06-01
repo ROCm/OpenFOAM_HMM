@@ -658,9 +658,7 @@ int main(int argc, char *argv[])
 
         IOdictionary motionProperties(motionObj);
 
-        Switch twoDMotion(motionProperties.lookup("twoDMotion"));
-
-        if (twoDMotion)
+        if (motionProperties.get<bool>("twoDMotion"))
         {
             Info<< "Correcting for 2D motion" << endl << endl;
             correct2DPtr = new twoDPointCorrector(mesh);
