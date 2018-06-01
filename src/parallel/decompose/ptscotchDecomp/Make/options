@@ -16,4 +16,9 @@ LIB_LIBS = \
     -L$(FOAM_EXT_LIBBIN) \
     -L$(FOAM_EXT_LIBBIN)/$(FOAM_MPI) \
     -lptscotch -lptscotcherrexit \
-    -lscotch -lrt
+    -lscotch
+
+/* May require librt, but scotch does not declare the dependency */
+ifeq ("$(SO)","so")
+    LIB_LIBS += -lrt
+endif
