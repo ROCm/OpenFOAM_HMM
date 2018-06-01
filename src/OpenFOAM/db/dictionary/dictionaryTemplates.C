@@ -57,31 +57,63 @@ T Foam::dictionary::get
     bool patternMatch
 ) const
 {
-    const const_searcher finder(csearch(keyword, recursive, patternMatch));
-
-    if (!finder.found())
-    {
-        FatalIOErrorInFunction(*this)
-            << "keyword " << keyword << " is undefined in dictionary "
-            << name()
-            << exit(FatalIOError);
-    }
-
     T val;
-    ITstream& is = finder.ptr()->stream();
-    is >> val;
-
-    if (!is.eof())
-    {
-        auto err = FatalIOErrorInFunction(*this);
-        excessTokens(err, keyword, is);
-        err << exit(FatalIOError);
-    }
-
+    read<T>(keyword, val, recursive, patternMatch);
     return val;
 }
 
 
+template<class T>
+T Foam::dictionary::getCompat
+(
+    const word& keyword,
+    std::initializer_list<std::pair<const char*,int>> compat,
+    bool recursive,
+    bool patternMatch
+) const
+{
+    T val;
+    readCompat<T>(keyword, compat, val, recursive, patternMatch);
+    return val;
+}
+
+
+template<class T>
+bool Foam::dictionary::readCompat
+(
+    const word& keyword,
+    std::initializer_list<std::pair<const char*,int>> compat,
+    T& val,
+    bool recursive,
+    bool patternMatch,
+    bool mandatory
+) const
+{
+    const const_searcher
+        finder(csearchCompat(keyword, compat, recursive, patternMatch));
+
+    if (finder.found())
+    {
+        ITstream& is = finder.ptr()->stream();
+        is >> val;
+
+        excessTokens(keyword, is);
+
+        return true;
+    }
+    else if (mandatory)
+    {
+        FatalIOErrorInFunction(*this)
+            << "'" << keyword << "' not found in dictionary "
+            << name()
+            << exit(FatalIOError);
+    }
+
+    return false;
+}
+
+
+// older name
 template<class T>
 T Foam::dictionary::lookupType
 (
@@ -112,21 +144,15 @@ T Foam::dictionary::lookupOrDefault
         ITstream& is = finder.ptr()->stream();
         is >> val;
 
-        if (!is.eof())
-        {
-            auto err = FatalIOErrorInFunction(*this);
-            excessTokens(err, keyword, is);
-            err << exit(FatalIOError);
-        }
+        excessTokens(keyword, is);
 
         return val;
     }
-
-    if (writeOptionalEntries)
+    else if (writeOptionalEntries)
     {
         IOInfoInFunction(*this)
-            << "Optional entry '" << keyword << "' is not present,"
-            << " returning the default value '" << deflt << "'"
+            << "Optional entry '" << keyword << "' not found,"
+            << " using default value '" << deflt << "'"
             << endl;
     }
 
@@ -152,26 +178,53 @@ T Foam::dictionary::lookupOrAddDefault
         ITstream& is = finder.ptr()->stream();
         is >> val;
 
-        if (!is.eof())
-        {
-            auto err = FatalIOErrorInFunction(*this);
-            excessTokens(err, keyword, is);
-            err << exit(FatalIOError);
-        }
+        excessTokens(keyword, is);
 
         return val;
     }
-
-    if (writeOptionalEntries)
+    else if (writeOptionalEntries)
     {
         IOInfoInFunction(*this)
-            << "Optional entry '" << keyword << "' is not present,"
-            << " adding and returning the default value '" << deflt << "'"
+            << "Optional entry '" << keyword << "' not found,"
+            << " adding default value '" << deflt << "'"
             << endl;
     }
 
     add(new primitiveEntry(keyword, deflt));
     return deflt;
+}
+
+
+template<class T>
+bool Foam::dictionary::read
+(
+    const word& keyword,
+    T& val,
+    bool recursive,
+    bool patternMatch,
+    bool mandatory
+) const
+{
+    const const_searcher finder(csearch(keyword, recursive, patternMatch));
+
+    if (finder.found())
+    {
+        ITstream& is = finder.ptr()->stream();
+        is >> val;
+
+        excessTokens(keyword, is);
+
+        return true;
+    }
+    else if (mandatory)
+    {
+        FatalIOErrorInFunction(*this)
+            << "'" << keyword << "' not found in dictionary "
+            << name()
+            << exit(FatalIOError);
+    }
+
+    return false;
 }
 
 
@@ -184,32 +237,8 @@ bool Foam::dictionary::readIfPresent
     bool patternMatch
 ) const
 {
-    const const_searcher finder(csearch(keyword, recursive, patternMatch));
-
-    if (finder.found())
-    {
-        ITstream& is = finder.ptr()->stream();
-        is >> val;
-
-        if (!is.eof())
-        {
-            auto err = FatalIOErrorInFunction(*this);
-            excessTokens(err, keyword, is);
-            err << exit(FatalIOError);
-        }
-
-        return true;
-    }
-
-    if (writeOptionalEntries)
-    {
-        IOInfoInFunction(*this)
-            << "Optional entry '" << keyword << "' is not present,"
-            << " the default value '" << val << "' will be used."
-            << endl;
-    }
-
-    return false;
+    // Read is non-mandatory
+    return read<T>(keyword, val, recursive, patternMatch, false);
 }
 
 
@@ -233,21 +262,15 @@ T Foam::dictionary::lookupOrDefaultCompat
         ITstream& is = finder.ptr()->stream();
         is >> val;
 
-        if (!is.eof())
-        {
-            auto err = FatalIOErrorInFunction(*this);
-            excessTokens(err, keyword, is);
-            err << exit(FatalIOError);
-        }
+        excessTokens(keyword, is);
 
         return val;
     }
-
-    if (writeOptionalEntries)
+    else if (writeOptionalEntries)
     {
         IOInfoInFunction(*this)
-            << "Optional entry '" << keyword << "' is not present,"
-            << " returning the default value '" << deflt << "'"
+            << "Optional entry '" << keyword << "' not found,"
+            << " using default value '" << deflt << "'"
             << endl;
     }
 
@@ -265,33 +288,8 @@ bool Foam::dictionary::readIfPresentCompat
     bool patternMatch
 ) const
 {
-    const const_searcher
-        finder(csearchCompat(keyword, compat, recursive, patternMatch));
-
-    if (finder.found())
-    {
-        ITstream& is = finder.ptr()->stream();
-        is >> val;
-
-        if (!is.eof())
-        {
-            auto err = FatalIOErrorInFunction(*this);
-            excessTokens(err, keyword, is);
-            err << exit(FatalIOError);
-        }
-
-        return true;
-    }
-
-    if (writeOptionalEntries)
-    {
-        IOInfoInFunction(*this)
-            << "Optional entry '" << keyword << "' is not present,"
-            << " the default value '" << val << "' will be used."
-            << endl;
-    }
-
-    return false;
+    // Read is non-mandatory
+    return readCompat<T>(keyword, compat, recursive, patternMatch, false);
 }
 
 

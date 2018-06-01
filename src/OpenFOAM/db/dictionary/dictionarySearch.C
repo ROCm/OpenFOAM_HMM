@@ -27,18 +27,17 @@ License
 #include "dictionaryEntry.H"
 #include "stringOps.H"
 
-/* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-namespace Foam
+namespace
 {
-    // file-scope
-    //- Walk lists of patterns and regexps for an exact match
-    //  or regular expression match
+    // Walk lists of patterns and regexps for an exact match
+    // or a regular expression match
     template<class WcIterator, class ReIterator>
     static bool findInPatterns
     (
         const bool patternMatch,
-        const word& keyword,
+        const Foam::word& keyword,
         WcIterator& wcIter,
         ReIterator& reIter
     )
@@ -61,7 +60,8 @@ namespace Foam
 
         return false;
     }
-}
+
+} // End anonymous namespace
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -73,7 +73,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchDotScoped
     bool patternMatch
 ) const
 {
-    std::string::size_type scopePos = keyword.find('.');
+    auto scopePos = keyword.find('.');
 
     if (scopePos == string::npos)
     {
@@ -101,10 +101,8 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchDotScoped
             }
             else
             {
-                FatalIOErrorInFunction
-                (
-                    *this
-                )   << "No parent of current dictionary when searching for "
+                FatalIOErrorInFunction(*this)
+                    << "No parent of current dictionary when searching for "
                     << keyword.substr(1)
                     << exit(FatalIOError);
 
@@ -210,10 +208,8 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchSlashScoped
             }
             else
             {
-                FatalIOErrorInFunction
-                (
-                    *dictPtr
-                )   << "No parent of current dictionary when searching for "
+                FatalIOErrorInFunction(*dictPtr)
+                    << "No parent of current dictionary when searching for "
                     << keyword << " at " << cmpt
                     << exit(FatalIOError);
                 break;
@@ -424,10 +420,8 @@ const Foam::dictionary* Foam::dictionary::cfindScopedDictPtr
             }
             else
             {
-                FatalIOErrorInFunction
-                (
-                    *dictPtr
-                )   << "No parent for dictionary while searching "
+                FatalIOErrorInFunction(*dictPtr)
+                    << "No parent for dictionary while searching "
                     << path
                     << exit(FatalIOError);
 
@@ -451,10 +445,8 @@ const Foam::dictionary* Foam::dictionary::cfindScopedDictPtr
                 }
                 else
                 {
-                    FatalIOErrorInFunction
-                    (
-                        *dictPtr
-                    )   << "Found entry '" << cmpt
+                    FatalIOErrorInFunction(*dictPtr)
+                        << "Found entry '" << cmpt
                         << "' but not a dictionary, while searching scoped"
                         << nl
                         << "    " << path
@@ -533,10 +525,8 @@ Foam::dictionary* Foam::dictionary::makeScopedDictPtr(const fileName& dictPath)
             }
             else
             {
-                FatalIOErrorInFunction
-                (
-                    *dictPtr
-                )   << "No parent for dictionary while searching "
+                FatalIOErrorInFunction(*dictPtr)
+                    << "No parent for dictionary while searching "
                     << path
                     << exit(FatalIOError);
 
@@ -561,10 +551,8 @@ Foam::dictionary* Foam::dictionary::makeScopedDictPtr(const fileName& dictPath)
                 }
                 else
                 {
-                    FatalIOErrorInFunction
-                    (
-                        *dictPtr
-                    )   << "Cannot create sub-dictionary entry '" << cmptName
+                    FatalIOErrorInFunction(*dictPtr)
+                        << "Cannot create sub-dictionary entry '" << cmptName
                         << "' - a non-dictionary entry is in the way"
                         << nl << "Encountered in scope" << nl
                         << "    " << path
@@ -621,10 +609,8 @@ bool Foam::dictionary::remove(const word& keyword)
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -651,10 +637,8 @@ bool Foam::dictionary::changeKeyword
 
     if (iter()->keyword().isPattern())
     {
-        FatalIOErrorInFunction
-        (
-            *this
-        )   << "Old keyword "<< oldKeyword
+        FatalIOErrorInFunction(*this)
+            << "Old keyword "<< oldKeyword
             << " is a pattern."
             << "Pattern replacement not yet implemented."
             << exit(FatalIOError);
@@ -688,10 +672,8 @@ bool Foam::dictionary::changeKeyword
         }
         else
         {
-            IOWarningInFunction
-            (
-                *this
-            )   << "cannot rename keyword "<< oldKeyword
+            IOWarningInFunction(*this)
+                << "cannot rename keyword "<< oldKeyword
                 << " to existing keyword " << newKeyword
                 << " in dictionary " << name() << endl;
             return false;

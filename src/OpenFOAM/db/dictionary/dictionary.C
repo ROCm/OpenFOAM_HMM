@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "dictionary.H"
+#include "error.H"
+#include "JobInfo.H"
 #include "primitiveEntry.H"
 #include "dictionaryEntry.H"
 #include "regExp.H"
@@ -48,7 +50,6 @@ bool Foam::dictionary::writeOptionalEntries
 
 void Foam::dictionary::excessTokens
 (
-    OSstream& msg,
     const word& keyword,
     const ITstream& is
 ) const
@@ -60,12 +61,44 @@ void Foam::dictionary::excessTokens
         return;
     }
 
-    msg << "entry '" << keyword << "' has "
-        << nExcess << " excess tokens, near line: " << is.lineNumber() << nl
-        << "dictionary: " << name() << nl
-        << "stream:  ";
-    is.writeList(msg, 0);
-    msg << nl;
+    // Similar to SafeFatalIOError
+
+    if (JobInfo::constructed)
+    {
+        OSstream& err =
+            FatalIOError
+            (
+                "",                 // functionName
+                "",                 // sourceFileName
+                0,                  // sourceFileLineNumber
+                this->name(),       // ioFileName
+                is.lineNumber()     // ioStartLineNumber
+            );
+
+        err << "'" << keyword << "' has "
+            << nExcess << " excess tokens in stream" << nl << nl
+            << "    ";
+        is.writeList(err, 0);
+
+        err << exit(FatalIOError);
+    }
+    else
+    {
+        std::cerr
+            << nl
+            << "--> FOAM FATAL IO ERROR:" << nl;
+
+        std::cerr
+            << "'" << keyword << "' has "
+            << nExcess << " excess tokens in stream" << nl << nl;
+
+        std::cerr
+            << "file: " << this->name()
+            << " at line " << is.lineNumber() << '.' << nl
+            << std::endl;
+
+        ::exit(1);
+    }
 }
 
 
@@ -296,10 +329,8 @@ const Foam::entry& Foam::dictionary::lookupEntry
 
     if (!finder.found())
     {
-        FatalIOErrorInFunction
-        (
-            *this
-        )   << "keyword " << keyword << " is undefined in dictionary "
+        FatalIOErrorInFunction(*this)
+            << "'" << keyword << "' not found in dictionary "
             << name()
             << exit(FatalIOError);
     }
@@ -422,10 +453,8 @@ const Foam::dictionary& Foam::dictionary::subDict(const word& keyword) const
 
     if (!finder.found())
     {
-        FatalIOErrorInFunction
-        (
-            *this
-        )   << "keyword " << keyword << " is undefined in dictionary "
+        FatalIOErrorInFunction(*this)
+            << "'" << keyword << "' not found in dictionary "
             << name()
             << exit(FatalIOError);
     }
@@ -441,10 +470,8 @@ Foam::dictionary& Foam::dictionary::subDict(const word& keyword)
 
     if (!finder.found())
     {
-        FatalIOErrorInFunction
-        (
-            *this
-        )   << "keyword " << keyword << " is undefined in dictionary "
+        FatalIOErrorInFunction(*this)
+            << "'" << keyword << "' not found in dictionary "
             << name()
             << exit(FatalIOError);
     }
@@ -470,20 +497,18 @@ Foam::dictionary Foam::dictionary::subOrEmptyDict
 
     if (mustRead)
     {
-        FatalIOErrorInFunction
-        (
-            *this
-        )   << "keyword " << keyword
-            << " is not a sub-dictionary in dictionary "
+        FatalIOErrorInFunction(*this)
+            << "'" << keyword
+            << "' is not a sub-dictionary in dictionary "
             << name()
             << exit(FatalIOError);
     }
 
     if (finder.found())
     {
-        IOWarningInFunction((*this))
-            << "keyword " << keyword
-            << " found but not a sub-dictionary in dictionary "
+        IOWarningInFunction(*this)
+            << "'" << keyword
+            << "' found but not a sub-dictionary in dictionary "
             << name() << endl;
     }
 
@@ -506,9 +531,9 @@ const Foam::dictionary& Foam::dictionary::optionalSubDict
 
     if (finder.found())
     {
-        IOWarningInFunction((*this))
-            << "keyword " << keyword
-            << " found but not a sub-dictionary in dictionary "
+        IOWarningInFunction(*this)
+            << "'" << keyword
+            << "' found but not a sub-dictionary in dictionary "
             << name() << endl;
     }
 
@@ -597,7 +622,7 @@ Foam::entry* Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
         }
 
 
-        IOWarningInFunction((*this))
+        IOWarningInFunction(*this)
             << "problem replacing entry "<< entryPtr->keyword()
             << " in dictionary " << name() << endl;
 
@@ -626,7 +651,7 @@ Foam::entry* Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
     }
 
 
-    IOWarningInFunction((*this))
+    IOWarningInFunction(*this)
         << "attempt to add entry " << entryPtr->keyword()
         << " which already exists in dictionary " << name()
         << endl;

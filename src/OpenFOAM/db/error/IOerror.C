@@ -139,15 +139,15 @@ void Foam::IOerror::SafeFatalIOError
     else
     {
         std::cerr
-            << std::endl
-            << "--> FOAM FATAL IO ERROR:" << std::endl
+            << nl
+            << "--> FOAM FATAL IO ERROR:" << nl
             << msg
-            << std::endl
+            << nl
             << "file: " << ioStream.name()
             << " at line " << ioStream.lineNumber() << '.'
-            << std::endl << std::endl
+            << nl << nl
             << "    From function " << functionName
-            << std::endl
+            << nl
             << "    in file " << sourceFileName
             << " at line " << sourceFileLineNumber << '.'
             << std::endl;

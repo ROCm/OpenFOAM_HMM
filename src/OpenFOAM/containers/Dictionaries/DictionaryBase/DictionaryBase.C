@@ -138,7 +138,7 @@ const T* Foam::DictionaryBase<IDLListType, T>::lookup(const word& keyword) const
     if (iter == hashedTs_.end())
     {
         FatalErrorInFunction
-            << keyword << " is undefined"
+            << "'" << keyword << "' not found"
             << exit(FatalError);
     }
 
@@ -154,7 +154,7 @@ T* Foam::DictionaryBase<IDLListType, T>::lookup(const word& keyword)
     if (iter == hashedTs_.end())
     {
         FatalErrorInFunction
-            << keyword << " is undefined"
+            << "'" << keyword << "' not found"
             << exit(FatalError);
     }
 

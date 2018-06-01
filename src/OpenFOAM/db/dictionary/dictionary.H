@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -143,18 +143,18 @@ public:
             return name_;
         }
 
-        //- Return the dictionary name
+        //- Return the dictionary name for modification (use with caution).
         fileName& name()
         {
             return name_;
         }
 
         //- Return the local dictionary name (final part of scoped name)
-        const word dictName() const
+        word dictName() const
         {
-            const word scopedName = name_.name();
-            const auto i = scopedName.rfind('.');
+            word scopedName(name_.name());
 
+            const auto i = scopedName.rfind('.');
             if (i == std::string::npos)
             {
                 return scopedName;
@@ -383,13 +383,8 @@ private:
         ) const;
 
 
-        //- Add report of excess tokens to the messageStream
-        void excessTokens
-        (
-            OSstream& msg,
-            const word& keyword,
-            const ITstream& is
-        ) const;
+        //- Emit FatalIOError if excess tokens exist
+        void excessTokens(const word& keyword, const ITstream& is) const;
 
 
 public:
@@ -505,7 +500,7 @@ public:
         ) const;
 
         //- Find and return an entry pointer for manipulation if present,
-        //  or return a nullptr.
+        //- or return a nullptr.
         //
         //  \param recursive search parent dictionaries
         //  \param patternMatch use regular expressions
@@ -516,7 +511,7 @@ public:
             bool patternMatch
         );
 
-        //- Find and return an entry if present otherwise error.
+        //- Find and return an entry if present, otherwise FatalIOError.
         //
         //  \param recursive search parent dictionaries
         //  \param patternMatch use regular expressions
@@ -528,7 +523,7 @@ public:
         ) const;
 
         //- Find and return a T.
-        //- FatalError if not found, or if there are excess tokens.
+        //- FatalIOError if not found, or if there are excess tokens.
         //  Default search: non-recursive with patterns.
         //
         //  \param recursive search parent dictionaries
@@ -554,13 +549,13 @@ public:
         ) const;
 
         //- Find and return a T.
-        //- FatalError if not found, or if there are excess tokens.
+        //- FatalIOError if not found, or if there are excess tokens.
         //  Default search: non-recursive with patterns.
         //
         //  \param recursive search parent dictionaries
         //  \param patternMatch use regular expressions
         //
-        //  \note same as get()
+        //  \deprecated - same as the get() method
         template<class T>
         T lookupType
         (
@@ -570,7 +565,7 @@ public:
         ) const;
 
         //- Find and return a T, or return the given default value
-        //- FatalError if it is found and there are excess tokens.
+        //- FatalIOError if it is found and there are excess tokens.
         //  Default search: non-recursive with patterns.
         //
         //  \param recursive search parent dictionaries
@@ -586,7 +581,7 @@ public:
 
         //- Find and return a T, or return the given default value
         //- and add it to dictionary.
-        //- FatalError if it is found and there are excess tokens.
+        //- FatalIOError if it is found and there are excess tokens.
         //  Default search: non-recursive with patterns.
         //
         //  \param recursive search parent dictionaries
@@ -600,8 +595,26 @@ public:
             bool patternMatch = true
         );
 
+        //- Find entry and assign to T val.
+        //- FatalIOError if it is found and there are excess tokens.
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        //
+        //  \return true if the entry was found.
+        template<class T>
+        bool read
+        (
+            const word& keyword,
+            T& val,
+            bool recursive = false,
+            bool patternMatch = true,
+            bool mandatory = true
+        ) const;
+
         //- Find an entry if present, and assign to T val.
-        //- FatalError if it is found and there are excess tokens.
+        //- FatalIOError if it is found and there are excess tokens.
         //  Default search: non-recursive with patterns.
         //
         //  \param val the value to read
@@ -662,7 +675,7 @@ public:
         dictionary& subDict(const word& keyword);
 
         //- Find and return a sub-dictionary as a copy, otherwise return
-        //  an empty dictionary.
+        //- an empty dictionary.
         //  Warn if the entry exists but is not a sub-dictionary.
         //
         //  Search type: non-recursive with patterns.
@@ -984,7 +997,7 @@ public:
             bool patternMatch
         ) const;
 
-        //- Find and return an entry if present otherwise error,
+        //- Find and return an entry if present, otherwise FatalIOError,
         //- using any compatibility names if needed.
         //
         //  \param compat list of old compatibility keywords and the last
@@ -997,6 +1010,24 @@ public:
             std::initializer_list<std::pair<const char*,int>> compat,
             bool recursive,
             bool patternMatch
+        ) const;
+
+        //- Find and return a T
+        //- using any compatibility names if needed.
+        //- FatalIOError if not found, or if there are excess tokens.
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param compat list of old compatibility keywords and the last
+        //      OpenFOAM version for which they were used.
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        template<class T>
+        T getCompat
+        (
+            const word& keyword,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            bool recursive = false,
+            bool patternMatch = true
         ) const;
 
         //- Find and return an entry data stream,
@@ -1033,8 +1064,32 @@ public:
             bool patternMatch = true
         ) const;
 
+        //- Find entry and assign to T val
+        //- using any compatibility names if needed.
+        //- FatalIOError if there are excess tokens.
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param compat list of old compatibility keywords and the last
+        //      OpenFOAM version for which they were used.
+        //  \param val the value to read
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        //
+        //  \return true if the entry was found.
+        template<class T>
+        bool readCompat
+        (
+            const word& keyword,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            T& val,
+            bool recursive = false,
+            bool patternMatch = true,
+            bool mandatory = true
+        ) const;
+
         //- Find an entry if present, and assign to T val
         //- using any compatibility names if needed.
+        //- FatalIOError if it is found and there are excess tokens.
         //  Default search: non-recursive with patterns.
         //
         //  \param compat list of old compatibility keywords and the last
