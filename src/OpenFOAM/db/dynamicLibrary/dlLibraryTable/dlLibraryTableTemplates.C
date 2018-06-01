@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,47 +37,36 @@ bool Foam::dlLibraryTable::open
     const TablePtr& tablePtr
 )
 {
-    if (dict.found(libsEntry))
+    fileNameList libNames;
+    dict.readIfPresent(libsEntry, libNames);
+
+    label nOpen = 0;
+
+    for (const fileName& libName : libNames)
     {
-        fileNameList libNames(dict.lookup(libsEntry));
+        const label nEntries = (tablePtr ? tablePtr->size() : 0);
 
-        bool allOpened = (libNames.size() > 0);
-
-        forAll(libNames, i)
+        if (dlLibraryTable::open(libName))
         {
-            const fileName& libName = libNames[i];
+            ++nOpen;
 
-            label nEntries = 0;
-
-            if (tablePtr)
-            {
-                nEntries = tablePtr->size();
-            }
-
-            bool opened = dlLibraryTable::open(libName);
-            allOpened = opened && allOpened;
-
-            if (!opened)
-            {
-                WarningInFunction
-                    << "Could not open library " << libName
-                    << endl << endl;
-            }
-            else if (debug && (!tablePtr || tablePtr->size() <= nEntries))
+            if (debug && (!tablePtr || tablePtr->size() <= nEntries))
             {
                 WarningInFunction
                     << "library " << libName
                     << " did not introduce any new entries"
-                    << endl << endl;
+                    << nl << endl;
             }
         }
+        else
+        {
+            WarningInFunction
+                << "Could not open library " << libName
+                << nl << endl;
+        }
+    }
 
-        return allOpened;
-    }
-    else
-    {
-        return false;
-    }
+    return nOpen && nOpen == libNames.size();
 }
 
 

@@ -49,12 +49,14 @@ namespace Foam
 
 class dlLibraryTable
 {
-    // Private Member Functions
+    // Private data
 
         DynamicList<void*> libPtrs_;
 
         DynamicList<fileName> libNames_;
 
+
+    // Private Member Functions
 
         //- No copy construct
         dlLibraryTable(const dlLibraryTable&) = delete;
@@ -73,9 +75,9 @@ public:
         //- Construct null
         dlLibraryTable();
 
-        //- Construct from dictionary and name of 'libs' entry giving
-        //  the libraries to load
-        dlLibraryTable(const dictionary&, const word&);
+        //- Open all libraries listed in the 'libsEntry' entry in the
+        //- given dictionary.
+        dlLibraryTable(const dictionary& dict, const word& libsEntry);
 
 
     //- Destructor
@@ -85,25 +87,25 @@ public:
     // Member Functions
 
         //- Open the named library, optionally with warnings if problems occur
-        bool open(const fileName& name, const bool verbose = true);
+        bool open(const fileName& libName, const bool verbose = true);
 
         //- Close the named library, optionally with warnings if problems occur
-        bool close(const fileName& name, const bool verbose = true);
+        bool close(const fileName& libName, const bool verbose = true);
 
         //- Find the handle of the named library
-        void* findLibrary(const fileName& name);
+        void* findLibrary(const fileName& libName);
 
-        //- Open all the libraries listed in the 'libsEntry' entry in the
-        //  given dictionary if present
-        bool open(const dictionary&, const word& libsEntry);
+        //- Open all libraries listed in the 'libsEntry' entry in the
+        //- given dictionary.
+        bool open(const dictionary& dict, const word& libsEntry);
 
-        //- Open all the libraries listed in the 'libsEntry' entry in the
-        //  given dictionary if present and check the additions
-        //  to the given constructor table
+        //- Open all libraries listed in the 'libsEntry' entry in the
+        //- given dictionary and check the additions
+        //- to the given constructor table
         template<class TablePtr>
         bool open
         (
-            const dictionary&,
+            const dictionary& dict,
             const word& libsEntry,
             const TablePtr& tablePtr
         );
