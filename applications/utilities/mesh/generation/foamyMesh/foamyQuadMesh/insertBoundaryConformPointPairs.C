@@ -295,7 +295,7 @@ void Foam::CV2D::markNearBoundaryPoints()
     {
         if (vit->internalPoint())
         {
-            point vert(toPoint3D(vit->point()));
+            Foam::point vert(toPoint3D(vit->point()));
 
             pointIndexHit pHit;
             label hitSurface = -1;

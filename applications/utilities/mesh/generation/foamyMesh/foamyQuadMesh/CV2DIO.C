@@ -210,8 +210,8 @@ void Foam::CV2D::extractPatches
          || (vB->internalOrBoundaryPoint() && !vA->internalOrBoundaryPoint())
         )
         {
-            point ptA = toPoint3D(vA->point());
-            point ptB = toPoint3D(vB->point());
+            Foam::point ptA = toPoint3D(vA->point());
+            Foam::point ptB = toPoint3D(vB->point());
 
             label patchIndex = qSurf_.findPatch(ptA, ptB);
 

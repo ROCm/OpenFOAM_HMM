@@ -347,9 +347,9 @@ public:
 
         // Conversion functions between point2D, point and Point
 
-            inline const point2D& toPoint2D(const point&) const;
+            inline const point2D& toPoint2D(const Foam::point&) const;
             inline const point2DField toPoint2D(const pointField&) const;
-            inline point toPoint3D(const point2D&) const;
+            inline Foam::point toPoint3D(const point2D&) const;
 
             #ifdef CGAL_INEXACT
                 typedef const point2D& point2DFromPoint;
@@ -361,7 +361,7 @@ public:
 
             inline point2DFromPoint toPoint2D(const Point&) const;
             inline PointFromPoint2D toPoint(const point2D&) const;
-            inline point toPoint3D(const Point&) const;
+            inline Foam::point toPoint3D(const Point&) const;
 
 
         // Point insertion
