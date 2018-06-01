@@ -49,9 +49,9 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
     {
         IOdictionary dict(dictHeader);
 
-        const word dynamicFvMeshTypeName(dict.lookup("dynamicFvMesh"));
+        const word modelType(dict.lookup("dynamicFvMesh"));
 
-        Info<< "Selecting dynamicFvMesh " << dynamicFvMeshTypeName << endl;
+        Info<< "Selecting dynamicFvMesh " << modelType << endl;
 
         const_cast<Time&>(io.time()).libs().open
         (
@@ -67,25 +67,22 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
                 << exit(FatalError);
         }
 
-        auto cstrIter =
-            IOobjectConstructorTablePtr_->cfind(dynamicFvMeshTypeName);
+        auto cstrIter = IOobjectConstructorTablePtr_->cfind(modelType);
 
         if (!cstrIter.found())
         {
             FatalIOErrorInFunction(dict)
                 << "Unknown dynamicFvMesh type "
-                << dynamicFvMeshTypeName << nl << nl
+                << modelType << nl << nl
                 << "Valid dynamicFvMesh types are :" << endl
                 << IOobjectConstructorTablePtr_->sortedToc()
                 << exit(FatalIOError);
         }
 
-        #define MOVING_MESH
         return autoPtr<dynamicFvMesh>(cstrIter()(io));
     }
 
 
-    #undef MOVING_MESH
     return autoPtr<dynamicFvMesh>(new staticFvMesh(io));
 }
 

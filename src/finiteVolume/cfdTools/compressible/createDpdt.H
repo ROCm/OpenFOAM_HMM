@@ -1,36 +1,29 @@
-#if defined(MOVING_MESH)
+IOobject dpdtHeader
+(
+    "dpdt",
+    runTime.timeName(),
+    mesh,
+    IOobject::NO_READ,
+    IOobject::NO_WRITE
+);
+
+if (mesh.dynamic())
+{
     Info<< "Creating field dpdt for moving meshes\n" << endl;
 
-    // Note: set to read if present and auto write to simplify dpdt correction
-    // by meshPhi
-    volScalarField dpdt
-    (
-        IOobject
-        (
-            "dpdt",
-            runTime.timeName(),
-            mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        fvc::ddt(p)
-    );
-#else
+    // Note
+    // - set to READ_IF_PRESENT and AUTO_WRITE to simplify dpdt correction
+    //   by meshPhi
+    
+    dpdtHeader.readOpt() = IOobject::READ_IF_PRESENT;
+    dpdtHeader.writeOpt() = IOobject::AUTO_WRITE;
+}
+else
+{
     Info<< "Creating field dpdt\n" << endl;
+}
 
-    volScalarField dpdt
-    (
-        IOobject
-        (
-            "dpdt",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        fvc::ddt(p)
-    );
-#endif
+volScalarField dpdt(dpdtHeader, fvc::ddt(p));
 
 if (!thermo.dpdt())
 {
