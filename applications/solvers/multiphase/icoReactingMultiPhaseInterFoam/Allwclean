@@ -1,9 +1,8 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # Run from this directory
-set -x
 
 wclean libso phasesSystem
-wclean libso meltingEvaporationModel
+wclean libso massTransferModels
 wclean libso CompressibleMultiPhaseTurbulenceModels
 wclean libso laserDTRM
 wclean

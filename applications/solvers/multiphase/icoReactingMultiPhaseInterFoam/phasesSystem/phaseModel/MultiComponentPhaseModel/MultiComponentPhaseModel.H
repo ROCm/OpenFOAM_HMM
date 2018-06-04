@@ -60,9 +60,6 @@ protected:
 
     // Protected data
 
-        //- Residual phase fraction
-        dimensionedScalar residualAlpha_;
-
         //- Species table
         hashedWordList species_;
 
@@ -71,6 +68,19 @@ protected:
 
         //- Thermophysical model
         autoPtr<phaseThermo> thermoPtr_;
+
+        //- Ptr list of volumetric fractions for species
+        PtrList<volScalarField> X_;
+
+
+    // Protected functions
+
+        //- Transfor volume fraction into mass fractions
+        void calculateMassFractions();
+
+        //- Transfor mass fraction into volume fractions
+        void calculateVolumeFractions();
+
 
 
 public:
@@ -107,8 +117,15 @@ public:
             //- Access non-const thermo
             virtual phaseThermo& thermo();
 
-            //- Return the species fraction equation
-            virtual tmp<fvScalarMatrix> YiEqn(volScalarField& Yi);
+            //- Correct phase thermo
+            virtual void correct();
+
+            //- Solve species fraction equation
+            virtual void solveYi
+            (
+                PtrList<volScalarField::Internal>&,
+                PtrList<volScalarField::Internal>&
+            );
 
             //- Constant access the species mass fractions
             virtual const PtrList<volScalarField>& Y() const;
@@ -116,26 +133,8 @@ public:
             //- Access the species mass fractions
             virtual PtrList<volScalarField>& Y();
 
-            //- Return heat of formation for species
-            virtual dimensionedScalar hf(label index) const;
-
-            //- Correct the mass fractions
-            //void correctMassFractions();
-
-
-        // Transport
-
-            //- Return the laminar dynamic viscosity
-            virtual tmp<volScalarField> mu() const;
-
-            //- Return the laminar dynamic viscosity on a patch
-            virtual tmp<scalarField> mu(const label patchI) const;
-
-            //- Return the laminar kinematic viscosity
-            virtual tmp<volScalarField> nu() const;
-
-            //- Return the laminar kinematic viscosity on a patch
-            virtual tmp<scalarField> nu(const label patchI) const;
+            //- Return inert species index
+            label inertIndex() const;
 
 };
 

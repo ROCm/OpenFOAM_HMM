@@ -154,9 +154,6 @@ public:
                 const scalarField& x2
             ) const;
 
-            //- Return true for Constant type
-            virtual bool isConstant() const;
-
 
         // I/O
 

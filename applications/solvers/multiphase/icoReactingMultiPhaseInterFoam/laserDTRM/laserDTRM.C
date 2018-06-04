@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ License
 #include "unitConversion.H"
 #include "interpolationCell.H"
 #include "interpolationCellPoint.H"
+#include "Random.H"
 
 using namespace Foam::constant;
 
@@ -124,19 +125,13 @@ Foam::tmp<Foam::volVectorField> Foam::radiation::laserDTRM::nHatfv
     const dimensionedScalar deltaN
     (
         "deltaN",
-        1e-8/pow(average(mesh_.V()), 1.0/3.0)
+        1e-7/pow(average(mesh_.V()), 1.0/3.0)
     );
 
-    const dimensionedScalar minAlpha
+    const volVectorField gradAlphaf
     (
-        "minAlpha", dimless, 1e-3
-    );
-
-    volVectorField gradAlphaf
-    (
-        "gradAlphaf",
-         (alpha2 + minAlpha)*fvc::grad(alpha1)
-       - (alpha1 + minAlpha)*fvc::grad(alpha2)
+         alpha2*fvc::grad(alpha1)
+       - alpha1*fvc::grad(alpha2)
     );
 
    // Face unit interface normal
@@ -144,15 +139,34 @@ Foam::tmp<Foam::volVectorField> Foam::radiation::laserDTRM::nHatfv
 }
 
 
-Foam::tmp<Foam::volScalarField>Foam::radiation::laserDTRM::nearInterface
-(
-    const volScalarField& alpha1,
-    const volScalarField& alpha2
-) const
+void Foam::radiation::laserDTRM::initialiseReflection()
 {
-    return
-        pos(alpha1 - 0.1)*pos(0.9 - alpha1)
-      * pos(alpha2 - 0.1)*pos(0.9 - alpha2);
+    if (found("reflectionModel"))
+    {
+        dictTable modelDicts(lookup("reflectionModel"));
+
+        forAllConstIter(dictTable, modelDicts, iter)
+        {
+            const phasePairKey& key = iter.key();
+
+            reflections_.insert
+            (
+                key,
+                reflectionModel::New
+                (
+                    *iter,
+                    mesh_
+                )
+            );
+        }
+
+        if (reflections_.size() > 0)
+        {
+            reflectionSwitch_ = true;
+        }
+
+        reflectionSwitch_ = returnReduce(reflectionSwitch_, orOp<bool>());
+    }
 }
 
 
@@ -175,9 +189,9 @@ void Foam::radiation::laserDTRM::initialise()
     // Find a vector on the area plane. Normal to laser direction
     vector rArea = vector::zero;
     scalar magr = 0.0;
-    cachedRandom rnd(1234, -1);
     while (magr < VSMALL)
     {
+        Random rnd(1234);
         vector v = rnd.sample01<vector>();
         rArea = v - (v & lDir)*lDir;
         magr = mag(rArea);
@@ -203,19 +217,6 @@ void Foam::radiation::laserDTRM::initialise()
                 new interpolation2DTable<scalar>(*this)
             );
 
-            // Check dimensions ndr and ndTheta
-//             if
-//             (
-//                (powerDistribution_->size() != ndTheta_)
-//             || (powerDistribution_().first().second().size() != ndr_)
-//             )
-//             {
-//                  FatalErrorInFunction
-//                     << " The table dimensions should correspond with ndTheta "
-//                     << " and ndr "
-//                     << exit(FatalError);
-//             }
-
             break;
         }
         case pdUniform:
@@ -235,9 +236,6 @@ void Foam::radiation::laserDTRM::initialise()
     p1 = p0;
     if (mesh_.nGeometricD() == 3)
     {
-        //scalar r0 = dr/2.0;
-        //scalar r1Max0 = drMax/2.0;
-
         for (label ri = 0; ri < ndr_; ri++)
         {
             scalar r1 = SMALL + dr*ri;
@@ -275,8 +273,6 @@ void Foam::radiation::laserDTRM::initialise()
                 // calculate target point using new deviation rl
                 p1 = lPosition + finalPos + (0.5*maxTrackLength_*lDir);
 
-                //scalar p = magSqr(p0 - lPosition);
-
                 scalar Ip = calculateIp(rP, thetaP);
 
                 scalar dAi = (sqr(r2) - sqr(r1))*(theta2 - theta1)/2.0;
@@ -290,7 +286,7 @@ void Foam::radiation::laserDTRM::initialise()
                 {
                     // Create a new particle
                     DTRMParticle* pPtr = new DTRMParticle
-                        (mesh_, p0, p1, Ip, cellI, dAi, 0 , 0.01*Ip, true);
+                        (mesh_, p0, p1, Ip, cellI, dAi, -1);
 
                     // Add to cloud
                     DTRMCloud_.addParticle(pPtr);
@@ -338,11 +334,11 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
     (
         Function1<point>::New("focalLaserPosition", *this)
     ),
+
     laserDirection_
     (
         Function1<vector>::New("laserDirection", *this)
     ),
-
 
     focalLaserRadius_(readScalar(lookup("focalLaserRadius"))),
     qualityBeamLaser_
@@ -354,11 +350,10 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
     laserPower_(Function1<scalar>::New("laserPower", *this)),
     powerDistribution_(),
 
-    reflection_(reflectionModel::New(*this, mesh_).ptr()),
-    reflectionSwitch_(lookupOrDefault("reflection", false)),
-    initialPhase_(lookupOrDefault("initialPhase", word::null)),
-    alpha1_(lookupOrDefault("alpha1", word::null)),
-    alpha2_(lookupOrDefault("alpha2", word::null)),
+    reflectionSwitch_(false),
+
+    alphaCut_( lookupOrDefault<scalar>("alphaCut", 0.5)),
+
     Qin_
     (
         IOobject
@@ -413,7 +408,7 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
     ),
     Q_
     (
-     IOobject
+        IOobject
         (
             "Q",
             mesh_.time().timeName(),
@@ -425,6 +420,8 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
         dimensionedScalar("Q", dimPower/dimVolume, 0.0)
     )
 {
+    initialiseReflection();
+
     initialise();
 }
 
@@ -462,11 +459,10 @@ Foam::radiation::laserDTRM::laserDTRM
     laserPower_(Function1<scalar>::New("laserPower", *this)),
     powerDistribution_(),
 
-    reflection_(reflectionModel::New(*this, mesh_).ptr()),
-    reflectionSwitch_(dict.lookupOrDefault("reflection", false)),
-    initialPhase_(lookupOrDefault("initialPhase", word::null)),
-    alpha1_(lookupOrDefault("alpha1", word::null)),
-    alpha2_(lookupOrDefault("alpha2", word::null)),
+    reflectionSwitch_(false),
+
+    alphaCut_( lookupOrDefault<scalar>("alphaCut", 0.5)),
+
     Qin_
     (
         IOobject
@@ -533,6 +529,7 @@ Foam::radiation::laserDTRM::laserDTRM
         dimensionedScalar("Q", dimPower/pow3(dimLength), 0.0)
     )
 {
+    initialiseReflection();
     initialise();
 }
 
@@ -573,25 +570,11 @@ void Foam::radiation::laserDTRM::calculate()
                 IOobject::NO_WRITE
             ),
             mesh_,
-            dimensionedScalar("zero", dimless, 0)
+            dimensionedScalar("zero", dimless, -1)
         )
     );
     volScalarField& reflectingCellsVol = treflectingCells.ref();
 
-    // Reset the fields
-    Qin_ == dimensionedScalar("zero", Qin_.dimensions(), 0);
-    Q_ == dimensionedScalar("zero", Q_.dimensions(), 0);
-
-    a_ = absorptionEmission_->a();
-    e_ = absorptionEmission_->e();
-    E_ = absorptionEmission_->E();
-
-    const interpolationCell<scalar> aInterp(a_);
-    const interpolationCell<scalar> eInterp(e_);
-    const interpolationCell<scalar> EInterp(E_);
-    const interpolationCell<scalar> TInterp(T_);
-
-    labelField reflectingCells(mesh_.nCells(), 0);
 
     tmp<volVectorField> tnHat
     (
@@ -611,53 +594,85 @@ void Foam::radiation::laserDTRM::calculate()
     );
     volVectorField& nHat = tnHat.ref();
 
+
+    // Reset the fields
+    Qin_ == dimensionedScalar("zero", Qin_.dimensions(), 0);
+    Q_ == dimensionedScalar("zero", Q_.dimensions(), 0);
+
+    a_ = absorptionEmission_->a();
+    e_ = absorptionEmission_->e();
+    E_ = absorptionEmission_->E();
+
+    const interpolationCell<scalar> aInterp(a_);
+    const interpolationCell<scalar> eInterp(e_);
+    const interpolationCell<scalar> EInterp(E_);
+    const interpolationCell<scalar> TInterp(T_);
+
+    labelField reflectingCells(mesh_.nCells(), -1);
+
     autoPtr<interpolationCellPoint<vector>> nHatIntrPtr;
+
+    UPtrList<reflectionModel> reflactionUPtr;
 
     if (reflectionSwitch_)
     {
-        const volScalarField& initialPhase =
-            mesh_.lookupObject<volScalarField>(initialPhase_);
+        reflactionUPtr.resize(reflections_.size());
 
-        if (alpha1_ != word::null)
+        label reflectionModelId(0);
+        forAllIter(reflectionModelTable, reflections_, iter1)
         {
-            const volScalarField& alpha1 =
-                mesh_.lookupObject<volScalarField>(alpha1_);
+            reflectionModel& model = iter1()();
 
-            nHat = nHatfv(initialPhase, alpha1);
+            reflactionUPtr.set(reflectionModelId, &model);
 
-            forAll(alpha1, cellI)
+            const word alpha1Name = "alpha." + iter1.key().first();
+            const word alpha2Name = "alpha." + iter1.key().second();
+
+            const volScalarField& alphaFrom =
+                mesh_.lookupObject<volScalarField>(alpha1Name);
+
+            const volScalarField& alphaTo =
+                mesh_.lookupObject<volScalarField>(alpha2Name);
+
+            const volVectorField nHatPhase(nHatfv(alphaFrom, alphaTo));
+
+            const volScalarField gradAlphaf
+            (
+                fvc::grad(alphaFrom)
+              & fvc::grad(alphaTo)
+            );
+
+            const volScalarField nearInterface(pos(alphaTo - alphaCut_));
+
+            const volScalarField mask(nearInterface*gradAlphaf);
+
+            forAll(alphaFrom, cellI)
             {
-                if ((alpha1[cellI] > 0.9) && (mag(nHat[cellI]) > 0.9))
+                if
+                (
+                    nearInterface[cellI]
+                 && mag(nHatPhase[cellI]) > 0.99
+                 && mask[cellI] < 0
+                )
                 {
-                    reflectingCells[cellI] = 1;
-                    reflectingCellsVol[cellI] = 1.0;
+                    reflectingCells[cellI] = reflectionModelId;
+                    reflectingCellsVol[cellI] = reflectionModelId;
+                    if (!mag(nHat[cellI]) > 0.0)
+                    {
+                        nHat[cellI] += nHatPhase[cellI];
+                    }
+
+
                 }
             }
+            reflectionModelId++;
         }
-
-        if (alpha2_ != word::null)
-        {
-            const volScalarField& alpha2 =
-                mesh_.lookupObject<volScalarField>(alpha2_);
-
-            nHat += nHatfv(initialPhase, alpha2);
-
-            forAll(alpha2, cellI)
-            {
-                if ((alpha2[cellI] > 0.9) && (mag(nHat[cellI]) > 0.9))
-                {
-                    reflectingCells[cellI] = 1;
-                    reflectingCellsVol[cellI] = 1.0;
-                }
-            }
-        }
-
-        nHatIntrPtr.reset
-        (
-            new interpolationCellPoint<vector>(nHat)
-        );
-
     }
+
+    nHatIntrPtr.reset
+    (
+        new interpolationCellPoint<vector>(nHat)
+    );
 
     DTRMParticle::trackingData td
     (
@@ -668,20 +683,22 @@ void Foam::radiation::laserDTRM::calculate()
         TInterp,
         nHatIntrPtr,
         reflectingCells,
-        reflection_,
+        reflactionUPtr,
         Q_
     );
 
     Info << "Move particles..."
          << returnReduce(DTRMCloud_.size(), sumOp<label>()) << endl;
 
-    DTRMCloud_.move(td, mesh_.time().deltaTValue());
+    DTRMCloud_.move(DTRMCloud_, td, mesh_.time().deltaTValue());
 
     // Normalize by cell volume
     Q_.primitiveFieldRef() /= mesh_.V();
 
     if (debug)
     {
+         Info<< "Final number of particles..."
+             << returnReduce(DTRMCloud_.size(), sumOp<label>()) << endl;
 
         OFstream osRef
         (
@@ -689,15 +706,41 @@ void Foam::radiation::laserDTRM::calculate()
         );
         label vertI = 0;
 
+        List<pointField> positions(Pstream::nProcs());
+        List<pointField> p0(Pstream::nProcs());
+
+        DynamicList<point>  positionsMyProc;
+        DynamicList<point>  p0MyProc;
+
         forAllIter(Cloud<DTRMParticle>, DTRMCloud_, iter)
         {
             DTRMParticle& p = iter();
-            meshTools::writeOBJ(osRef, p.position());
-            vertI++;
-            meshTools::writeOBJ(osRef, p.p0());
-            vertI++;
-            osRef << "l " << vertI-1 << ' ' << vertI << nl;
+            positionsMyProc.append(p.position());
+            p0MyProc.append(p.p0());
         }
+
+        positions[Pstream::myProcNo()].transfer(positionsMyProc);
+        p0[Pstream::myProcNo()].transfer(p0MyProc);
+
+        Pstream::gatherList(positions);
+        Pstream::scatterList(positions);
+        Pstream::gatherList(p0);
+        Pstream::scatterList(p0);
+
+        for (label proci = 0; proci < Pstream::nProcs(); proci++)
+        {
+            const pointField& pos = positions[proci];
+            const pointField& pfinal = p0[proci];
+            forAll (pos, i)
+            {
+                meshTools::writeOBJ(osRef, pos[i]);
+                vertI++;
+                meshTools::writeOBJ(osRef, pfinal[i]);
+                vertI++;
+                osRef << "l " << vertI-1 << ' ' << vertI << nl;
+            }
+        }
+
         osRef.flush();
 
         scalar totalQ = gSum(Q_.primitiveFieldRef()*mesh_.V());
@@ -706,6 +749,7 @@ void Foam::radiation::laserDTRM::calculate()
         if (mesh_.time().outputTime())
         {
              reflectingCellsVol.write();
+             nHat.write();
         }
     }
 

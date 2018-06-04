@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ License
 #include "physicoChemicalConstants.H"
 
 using namespace Foam::constant;
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::DTRMParticle::DTRMParticle
@@ -38,19 +39,40 @@ Foam::DTRMParticle::DTRMParticle
     const scalar I,
     const label cellI,
     const scalar dA,
-    const label reflectedId,
-    const scalar Imin,
-    bool doCellFacePt
+    const label transmissiveId
 )
 :
-    particle(mesh, position, cellI, doCellFacePt),
+    particle(mesh, position, cellI),
     p0_(position),
     p1_(targetPosition),
     I0_(I),
     I_(I),
     dA_(dA),
-    reflectedId_(reflectedId),
-    Imin_(Imin)
+    transmissiveId_(transmissiveId)
+{}
+
+
+Foam::DTRMParticle::DTRMParticle
+(
+    const polyMesh& mesh,
+    const barycentric& coordinates,
+    const label celli,
+    const label tetFacei,
+    const label tetPti,
+    const vector& position,
+    const vector& targetPosition,
+    const scalar I,
+    const scalar dA,
+    const label transmissiveId
+)
+:
+    particle(mesh, coordinates, celli, tetFacei, tetPti),
+    p0_(position),
+    p1_(targetPosition),
+    I0_(I),
+    I_(I),
+    dA_(dA),
+    transmissiveId_(transmissiveId)
 {}
 
 
@@ -62,14 +84,14 @@ Foam::DTRMParticle::DTRMParticle(const DTRMParticle& p)
     I0_(p.I0_),
     I_(p.I_),
     dA_(p.dA_),
-    reflectedId_(p.reflectedId_),
-    Imin_(p.Imin_)
+    transmissiveId_(p.transmissiveId_)
 {}
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::DTRMParticle::move
 (
+    Cloud<DTRMParticle>& spc,
     trackingData& td,
     const scalar trackTime
 )
@@ -77,106 +99,120 @@ bool Foam::DTRMParticle::move
     td.switchProcessor = false;
     td.keepParticle = true;
 
-    const polyBoundaryMesh& pbMesh = mesh_.boundaryMesh();
-
-    while (td.keepParticle && !td.switchProcessor)
+    while (td.keepParticle && !td.switchProcessor && stepFraction() < 1)
     {
-        point p0 = position();
-        label cell0 = cell();
+        //Cache old data of particle to use for reflected particle
+        const point pos0 = position();
+        const label cell0 = cell();
 
-        scalar dt = trackToFace(p1_, td);
+        scalar f = 1 - stepFraction();
+        const vector s = p1() - p0() - deviationFromMeshCentre();
+        trackToAndHitFace(f*s, f, spc, td);
 
-        // Consider the cell between f0(start of tracking) and f1
-        label celli = cell();
+        const point p1 = position();
+        vector dsv = p1 - pos0;
+        scalar ds = mag(dsv);
 
-        const vector dsv = position() - p0;
-        const scalar ds = mag(dsv);
+        const label cell1 = cell();
+
+        //NOTE:
+        // Under the new barocentric tracking alghorithm the newly
+        // inserted particles are tracked to the nearest cell centre first,
+        // then, given the direction, to a face. In both occasions the first call
+        // to trackToAndHitFace returns ds = 0. In this case we do an extra
+        // call to trackToAndHitFace to start the tracking.
+        // This is a temporary fix until the tracking can handle it.
+        if (ds == 0)
+        {
+            trackToAndHitFace(f*s, f, spc, td);
+            dsv = p1 - position();
+            ds = mag(dsv);
+        }
 
         // Boltzman constant
         const scalar sigma = physicoChemical::sigma.value();
+
+        label reflectedZoneId = td.relfectedCells()[cell1];
+
         if
         (
-            (!td.relfectedCells()[celli] > 0 && reflectedId_ == 0)
-         || reflectedId_ > 0
+            (reflectedZoneId > -1)
+         && (
+                (transmissiveId_ == -1)
+             || (transmissiveId_ != reflectedZoneId)
+            )
         )
         {
-            scalar a = td.aInterp().interpolate(position(), cell0);
-            scalar e = td.eInterp().interpolate(position(), cell0);
-            scalar E = td.EInterp().interpolate(position(), cell0);
-            scalar T = td.TInterp().interpolate(position(), cell0);
-
-            const scalar I1 =
-            (
-                I_
-                + ds*(e*sigma*pow4(T)/mathematical::pi + E)
-            ) / (1 + ds*a);
-
-            td.Q(cell0) += (I_ - I1)*dA_;
-
-            I_ = I1;
-
-            if ((I_ <= 0.01*I0_) || (I_ < Imin_))
-            {
-                break;
-            }
-        }
-        else
-        {
             scalar rho(0);
+
             // Create a new reflected particle when the particles is not
             // transmissive and larger than an absolute I
-            if (reflectedId_ == 0 && I_ > Imin_)
+            if (I_ > 0.01*I0_ && ds > 0)
             {
                 vector pDir = dsv/ds;
 
-                cellPointWeight cpw(mesh_, position(), celli, face());
-                //vector nHat = td.nHatCells()[celli];
+                cellPointWeight cpw(mesh(), position(), cell1, face());
                 vector nHat = td.nHatInterp().interpolate(cpw);
 
-                nHat /= mag(nHat);
+                nHat /= (mag(nHat) + ROOTSMALL);
                 scalar cosTheta(-pDir & nHat);
+
                 // Only new incoming rays
                 if (cosTheta > SMALL)
                 {
-                    vector newDir = td.reflection().R(pDir, nHat);
-
-                    //scalar theta = acos(-pDir & nHat);
+                    vector newDir =
+                        td.reflection()
+                        [
+                            td.relfectedCells()[cell1]
+                        ].R(pDir, nHat);
 
                     // reflectivity
-                    rho = min(max(td.reflection().rho(cosTheta), 0.0), 0.98);
+                    rho =
+                        min
+                        (
+                            max
+                            (
+                                td.reflection()
+                                [
+                                    td.relfectedCells()[cell1]
+                                ].rho(cosTheta)
+                                , 0.0
+                            )
+                            , 0.98
+                        );
 
-                    scalar delaM = sqrt(mesh_.cellVolumes()[cell0]);
+                    scalar delaM = cbrt(mesh().cellVolumes()[cell0]);
 
-                    DTRMParticle* pPtr = new DTRMParticle
-                    (
-                        mesh_,
-                        position() - pDir*0.1*delaM,
-                        position() + newDir*mesh_.bounds().mag(),
-                        I_*rho,
-                        cell0,
-                        dA_,
-                        reflectedId_,
-                        Imin_,
-                        true
-                    );
-                    // Add to cloud
-                    td.cloud().addParticle(pPtr);
+                    const point insertP(position() - pDir*0.1*delaM);
+                    label cellI = mesh().findCell(insertP);
+
+                    if (cellI > -1)
+                    {
+                        DTRMParticle* pPtr = new DTRMParticle
+                        (
+                            mesh(),
+                            insertP,
+                            insertP + newDir*mesh().bounds().mag(),
+                            I_*rho,
+                            cellI,
+                            dA_,
+                            -1
+                        );
+
+                        // Add to cloud
+                        spc.addParticle(pPtr);
+                    }
                 }
             }
 
-            reflectedId_++;
+            // Change transmissiveId of the particle
+            transmissiveId_ = reflectedZoneId;
 
-            const point p0 = position();
-
-            // Try to locate this particle across the reflecting surface in
-            // a pure phase face
-            scalar dt = trackToFace(p1_, td);
-            const scalar ds = mag(position() - p0);
-
-            scalar a = td.aInterp().interpolate(position(), celli);
-            scalar e = td.eInterp().interpolate(position(), celli);
-            scalar E = td.EInterp().interpolate(position(), celli);
-            scalar T = td.TInterp().interpolate(position(), celli);
+            const tetIndices tetIs = this->currentTetIndices();
+            scalar a = td.aInterp().interpolate(this->coordinates(), tetIs);
+            scalar e = td.eInterp().interpolate(this->coordinates(), tetIs);
+            scalar E = td.EInterp().interpolate(this->coordinates(), tetIs);
+            scalar T = td.TInterp().interpolate(this->coordinates(), tetIs);
 
             // Left intensity after reflection
             const scalar Itran = I_*(1.0 - rho);
@@ -186,46 +222,51 @@ bool Foam::DTRMParticle::move
               + ds*(e*sigma*pow4(T)/mathematical::pi + E)
             ) / (1 + ds*a);
 
-            td.Q(celli) += (Itran - I1)*dA_;
+            td.Q(cell1) += (Itran - max(I1, 0.0))*dA_;
 
             I_ = I1;
 
-            if (I_ <= 0.01*I0_ || I_ < Imin_)
+            if (I_ <= 0.01*I0_)
             {
+                stepFraction() = 1.0;
+                break;
+            }
+        }
+        else
+        {
+            const tetIndices tetIs = this->currentTetIndices();
+            scalar a = td.aInterp().interpolate(this->coordinates(), tetIs);
+            scalar e = td.eInterp().interpolate(this->coordinates(), tetIs);
+            scalar E = td.EInterp().interpolate(this->coordinates(), tetIs);
+            scalar T = td.TInterp().interpolate(this->coordinates(), tetIs);
+
+            const scalar I1 =
+            (
+                I_
+                + ds*(e*sigma*pow4(T)/mathematical::pi + E)
+            ) / (1 + ds*a);
+
+            td.Q(cell1) += (I_ -  max(I1, 0.0))*dA_;
+
+            I_ = I1;
+
+            if ((I_ <= 0.01*I0_))
+            {
+                stepFraction() = 1.0;
                 break;
             }
         }
 
-        if (onBoundary() && td.keepParticle)
-        {
-            if (isA<processorPolyPatch>(pbMesh[patch(face())]))
-            {
-                td.switchProcessor = true;
-            }
-        }
     }
 
     return td.keepParticle;
 }
 
 
-bool Foam::DTRMParticle::hitPatch
-(
-    const polyPatch&,
-    particle::TrackingData<Cloud<DTRMParticle>>&,
-    const label,
-    const scalar,
-    const tetIndices&
-)
-{
-    return false;
-}
-
-
 void Foam::DTRMParticle::hitProcessorPatch
 (
-    const processorPolyPatch&,
-    particle::TrackingData<Cloud<DTRMParticle>>& td
+    Cloud<DTRMParticle>&,
+    trackingData& td
 )
 {
     td.switchProcessor = true;
@@ -234,22 +275,21 @@ void Foam::DTRMParticle::hitProcessorPatch
 
 void Foam::DTRMParticle::hitWallPatch
 (
-    const wallPolyPatch& wpp,
-    particle::TrackingData<Cloud<DTRMParticle>>& td,
-    const tetIndices& tetIs
+    Cloud<DTRMParticle>&,
+    trackingData& td
 )
 {
     td.keepParticle = false;
 }
 
 
-void Foam::DTRMParticle::hitPatch
+bool Foam::DTRMParticle::hitPatch
 (
-    const polyPatch&,
-    particle::TrackingData<Cloud<DTRMParticle>>& td
+    Cloud<DTRMParticle>&,
+    trackingData& td
 )
 {
-    td.keepParticle = false;
+    return false;
 }
 
 

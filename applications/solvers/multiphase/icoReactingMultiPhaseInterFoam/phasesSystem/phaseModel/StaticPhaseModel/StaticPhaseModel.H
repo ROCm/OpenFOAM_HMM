@@ -93,7 +93,7 @@ public:
             //- Access the volumetric flux
             virtual const surfaceScalarField& phi();
 
-            //- Constant access the volumetric flux of the phase. Return zero field
+            //- Constant access the volumetric flux of the phase.
             virtual tmp<surfaceScalarField> alphaPhi() const;
 
             //- Access the volumetric flux of the phase
@@ -101,6 +101,9 @@ public:
 
             //- Access const reference to U
             virtual tmp<volVectorField> U() const;
+
+            //- Maximum diffusion number
+            virtual tmp<surfaceScalarField> diffNo() const;
 
 };
 

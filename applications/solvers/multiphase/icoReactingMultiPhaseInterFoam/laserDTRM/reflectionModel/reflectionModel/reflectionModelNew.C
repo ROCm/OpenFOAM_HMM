@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C)  2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C)  2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,7 @@ New
     const fvMesh& mesh
 )
 {
-    const word modelType(dict.lookup("reflectionModel"));
+    const word modelType(dict.lookup("type"));
 
     Info<< "Selecting reflectionModel " << modelType << endl;
 

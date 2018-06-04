@@ -106,9 +106,6 @@ public:
         //- Update properties
         virtual void correct();
 
-
-        //- Update properties from T
-        //virtual void correctT();
 };
 
 

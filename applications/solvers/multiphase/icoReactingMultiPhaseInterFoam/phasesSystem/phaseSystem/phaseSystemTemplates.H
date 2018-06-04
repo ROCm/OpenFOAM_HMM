@@ -48,12 +48,41 @@ void Foam::phaseSystem::createSubModels
             modelType::New
             (
                *iter,
-                phasePairs_[key]
+               phasePairs_[key]
             )
         );
     }
 }
 
+
+template<class modelType>
+void Foam::phaseSystem::createSubModels
+(
+    const dictTable& modelDicts,
+    const fvMesh& mesh,
+    HashTable
+    <
+        autoPtr<modelType>,
+        phasePairKey,
+        phasePairKey::hash
+    >& models
+)
+{
+    forAllConstIter(dictTable, modelDicts, iter)
+    {
+        const phasePairKey& key = iter.key();
+
+        models.insert
+        (
+            key,
+            modelType::New
+            (
+               *iter,
+               mesh
+            )
+        );
+    }
+}
 
 template<class modelType>
 void Foam::phaseSystem::generatePairsAndSubModels
@@ -73,6 +102,29 @@ void Foam::phaseSystem::generatePairsAndSubModels
     generatePairs(modelDicts);
 
     createSubModels(modelDicts, models);
+
+}
+
+
+template<class modelType>
+void Foam::phaseSystem::generatePairsAndSubModels
+(
+    const word& modelName,
+    const fvMesh& mesh,
+    HashTable
+    <
+        autoPtr<modelType>,
+        phasePairKey,
+        phasePairKey::hash
+    >& models
+)
+{
+
+    dictTable modelDicts(lookup(modelName));
+
+    generatePairs(modelDicts);
+
+    createSubModels(modelDicts, mesh, models);
 
 }
 
@@ -139,11 +191,11 @@ const modelType& Foam::phaseSystem::lookupSubModel(const phasePair& key) const
 template <class modelType>
 const modelType& Foam::phaseSystem::lookupSubModel
 (
-    const phaseModel& dispersed,
-    const phaseModel& continuous
+    const phaseModel& from,
+    const phaseModel& to
 ) const
 {
-    return lookupSubModel<modelType>(orderedPhasePair(dispersed, continuous));
+    return lookupSubModel<modelType>(orderedPhasePair(from, to));
 }
 
 

@@ -119,12 +119,6 @@ Type Foam::TimeFunction1<Type>::integrate
 }
 
 
-template<class Type>
-bool Foam::TimeFunction1<Type>::isConstant() const
-{
-    return entry_->isConstant();
-}
-
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class Type>

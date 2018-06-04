@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,8 +53,7 @@ Foam::radiation::FresnelLaser::FresnelLaser
 )
 :
     reflectionModel(dict, mesh),
-    coeffsDict_(dict.subDict(typeName + "Coeffs")),
-    epsilon_(readScalar(coeffsDict_.lookup("epsilon")))
+    epsilon_(readScalar(dict.lookup("epsilon")))
 {}
 
 

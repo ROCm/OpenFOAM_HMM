@@ -257,6 +257,12 @@ public:
                 volScalarField& T
             ) const;
 
+            //- Temperature source term
+            virtual tmp<fvScalarMatrix> ST
+            (
+                volScalarField& T
+            ) const;
+
             //- Access to absorptionEmission model
             const absorptionEmissionModel& absorptionEmission() const;
 

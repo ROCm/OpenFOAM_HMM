@@ -39,88 +39,6 @@ License
 #include "fvcDiv.H"
 #include "surfaceInterpolate.H"
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-template<class BasePhaseModel>
-Foam::tmp<Foam::surfaceScalarField>
-Foam::MovingPhaseModel<BasePhaseModel>::generatePhi
-(
-    const word& phiName,
-    const volVectorField& U
-) const
-{
-    IOobject phiHeader
-    (
-        phiName,
-        U.mesh().time().timeName(),
-        U.mesh(),
-        IOobject::NO_READ
-    );
-
-    if (phiHeader.typeHeaderOk<surfaceScalarField>(true))
-    {
-        Info<< "Reading face flux field " << phiName << endl;
-
-        return
-            tmp<surfaceScalarField>
-            (
-                new surfaceScalarField
-                (
-                    IOobject
-                    (
-                        phiName,
-                        U.mesh().time().timeName(),
-                        U.mesh(),
-                        IOobject::MUST_READ,
-                        IOobject::AUTO_WRITE
-                    ),
-                    U.mesh()
-                )
-            );
-    }
-    else
-    {
-        Info<< "Calculating face flux field " << phiName << endl;
-
-        wordList phiTypes
-        (
-            U.boundaryField().size(),
-            calculatedFvPatchScalarField::typeName
-        );
-
-        forAll(U.boundaryField(), i)
-        {
-            if
-            (
-                isA<fixedValueFvPatchVectorField>(U.boundaryField()[i])
-             || isA<slipFvPatchVectorField>(U.boundaryField()[i])
-             || isA<partialSlipFvPatchVectorField>(U.boundaryField()[i])
-            )
-            {
-                phiTypes[i] = fixedValueFvPatchScalarField::typeName;
-            }
-        }
-
-        return tmp<surfaceScalarField>
-        (
-            new surfaceScalarField
-            (
-                IOobject
-                (
-                    phiName,
-                    U.mesh().time().timeName(),
-                    U.mesh(),
-                    IOobject::NO_READ,
-                    IOobject::AUTO_WRITE
-                ),
-                fvc::interpolate(U) & U.mesh().Sf(),
-                phiTypes
-            )
-        );
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasePhaseModel>
@@ -133,15 +51,6 @@ Foam::MovingPhaseModel<BasePhaseModel>::MovingPhaseModel
     BasePhaseModel(fluid, phaseName),
     U_(fluid.mesh().lookupObject<volVectorField>("U")),
     phi_(fluid.mesh().lookupObject<surfaceScalarField>("phi")),
-    /*
-    (
-        generatePhi
-        (
-            IOobject::groupName("phi", phaseModel::name()),
-            U_
-        )
-    ),
-    */
     alphaPhi_
     (
         IOobject
@@ -211,5 +120,25 @@ Foam::MovingPhaseModel<BasePhaseModel>::U() const
     return tmp<volVectorField>(U_);
 }
 
+
+template<class BasePhaseModel>
+Foam::tmp<Foam::surfaceScalarField> Foam::MovingPhaseModel<BasePhaseModel>::
+diffNo() const
+{
+    return tmp<surfaceScalarField>
+    (
+        new surfaceScalarField
+        (
+            IOobject
+            (
+                IOobject::groupName("diffNo", phaseModel::name()),
+                U_.mesh().time().timeName(),
+                U_.mesh()
+            ),
+            U_.mesh(),
+            dimensionedScalar("0", dimless, 0.0)
+        )
+    );
+}
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,14 +29,14 @@ License
 
 Foam::orderedPhasePair::orderedPhasePair
 (
-    const phaseModel& dispersed,
-    const phaseModel& continuous
+    const phaseModel& from,
+    const phaseModel& to
 )
 :
     phasePair
     (
-        dispersed,
-        continuous,
+        from,
+        to,
         true
     )
 {}
@@ -50,13 +50,13 @@ Foam::orderedPhasePair::~orderedPhasePair()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-const Foam::phaseModel& Foam::orderedPhasePair::dispersed() const
+const Foam::phaseModel& Foam::orderedPhasePair::from() const
 {
     return phase1();
 }
 
 
-const Foam::phaseModel& Foam::orderedPhasePair::continuous() const
+const Foam::phaseModel& Foam::orderedPhasePair::to() const
 {
     return phase2();
 }

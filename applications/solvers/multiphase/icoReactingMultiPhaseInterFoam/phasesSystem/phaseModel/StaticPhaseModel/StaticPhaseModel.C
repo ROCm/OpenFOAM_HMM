@@ -27,14 +27,6 @@ License
 
 #include "phaseSystem.H"
 
-#include "fixedValueFvPatchFields.H"
-#include "slipFvPatchFields.H"
-#include "partialSlipFvPatchFields.H"
-
-#include "fvmDdt.H"
-#include "fvmDiv.H"
-
-#include "fvmSup.H"
 #include "fvcDdt.H"
 #include "fvcDiv.H"
 #include "surfaceInterpolate.H"
@@ -172,5 +164,19 @@ Foam::StaticPhaseModel<BasePhaseModel>::U() const
     );
 }
 
+
+template<class BasePhaseModel>
+Foam::tmp<Foam::surfaceScalarField> Foam::StaticPhaseModel<BasePhaseModel>
+::diffNo() const
+{
+    tmp<surfaceScalarField> tkapparhoCpbyDelta
+    (
+        sqr(U_.mesh().surfaceInterpolation::deltaCoeffs())
+       *fvc::interpolate(this->kappa().ref())
+       /fvc::interpolate((this->Cp()*this->rho())())
+    );
+
+    return tkapparhoCpbyDelta;
+}
 
 // ************************************************************************* //

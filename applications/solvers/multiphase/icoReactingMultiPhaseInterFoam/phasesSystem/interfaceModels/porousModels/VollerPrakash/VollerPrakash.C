@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,11 +49,10 @@ namespace porousModels
 Foam::porousModels::VollerPrakash::VollerPrakash
 (
     const dictionary& dict,
-    const phasePair& pair,
-    const bool registerObject
+    const fvMesh& mesh
 )
 :
-    porousModel(dict, pair, registerObject),
+    porousModel(dict, mesh),
     Cu_(readScalar(dict.lookup("Cu"))),
     solidPhase_(dict.lookup("solidPhase"))
 {}
@@ -71,10 +70,8 @@ Foam::porousModels::VollerPrakash::
 Foam::tmp<Foam::volScalarField>
 Foam::porousModels::VollerPrakash::S() const
 {
-    const fvMesh& mesh = this->pair_.phase1().mesh();
-
     const volScalarField& solidAlpha =
-        mesh.lookupObject<volScalarField>(solidPhase_);
+        mesh_.lookupObject<volScalarField>(solidPhase_);
 
     return Cu_*sqr(solidAlpha)/(pow3(1.0 - solidAlpha) + 1e-3);
 }

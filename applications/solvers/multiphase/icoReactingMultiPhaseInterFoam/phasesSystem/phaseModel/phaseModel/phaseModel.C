@@ -56,8 +56,7 @@ Foam::phaseModel::phaseModel
         dimensionedScalar("alpha", dimless, 0)
     ),
     fluid_(fluid),
-    name_(phaseName),
-    alphaMax_(fluid.subDict(phaseName).lookupOrDefault("alphaMax", 1.0))
+    name_(phaseName)
 {}
 
 
@@ -78,12 +77,6 @@ const Foam::word& Foam::phaseModel::name() const
 const Foam::phaseSystem& Foam::phaseModel::fluid() const
 {
     return fluid_;
-}
-
-
-Foam::scalar Foam::phaseModel::alphaMax() const
-{
-    return alphaMax_;
 }
 
 
@@ -265,7 +258,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseModel::alphaEff
     return (thermo().alpha(patchI) + alphat);
 }
 
-/*
+
 Foam::tmp<Foam::volScalarField> Foam::phaseModel::mu() const
 {
     return thermo().mu();
@@ -280,16 +273,15 @@ Foam::tmp<Foam::scalarField> Foam::phaseModel::mu(const label patchi) const
 
 Foam::tmp<Foam::volScalarField> Foam::phaseModel::nu() const
 {
-    return (thermo().mu()/thermo().rho());
+    return thermo().nu();
 }
-
 
 
 Foam::tmp<Foam::scalarField> Foam::phaseModel::nu(const label patchi) const
 {
-    return (thermo().mu(patchi)/thermo().rho(patchi));
+    return thermo().nu(patchi);
 }
-*/
+
 
 bool Foam::phaseModel::read()
 {

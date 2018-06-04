@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,9 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::phasePair
+    Foam::phasePair description for mass transfer between a pair of
+    phases. The direction of the mass transfer is from the phase
+    'from' to the phasse 'to'.
 
 Description
 
@@ -53,16 +55,6 @@ class phasePair
 {
 public:
 
-    // Hash table types
-
-        //- Dictionary hash table
-        typedef HashTable<dictionary, phasePairKey, phasePairKey::hash>
-            dictTable;
-
-        //- Scalar hash table
-        typedef HashTable<scalar, phasePairKey, phasePairKey::hash>
-            scalarTable;
-
 
 private:
 
@@ -74,15 +66,12 @@ private:
         //- Phase 2
         const phaseModel& phase2_;
 
-        //- Gravitational acceleration
-        const uniformDimensionedVectorField& g_;
-
 
 public:
 
     // Constructors
 
-        //- Construct from two phases and gravity
+        //- Construct from two phases
         phasePair
         (
             const phaseModel& phase1,
@@ -97,23 +86,15 @@ public:
 
     // Member Functions
 
-        //- Dispersed phase
-        virtual const phaseModel& dispersed() const;
+        //- From phase
+        virtual const phaseModel& from() const;
 
-        //- Continuous phase
-        virtual const phaseModel& continuous() const;
+        //- To phase
+        virtual const phaseModel& to() const;
 
         //- Pair name
         virtual word name() const;
 
-        //- Average density
-        tmp<volScalarField> rho() const;
-
-        //- Prandtl number
-        tmp<volScalarField> Pr() const;
-
-        //- Surface tension coefficient
-        tmp<volScalarField> sigma() const;
 
 
         // Access
@@ -124,8 +105,6 @@ public:
             // Phase 2
             inline const phaseModel& phase2() const;
 
-            // Gravitation acceleration
-            inline const uniformDimensionedVectorField& g() const;
 };
 
 

@@ -43,7 +43,7 @@ SourceFiles
 namespace Foam
 {
 
-class phasePair;
+class fvMesh;
 
 /*---------------------------------------------------------------------------*\
                            Class porousModel Declaration
@@ -57,8 +57,8 @@ protected:
 
     // Protected data
 
-        //- Phase pair
-        const phasePair& pair_;
+        //- Reference to mesh
+        const fvMesh& mesh_;
 
 
 public:
@@ -75,10 +75,9 @@ public:
         dictionary,
         (
             const dictionary& dict,
-            const phasePair& pair,
-            const bool registerObject
+            const fvMesh& mesh
         ),
-        (dict, pair, registerObject)
+        (dict, mesh)
     );
 
 
@@ -88,8 +87,7 @@ public:
         porousModel
         (
             const dictionary& dict,
-            const phasePair& pair,
-            const bool registerObject
+            const fvMesh& mesh
         );
 
 
@@ -102,7 +100,7 @@ public:
         static autoPtr<porousModel> New
         (
             const dictionary& dict,
-            const phasePair& pair
+            const fvMesh& mesh
         );
 
 

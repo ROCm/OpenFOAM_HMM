@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,7 +85,8 @@ Foam::radiation::localDensityAbsorptionEmission::localDensityAbsorptionEmission
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::radiation::localDensityAbsorptionEmission::~localDensityAbsorptionEmission()
+Foam::radiation::localDensityAbsorptionEmission::
+~localDensityAbsorptionEmission()
 {}
 
 
@@ -109,11 +110,11 @@ Foam::radiation::localDensityAbsorptionEmission::aCont(const label bandI) const
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", dimless/dimLength, 0)
+            dimensionedScalar("zero", inv(dimLength), 0)
         )
     );
 
-    scalarField& a = ta.ref().primitiveFieldRef();
+    volScalarField& a = ta.ref();
 
     forAll(alphaNames_, i)
     {
@@ -142,11 +143,11 @@ Foam::radiation::localDensityAbsorptionEmission::eCont(const label bandI) const
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", dimless/dimLength, 0)
+            dimensionedScalar("zero", inv(dimLength), 0)
         )
     );
 
-    scalarField& e = te.ref().primitiveFieldRef();
+    volScalarField& e = te.ref();
 
     forAll(alphaNames_, i)
     {

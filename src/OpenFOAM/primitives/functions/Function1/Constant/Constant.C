@@ -95,18 +95,7 @@ Foam::tmp<Foam::Field<Type>> Foam::Function1Types::Constant<Type>::value
 
 
 template<class Type>
-<<<<<<< HEAD
 Foam::tmp<Foam::Field<Type>> Foam::Function1Types::Constant<Type>::integrate
-=======
-bool Foam::Function1Types::Constant<Type>::isConstant() const
-{
-    return true;
-}
-
-
-template<class Type>
-Type Foam::Function1Types::Constant<Type>::integrate
->>>>>>> c61dc5e... ENH: adding thermo changes to handle multiphase T based thermos
 (
     const scalarField& x1,
     const scalarField& x2

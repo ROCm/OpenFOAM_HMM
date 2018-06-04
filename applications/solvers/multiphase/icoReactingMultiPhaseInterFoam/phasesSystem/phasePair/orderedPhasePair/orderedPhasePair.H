@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,8 +41,6 @@ SourceFiles
 namespace Foam
 {
 
-class aspectRatioModel;
-
 /*---------------------------------------------------------------------------*\
                          Class orderedPhasePair Declaration
 \*---------------------------------------------------------------------------*/
@@ -51,12 +49,6 @@ class orderedPhasePair
 :
     public phasePair
 {
-    // Private member functions
-
-        //- Set the aspect ratio model, if there is one
-        void setAspectRatioModel(const dictTable aspectRatioTable);
-
-
 public:
 
     // Constructors
@@ -64,8 +56,8 @@ public:
         //- Construct from two phases and gravity
         orderedPhasePair
         (
-            const phaseModel& dispersed,
-            const phaseModel& continuous
+            const phaseModel& from,
+            const phaseModel& to
         );
 
 
@@ -76,10 +68,10 @@ public:
     // Member Functions
 
         //- Dispersed phase
-        virtual const phaseModel& dispersed() const;
+        virtual const phaseModel& from() const;
 
         //- Continuous phase
-        virtual const phaseModel& continuous() const;
+        virtual const phaseModel& to() const;
 
         //- Pair name
         virtual word name() const;

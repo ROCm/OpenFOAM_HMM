@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,11 +34,11 @@ inline Foam::DTRMParticle::trackingData::trackingData
     const interpolationCell<scalar>& TInterp,
     const interpolationCellPoint<vector>& nHatInterp,
     const labelField& relfectedCell,
-    const reflectionModel& reflection,
+    const UPtrList<reflectionModel>& reflection,
     volScalarField& Q
 )
 :
-    particle::TrackingData<Cloud<DTRMParticle>>(spc),
+    particle::trackingData(spc),
     aInterp_(aInterp),
     eInterp_(eInterp),
     EInterp_(EInterp),
@@ -92,7 +92,7 @@ Foam::DTRMParticle::trackingData::relfectedCells() const
 }
 
 
-inline const Foam::reflectionModel&
+inline const Foam::UPtrList<Foam::radiation::reflectionModel>&
 Foam::DTRMParticle::trackingData::reflection() const
 {
     return reflection_;
@@ -138,18 +138,6 @@ inline Foam::scalar Foam::DTRMParticle::dA() const
 inline Foam::scalar& Foam::DTRMParticle::dA()
 {
     return dA_;
-}
-
-
-inline Foam::point& Foam::DTRMParticle::p0()
-{
-    return p0_;
-}
-
-
-inline Foam::label& Foam::DTRMParticle::reflectedId()
-{
-    return reflectedId_;
 }
 
 

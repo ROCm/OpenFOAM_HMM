@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,6 @@ SourceFiles
 #include "reflectionModel.H"
 #include "interpolationCellPoint.H"
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -65,6 +64,7 @@ class DTRMParticle
 {
 private:
 
+
     // Private data
 
         //- Size in bytes of the fields
@@ -85,11 +85,8 @@ private:
         //- Area of radiation
         scalar dA_;
 
-        //- Reflected index
-        label reflectedId_;
-
-        //- Minimum radiation intensity to which the particle is tracked [W/m2]
-        scalar Imin_;
+        //- Trasnmissive index
+        label transmissiveId_;
 
 
 public:
@@ -99,19 +96,23 @@ public:
     //- Class used to pass tracking data to the trackToFace function
     class trackingData
     :
-        public particle::TrackingData<Cloud<DTRMParticle>>
+        public particle::trackingData
     {
+
+
         // Interpolators for continuous phase fields
 
             const interpolationCell<scalar>& aInterp_;
             const interpolationCell<scalar>& eInterp_;
             const interpolationCell<scalar>& EInterp_;
             const interpolationCell<scalar>& TInterp_;
-
             const interpolationCellPoint<vector>& nHatInterp_;
 
+            //- Reflected cells
             const labelField& relfectedCells_;
-            const reflectionModel& reflection_;
+
+            //- Ptr to reflectiom model
+            UPtrList<reflectionModel> reflection_;
 
             //- Heat source term
             volScalarField& Q_;
@@ -130,7 +131,7 @@ public:
                 const interpolationCell<scalar>& TInterp,
                 const interpolationCellPoint<vector>& nHatInterp,
                 const labelField&,
-                const reflectionModel&,
+                const UPtrList<reflectionModel>&,
                 volScalarField& Q
             );
 
@@ -147,7 +148,7 @@ public:
             inline const interpolationCell<scalar>& TInterp() const;
             inline const interpolationCellPoint<vector>& nHatInterp() const;
             inline const labelField& relfectedCells() const;
-            inline const reflectionModel& reflection() const;
+            inline const UPtrList<reflectionModel>& reflection() const;
 
             inline scalar& Q(label celli);
 
@@ -163,7 +164,8 @@ public:
           + " p1"
           + " I0"
           + " I"
-          + " dA";
+          + " dA"
+          + " transmissiveId";
         );
 
         //- String representation of property types
@@ -173,7 +175,9 @@ public:
             "{point"
           + " point"
           + " scalar"
-          + " scalar}"
+          + " scalar"
+          + " scalar"
+          + " label}"
         );
 
 
@@ -190,9 +194,22 @@ public:
             const scalar I,
             const label cellI,
             const scalar dA,
-            const label reflectedId,
-            const scalar Imin,
-            bool doCellFacePt = true
+            const label transmissiveId
+        );
+
+        //- Construct from components
+        DTRMParticle
+        (
+            const polyMesh& mesh,
+            const barycentric& coordinates,
+            const label celli,
+            const label tetFacei,
+            const label tetPti,
+            const vector& position,
+            const vector& targetPosition,
+            const scalar I,
+            const scalar dA,
+            const label transmissiveId
         );
 
         //- Construct from Istream
@@ -200,17 +217,12 @@ public:
         (
             const polyMesh& mesh,
             Istream& is,
-            bool readFields = true
+            bool readFields = true,
+            bool newFormat = true
         );
 
         //- Construct as copy
         DTRMParticle(const DTRMParticle& p);
-
-        //- Construct and return a clone
-        virtual autoPtr<particle> clone() const
-        {
-            return autoPtr<particle>(new DTRMParticle(*this));
-        }
 
 
         //- Factory class to read-construct particles used for
@@ -256,8 +268,6 @@ public:
 
     // Edit
 
-        //- Return access to the initial position
-        inline point& p0();
 
         //- Return access to the target position
         inline point& p1();
@@ -274,55 +284,34 @@ public:
         //- Return access to reflectedId
         inline label& reflectedId();
 
-        //- Return access to initial tet face
-        //inline label& tetFace0();
-
-        //- Return access to initial tet point
-        //inline label& tetPt0();
-
-        //- Return access to initial proc Id
-        //inline label& origProc0();
-
 
    // Tracking
 
         //- Move
-        bool move(trackingData&, const scalar);
+        bool move(Cloud<DTRMParticle>& , trackingData&, const scalar);
 
 
     // Member Operators
 
-        //- Overridable function to handle the particle hitting a patch
-        //  Executed before other patch-hitting functions
-        bool hitPatch
-        (
-            const polyPatch&,
-            particle::TrackingData<Cloud<DTRMParticle>>& td,
-            const label patchi,
-            const scalar trackFraction,
-            const tetIndices& tetIs
-        );
 
         //- Overridable function to handle the particle hitting a processorPatch
         void hitProcessorPatch
         (
-            const processorPolyPatch&,
-            particle::TrackingData<Cloud<DTRMParticle>>& td
+            Cloud<DTRMParticle>&,
+            trackingData& td
         );
 
         //- Overridable function to handle the particle hitting a wallPatch
         void hitWallPatch
         (
-            const wallPolyPatch&,
-            particle::TrackingData<Cloud<DTRMParticle>>& td,
-            const tetIndices&
+            Cloud<DTRMParticle>&,
+            trackingData& td
         );
 
-        //- Overridable function to handle the particle hitting a polyPatch
-        void hitPatch
+        bool hitPatch
         (
-            const polyPatch&,
-            particle::TrackingData<Cloud<DTRMParticle>>& td
+            Cloud<DTRMParticle>&,
+            trackingData& td
         );
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,8 +29,7 @@ Group
 
 Description
     Solver for n incompressible, non-isothermal immiscible fluids with
-    phase-change (evaporation-condensation).  Uses a VOF (volume of fluid)
-    phase-fraction based interface capturing approach.
+    phase-change.  Uses a VOF (volume of fluid) phase-fraction based interface capturing approach.
 
     The momentum, energy and other fluid properties are of the "mixture" and a
     single momentum equation is solved.
@@ -40,7 +39,6 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "CMULES.H"
 #include "subCycle.H"
 #include "multiphaseSystem.H"
 #include "turbulentFluidThermoModel.H"
@@ -50,6 +48,7 @@ Description
 #include "radiationModel.H"
 #include "HashPtrTable.H"
 #include "fvcDDt.H"
+#include "zeroField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,7 +60,6 @@ int main(int argc, char *argv[])
 
     pimpleControl pimple(mesh);
 
-    #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "createFvOptions.H"
     #include "createTimeControls.H"

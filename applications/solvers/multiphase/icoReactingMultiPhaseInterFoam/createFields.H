@@ -28,8 +28,9 @@
 
 
     Info<< "Calculating field g.h\n" << endl;
-    volScalarField gh("gh", g & mesh.C());
-    surfaceScalarField ghf("ghf", g & mesh.Cf());
+    #include "readGravitationalAcceleration.H"
+    #include "readhRef.H"
+    #include "gh.H"
 
     volScalarField  p
     (
@@ -41,7 +42,7 @@
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        p_rgh //+ rho*gh
+        p_rgh
     );
 
     Info<< "Creating multiphaseSystem\n" << endl;
@@ -49,7 +50,13 @@
 
     multiphaseSystem& fluid = fluidPtr();
 
-    //volScalarField& e = fluid.he();
+    if (!fluid.incompressible())
+    {
+        FatalError << "One or more phases are not incompressible. " << nl
+            << "This is a incompressible solver." << abort(FatalError);
+    }
+
+
     volScalarField& T = fluid.T();
 
     // Need to store rho for ddt(rho, U)
@@ -115,23 +122,22 @@
     (
         radiation::radiationModel::New(T)
     );
-/*
-    Info<< "Calculating field kappaEff\n" << endl;
-    volScalarField kappaEff
+
+    Info<< "Calculating field rhoCp\n" << endl;
+    volScalarField rhoCp
     (
         IOobject
         (
-            "kappaEff",
+            "rhoCp",
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            IOobject::NO_WRITE
         ),
-        fluid.kappa()
+        fluid.rho()*fluid.Cp()
     );
+    rhoCp.oldTime();
 
-    kappaEff.correctBoundaryConditions();
-*/
 
     Info<< "Creating field kinetic energy K\n" << endl;
     volScalarField K("K", 0.5*magSqr(U));

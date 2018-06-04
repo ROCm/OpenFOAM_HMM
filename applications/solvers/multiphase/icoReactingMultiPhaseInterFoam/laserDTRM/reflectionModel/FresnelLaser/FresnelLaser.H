@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,10 +25,14 @@ Class
     Foam::radiation::FresnelLaser
 
 Description
-    Modified Fresnel FresnelLaser reflection model.
+
+    Modified Fresnel reflection model.
+
+    \verbatim
     Implementation of real-time multiple reflection and Fresnel absorption
     of FresnelLaser beam in keyhole.
     J. Phys. D: Appl. Phys. 39 (2006) 5372-5378
+    \endverbatim
 
 SourceFiles
     FresnelLaser.C
@@ -57,10 +61,6 @@ class FresnelLaser
 {
 
     // Private data
-
-        //- Coefficients dictionary
-        dictionary coeffsDict_;
-
 
         //- Model constant
         scalar epsilon_;

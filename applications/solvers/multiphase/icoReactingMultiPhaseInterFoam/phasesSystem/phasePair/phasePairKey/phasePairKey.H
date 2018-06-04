@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,13 +58,13 @@ public:
 
             // Constructors
 
-                // Construct null
+                //- Construct null
                 hash();
 
 
             // Member operators
 
-                // Generate a hash from a phase pair key
+                //- Generate a hash from a phase pair key
                 label operator()(const phasePairKey& key) const;
         };
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,13 +32,13 @@ Foam::autoPtr<Foam::porousModel >
 Foam::porousModel::New
 (
     const dictionary& dict,
-    const phasePair& pair
+    const fvMesh& mesh
 )
 {
     word porousModelType(dict.lookup("type"));
 
     Info<< "Selecting porousModel for "
-        << pair << ": " << porousModelType << endl;
+        <<  ": " << porousModelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(porousModelType);
@@ -53,7 +53,7 @@ Foam::porousModel::New
             << exit(FatalError);
     }
 
-    return cstrIter()(dict, pair, true);
+    return cstrIter()(dict, mesh);
 }
 
 

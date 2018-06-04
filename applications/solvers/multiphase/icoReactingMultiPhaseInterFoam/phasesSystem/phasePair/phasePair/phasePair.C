@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,8 +38,7 @@ Foam::phasePair::phasePair
 :
     phasePairKey(phase1.name(), phase2.name(), ordered),
     phase1_(phase1),
-    phase2_(phase2),
-    g_(phase1.mesh().lookupObject<uniformDimensionedVectorField>("g"))
+    phase2_(phase2)
 {}
 
 
@@ -51,20 +50,20 @@ Foam::phasePair::~phasePair()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-const Foam::phaseModel& Foam::phasePair::dispersed() const
+const Foam::phaseModel& Foam::phasePair::from() const
 {
-    FatalErrorIn("Foam::phasePair::dispersed() const")
-        << "Requested dispersed phase from an unordered pair."
+    FatalErrorIn("Foam::phasePair::from() const")
+        << "Requested from phase from an unordered pair."
         << exit(FatalError);
 
     return phase1_;
 }
 
 
-const Foam::phaseModel& Foam::phasePair::continuous() const
+const Foam::phaseModel& Foam::phasePair::to() const
 {
-    FatalErrorIn("Foam::phasePair::dispersed() const")
-        << "Requested continuous phase from an unordered pair."
+    FatalErrorIn("Foam::phasePair::to() const")
+        << "Requested to phase from an unordered pair."
         << exit(FatalError);
 
     return phase1_;
@@ -76,36 +75,6 @@ Foam::word Foam::phasePair::name() const
     word name2(second());
     name2[0] = toupper(name2[0]);
     return first() + "And" + name2;
-}
-
-
-Foam::tmp<Foam::volScalarField> Foam::phasePair::rho() const
-{
-    return phase1()*phase1().rho() + phase2()*phase2().rho();
-}
-
-
-Foam::tmp<Foam::volScalarField> Foam::phasePair::Pr() const
-{
-    return
-         continuous().nu()
-        *continuous().Cp()
-        *continuous().rho()
-        /continuous().kappa();
-}
-
-
-Foam::tmp<Foam::volScalarField> Foam::phasePair::sigma() const
-{
-    return
-        phase1().mesh().lookupObject<surfaceTensionModel>
-        (
-            IOobject::groupName
-            (
-                surfaceTensionModel::typeName,
-                phasePair::name()
-            )
-        ).sigma();
 }
 
 

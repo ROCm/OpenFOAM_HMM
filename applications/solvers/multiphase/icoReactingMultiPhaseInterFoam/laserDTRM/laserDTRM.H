@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,14 +24,24 @@ License
 Class
     Foam::radiation::laserDTRM
 
-Description
-    Works well for combustion applications where optical thickness, tau is
-    large, i.e. tau = a*L > 3 (L = distance between objects)
+Group
+    grpRadiationModels
 
-    Assumes
-     - all surfaces are diffuse
-     - tends to over predict radiative fluxes from sources/sinks
-       *** SOURCES NOT CURRENTLY INCLUDED ***
+Description
+    Discrete Tray Radiation Method for collimated radiation flux.
+    At the moment the particles are injected on a 2D disk in polar
+    coordinates providing starting and finish locations.
+
+    The ray is considered planar (no area divergence is considered). This
+    model was developed to represent a collimated laser beam.
+
+    The model is developed to work in a VOF framework, representing different
+    phases.
+
+    Reflection models are possible to set up between phases.
+
+    Different options are available in order to specify the power distribution
+    at the origin of the laser.
 
 SourceFiles
     laserDTRM.C
@@ -50,6 +60,8 @@ SourceFiles
 #include "Function1.H"
 #include "interpolation2DTable.H"
 #include "labelField.H"
+#include "phasePairKey.H"
+#include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -78,7 +90,23 @@ public:
             pdUniform
         };
 
+
 private:
+
+
+    // Private types
+
+        typedef
+            HashTable<dictionary, phasePairKey, phasePairKey::hash> dictTable;
+
+
+        typedef
+            HashTable
+            <
+                autoPtr<reflectionModel>,
+                phasePairKey,
+                phasePairKey::hash
+            > reflectionModelTable;
 
 
     // Private data
@@ -103,6 +131,7 @@ private:
 
         //- Maximum tracking length for particles
         scalar maxTrackLength_;
+
 
         // Laser parameters
 
@@ -138,19 +167,13 @@ private:
             // Reflection sub-model
 
                 //- Reflection model
-                autoPtr<reflectionModel> reflection_;
+                reflectionModelTable reflections_;
 
                 //- Reflection switch
                 bool reflectionSwitch_;
 
-                //- Phase in which the particles are inserted
-                word initialPhase_;
-
-                //- Phase name for absorbing medium 1
-                word alpha1_;
-
-                //- Phase name for absorbing medium 2
-                word alpha2_;
+                //- Alpha value at which reflection is set
+                scalar alphaCut_;
 
 
         // Fields
@@ -177,20 +200,14 @@ private:
         //- Initialise
         void initialise();
 
+        //- Initialise reflection model
+        void initialiseReflection();
+
         //- Calculate Intensity of the laser at p(t, theta) [W/m2]
         scalar calculateIp(scalar r, scalar theta);
 
         // Normal surface on the interface
         tmp<volVectorField> nHatfv
-        (
-            const volScalarField& alpha1,
-            const volScalarField& alpha2
-        ) const;
-
-
-        //- Indicator of the proximity of the interface
-        //  Field values are 1 near and 0 away for the interface.
-        tmp<volScalarField> nearInterface
         (
             const volScalarField& alpha1,
             const volScalarField& alpha2

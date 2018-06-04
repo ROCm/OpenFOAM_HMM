@@ -84,13 +84,6 @@ private:
             volScalarField& he
         );
 
-        //- Lookup or construct he
-//         volScalarField& lookupOrConstruct
-//         (
-//             const fvMesh& mesh,
-//             const word& name
-//         );
-
 
 public:
 

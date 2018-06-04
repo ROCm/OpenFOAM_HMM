@@ -40,23 +40,21 @@ namespace Foam
 Foam::porousModel::porousModel
 (
     const dictionary& dict,
-    const phasePair& pair,
-    const bool registerObject
+    const fvMesh& mesh
 )
 :
     regIOobject
     (
         IOobject
         (
-            IOobject::groupName(typeName, pair.name()),
-            pair.phase1().mesh().time().timeName(),
-            pair.phase1().mesh(),
+            IOobject::groupName(typeName, dict.name()),
+            mesh.time().timeName(),
+            mesh,
             IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            registerObject
+            IOobject::NO_WRITE
         )
     ),
-    pair_(pair)
+    mesh_(mesh)
 {}
 
 

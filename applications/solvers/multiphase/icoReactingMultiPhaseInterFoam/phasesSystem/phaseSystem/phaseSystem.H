@@ -25,7 +25,6 @@ Class
     Foam::phaseSystem
 
 Description
-    Class to represent a system of inmisible phases.
 
 SourceFiles
     phaseSystem.C
@@ -67,14 +66,6 @@ class phaseSystem
 public:
 
     // Public typedefs
-        typedef
-            HashPtrTable
-            <
-                fvScalarMatrix,
-                word,
-                string::hash
-            >
-            massTransferTable;
 
         typedef
             HashTable
@@ -84,12 +75,13 @@ public:
             phasePairTable;
 
 
+        typedef
+            HashTable<autoPtr<phaseModel>, word, word::hash> phaseModelTable;
+
+
 protected:
 
     // Protected typedefs
-
-        typedef
-            HashTable<autoPtr<phaseModel>, word, word::hash> phaseModelTable;
 
         typedef
             HashTable<dictionary, phasePairKey, phasePairKey::hash> dictTable;
@@ -115,15 +107,6 @@ protected:
             interfacePorousModelTable;
 
 
-         typedef
-            HashTable
-            <
-                volScalarField::Internal,
-                word,
-                word::hash
-            >
-            SuSpTable;
-
 
     // Protected data
 
@@ -142,18 +125,11 @@ protected:
         //- Phase models
         phaseModelTable phaseModels_;
 
-        //- Phase pairs. Used to hold references for sub-models only.
-        //  It accumulates phase pairs defined by sub-models
+        //- Phase pairs
         phasePairTable phasePairs_;
 
         //- Total ordered phase pairs in the system
         phasePairTable totalPhasePairs_;
-
-        //- Su phase source terms
-        SuSpTable Su_;
-
-        //- Sp phase source terms
-        SuSpTable Sp_;
 
         //- Turbulent Prandt number
         dimensionedScalar Prt_;
@@ -189,11 +165,25 @@ protected:
         //- Generate pair table
         void generatePairsTable();
 
-        //- Generate pairs and sub-model tables
+        //- Generate pairs and sub-model tables using pair keys
         template<class modelType>
         void createSubModels
         (
             const dictTable& modelDicts,
+            HashTable
+            <
+                autoPtr<modelType>,
+                phasePairKey,
+                phasePairKey::hash
+            >& models
+        );
+
+        //- Generate pairs and sub-model tables using mesh
+        template<class modelType>
+        void createSubModels
+        (
+            const dictTable& modelDicts,
+            const fvMesh& mesh,
             HashTable
             <
                 autoPtr<modelType>,
@@ -214,6 +204,22 @@ protected:
                 phasePairKey::hash
             >& models
         );
+
+
+        //- Generate pairs and per-phase sub-model tables with mesh ref
+        template<class modelType>
+        void generatePairsAndSubModels
+        (
+            const word& modelName,
+            const fvMesh& mesh,
+            HashTable
+            <
+                autoPtr<modelType>,
+                phasePairKey,
+                phasePairKey::hash
+            >& models
+        );
+
 
         //- Generate pairs and per-phase sub-model tables
         template<class modelType>
@@ -229,13 +235,15 @@ protected:
         );
 
 
+
+
 public:
 
     //- Runtime type information
     TypeName("phaseSystem");
 
     //- Default name of the phase properties dictionary
-    static const word propertiesName;
+    static const word phasePropertiesName;
 
 
     // Constructors
@@ -251,6 +259,7 @@ public:
     // Energy related thermo functionaliy functions
 
         //- Return access to the inernal energy field [J/Kg]
+        // NOTE: this mixture thermo is prepared to to work with T
         virtual volScalarField& he()
         {
             NotImplemented;
@@ -264,6 +273,7 @@ public:
         }
 
         //- Return access to the inernal energy field [J/Kg]
+        // NOTE: this mixture thermo is prepared to to work with T
         virtual const volScalarField& he() const
         {
            NotImplemented;
@@ -297,7 +307,7 @@ public:
             const label patchi
         ) const;
 
-        //- Chemical enthalpy oft he mixture [J/kg]
+        //- Chemical enthalpy of the mixture [J/kg]
         virtual tmp<volScalarField> hc() const;
 
         //- Temperature from enthalpy/internal energy for cell-set
@@ -305,7 +315,7 @@ public:
         (
             const scalarField& h,
             const scalarField& p,
-            const scalarField& T0,      // starting temperature
+            const scalarField& T0,
             const labelList& cells
         ) const;
 
@@ -314,7 +324,7 @@ public:
         (
             const scalarField& h,
             const scalarField& p,
-            const scalarField& T0,      // starting temperature
+            const scalarField& T0,
             const label patchi
         ) const;
 
@@ -341,8 +351,6 @@ public:
         //- Return Cv of the mixture
         virtual tmp<volScalarField> Cv() const;
 
-        //- Return rho weighted Cv of the mixture
-        tmp<volScalarField> rhoCv() const;
 
         //- Heat capacity at constant volume for patch [J/kg/K]
         virtual tmp<scalarField> Cv
@@ -352,13 +360,6 @@ public:
             const label patchI
         ) const;
 
-        //- Heat capacity rho weighted at constant volume for patch [J/kg/K]
-        tmp<scalarField> rhoCv
-        (
-            const scalarField& p,
-            const scalarField& T,
-            const label patchI
-        ) const;
 
         //- Gamma = Cp/Cv []
         virtual tmp<volScalarField> gamma() const;
@@ -392,6 +393,9 @@ public:
             const scalarField& T,
             const label patchi
         ) const;
+
+        //- Molecular weight [kg/kmol] of the mixture
+        virtual tmp<volScalarField> W() const;
 
 
     // Transport
@@ -439,23 +443,22 @@ public:
         const dimensionedScalar& Prt() const;
 
 
-        // Access to transport state variables
+    // Access to transport state variables
 
-            //- Dynamic viscosity of mixture [kg/m/s]
-            virtual tmp<volScalarField> mu() const;
+        //- Dynamic viscosity of mixture [kg/m/s]
+        virtual tmp<volScalarField> mu() const;
 
-            //- Dynamic viscosity of mixture for patch [kg/m/s]
-            virtual tmp<scalarField> mu(const label patchi) const;
+        //- Dynamic viscosity of mixture for patch [kg/m/s]
+        virtual tmp<scalarField> mu(const label patchi) const;
 
-            //- Kinematic viscosity of mixture [m^2/s]
-            virtual tmp<volScalarField> nu() const;
+        //- Kinematic viscosity of mixture [m^2/s]
+        virtual tmp<volScalarField> nu() const;
 
-            //- Kinematic viscosity of mixture for patch [m^2/s]
-            virtual tmp<scalarField> nu(const label patchi) const;
+        //- Kinematic viscosity of mixture for patch [m^2/s]
+        virtual tmp<scalarField> nu(const label patchi) const;
 
 
     // Phase fluxes
-
 
         //- Constant access to the total flux
         const surfaceScalarField& phi() const;
@@ -472,13 +475,6 @@ public:
         //- Mixture U
         tmp<volVectorField> U() const;
 
-        //- Mixture phi
-        tmp<surfaceScalarField> phiMixture() const;
-
-        //- Calculate buoyant flux
-        tmp<surfaceScalarField> phig(const surfaceScalarField& ghf) const;
-
-
 
     // Surface tension
 
@@ -492,27 +488,21 @@ public:
         ) const;
 
 
+        //- Return coefficients (1/rho)
+        virtual tmp<volScalarField> coeffs(const word& key) const;
+
+
     // Interface porous between solid/fluid phases
 
         //- Add interface porosity on phasePair
         void addInterfacePorosity(fvVectorMatrix& UEqn);
 
 
-    // Interphase mass and heat transfer defined in specialized systems
+    // Inter-Phase mass and heat transfe
 
         //- Return interfacial source mass rate per phase pair
         virtual tmp<volScalarField> dmdt(const phasePairKey& key) const = 0;
 
-
-        //- Return species interfacial source mass rate per species other
-        //  than the species driven models (i.e driven by pressure or temperature)
-        virtual tmp<volScalarField> dmdtYi
-        (
-            const word& phaseSpeciesName
-        ) const = 0;
-
-        //- Return coefficients (1/rho)
-        virtual tmp<volScalarField> coeffs(const word& key) const = 0;
 
         //- Return the heat transfer matrices
         virtual tmp<fvScalarMatrix> heatTransfer
@@ -520,22 +510,36 @@ public:
             const volScalarField& T
         ) = 0;
 
-        //- Return mass transfer table
-        virtual autoPtr<massTransferTable> massTransfer
+        //- Calculate mass transfer
+        //virtual void massTransfer(const volScalarField& T) = 0;
+
+        //- Calculate mass transfer for species
+        virtual void massSpeciesTransfer
         (
-            const volScalarField& T
+            const phaseModel& phase,
+            volScalarField::Internal& Su,
+            volScalarField::Internal& Sp,
+            const word speciesName
         ) = 0;
 
 
     // Solve phases and correct models
 
-        //- Solve for the phase fractions
+        //- Solve for the phase transport equations
         virtual void solve() = 0;
 
-        //- Correct the thermo
+        //- Correct the mixture thermos
         virtual void correct();
 
+        //- Return the name of the thermo physics
+        virtual word thermoName() const
+        {
+            NotImplemented
+            return word();
+        }
+
         //- Correct the turbulence
+        // (NOTE: Each phase could help its own turbulence)
         virtual void correctTurbulence();
 
         //- Read base phaseProperties dictionary
@@ -565,8 +569,8 @@ public:
         template <class modelType>
         const modelType& lookupSubModel
         (
-            const phaseModel& dispersed,
-            const phaseModel& continuous
+            const phaseModel& from,
+            const phaseModel& to
         ) const;
 
 

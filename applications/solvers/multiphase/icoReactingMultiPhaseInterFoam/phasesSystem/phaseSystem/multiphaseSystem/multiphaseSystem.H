@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,7 @@ SourceFiles
 
 #include "phaseSystem.H"
 #include "UPtrList.H"
+#include "phasePairKey.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,14 +54,46 @@ class multiphaseSystem
 {
 protected:
 
+        typedef
+            HashTable
+            <
+                volScalarField::Internal,
+                word,
+                word::hash
+            >
+            SuSpTable;
+
+        typedef HashTable<scalar, phasePairKey, phasePairKey::hash>
+            scalarTable;
+
+        typedef HashTable<surfaceScalarField, word, word::hash>
+            compressionFluxTable;
+
     // Protected data
 
         //- Unallocated phase list
         UPtrList<phaseModel> phases_;
 
-        //- dmdt continuity error
-        volScalarField dmdtContinuityError_;
+        //- Table for compression factors between phases
+        scalarTable cAlphas_;
 
+        //- Maximum volumen rate change
+        dimensionedScalar ddtAlphaMax_;
+
+        //- Compression fluxed for phases
+        compressionFluxTable limitedPhiAlphas_;
+
+        //- Su phase source terms
+        SuSpTable Su_;
+
+        //- Sp phase source terms
+        SuSpTable Sp_;
+
+
+    // Protected members
+
+        //- Calculate Sp and Su
+        void calculateSuSp();
 
 public:
 
@@ -105,12 +138,6 @@ public:
         // Access
 
 
-            //- Constant access the dmdt continuity error
-            const volScalarField& dmdtContinuityError() const;
-
-            //- Access the dmdt continuity error
-            volScalarField& dmdtContinuityError();
-
             //- Return phases
             const UPtrList<phaseModel>& phases() const;
 
@@ -118,10 +145,29 @@ public:
             UPtrList<phaseModel>& phases();
 
             //- Constant access phase model i
-            virtual const phaseModel& phase(const label i) const;
+            const phaseModel& phase(const label i) const;
 
             //- Access phase model i
-            virtual phaseModel& phase(const label i);
+            phaseModel& phase(const label i);
+
+            //- Access to ddtAlphaMax
+            dimensionedScalar ddtAlphaMax() const;
+
+            //- Maximum diffusion number
+            scalar maxDiffNo() const;
+
+            //- Access to compression fluxes for phaes
+            const compressionFluxTable& limitedPhiAlphas() const;
+
+            //- Access Su
+            SuSpTable& Su();
+
+            //- Access Sp
+            SuSpTable& Sp();
+
+            //- Read thermophysical properties dictionary
+            virtual bool read();
+
 
 
 };

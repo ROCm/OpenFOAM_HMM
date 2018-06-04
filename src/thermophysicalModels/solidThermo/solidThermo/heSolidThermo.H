@@ -56,9 +56,6 @@ class heSolidThermo
         //- Calculate the thermo variables
         void calculate();
 
-        //- Calculate the thermo variables based on T
-        void calculateT();
-
         //- Construct as copy (not implemented)
         heSolidThermo(const heSolidThermo<BasicSolidThermo, MixtureType>&);
 
@@ -103,9 +100,6 @@ public:
 
         //- Update properties
         virtual void correct();
-
-        //- Update properties from T
-        //virtual void correctT();
 
 
         // Derived thermal properties

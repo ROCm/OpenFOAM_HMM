@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ Foam::autoPtr<Foam::multiphaseSystem> Foam::multiphaseSystem::New
         (
             IOobject
             (
-                propertiesName,
+                phasePropertiesName,
                 mesh.time().constant(),
                 mesh,
                 IOobject::MUST_READ_IF_MODIFIED,

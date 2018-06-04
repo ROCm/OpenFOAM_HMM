@@ -28,7 +28,8 @@ EXE_LIBS = \
     -lfluidThermophysicalModels \
     -lIncompressibleMultiphaseSystems \
     -lCompressibleMultiPhaseTurbulenceModels \
-    -lmeltingEvaporationModels \
+    -lmassTransferModels \
     -lsolidThermo \
     -lsolidSpecie \
-    -ltwoPhaseProperties
+    -ltwoPhaseProperties \
+    -llaserDTRM

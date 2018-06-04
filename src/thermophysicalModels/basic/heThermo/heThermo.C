@@ -90,48 +90,8 @@ void Foam::heThermo<BasicThermo, MixtureType>::init
     }
 }
 
-/*
-template<class BasicThermo, class MixtureType>
-Foam::volScalarField& Foam::heThermo<BasicThermo, MixtureType>::lookupOrConstruct
-(
-    const fvMesh& mesh,
-    const word& name
-)
-{
-    if (!mesh.objectRegistry::foundObject<volScalarField>(name))
-    {
-        volScalarField* fPtr
-        (
-            new volScalarField
-            (
-                IOobject
-                (
-                    name,
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                mesh,
-                dimEnergy/dimMass,
-                this->heBoundaryTypes(),
-                this->heBoundaryBaseTypes()
-            )
-        );
-
-        // Transfer ownership of this object to the objectRegistry
-        fPtr->store(fPtr);
-    }
-
-    return const_cast<volScalarField&>
-    (
-        mesh.objectRegistry::lookupObject<volScalarField>(name)
-    );
-}
-*/
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
 
 template<class BasicThermo, class MixtureType>
 Foam::heThermo<BasicThermo, MixtureType>::heThermo
@@ -161,19 +121,6 @@ Foam::heThermo<BasicThermo, MixtureType>::heThermo
         this->heBoundaryTypes(),
         this->heBoundaryBaseTypes()
     )
-    /*
-    he_
-    (
-        this->lookupOrConstruct
-        (
-            mesh,
-            BasicThermo::phasePropertyName
-            (
-                MixtureType::thermoType::heName()
-            )
-        )
-    )
-    */
 {
     init(this->p_, this->T_, he_);
 }
@@ -208,18 +155,8 @@ Foam::heThermo<BasicThermo, MixtureType>::heThermo
         this->heBoundaryTypes(),
         this->heBoundaryBaseTypes()
     )
-    /*
-    he_
-    (
-        this->lookupOrConstruct
-        (
-            mesh,
-            MixtureType::thermoType::heName()
-        )
-    )
-    */
 {
-    init();
+    init(this->p_, this->T_, he_);
 }
 
 
@@ -252,19 +189,6 @@ Foam::heThermo<BasicThermo, MixtureType>::heThermo
         this->heBoundaryTypes(),
         this->heBoundaryBaseTypes()
     )
-    /*
-    he_
-    (
-        this->lookupOrConstruct
-        (
-            mesh,
-            BasicThermo::phasePropertyName
-            (
-                MixtureType::thermoType::heName()
-            )
-        )
-    )
-    */
 {
     init(this->p_, this->T_, he_);
 }

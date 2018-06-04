@@ -24,6 +24,9 @@ License
 Class
     Foam::phaseModel
 
+Description
+
+
 SourceFiles
     phaseModel.C
     newphaseModel.C
@@ -64,9 +67,6 @@ class phaseModel
         //- Name of phase
         word name_;
 
-        //- Optional maximum phase-fraction (e.g. packing limit)
-        scalar alphaMax_;
-
 
 public:
 
@@ -89,11 +89,8 @@ public:
 
     // Constructors
 
-        phaseModel
-        (
-            const phaseSystem& fluid,
-            const word& phaseName
-        );
+        //- Construct from phaseSystem and phaseName
+        phaseModel(const phaseSystem& fluid, const word& phaseName);
 
 
     //- Destructor
@@ -117,96 +114,102 @@ public:
         //- Return the system to which this phase belongs
         const phaseSystem& fluid() const;
 
-        //- Return the other phase in a two-phase system
-        const phaseModel& otherPhase() const;
-
-        //- Return the maximum phase-fraction (e.g. packing limit)
-        scalar alphaMax() const;
-
-        //- Correct the phase properties
+        //- Correct phase thermo
         virtual void correct();
 
         //- Correct the turbulence
         virtual void correctTurbulence();
 
-        //- Return the species fraction equation
-        virtual tmp<fvScalarMatrix> YiEqn(volScalarField& Yi) = 0;
+        //- Solve species fraction equation
+        virtual void solveYi
+        (
+            PtrList<volScalarField::Internal>& Su,
+            PtrList<volScalarField::Internal>& Sp
+        ) = 0;
 
         //- Read phase properties dictionary
         virtual bool read();
 
 
-        // Thermo
+    // Thermo
 
-            //- Access const to phase thermo
-            virtual const rhoThermo& thermo() const = 0;
+        //- Access const to phase thermo
+        virtual const rhoThermo& thermo() const = 0;
 
-            //- Access to phase thermo
-            virtual rhoThermo& thermo() = 0;
+        //- Access to phase thermo
+        virtual rhoThermo& thermo() = 0;
 
-            //- Return the phase density
-            tmp<volScalarField> rho() const;
+        //- Return the phase density
+        tmp<volScalarField> rho() const;
 
-            //- Return phase density on a patch
-            tmp<scalarField> rho(const label patchi) const;
+        //- Return phase density on a patch
+        tmp<scalarField> rho(const label patchi) const;
 
-            //- Chemical enthalpy for phase [J/kg]
-            tmp<volScalarField> hc() const;
+        //- Chemical enthalpy for phase [J/kg]
+        tmp<volScalarField> hc() const;
 
-            //- Return phase Cp
-            tmp<volScalarField> Cp() const;
+        //- Return phase Cp
+        tmp<volScalarField> Cp() const;
 
-            //- Heat capacity of the phase at constant pressure for patch [J/kg/K]
-            tmp<scalarField> Cp
-            (
-                const scalarField& p,
-                const scalarField& T,
-                const label patchi
-            ) const;
+        //- Heat capacity of the phase at constant pressure for patch
+        // [J/kg/K]
+        tmp<scalarField> Cp
+        (
+            const scalarField& p,
+            const scalarField& T,
+            const label patchi
+        ) const;
 
-            //- Return Cv of the phase
-            tmp<volScalarField> Cv() const;
+        //- Return Cv of the phase
+        tmp<volScalarField> Cv() const;
 
-            //- Heat capacity at constant volume for phase for a patch [J/kg/K]
-            tmp<scalarField> Cv
-            (
-                const scalarField& p,
-                const scalarField& T,
-                const label patchI
-            ) const;
+        //- Heat capacity at constant volume for phase for a patch [J/kg/K]
+        tmp<scalarField> Cv
+        (
+            const scalarField& p,
+            const scalarField& T,
+            const label patchI
+        ) const;
 
-            //- Gamma = Cp/Cv of phase[]
-            tmp<volScalarField> gamma() const;
+        //- Gamma = Cp/Cv of phase[]
+        tmp<volScalarField> gamma() const;
 
-            //- Gamma = Cp/Cv for phase on patch []
-            tmp<scalarField> gamma
-            (
-                const scalarField& p,
-                const scalarField& T,
-                const label patchi
-            ) const;
+        //- Gamma = Cp/Cv for phase on patch []
+        tmp<scalarField> gamma
+        (
+            const scalarField& p,
+            const scalarField& T,
+            const label patchi
+        ) const;
 
-            //- Heat capacity at constant pressure/volume for phase [J/kg/K]
-            tmp<volScalarField> Cpv() const;
+        //- Heat capacity at constant pressure/volume for phase [J/kg/K]
+        tmp<volScalarField> Cpv() const;
 
-            //- Heat capacity at constant pressure/volume for phase at patch [J/kg/K]
-            tmp<scalarField> Cpv
-            (
-                const scalarField& p,
-                const scalarField& T,
-                const label patchi
-            ) const;
+        //- Heat capacity at constant pressure/volume for phase at patch
+        // [J/kg/K]
+        tmp<scalarField> Cpv
+        (
+            const scalarField& p,
+            const scalarField& T,
+            const label patchi
+        ) const;
 
-            //- Heat capacity ratio for phase []
-            tmp<volScalarField> CpByCpv() const;
+        //- Heat capacity ratio for phase []
+        tmp<volScalarField> CpByCpv() const;
 
-            //- Heat capacity ratio for phase at patch []
-            tmp<scalarField> CpByCpv
-            (
-                const scalarField& p,
-                const scalarField& T,
-                const label patchi
-            ) const;
+        //- Heat capacity ratio for phase at patch []
+        tmp<scalarField> CpByCpv
+        (
+            const scalarField& p,
+            const scalarField& T,
+            const label patchi
+        ) const;
+
+        //- Query each thermo for dpdt
+        Switch dpdt() const
+        {
+             return thermo().dpdt();
+        }
 
 
 
@@ -217,27 +220,16 @@ public:
         const volScalarField& alpha() const;
 
         //- Thermal diffusivity for enthalpy of mixture for patch [kg/m/s]
-        const scalarField& alpha
-        (
-            const label patchi
-        ) const;
+        const scalarField& alpha(const label patchi) const;
 
         //- Thermal diffusivity for temperature of phase [J/m/s/K]
         tmp<volScalarField> kappa() const;
 
-        //- Thermal diffusivity for temperature
-        //  of phase for patch [J/m/s/K]
-        tmp<scalarField> kappa
-        (
-            const label patchi
-        ) const;
+        //- Thermal diffusivity for temperature of phase for patch [J/m/s/K]
+        tmp<scalarField> kappa(const label patchi) const;
 
-        //- Effective thermal diffusivity for temperature
-        //  of phase [J/m/s/K]
-        tmp<volScalarField> kappaEff
-        (
-            const volScalarField&
-        ) const;
+        //- Effective thermal diffusivity for temperature of phase [J/m/s/K]
+        tmp<volScalarField> kappaEff(const volScalarField&) const;
 
         //- Effective thermal diffusivity for temperature
         //  of phase for patch [J/m/s/K]
@@ -248,10 +240,7 @@ public:
         ) const;
 
         //- Effective thermal diffusivity of phase [kg/m/s]
-        tmp<volScalarField> alphaEff
-        (
-            const volScalarField& alphat
-        ) const;
+        tmp<volScalarField> alphaEff(const volScalarField& alphat) const;
 
         //- Effective thermal diffusivity of phase for patch [kg/m/s]
         tmp<scalarField> alphaEff
@@ -261,30 +250,33 @@ public:
         ) const;
 
         //- Return the mixture kinematic viscosity
-        virtual tmp<volScalarField> nu() const = 0;
+        virtual tmp<volScalarField> nu() const;
 
         //- Return the mixture kinematic viscosity on patchi
-        virtual tmp<scalarField> nu(const label patchi) const = 0;
+        virtual tmp<scalarField> nu(const label patchi) const;
 
         //- Return the mixture dymanic viscosity
-        virtual tmp<volScalarField> mu() const = 0;
+        virtual tmp<volScalarField> mu() const;
 
         //- Return the mixture dymanic viscosity on patchi
-        virtual tmp<scalarField> mu(const label patchi) const = 0;
+        virtual tmp<scalarField> mu(const label patchi) const;
+
+        //- Diffusion number
+        virtual tmp<surfaceScalarField> diffNo() const = 0;
 
 
 
-        // Species information
+    // Species
 
-            //- Constant access the species mass fractions
-            virtual const PtrList<volScalarField>& Y() const = 0;
+        //- Constant access the species mass fractions
+        virtual const PtrList<volScalarField>& Y() const = 0;
 
-            //- Access the species mass fractions
-            virtual PtrList<volScalarField>& Y() = 0;
+        //- Access the species mass fractions
+        virtual PtrList<volScalarField>& Y() = 0;
 
 
 
-        // Momentum
+    // Momentum
 
 
             //- Constant access the volumetric flux
@@ -303,27 +295,27 @@ public:
             virtual tmp<volVectorField> U() const = 0;
 
 
-        // Turbulence
+    // Turbulence (WIP: possible to add turbulent on each phase)
 
-            /*
-            //- Return the turbulent dynamic viscosity
-            virtual tmp<volScalarField> mut() const = 0;
+        /*
+        //- Return the turbulent dynamic viscosity
+        virtual tmp<volScalarField> mut() const = 0;
 
-            //- Return the turbulent dynamic viscosity on a patch
-            virtual tmp<scalarField> mut(const label patchI) const = 0;
+        //- Return the turbulent dynamic viscosity on a patch
+        virtual tmp<scalarField> mut(const label patchI) const = 0;
 
-            //- Return the turbulent kinematic viscosity
-            virtual tmp<volScalarField> nut() const = 0;
+        //- Return the turbulent kinematic viscosity
+        virtual tmp<volScalarField> nut() const = 0;
 
-            //- Return the turbulent kinematic viscosity on a patch
-            virtual tmp<scalarField> nut(const label patchI) const = 0;
+        //- Return the turbulent kinematic viscosity on a patch
+        virtual tmp<scalarField> nut(const label patchI) const = 0;
 
-            //- Return the kinetic pressure derivative w.r.t. volume fraction
-            virtual tmp<volScalarField> pPrime() const = 0;
+        //- Return the kinetic pressure derivative w.r.t. volume fraction
+        virtual tmp<volScalarField> pPrime() const = 0;
 
-            //- Return the turbulent kinetic energy
-            virtual tmp<volScalarField> k() const = 0;
-            */
+        //- Return the turbulent kinetic energy
+        virtual tmp<volScalarField> k() const = 0;
+        */
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

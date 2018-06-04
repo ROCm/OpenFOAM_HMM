@@ -25,7 +25,36 @@ Class
     Foam::VollerPrakash
 
 Description
-    Constant value surface tension model.
+    Porous model to apply a porous media on a solid phase.
+
+    Based on the references:
+    -# V.R. Voller and C. Prakash, A fixed grid numerical modelling
+       methodology for convection-diffusion mushy phase-change problems,
+       Int. J. Heat Mass Transfer 30(8):17091719, 1987.
+    -# C.R. Swaminathan. and V.R. Voller, A general enthalpy model for
+       modeling solidification processes, Metallurgical Transactions
+       23B:651664, 1992.
+Usage
+    Example usage:
+    \verbatim
+    interfacePorous
+    (
+        (solid and liquid)
+        {
+            type            VollerPrakash;
+            solidPhase      alpha.solid;
+            Cu              1e7;
+        }
+    );
+    \endverbatim
+
+    Where:
+
+    \table
+        Property    | Description           | Required    | Default value
+        solidPhase  | Solid phase name      | yes
+        Cu          | Model constant        | yes
+    \endtable
 
 SourceFiles
     VollerPrakash.C
@@ -73,8 +102,7 @@ public:
         VollerPrakash
         (
             const dictionary& dict,
-            const phasePair& pair,
-            const bool registerObject
+            const fvMesh& mesh
         );
 
 

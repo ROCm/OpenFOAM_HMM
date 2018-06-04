@@ -34,8 +34,20 @@ scalar maxAlphaCo
     readScalar(runTime.controlDict().lookup("maxAlphaCo"))
 );
 
+scalar maxAlphaDdt
+(
+    runTime.controlDict().lookupOrDefault("maxAlphaDdt", GREAT)
+);
+
+scalar maxDi
+(
+    runTime.controlDict().lookupOrDefault<scalar>("maxDi", GREAT)
+);
+
 scalar alphaCoNum = 0.0;
 scalar meanAlphaCoNum = 0.0;
+scalar ddtAlphaNum = 0.0;
+scalar DiNum = 0.0;
 
 if (mesh.nInternalFaces())
 {
@@ -49,9 +61,17 @@ if (mesh.nInternalFaces())
 
     meanAlphaCoNum =
         0.5*(gSum(sumPhi)/gSum(mesh.V().field()))*runTime.deltaTValue();
+
+    ddtAlphaNum = fluid.ddtAlphaMax().value()*runTime.deltaTValue();
+
+    DiNum = fluid.maxDiffNo();
 }
 
 Info<< "Interface Courant Number mean: " << meanAlphaCoNum
     << " max: " << alphaCoNum << endl;
+
+Info<< "Maximum ddtAlpha : " << ddtAlphaNum << endl;
+
+Info<< "Maximum DiffNum : " << DiNum << endl;
 
 // ************************************************************************* //

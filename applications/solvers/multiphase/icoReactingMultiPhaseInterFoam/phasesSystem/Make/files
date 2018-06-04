@@ -1,7 +1,3 @@
-interfaceModels/surfaceTensionModels/surfaceTensionModel/surfaceTensionModel.C
-interfaceModels/surfaceTensionModels/surfaceTensionModel/newSurfaceTensionModel.C
-interfaceModels/surfaceTensionModels/constantSurfaceTensionCoefficient/constantSurfaceTensionCoefficient.C
-
 interfaceModels/porousModels/porousModel/porousModel.C
 interfaceModels/porousModels/porousModel/newPorousModel.C
 interfaceModels/porousModels/VollerPrakash/VollerPrakash.C

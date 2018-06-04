@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,25 +27,21 @@ License
 
 #include "phaseSystem.H"
 #include "multiphaseSystem.H"
-#include "MeltingEvaporationPhaseSystem.H"
+#include "MassTransferPhaseSystem.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     typedef
-        MeltingEvaporationPhaseSystem
-        <
-            multiphaseSystem
-        >
-        meltingEvaporationMultiphaseSystem;
+        MassTransferPhaseSystem<multiphaseSystem> massTransferMultiphaseSystem;
 
     addNamedToRunTimeSelectionTable
     (
         multiphaseSystem,
-        meltingEvaporationMultiphaseSystem,
+        massTransferMultiphaseSystem,
         dictionary,
-        meltingEvaporationMultiphaseSystem
+        massTransferMultiphaseSystem
     );
 
 }

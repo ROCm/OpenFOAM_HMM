@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,27 +43,32 @@ Foam::DTRMParticle::DTRMParticle
 (
     const polyMesh& mesh,
     Istream& is,
-    bool readFields
+    bool readFields,
+    bool newFormat
 )
 :
-    particle(mesh, is, readFields),
-    p0_(position_),
+    particle(mesh, is, readFields, newFormat),
+    p0_(point::zero),
     p1_(point::zero),
     I0_(0),
     I_(0),
-    dA_(0)
+    dA_(0),
+    transmissiveId_(-1)
 {
     if (readFields)
     {
         if (is.format() == IOstream::ASCII)
         {
-            is >> p0_ >> p1_ >> I0_ >> I_ >> dA_;
+            is >> p0_ >> p1_ >> I0_ >> I_ >> dA_ >> transmissiveId_;
+            DebugVar(transmissiveId_);
         }
         else
         {
             is.read(reinterpret_cast<char*>(&p0_), sizeofFields_);
         }
     }
+
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -76,7 +81,8 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const DTRMParticle& p)
             << token::SPACE << p.p1_
             << token::SPACE << p.I0_
             << token::SPACE << p.I_
-            << token::SPACE << p.dA_;
+            << token::SPACE << p.dA_
+            << token::SPACE << p.transmissiveId_;
     }
     else
     {

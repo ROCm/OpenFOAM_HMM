@@ -67,16 +67,6 @@ class MovingPhaseModel
         surfaceScalarField alphaPhi_;
 
 
-    // Private static member functions
-
-        //- Generate the flux field
-        tmp<surfaceScalarField> generatePhi
-        (
-            const word& phiName,
-            const volVectorField& U
-        ) const;
-
-
 public:
 
     // Constructors
@@ -115,6 +105,9 @@ public:
 
             //- Access const reference to U
             virtual tmp<volVectorField> U() const;
+
+            //- Diffusion number
+            virtual tmp<surfaceScalarField> diffNo() const;
 
 };
 
