@@ -405,6 +405,9 @@ public:
 
         // Access
 
+            //- Return true if thisDb() is a valid DB
+            virtual bool hasDb() const;
+
             //- Return reference to the mesh database
             virtual const objectRegistry& thisDb() const;
 

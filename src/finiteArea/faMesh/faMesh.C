@@ -1000,6 +1000,12 @@ Foam::label& Foam::faMesh::comm()
 }
 
 
+bool Foam::faMesh::hasDb() const
+{
+    return true;
+}
+
+
 const Foam::objectRegistry& Foam::faMesh::thisDb() const
 {
     return mesh().thisDb();
