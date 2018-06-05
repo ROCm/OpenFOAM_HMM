@@ -71,7 +71,7 @@ protected:
         const label maxLevels_;
 
         //- Number of cells in coarsest level
-        const label nCellsInCoarsestLevel_;
+        label nCellsInCoarsestLevel_;
 
         //- Cached mesh interfaces
         const lduInterfacePtrsList meshInterfaces_;
@@ -242,7 +242,7 @@ public:
         );
 
         //- Runtime selection table for matrix or mixed geometric/matrix
-        //  agglomerators
+        //- agglomerators
         declareRunTimeSelectionTable
         (
             autoPtr,
@@ -259,7 +259,7 @@ public:
         );
 
         //- Runtime selection table for matrix or mixed geometric/matrix
-        //  agglomerators
+        //- agglomerators
         declareRunTimeSelectionTable
         (
             autoPtr,
@@ -378,7 +378,7 @@ public:
             }
 
             //- Return number of coarse patch faces (before processor
-            //  agglomeration)
+            //- agglomeration)
             const labelList& nPatchFaces(const label leveli) const
             {
                 return nPatchFaces_[leveli];
@@ -452,14 +452,14 @@ public:
             }
 
             //- Mapping from processor to agglomerated processor (global, all
-            //  processors have the same information). Note that level is
-            //  the fine, not the coarse, level index. This is to be
-            //  consistent with the way the restriction is stored
+            //- processors have the same information). Note that level is
+            //- the fine, not the coarse, level index. This is to be
+            //- consistent with the way the restriction is stored
             const labelList& procAgglomMap(const label fineLeveli) const;
 
             //- Set of processors to agglomerate. Element 0 is the
-            //  master processor. (local, same only on those processors that
-            //  agglomerate)
+            //- master processor. (local, same only on those processors that
+            //- agglomerate)
             const labelList& agglomProcIDs(const label fineLeveli) const;
 
             //- Check that level has combined mesh

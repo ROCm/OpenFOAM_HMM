@@ -265,6 +265,14 @@ Foam::GAMGAgglomeration::GAMGAgglomeration
 
     meshLevels_(maxLevels_)
 {
+    // Limit the cells in the coarsest level based on the local number of
+    // cells.  Note: 2 for pair-wise
+    nCellsInCoarsestLevel_ =
+        max(1, min(mesh.lduAddr().size()/2, nCellsInCoarsestLevel_));
+
+    // Ensure all procs see the same nCellsInCoarsestLevel_
+    reduce(nCellsInCoarsestLevel_, minOp<label>());
+
     procCommunicator_.setSize(maxLevels_ + 1, -1);
     if (processorAgglomerate())
     {
