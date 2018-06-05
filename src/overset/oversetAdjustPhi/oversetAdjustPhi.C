@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -121,19 +121,11 @@ bool Foam::oversetAdjustPhi
                     (ownType == cellCellStencil::CALCULATED)
                  && (neiType == cellCellStencil::INTERPOLATED);
 
-                bool neiCalc =
-                    (ownType == cellCellStencil::INTERPOLATED)
-                 && (neiType == cellCellStencil::CALCULATED);
 
-
-                if (ownCalc || neiCalc)
+                if (ownCalc)
                 {
                     // Calculate flux w.r.t. calculated cell
                     scalar flux = phip[i];
-                    if (neiCalc)
-                    {
-                        flux = -flux;
-                    }
 
                     if (flux < 0.0)
                     {
