@@ -22,54 +22,41 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::dummyFvMesh
+    Foam::proxyFvMesh
 
 Description
-    Functions to generate dummy finite volume meshes
+    Functions to generate proxy finite volume meshes
 
 SourceFiles
-    dummyFvMesh.C
+    proxyFvMesh.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dummyFvMesh_H
-#define dummyFvMesh_H
+#ifndef proxyFvMesh_H
+#define proxyFvMesh_H
 
-#include "className.H"
-#include "autoPtr.H"
-#include "HashSet.H"
+#include "runTimeSelectionTables.H"
+#include "fvMesh.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class fvMesh;
-class Time;
-template<class Type> class List;
-
 /*---------------------------------------------------------------------------*\
-                         Class dummyFvMesh Declaration
+                         Class proxyFvMesh Declaration
 \*---------------------------------------------------------------------------*/
 
-class dummyFvMesh
+class proxyFvMesh
+:
+    public fvMesh
 {
-    //- Helper function to see if the patch type exists in the run-time
-    //- selection tables
-    static bool fvPatchFieldExists(const word& patchType);
-
-    //- Set the patch information. Returns true if setting based on a real mesh
-    static bool setPatchEntries
-    (
-        const Time& runTime,
-        const word& instance,
-        dictionary& patchEntries,
-        label& nPatchWithFace
-    );
+protected:
 
     //- Helper function to initialise empty zones
     template<class ZoneMeshType>
-    static void initialiseZone
+    void initialiseZone
     (
         const word& zoneTypeName,
         const fileName& instance,
@@ -79,19 +66,49 @@ class dummyFvMesh
 
 public:
 
-    ClassName("dummyFvMesh");
+    //- Runtime type information
+    TypeName("proxyFvMesh");
 
-    //- Create a single cell mesh with empty boundary conditions all-round
-    static autoPtr<fvMesh> singleCellMesh
+    // Declare run-time constructor selection table
+
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            proxyFvMesh,
+            time,
+            (
+                const Time& runTime
+            ),
+            (runTime)
+        );
+
+
+    // Selectors
+
+        //- Return a reference to the selected proxy mesh
+        static autoPtr<proxyFvMesh> New
+        (
+            const word& modelType,
+            const Time& runTime
+        );
+
+
+    //- Constructor
+    proxyFvMesh
     (
-        const Time& runTime,
-        const scalar d = 1
+        const IOobject& io,
+        pointField&& points,
+        faceList&& faces,
+        labelList&& allOwner,
+        labelList&& allNeighbour
     );
 
-    //- Create an equivalent 1D mesh using the same boundary types as
-    //- described in the polyMesh/boundary file, complete with (empty)
-    //- [point|face|cell] zones
-    static autoPtr<fvMesh> equivalent1DMesh(const Time& runTime);
+
+    // Member Functions
+
+        //- Helper function to see if the patch type exists in the run-time
+        //- selection tables
+        static bool fvPatchFieldExists(const word& patchType);
 };
 
 
@@ -102,7 +119,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "dummyFvMeshTemplates.C"
+    #include "proxyFvMeshTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

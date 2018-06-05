@@ -9,7 +9,7 @@ if (args.optionFound("dry-run") || args.optionFound("dry-run-write"))
     Foam::FieldBase::allowConstructFromLargerSize = true;
 
     // Create a simplified 1D mesh and attempt to re-create boundary conditions
-    meshPtr.reset(Foam::dummyFvMesh::equivalent1DMesh(runTime));
+    meshPtr.reset(new Foam::proxyMeshes::columnFvMesh(runTime));
 
     // Stopping after 1 iteration of the simplified mesh
     // Note: using saNoWriteNow will only trigger the function object execute
