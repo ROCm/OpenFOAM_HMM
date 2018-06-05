@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,59 +23,77 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "dynamicMotionSolverFvMesh.H"
+#include "hexCellFvMesh.H"
+#include "emptyPolyPatch.H"
 #include "addToRunTimeSelectionTable.H"
-#include "motionSolver.H"
-#include "volFields.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Static Members  * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(dynamicMotionSolverFvMesh, 0);
+namespace proxyMeshes
+{
+    defineTypeNameAndDebug(hexCellFvMesh, 0);
+
     addToRunTimeSelectionTable
     (
-        dynamicFvMesh,
-        dynamicMotionSolverFvMesh,
-        IOobject
+        proxyFvMesh,
+        hexCellFvMesh,
+        time
     );
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::dynamicMotionSolverFvMesh::dynamicMotionSolverFvMesh(const IOobject& io)
+Foam::proxyMeshes::hexCellFvMesh::hexCellFvMesh
+(
+    const Time& runTime,
+    const scalar d
+)
 :
-    dynamicFvMesh(io),
-    motionPtr_(motionSolver::New(*this))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::dynamicMotionSolverFvMesh::~dynamicMotionSolverFvMesh()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-const Foam::motionSolver& Foam::dynamicMotionSolverFvMesh::motion() const
+    proxyFvMesh
+    (
+        IOobject
+        (
+            polyMesh::defaultRegion,
+            runTime.timeName(),
+            runTime,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE
+        ),
+        pointField
+        (
+            {
+                point(0, 0, 0),
+                point(d, 0, 0),
+                point(d, d, 0),
+                point(0, d, 0),
+                point(0, 0, d),
+                point(d, 0, d),
+                point(d, d, d),
+                point(0, d, d)
+            }
+        ),
+        faceList(cellModel::ref(cellModel::HEX).modelFaces()),
+        labelList(6, Zero),
+        labelList()
+    )
 {
-    return *motionPtr_;
-}
+    List<polyPatch*> patches(1);
 
+    patches[0] = new emptyPolyPatch
+    (
+        "boundary",
+        6,
+        0,
+        0,
+        boundaryMesh(),
+        emptyPolyPatch::typeName
+    );
 
-bool Foam::dynamicMotionSolverFvMesh::update()
-{
-    fvMesh::movePoints(motionPtr_->newPoints());
-
-    if (foundObject<volVectorField>("U"))
-    {
-        volVectorField& U = lookupObjectRef<volVectorField>("U");
-        U.correctBoundaryConditions();
-    }
-
-    return true;
+    addFvPatches(patches);
 }
 
 
