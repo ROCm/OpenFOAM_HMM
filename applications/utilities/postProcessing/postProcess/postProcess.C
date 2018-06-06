@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -191,6 +191,8 @@ int main(int argc, char *argv[])
         if (mesh.readUpdate() != polyMesh::UNCHANGED)
         {
             // Update functionObjectList if mesh changes
+            // Note clearing the dictionary to avoid merge warning
+            functionsDict.clear();
             functionsPtr = functionObjectList::New
             (
                 args,

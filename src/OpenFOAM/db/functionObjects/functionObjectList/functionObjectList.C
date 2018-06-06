@@ -386,9 +386,11 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
     HashSet<wordRe>& requiredFields
 )
 {
+    // Merge any functions from the provided controlDict
     controlDict.add
     (
-        dictionaryEntry("functions", controlDict, dictionary::null)
+        dictionaryEntry("functions", controlDict, dictionary::null),
+        true
     );
 
     dictionary& functionsDict = controlDict.subDict("functions");
