@@ -19,6 +19,6 @@ FoamFile
 numberOfSubdomains  3;
 
 //- The decomposition method (mandatory)
-method          random;
+method          scotch;
 
 // ************************************************************************* //
