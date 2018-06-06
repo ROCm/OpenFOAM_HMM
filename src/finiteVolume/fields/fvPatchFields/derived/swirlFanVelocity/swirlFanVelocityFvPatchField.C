@@ -85,6 +85,13 @@ void Foam::swirlFanVelocityFvPatchField::calcFanJump()
         }
         else
         {
+            if (rEff_ <= 0)
+            {
+                FatalErrorInFunction
+                    << "Effective radius rEff should be specified in the "<< nl
+                    << "dictionary." << nl
+                    << exit(FatalError);
+            }
             magTangU =
                 deltaP/rEff_/fanEff_/rpm_*constant::mathematical::pi/30.0;
         }
