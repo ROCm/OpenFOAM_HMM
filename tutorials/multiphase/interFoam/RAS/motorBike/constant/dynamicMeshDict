@@ -43,6 +43,7 @@ dynamicRefineFvMeshCoeffs
         (ghf none)
         (alphaPhi none)
         (alphaPhiUn none)
+        (alphaPhi0.water none)
     );
     // Write the refinement level as a volScalarField
     dumpLevel       true;

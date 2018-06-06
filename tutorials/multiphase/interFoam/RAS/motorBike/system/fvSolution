@@ -22,6 +22,14 @@ solvers
         nAlphaCorr      1;
         nAlphaSubCycles 3;
         cAlpha          1;
+
+        MULESCorr       yes;
+        nLimiterIter    3;
+
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-8;
+        relTol          0;
     }
 
     p_rgh

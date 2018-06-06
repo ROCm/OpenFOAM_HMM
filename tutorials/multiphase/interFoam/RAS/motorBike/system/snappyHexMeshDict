@@ -17,7 +17,7 @@ FoamFile
 // Which of the steps to run
 castellatedMesh true;
 snap            true;
-addLayers       true;
+addLayers       false;
 
 
 // Geometry. Definition of all surfaces. All surfaces are of class
@@ -38,7 +38,7 @@ geometry
 
 //// Optional: avoid patch-face merging. Allows mesh to be used for
 ////           refinement/unrefinement
-mergePatchFaces on; // default on
+mergePatchFaces off; // default on
 
 
 

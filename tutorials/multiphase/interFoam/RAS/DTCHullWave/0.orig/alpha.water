@@ -27,6 +27,7 @@ boundaryField
     inlet
     {
         type            waveAlpha;
+        value           $internalField;
     }
 
     outlet
