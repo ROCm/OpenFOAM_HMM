@@ -32,6 +32,8 @@ restore0Dir -processor
 
 runParallel $decompDict patchSummary
 runParallel $decompDict potentialFoam
+runParallel $decompDict checkMesh -writeFields '(nonOrthoAngle)' -constant
+
 runParallel $decompDict $(getApplication)
 
 runApplication reconstructParMesh -constant

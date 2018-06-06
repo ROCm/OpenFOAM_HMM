@@ -96,4 +96,6 @@ flux/flux.C
 ddt2/ddt2.C
 zeroGradient/zeroGradient.C
 
+stabilityBlendingFactor/stabilityBlendingFactor.C
+
 LIB = $(FOAM_LIBBIN)/libfieldFunctionObjects
