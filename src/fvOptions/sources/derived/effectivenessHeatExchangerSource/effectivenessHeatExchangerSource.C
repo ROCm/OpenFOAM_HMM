@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -300,7 +300,7 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
 
     Info<< type() << ": " << name() << nl << incrIndent
         << indent << "Net mass flux [Kg/s]      : " << sumPhi << nl
-        << indent << "Total energy exchange [W] : " << Qt << nl
+        << indent << "Total heat exchange [W] : " << Qt << nl
         << indent << "Secondary inlet T [K]     : " << secondaryInletT_ << nl
         << indent << "Tref [K]                  : " << Tref << nl
         << indent << "Effectiveness             : "
