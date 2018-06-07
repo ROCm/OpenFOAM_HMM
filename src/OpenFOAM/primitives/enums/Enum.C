@@ -186,7 +186,7 @@ EnumType Foam::Enum<EnumType>::lookup
     const dictionary& dict
 ) const
 {
-    const word enumName(dict.lookup(key));
+    const word enumName(dict.get<word>(key));
     const label idx = getIndex(enumName);
 
     if (idx < 0)
@@ -228,7 +228,7 @@ EnumType Foam::Enum<EnumType>::lookupOrFailsafe
 {
     if (dict.found(key))
     {
-        const word enumName(dict.lookup(key));
+        const word enumName(dict.get<word>(key));
         const label idx = getIndex(enumName);
 
         if (idx >= 0)

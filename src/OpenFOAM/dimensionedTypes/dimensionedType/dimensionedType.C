@@ -199,7 +199,7 @@ Foam::dimensioned<Type> Foam::dimensioned<Type>::lookupOrDefault
 {
     if (dict.found(name))
     {
-        return dimensioned<Type>(name, dims, dict.lookup(name));
+        return dimensioned<Type>(name, dims, dict.get<Type>(name));
     }
 
     return dimensioned<Type>(name, dims, defaultValue);
@@ -316,7 +316,7 @@ void Foam::dimensioned<Type>::replace
 template<class Type>
 void Foam::dimensioned<Type>::read(const dictionary& dict)
 {
-    dict.lookup(name_) >> value_;
+    dict.read(name_, value_);
 }
 
 
