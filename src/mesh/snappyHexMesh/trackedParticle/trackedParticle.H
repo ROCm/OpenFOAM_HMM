@@ -36,6 +36,7 @@ SourceFiles
 #ifndef trackedParticle_H
 #define trackedParticle_H
 
+#include "bitSet.H"
 #include "particle.H"
 #include "autoPtr.H"
 
@@ -44,11 +45,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+
 class trackedParticleCloud;
-
-
-// Forward declaration of friend functions and operators
-
 class trackedParticle;
 
 Ostream& operator<<(Ostream&, const trackedParticle&);

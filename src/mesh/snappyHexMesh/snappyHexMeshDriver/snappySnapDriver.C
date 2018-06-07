@@ -183,7 +183,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothInternalDisplacement
         label ownLevel = cellLevel[mesh.faceOwner()[facei]];
         label neiLevel = cellLevel[mesh.faceNeighbour()[facei]];
 
-        if (!isFront[facei] && ownLevel != neiLevel)
+        if (!isFront.test(facei) && ownLevel != neiLevel)
         {
             const face& f = mesh.faces()[facei];
             isMovingPoint.set(f);
@@ -200,7 +200,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothInternalDisplacement
         label ownLevel = cellLevel[mesh.faceOwner()[facei]];
         label neiLevel = neiCellLevel[facei-mesh.nInternalFaces()];
 
-        if (!isFront[facei] && ownLevel != neiLevel)
+        if (!isFront.test(facei) && ownLevel != neiLevel)
         {
             const face& f = mesh.faces()[facei];
             isMovingPoint.set(f);
@@ -239,7 +239,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothInternalDisplacement
 
     forAll(isMovingPoint, pointi)
     {
-        if (isMovingPoint[pointi])
+        if (isMovingPoint.test(pointi))
         {
             const labelList& pCells = mesh.pointCells(pointi);
 

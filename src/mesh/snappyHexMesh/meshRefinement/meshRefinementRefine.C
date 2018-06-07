@@ -261,7 +261,7 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
 
         forAll(changedFace, faceI)
         {
-            if (changedFace[faceI] && isMasterFace[faceI])
+            if (changedFace[faceI] && isMasterFace.test(faceI))
             {
                 nMasterChanged++;
             }

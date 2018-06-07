@@ -1025,9 +1025,9 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
                         else
                         {
                             facePatch[facei] = nearestAdaptPatch[facei];
-                            if (isMasterFace[facei])
+                            if (isMasterFace.test(facei))
                             {
-                                nBaffleFaces++;
+                                ++nBaffleFaces;
                             }
 
                             // Do NOT update boundary data since this would grow

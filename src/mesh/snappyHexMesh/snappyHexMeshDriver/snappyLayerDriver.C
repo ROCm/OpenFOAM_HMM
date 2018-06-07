@@ -634,7 +634,7 @@ void Foam::snappyLayerDriver::handleNonManifolds
             (
                 pp.edgeFaces()[edgei].size() == 1
              && edgeGlobalFaces[edgei].size() == 1
-             && isCoupledEdge[meshEdgei]
+             && isCoupledEdge.test(meshEdgei)
             )
             {
                 // Edge of patch but no continuation across processor.
@@ -4336,7 +4336,7 @@ void Foam::snappyLayerDriver::addLayers
             )
             {
                 label oldFacei = map.faceMap()[facei];
-                if (oldFacei != -1 && oldBaffleFace[oldFacei])
+                if (oldFacei != -1 && oldBaffleFace.test(oldFacei))
                 {
                     const face& f = mesh.faces()[facei];
                     forAll(f, fp)
@@ -4680,7 +4680,7 @@ void Foam::snappyLayerDriver::doLayers
                 facei++
             )
             {
-                if (intOrCoupled[facei] && isExtrudedZoneFace[facei])
+                if (intOrCoupled[facei] && isExtrudedZoneFace.test(facei))
                 {
                     faceZoneOnCoupledFace = true;
                     break;

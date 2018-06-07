@@ -2754,9 +2754,9 @@ const
         label nMasterFaces = 0;
         forAll(isMasterFace, i)
         {
-            if (isMasterFace[i])
+            if (isMasterFace.test(i))
             {
-                nMasterFaces++;
+                ++nMasterFaces;
             }
         }
 
@@ -2764,9 +2764,9 @@ const
         label nMasterPoints = 0;
         forAll(isMeshMasterPoint, i)
         {
-            if (isMeshMasterPoint[i])
+            if (isMeshMasterPoint.test(i))
             {
-                nMasterPoints++;
+                ++nMasterPoints;
             }
         }
 
