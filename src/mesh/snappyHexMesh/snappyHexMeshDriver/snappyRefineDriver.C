@@ -46,22 +46,19 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(snappyRefineDriver, 0);
-
+    defineTypeNameAndDebug(snappyRefineDriver, 0);
 } // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::snappyRefineDriver::snappyRefineDriver
 (
     meshRefinement& meshRefiner,
     decompositionMethod& decomposer,
     fvMeshDistribute& distributor,
-    const labelList& globalToMasterPatch,
-    const labelList& globalToSlavePatch
+    const labelUList& globalToMasterPatch,
+    const labelUList& globalToSlavePatch
 )
 :
     meshRefiner_(meshRefiner),
@@ -1629,8 +1626,7 @@ Foam::label Foam::snappyRefineDriver::directionalShellRefine
     List<labelVector> dirCellLevel(cellLevel.size());
     forAll(cellLevel, celli)
     {
-        label l = cellLevel[celli];
-        dirCellLevel[celli] = labelVector(l, l, l);
+        dirCellLevel[celli] = labelVector::uniform(cellLevel[celli]);
     }
 
     label iter;
