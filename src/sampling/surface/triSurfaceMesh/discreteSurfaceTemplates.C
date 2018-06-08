@@ -175,24 +175,26 @@ Foam::discreteSurface::sampleOnFaces
 
         Field<Type> bVals(nBnd, Zero);
 
-        forAll(vField.boundaryField(), patchi)
+        const auto& bField = vField.boundaryField();
+
+        forAll(bField, patchi)
         {
-            label bFacei = pbm[patchi].start() - mesh().nInternalFaces();
+            const label bFacei = pbm[patchi].start() - mesh().nInternalFaces();
 
             SubList<Type>
             (
                 bVals,
-                vField.boundaryField()[patchi].size(),
+                bField[patchi].size(),
                 bFacei
-            ) = vField.boundaryField()[patchi];
+            ) = bField[patchi];
         }
 
         // Sample in flat boundary field
 
         for (label i=0; i < len; ++i)
         {
-            label facei = elements[i];
-            values[i] = bVals[facei-mesh().nInternalFaces()];
+            const label bFacei = (elements[i] - mesh().nInternalFaces());
+            values[i] = bVals[bFacei];
         }
     }
 
@@ -230,7 +232,7 @@ Foam::discreteSurface::sampleOnPoints
 
         forAll(samplePoints_, pointi)
         {
-            label facei = sampleElements_[pointi];
+            const label facei = sampleElements_[pointi];
 
             values[pointi] = interpolator.interpolate
             (

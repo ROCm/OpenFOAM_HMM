@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,6 +90,13 @@ class surfMeshSampleDiscrete
 
         //- Transfer mesh content from SurfaceSource to surfMesh
         void transferContent();
+
+        //- Sample field (from volume field) onto surface faces
+        template<class Type>
+        tmp<Field<Type>> sampleOnFaces
+        (
+            const interpolation<Type>& sampler
+        ) const;
 
         //- Sample field on surface.
         template<class Type>

@@ -744,6 +744,7 @@ bool Foam::discreteSurface::interpolate() const
     return interpolate_;
 }
 
+
 bool Foam::discreteSurface::interpolate(bool b)
 {
     if (interpolate_ == b)

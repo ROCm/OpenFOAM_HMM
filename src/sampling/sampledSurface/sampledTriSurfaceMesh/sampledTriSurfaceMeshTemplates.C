@@ -58,14 +58,14 @@ Foam::sampledTriSurfaceMesh::sampleOnFaces
     auto& values = tvalues.ref();
 
     const polyBoundaryMesh& pbm = mesh().boundaryMesh();
-
+    const label nBnd = mesh().nFaces()-mesh().nInternalFaces();
 
     // Create flat boundary field
-    const label nBnd = mesh().nFaces()-mesh().nInternalFaces();
 
     Field<Type> bVals(nBnd, Zero);
 
     const auto& bField = sampler.psi().boundaryField();
+
     forAll(bField, patchi)
     {
         const label bFacei = (pbm[patchi].start() - mesh().nInternalFaces());
