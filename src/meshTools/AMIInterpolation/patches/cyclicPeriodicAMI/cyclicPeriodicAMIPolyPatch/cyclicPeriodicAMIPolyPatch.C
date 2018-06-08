@@ -547,12 +547,12 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
 
         if (nFace)
         {
-            scalarField srcWghtSum(size(), 0);
+            scalarField srcWghtSum(size(), Zero);
             forAll(srcWghtSum, faceI)
             {
                 srcWghtSum[faceI] = sum(AMIPtr_->srcWeights()[faceI]);
             }
-            scalarField tgtWghtSum(neighbPatch().size(), 0);
+            scalarField tgtWghtSum(neighbPatch().size(), Zero);
             forAll(tgtWghtSum, faceI)
             {
                 tgtWghtSum[faceI] = sum(AMIPtr_->tgtWeights()[faceI]);
@@ -560,16 +560,16 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
 
             Info<< indent
                 << "AMI: Patch " << name()
-                << " sum(weights) min/max/average = "
-                << gMin(srcWghtSum) << ", "
-                << gMax(srcWghtSum) << ", "
-                << gAverage(srcWghtSum) << endl;
+                << " sum(weights)"
+                << " min = " << gMin(srcWghtSum)
+                << " max = " << gMax(srcWghtSum)
+                << " average = " << gAverage(srcWghtSum) << nl;
             Info<< indent
                 << "AMI: Patch " << neighbPatch().name()
-                << " sum(weights) min/max/average = "
-                << gMin(tgtWghtSum) << ", "
-                << gMax(tgtWghtSum) << ", "
-                << gAverage(tgtWghtSum) << endl;
+                << " sum(weights)"
+                << " min = " << gMin(tgtWghtSum)
+                << " max = " << gMax(tgtWghtSum)
+                << " average = " << gAverage(tgtWghtSum) << nl;
         }
     }
 }
