@@ -71,10 +71,7 @@ outletMachNumberPressureFvPatchScalarField
     UName_(dict.lookupOrDefault<word>("U", "U")),
     choked_(dict.lookup("choked")),
     relax_(dict.lookupOrDefault<scalar>("relax", 0))
-{
-    Info<< "The outletMachNumber pressure BC is using the flag choked: "
-        <<  choked_  << endl;
-}
+{}
 
 
 Foam::outletMachNumberPressureFvPatchScalarField::
