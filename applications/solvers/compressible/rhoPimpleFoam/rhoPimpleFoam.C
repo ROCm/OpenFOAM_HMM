@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
                 }
             }
 
-            if (pimple.nCorrPIMPLE() <= 1)
+            if (pimple.firstIter() && !pimple.SIMPLErho())
             {
                 #include "rhoEqn.H"
             }
