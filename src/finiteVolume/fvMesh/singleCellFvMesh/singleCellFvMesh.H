@@ -155,7 +155,7 @@ public:
         singleCellFvMesh(const IOobject& io, const fvMesh&);
 
         //- Construct from fvMesh and agglomeration of boundary faces.
-        //  agglomeration is per patch, per patch face index the agglomeration
+        //  Agglomeration is per patch, per patch face index the agglomeration
         //  the face goes into.
         singleCellFvMesh
         (
@@ -193,14 +193,14 @@ public:
         }
 
         //- From point on original mesh to point on this (or -1 for removed
-        //  points)
+        //- points)
         const labelList& reversePointMap() const
         {
             return reversePointMap_;
         }
 
         //- Map volField. Internal field set to average, patch fields straight
-        //  copies.
+        //- copies.
         template<class Type>
         tmp<GeometricField<Type, fvPatchField, volMesh>>
         interpolate

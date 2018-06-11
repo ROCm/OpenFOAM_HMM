@@ -23,21 +23,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "proxyFvMesh.H"
+#include "simplifiedFvMesh.H"
 #include "fvPatchField.H"
 
 // * * * * * * * * * * * * * * * Static Members  * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-defineTypeNameAndDebug(proxyFvMesh, 0);
-defineRunTimeSelectionTable(proxyFvMesh, time);
+defineTypeNameAndDebug(simplifiedFvMesh, 0);
+defineRunTimeSelectionTable(simplifiedFvMesh, time);
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::proxyFvMesh::fvPatchFieldExists(const word& patchType)
+bool Foam::simplifiedFvMesh::fvPatchFieldExists(const word& patchType)
 {
     if
     (
@@ -57,7 +57,7 @@ bool Foam::proxyFvMesh::fvPatchFieldExists(const word& patchType)
 }
 
 
-Foam::proxyFvMesh::proxyFvMesh
+Foam::simplifiedFvMesh::simplifiedFvMesh
 (
     const IOobject& io,
     pointField&& points,
@@ -77,27 +77,27 @@ Foam::proxyFvMesh::proxyFvMesh
 {}
 
 
-Foam::autoPtr<Foam::proxyFvMesh> Foam::proxyFvMesh::New
+Foam::autoPtr<Foam::simplifiedFvMesh> Foam::simplifiedFvMesh::New
 (
     const word& modelType,
     const Time& runTime
 )
 {
-    Info<< "Selecting proxy mesh model " << modelType << endl;
+    Info<< "Selecting simplified mesh model " << modelType << endl;
 
     auto cstrIter = timeConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown proxy mesh type "
+            << "Unknown simplified fvMesh type "
             << modelType << nl << nl
-            << "Valid dumy meshes :" << endl
+            << "Valid simplified fvMeshes :" << endl
             << timeConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
-    return autoPtr<proxyFvMesh>(cstrIter()(runTime));
+    return autoPtr<simplifiedFvMesh>(cstrIter()(runTime));
 }
 
 

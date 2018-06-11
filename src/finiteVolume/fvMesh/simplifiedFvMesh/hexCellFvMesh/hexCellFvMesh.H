@@ -22,105 +22,51 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::proxyFvMesh
+    Foam::simplifiedMeshes::hexCellFvMesh
 
 Description
-    Functions to generate proxy finite volume meshes
+    Generates a single hex cell representation of a mesh
 
 SourceFiles
-    proxyFvMesh.C
+    hexCellFvMesh.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef proxyFvMesh_H
-#define proxyFvMesh_H
+#ifndef simplifiedMeshes_hexCellFvMesh_H
+#define simplifiedMeshes_hexCellFvMesh_H
 
-#include "runTimeSelectionTables.H"
-#include "fvMesh.H"
-#include "Time.H"
+#include "simplifiedFvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace simplifiedMeshes
+{
 
 /*---------------------------------------------------------------------------*\
-                         Class proxyFvMesh Declaration
+                        Class hexCellFvMesh Declaration
 \*---------------------------------------------------------------------------*/
 
-class proxyFvMesh
+class hexCellFvMesh
 :
-    public fvMesh
+    public simplifiedFvMesh
 {
-protected:
-
-    //- Helper function to initialise empty zones
-    template<class ZoneMeshType>
-    void initialiseZone
-    (
-        const word& zoneTypeName,
-        const fileName& instance,
-        ZoneMeshType& zoneType
-    );
-
 
 public:
 
     //- Runtime type information
-    TypeName("proxyFvMesh");
-
-    // Declare run-time constructor selection table
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            proxyFvMesh,
-            time,
-            (
-                const Time& runTime
-            ),
-            (runTime)
-        );
-
-
-    // Selectors
-
-        //- Return a reference to the selected proxy mesh
-        static autoPtr<proxyFvMesh> New
-        (
-            const word& modelType,
-            const Time& runTime
-        );
-
+    TypeName("hexCellFvMesh");
 
     //- Constructor
-    proxyFvMesh
-    (
-        const IOobject& io,
-        pointField&& points,
-        faceList&& faces,
-        labelList&& allOwner,
-        labelList&& allNeighbour
-    );
-
-
-    // Member Functions
-
-        //- Helper function to see if the patch type exists in the run-time
-        //- selection tables
-        static bool fvPatchFieldExists(const word& patchType);
+    hexCellFvMesh(const Time& runTime, const scalar d = 1);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace simplifiedMeshes
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "proxyFvMeshTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

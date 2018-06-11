@@ -22,9 +22,7 @@
 #include "IOMRFZoneList.H"
 #include "constants.H"
 
-#include "proxyFvMesh.H"
 #include "columnFvMesh.H"
-#include "hexCellFvMesh.H"
 
 #include "OSspecific.H"
 #include "argList.H"

@@ -43,7 +43,7 @@ Description
 #include "OFstream.H"
 #include "thermoPhysicsTypes.H"
 #include "basicSpecieMixture.H"
-#include "cellModel.H"
+#include "hexCellFvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -113,7 +113,15 @@ Foam::points0MotionSolver::points0MotionSolver
     motionSolver(mesh, dict, type),
     points0_(points0IO(mesh))
 {
-    if (points0_.size() != mesh.nPoints())
+    if
+    (
+        FieldBase::allowConstructFromLargerSize
+     && (points0_.size() > mesh.nPoints())
+    )
+    {
+        // Allowed
+    }
+    else if (points0_.size() != mesh.nPoints())
     {
         FatalErrorInFunction
             << "Number of points in mesh " << mesh.nPoints()

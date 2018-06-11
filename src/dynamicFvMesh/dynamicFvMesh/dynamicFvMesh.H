@@ -119,6 +119,16 @@ public:
         static autoPtr<dynamicFvMesh> New(const IOobject& io);
 
 
+        //- Select, construct and return the dynamicFvMesh
+        //  If the constant/dynamicMeshDict does not exist
+        //  a staticFvMesh is returned
+        static autoPtr<dynamicFvMesh> New
+        (
+            const argList& args,
+            const Time& runTime
+        );
+
+
     //- Destructor
     virtual ~dynamicFvMesh() = default;
 

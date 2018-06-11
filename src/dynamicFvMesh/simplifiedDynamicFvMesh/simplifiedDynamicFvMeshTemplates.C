@@ -21,55 +21,47 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::proxyMeshes::hexCellFvMesh
-
-Description
-    Generates a single hex cell representation of a mesh
-
-SourceFiles
-    hexCellFvMesh.C
-
 \*---------------------------------------------------------------------------*/
-
-#ifndef proxyMeshes_hexCellFvMesh_H
-#define proxyMeshes_hexCellFvMesh_H
-
-#include "proxyFvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-namespace proxyMeshes
-{
-
-/*---------------------------------------------------------------------------*\
-                        Class hexCellFvMesh Declaration
-\*---------------------------------------------------------------------------*/
-
-class hexCellFvMesh
+template<class DynamicMeshType>
+Foam::simplifiedMeshes::SimplifiedDynamicFvMesh<DynamicMeshType>::
+SimplifiedDynamicFvMesh
+(
+    const Time& runTime
+)
 :
-    public proxyFvMesh
+    simplifiedDynamicFvMeshBase(),
+    columnFvMeshInfo(runTime),
+    DynamicMeshType
+    (
+        IOobject
+        (
+            fvMesh::defaultRegion,
+            runTime.constant(),
+            runTime,
+            IOobject::NO_READ, // Do not read any existing mesh
+            IOobject::NO_WRITE
+        ),
+        std::move(points1D_),
+        std::move(faces1D_),
+        std::move(owner1D_),
+        std::move(neighbour1D_)
+    )
 {
+    // Workaround to read fvSchemes and fvSolution after setting NO_READ
+    // when creating the mesh
+    {
+        fvSchemes::readOpt() = IOobject::MUST_READ;
+        fvSchemes::read();
+        fvSolution::readOpt() = IOobject::MUST_READ;
+        fvSolution::read();
+    }
 
-public:
+    // Add the patches
+    addLocalPatches(*this);
+}
 
-    //- Runtime type information
-    TypeName("hexCellFvMesh");
-
-    //- Constructor
-    hexCellFvMesh(const Time& runTime, const scalar d = 1);
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace proxyMeshes
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

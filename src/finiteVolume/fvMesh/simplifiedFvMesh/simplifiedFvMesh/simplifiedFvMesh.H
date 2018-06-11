@@ -22,109 +22,105 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::proxyMeshes::columnFvMesh
+    Foam::simplifiedFvMesh
 
 Description
-    Generates a 1D column representation of a mesh based on an existing mesh
-    and/or fields
+    Functions to generate simplified finite volume meshes
 
 SourceFiles
-    columnFvMesh.C
+    simplifiedFvMesh.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef proxyMeshes_columnFvMesh_H
-#define proxyMeshes_columnFvMesh_H
+#ifndef simplifiedFvMesh_H
+#define simplifiedFvMesh_H
 
-#include "proxyFvMesh.H"
+#include "runTimeSelectionTables.H"
+#include "fvMesh.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace proxyMeshes
-{
 
 /*---------------------------------------------------------------------------*\
-                        Class columnFvMesh Declaration
+                         Class simplifiedFvMesh Declaration
 \*---------------------------------------------------------------------------*/
 
-class columnFvMeshInfo
+class simplifiedFvMesh
+:
+    public fvMesh
 {
-    // Private Member Funtions
-
-        //- Set the patch dictionary entries using the mesh or field files
-        bool setPatchEntries(const Time& runTime);
-
-        //- Initialise
-        void initialise(const Time& runTime);
-
-
 protected:
 
-    // Protected data
-
-        //- Location of existing mesh (if present)
-        const word localInstance_;
-
-        //- Created from existing mesh (false = from field)
-        bool createFromMesh_;
-
-        // Temporary mesh data used during construction of columnFvMesh
-        // Note: transferred to columnFvMesh
-
-            //- Points
-            pointField points1D_;
-
-            //- Faces
-            faceList faces1D_;
-
-            //- Owner addressing
-            labelList owner1D_;
-
-            //- Neighbour addressing
-            labelList neighbour1D_;
-
-
-        // Patch data
-
-            //- Dictionary of patch information
-            dictionary patchEntries_;
-
-            //- Number of patches with at least 1 local face
-            label nPatchWithFace_;
+    //- Helper function to initialise empty zones
+    template<class ZoneMeshType>
+    void initialiseZone
+    (
+        const word& zoneTypeName,
+        const fileName& instance,
+        ZoneMeshType& zoneType
+    );
 
 
 public:
 
     //- Runtime type information
-    ClassName("columnFvMeshInfo");
+    TypeName("simplifiedFvMesh");
 
-    // Constructor
-    columnFvMeshInfo(const Time& runTime);
-};
+    // Declare run-time constructor selection table
+
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            simplifiedFvMesh,
+            time,
+            (
+                const Time& runTime
+            ),
+            (runTime)
+        );
 
 
-class columnFvMesh
-:
-    public columnFvMeshInfo,
-    public proxyFvMesh
-{
+    // Selectors
 
-public:
+        //- Return a reference to the selected simplified mesh
+        static autoPtr<simplifiedFvMesh> New
+        (
+            const word& modelType,
+            const Time& runTime
+        );
 
-    //- Runtime type information
-    TypeName("columnFvMesh");
 
     //- Constructor
-    columnFvMesh(const Time& runTime);
+    simplifiedFvMesh
+    (
+        const IOobject& io,
+        pointField&& points,
+        faceList&& faces,
+        labelList&& allOwner,
+        labelList&& allNeighbour
+    );
+
+
+    // Member Functions
+
+        //- Helper function to see if the patch type exists in the run-time
+        //- selection tables
+        static bool fvPatchFieldExists(const word& patchType);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace proxyMeshes
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "simplifiedFvMeshTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

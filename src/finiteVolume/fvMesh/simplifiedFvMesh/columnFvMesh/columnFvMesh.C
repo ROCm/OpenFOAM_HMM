@@ -36,14 +36,14 @@ License
 
 namespace Foam
 {
-namespace proxyMeshes
+namespace simplifiedMeshes
 {
     defineTypeNameAndDebug(columnFvMeshInfo, 0);
     defineTypeNameAndDebug(columnFvMesh, 0);
 
     addToRunTimeSelectionTable
     (
-        proxyFvMesh,
+        simplifiedFvMesh,
         columnFvMesh,
         time
     );
@@ -53,7 +53,7 @@ namespace proxyMeshes
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::proxyMeshes::columnFvMeshInfo::setPatchEntries
+bool Foam::simplifiedMeshes::columnFvMeshInfo::setPatchEntries
 (
     const Time& runTime
 )
@@ -75,7 +75,7 @@ bool Foam::proxyMeshes::columnFvMeshInfo::setPatchEntries
     {
         polyBoundaryMeshEntries allPatchEntries(boundaryIO);
 
-        Info<< "Creating proxy mesh using " << allPatchEntries.path() << endl;
+        Info<< "Creating simplified mesh using " << allPatchEntries.path() << endl;
 
         for (const entry& e : allPatchEntries)
         {
@@ -115,7 +115,7 @@ bool Foam::proxyMeshes::columnFvMeshInfo::setPatchEntries
 
         const fieldDictionary fieldDict(io, io.headerClassName());
 
-        Info<< "Creating proxy mesh from field "
+        Info<< "Creating simplified mesh from field "
             << fieldDict.objectPath()
             << endl;
 
@@ -126,17 +126,17 @@ bool Foam::proxyMeshes::columnFvMeshInfo::setPatchEntries
         {
             const word type(e.dict().lookup("type"));
 
-            if (proxyFvMesh::fvPatchFieldExists(type))
+            if (simplifiedFvMesh::fvPatchFieldExists(type))
             {
                 if (!constraintPatches.found(type))
                 {
                     ++nPatchWithFace_;
-                    dictionary proxyEntries;
-                    proxyEntries.add("startFace", 0);
-                    proxyEntries.add("nFaces", 1);
-                    proxyEntries.add("type", "wall"); // default to wall type
+                    dictionary simplifiedEntries;
+                    simplifiedEntries.add("startFace", 0);
+                    simplifiedEntries.add("nFaces", 1);
+                    simplifiedEntries.add("type", "wall"); // default to wall type
 
-                    patchEntries_.add(e.keyword(), proxyEntries);
+                    patchEntries_.add(e.keyword(), simplifiedEntries);
                 }
             }
             else
@@ -150,7 +150,7 @@ bool Foam::proxyMeshes::columnFvMeshInfo::setPatchEntries
 }
 
 
-void Foam::proxyMeshes::columnFvMeshInfo::initialise(const Time& runTime)
+void Foam::simplifiedMeshes::columnFvMeshInfo::initialise(const Time& runTime)
 {
     DebugInfo << "Constructing 1-D mesh" << nl << endl;
 
@@ -304,61 +304,8 @@ void Foam::proxyMeshes::columnFvMeshInfo::initialise(const Time& runTime)
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::proxyMeshes::columnFvMeshInfo::columnFvMeshInfo(const Time& runTime)
-:
-    localInstance_
-    (
-        runTime.findInstance
-        (
-            polyMesh::meshSubDir,
-            "boundary",
-            IOobject::READ_IF_PRESENT
-        )
-    ),
-    createFromMesh_(false),
-    points1D_(),
-    faces1D_(),
-    owner1D_(),
-    neighbour1D_(),
-    patchEntries_(),
-    nPatchWithFace_(0)
+void Foam::simplifiedMeshes::columnFvMeshInfo::addLocalPatches(fvMesh& mesh) const
 {
-    initialise(runTime);
-}
-
-
-Foam::proxyMeshes::columnFvMesh::columnFvMesh(const Time& runTime)
-:
-    columnFvMeshInfo(runTime),
-    proxyFvMesh
-    (
-        IOobject
-        (
-            fvMesh::defaultRegion,
-            runTime.constant(),
-            runTime,
-            IOobject::NO_READ, // Do not read any existing mesh
-            IOobject::NO_WRITE
-        ),
-        std::move(points1D_),
-        std::move(faces1D_),
-        std::move(owner1D_),
-        std::move(neighbour1D_)
-    )
-{
-    // Workaround to read fvSchemes and fvSolution after setting NO_READ
-    // when creating the mesh
-    {
-        fvSchemes::readOpt() = IOobject::MUST_READ;
-        fvSchemes::read();
-        fvSolution::readOpt() = IOobject::MUST_READ;
-        fvSolution::read();
-    }
-
-    // Add the patches
-
     const label nPatch = patchEntries_.size();
 
     List<polyPatch*> patches(nPatch + 1);
@@ -390,7 +337,7 @@ Foam::proxyMeshes::columnFvMesh::columnFvMesh(const Time& runTime)
                 patchName,
                 patchDict,
                 entryi,
-                boundaryMesh()
+                mesh.boundaryMesh()
             ).ptr();
 
         ++entryi;
@@ -403,11 +350,11 @@ Foam::proxyMeshes::columnFvMesh::columnFvMesh(const Time& runTime)
         2,                                  // number of faces
         nInternalFace + 4*nPatchWithFace_,  // start face
         nPatch - 1,                         // index in boundary list
-        boundaryMesh(),                     // polyBoundaryMesh
+        mesh.boundaryMesh(),                // polyBoundaryMesh
         emptyPolyPatch::typeName            // patchType
     );
 
-    addFvPatches(patches);
+    mesh.addFvPatches(patches);
 
     if (debug)
     {
@@ -418,6 +365,63 @@ Foam::proxyMeshes::columnFvMesh::columnFvMesh(const Time& runTime)
                 << *patches[patchi] << endl;
         }
     }
+}
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::simplifiedMeshes::columnFvMeshInfo::columnFvMeshInfo(const Time& runTime)
+:
+    localInstance_
+    (
+        runTime.findInstance
+        (
+            polyMesh::meshSubDir,
+            "boundary",
+            IOobject::READ_IF_PRESENT
+        )
+    ),
+    createFromMesh_(false),
+    points1D_(),
+    faces1D_(),
+    owner1D_(),
+    neighbour1D_(),
+    patchEntries_(),
+    nPatchWithFace_(0)
+{
+    initialise(runTime);
+}
+
+
+Foam::simplifiedMeshes::columnFvMesh::columnFvMesh(const Time& runTime)
+:
+    columnFvMeshInfo(runTime),
+    simplifiedFvMesh
+    (
+        IOobject
+        (
+            fvMesh::defaultRegion,
+            runTime.constant(),
+            runTime,
+            IOobject::NO_READ, // Do not read any existing mesh
+            IOobject::NO_WRITE
+        ),
+        std::move(points1D_),
+        std::move(faces1D_),
+        std::move(owner1D_),
+        std::move(neighbour1D_)
+    )
+{
+    // Workaround to read fvSchemes and fvSolution after setting NO_READ
+    // when creating the mesh
+    {
+        fvSchemes::readOpt() = IOobject::MUST_READ;
+        fvSchemes::read();
+        fvSolution::readOpt() = IOobject::MUST_READ;
+        fvSolution::read();
+    }
+
+    // Add the patches
+    addLocalPatches(*this);
 
     // Add the zones
 

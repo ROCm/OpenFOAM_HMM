@@ -51,6 +51,29 @@ Foam::dynamicMotionSolverFvMesh::dynamicMotionSolverFvMesh(const IOobject& io)
 {}
 
 
+Foam::dynamicMotionSolverFvMesh::dynamicMotionSolverFvMesh
+(
+    const IOobject& io,
+    pointField&& points,
+    faceList&& faces,
+    labelList&& allOwner,
+    labelList&& allNeighbour,
+    const bool syncPar
+)
+:
+    dynamicFvMesh
+    (
+        io,
+        std::move(points),
+        std::move(faces),
+        std::move(allOwner),
+        std::move(allNeighbour),
+        syncPar
+    ),
+    motionPtr_(motionSolver::New(*this))
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::dynamicMotionSolverFvMesh::~dynamicMotionSolverFvMesh()

@@ -26,7 +26,7 @@ License
 #include "polyMesh.H"
 
 template<class ZoneMeshType>
-void Foam::proxyFvMesh::initialiseZone
+void Foam::simplifiedFvMesh::initialiseZone
 (
     const word& zoneTypeName,
     const fileName& instance, 

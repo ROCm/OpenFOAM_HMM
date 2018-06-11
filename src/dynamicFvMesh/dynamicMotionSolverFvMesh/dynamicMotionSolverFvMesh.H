@@ -77,6 +77,18 @@ public:
         //- Construct from IOobject
         dynamicMotionSolverFvMesh(const IOobject& io);
 
+        //- Construct from components without boundary.
+        //  Boundary is added using addFvPatches() member function
+        dynamicMotionSolverFvMesh
+        (
+            const IOobject& io,
+            pointField&& points,
+            faceList&& faces,
+            labelList&& allOwner,
+            labelList&& allNeighbour,
+            const bool syncPar = true
+        );
+
 
     //- Destructor
     ~dynamicMotionSolverFvMesh();

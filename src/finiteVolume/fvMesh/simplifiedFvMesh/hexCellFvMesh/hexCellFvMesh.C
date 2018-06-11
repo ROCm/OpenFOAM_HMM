@@ -31,13 +31,13 @@ License
 
 namespace Foam
 {
-namespace proxyMeshes
+namespace simplifiedMeshes
 {
     defineTypeNameAndDebug(hexCellFvMesh, 0);
 
     addToRunTimeSelectionTable
     (
-        proxyFvMesh,
+        simplifiedFvMesh,
         hexCellFvMesh,
         time
     );
@@ -47,13 +47,13 @@ namespace proxyMeshes
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::proxyMeshes::hexCellFvMesh::hexCellFvMesh
+Foam::simplifiedMeshes::hexCellFvMesh::hexCellFvMesh
 (
     const Time& runTime,
     const scalar d
 )
 :
-    proxyFvMesh
+    simplifiedFvMesh
     (
         IOobject
         (

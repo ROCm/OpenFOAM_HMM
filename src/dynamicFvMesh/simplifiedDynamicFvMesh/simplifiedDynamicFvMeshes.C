@@ -1,8 +1,8 @@
-/*---------------------------------------------------------------------------*\
+ /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,54 +23,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "staticFvMesh.H"
 #include "addToRunTimeSelectionTable.H"
+#include "simplifiedDynamicFvMesh.H"
+#include "staticFvMesh.H"
+#include "dynamicMotionSolverFvMesh.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(staticFvMesh, 0);
-    addToRunTimeSelectionTable(dynamicFvMesh, staticFvMesh, IOobject);
-}
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+    createProxyDynamicFvMesh(staticFvMesh);
+    createProxyDynamicFvMesh(dynamicMotionSolverFvMesh);
 
-Foam::staticFvMesh::staticFvMesh(const IOobject& io)
-:
-    dynamicFvMesh(io)
-{}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-Foam::staticFvMesh::staticFvMesh
-(
-    const IOobject& io,
-    pointField&& points,
-    faceList&& faces,
-    labelList&& allOwner,
-    labelList&& allNeighbour,
-    const bool syncPar
-)
-:
-    dynamicFvMesh
-    (
-        io,
-        std::move(points),
-        std::move(faces),
-        std::move(allOwner),
-        std::move(allNeighbour),
-        syncPar
-    )
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::staticFvMesh::update()
-{
-    return false;
-}
-
+} // End namespace Foam
 
 // ************************************************************************* //

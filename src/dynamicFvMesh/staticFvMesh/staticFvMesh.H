@@ -70,6 +70,18 @@ public:
         //- Construct from IOobject
         staticFvMesh(const IOobject& io);
 
+        //- Construct from components without boundary.
+        //  Boundary is added using addFvPatches() member function
+        staticFvMesh
+        (
+            const IOobject& io,
+            pointField&& points,
+            faceList&& faces,
+            labelList&& allOwner,
+            labelList&& allNeighbour,
+            const bool syncPar = true
+        );
+
 
     //- Destructor
     ~staticFvMesh() = default;

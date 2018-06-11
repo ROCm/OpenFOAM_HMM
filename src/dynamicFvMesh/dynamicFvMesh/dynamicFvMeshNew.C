@@ -24,6 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "staticFvMesh.H"
+#include "simplifiedDynamicFvMesh.H"
+#include "argList.H"
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
@@ -84,6 +86,64 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
 
 
     return autoPtr<dynamicFvMesh>(new staticFvMesh(io));
+}
+
+
+Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New
+(
+    const argList& args,
+    const Time& runTime
+)
+{
+    if (args.optionFound("dry-run") || args.optionFound("dry-run-write"))
+    {
+        Info
+            << "Operating in 'dry-run' mode: case will run for 1 time step.  "
+            << "All checks assumed OK on a clean exit" << Foam::endl;
+
+        FieldBase::allowConstructFromLargerSize = true;
+
+        // Stopping after 1 iteration of the simplified mesh
+        // Note: using saNoWriteNow will only trigger the function object execute
+        // function and not the write function
+        runTime.stopAt(Foam::Time::saNoWriteNow);
+
+        if (args.optionFound("dry-run-write"))
+        {
+            // Stopping after 1 iteration of the simplified mesh
+            // Note: using saWriteNow to trigger writing/execution of function
+            // objects
+            runTime.stopAt(Foam::Time::saWriteNow);
+        }
+
+        functionObject::outputPrefix = "postProcessing-dry-run";
+
+        return
+            simplifiedMeshes::simplifiedDynamicFvMeshBase::New
+            (
+                IOobject
+                (
+                    dynamicFvMesh::defaultRegion,
+                    runTime.timeName(),
+                    runTime,
+                    IOobject::MUST_READ
+                )
+            );
+    }
+    else
+    {
+        return
+            New
+            (
+                IOobject
+                (
+                    dynamicFvMesh::defaultRegion,
+                    runTime.timeName(),
+                    runTime,
+                    IOobject::MUST_READ
+                )
+            );
+    }
 }
 
 
