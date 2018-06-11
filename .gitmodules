@@ -4,6 +4,6 @@
 [submodule "avalanche"]
 	path = modules/avalanche
 	url = https://develop.openfoam.com/Community/avalanche.git
-[submodule "modules/catalyst"]
+[submodule "catalyst"]
 	path = modules/catalyst
 	url = https://develop.openfoam.com/Community/catalyst.git
