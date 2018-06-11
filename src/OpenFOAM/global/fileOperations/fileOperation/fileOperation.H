@@ -47,7 +47,7 @@ Description
 #include "labelList.H"
 #include "Switch.H"
 #include "tmpNrc.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -93,7 +93,7 @@ public:
             PROCBASEINSTANCE,       // as PROCBASEOBJECT but with instance
             PROCINSTANCE            // as PROCOBJECT but with instance
         };
-        static const NamedEnum<pathType, 12> pathTypeNames_;
+        static const Enum<pathType> pathTypeNames_;
 
         typedef Tuple2<fileName, Tuple2<pathType, label>> dirIndex;
         typedef List<dirIndex> dirIndexList;
