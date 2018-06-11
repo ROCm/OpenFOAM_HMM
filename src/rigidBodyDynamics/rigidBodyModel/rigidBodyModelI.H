@@ -25,6 +25,12 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+inline const Foam::Time& Foam::RBD::rigidBodyModel::time() const
+{
+    return time_;
+}
+
+
 inline Foam::label Foam::RBD::rigidBodyModel::nBodies() const
 {
     return bodies_.size();

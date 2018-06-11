@@ -1,0 +1,37 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+runApplication blockMesh
+
+#runApplication -s 1 topoSet -dict ./system/topoSetDictRefine
+#runApplication -s 1 refineMesh -overwrite -dict ./system/refineMeshDict
+runApplication -s 1 topoSet -dict ./system/topoSetDictRefine
+runApplication -s 1 refineMesh -overwrite -dict ./system/refineMeshDict
+runApplication -s 2 topoSet -dict ./system/topoSetDictRefine
+runApplication -s 2 refineMesh -overwrite -dict ./system/refineMeshDict
+# Select cellSets
+runApplication -s 3 topoSet -dict ./system/topoSetDictHull
+
+runApplication -s 3 subsetMesh keepBox -patch hullWall -overwrite
+
+# Select cellSets
+runApplication -s 4 topoSet -dict ./system/topoSetDictPropeller
+
+runApplication -s 4 subsetMesh keepBox -patch propellerWall -overwrite
+
+# Select cellSets
+runApplication -s 5 topoSet -dict ./system/topoSetDictRudder
+
+runApplication -s 5 subsetMesh keepBox -patch rudderWall -overwrite
+
+restore0Dir
+
+# Use cellSets to write zoneID
+runApplication -s 1 setFields -dict system/setFieldsDict
+runApplication -s 2 setFields -dict system/setFieldsDictWaterLevel
+
+
+
+touch rbm.foam
+#------------------------------------------------------------------------------

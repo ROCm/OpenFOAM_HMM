@@ -163,16 +163,22 @@ Foam::label Foam::RBD::rigidBodyModel::join_
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * * //
 
-Foam::RBD::rigidBodyModel::rigidBodyModel()
+Foam::RBD::rigidBodyModel::rigidBodyModel(const Time& time)
 :
+    time_(time),
     g_(Zero)
 {
     initializeRootBody();
 }
 
 
-Foam::RBD::rigidBodyModel::rigidBodyModel(const dictionary& dict)
+Foam::RBD::rigidBodyModel::rigidBodyModel
+(
+    const Time& time,
+    const dictionary& dict
+)
 :
+    time_(time),
     g_(Zero)
 {
     initializeRootBody();

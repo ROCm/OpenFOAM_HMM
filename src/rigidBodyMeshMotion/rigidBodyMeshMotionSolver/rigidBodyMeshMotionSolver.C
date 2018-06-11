@@ -73,6 +73,7 @@ Foam::rigidBodyMeshMotionSolver::rigidBodyMeshMotionSolver
     motionSolver(mesh, dict, typeName),
     model_
     (
+        mesh.time(),
         coeffDict(),
         IOobject
         (

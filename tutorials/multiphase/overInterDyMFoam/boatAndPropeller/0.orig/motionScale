@@ -1,0 +1,60 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1706                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       pointScalarField;
+    location    "0";
+    object      motionScale;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 0 0 0 0];
+
+
+internalField   uniform 0;
+
+boundaryField
+{
+    overset1
+    {
+        type            calculated;
+    }
+    overset2
+    {
+        type            calculated;
+    }
+    overset3
+    {
+        type            calculated;
+    }
+    hullWall
+    {
+        type            calculated;
+    }
+    propellerWall
+    {
+        type            calculated;
+    }
+    rudderWall
+    {
+        type            calculated;
+    }
+    atmosphere
+    {
+        type            calculated;
+    }
+    defaultFaces
+    {
+        type            calculated;
+    }
+}
+
+
+// ************************************************************************* //
