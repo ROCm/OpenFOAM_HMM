@@ -1,3 +1,5 @@
+#include "createRDeltaT.H"
+
 Info<< "Reading field p_rgh\n" << endl;
 volScalarField p_rgh
 (
@@ -119,5 +121,67 @@ if (p_rgh.needReference())
 mesh.setFluxRequired(p_rgh.name());
 mesh.setFluxRequired(alpha1.name());
 
+/*
+// MULES compressed flux is registered in case scalarTransport FO needs it.
+surfaceScalarField alphaPhiUn
+(
+    IOobject
+    (
+        "alphaPhiUn",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh,
+    dimensionedScalar(phi.dimensions(), Zero)
+);
+*/
+
 #include "createMRF.H"
-#include "createIsoAdvection.H"
+#include "createFvOptions.H"
+
+//Auxiliary fields when nOuterCorrectors > 1
+surfaceScalarField phi0
+(
+    IOobject
+    (
+        "phi0",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    phi
+);
+
+
+volVectorField U0
+(
+    IOobject
+    (
+        "U0",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    U
+);
+
+
+volScalarField alpha10
+(
+    IOobject
+    (
+        "alpha10",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    alpha1
+);
+
+
+isoAdvection advector(alpha1, phi, U);
