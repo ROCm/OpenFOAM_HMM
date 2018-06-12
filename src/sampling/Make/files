@@ -6,6 +6,7 @@ sampledSet/circle/circleSet.C
 sampledSet/cloud/cloudSet.C
 sampledSet/patchCloud/patchCloudSet.C
 sampledSet/polyLine/polyLineSet.C
+sampledSet/cellCentre/cellCentreSet.C
 sampledSet/face/faceOnlySet.C
 sampledSet/midPoint/midPointSet.C
 sampledSet/midPointAndFace/midPointAndFaceSet.C
