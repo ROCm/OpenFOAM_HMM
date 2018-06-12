@@ -174,7 +174,21 @@ int main(int argc, char *argv[])
         }
     }
 
-    cout<< nl << "Done." << endl;
+    // Test uniformity of random
+    {
+        List<label> samples(20, Zero);
+
+        Random rnd(123456);
+        for (label i=0; i < 1000*samples.size(); ++i)
+        {
+            ++samples[rnd.position<label>(0,19)];
+        }
+
+        Info<< nl << "uniform [0,20)" << nl << "  "
+            << flatOutput(samples) << nl;
+    }
+
+    Info<< nl << "Done." << endl;
 
     return 0;
 }

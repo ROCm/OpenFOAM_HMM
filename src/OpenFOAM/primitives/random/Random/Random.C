@@ -121,14 +121,16 @@ Foam::scalar Foam::Random::position
 template<>
 Foam::label Foam::Random::position(const label& start, const label& end)
 {
-    return start + round(scalar01()*(end - start));
+    // Extend range from [0, N-1] to (-0.5, N-0.5) to ensure that round()
+    // results in the same number density at the ends.
+    return start + round(scalar01()*((end - start) + 0.998) - 0.499);
 }
 
 
 template<>
 Foam::scalar Foam::Random::globalSample01()
 {
-    scalar value = -GREAT;
+    scalar value(-GREAT);
 
     if (Pstream::master())
     {
@@ -144,7 +146,7 @@ Foam::scalar Foam::Random::globalSample01()
 template<>
 Foam::label Foam::Random::globalSample01()
 {
-    label value = labelMin;
+    label value(labelMin);
 
     if (Pstream::master())
     {
@@ -160,7 +162,7 @@ Foam::label Foam::Random::globalSample01()
 template<>
 Foam::scalar Foam::Random::globalGaussNormal()
 {
-    scalar value = -GREAT;
+    scalar value(-GREAT);
 
     if (Pstream::master())
     {
@@ -176,16 +178,16 @@ Foam::scalar Foam::Random::globalGaussNormal()
 template<>
 Foam::label Foam::Random::globalGaussNormal()
 {
-    scalar value = -GREAT;
+    label value(labelMin);
 
     if (Pstream::master())
     {
-        value = GaussNormal<scalar>();
+        value = GaussNormal<label>();
     }
 
     Pstream::scatter(value);
 
-    return round(value);
+    return value;
 }
 
 
@@ -196,16 +198,16 @@ Foam::scalar Foam::Random::globalPosition
     const scalar& end
 )
 {
-    scalar value = -GREAT;
+    scalar value(-GREAT);
 
     if (Pstream::master())
     {
-        value = scalar01()*(end - start);
+        value = position<scalar>(start, end);
     }
 
     Pstream::scatter(value);
 
-    return start + value;
+    return value;
 }
 
 
@@ -216,16 +218,16 @@ Foam::label Foam::Random::globalPosition
     const label& end
 )
 {
-    label value = labelMin;
+    label value(labelMin);
 
     if (Pstream::master())
     {
-        value = round(scalar01()*(end - start));
+        value = position<label>(start, end);
     }
 
     Pstream::scatter(value);
 
-    return start + value;
+    return value;
 }
 
 
