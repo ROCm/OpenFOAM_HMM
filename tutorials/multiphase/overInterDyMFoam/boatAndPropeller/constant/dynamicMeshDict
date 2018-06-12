@@ -1,0 +1,135 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  plus.develop                          |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      dynamicMeshDict;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+motionSolverLibs    ("librigidBodyMeshMotion.so");
+
+dynamicFvMesh       dynamicOversetFvMesh;
+
+motionSolver        rigidBodyMotion;
+
+// rigidBodyMotionCoeffs
+//  {
+    report          on;
+
+    solver
+    {
+        type Newmark;
+        gamma   0.1;    // Velocity integration coefficient
+        beta    0.1;    // Position integration coefficient
+    }
+
+    accelerationRelaxation 1.0;
+
+    bodies
+    {
+        hull
+        {
+            type            rigidBody;
+            parent          root;
+
+            // Cuboid mass
+            mass            9;
+            rho             1;
+            inertia         (0.05 0 0 0.05 0 0.05);
+            centreOfMass    (0.21 -0.07 0);
+            transform       (1 0 0 0 1 0 0 0 1) (0.21 0 0);
+
+            joint
+            {
+                type            composite;
+                joints
+                (
+                    {
+                        type Pxyz;
+                    }
+                    {
+                        type Rxyz;
+                    }
+                );
+            }
+
+            patches         (hullWall);
+            innerDistance   100;
+            outerDistance   200;
+        } // end hull
+
+        propeller
+        {
+
+            type            rigidBody;
+            parent          hull;
+
+            centreOfMass    (-0.228 0.0 0);
+            mass            1;
+            rho             1;
+            inertia         (0.001 0 0 0.001 0 0.001);
+            transform       (1 0 0 0 1 0 0 0 1) (-0.228 0 0);
+            patches        (propellerWall);
+            innerDistance   100;
+            outerDistance   200;
+            joint
+            {
+                type            Rx;
+            }
+        } //end propeller
+
+        rudder
+        {
+            type            rigidBody;
+            parent          hull;//root;
+            centreOfMass    (-0.265 0 0);
+            mass            1;
+            rho             1;
+            inertia         (0.001 0 0 0.001 0 0.001);
+            transform       (1 0 0 0 1 0 0 0 1) (-0.265 0 0);
+            patches        (rudderWall);
+            innerDistance   100;
+            outerDistance   200;
+            joint
+            {
+                type            Ry;
+            }
+        }
+    }
+
+    restraints
+    {
+        rudderRotation
+        {
+            type                    prescribedRotation;
+            body                    rudder;
+            referenceOrientation    (1 0 0 0 1 0 0 0 1);
+            axis                    (0 1 0);
+            omega                   (0 26 0);
+        }
+        propellerRotation
+        {
+            type                    prescribedRotation;
+            body                    propeller;
+            referenceOrientation    (1 0 0 0 1 0 0 0 1);
+            axis                    (1 0 0);
+            omega                   table
+            (
+                (0 (16 0 0))
+            );
+        }
+    }
+
+//  } // end of rigidBodyMotionCoeffs
+
+
+// ************************************************************************* //

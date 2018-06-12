@@ -58,6 +58,10 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward declaration of friend functions and operators
+class Time;
+
 namespace RBD
 {
 
@@ -92,6 +96,9 @@ class rigidBodyModel
         void addRestraints(const dictionary& dict);
 
 protected:
+
+        //- Reference to time database
+        const Time& time_;
 
     // Protected data representing the model structure
 
@@ -211,10 +218,10 @@ public:
     // Constructors
 
         //- Null-constructor which adds the single root-body at the origin
-        rigidBodyModel();
+        rigidBodyModel(const Time& time);
 
         //- Construct from dictionary
-        rigidBodyModel(const dictionary& dict);
+        rigidBodyModel(const Time& time, const dictionary& dict);
 
 
     //- Destructor
@@ -222,6 +229,9 @@ public:
 
 
     // Member Functions
+
+        //- Return the time
+        inline const Time& time() const;
 
         //- Return the number of bodies in the model (bodies().size())
         inline label nBodies() const;

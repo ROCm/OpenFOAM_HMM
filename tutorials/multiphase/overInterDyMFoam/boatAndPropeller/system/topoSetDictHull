@@ -1,0 +1,138 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  plus-overset                          |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      topoSetDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+actions
+(
+    {
+      name    bgr0;       // all around bgr
+  //    set     hullBox0set;
+      type    cellSet;
+      action  new;
+      source  zoneToCell;
+      sourceInfo
+      {
+          name    background;
+      }
+    }
+    {
+        name    hullBox0;       // all around bgr
+        type    cellSet;
+        action  new;
+        source  zoneToCell;
+        sourceInfo
+        {
+            name    hullBox;
+        }
+    }
+    {
+        name    propeller0;       // all around bgr
+        type    cellSet;
+        action  new;
+        source  zoneToCell;
+        sourceInfo
+        {
+            name    propeller;
+        }
+    }
+    {
+        name    rudder0;       // all around bgr
+        type    cellSet;
+        action  new;
+        source  zoneToCell;
+        sourceInfo
+        {
+            name    rudder;
+        }
+    }
+
+    {
+        name    box;   //all cells
+        type    cellSet;
+        action  new;
+        source  cellToCell;
+        sourceInfo
+        {
+            set hullBox0;
+        }
+    }
+
+
+    {
+        name    box;   // hole in mesh
+        type    cellSet;
+        action  subset;
+        source  boxToCell;
+        sourceInfo
+        {
+            boxes
+            (
+                 (0.05 -0.082 -0.1)(0.52 0.052 0.1) //hullBox
+            //      (0 -1 -1)(5 1 1) //hullBox
+            //     (-0.02 -0.05 -0.03)( -0.01 0.05 0.03) //propeller
+            //     (-0.08 -0.08 -0.03)(-0.06 0.08 0.03) //rudder
+            );
+        }
+    }
+
+    {
+        name    box;
+        type    cellSet;
+        action  invert;
+    }
+    {
+        name    keepBox;   //all cells
+        type    cellSet;
+        action  new;
+        source  cellToCell;
+        sourceInfo
+        {
+            set box;
+        }
+    }
+    {
+        name    keepBox;   //all cells
+        type    cellSet;
+        action  add;
+        source  cellToCell;
+        sourceInfo
+        {
+            set propeller0;
+        }
+    }
+    {
+        name    keepBox;   //all cells
+        type    cellSet;
+        action  add;
+        source  cellToCell;
+        sourceInfo
+        {
+            set rudder0;
+        }
+    }
+    {
+        name    keepBox;   //all cells
+        type    cellSet;
+        action  add;
+        source  cellToCell;
+        sourceInfo
+        {
+            set bgr0;
+        }
+    }
+
+);
+
+// ************************************************************************* //

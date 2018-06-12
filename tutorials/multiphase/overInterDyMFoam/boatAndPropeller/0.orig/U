@@ -1,0 +1,58 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  plus-overset                          |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    object      U;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform (0 0 0);
+
+boundaryField
+{
+    #includeEtc "caseDicts/setConstraintTypes"
+
+    defaultFaces
+    {
+        //type            slip;
+        type            uniformFixedValue;
+        uniformValue    (0 0 0);
+    }
+
+    "(hullWall|propellerWall|rudderWall)"
+    {
+        type            movingWallVelocity;
+        value           uniform (0 0 0);
+    }
+
+   atmosphere
+   {
+       type            pressureInletOutletVelocity;
+       value           uniform (0 0 0);
+   }
+
+//
+//    right1
+//    {
+//        type            zeroGradient;   //calculated;
+//        value           $internalField;
+//    }
+
+    "overset.*"
+    {
+        type            overset;
+        value           uniform (0 0 0);
+    }
+}
+
+// ************************************************************************* //

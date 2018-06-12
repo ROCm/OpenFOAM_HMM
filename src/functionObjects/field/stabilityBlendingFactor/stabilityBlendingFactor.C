@@ -79,12 +79,13 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
         if (!residualPtr)
         {
              WarningInFunction
-                << residualName_ << " is not available in the database."
-                << "It won't be considered for the blended field. " << nl
-                << "Add the corresponding FO (residuals). If the FO is already "
-                << "set, you need to wait for the first iteration."
+                << "Could not find residual file : " << residualName_ << nl
+                << "The residual mode won't be considered for the blended "
+                << "field in the stability blending factor. " << nl
+                << "Add the corresponding residual function object. " << nl
+                << "If the residual function object is already set " << nl
+                << "you might need to wait for the first iteration."
                 << endl;
-
         }
         else
         {

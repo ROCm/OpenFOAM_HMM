@@ -55,6 +55,10 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward declarations
+class Time;
+
 namespace RBD
 {
 
@@ -112,17 +116,19 @@ public:
     // Constructors
 
         //- Construct null
-        rigidBodyMotion();
+        rigidBodyMotion(const Time& time);
 
         //- Construct from dictionary
         rigidBodyMotion
         (
+            const Time& time,
             const dictionary& dict
         );
 
         //- Construct from constant and state dictionaries
         rigidBodyMotion
         (
+            const Time& time,
             const dictionary& dict,
             const dictionary& stateDict
         );
