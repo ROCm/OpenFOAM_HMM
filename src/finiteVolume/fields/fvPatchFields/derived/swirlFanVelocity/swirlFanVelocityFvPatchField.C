@@ -79,7 +79,7 @@ void Foam::swirlFanVelocityFvPatchField::calcFanJump()
                         deltaP
                        /rMag[i]
                        /fanEff_
-                       /rpm_*constant::mathematical::pi/30.0;
+                       /(rpm_*constant::mathematical::pi/30.0);
                 }
             }
         }
@@ -93,22 +93,12 @@ void Foam::swirlFanVelocityFvPatchField::calcFanJump()
                     << exit(FatalError);
             }
             magTangU =
-                deltaP/rEff_/fanEff_/rpm_*constant::mathematical::pi/30.0;
+                deltaP/rEff_/fanEff_/(rpm_*constant::mathematical::pi/30.0);
         }
-
-        // U upstream from fan
-        const vectorField Uup(this->patchInternalField());
-
-        // U normal to fan
-        const vectorField Un((Uup & patch().nf())*patch().nf());
-
-        // U tangential into fan
-        const vectorField UtanIn(Uup - Un);
-
         // Calculate the tangential velocity
         const vectorField tangentialVelocity(magTangU*tanDir);
 
-        this->jump_ = tangentialVelocity + UtanIn;
+        this->jump_ = tangentialVelocity;
     }
 }
 

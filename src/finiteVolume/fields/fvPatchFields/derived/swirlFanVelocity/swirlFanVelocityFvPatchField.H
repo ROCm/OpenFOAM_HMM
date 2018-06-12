@@ -33,7 +33,7 @@ Description
 
     The U-jump is specified with a swirl component as follows:
 
-         Utan = deltaP/rEff/fanEff/rpm/pi/30.0;
+         Utan = deltaP/rEff/fanEff/(rpm*pi/30.0);
 
          where:
 
@@ -45,7 +45,7 @@ Description
     Alternatively an inner and outer radii can be used instead of rEff. The
     Utan is as follow for r > rInner and r < rOuter
 
-            Utan = deltaP/r/fanEff/rpm/pi/30.0;
+            Utan = deltaP/r/fanEff/(rpm/pi/30.0);
 
             where:
 
