@@ -43,42 +43,38 @@ namespace Foam
     defineTypeNameAndDebug(fileOperation, 0);
     defineRunTimeSelectionTable(fileOperation, word);
 
-    template<>
-    const char* Foam::NamedEnum
-    <
-        fileOperation::pathType,
-        12
-    >::names[] =
-    {
-        "notFound",
-        "absolute",
-        "objectPath",
-        "writeObject",
-        "uncollatedProc",
-        "globalProc",
-        "localProc",
-        "parentObjectPath",
-        "findInstance",
-        "uncollatedProcInstance",
-        "globalProcInstance",
-        "localProcInstance"
-    };
-    const NamedEnum<fileOperation::pathType, 12> fileOperation::pathTypeNames_;
-
     word fileOperation::defaultFileHandler
     (
-        debug::optimisationSwitches().lookupOrAddDefault
+        debug::optimisationSwitches().lookupOrAddDefault<word>
         (
             "fileHandler",
             //Foam::fileOperations::uncollatedFileOperation::typeName,
-            word("uncollated"),
+            "uncollated",
             false,
             false
         )
     );
 }
 
+
 Foam::word Foam::fileOperation::processorsBaseDir = "processors";
+
+const Foam::Enum<Foam::fileOperation::pathType>
+Foam::fileOperation::pathTypeNames_
+({
+    { fileOperation::NOTFOUND, "notFound" },
+    { fileOperation::ABSOLUTE, "absolute" },
+    { fileOperation::OBJECT, "objectPath" },
+    { fileOperation::WRITEOBJECT, "writeObject" },
+    { fileOperation::PROCUNCOLLATED, "uncollatedProc" },
+    { fileOperation::PROCBASEOBJECT, "globalProc" },
+    { fileOperation::PROCOBJECT, "localProc" },
+    { fileOperation::PARENTOBJECT, "parentObjectPath" },
+    { fileOperation::FINDINSTANCE, "findInstance" },
+    { fileOperation::PROCUNCOLLATEDINSTANCE, "uncollatedProcInstance" },
+    { fileOperation::PROCBASEINSTANCE, "globalProcInstance" },
+    { fileOperation::PROCINSTANCE, "localProcInstance" }
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

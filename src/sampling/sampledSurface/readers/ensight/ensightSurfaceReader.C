@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ensightSurfaceReader.H"
+#include "stringOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -158,15 +159,21 @@ void Foam::ensightSurfaceReader::readCase(IFstream& is)
 
     debugSection("GEOMETRY", is);
     readLine(is, buffer);
-    readFromLine(2, buffer, meshFileName_); // model: 1 xxx.0000.mesh
+
+    // GEOMETRY with any of these
+    //     model: 1 xxx.0000.mesh
+    //     model: xxx.0000.mesh
+    //     model: data/directory/geometry
+    //
+    // - use the last entry
+    meshFileName_ = stringOps::splitSpace(buffer).last().str();
 
     debugSection("VARIABLE", is);
 
     // Read the field description
     DynamicList<word> fieldNames(10);
     DynamicList<string> fieldFileNames(10);
-    word fieldName;
-    string fieldFileName;
+
     while (is.good())
     {
         readLine(is, buffer);
@@ -176,31 +183,30 @@ void Foam::ensightSurfaceReader::readCase(IFstream& is)
             break;
         }
 
-        IStringStream iss(buffer);
+        // Read the field name and associated file name. Eg,
+        //     scalar per element: 1  p  data/********/p
 
-        // Read the field name, e.g. p U etc
-        readFromLine(4, iss, fieldName);
-        fieldNames.append(fieldName);
+        const auto parsed = stringOps::splitSpace(buffer);
 
-        // Field file name may contain /'s e.g.
-        //   surfaceName.****.fieldName
-        // This is not parser friendly - simply take remainder of buffer
-        label iPos = iss.stdStream().tellg();
-        fieldFileName = buffer.substr(iPos);
-        size_t p0  = fieldFileName.find_first_not_of(' ');
-        if (p0 == string::npos)
+        if (buffer.find(':') == string::npos || parsed.size() < 4)
         {
             WarningInFunction
-                << "Error reading field file name. "
-                << "Current buffer: " << buffer
-                << endl;
+                << "Error reading field file name. Current buffer: "
+                << buffer << endl;
+            continue;
         }
-        else
+        else if (debug)
         {
-            size_t p1  = fieldFileName.find_last_not_of(' ');
-            fieldFileName = fieldFileName.substr(p0, p1 - p0 + 1);
+            Info<<"variable line: " << parsed.size();
+            for (const auto& s : parsed)
+            {
+                Info<<" " << s.str();
+            }
+            Info<<nl;
         }
-        fieldFileNames.append(fieldFileName);
+
+        fieldNames.append(parsed[parsed.size()-2].str());
+        fieldFileNames.append(parsed.last().str());
     }
     fieldNames_.transfer(fieldNames);
     fieldFileNames_.transfer(fieldFileNames);

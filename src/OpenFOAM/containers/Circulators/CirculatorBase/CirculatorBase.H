@@ -60,7 +60,8 @@ public:
     // Constructors
 
         //- Construct null
-        CirculatorBase(){};
+        CirculatorBase()
+        {}
 
 };
 

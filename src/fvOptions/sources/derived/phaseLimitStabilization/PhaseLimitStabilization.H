@@ -89,11 +89,11 @@ class PhaseLimitStabilization
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        PhaseLimitStabilization(const PhaseLimitStabilization&);
+        //- No copy construct
+        PhaseLimitStabilization(const PhaseLimitStabilization&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const PhaseLimitStabilization&);
+        //- No copy assignment
+        void operator=(const PhaseLimitStabilization&) = delete;
 
 
 public:
@@ -115,8 +115,7 @@ public:
 
 
     //- Destructor
-    virtual ~PhaseLimitStabilization()
-    {}
+    virtual ~PhaseLimitStabilization() = default;
 
 
     // Member Functions

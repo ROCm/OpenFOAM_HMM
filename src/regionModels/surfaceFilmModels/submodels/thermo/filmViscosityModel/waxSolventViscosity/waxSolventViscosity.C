@@ -161,12 +161,6 @@ waxSolventViscosity::waxSolventViscosity
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-waxSolventViscosity::~waxSolventViscosity()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void waxSolventViscosity::correct

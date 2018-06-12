@@ -60,8 +60,10 @@ class BasicChemistryModel
     // Private Member Functions
 
         //- Construct as copy (not implemented)
-        BasicChemistryModel(const BasicChemistryModel<ReactionThermo>&) =
-            delete;
+        BasicChemistryModel
+        (
+            const BasicChemistryModel<ReactionThermo>&
+        ) = delete;
 
         //- No copy assignment
         void operator=(const BasicChemistryModel<ReactionThermo>&) = delete;

@@ -63,8 +63,8 @@ protected:
         //- Base directory
         fileName baseDir_;
 
-        //- Name of mesh file
-        word meshFileName_;
+        //- Name of mesh file, including any subdirectory
+        fileName meshFileName_;
 
         //- Field names
         List<word> fieldNames_;

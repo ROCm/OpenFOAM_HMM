@@ -81,11 +81,11 @@ class freePiston
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        freePiston(const freePiston&);
+        //- No copy construct
+        freePiston(const freePiston&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const freePiston&);
+        //- No copy assignment
+        void operator=(const freePiston&) = delete;
 
 
 public:
@@ -108,8 +108,7 @@ public:
         );
 
     //- Destructor
-    virtual ~freePiston()
-    {}
+    virtual ~freePiston() = default;
 
 
     // Member Functions
