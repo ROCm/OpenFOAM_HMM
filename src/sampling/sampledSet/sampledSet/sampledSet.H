@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,12 @@ Description
     Each 'sampledSet' has a name and a specifier of how the axis should be
     write (x/y/z component or all 3 components)
 
+    For a dictionary specification:
+    \table
+        Property | Description                             | Required | Default
+        axis     | x, y, z, xyz, distance                  | yes      |
+    \endtable
+
 SourceFiles
     sampledSet.C
 
@@ -54,7 +60,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class polyMesh;
 class meshSearch;
 
@@ -88,6 +94,9 @@ protected:
 
 
     // Protected Member Functions
+
+        //- Check for consistent sizing
+        void checkDimensions() const;
 
         //- Returns cell next to boundary face
         label getBoundaryCell(const label) const;
@@ -135,7 +144,7 @@ protected:
             label& trackFacei
         ) const;
 
-        //- Sets sample data
+        //- Set sample data. Copy list contents.
         void setSamples
         (
             const List<point>& samplingPts,
@@ -145,6 +154,15 @@ protected:
             const scalarList& samplingCurveDist
         );
 
+        //- Set sample data. Move list contents.
+        void setSamples
+        (
+            List<point>&& samplingPts,
+            labelList&& samplingCells,
+            labelList&& samplingFaces,
+            labelList&& samplingSegments,
+            scalarList&& samplingCurveDist
+        );
 
 public:
 
@@ -201,6 +219,15 @@ public:
             const word& name,
             const polyMesh& mesh,
             const meshSearch& searchEngine,
+            const coordSet::coordFormat axisType
+        );
+
+        //- Construct from components
+        sampledSet
+        (
+            const word& name,
+            const polyMesh& mesh,
+            const meshSearch& searchEngine,
             const word& axis
         );
 
@@ -234,7 +261,7 @@ public:
 
 
     //- Destructor
-    virtual ~sampledSet();
+    virtual ~sampledSet() = default;
 
 
     // Member Functions
@@ -267,8 +294,8 @@ public:
         //- Output for debugging
         Ostream& write(Ostream&) const;
 
-        //- Helper: gather onto master and sort. Return (on master) gathered set
-        //  and overall sort order
+        //- Helper: gather onto master and sort.
+        //  \return (on master) gathered set and overall sort order
         autoPtr<coordSet> gather(labelList& indexSet) const;
 };
 

@@ -27,6 +27,16 @@ Class
 Description
     Initialises points on or just off patch
 
+    For a dictionary specification:
+    \table
+        Property | Description                             | Required | Default
+        type     | patchSeed                               | yes      |
+        axis     | x, y, z, xyz, distance                  | yes      |
+        patches  | List of patch names or regexs           | yes      |
+        maxPoints | Max number of points to seed           | yes      |
+        points   | List of selected locations              | no       | empty
+    \endtable
+
 SourceFiles
     patchSeedSet.C
 

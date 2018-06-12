@@ -68,15 +68,15 @@ void Foam::arraySet::calcSamples
     const scalar deltaz = spanBox_.z()/(pointsDensity_.z() + 1);
 
     label p(0);
-    for (label k=1; k<=pointsDensity_.z(); k++)
+    for (label k=1; k<=pointsDensity_.z(); ++k)
     {
-        for (label j=1; j<=pointsDensity_.y(); j++)
+        for (label j=1; j<=pointsDensity_.y(); ++j)
         {
-            for (label i=1; i<=pointsDensity_.x(); i++)
+            for (label i=1; i<=pointsDensity_.x(); ++i)
             {
                 vector t(deltax*i , deltay*j, deltaz*k);
                 sampleCoords[p] = coordSys_.origin() + t;
-                p++;
+                ++p;
             }
         }
     }
@@ -126,14 +126,20 @@ void Foam::arraySet::genSamples()
     samplingSegments.shrink();
     samplingCurveDist.shrink();
 
+    // Move into *this
     setSamples
     (
-        samplingPts,
-        samplingCells,
-        samplingFaces,
-        samplingSegments,
-        samplingCurveDist
+        std::move(samplingPts),
+        std::move(samplingCells),
+        std::move(samplingFaces),
+        std::move(samplingSegments),
+        std::move(samplingCurveDist)
     );
+
+    if (debug)
+    {
+        write(Info);
+    }
 }
 
 
@@ -156,11 +162,6 @@ Foam::arraySet::arraySet
     spanBox_(spanBox)
 {
     genSamples();
-
-    if (debug)
-    {
-        write(Info);
-    }
 }
 
 
@@ -178,18 +179,7 @@ Foam::arraySet::arraySet
     spanBox_(dict.lookup("spanBox"))
 {
     genSamples();
-
-    if (debug)
-    {
-        write(Info);
-    }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::arraySet::~arraySet()
-{}
 
 
 // ************************************************************************* //

@@ -25,6 +25,18 @@ Class
     Foam::arraySet
 
 Description
+    Specifies an x,y,z array of uniformly distributed sampling points.
+
+    For a dictionary specification:
+    \table
+        Property | Description                             | Required | Default
+        type     | array                                   | yes      |
+        axis     | x, y, z, xyz, distance                  | yes      |
+        pointsDensity | The sampling density as (x y z) integers | yes      |
+        spanBox   | The sample box dimensions (vector)     | yes      |
+    \endtable
+
+    The dictionary can also contain an embedded coordinateSystem specification.
 
 SourceFiles
     arraySet.C
@@ -43,7 +55,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class passiveParticle;
 template<class Type> class particle;
 
@@ -114,7 +126,7 @@ public:
 
 
     //- Destructor
-    virtual ~arraySet();
+    virtual ~arraySet() = default;
 };
 
 

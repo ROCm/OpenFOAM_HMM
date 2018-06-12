@@ -36,9 +36,9 @@ namespace Foam
 {
     defineTypeNameAndDebug(uniformSet, 0);
     addToRunTimeSelectionTable(sampledSet, uniformSet, word);
-
-    const scalar uniformSet::tol = 1e-3;
 }
+
+const Foam::scalar Foam::uniformSet::tol = 1e-3;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -57,9 +57,9 @@ bool Foam::uniformSet::nextSample
     const vector normOffset = offset/mag(offset);
 
     samplePt += offset;
-    sampleI++;
+    ++sampleI;
 
-    for (; sampleI < nPoints_; sampleI++)
+    for (; sampleI < nPoints_; ++sampleI)
     {
         scalar s = (samplePt - currentPt) & normOffset;
 
@@ -96,7 +96,7 @@ bool Foam::uniformSet::trackToBoundary
 
     point trackPt = singleParticle.position();
 
-    while(true)
+    while (true)
     {
         // Find next samplePt on/after trackPt. Update samplePt, sampleI
         if (!nextSample(trackPt, offset, smallDist, samplePt, sampleI))
@@ -282,7 +282,7 @@ void Foam::uniformSet::calcSamples
     // index in bHits; current boundary intersection
     label bHitI = 1;
 
-    while(true)
+    while (true)
     {
         // Initialize tracking starting from trackPt
         passiveParticle singleParticle(mesh(), trackPt, trackCelli);
@@ -344,7 +344,7 @@ void Foam::uniformSet::calcSamples
             }
             else
             {
-                bHitI++;
+                ++bHitI;
             }
         }
 
@@ -359,7 +359,7 @@ void Foam::uniformSet::calcSamples
         trackPt = pushIn(bPoint, trackFacei);
         trackCelli = getBoundaryCell(trackFacei);
 
-        segmentI++;
+        ++segmentI;
 
         startSegmentI = samplingPts.size();
     }
@@ -392,14 +392,20 @@ void Foam::uniformSet::genSamples()
     samplingSegments.shrink();
     samplingCurveDist.shrink();
 
+    // Move into *this
     setSamples
     (
-        samplingPts,
-        samplingCells,
-        samplingFaces,
-        samplingSegments,
-        samplingCurveDist
+        std::move(samplingPts),
+        std::move(samplingCells),
+        std::move(samplingFaces),
+        std::move(samplingSegments),
+        std::move(samplingCurveDist)
     );
+
+    if (debug)
+    {
+        write(Pout);
+    }
 }
 
 
@@ -422,11 +428,6 @@ Foam::uniformSet::uniformSet
     nPoints_(nPoints)
 {
     genSamples();
-
-    if (debug)
-    {
-        write(Pout);
-    }
 }
 
 
@@ -441,21 +442,10 @@ Foam::uniformSet::uniformSet
     sampledSet(name, mesh, searchEngine, dict),
     start_(dict.lookup("start")),
     end_(dict.lookup("end")),
-    nPoints_(readLabel(dict.lookup("nPoints")))
+    nPoints_(dict.get<label>("nPoints"))
 {
     genSamples();
-
-    if (debug)
-    {
-        write(Pout);
-    }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::uniformSet::~uniformSet()
-{}
 
 
 // ************************************************************************* //

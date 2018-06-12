@@ -55,6 +55,15 @@ Usage
     }
     \endverbatim
 
+    For a dictionary specification:
+    \table
+        Property | Description                             | Required | Default
+        type     | shortestPath                            | yes      |
+        axis     | x, y, z, xyz, distance                  | yes      |
+        insidePoints  | The inside points                  | yes      |
+        outsidePoints | The outside points                 | yes      |
+    \endtable
+
 SourceFiles
     shortestPathSet.C
 
@@ -134,7 +143,7 @@ public:
 
 
     //- Destructor
-    virtual ~shortestPathSet();
+    virtual ~shortestPathSet() = default;
 };
 
 

@@ -36,9 +36,9 @@ namespace Foam
 {
     defineTypeNameAndDebug(faceOnlySet, 0);
     addToRunTimeSelectionTable(sampledSet, faceOnlySet, word);
-
-    const scalar faceOnlySet::tol = 1e-6;
 }
+
+const Foam::scalar Foam::faceOnlySet::tol = 1e-6;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -60,7 +60,7 @@ bool Foam::faceOnlySet::trackToBoundary
 
     point trackPt = singleParticle.position();
 
-    while(true)
+    while (true)
     {
         point oldPoint = trackPt;
 
@@ -265,7 +265,7 @@ void Foam::faceOnlySet::calcSamples
             }
             else
             {
-                bHitI++;
+                ++bHitI;
             }
         }
 
@@ -280,7 +280,7 @@ void Foam::faceOnlySet::calcSamples
         trackPt = pushIn(bHits[bHitI].hitPoint(), trackFacei);
         trackCelli = getBoundaryCell(trackFacei);
 
-        segmentI++;
+        ++segmentI;
 
         startSegmentI = samplingPts.size();
     }
@@ -313,15 +313,20 @@ void Foam::faceOnlySet::genSamples()
     samplingSegments.shrink();
     samplingCurveDist.shrink();
 
-    // Copy into *this
+    // Move into *this
     setSamples
     (
-        samplingPts,
-        samplingCells,
-        samplingFaces,
-        samplingSegments,
-        samplingCurveDist
+        std::move(samplingPts),
+        std::move(samplingCells),
+        std::move(samplingFaces),
+        std::move(samplingSegments),
+        std::move(samplingCurveDist)
     );
+
+    if (debug)
+    {
+        write(Info);
+    }
 }
 
 
@@ -342,11 +347,6 @@ Foam::faceOnlySet::faceOnlySet
     end_(end)
 {
     genSamples();
-
-    if (debug)
-    {
-        write(Info);
-    }
 }
 
 
@@ -363,18 +363,7 @@ Foam::faceOnlySet::faceOnlySet
     end_(dict.lookup("end"))
 {
     genSamples();
-
-    if (debug)
-    {
-        write(Info);
-    }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::faceOnlySet::~faceOnlySet()
-{}
 
 
 // ************************************************************************* //

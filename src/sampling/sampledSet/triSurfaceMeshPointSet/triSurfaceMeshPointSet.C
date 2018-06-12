@@ -91,14 +91,20 @@ void Foam::triSurfaceMeshPointSet::genSamples()
     samplingSegments.shrink();
     samplingCurveDist.shrink();
 
+    // Move into *this
     setSamples
     (
-        samplingPts,
-        samplingCells,
-        samplingFaces,
-        samplingSegments,
-        samplingCurveDist
+        std::move(samplingPts),
+        std::move(samplingCells),
+        std::move(samplingFaces),
+        std::move(samplingSegments),
+        std::move(samplingCurveDist)
     );
+
+    if (debug)
+    {
+        write(Info);
+    }
 }
 
 
@@ -113,7 +119,7 @@ Foam::triSurfaceMeshPointSet::triSurfaceMeshPointSet
 )
 :
     sampledSet(name, mesh, searchEngine, dict),
-    surface_(dict.lookup("surface"))
+    surface_(dict.get<word>("surface"))
 {
     // Load surface.
     if (mesh.time().foundObject<triSurfaceMesh>(surface_))
@@ -143,34 +149,23 @@ Foam::triSurfaceMeshPointSet::triSurfaceMeshPointSet
     }
 
     genSamples();
-
-    if (debug)
-    {
-        write(Info);
-    }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::triSurfaceMeshPointSet::~triSurfaceMeshPointSet()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::point Foam::triSurfaceMeshPointSet::getRefPoint(const List<point>& pts)
- const
+Foam::point Foam::triSurfaceMeshPointSet::getRefPoint
+(
+    const List<point>& pts
+) const
 {
     if (pts.size())
     {
         // Use first samplePt as starting point
-        return pts[0];
+        return pts.first();
     }
-    else
-    {
-        return Zero;
-    }
+
+    return Zero;
 }
 
 

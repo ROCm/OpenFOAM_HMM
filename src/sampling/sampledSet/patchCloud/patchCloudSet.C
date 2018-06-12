@@ -180,9 +180,9 @@ void Foam::patchCloudSet::calcSamples
             if (nearest[i].first().hit())
             {
                 meshTools::writeOBJ(str, sampleCoords_[i]);
-                vertI++;
+                ++vertI;
                 meshTools::writeOBJ(str, nearest[i].first().hitPoint());
-                vertI++;
+                ++vertI;
                 str << "l " << vertI-1 << ' ' << vertI << nl;
             }
         }
@@ -256,6 +256,11 @@ void Foam::patchCloudSet::genSamples()
         samplingSegments,
         samplingCurveDist
     );
+
+    if (debug)
+    {
+        write(Info);
+    }
 }
 
 
@@ -278,11 +283,6 @@ Foam::patchCloudSet::patchCloudSet
     searchDist_(searchDist)
 {
     genSamples();
-
-    if (debug)
-    {
-        write(Info);
-    }
 }
 
 
@@ -303,14 +303,9 @@ Foam::patchCloudSet::patchCloudSet
             wordReList(dict.lookup("patches"))
         )
     ),
-    searchDist_(readScalar(dict.lookup("maxDistance")))
+    searchDist_(dict.get<scalar>("maxDistance"))
 {
     genSamples();
-
-    if (debug)
-    {
-        write(Info);
-    }
 }
 
 

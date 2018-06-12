@@ -111,7 +111,7 @@ void Foam::circleSet::calcSamples
                 radius*constant::mathematical::pi/180.0*theta
             );
 
-            nPoint++;
+            ++nPoint;
         }
         else
         {
@@ -148,14 +148,20 @@ void Foam::circleSet::genSamples()
     samplingSegments.shrink();
     samplingCurveDist.shrink();
 
+    // Move into *this
     setSamples
     (
-        samplingPts,
-        samplingCells,
-        samplingFaces,
-        samplingSegments,
-        samplingCurveDist
+        std::move(samplingPts),
+        std::move(samplingCells),
+        std::move(samplingFaces),
+        std::move(samplingSegments),
+        std::move(samplingCurveDist)
     );
+
+    if (debug)
+    {
+        write(Info);
+    }
 }
 
 
@@ -180,11 +186,6 @@ Foam::circleSet::circleSet
     dTheta_(dTheta)
 {
     genSamples();
-
-    if (debug)
-    {
-        write(Info);
-    }
 }
 
 
@@ -200,24 +201,13 @@ Foam::circleSet::circleSet
     origin_(dict.lookup("origin")),
     circleAxis_(dict.lookup("circleAxis")),
     startPoint_(dict.lookup("startPoint")),
-    dTheta_(readScalar(dict.lookup("dTheta")))
+    dTheta_(dict.get<scalar>("dTheta"))
 {
     // Normalise circleAxis
     circleAxis_ /= mag(circleAxis_);
 
     genSamples();
-
-    if (debug)
-    {
-        write(Info);
-    }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::circleSet::~circleSet()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

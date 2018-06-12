@@ -52,7 +52,6 @@ class coordSet
 :
     public pointField
 {
-
 public:
 
     // Public data types
@@ -94,8 +93,11 @@ public:
 
         //- Construct from components
         //  Note: curveDist will be empty
-        coordSet(const word& name, const word& axis);
+        coordSet(const word& name, const coordFormat axisType);
 
+        //- Construct from components
+        //  Note: curveDist will be empty
+        coordSet(const word& name, const word& axis);
 
         //- Copy construct from components
         coordSet
@@ -128,16 +130,35 @@ public:
             return coordFormatNames[axis_];
         }
 
-        //- Cumulative distance
+        //- Set the points
+        void setPoints(const List<point>& newPoints)
+        {
+            static_cast<pointField&>(*this) = newPoints;
+        }
+
+        //- Set the points
+        void setPoints(List<point>&& newPoints)
+        {
+            static_cast<pointField&>(*this) = std::move(newPoints);
+        }
+
+        //- Return the cumulative distance
         const scalarList& curveDist() const
         {
             return curveDist_;
         }
 
-        //- Set cumulative distance
+        //- Set the cumulative distance
         void setCurveDist(const scalarList& curveDist)
         {
             curveDist_ = curveDist;
+            checkDimensions();
+        }
+
+        //- Set the cumulative distance
+        void setCurveDist(scalarList&& curveDist)
+        {
+            curveDist_ = std::move(curveDist);
             checkDimensions();
         }
 
