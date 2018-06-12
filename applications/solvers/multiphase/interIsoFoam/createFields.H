@@ -121,23 +121,6 @@ if (p_rgh.needReference())
 mesh.setFluxRequired(p_rgh.name());
 mesh.setFluxRequired(alpha1.name());
 
-/*
-// MULES compressed flux is registered in case scalarTransport FO needs it.
-surfaceScalarField alphaPhiUn
-(
-    IOobject
-    (
-        "alphaPhiUn",
-        runTime.timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedScalar(phi.dimensions(), Zero)
-);
-*/
-
 #include "createMRF.H"
 #include "createFvOptions.H"
 
@@ -155,7 +138,6 @@ surfaceScalarField phi0
     phi
 );
 
-
 volVectorField U0
 (
     IOobject
@@ -169,7 +151,6 @@ volVectorField U0
     U
 );
 
-
 volScalarField alpha10
 (
     IOobject
@@ -182,6 +163,5 @@ volScalarField alpha10
     ),
     alpha1
 );
-
 
 isoAdvection advector(alpha1, phi, U);
