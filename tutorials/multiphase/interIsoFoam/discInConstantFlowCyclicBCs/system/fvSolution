@@ -4,8 +4,7 @@
 |  \\    /   O peration     | Version:  plus                                  |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
-\*---------------------------------------------------------------------------*/
-FoamFile
+\*---------------------------------------------------------------------------*/FoamFile
 {
     version     2.0;
     format      ascii;
@@ -17,18 +16,26 @@ FoamFile
 
 solvers
 {
+
     "alpha.water.*"
     {
         isoFaceTol      1e-6;
         surfCellTol     1e-6;
+        snapTol         1e-10;
         nAlphaBounds    3;
-        snapTol         1e-12;
         clip            true;
 
+        nAlphaCorr      2;
         nAlphaSubCycles 1;
-        cAlpha          1; // Note: cAlpha is not used by isoAdvector but must
-                           // be specified because interfacePropertes object
-                           // reads it during construction.
+        cAlpha          1;
+
+        MULESCorr       yes;
+        nLimiterIter    3;
+
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-8;
+        relTol          0;
     }
 
     "pcorr.*"
@@ -41,8 +48,8 @@ solvers
 
     p_rgh
     {
-        solver          GAMG;
-        smoother        DICGaussSeidel;
+        solver          PCG;
+        preconditioner  DIC;
         tolerance       1e-07;
         relTol          0.05;
     }
@@ -56,7 +63,9 @@ solvers
 
     U
     {
-        solver          PBiCGStab;
+        prescribedU     true;
+
+        solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-06;
         relTol          0;
@@ -66,13 +75,12 @@ solvers
 
 PIMPLE
 {
+    frozenFlow      yes;
     momentumPredictor no;
-    nCorrectors     3;
-    nOuterCorrectors 1;
-    nNonOrthogonalCorrectors 0;
+    nCorrectors     -1;
+    nNonOrthogonalCorrectors -1;
     pRefCell        0;
     pRefValue       0;
 }
-
 
 // ************************************************************************* //

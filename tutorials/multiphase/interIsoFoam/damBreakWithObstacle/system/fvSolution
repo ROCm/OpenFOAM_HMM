@@ -19,7 +19,7 @@ solvers
 {
     "alpha.water.*"
     {
-        isoFaceTol      1e-6;
+        isoFaceTol      1e-10;
         surfCellTol     1e-6;
         nAlphaBounds    3;
         snapTol         1e-12;

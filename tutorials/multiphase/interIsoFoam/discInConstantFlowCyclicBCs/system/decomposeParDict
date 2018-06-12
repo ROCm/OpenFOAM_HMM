@@ -4,34 +4,41 @@
 |  \\    /   O peration     | Version:  plus                                  |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
-\*---------------------------------------------------------------------------*/
-FoamFile
+\*---------------------------------------------------------------------------*/FoamFile
 {
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
-    object      transportProperties;
+    location    "system";
+    object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+numberOfSubdomains 1;
 
-phases (water air);
+method          simple;
 
-water
+simpleCoeffs
 {
-    transportModel  Newtonian;
-    nu              [0 2 -1 0 0 0 0] 1e-06;
-    rho             [1 -3 0 0 0 0 0] 1000;
+    n               ( 2 1 2 );
+    delta           0.001;
 }
 
-air
+hierarchicalCoeffs
 {
-    transportModel  Newtonian;
-    nu              [0 2 -1 0 0 0 0] 1.48e-05;
-    rho             [1 -3 0 0 0 0 0] 1;
+    n               ( 1 1 1 );
+    delta           0.001;
+    order           xyz;
 }
 
-sigma           sigma [ 1 0 -2 0 0 0 0 ] 0.07;
+manualCoeffs
+{
+    dataFile        "";
+}
+
+distributed     no;
+
+roots           ( );
+
 
 // ************************************************************************* //

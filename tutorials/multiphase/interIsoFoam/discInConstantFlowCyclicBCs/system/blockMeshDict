@@ -4,8 +4,7 @@
 |  \\    /   O peration     | Version:  plus                                  |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
-\*---------------------------------------------------------------------------*/
-FoamFile
+\*---------------------------------------------------------------------------*/FoamFile
 {
     version     2.0;
     format      ascii;
@@ -14,17 +13,17 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-scale   1;
+convertToMeters 1;
 
-L   1;
-nx  50;
+L	1;
+nx	50;
 
-y1  -.005;
-y2  .005;
-ny  1;
+y1     -.05;
+y2	.05;
+ny	1;
 
-H   1;
-nz  50;
+H	1;
+nz	50;
 
 vertices
 (
@@ -51,7 +50,8 @@ boundary
 (
     left
     {
-        type patch;
+        type cyclic;
+        neighbourPatch right;
         faces
         (
             (0 4 7 3)
@@ -59,7 +59,8 @@ boundary
     }
     right
     {
-        type patch;
+        type cyclic;
+        neighbourPatch left;
         faces
         (
             (1 2 6 5)
@@ -67,7 +68,8 @@ boundary
     }
     top
     {
-        type patch;
+        type cyclic;
+        neighbourPatch bottom;
         faces
         (
             (4 5 6 7)
@@ -75,7 +77,8 @@ boundary
     }
     bottom
     {
-        type patch;
+        type cyclic;
+        neighbourPatch top;
         faces
         (
             (0 3 2 1)
