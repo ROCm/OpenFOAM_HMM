@@ -59,9 +59,7 @@ namespace vtk
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-  // Constants
-
-  // General Functions
+// General Functions
 
     //- Return a default asciiFormatter
     autoPtr<vtk::formatter> newFormatter(std::ostream& os);
@@ -94,7 +92,7 @@ namespace vtk
     void writeList
     (
         vtk::formatter& fmt,
-        const UList<Type>& lst
+        const UList<Type>& list
     );
 
     //- Write a list of values.
@@ -103,7 +101,7 @@ namespace vtk
     void writeList
     (
         vtk::formatter& fmt,
-        const FixedList<Type, Size>& lst
+        const FixedList<Type, Size>& list
     );
 
 
@@ -113,7 +111,7 @@ namespace vtk
     void writeList
     (
         vtk::formatter& fmt,
-        const UList<Type>& lst,
+        const UList<Type>& list,
         const labelUList& addressing
     );
 
@@ -126,7 +124,7 @@ namespace vtk
 namespace legacy
 {
 
-  // Constants
+// Constants
 
     //- Strings corresponding to the (POLYDATA, UNSTRUCTURED_GRID) elements
     extern const Foam::Enum<vtk::fileTag> contentNames;
@@ -135,7 +133,7 @@ namespace legacy
     extern const Foam::Enum<vtk::fileTag> dataTypeNames;
 
 
-  // Functions
+// Functions
 
     //- Emit header for legacy file.
     //  Writes "ASCII" or "BINARY" depending on specified type.
