@@ -121,7 +121,24 @@ Foam::scalar Foam::Random::position
 template<>
 Foam::label Foam::Random::position(const label& start, const label& end)
 {
-    return start + round(scalar01()*(end - start));
+    #ifdef FULLDEBUG
+    if (start > end)
+    {
+        FatalErrorInFunction
+            << "start index " << start << " > end index " << end << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    // Extend the upper sampling range by 1 and floor the result.
+    // Since the range is non-negative, can use integer truncation
+    // instead using floor().
+
+    const label val = start + label(scalar01()*(end - start + 1));
+
+    // Rare case when scalar01() returns exactly 1.000 and the truncated
+    // value would be out of range.
+    return min(val, end);
 }
 
 
@@ -200,12 +217,12 @@ Foam::scalar Foam::Random::globalPosition
 
     if (Pstream::master())
     {
-        value = scalar01()*(end - start);
+        value = position<scalar>(start, end);
     }
 
     Pstream::scatter(value);
 
-    return start + value;
+    return value;
 }
 
 
@@ -220,12 +237,12 @@ Foam::label Foam::Random::globalPosition
 
     if (Pstream::master())
     {
-        value = round(scalar01()*(end - start));
+        value = position<label>(start, end);
     }
 
     Pstream::scatter(value);
 
-    return start + value;
+    return value;
 }
 
 

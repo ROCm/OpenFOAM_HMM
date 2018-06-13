@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,6 +60,13 @@ Foam::vectorField Foam::turbGen::U()
 
     s = Ek(Ea, k0, mag(K))*s;
 
+    label ntot = 1;
+    forAll(K.nn(), idim)
+    {
+        ntot *= K.nn()[idim];
+    }
+    const scalar recRootN = 1.0/sqrt(scalar(ntot));
+
     complexVectorField up
     (
         fft::reverseTransform
@@ -67,7 +74,7 @@ Foam::vectorField Foam::turbGen::U()
             ComplexField(cos(constant::mathematical::twoPi*rndPhases)*s,
             sin(constant::mathematical::twoPi*rndPhases)*s),
             K.nn()
-        )
+        )*recRootN
     );
 
     return ReImSum(up);

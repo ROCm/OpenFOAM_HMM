@@ -214,7 +214,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
 
     while(magTangent < SMALL)
     {
-        vector v = rndGen.sample01<vector>();
+        vector v = rndGen.globalSample01<vector>();
 
         tangent = v - (v & direction_)*direction_;
         magTangent = mag(tangent);
@@ -354,7 +354,7 @@ void Foam::ConeNozzleInjection<CloudType>::setPositionAndCell
 {
     Random& rndGen = this->owner().rndGen();
 
-    scalar beta = mathematical::twoPi*rndGen.sample01<scalar>();
+    scalar beta = mathematical::twoPi*rndGen.globalSample01<scalar>();
     normal_ = tanVec1_*cos(beta) + tanVec2_*sin(beta);
 
     switch (injectionMethod_)

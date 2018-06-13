@@ -19,3 +19,10 @@
 
     Kmesh K(mesh);
     UOprocess forceGen(K, runTime.deltaTValue(), turbulenceProperties);
+
+    label ntot = 1;
+    forAll(K.nn(), idim)
+    {
+        ntot *= K.nn()[idim];
+    }
+    const scalar recRootN = 1.0/Foam::sqrt(scalar(ntot));
