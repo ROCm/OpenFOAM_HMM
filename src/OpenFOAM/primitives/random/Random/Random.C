@@ -121,9 +121,24 @@ Foam::scalar Foam::Random::position
 template<>
 Foam::label Foam::Random::position(const label& start, const label& end)
 {
-    // Extend range from [0, N-1] to (-0.5, N-0.5) to ensure that round()
-    // results in the same number density at the ends.
-    return start + round(scalar01()*((end - start) + 0.998) - 0.499);
+    #ifdef FULLDEBUG
+    if (start > end)
+    {
+        FatalErrorInFunction
+            << "start index " << start << " > end index " << end << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    // Extend the upper sampling range by 1 and floor the result.
+    // Since the range is non-negative, can use integer truncation
+    // instead using floor().
+
+    const label val = start + label(scalar01()*(end - start + 1));
+
+    // Rare case when scalar01() returns exactly 1.000 and the truncated
+    // value would be out of range.
+    return min(val, end);
 }
 
 

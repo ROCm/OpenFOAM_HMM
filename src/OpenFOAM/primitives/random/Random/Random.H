@@ -61,10 +61,10 @@ class Random
         //- Initial random number seed
         label seed_;
 
-        //- Random number generator on the int32 interval [0, 2^31)
+        //- Random number generator on the int32 interval [0,2^31)
         Rand48 generator_;
 
-        //- Uniform distribution on the scalar interval [0, 1]
+        //- Uniform distribution on the scalar interval [0,1]
         std::uniform_real_distribution<scalar> uniform01_;
 
         //- Is there a gaussian sample cached?
@@ -91,7 +91,7 @@ public:
         Random(const Random& r, const bool reset = false);
 
 
-    // Destructor
+    //- Destructor
     ~Random() = default;
 
 
@@ -111,20 +111,20 @@ public:
         //- Return a random bit
         inline int bit();
 
-        //- Return a sample whose components lie in the range 0-1
+        //- Return a sample whose components lie in the range [0,1]
         template<class Type>
         Type sample01();
 
         //- Return a sample whose components are normally distributed
-        //  with zero mean and unity variance N(0, 1)
+        //- with zero mean and unity variance N(0,1)
         template<class Type>
         Type GaussNormal();
 
-        //- Return a sample between start and end
+        //- Return a sample on the interval [start,end]
         template<class Type>
         Type position(const Type& start, const Type& end);
 
-        //- Randomise value in the range 0-1
+        //- Randomise value in the range [0,1]
         template<class Type>
         void randomise01(Type& value);
 
@@ -135,16 +135,16 @@ public:
 
     // Global random numbers - consistent across all processors
 
-        //- Return a sample whose components lie in the range 0-1
+        //- Return a sample whose components lie in the range [0,1]
         template<class Type>
         Type globalSample01();
 
         //- Return a sample whose components are normally distributed
-        //  with zero mean and unity variance N(0, 1)
+        //- with zero mean and unity variance N(0,1)
         template<class Type>
         Type globalGaussNormal();
 
-        //- Return a sample between start and end
+        //- Return a sample on the interval [start,end]
         template<class Type>
         Type globalPosition(const Type& start, const Type& end);
 

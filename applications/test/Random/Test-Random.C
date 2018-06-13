@@ -68,6 +68,22 @@ double randomFraction(const uint64_t bits)
 
 using namespace Foam;
 
+// Test uniformity of random
+void testPosition(const label n)
+{
+    List<label> samples(n, Zero);
+
+    Random rnd(123456);
+    for (label i=0; i < 100000*n; ++i)
+    {
+        ++samples[rnd.position<label>(0,n-1)];
+    }
+
+    Info<< nl << "uniform [0," << n << ")\n  "
+        << flatOutput(samples) << nl;
+}
+
+
 // Output with cout instead of Info to keep values unsigned on output
 using std::cout;
 using std::setw;
@@ -175,20 +191,24 @@ int main(int argc, char *argv[])
     }
 
     // Test uniformity of random
+    testPosition(20);
+    testPosition(3);
+
+    // This should fail (in FULLDEBUG)
+    const bool throwingError = FatalError.throwExceptions();
+    try
     {
-        List<label> samples(20, Zero);
-
-        Random rnd(123456);
-        for (label i=0; i < 1000*samples.size(); ++i)
-        {
-            ++samples[rnd.position<label>(0,19)];
-        }
-
-        Info<< nl << "uniform [0,20)" << nl << "  "
-            << flatOutput(samples) << nl;
+        Info<<"Random position(10,5): "
+            << Random().position<label>(10, 5) << endl;
+    }
+    catch (Foam::error& err)
+    {
+        Info<< "Caught FatalError " << err << nl << endl;
     }
 
-    Info<< nl << "Done." << endl;
+    FatalError.throwExceptions(throwingError);
+
+    Info<< "\nDone" << nl << endl;
 
     return 0;
 }
