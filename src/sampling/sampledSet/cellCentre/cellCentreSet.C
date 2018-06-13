@@ -27,6 +27,7 @@ License
 #include "meshSearch.H"
 #include "polyMesh.H"
 #include "volFields.H"
+#include "globalIndex.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -43,6 +44,8 @@ namespace Foam
 void Foam::cellCentreSet::genSamples()
 {
     const label len = mesh().nCells();
+
+    const globalIndex globalSampleNumbers(len);
 
     const auto& cellCentres =
         refCast<const fvMesh>(mesh()).C().primitiveField();
@@ -70,8 +73,13 @@ void Foam::cellCentreSet::genSamples()
     }
 
     labelList samplingFaces(selectedCells.size(), -1);
-    labelList samplingSegments(selectedCells.size(), -1);
-    scalarList samplingCurveDist(selectedCells.size(), 0.0);
+    labelList samplingSegments(selectedCells.size(), 0);
+    scalarList samplingCurveDist(selectedCells.size());
+
+    forAll(selectedCells, i)
+    {
+        samplingCurveDist[i] = globalSampleNumbers.toGlobal(selectedCells[i]);
+    }
 
     // Move into *this
     setSamples

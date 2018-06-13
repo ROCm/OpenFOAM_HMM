@@ -29,7 +29,6 @@ License
 #include "meshSearch.H"
 #include "writer.H"
 #include "particle.H"
-#include "SortableList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -467,7 +466,7 @@ Foam::autoPtr<Foam::coordSet> Foam::sampledSet::gather
     );
 
 
-    if (Pstream::master() && allCurveDist.size() == 0)
+    if (Pstream::master() && allCurveDist.empty())
     {
         WarningInFunction
             << "Sample set " << name()
@@ -475,8 +474,8 @@ Foam::autoPtr<Foam::coordSet> Foam::sampledSet::gather
     }
 
     // Sort curveDist and use to fill masterSamplePts
-    SortableList<scalar> sortedDist(allCurveDist);
-    indexSet = sortedDist.indices();
+    Foam::sortedOrder(allCurveDist, indexSet);      // uses stable sort
+    scalarList sortedDist(allCurveDist, indexSet);  // with indices for mapping
 
     return autoPtr<coordSet>::New
     (

@@ -28,7 +28,6 @@ License
 #include "Time.H"
 #include "volFields.H"
 #include "ListListOps.H"
-#include "SortableList.H"
 #include "volPointInterpolation.H"
 #include "mapPolyMesh.H"
 #include "addToRunTimeSelectionTable.H"
