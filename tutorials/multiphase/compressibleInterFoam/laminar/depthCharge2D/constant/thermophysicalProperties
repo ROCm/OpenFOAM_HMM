@@ -21,8 +21,8 @@ pMin        10000;
 
 sigma
 {
-    type    liquidProperties;
-    phase   water;
+    type    constant;
+    sigma   0.07;
 }
 
 // ************************************************************************* //

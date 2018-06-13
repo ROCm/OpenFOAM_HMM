@@ -14,7 +14,7 @@ FoamFile
     object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+/*
 thermoType
 {
     type            heRhoThermo;
@@ -27,9 +27,9 @@ mixture
 {
     H2O;
 }
+*/
 
 
-/*
 thermoType
 {
     type            heRhoThermo;
@@ -63,7 +63,7 @@ mixture
         Pr          2.289;
     }
 }
-*/
+
 
 
 // ************************************************************************* //

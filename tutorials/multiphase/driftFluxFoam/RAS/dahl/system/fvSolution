@@ -24,7 +24,7 @@ solvers
 
         MULESCorr       yes;
         nLimiterIter    3;
-        alphaApplyPrevCorr  yes;
+        alphaApplyPrevCorr  no;
 
         solver          smoothSolver;
         smoother        symGaussSeidel;

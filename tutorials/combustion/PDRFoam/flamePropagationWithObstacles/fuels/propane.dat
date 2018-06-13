@@ -1,7 +1,7 @@
 SCOPECoeffs
 {
-    lowerFlamabilityLimit      0.522;
-    upperFlamabilityLimit      2.362;
+    lowerFlammabilityLimit      0.522;
+    upperFlammabilityLimit      2.362;
 
     lowerSuPolynomial
     {

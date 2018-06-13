@@ -15,12 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//DebugSwitches
-//{
-//    dynamicRefineFvMesh 1;
-//}
-
-application     interDyMFoam;
+application     interFoam;
 
 startFrom       latestTime;
 
