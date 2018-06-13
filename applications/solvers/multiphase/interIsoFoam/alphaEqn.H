@@ -1,44 +1,42 @@
 {
-    // Note for AMR implementation:
-    // At this point we have just entered the new time step,
-    // the mesh has been refined and the alpha, phi and U contain
-    // the field values at the beginning of this time step mapped
-    // to the new mesh.
-
-    // The above assumes that we are in firstIter() of the outer
-    // corrector loop. If we are in any subsequent iter of this loop
-    // the alpha1, U and phi will be overwritten with the new time step
-    // values but still on the same mesh.
-
-
-    if (pimple.firstIter())
+    if (pimple.nCorrPIMPLE() > 1)
     {
-        // Note: This assumes moveMeshOuterCorrectors is false
-        // Saving field values before advection in first PIMPLE iteration
-        alpha10 = alpha1;
-        U0 = U;
-        phi0 = phi;
+        // If nOuterCorrectors > 1 then for all but the first loop the advection
+        // of alpha is done using an average, 0.5*phi+0.5*phiNew where phi is 
+        // the flux at the beginning of the time step and phiNew is the flux 
+        // estimate at the end of the time step from the previous outer 
+        // iteration. Similarly we use 0.5*U + 0.5*UNew in later iterations.
+        if (pimple.firstIter())
+        {
+            // To recalculate the alpha1 update in subsequent iterations, we 
+            // must store its current value before overwriting with the new 
+            // value
+            alpha1.prevIter();
+            // Storing initial phi and U for use in later outer iterations.
+            phi.storePrevIter();
+            U.storePrevIter();
+        }
+        else
+        {
+            // Resetting alpha1 to value before advection in first PIMPLE 
+            // iteration.
+            alpha1 = alpha1.prevIter();
+            // Setting U and phi with which to advect interface.
+            U = 0.5*U.prevIter() + 0.5*U;
+            phi = 0.5*phi.prevIter() + 0.5*phi;
+        }
     }
-    else
-    {
-        // Resetting alpha1 to value before advection in first PIMPLE iteration
-        alpha1 = alpha10;
-        // Temporarily setting U and phi to average of old and new value
-        // Note: Illegal additions if mesh is topoChanging
-        // (e.g. if moveMeshOuterCorrectors and AMR)
-        U = 0.5*U0 + 0.5*U;
-        phi = 0.5*phi0 + 0.5*phi;
-    }
-
+    
+    // Updating alpha1
     advector.advect();
     #include "rhofs.H"
     rhoPhi = advector.getRhoPhi(rho1f, rho2f);
 
     if (!pimple.firstIter())
     {
-        // Resetting U and phi to the new value
-        U = 2.0*U - U0;
-        phi = 2.0*phi - phi0;
+        // Resetting U and phi to value at latest iteration.
+        U = 2.0*U - U.prevIter();
+        phi = 2.0*phi - phi.prevIter();
     }
 
     alpha2 = 1.0 - alpha1;

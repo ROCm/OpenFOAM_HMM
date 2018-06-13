@@ -124,44 +124,4 @@ mesh.setFluxRequired(alpha1.name());
 #include "createMRF.H"
 #include "createFvOptions.H"
 
-//Auxiliary fields when nOuterCorrectors > 1
-surfaceScalarField phi0
-(
-    IOobject
-    (
-        "phi0",
-        runTime.timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    phi
-);
-
-volVectorField U0
-(
-    IOobject
-    (
-        "U0",
-        runTime.timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    U
-);
-
-volScalarField alpha10
-(
-    IOobject
-    (
-        "alpha10",
-        runTime.timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    alpha1
-);
-
 isoAdvection advector(alpha1, phi, U);
