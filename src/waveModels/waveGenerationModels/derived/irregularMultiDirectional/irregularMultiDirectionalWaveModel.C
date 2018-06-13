@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "irregularWavesMultiDirecWaveModel.H"
+#include "irregularMultiDirectionalWaveModel.H"
 #include "mathematicalConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -35,11 +35,11 @@ namespace Foam
 {
 namespace waveModels
 {
-    defineTypeNameAndDebug(irregularWavesMultiDirec, 0);
+    defineTypeNameAndDebug(irregularMultiDirectional, 0);
     addToRunTimeSelectionTable
     (
         waveModel,
-        irregularWavesMultiDirec,
+        irregularMultiDirectional,
         patch
     );
 }
@@ -48,8 +48,7 @@ namespace waveModels
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-// First order wave height
-Foam::scalar Foam::waveModels::irregularWavesMultiDirec::eta
+Foam::scalar Foam::waveModels::irregularMultiDirectional::eta
 (
     const scalar H,
     const scalar Kx,
@@ -68,8 +67,7 @@ Foam::scalar Foam::waveModels::irregularWavesMultiDirec::eta
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
-//Calculate waveLength
-Foam::scalar Foam::waveModels::irregularWavesMultiDirec::waveLength
+Foam::scalar Foam::waveModels::irregularMultiDirectional::waveLength
 (
     const scalar h,
     const scalar T
@@ -78,7 +76,7 @@ Foam::scalar Foam::waveModels::irregularWavesMultiDirec::waveLength
     scalar L0 = mag(g_)*T*T/(2.0*mathematical::pi);
     scalar L = L0;
 
-    for (int iii=1; iii<=100; iii++)
+    for (label i=1; i<=100; ++i)
     {
         L = L0*tanh(2.0*mathematical::pi*h/L);
     }
@@ -87,7 +85,7 @@ Foam::scalar Foam::waveModels::irregularWavesMultiDirec::waveLength
 }
 
 
-Foam::vector Foam::waveModels::irregularWavesMultiDirec::U
+Foam::vector Foam::waveModels::irregularMultiDirectional::Uf
 (
     const scalar h,
     const scalar x,
@@ -100,98 +98,80 @@ Foam::vector Foam::waveModels::irregularWavesMultiDirec::U
     scalar v = 0.0;
     scalar w = 0.0;
 
-    scalar phaseTot = 0.0;
-    scalar waveKs_ = 0.0;
-    scalar waveOmegas_ = 0.0;
+    forAll(irregWaveHeights_, ii)
+    {
+        forAll(irregWaveHeights_[ii], jj)
+        {
+            scalar waveKs = mathematical::twoPi/irregWaveLengths_[ii][jj];
+            scalar waveOmegas = mathematical::twoPi/irregWavePeriods_[ii][jj];
 
-    int ii;
-    int jj;
-    scalar COLUMNAS = 0;
-    scalar FILAS = irregWaveHeights_.size();
+            scalar phaseTot =
+                waveKs*x*cos(irregWaveDirs_[ii][jj])
+              + waveKs*y*sin(irregWaveDirs_[ii][jj])
+              - waveOmegas*t
+              + irregWavePhases_[ii][jj];
 
-    for (ii=0; ii<FILAS; ++ii)
-    {		
-	COLUMNAS= irregWaveHeights_[ii].size();	
+            const vector Uf = uMultiDirec
+            (
+                irregWaveHeights_[ii][jj],
+                waveOmegas,
+                phaseTot,
+                waveKs,
+                z,
+                h,
+                irregWaveDirs_[ii][jj]
+            );
 
-	for (jj=0; jj<COLUMNAS; ++jj)
-    	{
-	     waveKs_ = mathematical::twoPi/irregWaveLengths_[ii][jj];
-	     waveOmegas_ = mathematical::twoPi/irregWavePeriods_[ii][jj];
-
-	     phaseTot = waveKs_*x*cos(irregWaveDirs_[ii][jj]) + waveKs_*y*sin(irregWaveDirs_[ii][jj]) - waveOmegas_*t + irregWavePhases_[ii][jj];
-
-	     const vector Uf = uMultiDirec
-	            (
-                    irregWaveHeights_[ii][jj],
-		    waveOmegas_,
-		    phaseTot,
-		    waveKs_,
-		    z,
-		    h,
-		    irregWaveDirs_[ii][jj]
-              );
-	      u = u + Uf[0];
-	      v = v + Uf[1];
-	      w = w + Uf[2];
-	}	    
+            u += Uf[0];
+            v += Uf[1];
+            w += Uf[2];
+        }
     }
 
     return vector(u, v, w);
 }
 
 
-void Foam::waveModels::irregularWavesMultiDirec::setLevel
+void Foam::waveModels::irregularMultiDirectional::setLevel
 (
     const scalar t,
     const scalar tCoeff,
     scalarField& level
 ) const
 {
-    scalar eta = 0.0;
-
-    scalar COLUMNAS = 0;
-    scalar FILAS = 0;
-
-    scalar waveKs_ = 0.0;
-    scalar waveOmegas_ = 0.0;
-
-    int ii;
-    int jj;
-
     forAll(level, paddlei)
     {
-        eta = 0.0;
-	FILAS= irregWaveHeights_.size();
+        scalar eta = 0;
 
-        for (ii=0; ii<FILAS; ++ii)
-        {	
-	    COLUMNAS= irregWaveHeights_[ii].size();
-
-	    for (jj=0; jj<COLUMNAS; ++jj)
-    	    {
-		waveKs_ = mathematical::twoPi/irregWaveLengths_[ii][jj];
-		waveOmegas_ = mathematical::twoPi/irregWavePeriods_[ii][jj];
+        forAll(irregWaveHeights_, ii)
+        {
+            forAll(irregWaveHeights_[ii], jj)
+            {
+                scalar waveKs = mathematical::twoPi/irregWaveLengths_[ii][jj];
+                scalar waveOmegas =
+                    mathematical::twoPi/irregWavePeriods_[ii][jj];
 
                 eta +=
                     this->eta
-	                (
+                    (
                         irregWaveHeights_[ii][jj],
-			waveKs_*cos(irregWaveDirs_[ii][jj]),
-		        xPaddle_[paddlei],
-			waveKs_*sin(irregWaveDirs_[ii][jj]),
-		        yPaddle_[paddlei],
-			waveOmegas_,
+                        waveKs*cos(irregWaveDirs_[ii][jj]),
+                        xPaddle_[paddlei],
+                        waveKs*sin(irregWaveDirs_[ii][jj]),
+                        yPaddle_[paddlei],
+                        waveOmegas,
                         t,
                         irregWavePhases_[ii][jj]
-                );
-	     }
-	}
+                    );
+            }
+        }
 
-	level[paddlei] = waterDepthRef_ + tCoeff*eta;
+        level[paddlei] = waterDepthRef_ + tCoeff*eta;
     }
 }
 
-Foam::vector Foam::waveModels::irregularWavesMultiDirec::uMultiDirec
+
+Foam::vector Foam::waveModels::irregularMultiDirectional::uMultiDirec
 (
     const scalar irregH,
     const scalar irregWaveOmega,
@@ -202,31 +182,23 @@ Foam::vector Foam::waveModels::irregularWavesMultiDirec::uMultiDirec
     const scalar irregDir
 ) const
 {
+    const scalar ksh = irregWaveKs*hh;
+    const scalar ksz = irregWaveKs*zz;
 
     scalar u =
-             irregH*0.5*irregWaveOmega*
-             cos(pha)*
-             (cosh(irregWaveKs*zz)/
-             sinh(irregWaveKs*hh))*
-	     cos(irregDir);
+        irregH*0.5*irregWaveOmega*cos(pha)*(cosh(ksz)/sinh(ksh))*cos(irregDir);
 
-    scalar v =     
-             irregH*0.5*irregWaveOmega*
-             cos(pha)*
-             (cosh(irregWaveKs*zz)/
-             sinh(irregWaveKs*hh))*
-	     sin(irregDir);
+    scalar v =
+        irregH*0.5*irregWaveOmega*cos(pha)*(cosh(ksz)/sinh(ksh))*sin(irregDir);
 
     scalar w =
-             irregH*0.5*irregWaveOmega*
-             sin(pha)*
-             (sinh(irregWaveKs*zz)/
-             sinh(irregWaveKs*hh));
+        irregH*0.5*irregWaveOmega*sin(pha)*(sinh(ksz)/sinh(ksh));
 
     return vector(u, v, w);
 }
 
-void Foam::waveModels::irregularWavesMultiDirec::setVelocity
+
+void Foam::waveModels::irregularMultiDirectional::setVelocity
 (
     const scalar t,
     const scalar tCoeff,
@@ -247,8 +219,8 @@ void Foam::waveModels::irregularWavesMultiDirec::setVelocity
         {
             const label paddlei = faceToPaddle_[facei];
 
-            const vector Uf = U
-	        (
+            const vector Uf = this->Uf
+            (
                 waterDepthRef_,
                 xPaddle_[paddlei],
                 yPaddle_[paddlei],
@@ -257,15 +229,14 @@ void Foam::waveModels::irregularWavesMultiDirec::setVelocity
             );
 
             U_[facei] = fraction*Uf*tCoeff;
-
         }
     }
-
 }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::waveModels::irregularWavesMultiDirec::irregularWavesMultiDirec
+Foam::waveModels::irregularMultiDirectional::irregularMultiDirectional
 (
     const dictionary& dict,
     const fvMesh& mesh,
@@ -284,56 +255,54 @@ Foam::waveModels::irregularWavesMultiDirec::irregularWavesMultiDirec
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::waveModels::irregularWavesMultiDirec::~irregularWavesMultiDirec()
+Foam::waveModels::irregularMultiDirectional::~irregularMultiDirectional()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::waveModels::irregularWavesMultiDirec::readDict(const dictionary& overrideDict)
+bool Foam::waveModels::irregularMultiDirectional::readDict
+(
+    const dictionary& overrideDict
+)
 {
-    int ii;
-    int jj;
-
     if (irregularWaveModel::readDict(overrideDict))
     {
+        lookup("wavePeriods") >> irregWavePeriods_;
+        lookup("waveHeights") >> irregWaveHeights_;
+        lookup("wavePhases") >> irregWavePhases_;
+        lookup("waveDirs") >> irregWaveDirs_;
 
-	lookup("irregWavePeriods") >> irregWavePeriods_;
-	lookup("irregWaveHeights") >> irregWaveHeights_;
-	lookup("irregWavePhases") >> irregWavePhases_;
-	lookup("irregWaveDirs") >> irregWaveDirs_;
+        irregWaveLengths_ = irregWaveHeights_;
 
-	 irregWaveLengths_ = irregWaveHeights_;
-         scalar COLUMNAS = 0;
-         scalar FILAS = irregWaveHeights_.size();
-
-         for (ii=0; ii<FILAS; ++ii)
-         {		
-	      COLUMNAS= irregWaveHeights_[ii].size();	
-
-	      for (jj=0; jj<COLUMNAS; ++jj)
-    	      {
-		  irregWaveLengths_[ii][jj] = waveLength (waterDepthRef_, irregWavePeriods_[ii][jj]);
-		  irregWaveDirs_[ii][jj]  = irregWaveDirs_[ii][jj]  * (mathematical::pi/180);
-	      }
-         }
+        forAll(irregWaveHeights_, ii)
+        {
+            forAll(irregWaveHeights_[ii], jj)
+            {
+                irregWaveLengths_[ii][jj] =
+                    waveLength(waterDepthRef_, irregWavePeriods_[ii][jj]);
+                irregWaveDirs_[ii][jj] =
+                    irregWaveDirs_[ii][jj]*mathematical::pi/180;
+            }
+        }
 
         return true;
-
     }
 
     return false;
 }
 
-void Foam::waveModels::irregularWavesMultiDirec::info(Ostream& os) const
+
+void Foam::waveModels::irregularMultiDirectional::info(Ostream& os) const
 {
     irregularWaveModel::info(os);
 
-    os  << "    WavePeriods (s) coefficients : " << irregWavePeriods_ << nl
-        << "    WaveHeights (m) coefficients : " << irregWaveHeights_ << nl
-        << "    WavePhases (rad) coefficients : " << irregWavePhases_ << nl
-        << "    WaveLengths (m) coefficients : " << irregWaveLengths_ << nl
-        << "    WaveDirections (rad) coefficients : " << irregWaveDirs_ << nl;
+    os  << "    Wave periods    : " << irregWavePeriods_.size() << nl
+        << "    Wave heights    : " << irregWaveHeights_.size() << nl
+        << "    Wave phases     : " << irregWavePhases_.size() << nl
+        << "    Wave lengths    : " << irregWaveLengths_.size() << nl
+        << "    Wave directions : " << irregWaveDirs_.size() << nl;
 }
+
 
 // ************************************************************************* //

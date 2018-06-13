@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  | Copyright (C) 2015 IH-Cantabria
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ Description
 #ifndef waveModels_reguarWaveModel_H
 #define waveModels_reguarWaveModel_H
 
-#include "waveGenerationModel.H"
+#include "irregularWaveModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,7 +46,7 @@ namespace waveModels
 
 class regularWaveModel
 :
-    public waveGenerationModel
+    public irregularWaveModel
 {
     // Private Member Functions
 
@@ -61,8 +61,11 @@ protected:
 
     // Protected data
 
-        //- Ramp time
-        scalar rampTime_;
+        //- Wave height / [m]
+        scalar waveHeight_;
+
+        //- Wave angle / [rad]  (read in degrees)
+        scalar waveAngle_;
 
         //- Wave period
         scalar wavePeriod_;
@@ -75,9 +78,6 @@ protected:
 
 
     // Protected Member Functions
-
-        //- Return the time scaling coefficient
-        virtual scalar timeCoeff(const scalar t) const;
 
         //- Return word description of wave type
         virtual word waveType() const;

@@ -2,6 +2,7 @@ waveModel/waveModel.C
 waveModel/waveModelNew.C
 
 waveGenerationModels/base/waveGenerationModel/waveGenerationModel.C
+waveGenerationModels/base/irregularWaveModel/irregularWaveModel.C
 waveGenerationModels/base/regularWaveModel/regularWaveModel.C
 waveGenerationModels/base/solitaryWaveModel/solitaryWaveModel.C
 waveGenerationModels/derived/Boussinesq/BoussinesqWaveModel.C
@@ -12,6 +13,7 @@ waveGenerationModels/derived/streamFunction/streamFunctionWaveModel.C
 waveGenerationModels/derived/StokesII/StokesIIWaveModel.C
 waveGenerationModels/derived/StokesI/StokesIWaveModel.C
 waveGenerationModels/derived/StokesV/StokesVWaveModel.C
+waveGenerationModels/derived/irregularMultiDirectional/irregularMultiDirectionalWaveModel.C
 
 
 waveAbsorptionModels/base/waveAbsorptionModel/waveAbsorptionModel.C

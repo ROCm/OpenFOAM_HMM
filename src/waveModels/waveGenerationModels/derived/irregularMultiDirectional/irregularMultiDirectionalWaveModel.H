@@ -22,15 +22,15 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::waveModels::irregularWavesMultiDirec
+    Foam::waveModels::irregularMultiDirectional
 
 Description
     Multi-directional irregular wave model
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef waveModels_irregularWavesMultiDirec_H
-#define waveModels_irregularWavesMultiDirec_H
+#ifndef waveModels_irregularMultiDirectional_H
+#define waveModels_irregularMultiDirectional_H
 
 #include "irregularWaveModel.H"
 
@@ -42,10 +42,10 @@ namespace waveModels
 {
 
 /*---------------------------------------------------------------------------*\
-                            Class irregularWavesMultiDirec Declaration
+                  Class irregularMultiDirectional Declaration
 \*---------------------------------------------------------------------------*/
 
-class irregularWavesMultiDirec
+class irregularMultiDirectional
 :
     public irregularWaveModel
 {
@@ -53,20 +53,21 @@ private:
 
     // Proteced Data
 
-        //- Wave periods for irregularWavesMultiDirec case (seconds)
-        List< List<scalar> > irregWavePeriods_;
+        //- Wave periods for irregularMultiDirectional case [seconds]
+        List<List<scalar>> irregWavePeriods_;
 
-        //- Wave heights for irregularWavesMultiDirec case (meters)
-	List< List<scalar> > irregWaveHeights_;
+        //- Wave heights for irregularMultiDirectional case [metres]
+        List<List<scalar>> irregWaveHeights_;
 
-        //- Wave lengths for irregularWavesMultiDirec case (meters)
-	List< List<scalar> > irregWaveLengths_;
+        //- Wave lengths for irregularMultiDirectional case [metres]
+        List<List<scalar>> irregWaveLengths_;
 
-        //- Wave phases for irregularWavesMultiDirec case (radians)
-	List< List<scalar> > irregWavePhases_;
+        //- Wave phases for irregularMultiDirectional case [radians]
+        List<List<scalar>> irregWavePhases_;
 
-        //- Direction of propagation for irregularWavesMultiDirec case (degrees, from X axis)
-	List< List<scalar> > irregWaveDirs_;
+        //- Direction of propagation for irregularMultiDirectional case
+        //- [degrees] from X axis
+        List<List<scalar>> irregWaveDirs_;
 
 
     // Private Member Functions
@@ -91,13 +92,13 @@ protected:
 
         //- Return the wavelength
         virtual scalar waveLength
-	(
-	     const scalar h, 
-	     const scalar T
-	) const;
+        (
+            const scalar h,
+            const scalar T
+        ) const;
 
         //- Wave velocity
-        virtual vector U
+        virtual vector Uf
         (
             const scalar d,
             const scalar x,
@@ -115,7 +116,7 @@ protected:
             const scalar irregWaveKs,
             const scalar z,
             const scalar h,
-	    const scalar irregDir
+            const scalar irregDir
         ) const;
 
         //- Set the water level
@@ -134,13 +135,14 @@ protected:
             const scalarField& level
         );
 
+
 public:
 
     //- Runtime type information
-    TypeName("irregularWavesMultiDirectional");
+    TypeName("irregularMultiDirectional");
 
     //- Constructor
-    irregularWavesMultiDirec
+    irregularMultiDirectional
     (
         const dictionary& dict,
         const fvMesh& mesh,
@@ -149,7 +151,7 @@ public:
     );
 
     //- Destructor
-    virtual ~irregularWavesMultiDirec();
+    virtual ~irregularMultiDirectional();
 
 
     // Public Member Functions

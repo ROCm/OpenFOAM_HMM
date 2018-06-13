@@ -39,6 +39,30 @@ namespace waveModels
 }
 
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+Foam::scalar Foam::waveModels::waveGenerationModel::readWaveHeight() const
+{
+    scalar h(readScalar(lookup("waveHeight")));
+    if (h < 0)
+    {
+        FatalIOErrorInFunction(*this)
+            << "Wave height must be greater than zero.  Supplied"
+            << " value waveHeight = " << h
+            << exit(FatalIOError);
+    }
+
+    return h;
+}
+
+
+Foam::scalar Foam::waveModels::waveGenerationModel::readWaveAngle() const
+{
+    scalar angle(readScalar(lookup("waveAngle")));
+    return angle* mathematical::pi/180;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::waveModels::waveGenerationModel::waveGenerationModel
@@ -49,9 +73,7 @@ Foam::waveModels::waveGenerationModel::waveGenerationModel
     const bool readFields
 )
 :
-    waveModel(dict, mesh, patch, false),
-    waveHeight_(0),
-    waveAngle_(0)
+    waveModel(dict, mesh, patch, false)
 {
     if (readFields)
     {
@@ -77,18 +99,6 @@ bool Foam::waveModels::waveGenerationModel::readDict
     {
         lookup("activeAbsorption") >> activeAbsorption_;
 
-        lookup("waveHeight") >> waveHeight_;
-        if (waveHeight_ < 0)
-        {
-            FatalIOErrorInFunction(*this)
-                << "Wave height must be greater than zero.  Supplied"
-                << " value waveHeight = " << waveHeight_
-                << exit(FatalIOError);
-        }
-
-        lookup("waveAngle") >> waveAngle_;
-        waveAngle_ *= mathematical::pi/180;
-
         return true;
     }
 
@@ -99,9 +109,6 @@ bool Foam::waveModels::waveGenerationModel::readDict
 void Foam::waveModels::waveGenerationModel::info(Ostream& os) const
 {
     waveModel::info(os);
-
-    os  << "    Wave height : " << waveHeight_ << nl
-        << "    Wave angle  : " << 180/mathematical::pi*waveAngle_ << nl;
 }
 
 

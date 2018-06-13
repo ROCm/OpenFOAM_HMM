@@ -50,13 +50,13 @@ class waveGenerationModel
 {
 protected:
 
-    // Protected data
+    // Protected Member Functions
 
-        //- Wave height / [m]
-        scalar waveHeight_;
+        //- Helper function to read the wave height from the coeff dictionary
+        scalar readWaveHeight() const;
 
-        //- Wave angle / [rad]  (read in degrees)
-        scalar waveAngle_;
+        //- Helper function to read the wave angle from the coeff dictionary
+        scalar readWaveAngle() const;
 
 
 public:

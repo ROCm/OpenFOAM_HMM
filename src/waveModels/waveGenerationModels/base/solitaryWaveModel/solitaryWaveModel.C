@@ -27,6 +27,11 @@ License
 #include "polyPatch.H"
 #include "SubField.H"
 
+#include "mathematicalConstants.H"
+
+using namespace Foam::constant;
+
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -61,6 +66,8 @@ Foam::waveModels::solitaryWaveModel::solitaryWaveModel
 )
 :
     waveGenerationModel(dict, mesh, patch, false),
+    waveHeight_(0),
+    waveAngle_(0),
     x_
     (
         patch.faceCentres().component(0)*cos(waveAngle_)
@@ -90,6 +97,9 @@ bool Foam::waveModels::solitaryWaveModel::readDict
 {
     if (waveGenerationModel::readDict(overrideDict))
     {
+        waveHeight_ = readWaveHeight();
+        waveAngle_ = readWaveAngle();
+
         return true;
     }
 
@@ -101,7 +111,9 @@ void Foam::waveModels::solitaryWaveModel::info(Ostream& os) const
 {
     waveGenerationModel::info(os);
 
-    os << "    x0: " << x0_ << nl;
+    os  << "    Wave height : " << waveHeight_ << nl
+        << "    Wave angle  : " << 180/mathematical::pi*waveAngle_ << nl
+        << "    x0: " << x0_ << nl;
 }
 
 
