@@ -34,6 +34,10 @@ motionSolver        rigidBodyMotion;
 
     accelerationRelaxation 1.0;
 
+    //- prescribedRotation requires some sub-iterations to converge faster
+    //  to desired value.
+    nIter   3;
+
     bodies
     {
         hull

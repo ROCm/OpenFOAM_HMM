@@ -122,19 +122,27 @@ void Foam::RBD::restraints::prescribedRotation::restrain
     vector omega = model_.v(model_.master(bodyID_)).w();
     scalar Inertia = mag(model_.I(model_.master(bodyID_)).Ic());
 
-
     // from the definition of the angular momentum:
     //  moment = Inertia*ddt(omega)
-    // with time step 1:
-    //  moment = Inertia*(omega_wanted - omega)
+    const scalar relax = 0.5;
+
     vector moment
     (
-        (Inertia * (omegaSet_.value(model_.time().value()) - omega) & a) * a
+        (
+            relax
+          * Inertia
+          * (omegaSet_.value(model_.time().value()) - omega)
+          / model_.time().deltaTValue()
+          & a
+        )
+      * a
     );
 
     if (model_.debug)
     {
         Info<< " angle  " << theta*sign(a & axis_) << endl
+            << " omega  " << omega << endl
+            << " wanted " << omegaSet_.value(model_.time().value()) << endl
             << " moment " << moment << endl
             << " oldDir " << oldDir << endl
             << " newDir " << newDir << endl

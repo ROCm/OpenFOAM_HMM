@@ -263,32 +263,37 @@ void Foam::rigidBodyMeshMotion::solve()
     }
     else
     {
-        Field<spatialVector> fx(model_.nBodies(), Zero);
+        label nIter(coeffDict().lookupOrDefault("nIter", 1));
 
-        forAll(bodyMeshes_, bi)
+        for (label i=0; i<nIter; i++)
         {
-            const label bodyID = bodyMeshes_[bi].bodyID_;
+            Field<spatialVector> fx(model_.nBodies(), Zero);
 
-            dictionary forcesDict;
-            forcesDict.add("type", functionObjects::forces::typeName);
-            forcesDict.add("patches", bodyMeshes_[bi].patches_);
-            forcesDict.add("rhoInf", rhoInf_);
-            forcesDict.add("rho", rhoName_);
-            forcesDict.add("CofR", vector::zero);
+            forAll(bodyMeshes_, bi)
+            {
+                const label bodyID = bodyMeshes_[bi].bodyID_;
 
-            functionObjects::forces f("forces", db(), forcesDict);
-            f.calcForcesMoment();
+                dictionary forcesDict;
+                forcesDict.add("type", functionObjects::forces::typeName);
+                forcesDict.add("patches", bodyMeshes_[bi].patches_);
+                forcesDict.add("rhoInf", rhoInf_);
+                forcesDict.add("rho", rhoName_);
+                forcesDict.add("CofR", vector::zero);
 
-            fx[bodyID] = ramp*spatialVector(f.momentEff(), f.forceEff());
+                functionObjects::forces f("forces", db(), forcesDict);
+                f.calcForcesMoment();
+
+                fx[bodyID] = ramp*spatialVector(f.momentEff(), f.forceEff());
+            }
+
+            model_.solve
+            (
+                t.value(),
+                t.deltaTValue(),
+                scalarField(model_.nDoF(), Zero),
+                fx
+            );
         }
-
-        model_.solve
-        (
-            t.value(),
-            t.deltaTValue(),
-            scalarField(model_.nDoF(), Zero),
-            fx
-        );
     }
 
     if (Pstream::master() && model_.report())
@@ -354,7 +359,8 @@ bool Foam::rigidBodyMeshMotion::writeObject
     );
 
     model_.state().write(dict);
-    return dict.regIOobject::write();
+    // Force ascii writing
+    return dict.regIOobject::writeObject(IOstream::ASCII, ver, cmp, valid);
 }
 
 
