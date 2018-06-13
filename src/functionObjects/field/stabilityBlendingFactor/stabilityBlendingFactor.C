@@ -70,7 +70,6 @@ bool Foam::functionObjects::stabilityBlendingFactor::calc()
 
 bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
 {
-
     const IOField<scalar>* residualPtr =
         mesh_.lookupObjectPtr<IOField<scalar>>(residualName_);
 
@@ -100,7 +99,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
             oldErrorIntegral_ = errorIntegral_;
             error_ = mag(meanRes - mag(*residualPtr));
             errorIntegral_ = oldErrorIntegral_ + 0.5*(error_ + oldError_);
-            const scalarField errorDifferential = error_ - oldError_;
+            const scalarField errorDifferential(error_ - oldError_);
 
             const scalarField factorList
             (
@@ -229,7 +228,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
                     IOobject::NO_WRITE
                 ),
                 mesh_,
-                dimensionedScalar("0", dimless, Zero),
+                dimensionedScalar(dimless, Zero),
                 zeroGradientFvPatchScalarField::typeName
             )
         );
@@ -248,7 +247,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
                     IOobject::NO_WRITE
                 ),
                 mesh_,
-                dimensionedScalar("zero", dimLength, 0),
+                dimensionedScalar(dimLength, Zero),
                 zeroGradientFvPatchScalarField::typeName
             );
             cci = mesh_.C().component(i);
@@ -298,7 +297,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
                     IOobject::NO_WRITE
                 ),
                 mesh_,
-                dimensionedScalar("0", dimless, Zero),
+                dimensionedScalar(dimless, Zero),
                 zeroGradientFvPatchScalarField::typeName
             )
         );
@@ -360,7 +359,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("0", dimless, 0.0),
+        dimensionedScalar(dimless, Zero),
         zeroGradientFvPatchScalarField::typeName
     ),
     nonOrthogonality_(dict.lookupOrDefault<Switch>("switchNonOrtho", false)),
@@ -434,7 +433,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
                 IOobject::NO_WRITE
             ),
             mesh_,
-            dimensionedScalar("0", dimless, 0.0)
+            dimensionedScalar(dimless, Zero)
         )
     );
     store(resultName_, faceBlendedPtr);
