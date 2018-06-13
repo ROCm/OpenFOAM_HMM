@@ -289,7 +289,7 @@ bool Foam::dictionary::readIfPresentCompat
 ) const
 {
     // Read is non-mandatory
-    return readCompat<T>(keyword, compat, recursive, patternMatch, false);
+    return readCompat<T>(keyword, compat, val, recursive, patternMatch, false);
 }
 
 
