@@ -1,3 +1,5 @@
+#include "createRDeltaT.H"
+
 Info<< "Reading field p_rgh\n" << endl;
 volScalarField p_rgh
 (
@@ -120,4 +122,6 @@ mesh.setFluxRequired(p_rgh.name());
 mesh.setFluxRequired(alpha1.name());
 
 #include "createMRF.H"
-#include "createIsoAdvection.H"
+#include "createFvOptions.H"
+
+isoAdvection advector(alpha1, phi, U);

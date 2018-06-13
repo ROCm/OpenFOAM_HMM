@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                 isoAdvector | Copyright (C) 2016-2017 DHI
+              Modified work | Copyright (C) 2018 Johan Roenby
 -------------------------------------------------------------------------------
 
 License
@@ -156,7 +157,6 @@ void Foam::isoAdvection::timeIntegratedFlux()
     // Clear out the data for re-use and reset list containing information
     // whether cells could possibly need bounding
     clearIsoFaceData();
-    checkBounding_ = false;
 
     // Get necessary references
     const scalarField& phiIn = phi_.primitiveField();
@@ -164,199 +164,170 @@ void Foam::isoAdvection::timeIntegratedFlux()
     scalarField& dVfIn = dVf_.primitiveFieldRef();
 
     // Get necessary mesh data
-    const labelListList& cellPoints = mesh_.cellPoints();
-    const labelListList& cellCells = mesh_.cellCells();
     const cellList& cellFaces = mesh_.cells();
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
-    const vectorField& cellCentres = mesh_.cellCentres();
-    const pointField& points = mesh_.points();
+    const labelListList& cellCells = mesh_.cellCells();
 
-    // Storage for isoFace points. Only used if writeIsoFacesToFile_
-    DynamicList<List<point>> isoFacePts;
-
-    // Interpolating alpha1 cell centre values to mesh points (vertices)
-    ap_ = volPointInterpolation::New(mesh_).interpolate(alpha1_);
-
-    vectorField gradAlpha(mesh_.nPoints(), vector::zero);
+    // Calculate alpha vertex values, ap_, or cell normals (used to get
+    // interface-vertex distance function if gradAlphaBasedNormal_)
+    volVectorField cellNormals("cellN", fvc::grad(alpha1_));
     if (gradAlphaBasedNormal_)
     {
-        // Calculate gradient of alpha1 and interpolate to vertices
-        volVectorField gradA("gradA", fvc::grad(alpha1_));
-        gradAlpha = volPointInterpolation::New(mesh_).interpolate(gradA);
+        // Calculate gradient of alpha1 and normalise and smoothen it.
+        normaliseAndSmooth(cellNormals);
+    }
+    else
+    {
+        // Interpolating alpha1 cell centre values to mesh points (vertices)
+        ap_ = volPointInterpolation::New(mesh_).interpolate(alpha1_);
     }
 
-    // Loop through cells
+    // Storage for isoFace points. Only used if writeIsoFacesToFile_
+    DynamicList<List<point> > isoFacePts;
+
+    // Loop through all cells
     forAll(alpha1In_, celli)
     {
-        if (isASurfaceCell(celli))
+        // If not a surface cell continue to next cell
+        if (!isASurfaceCell(celli)) continue;
+
+        // This is a surface cell, increment counter, append and mark cell
+        // Note: We also have the cellStatus below where the cell might not have
+        // an isoface. So maybe the counter and append should be put there.
+        nSurfaceCells++;
+        surfCells_.append(celli);
+        checkBounding_[celli] = true;
+
+        DebugInfo
+            << "\n------------ Cell " << celli << " with alpha1 = "
+            << alpha1In_[celli] << " and 1-alpha1 = "
+            << 1.0 - alpha1In_[celli] << " ------------"
+            << endl;
+
+        if (gradAlphaBasedNormal_)
         {
-            // This is a surface cell, increment counter, append and mark cell
-            nSurfaceCells++;
-            surfCells_.append(celli);
-            checkBounding_.set(celli);
+            vectorField& cellNormalsIn = cellNormals.primitiveFieldRef();
+            setCellVertexValues(celli, cellNormalsIn);
+        }
 
-            DebugInfo
-                << "\n------------ Cell " << celli << " with alpha1 = "
-                << alpha1In_[celli] << " and 1-alpha1 = "
-                << 1.0 - alpha1In_[celli] << " ------------"
-                << endl;
+        // Calculate isoFace centre x0, normal n0 at time t
 
-            // Calculate isoFace centre x0, normal n0 at time t
-            label maxIter = 100; // NOTE: make it a debug switch
+        // Calculate cell status (-1: cell is fully below the isosurface, 0:
+        // cell is cut, 1: cell is fully above the isosurface)
+        label maxIter = 100; // NOTE: make it a debug switch
+        label cellStatus = isoCutCell_.vofCutCell
+        (
+            celli,
+            alpha1In_[celli],
+            isoFaceTol_,
+            maxIter
+        );
 
-            const labelList& cp = cellPoints[celli];
-            scalarField ap_org(cp.size(), 0);
-            if (gradAlphaBasedNormal_)
+        // If cell is not cut move on to next cell
+        if (cellStatus != 0) continue;
+
+        // If cell is cut calculate isoface unit normal
+        const scalar f0(isoCutCell_.isoValue());
+        const point& x0(isoCutCell_.isoFaceCentre());
+        vector n0(isoCutCell_.isoFaceArea());
+        n0 /= (mag(n0));
+
+        if (writeIsoFacesToFile_ && mesh_.time().writeTime())
+        {
+            isoFacePts.append(isoCutCell_.isoFacePoints());
+        }
+
+        // Get the speed of the isoface by interpolating velocity and
+        // dotting it with isoface unit normal
+        const scalar Un0 = UInterp.interpolate(x0, celli) & n0;
+
+        DebugInfo
+            << "calcIsoFace gives initial surface: \nx0 = " << x0
+            << ", \nn0 = " << n0 << ", \nf0 = " << f0 << ", \nUn0 = "
+            << Un0 << endl;
+
+        // Estimate time integrated flux through each downwind face
+        // Note: looping over all cell faces - in reduced-D, some of
+        //       these faces will be on empty patches
+        const cell& celliFaces = cellFaces[celli];
+        forAll(celliFaces, fi)
+        {
+            const label facei = celliFaces[fi];
+
+            if (mesh_.isInternalFace(facei))
             {
-                // Calculating smoothed alpha gradient in surface cell in order
-                // to use it as the isoface orientation.
-                vector smoothedGradA = vector::zero;
-                const point& cellCentre = cellCentres[celli];
-                scalar wSum = 0;
-                forAll(cp, pointI)
-                {
-                    point vertex = points[cp[pointI]];
-                    scalar w = 1.0/mag(vertex - cellCentre);
-                    wSum += w;
-                    smoothedGradA += w*gradAlpha[cp[pointI]];
-                }
-                smoothedGradA /= wSum;
+                bool isDownwindFace = false;
+                label otherCell = -1;
 
-                // Temporarily overwrite the interpolated vertex alpha values in
-                // ap_ with the vertex-cell centre distance along smoothedGradA.
-                forAll(ap_org, vi)
+                if (celli == own[facei])
                 {
-                    ap_org[vi] = ap_[cp[vi]];
-                    const point& vertex = points[cp[vi]];
-                    ap_[cp[vi]] =
+                    if (phiIn[facei] > 10*SMALL)
+                    {
+                        isDownwindFace = true;
+                    }
+
+                    otherCell = nei[facei];
+                }
+                else
+                {
+                    if (phiIn[facei] < -10*SMALL)
+                    {
+                        isDownwindFace = true;
+                    }
+
+                    otherCell = own[facei];
+                }
+
+                if (isDownwindFace)
+                {
+                    dVfIn[facei] = isoCutFace_.timeIntegratedFaceFlux
                     (
-                        (vertex - cellCentre)
-                      & (smoothedGradA/mag(smoothedGradA))
+                        facei,
+                        x0,
+                        n0,
+                        Un0,
+                        f0,
+                        dt,
+                        phiIn[facei],
+                        magSfIn[facei]
                     );
                 }
-            }
 
-            // Calculate cell status (-1: cell is fully below the isosurface, 0:
-            // cell is cut, 1: cell is fully above the isosurface)
-            label cellStatus = isoCutCell_.vofCutCell
-            (
-                celli,
-                alpha1In_[celli],
-                isoFaceTol_,
-                maxIter
-            );
+                // We want to check bounding of neighbour cells to
+                // surface cells as well:
+                checkBounding_[otherCell] = true;
 
-            if (gradAlphaBasedNormal_)
-            {
-                // Restoring ap_ by putting the original values  back into it.
-                forAll(ap_org, vi)
+                // Also check neighbours of neighbours.
+                // Note: consider making it a run time selectable
+                // extension level (easily done with recursion):
+                // 0 - only neighbours
+                // 1 - neighbours of neighbours
+                // 2 - ...
+                // Note: We will like all point neighbours to interface cells to
+                // be checked. Especially if the interface leaves a cell during
+                // a time step, it may enter a point neighbour which should also
+                // be treated like a surface cell. Its interface normal should 
+                // somehow be inherrited from its upwind cells from which it 
+                // receives the interface.
+                const labelList& nNeighbourCells = cellCells[otherCell];
+                forAll(nNeighbourCells, ni)
                 {
-                    ap_[cp[vi]] = ap_org[vi];
+                    checkBounding_[nNeighbourCells[ni]] = true;
                 }
             }
-
-            // Cell is cut
-            if (cellStatus == 0)
+            else
             {
-                const scalar f0 = isoCutCell_.isoValue();
-                const point& x0 = isoCutCell_.isoFaceCentre();
-                vector n0 = isoCutCell_.isoFaceArea();
-                n0 /= (mag(n0));
+                bsFaces_.append(facei);
+                bsx0_.append(x0);
+                bsn0_.append(n0);
+                bsUn0_.append(Un0);
+                bsf0_.append(f0);
 
-                if (writeIsoFacesToFile_ && mesh_.time().writeTime())
-                {
-                    isoFacePts.append(isoCutCell_.isoFacePoints());
-                }
-
-                // Get the speed of the isoface by interpolating velocity and
-                // dotting it with isoface normal
-                const scalar Un0 = UInterp.interpolate(x0, celli) & n0;
-
-                DebugInfo
-                    << "calcIsoFace gives initial surface: \nx0 = " << x0
-                    << ", \nn0 = " << n0 << ", \nf0 = " << f0 << ", \nUn0 = "
-                    << Un0 << endl;
-
-                // Estimate time integrated flux through each downwind face
-                // Note: looping over all cell faces - in reduced-D, some of
-                //       these faces will be on empty patches
-                const cell& celliFaces = cellFaces[celli];
-                forAll(celliFaces, fi)
-                {
-                    const label facei = celliFaces[fi];
-
-                    if (mesh_.isInternalFace(facei))
-                    {
-                        bool isDownwindFace = false;
-                        label otherCell = -1;
-
-                        if (celli == own[facei])
-                        {
-                            if (phiIn[facei] > 10*SMALL)
-                            {
-                                isDownwindFace = true;
-                            }
-
-                            otherCell = nei[facei];
-                        }
-                        else
-                        {
-                            if (phiIn[facei] < -10*SMALL)
-                            {
-                                isDownwindFace = true;
-                            }
-
-                            otherCell = own[facei];
-                        }
-
-                        if (isDownwindFace)
-                        {
-                            dVfIn[facei] = timeIntegratedFaceFlux
-                            (
-                                facei,
-                                x0,
-                                n0,
-                                Un0,
-                                f0,
-                                dt,
-                                phiIn[facei],
-                                magSfIn[facei]
-                            );
-                        }
-
-                        // We want to check bounding of neighbour cells to
-                        // surface cells as well:
-                        checkBounding_.set(otherCell);
-
-                        // Also check neighbours of neighbours.
-                        // Note: consider making it a run time selectable
-                        // extension level (easily done with recursion):
-                        // 0 - only neighbours
-                        // 1 - neighbours of neighbours
-                        // 2 - ...
-                        const labelList& nNeighbourCells = cellCells[otherCell];
-                        checkBounding_.set(nNeighbourCells);
-                    }
-                    else
-                    {
-                        bsFaces_.append(facei);
-                        bsx0_.append(x0);
-                        bsn0_.append(n0);
-                        bsUn0_.append(Un0);
-                        bsf0_.append(f0);
-
-                        // Note: we must not check if the face is on the
-                        // processor patch here.
-                    }
-                }
+                // Note: we must not check if the face is on the
+                // processor patch here.
             }
         }
-    }
-
-    if (writeIsoFacesToFile_ && mesh_.time().writeTime())
-    {
-        writeIsoFaces(isoFacePts);
     }
 
     // Get references to boundary fields
@@ -383,7 +354,7 @@ void Foam::isoAdvection::timeIntegratedFlux()
             {
                 const scalar magSf = magSfb[patchi][patchFacei];
 
-                dVfb[patchi][patchFacei] = timeIntegratedFaceFlux
+                dVfb[patchi][patchFacei] = isoCutFace_.timeIntegratedFaceFlux
                 (
                     facei,
                     bsx0_[i],
@@ -402,156 +373,62 @@ void Foam::isoAdvection::timeIntegratedFlux()
         }
     }
 
+    // Synchronize processor patches
+    syncProcPatches(dVf_, phi_);
+
+    writeIsoFaces(isoFacePts);
+
     Info<< "Number of isoAdvector surface cells = "
         << returnReduce(nSurfaceCells, sumOp<label>()) << endl;
 }
 
 
-Foam::scalar Foam::isoAdvection::timeIntegratedFaceFlux
+void Foam::isoAdvection::setCellVertexValues
 (
-    const label facei,
-    const vector& x0,
-    const vector& n0,
-    const scalar Un0,
-    const scalar f0,
-    const scalar dt,
-    const scalar phi,
-    const scalar magSf
+    const label celli,
+    const vectorField& cellNormalsIn
 )
 {
-    // Treating rare cases where isoface normal is not calculated properly
-    if (mag(n0) < 0.5)
+    const labelListList& cellPoints = mesh_.cellPoints();
+    const vectorField& cellCentres = mesh_.cellCentres();
+    const pointField& points = mesh_.points();
+    const labelList& cp = cellPoints[celli];
+    const point& cellCentre = cellCentres[celli];
+    forAll(cp, vi)
     {
-        scalar alphaf = 0;
-        scalar waterInUpwindCell = 0;
-
-        if (phi > 10*SMALL || !mesh_.isInternalFace(facei))
-        {
-            const label upwindCell = mesh_.faceOwner()[facei];
-            alphaf = alpha1In_[upwindCell];
-            waterInUpwindCell = alphaf*mesh_.cellVolumes()[upwindCell];
-        }
-        else
-        {
-            const label upwindCell = mesh_.faceNeighbour()[facei];
-            alphaf = alpha1In_[upwindCell];
-            waterInUpwindCell = alphaf*mesh_.cellVolumes()[upwindCell];
-        }
-
-        if (debug)
-        {
-            WarningInFunction
-                << "mag(n0) = " << mag(n0)
-                << " so timeIntegratedFlux calculates dVf from upwind"
-                << " cell alpha value: " << alphaf << endl;
-        }
-
-        return min(alphaf*phi*dt, waterInUpwindCell);
+        const point& vertex = points[cp[vi]];
+        ap_[cp[vi]] = (vertex - cellCentre) & cellNormalsIn[celli];
     }
+}
 
 
-    // Find sorted list of times where the isoFace will arrive at face points
-    // given initial position x0 and velocity Un0*n0
+void Foam::isoAdvection::normaliseAndSmooth
+(
+    volVectorField& cellN
+)
+{
+    const labelListList& cellPoints = mesh_.cellPoints();
+    const vectorField& cellCentres = mesh_.cellCentres();
+    const pointField& points = mesh_.points();
 
-    // Get points for this face
-    const face& f = mesh_.faces()[facei];
-    const pointField fPts(f.points(mesh_.points()));
-    const label nPoints = fPts.size();
-
-    scalarField pTimes(fPts.size());
-    if (mag(Un0) > 10*SMALL) // Note: tolerances
+    vectorField& cellNIn = cellN.primitiveFieldRef();
+    cellNIn /= (mag(cellNIn) + SMALL);
+    vectorField vertexN(mesh_.nPoints(), vector::zero);
+    vertexN = volPointInterpolation::New(mesh_).interpolate(cellN);
+    vertexN /= (mag(vertexN) + SMALL);
+    // Interpolate vertex normals back to cells
+    forAll(cellNIn, celli)
     {
-        // Here we estimate time of arrival to the face points from their normal
-        // distance to the initial surface and the surface normal velocity
-
-        pTimes = ((fPts - x0) & n0)/Un0;
-
-        scalar dVf = 0;
-
-        // Check if pTimes changes direction more than twice when looping face
-        label nShifts = 0;
-        forAll(pTimes, pi)
+        const labelList& cp = cellPoints[celli];
+        vector cellNi = vector::zero;
+        const point& cellCentre = cellCentres[celli];
+        forAll(cp, pointI)
         {
-            const label oldEdgeSign =
-                sign(pTimes[(pi + 1) % nPoints] - pTimes[pi]);
-            const label newEdgeSign =
-                sign(pTimes[(pi + 2) % nPoints] - pTimes[(pi + 1) % nPoints]);
-
-            if (newEdgeSign != oldEdgeSign)
-            {
-                nShifts++;
-            }
+            point vertex = points[cp[pointI]];
+            scalar w = 1.0/mag(vertex - cellCentre);
+            cellNi += w*vertexN[cp[pointI]];
         }
-
-        if (nShifts == 2)
-        {
-            dVf =
-                phi/magSf
-               *isoCutFace_.timeIntegratedArea(fPts, pTimes, dt, magSf, Un0);
-        }
-        else if (nShifts > 2)
-        {
-            // Triangle decompose the face
-            pointField fPts_tri(3);
-            scalarField pTimes_tri(3);
-            fPts_tri[0] = mesh_.faceCentres()[facei];
-            pTimes_tri[0] = ((fPts_tri[0] - x0) & n0)/Un0;
-            for (label pi = 0; pi < nPoints; pi++)
-            {
-                fPts_tri[1] = fPts[pi];
-                pTimes_tri[1] = pTimes[pi];
-                fPts_tri[2] = fPts[(pi + 1) % nPoints];
-                pTimes_tri[2] = pTimes[(pi + 1) % nPoints];
-                const scalar magSf_tri =
-                    mag
-                    (
-                        0.5
-                       *(fPts_tri[2] - fPts_tri[0])
-                       ^(fPts_tri[1] - fPts_tri[0])
-                    );
-                const scalar phi_tri = phi*magSf_tri/magSf;
-                dVf +=
-                    phi_tri
-                   /magSf_tri
-                   *isoCutFace_.timeIntegratedArea
-                    (
-                        fPts_tri,
-                        pTimes_tri,
-                        dt,
-                        magSf_tri,
-                        Un0
-                    );
-            }
-        }
-        else
-        {
-            if (debug)
-            {
-                WarningInFunction
-                    << "Warning: nShifts = " << nShifts << " on face " << facei
-                    << " with pTimes = " << pTimes << " owned by cell "
-                    << mesh_.faceOwner()[facei] << endl;
-            }
-        }
-
-        return dVf;
-    }
-    else
-    {
-        // Un0 is almost zero and isoFace is treated as stationary
-        isoCutFace_.calcSubFace(facei, f0);
-        const scalar alphaf = mag(isoCutFace_.subFaceArea()/magSf);
-
-        if (debug)
-        {
-            WarningInFunction
-                << "Un0 is almost zero (" << Un0
-                << ") - calculating dVf on face " << facei
-                << " using subFaceFraction giving alphaf = " << alphaf
-                << endl;
-        }
-
-        return phi*dt*alphaf;
+        cellNIn[celli] = cellNi/(mag(cellNi) + SMALL);
     }
 }
 
@@ -602,19 +479,20 @@ void Foam::isoAdvection::limitFluxes()
     // Get time step size
     const scalar dt = mesh_.time().deltaT().value();
 
-//    scalarField alphaNew = alpha1In_ - fvc::surfaceIntegrate(dVf_);
+    volScalarField alphaNew = alpha1_ - fvc::surfaceIntegrate(dVf_);
     const scalar aTol = 1.0e-12;          // Note: tolerances
-    const scalar maxAlphaMinus1 = 1;      // max(alphaNew - 1);
-    const scalar minAlpha = -1;           // min(alphaNew);
+    scalar maxAlphaMinus1 = gMax(alphaNew) - 1;      // max(alphaNew - 1);
+    scalar minAlpha = gMin(alphaNew);           // min(alphaNew);
     const label nUndershoots = 20;        // sum(neg0(alphaNew + aTol));
     const label nOvershoots = 20;         // sum(pos0(alphaNew - 1 - aTol));
     cellIsBounded_ = false;
 
+    Info << "isoAdvection: Before conservative bounding: min(alpha) = "
+        << minAlpha << ", max(alpha) = 1 + " << maxAlphaMinus1 << endl;
+
     // Loop number of bounding steps
     for (label n = 0; n < nAlphaBounds_; n++)
     {
-        Info<< "isoAdvection: bounding iteration " << n + 1 << endl;
-
         if (maxAlphaMinus1 > aTol) // Note: tolerances
         {
             DebugInfo << "Bound from above... " << endl;
@@ -974,15 +852,17 @@ void Foam::isoAdvection::advect()
     // Do the isoAdvection on surface cells
     timeIntegratedFlux();
 
-    // Synchronize processor patches
-    syncProcPatches(dVf_, phi_);
-
     // Adjust dVf for unbounded cells
     limitFluxes();
 
     // Advect the free surface
     alpha1_ -= fvc::surfaceIntegrate(dVf_);
     alpha1_.correctBoundaryConditions();
+
+    scalar maxAlphaMinus1 = gMax(alpha1In_) - 1;
+    scalar minAlpha = gMin(alpha1In_);
+    Info << "isoAdvection: After conservative bounding: min(alpha) = "
+        << minAlpha << ", max(alpha) = 1 + " << maxAlphaMinus1 << endl;
 
     // Apply non-conservative bounding mechanisms (clipping and snapping)
     // Note: We should be able to write out alpha before this is done!
@@ -993,6 +873,9 @@ void Foam::isoAdvection::advect()
     writeBoundedCells();
 
     advectionTime_ += (mesh_.time().elapsedCpuTime() - advectionStartTime);
+    Info << "isoAdvection: time consumption = "
+        << label(100*advectionTime_/(mesh_.time().elapsedCpuTime() + SMALL))
+        << "%" << endl;
 }
 
 
@@ -1027,6 +910,8 @@ void Foam::isoAdvection::applyBruteForceBounding()
 
 void Foam::isoAdvection::writeSurfaceCells() const
 {
+    if (!mesh_.time().writeTime()) return;
+
     if (dict_.lookupOrDefault("writeSurfCells", false))
     {
         cellSet cSet
@@ -1049,6 +934,8 @@ void Foam::isoAdvection::writeSurfaceCells() const
 
 void Foam::isoAdvection::writeBoundedCells() const
 {
+    if (!mesh_.time().writeTime()) return;
+
     if (dict_.lookupOrDefault("writeBoundedCells", false))
     {
         cellSet cSet
@@ -1077,6 +964,9 @@ void Foam::isoAdvection::writeIsoFaces
     const DynamicList<List<point>>& faces
 ) const
 {
+
+    if (!writeIsoFacesToFile_ || !mesh_.time().writeTime()) return;
+
     // Writing isofaces to obj file for inspection, e.g. in paraview
     const fileName dirName
     (
