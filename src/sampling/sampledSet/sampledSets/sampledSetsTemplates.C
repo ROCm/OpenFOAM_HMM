@@ -223,7 +223,7 @@ void Foam::sampledSets::sampleAndWrite(fieldGroup<Type>& fields)
 {
     if (fields.size())
     {
-        bool interpolate = interpolationScheme_ != "cell";
+        const bool interpolate = interpolationScheme_ != "cell";
 
         // Create or use existing writer
         if (fields.formatter.empty())

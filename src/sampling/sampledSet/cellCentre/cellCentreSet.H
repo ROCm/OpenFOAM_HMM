@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,101 +22,75 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::arraySet
+    Foam::cellCentreSet
 
 Description
-    Specifies an x,y,z array of uniformly distributed sampling points.
+    A sampleSet based on cell centres
 
     For a dictionary specification:
     \table
         Property | Description                             | Required | Default
-        type     | array                                   | yes      |
-        axis     | x, y, z, xyz, distance                  | yes      |
-        pointsDensity | The sampling density as (x y z) integers | yes      |
-        spanBox   | The sample box dimensions (vector)     | yes      |
+        type     | cellCentre                              | yes      |
+        axis     | x, y, z, xyz, distance                  | no       | xyz
+        bounds   | limit with bounding box                 | no       |
     \endtable
 
-    The dictionary can also contain an embedded coordinateSystem specification.
-
 SourceFiles
-    arraySet.C
+    cellCentreSet.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef arraySet_H
-#define arraySet_H
+#ifndef cellCentreSet_H
+#define cellCentreSet_H
 
 #include "sampledSet.H"
-#include "DynamicList.H"
-#include "coordinateSystem.H"
+#include "boundBox.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declarations
-class passiveParticle;
-template<class Type> class particle;
-
 /*---------------------------------------------------------------------------*\
-                           Class arraySet Declaration
+                        Class cellCentreSet Declaration
 \*---------------------------------------------------------------------------*/
 
-class arraySet
+class cellCentreSet
 :
     public sampledSet
 {
     // Private data
 
-        //- Coordinate system
-        coordinateSystem coordSys_;
-
-        //- Point density vector
-        Vector<label> pointsDensity_;
-
-        //- Span box
-        Vector<scalar> spanBox_;
+        //- Optional bounding box to restrict the geometry
+        const boundBox bounds_;
 
 
     // Private Member Functions
 
-        //- Samples all points in sampleCoords.
-        void calcSamples
-        (
-            DynamicList<point>& samplingPts,
-            DynamicList<label>& samplingCells,
-            DynamicList<label>& samplingFaces,
-            DynamicList<label>& samplingSegments,
-            DynamicList<scalar>& samplingCurveDist
-        ) const;
-
-        //- Uses calcSamples to obtain samples. Copies them into *this.
+        //- Generate samples
         void genSamples();
 
 
 public:
 
     //- Runtime type information
-    TypeName("array");
+    TypeName("cellCentre");
 
 
     // Constructors
 
         //- Construct from components
-        arraySet
+        cellCentreSet
         (
             const word& name,
             const polyMesh& mesh,
             const meshSearch& searchEngine,
             const word& axis,
-            const coordinateSystem& coordSys,
-            const Vector<label>& pointsDensity,
-            const Vector<scalar>& spanBox
+            const boundBox& bbox = boundBox::invertedBox
         );
 
         //- Construct from dictionary
-        arraySet
+        cellCentreSet
         (
             const word& name,
             const polyMesh& mesh,
@@ -126,7 +100,7 @@ public:
 
 
     //- Destructor
-    virtual ~arraySet() = default;
+    virtual ~cellCentreSet() = default;
 };
 
 

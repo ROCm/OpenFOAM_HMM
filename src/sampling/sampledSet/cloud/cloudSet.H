@@ -25,6 +25,15 @@ Class
     Foam::cloudSet
 
 Description
+    Samples at arbitrary locations with a volume mesh.
+
+    For a dictionary specification:
+    \table
+        Property | Description                             | Required | Default
+        type     | cloud                                   | yes      |
+        axis     | x, y, z, xyz, distance                  | yes      |
+        points   | The locations                           | yes      |
+    \endtable
 
 SourceFiles
     cloudSet.C
@@ -42,12 +51,12 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class passiveParticle;
 template<class Type> class particle;
 
 /*---------------------------------------------------------------------------*\
-                           Class cloudSet Declaration
+                          Class cloudSet Declaration
 \*---------------------------------------------------------------------------*/
 
 class cloudSet
@@ -105,7 +114,7 @@ public:
 
 
     //- Destructor
-    virtual ~cloudSet();
+    virtual ~cloudSet() = default;
 };
 
 

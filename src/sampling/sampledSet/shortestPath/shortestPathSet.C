@@ -272,20 +272,27 @@ void Foam::shortestPathSet::genSamples(const polyMesh& mesh)
             }
         }
     }
+
     samplingPts.shrink();
     samplingCells.shrink();
     samplingFaces.shrink();
     samplingSegments.shrink();
     samplingCurveDist.shrink();
 
+    // Move into *this
     setSamples
     (
-        samplingPts,
-        samplingCells,
-        samplingFaces,
-        samplingSegments,
-        samplingCurveDist
+        std::move(samplingPts),
+        std::move(samplingCells),
+        std::move(samplingFaces),
+        std::move(samplingSegments),
+        std::move(samplingCurveDist)
     );
+
+    if (debug)
+    {
+        write(Info);
+    }
 }
 
 
@@ -306,11 +313,6 @@ Foam::shortestPathSet::shortestPathSet
     outsidePoints_(outsidePoints)
 {
     genSamples(mesh);
-
-    if (debug)
-    {
-        write(Info);
-    }
 }
 
 
@@ -327,18 +329,7 @@ Foam::shortestPathSet::shortestPathSet
     outsidePoints_(dict.lookup("outsidePoints"))
 {
     genSamples(mesh);
-
-    if (debug)
-    {
-        write(Info);
-    }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::shortestPathSet::~shortestPathSet()
-{}
 
 
 // ************************************************************************* //

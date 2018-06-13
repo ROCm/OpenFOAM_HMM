@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,28 @@ namespace Foam
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+void Foam::sampledSet::checkDimensions() const
+{
+    if
+    (
+        (cells_.size() != size())
+     || (faces_.size() != size())
+     || (segments_.size() != size())
+     || (curveDist_.size() != size())
+    )
+    {
+        FatalErrorInFunction
+            << "sizes not equal : "
+            << "  points:" << size()
+            << "  cells:" << cells_.size()
+            << "  faces:" << faces_.size()
+            << "  segments:" << segments_.size()
+            << "  curveDist:" << curveDist_.size()
+            << abort(FatalError);
+    }
+}
+
+
 Foam::label Foam::sampledSet::getBoundaryCell(const label facei) const
 {
     return mesh().faceOwner()[facei];
@@ -69,7 +91,7 @@ Foam::label Foam::sampledSet::pointInCell
 {
     // Collect the face owner and neighbour cells of the sample into an array
     // for convenience
-    label cells[4] =
+    const label cells[4] =
     {
         mesh().faceOwner()[faces_[samplei]],
         getNeighbourCell(faces_[samplei]),
@@ -90,7 +112,7 @@ Foam::label Foam::sampledSet::pointInCell
         // otherwise ignore
         if (!mesh().pointInCell(p, cellm, searchEngine_.decompMode()))
         {
-           cellm = -1;
+            cellm = -1;
 
             if (debug)
             {
@@ -104,7 +126,7 @@ Foam::label Foam::sampledSet::pointInCell
     {
         // If the sample does not pass through a single cell check if the point
         // is in any of the owners or neighbours otherwise ignore
-        for (label i=0; i<4; i++)
+        for (label i=0; i<4; ++i)
         {
             if (mesh().pointInCell(p, cells[i], searchEngine_.decompMode()))
             {
@@ -238,7 +260,7 @@ Foam::point Foam::sampledSet::pushIn
                 tetPtI
             );
 
-            iterNo++;
+            ++iterNo;
 
         } while (tetFacei < 0  && iterNo <= trap);
     }
@@ -367,39 +389,34 @@ void Foam::sampledSet::setSamples
     const scalarList& samplingCurveDist
 )
 {
-    setSize(samplingPts.size());
-    cells_.setSize(samplingCells.size());
-    faces_.setSize(samplingFaces.size());
-    segments_.setSize(samplingSegments.size());
-    curveDist_.setSize(samplingCurveDist.size());
-
-    if
-    (
-        (cells_.size() != size())
-     || (faces_.size() != size())
-     || (segments_.size() != size())
-     || (curveDist_.size() != size())
-    )
-    {
-        FatalErrorInFunction
-            << "sizes not equal : "
-            << "  points:" << size()
-            << "  cells:" << cells_.size()
-            << "  faces:" << faces_.size()
-            << "  segments:" << segments_.size()
-            << "  curveDist:" << curveDist_.size()
-            << abort(FatalError);
-    }
-
-    forAll(samplingPts, sampleI)
-    {
-        operator[](sampleI) = samplingPts[sampleI];
-    }
+    setPoints(samplingPts);
     curveDist_ = samplingCurveDist;
 
+    segments_ = samplingSegments;
     cells_ = samplingCells;
     faces_ = samplingFaces;
-    segments_ = samplingSegments;
+
+    checkDimensions();
+}
+
+
+void Foam::sampledSet::setSamples
+(
+    List<point>&& samplingPts,
+    labelList&& samplingCells,
+    labelList&& samplingFaces,
+    labelList&& samplingSegments,
+    scalarList&& samplingCurveDist
+)
+{
+    setPoints(std::move(samplingPts));
+    curveDist_ = std::move(samplingCurveDist);
+
+    segments_ = std::move(samplingSegments);
+    cells_ = std::move(samplingCells);
+    faces_ = std::move(samplingFaces);
+
+    checkDimensions();
 }
 
 
@@ -461,20 +478,34 @@ Foam::autoPtr<Foam::coordSet> Foam::sampledSet::gather
     SortableList<scalar> sortedDist(allCurveDist);
     indexSet = sortedDist.indices();
 
-    return autoPtr<coordSet>
+    return autoPtr<coordSet>::New
     (
-        new coordSet
-        (
-            name(),
-            axis(),
-            List<point>(UIndirectList<point>(allPts, indexSet)),
-            sortedDist
-        )
+        name(),
+        axis(),
+        List<point>(UIndirectList<point>(allPts, indexSet)),
+        sortedDist
     );
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::sampledSet::sampledSet
+(
+    const word& name,
+    const polyMesh& mesh,
+    const meshSearch& searchEngine,
+    const coordSet::coordFormat axisType
+)
+:
+    coordSet(name, axisType),
+    mesh_(mesh),
+    searchEngine_(searchEngine),
+    segments_(),
+    cells_(),
+    faces_()
+{}
+
 
 Foam::sampledSet::sampledSet
 (
@@ -487,9 +518,9 @@ Foam::sampledSet::sampledSet
     coordSet(name, axis),
     mesh_(mesh),
     searchEngine_(searchEngine),
-    segments_(0),
-    cells_(0),
-    faces_(0)
+    segments_(),
+    cells_(),
+    faces_()
 {}
 
 
@@ -501,18 +532,12 @@ Foam::sampledSet::sampledSet
     const dictionary& dict
 )
 :
-    coordSet(name, dict.lookup("axis")),
+    coordSet(name, dict.get<word>("axis")),
     mesh_(mesh),
     searchEngine_(searchEngine),
-    segments_(0),
-    cells_(0),
-    faces_(0)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::sampledSet::~sampledSet()
+    segments_(),
+    cells_(),
+    faces_()
 {}
 
 
@@ -526,7 +551,7 @@ Foam::autoPtr<Foam::sampledSet> Foam::sampledSet::New
     const dictionary& dict
 )
 {
-    const word sampleType(dict.lookup("type"));
+    const word sampleType(dict.get<word>("type"));
 
     auto cstrIter = wordConstructorTablePtr_->cfind(sampleType);
 
@@ -535,7 +560,7 @@ Foam::autoPtr<Foam::sampledSet> Foam::sampledSet::New
         FatalErrorInFunction
             << "Unknown sample type "
             << sampleType << nl << nl
-            << "Valid sample types : " << endl
+            << "Valid sample types : " << nl
             << wordConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -557,13 +582,13 @@ Foam::Ostream& Foam::sampledSet::write(Ostream& os) const
 {
     coordSet::write(os);
 
-    os  << endl << "\t(celli)\t(facei)" << endl;
+    os  << nl << "\t(celli)\t(facei)" << nl;
 
-    forAll(*this, sampleI)
+    forAll(*this, samplei)
     {
-        os  << '\t' << cells_[sampleI]
-            << '\t' << faces_[sampleI]
-            << endl;
+        os  << '\t' << cells_[samplei]
+            << '\t' << faces_[samplei]
+            << nl;
     }
 
     return os;

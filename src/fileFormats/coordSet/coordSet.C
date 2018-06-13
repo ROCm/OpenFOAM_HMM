@@ -61,6 +61,19 @@ void Foam::coordSet::checkDimensions() const
 Foam::coordSet::coordSet
 (
     const word& name,
+    const coordFormat axisType
+)
+:
+    pointField(),
+    name_(name),
+    axis_(axisType),
+    curveDist_()
+{}
+
+
+Foam::coordSet::coordSet
+(
+    const word& name,
     const word& axis
 )
 :

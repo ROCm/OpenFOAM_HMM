@@ -27,6 +27,14 @@ Class
 Description
     Sample along poly line defined by a list of points (knots)
 
+    For a dictionary specification:
+    \table
+        Property | Description                             | Required | Default
+        type     | polyLine                                | yes      |
+        axis     | x, y, z, xyz, distance                  | yes      |
+        points   | The locations                           | yes      |
+    \endtable
+
 SourceFiles
     polyLineSet.C
 
@@ -98,7 +106,7 @@ public:
     // Static data
 
         //- Tolerance when comparing points relative to difference between
-        //  start_ and end_
+        //- start and end points
         static const scalar tol;
 
 
@@ -125,7 +133,7 @@ public:
 
 
     //- Destructor
-    virtual ~polyLineSet();
+    virtual ~polyLineSet() = default;
 };
 
 

@@ -25,7 +25,15 @@ Class
     Foam::triSurfaceMeshPointSet
 
 Description
-    sampleSet from all points of a triSurfaceMesh.
+    A sampleSet from all points of a triSurfaceMesh.
+
+    For a dictionary specification:
+    \table
+        Property | Description                             | Required | Default
+        type     | triSurfaceMeshPointSet                  | yes      |
+        axis     | x, y, z, xyz, distance                  | yes      |
+        surface  | The surface name                        | yes      |
+    \endtable
 
 SourceFiles
     triSurfaceMeshPointSet.C
@@ -42,10 +50,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-
 /*---------------------------------------------------------------------------*\
-                           Class triSurfaceMeshPointSet Declaration
+                   Class triSurfaceMeshPointSet Declaration
 \*---------------------------------------------------------------------------*/
 
 class triSurfaceMeshPointSet
@@ -96,13 +102,13 @@ public:
 
 
     //- Destructor
-    virtual ~triSurfaceMeshPointSet();
+    virtual ~triSurfaceMeshPointSet() = default;
 
 
     // Member Functions
 
         //- Get reference point
-        virtual point getRefPoint(const List<point>&) const;
+        virtual point getRefPoint(const List<point>& pts) const;
 };
 
 

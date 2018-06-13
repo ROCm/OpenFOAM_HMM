@@ -25,6 +25,16 @@ Class
     Foam::faceOnlySet
 
 Description
+    Sample on faces along a specified path
+
+    For a dictionary specification:
+    \table
+        Property | Description                             | Required | Default
+        type     | face                                    | yes      |
+        axis     | x, y, z, xyz, distance                  | yes      |
+        start    | The start point                         | yes      |
+        end      | The end point                           | yes      |
+    \endtable
 
 SourceFiles
     faceOnlySet.C
@@ -129,7 +139,7 @@ public:
 
 
     //- Destructor
-    virtual ~faceOnlySet();
+    virtual ~faceOnlySet() = default;
 
 
     // Member Functions

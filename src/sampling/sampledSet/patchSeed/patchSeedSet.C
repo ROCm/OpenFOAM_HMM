@@ -223,7 +223,7 @@ void Foam::patchSeedSet::calcSamples
             label(scalar(patchFaces.size())/totalSize*maxPoints_);
 
         labelList subset = identity(patchFaces.size());
-        for (label iter = 0; iter < 4; iter++)
+        for (label iter = 0; iter < 4; ++iter)
         {
             forAll(subset, i)
             {
@@ -316,14 +316,20 @@ void Foam::patchSeedSet::genSamples()
     samplingSegments.shrink();
     samplingCurveDist.shrink();
 
+    // Move into *this
     setSamples
     (
-        samplingPts,
-        samplingCells,
-        samplingFaces,
-        samplingSegments,
-        samplingCurveDist
+        std::move(samplingPts),
+        std::move(samplingCells),
+        std::move(samplingFaces),
+        std::move(samplingSegments),
+        std::move(samplingCurveDist)
     );
+
+    if (debug)
+    {
+        write(Info);
+    }
 }
 
 
@@ -345,7 +351,7 @@ Foam::patchSeedSet::patchSeedSet
             wordReList(dict.lookup("patches"))
         )
     ),
-    maxPoints_(readLabel(dict.lookup("maxPoints"))),
+    maxPoints_(dict.get<label>("maxPoints")),
     selectedLocations_
     (
         dict.lookupOrDefault<pointField>
@@ -356,11 +362,6 @@ Foam::patchSeedSet::patchSeedSet
     )
 {
     genSamples();
-
-    if (debug)
-    {
-        write(Info);
-    }
 }
 
 

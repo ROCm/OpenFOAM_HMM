@@ -41,11 +41,11 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class meshSearch;
 
 /*---------------------------------------------------------------------------*\
-                           Class midPointAndFaceSet Declaration
+                     Class midPointAndFaceSet Declaration
 \*---------------------------------------------------------------------------*/
 
 class midPointAndFaceSet
@@ -88,7 +88,7 @@ public:
 
 
     //- Destructor
-    virtual ~midPointAndFaceSet();
+    virtual ~midPointAndFaceSet() = default;
 };
 
 

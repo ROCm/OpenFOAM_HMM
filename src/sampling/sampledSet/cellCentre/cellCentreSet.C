@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,81 +23,64 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "midPointSet.H"
-#include "polyMesh.H"
+#include "cellCentreSet.H"
 #include "meshSearch.H"
+#include "polyMesh.H"
+#include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(midPointSet, 0);
-    addToRunTimeSelectionTable(sampledSet, midPointSet, word);
+    defineTypeNameAndDebug(cellCentreSet, 0);
+    addToRunTimeSelectionTable(sampledSet, cellCentreSet, word);
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::midPointSet::genSamples()
+void Foam::cellCentreSet::genSamples()
 {
-    // Generate midpoints.
+    const label len = mesh().nCells();
 
-    List<point> midPoints(2*size());
-    labelList midCells(2*size());
-    labelList midSegments(2*size());
-    scalarList midCurveDist(2*size());
+    const auto& cellCentres =
+        refCast<const fvMesh>(mesh()).C().primitiveField();
 
-    label mSamplei = 0;
-    label samplei = 0;
+    labelList selectedCells = identity(len);
+    List<point> selectedPoints;
 
-    while (size() > 0)
+    if (bounds_.empty())
     {
-        // Calculate midpoint between samplei and samplei+1 (if in same segment)
-        while
-        (
-            (samplei < size() - 1)
-         && (segments_[samplei] == segments_[samplei+1])
-        )
+        selectedPoints = cellCentres;
+    }
+    else
+    {
+        label count = 0;
+        for (label celli=0; celli < len; ++celli)
         {
-            point midPoint(0.5*(operator[](samplei) + operator[](samplei+1)));
-            label cellm = pointInCell(midPoint, samplei);
-
-            if (cellm != -1)
+            if (bounds_.contains(cellCentres[celli]))
             {
-                midPoints[mSamplei] = midPoint;
-                midCells[mSamplei] = cellm;
-                midSegments[mSamplei] = segments_[samplei];
-                midCurveDist[mSamplei] = mag(midPoints[mSamplei] - start());
-                ++mSamplei;
+                selectedCells[count++] = celli;
             }
-
-            ++samplei;
         }
 
-        if (samplei == size() - 1)
-        {
-            break;
-        }
-
-        ++samplei;
+        selectedCells.resize(count);
+        selectedPoints = UIndirectList<point>(cellCentres, selectedCells);
     }
 
-    midPoints.setSize(mSamplei);
-    midCells.setSize(mSamplei);
-    midSegments.setSize(mSamplei);
-    midCurveDist.setSize(mSamplei);
-
-    labelList midFaces(midCells.size(), -1);
+    labelList samplingFaces(selectedCells.size(), -1);
+    labelList samplingSegments(selectedCells.size(), -1);
+    scalarList samplingCurveDist(selectedCells.size(), 0.0);
 
     // Move into *this
     setSamples
     (
-        std::move(midPoints),
-        std::move(midCells),
-        std::move(midFaces),
-        std::move(midSegments),
-        std::move(midCurveDist)
+        std::move(selectedPoints),
+        std::move(selectedCells),
+        std::move(samplingFaces),
+        std::move(samplingSegments),
+        std::move(samplingCurveDist)
     );
 
     if (debug)
@@ -109,23 +92,23 @@ void Foam::midPointSet::genSamples()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::midPointSet::midPointSet
+Foam::cellCentreSet::cellCentreSet
 (
     const word& name,
     const polyMesh& mesh,
     const meshSearch& searchEngine,
     const word& axis,
-    const point& start,
-    const point& end
+    const boundBox& bbox
 )
 :
-    faceOnlySet(name, mesh, searchEngine, axis, start, end)
+    sampledSet(name, mesh, searchEngine, axis),
+    bounds_(bbox)
 {
     genSamples();
 }
 
 
-Foam::midPointSet::midPointSet
+Foam::cellCentreSet::cellCentreSet
 (
     const word& name,
     const polyMesh& mesh,
@@ -133,7 +116,14 @@ Foam::midPointSet::midPointSet
     const dictionary& dict
 )
 :
-    faceOnlySet(name, mesh, searchEngine, dict)
+    sampledSet
+    (
+        name,
+        mesh,
+        searchEngine,
+        dict.lookupOrDefault<word>("axis", "xyz")
+    ),
+    bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox))
 {
     genSamples();
 }

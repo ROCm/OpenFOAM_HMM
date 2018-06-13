@@ -41,7 +41,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class meshSearch;
 
 /*---------------------------------------------------------------------------*\
@@ -87,7 +87,7 @@ public:
 
 
     //- Destructor
-    virtual ~midPointSet();
+    virtual ~midPointSet() = default;
 };
 
 

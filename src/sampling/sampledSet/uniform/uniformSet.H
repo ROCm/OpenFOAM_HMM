@@ -26,6 +26,16 @@ Class
 
 Description
 
+    For a dictionary specification:
+    \table
+        Property | Description                             | Required | Default
+        type     | uniform                                 | yes      |
+        axis     | x, y, z, xyz, distance                  | yes      |
+        start    | The start point                         | yes      |
+        end      | The end point                           | yes      |
+        nPoints  | The number of points between start/end  | yes
+    \endtable
+
 SourceFiles
     uniformSet.C
 
@@ -145,7 +155,7 @@ public:
 
 
     //- Destructor
-    virtual ~uniformSet();
+    virtual ~uniformSet() = default;
 };
 
 

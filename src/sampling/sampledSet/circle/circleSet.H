@@ -27,6 +27,17 @@ Class
 Description
     Samples along a circular path
 
+    For a dictionary specification:
+    \table
+        Property | Description                             | Required | Default
+        type     | circle                                  | yes      |
+        axis     | x, y, z, xyz, distance                  | yes      |
+        origin   | The origin of the circle                | yes      |
+        circleAxis | The axis of the circle                | yes      |
+        startPoint | Starting point of the circle          | yes      |
+        dTheta     | Sampling increment in degrees         | yes      |
+    \endtable
+
 SourceFiles
     circleSet.C
 
@@ -43,7 +54,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class meshSearch;
 
 /*---------------------------------------------------------------------------*\
@@ -121,15 +132,14 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~circleSet();
+    //- Destructor
+    virtual ~circleSet() = default;
 
 
     // Member Functions
 
         //- Get reference point
-        virtual point getRefPoint(const List<point>&) const;
+        virtual point getRefPoint(const List<point>& pts) const;
 };
 
 

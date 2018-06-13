@@ -26,7 +26,7 @@ Class
 
 Description
     Set of sets to sample.
-    Call sampledSets.write() to sample&write files.
+    Call sampledSets.write() to sample and write files.
 
 SourceFiles
     sampledSets.C
@@ -50,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class Time;
 class objectRegistry;
 class dictionary;
