@@ -55,8 +55,8 @@ Usage
         }
 
 
-        // Input file
-        inputFile   "postProcessing/faceSource1/surface/patch/patch.case";
+        // Input files list
+        files       ("postProcessing/faceSource1/surface/patch/patch.case";)
 
         // Surface reader
         reader      ensight;
