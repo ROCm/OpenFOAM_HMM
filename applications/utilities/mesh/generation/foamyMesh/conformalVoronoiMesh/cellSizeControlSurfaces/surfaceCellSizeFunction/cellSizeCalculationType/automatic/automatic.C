@@ -97,7 +97,7 @@ Foam::automatic::automatic
 (
     const dictionary& cellSizeCalcTypeDict,
     const triSurfaceMesh& surface,
-    const scalar& defaultCellSize
+    const scalar defaultCellSize
 )
 :
     cellSizeCalculationType
@@ -109,12 +109,15 @@ Foam::automatic::automatic
     ),
     coeffsDict_(cellSizeCalcTypeDict.optionalSubDict(typeName + "Coeffs")),
     surfaceName_(surface.searchableSurface::name()),
-    readCurvature_(Switch(coeffsDict_.lookup("curvature"))),
-    curvatureFile_(coeffsDict_.lookup("curvatureFile")),
-    readFeatureProximity_(Switch(coeffsDict_.lookup("featureProximity"))),
-    featureProximityFile_(coeffsDict_.lookup("featureProximityFile")),
-    readInternalCloseness_(Switch(coeffsDict_.lookup("internalCloseness"))),
-    internalClosenessFile_(coeffsDict_.lookup("internalClosenessFile")),
+
+    readCurvature_(coeffsDict_.get<bool>("curvature")),
+    readFeatureProximity_(coeffsDict_.get<bool>("featureProximity")),
+    readInternalCloseness_(coeffsDict_.get<bool>("internalCloseness")),
+
+    curvatureFile_(coeffsDict_.get<word>("curvatureFile")),
+    featureProximityFile_(coeffsDict_.get<word>("featureProximityFile")),
+    internalClosenessFile_(coeffsDict_.get<word>("internalClosenessFile")),
+
     curvatureCellSizeCoeff_
     (
         readScalar(coeffsDict_.lookup("curvatureCellSizeCoeff"))

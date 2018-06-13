@@ -553,13 +553,10 @@ Foam::PairCollision<CloudType>::PairCollision
     (
         owner.mesh(),
         readScalar(this->coeffDict().lookup("maxInteractionDistance")),
-        Switch
+        this->coeffDict().lookupOrDefault
         (
-            this->coeffDict().lookupOrDefault
-            (
-                "writeReferredParticleCloud",
-                false
-            )
+            "writeReferredParticleCloud",
+            false
         ),
         this->coeffDict().lookupOrDefault("U", word("U"))
     )

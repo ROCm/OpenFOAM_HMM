@@ -58,14 +58,14 @@ Foam::PDRDragModel::PDRDragModel
     (
         PDRProperties.subDict
         (
-            word(PDRProperties.lookup("PDRDragModel")) + "Coeffs"
+            PDRProperties.get<word>("PDRDragModel") + "Coeffs"
         )
     ),
     turbulence_(turbulence),
     rho_(rho),
     U_(U),
     phi_(phi),
-    on_(PDRDragModelCoeffs_.lookup("drag"))
+    on_(PDRDragModelCoeffs_.get<bool>("drag"))
 {}
 
 
@@ -81,7 +81,7 @@ bool Foam::PDRDragModel::read(const dictionary& PDRProperties)
 {
     PDRDragModelCoeffs_ = PDRProperties.optionalSubDict(type() + "Coeffs");
 
-    PDRDragModelCoeffs_.lookup("drag") >> on_;
+    PDRDragModelCoeffs_.read("drag", on_);
 
     return true;
 }

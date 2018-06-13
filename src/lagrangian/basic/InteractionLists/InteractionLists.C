@@ -1114,7 +1114,7 @@ Foam::InteractionLists<ParticleType>::InteractionLists
 (
     const polyMesh& mesh,
     scalar maxDistance,
-    Switch writeCloud,
+    bool writeCloud,
     const word& UName
 )
 :

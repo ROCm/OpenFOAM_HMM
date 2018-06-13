@@ -100,6 +100,12 @@ public:
         //- Calculate time scale
         virtual tmp<volScalarField> timeScale() = 0;
 
+        //- Return the CEDC coefficient
+        scalar CEDC() const
+        {
+            return CEDC_;
+        }
+
 
         // I-O
 

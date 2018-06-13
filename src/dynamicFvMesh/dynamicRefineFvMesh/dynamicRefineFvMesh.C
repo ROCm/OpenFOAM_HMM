@@ -203,7 +203,7 @@ void Foam::dynamicRefineFvMesh::readDict()
         correctFluxes_.insert(fluxVelocities[i][0], fluxVelocities[i][1]);
     }
 
-    dumpLevel_ = Switch(refineDict.lookup("dumpLevel"));
+    dumpLevel_ = refineDict.get<bool>("dumpLevel");
 }
 
 

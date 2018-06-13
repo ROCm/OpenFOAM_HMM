@@ -122,7 +122,7 @@ class isoSurface
         const scalar iso_;
 
         //- Regularise?
-        const Switch regularise_;
+        const bool regularise_;
 
         //- Optional bounds
         const boundBox bounds_;

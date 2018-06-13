@@ -31,7 +31,6 @@ License
 #include "OFstream.H"
 #include "meshTools.H"
 #include "hexMatcher.H"
-#include "Switch.H"
 #include "globalMeshData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -371,7 +370,7 @@ Foam::directions::directions
                 << tan1 << endl << endl;
         }
 
-        Switch useTopo(dict.lookup("useHexTopology"));
+        const bool useTopo(dict.get<bool>("useHexTopology"));
 
         vectorField normalDirs;
         vectorField tan1Dirs;

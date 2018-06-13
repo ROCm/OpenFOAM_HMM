@@ -89,7 +89,7 @@ class InteractionLists
 
         //- Switch controlling whether or not the cloud gets populated
         //  with the referred particles, hence gets written out
-        const Switch writeCloud_;
+        const bool writeCloud_;
 
         //- mapDistribute to exchange referred particles into referred cells
         autoPtr<mapDistribute> cellMapPtr_;
@@ -218,7 +218,7 @@ public:
         (
             const polyMesh& mesh,
             scalar maxDistance,
-            Switch writeCloud = false,
+            bool writeCloud = false,
             const word& UName = "U"
         );
 

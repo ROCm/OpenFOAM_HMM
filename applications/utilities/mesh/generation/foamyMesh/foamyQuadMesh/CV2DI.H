@@ -121,7 +121,7 @@ inline const Foam::cv2DControls& Foam::CV2D::meshControls() const
 }
 
 
-inline const Foam::point2D& Foam::CV2D::toPoint2D(const point& p) const
+inline const Foam::point2D& Foam::CV2D::toPoint2D(const Foam::point& p) const
 {
     return reinterpret_cast<const point2D&>(p);
 }
@@ -140,7 +140,7 @@ inline const Foam::point2DField Foam::CV2D::toPoint2D(const pointField& p) const
 
 inline Foam::point Foam::CV2D::toPoint3D(const point2D& p) const
 {
-    return point(p.x(), p.y(), z_);
+    return Foam::point(p.x(), p.y(), z_);
 }
 
 
@@ -175,7 +175,7 @@ inline Foam::CV2D::PointFromPoint2D Foam::CV2D::toPoint(const point2D& p) const
 
 inline Foam::point Foam::CV2D::toPoint3D(const Point& P) const
 {
-    return point(CGAL::to_double(P.x()), CGAL::to_double(P.y()), z_);
+    return Foam::point(CGAL::to_double(P.x()), CGAL::to_double(P.y()), z_);
 }
 
 

@@ -37,7 +37,6 @@ SourceFiles
 #include "cellSizeCalculationType.H"
 #include "triSurfaceFields.H"
 #include "PrimitivePatchInterpolation.H"
-#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,9 +53,6 @@ class automatic
 :
     public cellSizeCalculationType
 {
-
-private:
-
     // Private data
 
         //- Dictionary of coefficients for automatic cell sizing
@@ -65,13 +61,12 @@ private:
         //- Name of the surface. Used to write the cell size field
         const fileName surfaceName_;
 
-        const Switch readCurvature_;
+        const bool readCurvature_;
+        const bool readFeatureProximity_;
+        const bool readInternalCloseness_;
+
         const word curvatureFile_;
-
-        const Switch readFeatureProximity_;
         const word featureProximityFile_;
-
-        const Switch readInternalCloseness_;
         const word internalClosenessFile_;
 
         //- The curvature values are multiplied by the inverse of this value to
@@ -100,13 +95,12 @@ public:
         (
             const dictionary& cellSizeCalcTypeDict,
             const triSurfaceMesh& surface,
-            const scalar& defaultCellSize
+            const scalar defaultCellSize
         );
 
 
     //- Destructor
-    virtual ~automatic()
-    {}
+    virtual ~automatic() = default;
 
 
     // Member Functions

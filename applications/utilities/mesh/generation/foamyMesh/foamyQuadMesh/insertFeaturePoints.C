@@ -109,8 +109,8 @@ void Foam::CV2D::insertFeaturePoints()
         {
             const edge& e = feMesh.edges()[edgeI];
 
-            const point& ep0 = points[e.start()];
-            const point& ep1 = points[e.end()];
+            const Foam::point& ep0 = points[e.start()];
+            const Foam::point& ep1 = points[e.end()];
 
             const linePointRef line(ep0, ep1);
 

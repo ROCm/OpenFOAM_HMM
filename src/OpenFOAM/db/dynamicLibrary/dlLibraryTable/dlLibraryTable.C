@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,104 +79,92 @@ Foam::dlLibraryTable::~dlLibraryTable()
 
 bool Foam::dlLibraryTable::open
 (
-    const fileName& functionLibName,
+    const fileName& libName,
     const bool verbose
 )
 {
-    if (functionLibName.size())
-    {
-        void* functionLibPtr = dlOpen
-        (
-            fileName(functionLibName).expand(),
-            verbose
-        );
-
-        if (debug)
-        {
-            InfoInFunction
-                << "Opened " << functionLibName
-                << " resulting in handle " << uintptr_t(functionLibPtr) << endl;
-        }
-
-        if (!functionLibPtr)
-        {
-            if (verbose)
-            {
-                WarningInFunction
-                    << "could not load " << functionLibName
-                    << endl;
-            }
-
-            return false;
-        }
-        else
-        {
-            libPtrs_.append(functionLibPtr);
-            libNames_.append(functionLibName);
-            return true;
-        }
-    }
-    else
+    if (libName.empty())
     {
         return false;
     }
+
+    void* ptr = dlOpen(fileName(libName).expand(), verbose);
+
+    if (debug)
+    {
+        InfoInFunction
+            << "Opened " << libName
+            << " resulting in handle " << uintptr_t(ptr) << endl;
+    }
+
+    if (ptr)
+    {
+        libPtrs_.append(ptr);
+        libNames_.append(libName);
+        return true;
+    }
+
+    if (verbose)
+    {
+        WarningInFunction
+            << "could not load " << libName
+            << endl;
+    }
+
+    return false;
 }
 
 
 bool Foam::dlLibraryTable::close
 (
-    const fileName& functionLibName,
+    const fileName& libName,
     const bool verbose
 )
 {
     label index = -1;
     forAllReverse(libNames_, i)
     {
-        if (libNames_[i] == functionLibName)
+        if (libName == libNames_[i])
         {
             index = i;
             break;
         }
     }
 
-    if (index != -1)
+    if (index == -1)
     {
-        if (debug)
-        {
-            InfoInFunction
-                << "Closing " << functionLibName
-                << " with handle " << uintptr_t(libPtrs_[index]) << endl;
-        }
-
-        bool ok = dlClose(libPtrs_[index]);
-
-        libPtrs_[index] = nullptr;
-        libNames_[index] = fileName::null;
-
-        if (!ok)
-        {
-            if (verbose)
-            {
-                WarningInFunction
-                    << "could not close " << functionLibName
-                    << endl;
-            }
-
-            return false;
-        }
-
-        return true;
+        return false;
     }
-    return false;
+
+    if (debug)
+    {
+        InfoInFunction
+            << "Closing " << libName
+            << " with handle " << uintptr_t(libPtrs_[index]) << endl;
+    }
+
+    const bool ok = dlClose(libPtrs_[index]);
+
+    libPtrs_[index] = nullptr;
+    libNames_[index].clear();
+
+    if (!ok && verbose)
+    {
+        WarningInFunction
+            << "could not close " << libName
+            << endl;
+    }
+
+    return ok;
 }
 
 
-void* Foam::dlLibraryTable::findLibrary(const fileName& functionLibName)
+void* Foam::dlLibraryTable::findLibrary(const fileName& libName)
 {
     label index = -1;
     forAllReverse(libNames_, i)
     {
-        if (libNames_[i] == functionLibName)
+        if (libName == libNames_[i])
         {
             index = i;
             break;
@@ -187,6 +175,7 @@ void* Foam::dlLibraryTable::findLibrary(const fileName& functionLibName)
     {
         return libPtrs_[index];
     }
+
     return nullptr;
 }
 
@@ -197,23 +186,20 @@ bool Foam::dlLibraryTable::open
     const word& libsEntry
 )
 {
-    if (dict.found(libsEntry))
+    fileNameList libNames;
+    dict.readIfPresent(libsEntry, libNames);
+
+    label nOpen = 0;
+
+    for (const fileName& libName : libNames)
     {
-        fileNameList libNames(dict.lookup(libsEntry));
-
-        bool allOpened = !libNames.empty();
-
-        forAll(libNames, i)
+        if (dlLibraryTable::open(libName))
         {
-            allOpened = dlLibraryTable::open(libNames[i]) && allOpened;
+            ++nOpen;
         }
+    }
 
-        return allOpened;
-    }
-    else
-    {
-        return false;
-    }
+    return nOpen && nOpen == libNames.size();
 }
 
 

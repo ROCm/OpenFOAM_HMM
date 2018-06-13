@@ -301,7 +301,10 @@ Foam::ORourkeCollision<CloudType>::ORourkeCollision
     (
         owner.db().template lookupObject<SLGThermo>("SLGThermo").liquids()
     ),
-    coalescence_(this->coeffDict().lookup("coalescence"))
+    coalescence_
+    (
+        this->coeffDict().template get<bool>("coalescence")
+    )
 {}
 
 

@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     );
     const dictionary& extrusionDict(controlDict.subDict("extrusion"));
 
-    Switch extrude(extrusionDict.lookup("extrude"));
+    const bool extrude = extrusionDict.get<bool>("extrude");
     const bool overwrite = args.found("overwrite");
 
     // Read and triangulation

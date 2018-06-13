@@ -50,7 +50,7 @@ Usage
         Write differences with respect to the specified dictionary
         (or sub entry if -entry specified)
 
-      - \par -diffEtc \<dictionary\>
+      - \par -diff-etc \<dictionary\>
         Write differences with respect to the specified dictionary
         (or sub entry if -entry specified)
 
@@ -94,13 +94,13 @@ Usage
 
       - Write the differences with respect to a template dictionary:
         \verbatim
-          foamDictionary 0/U -diffEtc templates/closedVolume/0/U
+          foamDictionary 0/U -diff-etc templates/closedVolume/0/U
         \endverbatim
 
       - Write the differences in boundaryField with respect to a
         template dictionary:
         \verbatim
-          foamDictionary 0/U -diffEtc templates/closedVolume/0/U \
+          foamDictionary 0/U -diff-etc templates/closedVolume/0/U \
             -entry boundaryField
         \endverbatim
 
@@ -217,11 +217,9 @@ const dictionary& lookupScopedDict
     if (!eptr || !eptr->isDict())
     {
         FatalIOErrorInFunction(dict)
-            << "keyword " << subDictName
-            << " is undefined in dictionary "
-            << dict.name() << " or is not a dictionary"
-            << endl
-            << "Valid keywords are " << dict.keys()
+            << "'" << subDictName << "' not found in dictionary "
+            << dict.name() << " or is not a dictionary" << nl
+            << "Known entries are " << dict.keys()
             << exit(FatalIOError);
     }
 
@@ -300,10 +298,12 @@ int main(int argc, char *argv[])
     );
     argList::addOption
     (
-        "diffEtc",
+        "diff-etc",
         "dict",
         "As per -diff, but locate the file as per foamEtcFile"
     );
+    argList::addOptionCompat("diff-etc", {"diffEtc", 1712});
+
     argList::addBoolOption
     (
         "includes",
@@ -371,10 +371,10 @@ int main(int argc, char *argv[])
     }
 
 
-    // Has "diff" or "diffEtc"
+    // Has "diff" or "diff-etc"
     bool optDiff = false;
 
-    // Reference dictionary for -diff / -diffEtc
+    // Reference dictionary for -diff / -diff-etc
     dictionary diffDict;
     {
         fileName diffFileName;
@@ -392,7 +392,7 @@ int main(int argc, char *argv[])
             diffDict.read(diffFile, true);
             optDiff = true;
         }
-        else if (args.readIfPresent("diffEtc", diffFileName))
+        else if (args.readIfPresent("diff-etc", diffFileName))
         {
             fileName foundName = findEtcFile(diffFileName);
             if (foundName.empty())

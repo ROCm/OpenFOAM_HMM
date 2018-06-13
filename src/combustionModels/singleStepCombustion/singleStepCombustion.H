@@ -40,6 +40,7 @@ SourceFiles
 
 #include "singleStepReactingMixture.H"
 #include "ThermoCombustion.H"
+#include "fvScalarMatrix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

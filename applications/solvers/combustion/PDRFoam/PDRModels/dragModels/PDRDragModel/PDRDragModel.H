@@ -67,7 +67,7 @@ protected:
         const volVectorField& U_;
         const surfaceScalarField& phi_;
 
-        Switch on_;
+        bool on_;
 
 
 private:

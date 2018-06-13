@@ -165,8 +165,8 @@ bool Foam::PDRDragModels::basic::read(const dictionary& PDRProperties)
 {
     PDRDragModel::read(PDRProperties);
 
-    PDRDragModelCoeffs_.lookup("Csu") >> Csu.value();
-    PDRDragModelCoeffs_.lookup("Csk") >> Csk.value();
+    PDRDragModelCoeffs_.read("Csu", Csu.value());
+    PDRDragModelCoeffs_.read("Csk", Csk.value());
 
     return true;
 }

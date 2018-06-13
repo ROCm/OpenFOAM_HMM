@@ -141,6 +141,7 @@ public:
     // Static member functions
 
         //- Construct from dictionary, with default dimensions and value.
+        //- FatalIOError if there are excess tokens.
         static dimensioned<Type> lookupOrDefault
         (
             const word& name,
@@ -149,7 +150,8 @@ public:
             const Type& defaultValue = Type(Zero)
         );
 
-        //- Construct from dictionary dimensionless with value.
+        //- Construct from dictionary, dimensionless and with a value.
+        //  FatalIOError if it is found and there are excess tokens.
         static dimensioned<Type> lookupOrDefault
         (
             const word& name,
@@ -159,6 +161,7 @@ public:
 
         //- Construct from dictionary, with default value.
         //  If the value is not found, it is added into the dictionary.
+        //  FatalIOError if it is found and there are excess tokens.
         static dimensioned<Type> lookupOrAddToDict
         (
             const word& name,
@@ -169,6 +172,7 @@ public:
 
         //- Construct from dictionary, dimensionless with default value.
         //  If the value is not found, it is added into the dictionary.
+        //  FatalIOError if it is found and there are excess tokens.
         static dimensioned<Type> lookupOrAddToDict
         (
             const word& name,

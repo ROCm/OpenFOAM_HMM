@@ -12,4 +12,9 @@ EXE_INC = \
 
 LIB_LIBS = \
     -L$(SCOTCH_LIB_DIR) \
-    -lscotch -lscotcherrexit -lrt
+    -lscotch -lscotcherrexit
+
+/* May require librt, but scotch does not declare the dependency */
+ifeq ("$(SO)","so")
+    LIB_LIBS += -lrt
+endif

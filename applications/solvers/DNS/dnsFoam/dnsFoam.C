@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
             fft::reverseTransform
             (
                 K/(mag(K) + 1.0e-6) ^ forceGen.newField(), K.nn()
-            )
+            )*recRootN
         );
 
         #include "globalProperties.H"

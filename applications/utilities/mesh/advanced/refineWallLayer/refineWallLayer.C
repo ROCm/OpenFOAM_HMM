@@ -137,10 +137,9 @@ int main(int argc, char *argv[])
             << cells.instance()/cells.local()/cells.name()
             << nl << endl;
 
-        for (const label celli : cells)
-        {
-            cutCells.erase(celli);
-        }
+
+        cutCells.retain(cells);
+
         Info<< "Removed from cells to cut all the ones not in set "
             << setName << nl << endl;
     }

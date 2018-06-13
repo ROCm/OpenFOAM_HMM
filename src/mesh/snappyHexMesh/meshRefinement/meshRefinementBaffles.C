@@ -2333,20 +2333,20 @@ void Foam::meshRefinement::getIntersections
             )
             {
                 namedSurfaceIndex[faceI] = surface2[i];
-                posOrientation[faceI] = ((area&normal2[i]) > 0);
+                posOrientation.set(faceI, ((area&normal2[i]) > 0));
                 nSurfFaces[surface2[i]]++;
             }
             else
             {
                 namedSurfaceIndex[faceI] = surface1[i];
-                posOrientation[faceI] = ((area&normal1[i]) > 0);
+                posOrientation.set(faceI, ((area&normal1[i]) > 0));
                 nSurfFaces[surface1[i]]++;
             }
         }
         else if (surface2[i] != -1)
         {
             namedSurfaceIndex[faceI] = surface2[i];
-            posOrientation[faceI] = ((area&normal2[i]) > 0);
+            posOrientation.set(faceI, ((area&normal2[i]) > 0));
             nSurfFaces[surface2[i]]++;
         }
     }

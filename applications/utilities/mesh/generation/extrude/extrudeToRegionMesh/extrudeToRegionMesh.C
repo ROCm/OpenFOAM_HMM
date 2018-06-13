@@ -1536,8 +1536,8 @@ int main(int argc, char *argv[])
     mappedPatchBase::sampleMode sampleMode =
         mappedPatchBase::sampleModeNames_[dict.lookup("sampleMode")];
 
-    const Switch oneD(dict.lookup("oneD"));
-    Switch oneDNonManifoldEdges(false);
+    const bool oneD(dict.get<bool>("oneD"));
+    bool oneDNonManifoldEdges(false);
     word oneDPatchType(emptyPolyPatch::typeName);
     if (oneD)
     {
@@ -1545,7 +1545,7 @@ int main(int argc, char *argv[])
         dict.lookup("oneDPolyPatchType") >> oneDPatchType;
     }
 
-    const Switch adaptMesh(dict.lookup("adaptMesh"));
+    const bool adaptMesh(dict.get<bool>("adaptMesh"));
 
     if (hasZones)
     {

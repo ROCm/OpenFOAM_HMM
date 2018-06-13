@@ -297,7 +297,7 @@ int main(int argc, char *argv[])
     autoPtr<extrudeModel> model(extrudeModel::New(dict));
 
     // Whether to flip normals
-    const Switch flipNormals(dict.lookup("flipNormals"));
+    const bool flipNormals(dict.get<bool>("flipNormals"));
 
     // What to extrude
     const ExtrudeMode mode = ExtrudeModeNames.lookup
@@ -983,8 +983,7 @@ int main(int argc, char *argv[])
     // Merging front and back patch faces
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Switch mergeFaces(dict.lookup("mergeFaces"));
-    if (mergeFaces)
+    if (dict.get<bool>("mergeFaces"))
     {
         if (mode == MESH)
         {
@@ -1007,7 +1006,6 @@ int main(int argc, char *argv[])
                 << backPatchFaces.size() << ")"
                 << exit(FatalError);
         }
-
 
 
         polyTopoChanger stitcher(mesh);

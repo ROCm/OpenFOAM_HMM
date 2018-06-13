@@ -63,4 +63,6 @@ alpha1Min/Min\(alpha1\) =/Min(alpha1) =
 alpha1Max/Max\(alpha1\) =/Max(alpha1) = 
 
 # AMI
-AMIMin/AMI: Patch source sum/average = 
+AMIMin/AMI: Patch source sum/min = 
+AMIMax/AMI: Patch source sum/max = 
+AMIAvg/AMI: Patch source sum/average = 

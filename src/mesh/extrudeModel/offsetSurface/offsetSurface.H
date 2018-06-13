@@ -36,7 +36,6 @@ Description
 
 #include "point.H"
 #include "extrudeModel.H"
-#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,7 +72,7 @@ class offsetSurface
         autoPtr<triSurfaceSearch> offsetSearchPtr_;
 
         // Whether to re-project onto offsetted surface
-        const Switch project_;
+        const bool project_;
 
 public:
 

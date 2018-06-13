@@ -71,7 +71,6 @@ SourceFiles
 #include "dynamicFvMesh.H"
 #include "hexRef8.H"
 #include "bitSet.H"
-#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -92,7 +91,7 @@ protected:
         hexRef8 meshCutter_;
 
         //- Dump cellLevel for post-processing
-        Switch dumpLevel_;
+        bool dumpLevel_;
 
         //- Fluxes to map
         HashTable<word> correctFluxes_;

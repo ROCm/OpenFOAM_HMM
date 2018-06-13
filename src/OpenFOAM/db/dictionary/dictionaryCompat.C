@@ -52,7 +52,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchCompat
     bool patternMatch
 ) const
 {
-    const_searcher finder(csearch(keyword, recursive,patternMatch));
+    const_searcher finder(csearch(keyword, recursive, patternMatch));
 
     if (finder.found())
     {
@@ -61,7 +61,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchCompat
 
     for (const std::pair<const char*,int>& iter : compat)
     {
-        finder = csearch(word::validate(iter.first), recursive,patternMatch);
+        finder = csearch(word::validate(iter.first), recursive, patternMatch);
 
         if (finder.found())
         {
@@ -95,7 +95,7 @@ bool Foam::dictionary::foundCompat
     bool patternMatch
 ) const
 {
-    return csearchCompat(keyword, compat, recursive,patternMatch).found();
+    return csearchCompat(keyword, compat, recursive, patternMatch).found();
 }
 
 
@@ -107,7 +107,7 @@ const Foam::entry* Foam::dictionary::lookupEntryPtrCompat
     bool patternMatch
 ) const
 {
-    return csearchCompat(keyword, compat, recursive,patternMatch).ptr();
+    return csearchCompat(keyword, compat, recursive, patternMatch).ptr();
 }
 
 
@@ -120,14 +120,12 @@ const Foam::entry& Foam::dictionary::lookupEntryCompat
 ) const
 {
     const const_searcher
-        finder(csearchCompat(keyword, compat, recursive,patternMatch));
+        finder(csearchCompat(keyword, compat, recursive, patternMatch));
 
     if (!finder.found())
     {
-        FatalIOErrorInFunction
-        (
-            *this
-        )   << "keyword " << keyword << " is undefined in dictionary "
+        FatalIOErrorInFunction(*this)
+            << "'" << keyword << "' not found in dictionary "
             << name()
             << exit(FatalIOError);
     }
@@ -144,7 +142,8 @@ Foam::ITstream& Foam::dictionary::lookupCompat
     bool patternMatch
 ) const
 {
-    return lookupEntryCompat(keyword, compat, recursive,patternMatch).stream();
+    return
+        lookupEntryCompat(keyword, compat, recursive, patternMatch).stream();
 }
 
 

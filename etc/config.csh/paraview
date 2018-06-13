@@ -43,7 +43,7 @@
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-setenv ParaView_VERSION 5.5.0
+setenv ParaView_VERSION 5.5.1
 set    ParaView_QT=qt-system
 set cmake_version=cmake-system
 
@@ -126,7 +126,7 @@ if ( $?ParaView_VERSION ) then
         set qtDir="$archDir/$ParaView_QT"
         if ( -d "$qtDir" ) then
             switch ($ParaView_QT)
-            case *-qt*:
+            case *-5*:
                 setenv Qt5_DIR $qtDir
                 breaksw
             endsw

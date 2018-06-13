@@ -158,7 +158,7 @@ public:
             const word& zoneName,
             const scalar minThickness,
             const scalar maxThickness,
-            const Switch thicknessFromVolume = true
+            const bool thicknessFromVolume = true
         );
 
         //- Construct from dictionary

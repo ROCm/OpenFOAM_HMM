@@ -1,3 +1,3 @@
-runTime.controlDict().lookup("adjustTimeStep") >> adjustTimeStep;
+runTime.controlDict().read("adjustTimeStep", adjustTimeStep);
 
-maxDeltaT = readScalar(runTime.controlDict().lookup("maxDeltaT"));
+runTime.controlDict().read("maxDeltaT", maxDeltaT);

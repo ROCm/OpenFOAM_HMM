@@ -54,4 +54,5 @@ inline bool Foam::pairPotential::writeTables() const
     return writeTables_;
 }
 
+
 // ************************************************************************* //

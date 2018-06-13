@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2107 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,12 +44,12 @@ template<class Type>
 void Foam::vtk::writeList
 (
     vtk::formatter& fmt,
-    const UList<Type>& lst
+    const UList<Type>& list
 )
 {
-    forAll(lst, i)
+    for (const Type& val : list)
     {
-        write(fmt, lst[i]);
+        write(fmt, val);
     }
 }
 
@@ -58,12 +58,12 @@ template<class Type, unsigned Size>
 void Foam::vtk::writeList
 (
     vtk::formatter& fmt,
-    const FixedList<Type, Size>& lst
+    const FixedList<Type, Size>& list
 )
 {
-    for (unsigned i=0; i<Size; ++i)
+    for (const Type& val : list)
     {
-        write(fmt, lst[i]);
+        write(fmt, val);
     }
 }
 
@@ -72,13 +72,13 @@ template<class Type>
 void Foam::vtk::writeList
 (
     vtk::formatter& fmt,
-    const UList<Type>& lst,
+    const UList<Type>& list,
     const labelUList& addressing
 )
 {
-    forAll(addressing, i)
+    for (const label idx : addressing)
     {
-        write(fmt, lst[addressing[i]]);
+        write(fmt, list[idx]);
     }
 }
 

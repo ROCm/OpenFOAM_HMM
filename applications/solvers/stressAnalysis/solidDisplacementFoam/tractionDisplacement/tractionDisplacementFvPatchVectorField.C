@@ -164,9 +164,7 @@ void tractionDisplacementFvPatchVectorField::updateCoeffs()
     scalarField lambda(nu*E/((1.0 + nu)*(1.0 - 2.0*nu)));
     scalarField threeK(E/(1.0 - 2.0*nu));
 
-    Switch planeStress(mechanicalProperties.lookup("planeStress"));
-
-    if (planeStress)
+    if (mechanicalProperties.get<bool>("planeStress"))
     {
         lambda = nu*E/((1.0 + nu)*(1.0 - nu));
         threeK = E/(1.0 - nu);
@@ -185,9 +183,7 @@ void tractionDisplacementFvPatchVectorField::updateCoeffs()
       + twoMuLambda*fvPatchField<vector>::snGrad() - (n & sigmaD)
     )/twoMuLambda;
 
-    Switch thermalStress(thermalProperties.lookup("thermalStress"));
-
-    if (thermalStress)
+    if (thermalProperties.get<bool>("thermalStress"))
     {
         const fvPatchField<scalar>&  threeKalpha=
             patch().lookupPatchField<volScalarField, scalar>("threeKalpha");

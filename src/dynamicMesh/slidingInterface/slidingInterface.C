@@ -210,7 +210,7 @@ Foam::slidingInterface::slidingInterface
     const polyTopoChanger& mme
 )
 :
-    polyMeshModifier(name, index, mme, Switch(dict.lookup("active"))),
+    polyMeshModifier(name, index, mme, dict.get<bool>("active")),
     masterFaceZoneID_
     (
         dict.lookup("masterFaceZoneName"),

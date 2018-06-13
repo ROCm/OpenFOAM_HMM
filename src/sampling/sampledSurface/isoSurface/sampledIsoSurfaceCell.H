@@ -97,10 +97,10 @@ class sampledIsoSurfaceCell
         const boundBox bounds_;
 
         //- Whether to coarse
-        const Switch regularise_;
+        const bool regularise_;
 
         //- Whether to recalculate cell values as average of point values
-        const Switch average_;
+        const bool average_;
 
         //- If restricted to zones, name of this zone or a regular expression
         keyType zoneKey_;

@@ -1,5 +1,5 @@
     IOporosityModelList pZones(mesh);
-    Switch pressureImplicitPorosity(false);
+    bool pressureImplicitPorosity(false);
 
     // nUCorrectors used for pressureImplicitPorosity
     int nUCorr = 0;

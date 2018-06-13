@@ -150,7 +150,7 @@ Foam::CV2D::CV2D
     ),
     z_
     (
-        point
+        Foam::point
         (
             cvMeshDict.subDict("surfaceConformation").lookup("locationInMesh")
         ).z()
@@ -260,7 +260,7 @@ void Foam::CV2D::insertGrid()
     {
         for (int j=0; j<nj; j++)
         {
-            point p(x0 + i*deltax, y0 + j*deltay, 0);
+            Foam::point p(x0 + i*deltax, y0 + j*deltay, 0);
 
             if (meshControls().randomiseInitialGrid())
             {

@@ -58,8 +58,8 @@ protected:
 
         const liquidMixtureProperties& liquids_;
 
-        //- Coalescence activation switch
-        Switch coalescence_;
+        //- Coalescence activated?
+        bool coalescence_;
 
 
     // Protected Member Functions

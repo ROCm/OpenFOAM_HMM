@@ -36,9 +36,9 @@ Foam::autoPtr<Foam::PDRDragModel> Foam::PDRDragModel::New
     const surfaceScalarField& phi
 )
 {
-    const word modelType(PDRProperties.lookup("PDRDragModel"));
+    const word modelType(PDRProperties.get<word>("PDRDragModel"));
 
-    Info<< "Selecting flame-wrinkling model " << modelType << endl;
+    Info<< "Selecting drag model " << modelType << endl;
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 

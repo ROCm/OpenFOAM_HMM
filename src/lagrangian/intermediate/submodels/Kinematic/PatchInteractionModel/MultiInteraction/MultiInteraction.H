@@ -94,7 +94,7 @@ class MultiInteraction
 {
     // Private data
 
-        Switch oneInteractionOnly_;
+        bool oneInteractionOnly_;
 
         //- Submodels
         PtrList<PatchInteractionModel<CloudType>> models_;

@@ -35,7 +35,7 @@ Description
 
 SourceFiles
     pointPatchField.C
-    newPointPatchField.C
+    pointPatchFieldNew.C
 
 \*---------------------------------------------------------------------------*/
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,10 +24,31 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "surfMeshSampleDiscrete.H"
-#include "dimensionedType.H"
-#include "error.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>>
+Foam::surfMeshSampleDiscrete::sampleOnFaces
+(
+    const interpolation<Type>& sampler
+) const
+{
+    if (onBoundary())
+    {
+        return SurfaceSource::sampleOnFaces(sampler);
+    }
+
+    // Sample cells
+    return surfMeshSample::sampleOnFaces
+    (
+        sampler,
+        sampleElements(),  //< sampleElements == meshCells
+        surface().faces(),
+        surface().points()
+    );
+}
+
 
 template<class Type>
 bool Foam::surfMeshSampleDiscrete::sampleType
@@ -38,7 +59,7 @@ bool Foam::surfMeshSampleDiscrete::sampleType
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
-    const auto volFldPtr =
+    const auto* volFldPtr =
         SurfaceSource::mesh().lookupObjectPtr<VolFieldType>(fieldName);
 
     if (!volFldPtr)
@@ -48,52 +69,11 @@ bool Foam::surfMeshSampleDiscrete::sampleType
 
     auto samplerPtr = interpolation<Type>::New(sampleScheme, *volFldPtr);
 
-    getOrCreateSurfField<Type>(*volFldPtr).field()
-        = SurfaceSource::sampleOnFaces(*samplerPtr);
+    getOrCreateSurfField<Type>(*volFldPtr).field() =
+        sampleOnFaces(*samplerPtr);
 
     return true;
 }
-
-
-// template<class Type>
-// Foam::tmp<Foam::DimensionedField<Type, Foam::surfGeoMesh>>
-// Foam::surfMeshSampleDiscrete::sampleOnFaces
-// (
-//     const GeometricField<Type, fvPatchField, volMesh>& fld
-// ) const
-// {
-//     typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
-//
-//     tmp<Field<Type>> tfield = SurfaceSource::sampleOnFaces(fld);
-//     SurfFieldType& result = getOrCreateSurfField<Type>(fld);
-//
-//     // need to verify if this will be needed (in the future)
-//     const surfMesh& s = surface();
-//     if (result.size() != s.size())
-//     {
-//         // maybe resampling changed the surfMesh,
-//         // but the existing surfField wasn't updated
-//
-//         result.resize(s.size(), Zero);
-//     }
-//
-//     if (result.size() != sampleElements().size())
-//     {
-//         FatalErrorInFunction
-//             << "mismatch in field/mesh sizes "
-//             << result.name() << nl
-//             << " field has " << result.size()
-//             << " but sampleElements has " << sampleElements().size() << nl
-//             << endl
-//             << exit(FatalError);
-//
-//         Info<< "WARNING: "
-//             << endl;
-//     }
-//
-//     result = tfield;
-//     return result;
-// }
 
 
 // ************************************************************************* //

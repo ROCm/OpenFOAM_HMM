@@ -42,7 +42,6 @@ SourceFiles
 #include "chemistryReader.H"
 #include "fileName.H"
 #include "typeInfo.H"
-#include "Switch.H"
 #include "HashPtrTable.H"
 #include "ReactionList.H"
 #include "DynamicList.H"
@@ -187,7 +186,7 @@ private:
         dictionary transportDict_;
 
         //- Flag to indicate that file is in new format
-        Switch newFormat_;
+        bool newFormat_;
 
         //- Tolerance for element imbalance in a reaction
         scalar imbalanceTol_;

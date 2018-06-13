@@ -36,15 +36,13 @@ SourceFiles
 
 #include "wordPairHashTable.H"
 #include "labelList.H"
-#include "PackedBoolList.H"
-#include "labelVector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class refinementParameters;
 class snapParameters;
 
@@ -206,8 +204,8 @@ public:
             meshRefinement& meshRefiner,
             decompositionMethod& decomposer,
             fvMeshDistribute& distributor,
-            const labelList& globalToMasterPatch,
-            const labelList& globalToSlavePatch
+            const labelUList& globalToMasterPatch,
+            const labelUList& globalToSlavePatch
         );
 
 

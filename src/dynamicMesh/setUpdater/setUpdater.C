@@ -56,7 +56,7 @@ Foam::setUpdater::setUpdater
     const polyTopoChanger& mme
 )
 :
-    polyMeshModifier(name, index, mme, Switch(dict.lookup("active")))
+    polyMeshModifier(name, index, mme, dict.get<bool>("active"))
 {}
 
 

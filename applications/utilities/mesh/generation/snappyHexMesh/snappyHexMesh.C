@@ -141,12 +141,13 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
             // Invert surfaceCellSize to get the refinementLevel
 
             const word scsFuncName =
-                shapeDict.lookup("surfaceCellSizeFunction");
+                shapeDict.get<word>("surfaceCellSizeFunction");
+
             const dictionary& scsDict =
                 shapeDict.optionalSubDict(scsFuncName + "Coeffs");
 
             const scalar surfaceCellSize =
-                readScalar(scsDict.lookup("surfaceCellSizeCoeff"));
+                scsDict.get<scalar>("surfaceCellSizeCoeff");
 
             const label refLevel = sizeCoeffToRefinement
             (
@@ -222,7 +223,7 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
                             );
 
                         const word scsFuncName =
-                            shapeControlRegionDict.lookup
+                            shapeControlRegionDict.get<word>
                             (
                                 "surfaceCellSizeFunction"
                             );
@@ -233,10 +234,7 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
                             );
 
                         const scalar surfaceCellSize =
-                            readScalar
-                            (
-                                scsDict.lookup("surfaceCellSizeCoeff")
-                            );
+                            scsDict.get<scalar>("surfaceCellSizeCoeff");
 
                         const label refLevel = sizeCoeffToRefinement
                         (
@@ -780,10 +778,10 @@ int main(int argc, char *argv[])
     const scalar mergeDist = getMergeDistance
     (
         mesh,
-        readScalar(meshDict.lookup("mergeTolerance"))
+        meshDict.get<scalar>("mergeTolerance")
     );
 
-    const Switch keepPatches(meshDict.lookupOrDefault("keepPatches", false));
+    const bool keepPatches(meshDict.lookupOrDefault("keepPatches", false));
 
 
     // Read decomposePar dictionary
@@ -958,7 +956,7 @@ int main(int argc, char *argv[])
 
         // Calculate current ratio of hex cells v.s. wanted cell size
         const scalar defaultCellSize =
-            readScalar(motionDict.lookup("defaultCellSize"));
+            motionDict.get<scalar>("defaultCellSize");
 
         const scalar initialCellSize = ::pow(meshPtr().V()[0], 1.0/3.0);
 
@@ -1020,7 +1018,7 @@ int main(int argc, char *argv[])
                 if (patchInfo.set(globalRegioni))
                 {
                     patchTypes[geomi][regioni] =
-                        word(patchInfo[globalRegioni].lookup("type"));
+                        patchInfo[globalRegioni].get<word>("type");
                 }
                 else
                 {
@@ -1449,11 +1447,11 @@ int main(int argc, char *argv[])
     // Now do the real work -refinement -snapping -layers
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    const Switch wantRefine(meshDict.lookup("castellatedMesh"));
-    const Switch wantSnap(meshDict.lookup("snap"));
-    const Switch wantLayers(meshDict.lookup("addLayers"));
+    const bool wantRefine(meshDict.get<bool>("castellatedMesh"));
+    const bool wantSnap(meshDict.get<bool>("snap"));
+    const bool wantLayers(meshDict.get<bool>("addLayers"));
 
-    const Switch mergePatchFaces
+    const bool mergePatchFaces
     (
         meshDict.lookupOrDefault("mergePatchFaces", true)
     );

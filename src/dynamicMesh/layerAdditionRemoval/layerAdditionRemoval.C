@@ -140,7 +140,7 @@ Foam::layerAdditionRemoval::layerAdditionRemoval
     const word& zoneName,
     const scalar minThickness,
     const scalar maxThickness,
-    const Switch thicknessFromVolume
+    const bool thicknessFromVolume
 )
 :
     polyMeshModifier(name, index, ptc, true),
@@ -166,14 +166,11 @@ Foam::layerAdditionRemoval::layerAdditionRemoval
     const polyTopoChanger& ptc
 )
 :
-    polyMeshModifier(name, index, ptc, Switch(dict.lookup("active"))),
+    polyMeshModifier(name, index, ptc, dict.get<bool>("active")),
     faceZoneID_(dict.lookup("faceZoneName"), ptc.mesh().faceZones()),
     minLayerThickness_(readScalar(dict.lookup("minLayerThickness"))),
     maxLayerThickness_(readScalar(dict.lookup("maxLayerThickness"))),
-    thicknessFromVolume_
-    (
-        dict.lookupOrDefault<Switch>("thicknessFromVolume", true)
-    ),
+    thicknessFromVolume_(dict.lookupOrDefault("thicknessFromVolume", true)),
     oldLayerThickness_(readOldThickness(dict)),
     pointsPairingPtr_(nullptr),
     facesPairingPtr_(nullptr),

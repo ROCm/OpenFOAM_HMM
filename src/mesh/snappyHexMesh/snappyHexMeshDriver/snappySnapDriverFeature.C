@@ -271,7 +271,7 @@ void Foam::snappySnapDriver::calcNearestFace
                 << exit(FatalError);
         }
         const faceZone& fZone = mesh.faceZones()[zonei];
-        bitSet isZonedFace(mesh.nFaces(), fZone);
+        const bitSet isZonedFace(mesh.nFaces(), fZone);
 
         DynamicList<label> ppFaces(fZone.size());
         DynamicList<label> meshFaces(fZone.size());
@@ -451,7 +451,7 @@ void Foam::snappySnapDriver::calcNearestFacePointProperties
     List<List<point>>& pointFaceSurfNormals,
     List<List<point>>& pointFaceDisp,
     List<List<point>>& pointFaceCentres,
-    List<labelList>&    pointFacePatchID
+    List<labelList>&  pointFacePatchID
 ) const
 {
     const fvMesh& mesh = meshRefiner_.mesh();
@@ -603,7 +603,7 @@ void Foam::snappySnapDriver::calcNearestFacePointProperties
                 {
                     label pointi = meshToPatchPoint[f[fp]];
 
-                    if (pointi != -1 && isBoundaryPoint[pointi])
+                    if (pointi != -1 && isBoundaryPoint.test(pointi))
                     {
                         List<point>& pNormals = pointFaceSurfNormals[pointi];
                         List<point>& pDisp = pointFaceDisp[pointi];
@@ -1440,13 +1440,13 @@ void Foam::snappySnapDriver::releasePointsNextToMultiPatch
             pointFacePatchID[pointi],
             pointFaceCentres[pointi]
         );
-        isMultiPatchPoint[pointi] = multiPatchPt.hit();
+        isMultiPatchPoint.set(pointi, multiPatchPt.hit());
     }
 
     // 2. Make sure multi-patch points are also attracted
     forAll(isMultiPatchPoint, pointi)
     {
-        if (isMultiPatchPoint[pointi])
+        if (isMultiPatchPoint.test(pointi))
         {
             if
             (
@@ -1484,11 +1484,11 @@ void Foam::snappySnapDriver::releasePointsNextToMultiPatch
             label pointi = f[fp];
             if
             (
-                isMultiPatchPoint[pointi]
+                isMultiPatchPoint.test(pointi)
              && patchConstraints[pointi].first() > 1
             )
             {
-                nMultiPatchPoints++;
+                ++nMultiPatchPoints;
             }
         }
 
@@ -1499,7 +1499,7 @@ void Foam::snappySnapDriver::releasePointsNextToMultiPatch
                 label pointi = f[fp];
                 if
                 (
-                   !isMultiPatchPoint[pointi]
+                   !isMultiPatchPoint.test(pointi)
                  && patchConstraints[pointi].first() > 1
                 )
                 {
@@ -2870,7 +2870,7 @@ void Foam::snappySnapDriver::determineBaffleFeatures
         if (efn.size() == 2 && (efn[0]&efn[1]) < baffleFeatureCos)
         {
             isBaffleEdge.set(edgei);
-            nBaffleEdges++;
+            ++nBaffleEdges;
             const edge& e = pp.edges()[edgei];
             pointStatus[e[0]] = 0;
             pointStatus[e[1]] = 0;
