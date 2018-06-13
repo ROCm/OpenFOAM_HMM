@@ -39,6 +39,7 @@ SourceFiles
 #define singleStepCombustion_H
 
 #include "singleStepReactingMixture.H"
+#include "fvScalarMatrix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
