@@ -115,6 +115,7 @@ Usage
        CoV           | coefficient of variation: standard deviation/mean
        areaNormalAverage| area-weighted average in face normal direction
        areaNormalIntegrate | area-weighted integral in face normal directon
+       uniformity    | uniformity index
        weightedSum   | weighted sum
        weightedAverage | weighted average
        weightedAreaAverage | weighted area average
