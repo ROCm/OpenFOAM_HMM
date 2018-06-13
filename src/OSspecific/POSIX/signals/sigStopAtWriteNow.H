@@ -73,7 +73,7 @@ class sigStopAtWriteNow
 
 public:
 
-    //- wip. Have setter have access to signal_
+    //- Allow setter access to signal_
     friend class addstopAtWriteNowSignalToOpt;
 
 

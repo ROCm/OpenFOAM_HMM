@@ -1,0 +1,10 @@
+# Clang build of CGAL on Darwin without mpfr,gmp
+
+CGAL_INC = \
+    -I$(BOOST_ARCH_PATH)/include \
+    -I$(CGAL_ARCH_PATH)/include
+
+CGAL_LIBS = \
+    -L$(BOOST_ARCH_PATH)/lib \
+    -L$(CGAL_ARCH_PATH)/lib \
+    -lCGAL

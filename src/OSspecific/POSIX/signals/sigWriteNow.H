@@ -74,8 +74,9 @@ public:
 
     friend class sigStopAtWriteNow;
 
-    //- wip. Have setter have access to signal_
+    //- Allow setter access to signal_
     friend class addwriteNowSignalToOpt;
+
 
     // Constructors
 
@@ -90,7 +91,7 @@ public:
     ~sigWriteNow();
 
 
-    // Member functions
+    // Member Functions
 
         //- Is active?
         bool active() const;

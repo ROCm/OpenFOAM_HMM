@@ -91,12 +91,10 @@ class sigFpe
         static struct sigaction oldAction_;
 
 
-    // Static data members
+    // Private Member Functions
 
-        #if defined(__linux__) && defined(__GNUC__)
         //- Handler for caught signals
         static void sigHandler(int);
-        #endif
 
 
 public:
@@ -111,7 +109,7 @@ public:
     ~sigFpe();
 
 
-    // Member functions
+    // Member Functions
 
         //- Check if SIGFPE signals handler is to be enabled.
         //  This is controlled by the trapFpe entry or the FOAM_SIGFPE

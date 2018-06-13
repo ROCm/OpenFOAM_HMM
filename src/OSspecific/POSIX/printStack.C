@@ -115,7 +115,13 @@ void printSourceFileAndLine
     uintptr_t address = uintptr_t(addr);
     word myAddress = addressToWord(address);
 
-    if (filename.ext() == "so")
+    if
+    (
+        filename.hasExt("so")
+        #ifdef darwin
+     || filename.hasExt("dylib")
+        #endif
+    )
     {
         // Convert address into offset into dynamic library
         uintptr_t offset = uintptr_t(info->dli_fbase);

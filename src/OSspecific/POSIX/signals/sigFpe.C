@@ -41,6 +41,10 @@ License
     #include <sigfpe.h>
 #endif
 
+#ifdef darwin
+    #include "feexceptErsatz.H"
+#endif
+
 #include <limits>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -108,11 +112,15 @@ void* Foam::sigFpe::mallocNan(size_t size)
 
     return result;
 }
+#endif  // __linux__
 
 
-#ifdef __GNUC__
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
 void Foam::sigFpe::sigHandler(int)
 {
+    #if (defined(__linux__) && defined(__GNUC__)) || defined(darwin)
+
     // Reset old handling
     if (sigaction(SIGFPE, &oldAction_, nullptr) < 0)
     {
@@ -124,9 +132,9 @@ void Foam::sigFpe::sigHandler(int)
     jobInfo.signalEnd();        // Update jobInfo file
     error::printStack(Perr);
     raise(SIGFPE);              // Throw signal (to old handler)
+
+    #endif  // (__linux__ && __GNUC__) || darwin
 }
-#endif  // __GNUC__
-#endif  // __linux__
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -157,7 +165,7 @@ void Foam::sigFpe::set(bool verbose)
 {
     if (!sigActive_ && requested())
     {
-        #if defined(__linux__) && defined(__GNUC__)
+        #if (defined(__linux__) && defined(__GNUC__)) || defined(darwin)
 
         feenableexcept
         (
@@ -247,7 +255,7 @@ void Foam::sigFpe::set(bool verbose)
 
 void Foam::sigFpe::unset(bool verbose)
 {
-    #if defined(__linux__) && defined(__GNUC__)
+    #if (defined(__linux__) && defined(__GNUC__)) || defined(darwin)
     if (sigActive_)
     {
         if (verbose)
