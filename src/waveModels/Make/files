@@ -15,11 +15,13 @@ waveGenerationModels/derived/StokesI/StokesIWaveModel.C
 waveGenerationModels/derived/StokesV/StokesVWaveModel.C
 waveGenerationModels/derived/irregularMultiDirectional/irregularMultiDirectionalWaveModel.C
 
-
 waveAbsorptionModels/base/waveAbsorptionModel/waveAbsorptionModel.C
 waveAbsorptionModels/derived/shallowWaterAbsorption/shallowWaterAbsorption.C
 
 derivedFvPatchFields/waveVelocity/waveVelocityFvPatchVectorField.C
 derivedFvPatchFields/waveAlpha/waveAlphaFvPatchScalarField.C
+
+fvOptions/multiphaseMangrovesSource/multiphaseMangrovesSource.C
+fvOptions/multiphaseMangrovesTurbulenceModel/multiphaseMangrovesTurbulenceModel.C
 
 LIB = $(FOAM_LIBBIN)/libwaveModels
