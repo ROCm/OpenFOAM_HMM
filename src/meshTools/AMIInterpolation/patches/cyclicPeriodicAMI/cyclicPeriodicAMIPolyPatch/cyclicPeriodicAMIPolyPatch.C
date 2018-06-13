@@ -561,15 +561,15 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
             Info<< indent
                 << "AMI: Patch " << name()
                 << " sum(weights)"
-                << " min = " << gMin(srcWghtSum)
-                << " max = " << gMax(srcWghtSum)
-                << " average = " << gAverage(srcWghtSum) << nl;
+                << " min:" << gMin(srcWghtSum)
+                << " max:" << gMax(srcWghtSum)
+                << " average:" << gAverage(srcWghtSum) << nl;
             Info<< indent
                 << "AMI: Patch " << neighbPatch().name()
                 << " sum(weights)"
-                << " min = " << gMin(tgtWghtSum)
-                << " max = " << gMax(tgtWghtSum)
-                << " average = " << gAverage(tgtWghtSum) << nl;
+                << " min:" << gMin(tgtWghtSum)
+                << " max:" << gMax(tgtWghtSum)
+                << " average:" << gAverage(tgtWghtSum) << nl;
         }
     }
 }

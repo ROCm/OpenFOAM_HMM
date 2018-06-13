@@ -98,7 +98,7 @@ void Foam::cyclicACMIPolyPatch::resetAMI
             const_cast<AMIPatchToPatchInterpolation&>(this->AMI());
 
         // Output some stats. AMIInterpolation will have already output the
-        // average weights ("sum(weights) min = 1 max = 1 average = 1")
+        // average weights ("sum(weights) min:1 max:1 average:1")
         {
             const scalarField& wghtsSum = AMI.srcWeightsSum();
 
