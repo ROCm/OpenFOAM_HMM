@@ -479,7 +479,7 @@ void Foam::isoAdvection::limitFluxes()
     // Get time step size
     const scalar dt = mesh_.time().deltaT().value();
 
-    volScalarField alphaNew = alpha1_ - fvc::surfaceIntegrate(dVf_);
+    volScalarField alphaNew(alpha1_ - fvc::surfaceIntegrate(dVf_));
     const scalar aTol = 1.0e-12;          // Note: tolerances
     scalar maxAlphaMinus1 = gMax(alphaNew) - 1;      // max(alphaNew - 1);
     scalar minAlpha = gMin(alphaNew);           // min(alphaNew);
