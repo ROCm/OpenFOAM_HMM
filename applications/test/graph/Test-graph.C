@@ -55,11 +55,13 @@ int main()
     graph phi("@f! (R = 5)", "@a!", "@f!", alpha);
     phi.insert
     (
-        "@f!&e!", new curve("@f!&e!", curve::curveStyle::CONTINUOUS, phie)
+        "@f!&e!",
+        autoPtr<curve>::New("@f!&e!", curve::curveStyle::CONTINUOUS, phie)
     );
     phi.insert
     (
-        "@f!&c!", new curve("@f!&c!", curve::curveStyle::CONTINUOUS, phic)
+        "@f!&c!",
+        autoPtr<curve>::New("@f!&c!", curve::curveStyle::CONTINUOUS, phic)
     );
     phi.write("phi", "xmgr");
 

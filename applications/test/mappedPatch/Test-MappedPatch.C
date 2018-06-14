@@ -38,6 +38,7 @@ Description
 #include "OFstream.H"
 #include "mappedPolyPatch.H"
 #include "mappedFixedValueFvPatchFields.H"
+#include "fvCFD.H"
 
 using namespace Foam;
 

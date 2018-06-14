@@ -30,6 +30,7 @@ License
 #include "treeDataEdge.H"
 #include "OFstream.H"
 #include "extendedFeatureEdgeMesh.H"
+#include "fvCFD.H"
 
 using namespace Foam;
 

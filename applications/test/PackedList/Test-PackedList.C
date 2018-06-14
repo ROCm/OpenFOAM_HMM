@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 
         if (args.found("info"))
         {
-            packLst.printInfo(Info);
+            Info<< packLst.info();
         }
 
         Info<< nl;

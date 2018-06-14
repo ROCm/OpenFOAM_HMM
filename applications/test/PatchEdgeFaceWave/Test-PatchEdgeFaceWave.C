@@ -29,10 +29,10 @@ Description
 #include "argList.H"
 #include "Time.H"
 #include "fvMesh.H"
-#include "volFields.H"
 #include "PatchEdgeFaceWave.H"
 #include "patchEdgeFaceInfo.H"
 #include "patchPatchDist.H"
+#include "fvCFD.H"
 
 using namespace Foam;
 

@@ -30,6 +30,7 @@ Description
 #include "Time.H"
 #include "fvMesh.H"
 #include "wallDist.H"
+#include "fvCFD.H"
 
 using namespace Foam;
 

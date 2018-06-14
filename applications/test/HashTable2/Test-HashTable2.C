@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
         << "toc: " << table4.toc() << endl;
 
     HashPtrTable<label, Foam::string> ptable1(0);
-    ptable1.insert("kjhkjh", new label(10));
+    ptable1.insert("kjhkjh", autoPtr<label>::New(10));
 
     Info<< "PtrTable toc: " << ptable1.toc() << endl;
 

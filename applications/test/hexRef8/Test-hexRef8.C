@@ -42,7 +42,7 @@ Description
 #include "zeroGradientFvPatchFields.H"
 #include "calculatedPointPatchFields.H"
 #include "pointConstraints.H"
-#include "fvcDiv.H"
+#include "fvCFD.H"
 
 using namespace Foam;
 

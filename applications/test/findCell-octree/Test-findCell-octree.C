@@ -29,6 +29,7 @@ License
 #include "indexedOctree.H"
 #include "treeDataCell.H"
 #include "OFstream.H"
+#include "fvCFD.H"
 
 using namespace Foam;
 

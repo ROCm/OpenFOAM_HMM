@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    #include "createMesh.H"
+    #include "createPolyMesh.H"
 
     const word patchName = args[1];
     label patchi = mesh.boundaryMesh().findPatchID(patchName);

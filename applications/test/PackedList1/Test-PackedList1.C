@@ -185,13 +185,13 @@ int main(int argc, char *argv[])
     list1.resize(8, list1.max_value);
     report(list1);
 
-    Info<< "\ntest flip() function\n";
-    list1.flip();
-    report(list1);
+    //Info<< "\ntest flip() function\n";
+    //list1.flip();
+    //report(list1);
 
-    Info<< "\nre-flip()\n";
-    list1.flip();
-    report(list1);
+    //Info<< "\nre-flip()\n";
+    //list1.flip();
+    //report(list1);
 
     Info<< "\ntest set() function\n";
     list1.set(1, 5);

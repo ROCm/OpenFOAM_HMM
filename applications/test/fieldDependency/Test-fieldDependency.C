@@ -29,6 +29,7 @@ Description
 #include "argList.H"
 #include "Time.H"
 #include "volFields.H"
+#include "fvCFD.H"
 
 using namespace Foam;
 

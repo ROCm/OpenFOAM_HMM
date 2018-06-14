@@ -38,7 +38,7 @@ Description
 #include "removeFaces.H"
 #include "mapPolyMesh.H"
 #include "polyTopoChange.H"
-#include "fvcDiv.H"
+#include "fvCFD.H"
 #include "zeroGradientFvPatchFields.H"
 #include "Random.H"
 

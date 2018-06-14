@@ -412,7 +412,7 @@ void testPointSync(const polyMesh& mesh, Random& rndGen)
         {
             if (isMasterPoint.test(pointi))
             {
-                nMasters.set(pointi);
+                nMasters[pointi] = 1;
             }
         }
 
@@ -488,7 +488,7 @@ void testEdgeSync(const polyMesh& mesh, Random& rndGen)
         {
             if (isMasterEdge.test(edgeI))
             {
-                nMasters.set(edgeI);
+                nMasters[edgeI] = 1;
             }
         }
 
@@ -551,13 +551,13 @@ void testFaceSync(const polyMesh& mesh, Random& rndGen)
     {
         labelList nMasters(mesh.nFaces(), 0);
 
-        Bitset isMasterFace(syncTools::getMasterFaces(mesh));
+        bitSet isMasterFace(syncTools::getMasterFaces(mesh));
 
         forAll(isMasterFace, facei)
         {
             if (isMasterFace.test(facei))
             {
-                nMasters.set(facei);
+                nMasters[facei] = 1;
             }
         }
 
