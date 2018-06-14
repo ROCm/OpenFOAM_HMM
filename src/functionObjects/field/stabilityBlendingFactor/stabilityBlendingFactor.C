@@ -115,13 +115,13 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
                     min
                     (
                         mag(factorList - meanRes)/(maxResidual_*meanRes),
-                        1.0
+                        scalar(1)
                     ),
-                    0.0
+                    scalar(0)
                 )
             );
 
-            forAll (indicator_, i)
+            forAll(indicator_, i)
             {
                 indicator_[i] = indicatorResidual[i];
             }
@@ -141,11 +141,11 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
             (
                 max
                 (
-                    0.0,
+                    scalar(0),
                     (*nonOrthPtr - maxNonOrthogonality_)
-                   /(minNonOrthogonality_ - maxNonOrthogonality_)
+                  / (minNonOrthogonality_ - maxNonOrthogonality_)
                 ),
-                1.0
+                scalar(1)
             )
         );
 
@@ -169,11 +169,11 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
             (
                 max
                 (
-                    0.0,
+                    scalar(0),
                     (*skewnessPtr - maxSkewness_)
                   / (minSkewness_ - maxSkewness_)
                 ),
-                1.0
+                scalar(1)
             )
         );
 
@@ -197,11 +197,11 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
                 (
                     max
                     (
-                        0.0,
+                        scalar(0),
                         (minFaceWeight_ - *faceWeightsPtr)
                       / (minFaceWeight_ - maxFaceWeight_)
                     ),
-                    1.0
+                    scalar(1)
                 )
             );
 
@@ -269,11 +269,11 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
                 (
                     max
                     (
-                        0.0,
+                        scalar(0),
                         (magGradCCPtr.ref() - maxGradCc_)
                       / (minGradCc_ - maxGradCc_)
                     ),
-                    1.0
+                    scalar(1)
                 )
             );
     }
@@ -311,7 +311,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
             max
             (
                 indicator_,
-                min(max(0.0, (Co - Co1_)/(Co2_ - Co1_)), 1.0)
+                min(max(scalar(0), (Co - Co1_)/(Co2_ - Co1_)), scalar(1))
             );
 
         if (log)
