@@ -350,7 +350,7 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::updateCoeffs()
             << dimensionedScalar("U", dimVelocity, newQ/patchA)
             << endl << "    "
             << dimensionedScalar("deltaP", pDimensions, deltaP)
-            << " (" << mag(error)*100 << "\% "
+            << " (" << mag(error)*100 << "% "
             << (error < 0 ? "below" : "above") << " the target)" << endl;
     }
 
