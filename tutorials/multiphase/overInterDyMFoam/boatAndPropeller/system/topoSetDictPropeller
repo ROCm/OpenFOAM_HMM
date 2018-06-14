@@ -18,7 +18,6 @@ actions
 (
     {
       name    bgr0;       // all around bgr
-  //    set     hullBox0set;
       type    cellSet;
       action  new;
       source  zoneToCell;
@@ -79,9 +78,7 @@ actions
         {
             boxes
             (
-            //     (0.15 -0.1 -0.1)(0.5 0.1 0.1) //hullBox
             (-0.0199 -0.0499 -0.0499)( -0.00998 0.0499 0.0499) //propeller
-          //  (-0.10 -0.0749 -0.00499)(-0.050 0.0749 0.00499) //rudder
             );
         }
     }
@@ -131,131 +128,6 @@ actions
             set bgr0;
         }
     }
-
 );
 
-
-// /*--------------------------------*- C++ -*----------------------------------*\
-// | =========                 |                                                 |
-// | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-// |  \\    /   O peration     | Version:  plus-overset                          |
-// |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
-// |    \\/     M anipulation  |                                                 |
-// \*---------------------------------------------------------------------------*/
-// FoamFile
-// {
-//     version     2.0;
-//     format      ascii;
-//     class       dictionary;
-//     object      topoSetDict;
-// }
-// // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-//
-// actions
-// (
-//     {
-//         name    propeller0;       // all around bgr
-//         type    cellSet;
-//         action  new;
-//         source  zoneToCell;
-//         sourceInfo
-//         {
-//             name propeller;
-//           //  insidePoints ((-0.02 0.0001 0.0001));
-//         }
-//     }
-//     {
-//         name    c0;            //copy
-//         type    cellSet;
-//         action  new;
-//         source  cellToCell;
-//         sourceInfo
-//         {
-//             set propeller0;
-//         }
-//     }
-//
-//     {
-//         name    c0;          //all around hullBox0
-//         type    cellSet;
-//         action  invert;
-//     }
-//
-// /*
-//
-//     {
-//         name    c1;
-//         type    cellSet;
-//         action  new;
-//         source  regionsToCell;
-//         sourceInfo
-//         {
-//             insidePoints ((-0.01 0.0 0.0));
-//             set          c0;
-//         }
-//     }
-//
-//
-//
-//
-//
-//    {
-//         name    c1;
-//         type    cellSet;
-//         action  delete;
-//         source  cellToCell;
-//         sourceInfo
-//         {
-//             set c2;
-//         }
-//     }
-// */
-//     // Select box to remove from region 1 and 2
-//
-//     {
-//         name    box;
-//         type    cellSet;
-//         action  new;
-//         source  cellToCell;
-//         sourceInfo
-//         {
-//             set c0;
-//         }
-//     }
-//
-//
-//     {
-//         name    box;
-//         type    cellSet;
-//         action  add;
-//         source  cellToCell;
-//         sourceInfo
-//         {
-//             set propeller0;
-//         }
-//     }
-//
-//     {
-//         name    box;
-//         type    cellSet;
-//         action  subset;
-//         source  boxToCell;
-//         sourceInfo
-//         {
-//             boxes
-//             (
-//             //     (0 -0.1 -0.1)(0.5 0.1 0.1) //hullBox
-//                  (-0.0199 -0.0499 -0.0499)( -0.00998 0.0499 0.0499) //propeller
-//             //     (-0.08 -0.08 -0.03)(-0.06 0.08 0.03) //rudder
-//             );
-//         }
-//     }
-//
-//     {
-//         name    box;
-//         type    cellSet;
-//         action  invert;
-//     }
-// );
-//
-// // ************************************************************************* //
+// ************************************************************************* //

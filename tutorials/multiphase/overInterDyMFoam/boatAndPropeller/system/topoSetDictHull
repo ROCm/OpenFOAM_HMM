@@ -18,7 +18,6 @@ actions
 (
     {
       name    bgr0;       // all around bgr
-  //    set     hullBox0set;
       type    cellSet;
       action  new;
       source  zoneToCell;
@@ -80,9 +79,6 @@ actions
             boxes
             (
                  (0.05 -0.082 -0.1)(0.52 0.052 0.1) //hullBox
-            //      (0 -1 -1)(5 1 1) //hullBox
-            //     (-0.02 -0.05 -0.03)( -0.01 0.05 0.03) //propeller
-            //     (-0.08 -0.08 -0.03)(-0.06 0.08 0.03) //rudder
             );
         }
     }
@@ -132,7 +128,6 @@ actions
             set bgr0;
         }
     }
-
 );
 
 // ************************************************************************* //

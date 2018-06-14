@@ -21,7 +21,7 @@ dynamicFvMesh       dynamicOversetFvMesh;
 
 motionSolver        rigidBodyMotion;
 
-// rigidBodyMotionCoeffs
+// rigidBodyMotionCoeffs  - not needed any more
 //  {
     report          on;
 
@@ -45,11 +45,16 @@ motionSolver        rigidBodyMotion;
             type            rigidBody;
             parent          root;
 
-            // Cuboid mass
+            // Cuboid mass -- very simple setup. For more complicated shapes
+            // see utility surfaceInertia
             mass            9;
             rho             1;
             inertia         (0.05 0 0 0.05 0 0.05);
-            centreOfMass    (0.21 -0.07 0);
+            centreOfMass    (0.21 -0.07 0); // relative to the centreOfMass
+                                            // of parent body
+                                            // (here root = global coord system)
+
+            // Transformation tensor and centre of rotation
             transform       (1 0 0 0 1 0 0 0 1) (0.21 0 0);
 
             joint
@@ -58,16 +63,18 @@ motionSolver        rigidBodyMotion;
                 joints
                 (
                     {
-                        type Pxyz;
+                        type Pxyz;  // Allow movement in any direction
                     }
                     {
-                        type Rxyz;
+                        type Rxyz;  // Allow rotation along any axis
+                                    // (local - body CS)
                     }
                 );
             }
 
             patches         (hullWall);
-            innerDistance   100;
+            innerDistance   100;    // With overset we want to avoid the mesh
+                                    // deformation so have large innerDistance
             outerDistance   200;
         } // end hull
 
@@ -117,8 +124,15 @@ motionSolver        rigidBodyMotion;
             type                    prescribedRotation;
             body                    rudder;
             referenceOrientation    (1 0 0 0 1 0 0 0 1);
-            axis                    (0 1 0);
-            omega                   (0 26 0);
+            axis                    (0 1 0);    // Axis of rotation
+            omega                   sine;       // Function1 entry
+            omegaCoeffs
+            {
+                frequency   4;
+                amplitude   0.2;
+                scale       (0 1 0);
+                level       (0 1 0);
+            }
         }
         propellerRotation
         {
@@ -128,7 +142,8 @@ motionSolver        rigidBodyMotion;
             axis                    (1 0 0);
             omega                   table
             (
-                (0 (16 0 0))
+                (0 (0 0 0))
+                (1 (16 0 0))
             );
         }
     }

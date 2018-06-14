@@ -59,6 +59,12 @@ solvers
         tolerance       1e-9;
         relTol          0.01;
     }
+
+    Phi
+    {
+        $p_rgh;
+    }
+
     p_rghFinal
     {
         $p_rgh;
@@ -82,15 +88,21 @@ PIMPLE
     nCorrectors         2;
     nNonOrthogonalCorrectors 0;
 
-    ddtCorr                     yes;
-    correctPhi                 no;
-    massFluxInterpolation      no;
+    ddtCorr                 yes;
+    correctPhi              no;
+    massFluxInterpolation   no;
 
     moveMeshOuterCorrectors no;
     turbOnFinalIterOnly no;
 
     oversetAdjustPhi    no;
 
+}
+potentialFlow
+{
+    nNonOrthogonalCorrectors    2;
+    PhiRefCell                  0;
+    PhiRefValue                 0;
 }
 
 relaxationFactors

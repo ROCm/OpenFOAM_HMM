@@ -41,12 +41,6 @@ boundaryField
        value           uniform (0 0 0);
    }
 
-//
-//    right1
-//    {
-//        type            zeroGradient;   //calculated;
-//        value           $internalField;
-//    }
 
     "overset.*"
     {
