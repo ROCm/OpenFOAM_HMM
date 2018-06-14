@@ -64,10 +64,24 @@ namespace fv
                            Class ddtScheme Declaration
 \*---------------------------------------------------------------------------*/
 
+class ddtSchemeBase
+{
+public:
+
+        //- Flag to use experimental ddtCorr from org version
+        //- Default is off for backwards compatibility
+        static bool experimentalDdtCorr;
+
+        ddtSchemeBase()
+        {}
+};
+
+
 template<class Type>
 class ddtScheme
 :
-    public refCount
+    public refCount,
+    public ddtSchemeBase
 {
 
 protected:
@@ -76,7 +90,9 @@ protected:
 
         const fvMesh& mesh_;
 
-        //- Input for fvcDdtPhiCoeff (-1 default)
+        //- Input for fvcDdtPhiCoeff
+        //  If set to -1 (default) the code will calculate the coefficient
+        //  If > 0 the coupling coeff is set to this value
         scalar ddtPhiCoeff_;
 
 
@@ -212,6 +228,13 @@ public:
         > fluxFieldType;
 
         tmp<surfaceScalarField> fvcDdtPhiCoeff
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& U,
+            const fluxFieldType& phi,
+            const fluxFieldType& phiCorr
+        );
+
+        tmp<surfaceScalarField> fvcDdtPhiCoeffExperimental
         (
             const GeometricField<Type, fvPatchField, volMesh>& U,
             const fluxFieldType& phi,

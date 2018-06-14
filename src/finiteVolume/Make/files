@@ -358,6 +358,7 @@ finiteVolume/fv/fv.C
 finiteVolume/fvSchemes/fvSchemes.C
 
 ddtSchemes = finiteVolume/ddtSchemes
+$(ddtSchemes)/ddtScheme/ddtSchemeBase.C
 $(ddtSchemes)/ddtScheme/ddtSchemes.C
 $(ddtSchemes)/steadyStateDdtScheme/steadyStateDdtSchemes.C
 $(ddtSchemes)/EulerDdtScheme/EulerDdtSchemes.C
