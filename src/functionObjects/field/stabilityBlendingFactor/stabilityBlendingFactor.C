@@ -73,18 +73,25 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
     const IOField<scalar>* residualPtr =
         mesh_.lookupObjectPtr<IOField<scalar>>(residualName_);
 
+    if (log)
+    {
+        Log << nl << type() << " : " << nl;
+    }
+
     if (residuals_)
     {
         if (!residualPtr)
         {
              WarningInFunction
-                << "Could not find residual file : " << residualName_ << nl
-                << "The residual mode won't be considered for the blended "
-                << "field in the stability blending factor. " << nl
-                << "Add the corresponding residual function object. " << nl
-                << "If the residual function object is already set " << nl
-                << "you might need to wait for the first iteration."
-                << endl;
+                << "Could not find residual file : " << residualName_
+                << ".The residual mode won't be " << nl
+                << "    considered for the blended field in the stability "
+                << "blending factor. " << nl
+                << "    Add the corresponding residual function object. " << nl
+                << "    If the residual function object is already set "
+                << "you might need to wait " << nl
+                << "    for the first iteration."
+                << nl << endl;
         }
         else
         {
@@ -284,6 +291,13 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
 
     if (Co_)
     {
+        if (Co1_ >= Co2_)
+        {
+            FatalErrorInFunction
+                << "    Co2 should be larger than Co1."
+                << exit(FatalError);
+        }
+
         tmp<volScalarField> CoPtr
         (
             new volScalarField
@@ -319,6 +333,11 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
             Log << "    Max Co :  " << max(Co).value()
                 << endl;
         }
+    }
+
+    if (log)
+    {
+        Log << nl;
     }
 
     indicator_.correctBoundaryConditions();
@@ -462,7 +481,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
             else
             {
                 FatalErrorInFunction
-                    << "Field : " << nonOrthogonalityName_ << " not found."
+                    << "    Field : " << nonOrthogonalityName_ << " not found."
                     << exit(FatalError);
             }
         }
@@ -493,7 +512,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
             else
             {
                 FatalErrorInFunction
-                    << "Field : " << faceWeightName_ << " not found."
+                    << "    Field : " << faceWeightName_ << " not found."
                     << exit(FatalError);
             }
         }
@@ -523,7 +542,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
             else
             {
                 FatalErrorInFunction
-                    << "Field : " << skewnessName_ << " not found."
+                    << "    Field : " << skewnessName_ << " not found."
                     << exit(FatalError);
             }
         }
@@ -535,6 +554,8 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
     }
 
     init(true);
+
+     writeFileHeader(file());
 }
 
 
@@ -590,6 +611,37 @@ bool Foam::functionObjects::stabilityBlendingFactor::read
                 << tolerance_ << exit(FatalError);
         }
 
+        Info<< type() << " " << name() << ":" << nl;
+        if (nonOrthogonality_)
+        {
+            Info<< "    Including nonOrthogonality between: "
+                << minNonOrthogonality_ <<  " and " << maxNonOrthogonality_ << endl;
+        }
+        if (gradCc_)
+        {
+            Info<< "    Including gradient between: "
+                << minGradCc_ << " and " << maxGradCc_ << endl;
+        }
+        if (residuals_)
+        {
+            Info<< "    Including residuals" << endl;
+        }
+        if (faceWeight_)
+        {
+            Info<< "    Including faceWeight between: "
+                << minFaceWeight_ << " and " << maxFaceWeight_ << endl;
+        }
+        if (skewness_)
+        {
+            Info<< "    Including skewness between: "
+                << minSkewness_ << " and " << maxSkewness_ << endl;
+        }
+        if (Co_)
+        {
+            Info<< "    Including Co between: "
+                << Co2_ << " and " << Co1_ << endl;
+        }
+
         return true;
     }
     else
@@ -627,7 +679,8 @@ bool Foam::functionObjects::stabilityBlendingFactor::write()
     reduce(nCellsScheme2, sumOp<label>());
     reduce(nCellsBlended, sumOp<label>());
 
-    Log << "    scheme 1 cells :  " << nCellsScheme1 << nl
+    Log << nl << type() << " : " << nl
+        << "    scheme 1 cells :  " << nCellsScheme1 << nl
         << "    scheme 2 cells :  " << nCellsScheme2 << nl
         << "    blended cells  :  " << nCellsBlended << nl
         << endl;
@@ -635,9 +688,9 @@ bool Foam::functionObjects::stabilityBlendingFactor::write()
     writeTime(file());
 
     file()
-        << token::TAB << nCellsScheme1
-        << token::TAB << nCellsScheme2
-        << token::TAB << nCellsBlended
+        << tab << nCellsScheme1
+        << tab << nCellsScheme2
+        << tab << nCellsBlended
         << endl;
 
     return true;
