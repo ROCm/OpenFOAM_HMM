@@ -15,12 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-combustionModel  laminar<rhoChemistryCombustion>;
-
-active  false;
-
-laminarCoeffs
-{}
+combustionModel  none;
 
 
 // ************************************************************************* //
