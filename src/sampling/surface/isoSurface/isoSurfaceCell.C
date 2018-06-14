@@ -284,16 +284,18 @@ Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
 
         if (shared[0] != -1)
         {
-            vector n0 = tri0.normal(localPoints);
-            n0 /= mag(n0);
-            vector n1 = tri1.normal(localPoints);
-            n1 /= mag(n1);
+            const vector n0 = tri0.normal(localPoints);
+            const vector n1 = tri1.normal(localPoints);
 
-            if ((n0 & n1) < 0)
-            {
-                // Too big an angle. Do not simplify.
-            }
-            else
+            // Merge any zero-sized triangles,
+            // or if they point in the same direction.
+
+            if
+            (
+                mag(n0) <= ROOTVSMALL
+             || mag(n1) <= ROOTVSMALL
+             || (n0 & n1) >= 0
+            )
             {
                 info.setPoint
                 (
