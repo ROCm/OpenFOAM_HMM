@@ -115,13 +115,13 @@ void printSourceFileAndLine
     uintptr_t address = uintptr_t(addr);
     word myAddress = addressToWord(address);
 
-    if
-    (
-        filename.hasExt("so")
-        #ifdef darwin
-     || filename.hasExt("dylib")
-        #endif
-    )
+    // Can use relative addresses for executables and libraries with the
+    // Darwin addr2line implementation.
+    // On other systems (Linux), only use relative addresses for libraries.
+
+    #ifndef darwin
+    if (filename.hasExt("so"))
+    #endif
     {
         // Convert address into offset into dynamic library
         uintptr_t offset = uintptr_t(info->dli_fbase);
