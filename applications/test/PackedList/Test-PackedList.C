@@ -41,15 +41,15 @@ using namespace Foam;
 template<unsigned nBits>
 inline void reportInfo()
 {
-    const unsigned offset = PackedList<nBits>::packing();
+    const unsigned offset = PackedList<nBits>::elem_per_block;
 
     unsigned useSHL = ((1u << (nBits * offset)) - 1);
     unsigned useSHR = (~0u >> (sizeof(unsigned)*CHAR_BIT - nBits * offset));
 
     Info<< nl
         << "PackedList<" << nBits << ">" << nl
-        << " max_value: " << PackedList<nBits>::max_value() << nl
-        << " packing: " << PackedList<nBits>::packing() << nl
+        << " max_value: " << PackedList<nBits>::max_value << nl
+        << " packing: " << PackedList<nBits>::elem_per_block << nl
         << " utilization: " << (nBits * offset) << nl;
 
     Info<< " Masking:" << nl
@@ -61,7 +61,7 @@ inline void reportInfo()
 
     hex(Info);
     Info<< "   maskLower: "
-        << PackedList<nBits>::maskLower(PackedList<nBits>::packing())
+        << PackedList<nBits>::mask_lower(PackedList<nBits>::elem_per_block)
         << nl
         << "      useSHL: " << useSHL << nl
         << "      useSHR: " << useSHR << nl;

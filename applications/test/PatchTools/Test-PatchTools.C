@@ -35,6 +35,7 @@ Description
 #include "volFields.H"
 #include "Time.H"
 #include "OBJstream.H"
+#include "fvCFD.H"
 
 using namespace Foam;
 

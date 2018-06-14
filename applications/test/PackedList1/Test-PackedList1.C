@@ -111,16 +111,11 @@ int main(int argc, char *argv[])
     list1[4] = list1[2];
     report(list1);
 
-    Info<< "\ntest assign between references, with chaining\n";
-    list1[0] = 1;
-    list1[4] = 1;
-    report(list1);
-
-    Info<< "\ntest assign between references, with chaining and auto-vivify\n";
+    Info<< "\nset auto-vivify entries\n";
     list1[1] = 2;
-    list1[8] = 2;
-    list1[10] = 2;
-    list1[14] = 2;
+    list1.set(8, 2);
+    list1.set(10, 2);
+    list1.set(14, 2);
     report(list1);
 
     Info<< "\ntest operator== between references\n";
@@ -160,38 +155,56 @@ int main(int argc, char *argv[])
         report(constLst);
 
         Info<< "\ntest operator[] non-const with out-of-range index\n";
-        if (list1[20])
+
+        // Expect failure
+        const bool throwingError = FatalError.throwExceptions();
+
+        try
         {
-            Info<< "[20] is true (unexpected)\n";
+            if (list1[20])
+            {
+                Info<< "[20] is true (unexpected)\n";
+            }
+            else
+            {
+                Info<< "[20] is false (expected) but list was resized?? "
+                    << "(non-const)\n";
+            }
         }
-        else
+        catch (Foam::error& err)
         {
-            Info<< "[20] is false (expected) but list was resized?? "
-                << "(non-const)\n";
+            Info<< "Failed (expected) " << err << nl << endl;
         }
 
+        FatalError.throwExceptions(throwingError);
         report(list1);
     }
 
-
-    Info<< "\ntest operator[] with out-of-range index\n";
-    if (!list1[20])
     {
-        Info<< "[20] is false, as expected\n";
+        Info<< "\ntest operator[] with out-of-range index\n";
+
+        // Expect failure
+        const bool throwingError = FatalError.throwExceptions();
+
+        try
+        {
+            if (!list1[20])
+            {
+                Info<< "[20] is false, as expected for const-access\n";
+            }
+        }
+        catch (Foam::error& err)
+        {
+            Info<< "Failed (expected) " << err << nl << endl;
+        }
+
+        FatalError.throwExceptions(throwingError);
+        report(list1);
     }
-    report(list1);
 
     Info<< "\ntest resize with value (without reallocation)\n";
     list1.resize(8, list1.max_value);
     report(list1);
-
-    //Info<< "\ntest flip() function\n";
-    //list1.flip();
-    //report(list1);
-
-    //Info<< "\nre-flip()\n";
-    //list1.flip();
-    //report(list1);
 
     Info<< "\ntest set() function\n";
     list1.set(1, 5);
@@ -239,19 +252,36 @@ int main(int argc, char *argv[])
     list1.setCapacity(100);
     report(list1);
 
-    Info<< "\ntest operator[] assignment\n";
-    list1[16] = 5;
-    report(list1);
+    // Expect failure
+    {
+        const bool throwingError = FatalError.throwExceptions();
 
-    Info<< "\ntest operator[] assignment with auto-vivify\n";
-    list1[36] = list1.max_value;
-    report(list1);
+        Info<< "\ntest operator[] assignment with auto-vivify\n";
+
+        try
+        {
+            list1[16] = 5;
+            list1[36] = list1.max_value;
+        }
+        catch (Foam::error& err)
+        {
+            Info<< "Failed (expected) " << err << nl << endl;
+
+            Info<< "Using set(...) instead" << nl;
+
+            list1.set(36, list1.max_value);
+        }
+
+        FatalError.throwExceptions(throwingError);
+        report(list1);
+    }
+
 
     Info<< "\ntest setCapacity smaller\n";
     list1.setCapacity(24);
     report(list1);
 
-    Info<< "\ntest resize much smaller\n";
+    Info<< "\ntest resize much larger\n";
     list1.resize(150);
     report(list1);
 
@@ -260,26 +290,24 @@ int main(int argc, char *argv[])
     report(list1);
 
     // Add in some misc values
-    list1[31] = 1;
-    list1[32] = 2;
-    list1[33] = 3;
+    list1.set(31, 1);
+    list1.set(32, 2);
+    list1.set(33, 3);
 
     Info<< "\ntest get() method\n";
     Info<< "get(10):" << list1.get(10) << " and list[10]:" << list1[10] << "\n";
     report(list1);
 
-    Info<< "\ntest operator[] auto-vivify\n";
+    Info<< "\ntest set() auto-vivify\n";
     Info<< "size:" << list1.size() << "\n";
 
-    const unsigned int val = list1[45];
-
-    Info<< "list[45]:" << val << "\n";
+    Info<< "list[45]:" << list1.get(45) << "\n";
     Info<< "size after read:" << list1.size() << "\n";
 
-    list1[45] = list1.max_value;
+    list1.set(45, list1.max_value);
     Info<< "size after write:" << list1.size() << "\n";
     Info<< "list[45]:" << list1[45] << "\n";
-    list1[49] = list1[100];
+    list1.set(49, list1.get(100));
     report(list1);
 
 
