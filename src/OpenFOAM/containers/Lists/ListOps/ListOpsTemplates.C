@@ -1077,7 +1077,7 @@ Foam::List<T> Foam::ListOps::create
 
     if (len)
     {
-        List_ACCESS(T, output, out);
+        T* out = output.begin();
 
         while (first != last)
         {
