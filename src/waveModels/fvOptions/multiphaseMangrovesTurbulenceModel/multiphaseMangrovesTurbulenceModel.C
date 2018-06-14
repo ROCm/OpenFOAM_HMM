@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  | Copyright (C) 2017 IH-Cantabria
 -------------------------------------------------------------------------------
 License
@@ -27,13 +27,7 @@ License
 #include "mathematicalConstants.H"
 #include "fvMesh.H"
 #include "fvMatrices.H"
-#include "fvmDdt.H"
-#include "fvcGrad.H"
-#include "fvmDiv.H"
-#include "fvmLaplacian.H"
 #include "fvmSup.H"
-#include "surfaceInterpolate.H"
-#include "surfaceFields.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -50,6 +44,100 @@ namespace fv
         dictionary
     );
 }
+}
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+Foam::tmp<Foam::volScalarField>
+Foam::fv::multiphaseMangrovesTurbulenceModel::kCoeff
+(
+    const volVectorField& U
+) const
+{
+    tmp<volScalarField> tkCoeff = tmp<volScalarField>::New
+    (
+        IOobject
+        (
+            typeName + ":kCoeff",
+            mesh_.time().timeName(),
+            mesh_.time(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("0", dimless/dimTime, 0)
+    );
+
+    volScalarField& kCoeff = tkCoeff.ref();
+
+    forAll(zoneIDs_, i)
+    {
+        const scalar a = aZone_[i];
+        const scalar N = NZone_[i];
+        const scalar Ckp = CkpZone_[i];
+        const scalar Cd = CdZone_[i];
+
+        for (label zonei : zoneIDs_[i])
+        {
+            const cellZone& cz = mesh_.cellZones()[zonei];
+
+            for (label celli : cz)
+            {
+                kCoeff[celli] = Ckp*Cd*a*N*mag(U[celli]);
+            }
+        }
+    }
+
+    kCoeff.correctBoundaryConditions();
+
+    return tkCoeff;
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::fv::multiphaseMangrovesTurbulenceModel::epsilonCoeff
+(
+    const volVectorField& U
+) const
+{
+    tmp<volScalarField> tepsilonCoeff = tmp<volScalarField>::New
+    (
+        IOobject
+        (
+            typeName + ":epsilonCoeff",
+            mesh_.time().timeName(),
+            mesh_.time(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("0", dimless/dimTime, 0)
+    );
+
+    volScalarField& epsilonCoeff = tepsilonCoeff.ref();
+
+    forAll(zoneIDs_, i)
+    {
+        const scalar a = aZone_[i];
+        const scalar N = NZone_[i];
+        const scalar Cep = CepZone_[i];
+        const scalar Cd = CdZone_[i];
+
+        for (label zonei : zoneIDs_[i])
+        {
+            const cellZone& cz = mesh_.cellZones()[zonei];
+
+            for (label celli : cz)
+            {
+                epsilonCoeff[celli] = Cep*Cd*a*N*mag(U[celli]);
+            }
+        }
+    }
+
+    epsilonCoeff.correctBoundaryConditions();
+
+    return tepsilonCoeff;
 }
 
 
@@ -87,82 +175,48 @@ void Foam::fv::multiphaseMangrovesTurbulenceModel::addSup
 {
     const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
 
-    // Set alpha as zero-gradient
-    const volScalarField& epsilon =
-        mesh_.lookupObject<volScalarField>(epsilonName_);
-    const volScalarField& k = mesh_.lookupObject<volScalarField>(kName_);
-
-    volScalarField epsilonMangroves
-    (
-        IOobject
-        (
-            typeName + ":epsilonMangroves",
-            mesh_.time().timeName(),
-            mesh_.time(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar("epsilonMangroves", dimMass/dimMass/dimTime, 0)
-    );
-
-    volScalarField kMangroves
-    (
-        IOobject
-        (
-            typeName + ":kMangroves",
-            mesh_.time().timeName(),
-            mesh_.time(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar("kMangroves", dimTime/dimTime/dimTime, 0)
-    );
-
-    forAll(zoneIDs_, i)
-    {
-        const labelList& zones = zoneIDs_[i];
-
-        forAll(zones, j)
-        {
-            const label zonei = zones[j];
-            const cellZone& cz = mesh_.cellZones()[zonei];
-
-            forAll(cz, kk)
-            {
-                const label celli = cz[kk];
-                const scalar a = aZone_[i];
-                const scalar N = NZone_[i];
-                const scalar Ckp = CkpZone_[i];
-                const scalar Cep = CepZone_[i];
-                const scalar Cd = CdZone_[i];
-
-                const vector& Uc = U[celli];
-
-                const scalar f = Cd*a*N*mag(Uc);
-                epsilonMangroves[celli] = Cep*f;
-                kMangroves[celli] = Ckp*f;
-            }
-        }
-    }
-
     if (eqn.psi().name() == epsilonName_)
     {
-    	epsilonMangroves.correctBoundaryConditions();
 	    fvMatrix<scalar> epsilonEqn
 	    (
-      	    - fvm::Sp(epsilonMangroves, epsilon)
-    	);
-	    eqn += epsilonEqn;
+          - fvm::Sp(epsilonCoeff(U), eqn.psi())
+        );
+        eqn += epsilonEqn;
     }
     else if (eqn.psi().name() == kName_)
     {
-    	kMangroves.correctBoundaryConditions();
 	    fvMatrix<scalar> kEqn
 	    (
-      	    - fvm::Sp(kMangroves, k)
-    	);
+          - fvm::Sp(kCoeff(U), eqn.psi())
+        );
+        eqn += kEqn;
+    }
+}
+
+
+void Foam::fv::multiphaseMangrovesTurbulenceModel::addSup
+(
+    const volScalarField& rho,
+    fvMatrix<scalar>& eqn,
+    const label fieldi
+)
+{
+    const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
+
+    if (eqn.psi().name() == epsilonName_)
+    {
+	    fvMatrix<scalar> epsilonEqn
+	    (
+          - fvm::Sp(rho*epsilonCoeff(U), eqn.psi())
+        );
+        eqn += epsilonEqn;
+    }
+    else if (eqn.psi().name() == kName_)
+    {
+	    fvMatrix<scalar> kEqn
+	    (
+          - fvm::Sp(rho*kCoeff(U), eqn.psi())
+        );
 	    eqn += kEqn;
     }
 }
@@ -230,106 +284,5 @@ bool Foam::fv::multiphaseMangrovesTurbulenceModel::read(const dictionary& dict)
     }
 }
 
-void Foam::fv::multiphaseMangrovesTurbulenceModel::addSup
-(
-    const volScalarField& rho,
-    fvMatrix<scalar>& eqn,
-    const label fieldi
-)
-{
-    const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
-
-    // Set alpha as zero-gradient
-    const volScalarField& epsilon =
-        mesh_.lookupObject<volScalarField>(epsilonName_);
-    const volScalarField& k = mesh_.lookupObject<volScalarField>(kName_);
-
-    volScalarField epsilonMangroves
-    (
-        IOobject
-        (
-            typeName + ":epsilonMangroves",
-            mesh_.time().timeName(),
-            mesh_.time(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar("epsilonMangroves", dimMass/dimMass/dimTime, 0)
-    );
-
-    volScalarField kMangroves
-    (
-        IOobject
-        (
-            typeName + ":kMangroves",
-            mesh_.time().timeName(),
-            mesh_.time(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar("kMangroves", dimTime/dimTime/dimTime, 0)
-    );
-
-    forAll(zoneIDs_, i)
-    {
-        const labelList& zones = zoneIDs_[i];
-
-        forAll(zones, j)
-        {
-            const label zonei = zones[j];
-            const cellZone& cz = mesh_.cellZones()[zonei];
-
-            forAll(cz, kk)
-            {
-                const label celli = cz[kk];
-                const scalar a = aZone_[i];
-                const scalar N = NZone_[i];
-                const scalar Ckp = CkpZone_[i];
-                const scalar Cep = CepZone_[i];
-                const scalar Cd = CdZone_[i];
-
-                const vector& Uc = U[celli];
-
-    epsilonMangroves[celli] = Cep * Cd * a * N * sqrt ( Uc.x()*Uc.x() + Uc.y()*Uc.y() + Uc.z()*Uc.z());
-    kMangroves[celli] = Ckp * Cd * a * N * sqrt ( Uc.x()*Uc.x() + Uc.y()*Uc.y() + Uc.z()*Uc.z());
-            }
-        }
-    }
-
-    if (eqn.psi().name() == "epsilon")
-    {
-	Info<< " applying source to epsilon stuff.... " << endl;
-    	epsilonMangroves.correctBoundaryConditions();
-	fvMatrix<scalar> epsilonEqn
-	(
-      	    - fvm::Sp(rho*epsilonMangroves, epsilon)
-    	);
-	eqn += epsilonEqn;
-    }
-    else if (eqn.psi().name() == "k")
-    {
-	Info<< " applying source to k stuff.... " << endl;
-    	kMangroves.correctBoundaryConditions();
-	fvMatrix<scalar> kEqn
-	(
-      	    - fvm::Sp(rho*kMangroves, k)
-    	);
-	eqn += kEqn;
-    }
-
-}
-
-void Foam::fv::multiphaseMangrovesTurbulenceModel::addSup
-(
-    const volScalarField& alpha,
-    const volScalarField& rho,
-    fvMatrix<scalar>& eqn,
-    const label fieldi
-)
-{
-    NotImplemented;
-}
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  | Copyright (C) 2017 IH-Cantabria
 -------------------------------------------------------------------------------
 License
@@ -48,6 +48,100 @@ namespace fv
 }
 
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+Foam::tmp<Foam::volScalarField>
+Foam::fv::multiphaseMangrovesSource::dragCoeff(const volVectorField& U) const
+{
+    tmp<volScalarField> tdragCoeff = tmp<volScalarField>::New
+    (
+        IOobject
+        (
+            typeName + ":dragCoeff",
+            mesh_.time().timeName(),
+            mesh_.time(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("0", dimless/dimTime, 0)
+    );
+
+    volScalarField& dragCoeff = tdragCoeff.ref();
+
+    forAll(zoneIDs_, i)
+    {
+        const scalar a = aZone_[i];
+        const scalar N = NZone_[i];
+        const scalar Cd = CdZone_[i];
+
+        const labelList& zones = zoneIDs_[i];
+
+        for (label zonei : zones)
+        {
+            const cellZone& cz = mesh_.cellZones()[zonei];
+
+            for (label celli : cz)
+            {
+                const vector& Uc = U[celli];
+
+                dragCoeff[celli] = 0.5*Cd*a*N*mag(Uc);
+            }
+        }
+    }
+
+    dragCoeff.correctBoundaryConditions();
+
+    return tdragCoeff;
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::fv::multiphaseMangrovesSource::inertiaCoeff() const
+{
+    tmp<volScalarField> tinertiaCoeff = tmp<volScalarField>::New
+    (
+        IOobject
+        (
+            typeName + ":inertiaCoeff",
+            mesh_.time().timeName(),
+            mesh_.time(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("0", dimless, 0)
+    );
+
+    volScalarField& inertiaCoeff = tinertiaCoeff.ref();
+
+    const scalar pi = constant::mathematical::pi;
+
+    forAll(zoneIDs_, i)
+    {
+        const scalar a = aZone_[i];
+        const scalar N = NZone_[i];
+        const scalar Cm = CmZone_[i];
+
+        const labelList& zones = zoneIDs_[i];
+
+        for (label zonei : zones)
+        {
+            const cellZone& cz = mesh_.cellZones()[zonei];
+
+            for (label celli : cz)
+            {
+                inertiaCoeff[celli] = 0.25*(Cm+1)*pi*a*a*N;
+            }
+        }
+    }
+
+    inertiaCoeff.correctBoundaryConditions();
+
+    return tinertiaCoeff;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fv::multiphaseMangrovesSource::multiphaseMangrovesSource
@@ -72,6 +166,25 @@ Foam::fv::multiphaseMangrovesSource::multiphaseMangrovesSource
 
 void Foam::fv::multiphaseMangrovesSource::addSup
 (
+    fvMatrix<vector>& eqn,
+    const label fieldi
+)
+{
+    const volVectorField& U = eqn.psi();
+
+    fvMatrix<vector> mangrovesEqn
+    (
+      - fvm::Sp(dragCoeff(U), U)
+      - inertiaCoeff()*fvm::ddt(U)
+    );
+
+    // Contributions are added to RHS of momentum equation
+    eqn += mangrovesEqn;
+}
+
+
+void Foam::fv::multiphaseMangrovesSource::addSup
+(
     const volScalarField& rho,
     fvMatrix<vector>& eqn,
     const label fieldi
@@ -79,72 +192,14 @@ void Foam::fv::multiphaseMangrovesSource::addSup
 {
     const volVectorField& U = eqn.psi();
 
-    volScalarField DragForceMangroves
+    fvMatrix<vector> mangrovesEqn
     (
-        IOobject
-        (
-            typeName + ":DragForceMangroves",
-            mesh_.time().timeName(),
-            mesh_.time(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar("DragForceMangroves", dimDensity/dimTime, 0)
-    );
-
-    volScalarField InertiaForceMangroves
-    (
-        IOobject
-        (
-            typeName + ":InertiaForceMangroves",
-            mesh_.time().timeName(),
-            mesh_.time(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar("InertiaForceMangroves", dimless, 0)
-    );
-
-    const scalar pi = constant::mathematical::pi;
-
-    forAll(zoneIDs_, i)
-    {
-        const labelList& zones = zoneIDs_[i];
-
-        forAll(zones, j)
-        {
-            const label zonei = zones[j];
-            const cellZone& cz = mesh_.cellZones()[zonei];
-
-            forAll(cz, k)
-            {
-                const label celli = cz[k];
-                const scalar a = aZone_[i];
-                const scalar N = NZone_[i];
-                const scalar Cm = CmZone_[i];
-                const scalar Cd = CdZone_[i];
-
-                const vector& Uc = U[celli];
-
-                DragForceMangroves[celli] = 0.5*Cd*a*N*mag(Uc);
-                InertiaForceMangroves[celli] = 0.25*(Cm+1)*pi*a*a;
-            }
-        }
-    }
-
-    DragForceMangroves.correctBoundaryConditions();
-    InertiaForceMangroves.correctBoundaryConditions();
-
-    fvMatrix<vector> MangrovesEqn
-    (
-      - fvm::Sp(rho*DragForceMangroves, U)
-      - rho*InertiaForceMangroves*fvm::ddt(rho, U)
+      - fvm::Sp(rho*dragCoeff(U), U)
+      - rho*inertiaCoeff()*fvm::ddt(U)
     );
 
     // Contributions are added to RHS of momentum equation
-    eqn += MangrovesEqn;
+    eqn += mangrovesEqn;
 }
 
 

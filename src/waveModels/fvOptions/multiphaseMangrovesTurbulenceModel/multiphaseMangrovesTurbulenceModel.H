@@ -59,6 +59,18 @@ class multiphaseMangrovesTurbulenceModel
 :
     public option
 {
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        multiphaseMangrovesTurbulenceModel
+        (
+            const multiphaseMangrovesTurbulenceModel&
+        );
+
+        //- Disallow default bitwise assignment
+        void operator=(const multiphaseMangrovesTurbulenceModel&);
+
+
 
 protected:
 
@@ -97,18 +109,13 @@ protected:
             word epsilonName_;
 
 
-private:
+    // Protected Member Functions
 
-    // Private Member Functions
+        //- Return the k coefficient
+        tmp<volScalarField> kCoeff(const volVectorField& U) const;
 
-        //- Disallow default bitwise copy construct
-        multiphaseMangrovesTurbulenceModel
-        (
-            const multiphaseMangrovesTurbulenceModel&
-        );
-
-        //- Disallow default bitwise assignment
-        void operator=(const multiphaseMangrovesTurbulenceModel&);
+        //- Return the epsilon coefficient
+        tmp<volScalarField> epsilonCoeff(const volVectorField& U) const;
 
 
 public:
@@ -153,14 +160,6 @@ public:
                 const label fieldi
             );
 
-            //- Add implicit contribution to phase momentum equation
-            virtual void addSup
-            (
-                const volScalarField& alpha,
-                const volScalarField& rho,
-                fvMatrix<scalar>& eqn,
-                const label fieldi
-            );
 
         // IO
 

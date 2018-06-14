@@ -61,6 +61,15 @@ class multiphaseMangrovesSource
 :
     public option
 {
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        multiphaseMangrovesSource(const multiphaseMangrovesSource&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const multiphaseMangrovesSource&);
+
+
 
 protected:
 
@@ -86,17 +95,14 @@ protected:
             //- Zone indices
             labelListList zoneIDs_;
 
-        // Field properties
 
-private:
+    // Protected Member Functions
 
-    // Private Member Functions
+        //- Return the drag force coefficient
+        tmp<volScalarField> dragCoeff(const volVectorField& U) const;
 
-        //- Disallow default bitwise copy construct
-        multiphaseMangrovesSource(const multiphaseMangrovesSource&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const multiphaseMangrovesSource&);
+        //- Return the inertia force coefficient
+        tmp<volScalarField> inertiaCoeff() const;
 
 
 public:
@@ -125,6 +131,13 @@ public:
     // Member Functions
 
         // Add explicit and implicit contributions
+
+            //- Add implicit contribution to momentum equation
+            virtual void addSup
+            (
+                fvMatrix<vector>& eqn,
+                const label fieldi
+            );
 
             //- Add implicit contribution to phase momentum equation
             virtual void addSup
