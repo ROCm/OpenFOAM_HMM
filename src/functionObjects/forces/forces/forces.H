@@ -111,8 +111,12 @@ Note
         coordinateSystem
         {
             origin  (0 0 0);
-            e3      (0 0 1);
-            e1      (1 0 0);
+            coordinateRotation
+            {
+                type    axesRotation;
+                e3      (0 0 1);
+                e1      (1 0 0);
+            }
         }
     \endverbatim
 
@@ -346,11 +350,11 @@ protected:
         //- Write binned data
         void writeBins();
 
-        //- Disallow default bitwise copy construct
-        forces(const forces&);
+        //- No copy construct
+        forces(const forces&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const forces&);
+        //- No copy assignment
+        void operator=(const forces&) = delete;
 
 
 public:
