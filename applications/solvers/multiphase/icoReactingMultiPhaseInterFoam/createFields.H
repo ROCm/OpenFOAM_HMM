@@ -26,6 +26,22 @@
         mesh
     );
 
+    // Note: construct T to be around before the thermos. The thermos will
+    //       not update T.
+    Info<< "Reading field T\n" << endl;
+    volScalarField T
+    (
+        IOobject
+        (
+            "T",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
 
     Info<< "Calculating field g.h\n" << endl;
     #include "readGravitationalAcceleration.H"
@@ -45,6 +61,7 @@
         p_rgh
     );
 
+
     Info<< "Creating multiphaseSystem\n" << endl;
     autoPtr<multiphaseSystem> fluidPtr = multiphaseSystem::New(mesh);
 
@@ -56,8 +73,6 @@
             << "This is a incompressible solver." << abort(FatalError);
     }
 
-
-    volScalarField& T = fluid.T();
 
     // Need to store rho for ddt(rho, U)
     volScalarField rho

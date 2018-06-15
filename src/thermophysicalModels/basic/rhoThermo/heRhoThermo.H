@@ -67,9 +67,6 @@ class heRhoThermo
             const bool doOldTimes
         );
 
-        //- Calculate the thermo variables based on T
-        void calculateT();
-
         //- Construct as copy (not implemented)
         heRhoThermo(const heRhoThermo<BasicPsiThermo, MixtureType>&);
 

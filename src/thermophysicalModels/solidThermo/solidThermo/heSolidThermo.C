@@ -46,7 +46,7 @@ void Foam::heSolidThermo<BasicSolidThermo, MixtureType>::calculate()
         const typename MixtureType::thermoType& volMixture_ =
             this->cellVolMixture(pCells[celli], TCells[celli], celli);
 
-        if (!this->tempBased())
+        if (this->updateT())
         {
             TCells[celli] = mixture_.THE
             (
@@ -128,7 +128,7 @@ void Foam::heSolidThermo<BasicSolidThermo, MixtureType>::calculate()
                         facei
                     );
 
-                if (!this->tempBased())
+                if (this->updateT())
                 {
                     pT[facei] = mixture_.THE(phe[facei], pp[facei] ,pT[facei]);
                 }

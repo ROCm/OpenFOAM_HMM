@@ -68,7 +68,7 @@ void Foam::hePsiThermo<BasicPsiThermo, MixtureType>::calculate
         const typename MixtureType::thermoType& mixture_ =
             this->cellMixture(celli);
 
-        if (!this->tempBased())
+        if (this->updateT())
         {
             TCells[celli] = mixture_.THE
             (
@@ -121,7 +121,7 @@ void Foam::hePsiThermo<BasicPsiThermo, MixtureType>::calculate
                 const typename MixtureType::thermoType& mixture_ =
                     this->patchFaceMixture(patchi, facei);
 
-                if (!this->tempBased())
+                if (this->updateT())
                 {
                     pT[facei] = mixture_.THE(phe[facei], pp[facei], pT[facei]);
                 }

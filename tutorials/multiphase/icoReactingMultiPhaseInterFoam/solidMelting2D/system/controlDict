@@ -16,7 +16,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
-application     interThermalDyMFoam;
+application     icoReactingMultiPhaseInterFoam;
 
 startFrom       latestTime;
 
