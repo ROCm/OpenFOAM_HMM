@@ -63,7 +63,7 @@ void Foam::functionObjects::stabilityBlendingFactor::writeFileHeader
 
 bool Foam::functionObjects::stabilityBlendingFactor::calc()
 {
-    init(true);
+    init(false);
     return true;
 }
 
@@ -140,6 +140,14 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
 
     if (nonOrthogonality_)
     {
+        if (maxNonOrthogonality_ >= minNonOrthogonality_)
+        {
+            FatalErrorInFunction
+                << "    minNonOrthogonality should be larger than "
+                << "maxNonOrthogonality."
+                << exit(FatalError);
+        }
+
         indicator_ =
         max
         (
@@ -156,7 +164,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
             )
         );
 
-        if (log)
+        if (first)
         {
             Log << "    Max non-orthogonality :  " << max(*nonOrthPtr).value()
                 << endl;
@@ -168,6 +176,13 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
 
     if (skewness_)
     {
+        if (maxSkewness_ >= minSkewness_)
+        {
+            FatalErrorInFunction
+                << "    minSkewness should be larger than maxSkewness."
+                << exit(FatalError);
+        }
+
         indicator_ =
         max
         (
@@ -184,7 +199,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
             )
         );
 
-        if (log)
+        if (first)
         {
             Log << "    Max skewness :  " << max(*skewnessPtr).value()
                 << endl;
@@ -196,6 +211,13 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
 
     if (faceWeight_)
     {
+        if (maxFaceWeight_ >= minFaceWeight_)
+        {
+            FatalErrorInFunction
+                << "    minFaceWeight should be larger than maxFaceWeight."
+                << exit(FatalError);
+        }
+
         indicator_ =
             max
             (
@@ -212,7 +234,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
                 )
             );
 
-        if (log)
+        if (first)
         {
             Log << "    Min face weight:  " << min(*faceWeightsPtr).value()
                 << endl;
@@ -222,6 +244,13 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
 
     if (gradCc_)
     {
+        if (maxGradCc_ >= minGradCc_)
+        {
+            FatalErrorInFunction
+                << "    minGradCc should be larger than maxGradCc."
+                << exit(FatalError);
+        }
+
         tmp<volScalarField> magGradCCPtr
         (
             new volScalarField
@@ -262,7 +291,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
             magGradCCPtr.ref() +=  mag(fvc::grad(cci)).ref();
         }
 
-        if (log)
+        if (first)
         {
             Log << "    Max magGradCc :  " << max(magGradCCPtr.ref()).value()
                 << endl;
@@ -328,14 +357,14 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
                 min(max(scalar(0), (Co - Co1_)/(Co2_ - Co1_)), scalar(1))
             );
 
-        if (log)
+        if (first)
         {
             Log << "    Max Co :  " << max(Co).value()
                 << endl;
         }
     }
 
-    if (log)
+    if (first)
     {
         Log << nl;
     }
@@ -555,7 +584,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
 
     init(true);
 
-     writeFileHeader(file());
+    writeFileHeader(file());
 }
 
 
@@ -679,7 +708,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::write()
     reduce(nCellsScheme2, sumOp<label>());
     reduce(nCellsBlended, sumOp<label>());
 
-    Log << nl << type() << " : " << nl
+    Log << nl << type() << " execute :" << nl
         << "    scheme 1 cells :  " << nCellsScheme1 << nl
         << "    scheme 2 cells :  " << nCellsScheme2 << nl
         << "    blended cells  :  " << nCellsBlended << nl
