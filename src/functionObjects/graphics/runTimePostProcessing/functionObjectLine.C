@@ -99,7 +99,7 @@ addGeometryToScene
         return;
     }
 
-    if (fName.ext() == "vtk")
+    if (fName.hasExt("vtk"))
     {
         auto lines = vtkSmartPointer<vtkPolyDataReader>::New();
         lines->SetFileName(fName.c_str());

@@ -15,6 +15,7 @@ include_directories(
     $ENV{WM_PROJECT_DIR}/src/OSspecific/$ENV{WM_OSTYPE}/lnInclude
     $ENV{WM_PROJECT_DIR}/src/surfMesh/lnInclude
     $ENV{WM_PROJECT_DIR}/src/finiteVolume/lnInclude
+    $ENV{WM_PROJECT_DIR}/src/conversion/lnInclude
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
 )
@@ -58,6 +59,7 @@ file(GLOB SOURCE_FILES
     functionObjectLine.C
     functionObjectSurface.C
     geometryBase.C
+    geometryPatches.C
     geometrySurface.C
     pathline.C
     pointData.C
@@ -72,6 +74,7 @@ set(OPENFOAM_LIBRARIES
     OpenFOAM
     surfMesh
     finiteVolume
+    conversion
 )
 
 add_library(

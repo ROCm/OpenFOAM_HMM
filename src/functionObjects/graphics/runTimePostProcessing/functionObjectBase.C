@@ -44,11 +44,11 @@ namespace runTimePostPro
 bool Foam::functionObjects::runTimePostPro::functionObjectBase::removeFile
 (
     const word& keyword,
-    const word& fieldName
+    const word& subDictName
 )
 {
     dictionary dict;
-    state_.getObjectDict(functionObjectName_, fieldName, dict);
+    state_.getObjectDict(functionObjectName_, subDictName, dict);
 
     fileName fName;
     if (dict.readIfPresent(keyword, fName))
@@ -65,15 +65,13 @@ Foam::fileName
 Foam::functionObjects::runTimePostPro::functionObjectBase::getFileName
 (
     const word& keyword,
-    const word& fieldName
+    const word& subDictName
 ) const
 {
     dictionary dict;
-    state_.getObjectDict(functionObjectName_, fieldName, dict);
+    state_.getObjectDict(functionObjectName_, subDictName, dict);
 
-    fileName fName(dict.lookupOrDefault(keyword, fileName::null));
-
-    return fName;
+    return dict.lookupOrDefault<fileName>(keyword, fileName::null);
 }
 
 
@@ -88,11 +86,9 @@ Foam::functionObjects::runTimePostPro::functionObjectBase::functionObjectBase
 :
     fieldVisualisationBase(dict, colours),
     state_(state),
-    functionObjectName_(""),
+    functionObjectName_(dict.lookup("functionObject")),
     clearObjects_(dict.lookupOrDefault("clearObjects", false))
-{
-    dict.lookup("functionObject") >> functionObjectName_;
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

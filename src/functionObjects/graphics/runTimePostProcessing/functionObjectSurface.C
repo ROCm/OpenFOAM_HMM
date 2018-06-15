@@ -115,34 +115,33 @@ addGeometryToScene
             surfaceActor_,
             renderer
         );
+        return;
+    }
+
+    if (fName.hasExt("vtk"))
+    {
+        auto surf = vtkSmartPointer<vtkPolyDataReader>::New();
+        surf->SetFileName(fName.c_str());
+        surf->Update();
+
+        addFeatureEdges(renderer, surf->GetOutput());
+
+        auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+        mapper->SetInputConnection(surf->GetOutputPort());
+
+        setField(position, fieldName_, mapper, renderer, surf->GetOutput());
+
+        surfaceActor_->SetMapper(mapper);
+
+        setRepresentation(surfaceActor_);
+
+        renderer->AddActor(surfaceActor_);
     }
     else
     {
-        if (fName.ext() == "vtk")
-        {
-            auto surf = vtkSmartPointer<vtkPolyDataReader>::New();
-            surf->SetFileName(fName.c_str());
-            surf->Update();
-
-            addFeatureEdges(renderer, surf->GetOutput());
-
-            auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-            mapper->SetInputConnection(surf->GetOutputPort());
-
-            setField(position, fieldName_, mapper, renderer, surf->GetOutput());
-
-            surfaceActor_->SetMapper(mapper);
-
-            setRepresentation(surfaceActor_);
-
-            renderer->AddActor(surfaceActor_);
-        }
-        else
-        {
-            WarningInFunction
-                << "Only VTK file types are supported"
-                << endl;
-        }
+        WarningInFunction
+            << "Only VTK file types are supported"
+            << endl;
     }
 }
 

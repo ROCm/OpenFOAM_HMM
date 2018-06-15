@@ -71,7 +71,7 @@ void Foam::functionObjects::runTimePostPro::geometrySurface::addGeometryToScene
     {
         FatalErrorInFunction
             << "Glyph representation not available for " << typeName
-            << "object" << exit(FatalError);
+            << " object" << exit(FatalError);
     }
 
     triSurface surf(fName);

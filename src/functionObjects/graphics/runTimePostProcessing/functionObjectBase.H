@@ -27,6 +27,13 @@ Class
 Description
     Base class for function object visualisation
 
+    Dictionary controls
+    \table
+        Property     | Description                      | Required    | Default
+        functionObject | The data source                | yes         |
+        clearObjects  | Remove file after use           | no          | no
+    \endtable
+
 SourceFiles
     functionObjectBase.C
 
@@ -73,7 +80,7 @@ protected:
         //- Reference to the state
         const stateFunctionObject& state_;
 
-        //- Function object name
+        //- The function object name which provides the source data
         word functionObjectName_;
 
         //- Flag to indicate that source data should be cleared after use
@@ -82,11 +89,36 @@ protected:
 
     // Protected Member Functions
 
-        //- Retrieve file used to create the scene object
-        fileName getFileName(const word& keyword, const word& fieldName) const;
+        //- Retrieve the filename used to create the scene object
+        //- using information stored via the stateFunctionObject.
+        //
+        //  \param keyword is normally "file"
+        //  \param subDictName is the sub-dictionary name, which is often
+        //     the fieldName when one file is used per field.
+        //
+        //  Eg,
+        //  \verbatim
+        //      T
+        //      {
+        //          file    "path/T_object.vtk";
+        //      }
+        //      defaultCloud
+        //      {
+        //          file    "path/cloud_0001.vtp";
+        //          fields  (T U);
+        //      }
+        //  \endverbatim
+        fileName getFileName
+        (
+            const word& keyword,
+            const word& subDictName
+        ) const;
 
-        //- Remove file used to create the scene object
-        bool removeFile(const word& keyword, const word& fieldName);
+        //- Remove file used to create the scene object.
+        //  Same naming semantics as getFileName.
+        //
+        //  \note does not change the stateFunctionObject
+        bool removeFile(const word& keyword, const word& subDictName);
 
 
 public:
