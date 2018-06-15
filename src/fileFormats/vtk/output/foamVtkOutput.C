@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ License
 #include "foamVtkLegacyAsciiFormatter.H"
 #include "foamVtkLegacyRawFormatter.H"
 #include "typeInfo.H"
+#include "instant.H"
 
 // * * * * * * * * * * * * * * * Static Data * * * * * * * * * * * * * * * * //
 
@@ -101,19 +102,52 @@ Foam::vtk::newFormatter
 }
 
 
+void Foam::vtk::writeSeries
+(
+    Ostream& os,
+    const word& prefix,
+    const word& suffix,
+    const UList<instant>& series
+)
+{
+    // Begin file-series (JSON)
+    os  << "{\n  \"file-series-version\" : \"1.0\",\n  \"files\" : [\n";
+
+    // Track how many entries are remaining
+    // - trailing commas on all but the final entry (JSON requirement)
+    label nremain = series.size();
+
+    // Each entry
+    //   { "name" : "<prefix>name<suffix>", "time" : value }
+
+    for (const instant& inst : series)
+    {
+        os  << "    { \"name\" : \""
+            << prefix << inst.name() << suffix
+            << "\", \"time\" : " << inst.value() << " }";
+
+        if (--nremain)
+        {
+            os  << ',';
+        }
+        os  << nl;
+    }
+
+    os  << "  ]\n}\n";
+}
+
+
 Foam::label Foam::vtk::writeVtmFile
 (
     std::ostream& os,
     const UList<fileName>& files
 )
 {
-    const word& content = "vtkMultiBlockDataSet";
-
     asciiFormatter vtmFile(os);
 
     vtmFile
         .xmlHeader()
-        .beginVTKFile(content, "1.0");
+        .beginVTKFile(fileTagNames[vtk::fileTag::MULTI_BLOCK], "1.0");
 
     forAll(files, i)
     {
@@ -124,7 +158,7 @@ Foam::label Foam::vtk::writeVtmFile
             .closeTag(true);
     }
 
-    vtmFile.endTag(content).endVTKFile();
+    vtmFile.endTag(fileTagNames[vtk::fileTag::MULTI_BLOCK]).endVTKFile();
 
     return files.size();
 }

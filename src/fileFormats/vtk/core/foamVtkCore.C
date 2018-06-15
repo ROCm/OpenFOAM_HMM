@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,6 +46,7 @@ Foam::vtk::fileTagNames
     { fileTag::POINT_DATA, "PointData" },
     { fileTag::POLY_DATA, "PolyData" },
     { fileTag::UNSTRUCTURED_GRID, "UnstructuredGrid" },
+    { fileTag::MULTI_BLOCK, "vtkMultiBlockDataSet" },
 };
 
 

@@ -109,6 +109,32 @@ Foam::vtk::Tools::Patch::mesh(const PatchType& p)
 }
 
 
+template<class PatchType>
+vtkSmartPointer<vtkFloatArray>
+Foam::vtk::Tools::Patch::faceNormals(const PatchType& p)
+{
+    auto array = vtkSmartPointer<vtkFloatArray>::New();
+
+    array->SetNumberOfComponents(3);
+    array->SetNumberOfTuples(p.size());
+
+    // Unit normals for patch faces.
+    // If not already cached, could be more memory efficient to loop over
+    // the individual faces instead.
+
+    const vectorField& norms = p.faceNormals();
+
+    vtkIdType faceId = 0;
+    for (const vector& n : norms)
+    {
+        array->SetTuple(faceId, n.v_);
+        ++faceId;
+    }
+
+    return array;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //
 // Low-Level conversions

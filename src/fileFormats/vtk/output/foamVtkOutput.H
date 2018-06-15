@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,6 +54,9 @@ SourceFiles
 
 namespace Foam
 {
+// Forward declarations
+class instant;
+
 namespace vtk
 {
 
@@ -72,6 +75,19 @@ namespace vtk
         unsigned prec = IOstream::defaultPrecision()
     );
 
+
+    //- Write file series (JSON format) for specified time instances
+    //
+    //  \param prefix before the \c instant.name()
+    //  \param suffix after the \c instant.name()
+    //  \param series the list of name/value entries
+    void writeSeries
+    (
+        Ostream& os,
+        const word& prefix,
+        const word& suffix,
+        const UList<instant>& series
+    );
 
     //- Write vtm datasets for specified files
     label writeVtmFile(std::ostream& os, const UList<fileName>& files);

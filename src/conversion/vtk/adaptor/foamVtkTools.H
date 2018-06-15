@@ -197,6 +197,10 @@ public:
         //- Convert patch points/faces to vtkPolyData
         template<class PatchType>
         static vtkSmartPointer<vtkPolyData> mesh(const PatchType& p);
+
+        //- Convert patch face normals to vtkFloatArray
+        template<class PatchType>
+        static vtkSmartPointer<vtkFloatArray> faceNormals(const PatchType& p);
     };
 
 
