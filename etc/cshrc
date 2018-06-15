@@ -13,23 +13,21 @@
 #     etc/cshrc
 #
 # Description
-#     Set OpenFOAM environment for C-shell (csh, tcsh).
-#     Source manually or from the ~/.login or ~/.cshrc files.
+#     The OpenFOAM environment for C-shell (csh, tcsh).
+#     Source manually or from the ~/.cshrc or ~/.login files.
 #
-# Note
-#     Many environment variables can be overridden using a <prefs.csh> file
-#     from one of these locations:
-#     * user-specific:
-#         * ~/.OpenFOAM/$WM_PROJECT_VERSION
-#         * ~/.OpenFOAM
-#     * group-specific:
-#         * $WM_PROJECT_SITE/site/$WM_PROJECT_VERSION
-#         * $WM_PROJECT_SITE/site
-#     * general:
-#         * $WM_PROJECT_DIR/etc
+#     Many settings can be overridden using a <prefs.csh> file:
 #
-#     Any changes made to this cshrc file may be lost with the next upgrade.
+#       - Base values (eg, from system admin):
+#         -  $WM_PROJECT_DIR/etc/prefs.csh
 #
+#       - User or group values (first file found):
+#         -  ~/.OpenFOAM/$WM_PROJECT_VERSION/prefs.csh
+#         -  ~/.OpenFOAM/prefs.csh
+#         -  $WM_PROJECT_SITE/site/$WM_PROJECT_VERSION/prefs.csh
+#         -  $WM_PROJECT_SITE/site/prefs.csh
+#
+# Note: Changes made to this cshrc file may be lost with the next upgrade.
 #------------------------------------------------------------------------------
 
 setenv WM_PROJECT OpenFOAM
@@ -49,8 +47,8 @@ setenv FOAM_INST_DIR `lsof +p $$ |& \
 # END OF (NORMAL) USER EDITABLE PART
 ################################################################################
 
-# Default environment variables.
-# Can override with a <prefs.sh> file instead of editing below.
+# Configuration environment variables.
+# Should override via <prefs.csh> file instead of editing this file.
 
 # [WM_COMPILER_TYPE] - Compiler location:
 # = system | ThirdParty
@@ -58,7 +56,7 @@ setenv WM_COMPILER_TYPE system
 
 # [WM_COMPILER] - Compiler:
 # = Gcc | Gcc4[8-9] | Gcc5[1-5] | Gcc6[1-4] | Gcc7[1-3] | Gcc8[1] | GccKNL |
-#   Clang | Clang3[8-9] | Clang[4-6]0 | Icc | IccKNL | Cray | Arm
+#   Clang | Clang3[7-9] | Clang[4-6]0 | Icc | IccKNL | Cray | Arm
 setenv WM_COMPILER Gcc
 
 # [WM_ARCH_OPTION] - Memory addressing:
@@ -85,12 +83,15 @@ setenv WM_COMPILE_OPTION Opt
 setenv WM_MPLIB SYSTEMOPENMPI
 
 
-# [FOAM_SIGFPE] - Trapping of floating-point exceptions.
+#------------------------------------------------------------------------------
+# (legacy / advanced)
+#
+# [FOAM_SIGFPE] - Trap floating-point exceptions.
 #               - overrides the 'trapFpe' controlDict entry
 # = true | false
 #setenv FOAM_SIGFPE true
 
-# [FOAM_SETNAN] - Memory initialisation as NaN
+# [FOAM_SETNAN] - Initialize memory with NaN
 #               - overrides the 'setNaN' controlDict entry
 # = true | false
 #setenv FOAM_SETNAN false
@@ -139,10 +140,9 @@ setenv WM_PROJECT_USER_DIR $HOME/$WM_PROJECT/$LOGNAME-$WM_PROJECT_VERSION
 # Load shell "functions" (actually aliases)
 source $WM_PROJECT_DIR/etc/config.csh/functions
 
-# Override definitions via prefs, with 'other' first so the sys-admin
-# can provide base values independent of WM_PROJECT_SITE
-_foamEtc -mode=o  prefs.csh
-_foamEtc -mode=ug prefs.csh
+# Overrides via <prefs.csh>
+_foamEtc -mode=o  prefs.csh     # 1) other (system) systems
+_foamEtc -mode=ug prefs.csh     # 2) user or group settings
 
 # Evaluate command-line parameters and record settings for later.
 # These can be used to set/unset values, specify additional files etc.

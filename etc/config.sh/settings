@@ -100,9 +100,11 @@ Linux)
 Darwin)     # Presumably x86_64
     : ${WM_ARCH_OPTION:=64}; export WM_ARCH_OPTION  # Default to 64-bit
     WM_ARCH=darwin64
+    export WM_CFLAGS="$WM_CFLAGS -m64 -Ddarwin"
+    export WM_CXXFLAGS="$WM_CXXFLAGS -m64 -Ddarwin"
     /bin/cat << INCOMPLETE 1>&2
 ===============================================================================
-Operating system '$WM_ARCH' has incomplete support in this OpenFOAM release.
+Darwin support (clang only) is incomplete or untested in this OpenFOAM release.
 For further assistance, please contact www.OpenFOAM.com
 ===============================================================================
 INCOMPLETE
