@@ -130,7 +130,7 @@ public:
 typedef simplifiedMeshes::SimplifiedDynamicFvMesh<Type> simplified##Type;     \
                                                                               \
 template<>                                                                    \
-const word simplified##Type::typeName = Type::typeName;                       \
+const word simplified##Type::typeName(Type::typeName_());                     \
                                                                               \
 namespace simplifiedMeshes                                                    \
 {                                                                             \
