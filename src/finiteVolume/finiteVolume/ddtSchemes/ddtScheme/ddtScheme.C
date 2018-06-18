@@ -353,7 +353,7 @@ tmp<surfaceScalarField> ddtScheme<Type>::fvcDdtPhiCoeff
 template<class Type>
 tmp<surfaceScalarField> ddtScheme<Type>::fvcDdtPhiCoeff
 (
-    const GeometricField<Type, fvPatchField, volMesh>& U,
+    const GeometricField<Type, fvPatchField, volMesh>& rhoU,
     const fluxFieldType& phi,
     const volScalarField& rho
 )
@@ -362,9 +362,9 @@ tmp<surfaceScalarField> ddtScheme<Type>::fvcDdtPhiCoeff
     {
         return fvcDdtPhiCoeffExperimental
         (
-            U,
+            rhoU,
             phi,
-            (phi - fvc::dotInterpolate(mesh().Sf(), rho*U))
+            (phi - fvc::dotInterpolate(mesh().Sf(), rhoU))
            /fvc::interpolate(rho)
         );
     }
@@ -372,9 +372,9 @@ tmp<surfaceScalarField> ddtScheme<Type>::fvcDdtPhiCoeff
     {
         return fvcDdtPhiCoeff
         (
-            U,
+            rhoU,
             phi,
-            (phi - fvc::dotInterpolate(mesh().Sf(), rho*U))
+            (phi - fvc::dotInterpolate(mesh().Sf(), rhoU))
         );
     }
 }

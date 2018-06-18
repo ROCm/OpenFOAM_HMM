@@ -257,7 +257,7 @@ public:
 
         tmp<surfaceScalarField> fvcDdtPhiCoeff
         (
-            const GeometricField<Type, fvPatchField, volMesh>& U,
+            const GeometricField<Type, fvPatchField, volMesh>& rhoU,
             const fluxFieldType& phi,
             const volScalarField& rho
         );

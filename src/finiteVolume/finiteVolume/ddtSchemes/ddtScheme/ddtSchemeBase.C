@@ -31,10 +31,10 @@ License
 
 bool Foam::fv::ddtSchemeBase::experimentalDdtCorr
 (
-    Foam::debug::infoSwitch("experimentalDdtCorr", 0)
+    Foam::debug::optimisationSwitch("experimentalDdtCorr", 0)
 );
 
-registerInfoSwitch
+registerOptSwitch
 (
     "experimentalDdtCorr",
     bool,

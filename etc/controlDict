@@ -129,6 +129,11 @@ OptimisationSwitches
 
     //- Choose STL ASCII parser:  0=Flex, 1=Ragel, 2=Manual
     fileFormats::stl 0;
+
+    //- Use the updated ddt correction formulation introduced by openfoam org
+    //  in commit da787200.  Default is to use the formulation from v1712
+    //  see ddtScheme.C
+    experimentalDdtCorr 0;
 }
 
 
