@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "dictionary.H"
+#include "Pstream.H"
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
@@ -65,7 +66,14 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchCompat
 
         if (finder.found())
         {
-            if (shouldWarnVersion(iter.second))
+            // Only want a single warning (on master), but guard with a
+            // parRun check to avoid Pstream::master() when Pstream has not
+            // yet been initialized
+            if
+            (
+                shouldWarnVersion(iter.second)
+             && (Pstream::parRun() ? Pstream::master() : true)
+            )
             {
                 std::cerr
                     << "--> FOAM IOWarning :" << nl
