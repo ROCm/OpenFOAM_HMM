@@ -117,14 +117,14 @@ public:
                 return number_;
             }
 
-            //- The major version number
-            inline int major() const noexcept
+            //- Return the major version number.
+            inline int getMajor() const noexcept
             {
                 return int(number_ / 10);
             }
 
-            //- The minor version number
-            inline int minor() const noexcept
+            //- Return the minor version number
+            inline int getMinor() const noexcept
             {
                 return int(number_ % 10);
             }
@@ -132,7 +132,10 @@ public:
             //- A string representation of major.minor
             std::string str() const
             {
-                return std::to_string(major()) + '.' + std::to_string(minor());
+                return
+                    std::to_string(getMajor())
+                  + '.'
+                  + std::to_string(getMinor());
             }
 
 
