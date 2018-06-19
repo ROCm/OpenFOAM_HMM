@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -334,7 +334,11 @@ int main(int argc, char *argv[])
     const bool disableEntries = args.found("disableFunctionEntries");
     if (disableEntries)
     {
-        Info<< "Not expanding variables or dictionary directives" << endl;
+        // Report on stderr (once) to avoid polluting the output
+        if (Pstream::master())
+        {
+            Serr<< "Not expanding variables or dictionary directives" << endl;
+        }
         entry::disableFunctionEntries = true;
     }
 

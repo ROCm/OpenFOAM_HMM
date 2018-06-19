@@ -56,6 +56,9 @@ notTest()
 # Extract 'numberOfSubdomains' from system/decomposeParDict
 # (or alternative location).
 #
+# Note that '#include' and other directives are disabled - only entries that
+# are in the dictionary are considered.
+#
 # On failure:
 #    return '1'
 #    exit status 1
@@ -65,13 +68,13 @@ getNumberOfProcessors()
     local dict="${1:-system/decomposeParDict}"
 
     # Re-use positional parameters for automatic whitespace elimination
-    set -- $(foamDictionary -entry numberOfSubdomains -value "$dict" 2>/dev/null)
+    set -- $(foamDictionary -disableFunctionEntries -entry numberOfSubdomains -value "$dict" 2>/dev/null)
 
     if [ "$#" -eq 1 ]
     then
         echo "$1"
     else
-        echo "Warning no 'numberOfSubdomains' in '$dict'" 1>&2
+        echo "Error getting 'numberOfSubdomains' from '$dict'" 1>&2
         echo 1 # serial as fallback
         return 1
     fi
@@ -81,6 +84,9 @@ getNumberOfProcessors()
 #
 # Extract 'application' from system/controlDict
 #
+# Note that '#include' and other directives are disabled - only entries that
+# are in the dictionary are considered.
+#
 # On failure:
 #    return 'false' which is also a command (ie, shell builtin or /bin/false)
 #    exit status 1
@@ -88,13 +94,13 @@ getNumberOfProcessors()
 getApplication()
 {
     # Re-use positional parameters for automatic whitespace elimination
-    set -- $(foamDictionary -entry application -value system/controlDict)
+    set -- $(foamDictionary -disableFunctionEntries -entry application -value system/controlDict)
 
     if [ "$#" -eq 1 ]
     then
         echo "$1"
     else
-        echo "Error retrieving 'application' from controlDict" 1>&2
+        echo "Error getting 'application' from system/controlDict" 1>&2
         echo false
         return 1
     fi
