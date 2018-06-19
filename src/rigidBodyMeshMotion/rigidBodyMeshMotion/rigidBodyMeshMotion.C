@@ -351,7 +351,8 @@ bool Foam::rigidBodyMeshMotion::writeObject
     );
 
     model_.state().write(dict);
-    return dict.regIOobject::write();
+    // Force ascii writing
+    return dict.regIOobject::writeObject(IOstream::ASCII, ver, cmp, valid);
 }
 
 

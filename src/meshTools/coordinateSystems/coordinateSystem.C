@@ -147,9 +147,21 @@ Foam::coordinateSystem::coordinateSystem
 {
     const entry* entryPtr = dict.lookupEntryPtr(typeName_(), false, false);
 
-    // non-dictionary entry is a lookup into global coordinateSystems
-    if (entryPtr && !entryPtr->isDict())
+    if (!entryPtr)
     {
+        // No 'coordinateSystem' entry
+        init(dict, obr);
+    }
+    else if (entryPtr->isDict())
+    {
+        // 'coordinateSystem' as dictionary entry - use it
+        init(entryPtr->dict(), obr);
+    }
+    else
+    {
+        // 'coordinateSystem' as non-dictionary entry
+        // - this is a lookup into global coordinateSystems
+
         keyType key(entryPtr->stream());
 
         const coordinateSystems& lst = coordinateSystems::New(obr);
@@ -170,14 +182,10 @@ Foam::coordinateSystem::coordinateSystem
                 << exit(FatalError);
         }
 
-        // copy coordinateSystem, but assign the name as the typeName
+        // Copy from coordinateSystem, but assign the name as the typeName
         // to avoid strange things in writeDict()
         operator=(lst[index]);
         name_ = typeName_();
-    }
-    else
-    {
-        init(dict, obr);
     }
 }
 
