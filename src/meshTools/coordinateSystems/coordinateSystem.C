@@ -147,9 +147,21 @@ Foam::coordinateSystem::coordinateSystem
 {
     const entry* entryPtr = dict.lookupEntryPtr(typeName_(), false, false);
 
-    // non-dictionary entry is a lookup into global coordinateSystems
-    if (entryPtr && !entryPtr->isDict())
+    if (!entryPtr)
     {
+        // No 'coordinateSystem' entry
+        init(dict, obr);
+    }
+    else if (entryPtr->isDict())
+    {
+        // 'coordinateSystem' as dictionary entry - use it
+        init(entryPtr->dict(), obr);
+    }
+    else
+    {
+        // 'coordinateSystem' as non-dictionary entry
+        // - this is a lookup into global coordinateSystems
+
         keyType key(entryPtr->stream());
 
         const coordinateSystems& lst = coordinateSystems::New(obr);
@@ -170,14 +182,10 @@ Foam::coordinateSystem::coordinateSystem
                 << exit(FatalError);
         }
 
-        // copy coordinateSystem, but assign the name as the typeName
+        // Copy from coordinateSystem, but assign the name as the typeName
         // to avoid strange things in writeDict()
         operator=(lst[index]);
         name_ = typeName_();
-    }
-    else
-    {
-        init(dict, obr);
     }
 }
 
@@ -202,7 +210,7 @@ Foam::dictionary Foam::coordinateSystem::dict(bool ignoreType) const
 
     dict.add("name", name_);
 
-    // only write type for derived types
+    // Only write type for derived types
     if (!ignoreType && type() != typeName_())
     {
         dict.add("type", type());
@@ -296,8 +304,6 @@ void Foam::coordinateSystem::transfer(coordinateSystem& cs)
     note_ = std::move(cs.note_);
     origin_ = std::move(cs.origin_);
     R_ = std::move(cs.R_);
-
-    cs.clear();
 }
 
 
@@ -340,7 +346,16 @@ void Foam::coordinateSystem::operator=(const coordinateSystem& cs)
     name_ = cs.name_;
     note_ = cs.note_;
     origin_ = cs.origin_;
-    R_ = cs.R_.clone();
+
+    // Some extra safety
+    if (cs.R_.valid())
+    {
+        R_ = cs.R_.clone();
+    }
+    else
+    {
+        R_.reset(new axesRotation(sphericalTensor::I));
+    }
 }
 
 void Foam::coordinateSystem::operator=(coordinateSystem&& cs)
@@ -349,38 +364,27 @@ void Foam::coordinateSystem::operator=(coordinateSystem&& cs)
 }
 
 
-void Foam::coordinateSystem::init(const dictionary& rhs)
+void Foam::coordinateSystem::init(const dictionary& dict)
 {
-    rhs.lookup("origin") >> origin_;
+    dict.lookup("origin") >> origin_;
     note_.clear();
-    rhs.readIfPresent("note", note_);
-    R_ = coordinateRotation::New(rhs.subDict("coordinateRotation"));
+    dict.readIfPresent("note", note_);
+    R_ = coordinateRotation::New(dict.subDict("coordinateRotation"));
 }
 
 
 void Foam::coordinateSystem::init
 (
-    const dictionary& rhs,
+    const dictionary& dict,
     const objectRegistry& obr
 )
 {
-    if (debug)
-    {
-        Pout<< "coordinateSystem::operator="
-                "("
-                    "const dictionary&, "
-                    "const objectRegistry&"
-                ") : "
-            << "assign from " << rhs << endl;
-    }
-
-    rhs.lookup("origin") >> origin_;
+    dict.lookup("origin") >> origin_;
 
     // The 'note' entry is optional
     note_.clear();
-    rhs.readIfPresent("note", note_);
-
-    R_ = coordinateRotation::New(rhs.subDict("coordinateRotation"), obr);
+    dict.readIfPresent("note", note_);
+    R_ = coordinateRotation::New(dict.subDict("coordinateRotation"), obr);
 }
 
 

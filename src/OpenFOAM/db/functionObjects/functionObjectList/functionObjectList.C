@@ -829,7 +829,9 @@ bool Foam::functionObjectList::read()
                 {
                     // Bit of trickery to get the original message
                     err.write(Warning, false);
-                    InfoInFunction << nl << endl;
+                    InfoInFunction << nl
+                        << "--> while loading function object '" << key << "'"
+                        << nl << endl;
                 }
 
                 // Restore previous exception throwing state

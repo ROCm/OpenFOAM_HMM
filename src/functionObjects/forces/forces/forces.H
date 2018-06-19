@@ -111,8 +111,12 @@ Note
         coordinateSystem
         {
             origin  (0 0 0);
-            e3      (0 0 1);
-            e1      (1 0 0);
+            coordinateRotation
+            {
+                type    axesRotation;
+                e3      (0 0 1);
+                e1      (1 0 0);
+            }
         }
     \endverbatim
 

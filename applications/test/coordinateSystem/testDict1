@@ -1,0 +1,112 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      testDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Rotate 90 deg around x: y -> z, z -> -y
+
+rot_x90_axesRotation
+{
+    origin  (0 0 0);
+    coordinateRotation
+    {
+        type    axesRotation;
+        e1      (1 0 0);
+        e3      (0 -1 0);
+    }
+}
+
+rot_x90_euler
+{
+    origin  (0 0 0);
+    coordinateRotation
+    {
+        type    EulerRotation;
+        rotation (0 90 0);      // z-x'-z''
+    }
+}
+
+
+// Rotate 45 deg around z: x -> (1 1 0), y = (-1 1 0)
+
+rot_z45_axesRotation
+{
+    origin  (0 0 0);
+    coordinateRotation
+    {
+        type    axesRotation;
+        e1      (1 1 0);
+        e3      (0 0 1);
+    }
+}
+
+rot_z45_euler
+{
+    origin  (0 0 0);
+    coordinateRotation
+    {
+        type    EulerRotation;
+        rotation (45 0 0);      // z-x'-z''
+    }
+}
+
+
+// Rotate -45 deg around z: x -> (1 -1 0), y = (1 1 0)
+rot_zm45_axesRotation
+{
+    origin  (0 0 0);
+    coordinateRotation
+    {
+        type    axesRotation;
+        e1      (1 -1 0);
+        e3      (0 0 1);
+    }
+}
+
+rot_zm45_euler
+{
+    origin  (0 0 0);
+    coordinateRotation
+    {
+        type    EulerRotation;
+        rotation (-45 0 0);      // z-x'-z''
+    }
+}
+
+
+// Null transforms
+
+null_axesRotation
+{
+    origin  (0 0 0);
+    coordinateRotation
+    {
+        type    axesRotation;
+        e1      (1 0 0);
+        e3      (0 0 1);
+    }
+}
+
+null_euler
+{
+    origin  (0 0 0);
+    coordinateRotation
+    {
+        type    EulerRotation;
+        rotation (0 0 0);      // z-x'-z''
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

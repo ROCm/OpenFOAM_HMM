@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,16 +34,16 @@ Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
     const objectRegistry& obr
 )
 {
-    const word rotType = dict.lookup("type");
+    const word modelType(dict.get<word>("type"));
 
-    auto cstrIter = objectRegistryConstructorTablePtr_->cfind(rotType);
+    auto cstrIter = objectRegistryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalIOErrorInFunction(dict)
-            << "Unknown coordinateRotation type " << rotType << nl << nl
-            << "Valid coordinateRotation types :" <<  nl
-            << objectRegistryConstructorTablePtr_->sortedToc()
+            << "Unknown coordinateRotation type " << modelType << nl << nl
+            << "Valid types:  "
+            << flatOutput(objectRegistryConstructorTablePtr_->sortedToc())
             << exit(FatalIOError);
     }
 
@@ -56,16 +56,16 @@ Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
     const dictionary& dict
 )
 {
-    const word rotType = dict.lookup("type");
+    const word modelType(dict.get<word>("type"));
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(rotType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalIOErrorInFunction(dict)
-            << "Unknown coordinateRotation type " << rotType << nl << nl
-            << "Valid coordinateRotation types :" <<  nl
-            << dictionaryConstructorTablePtr_->sortedToc()
+            << "Unknown coordinateRotation type " << modelType << nl << nl
+            << "Valid types:  "
+            << flatOutput(dictionaryConstructorTablePtr_->sortedToc())
             << exit(FatalIOError);
     }
 
