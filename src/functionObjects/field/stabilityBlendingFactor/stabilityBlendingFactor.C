@@ -61,6 +61,7 @@ void Foam::functionObjects::stabilityBlendingFactor::writeFileHeader
     os  << endl;
 }
 
+
 bool Foam::functionObjects::stabilityBlendingFactor::calc()
 {
     init(false);
@@ -511,6 +512,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
             {
                 FatalErrorInFunction
                     << "    Field : " << nonOrthogonalityName_ << " not found."
+                    << " The function object will no be used"
                     << exit(FatalError);
             }
         }
@@ -542,6 +544,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
             {
                 FatalErrorInFunction
                     << "    Field : " << faceWeightName_ << " not found."
+                    << " The function object will no be used"
                     << exit(FatalError);
             }
         }
@@ -572,6 +575,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
             {
                 FatalErrorInFunction
                     << "    Field : " << skewnessName_ << " not found."
+                    << " The function object will no be used"
                     << exit(FatalError);
             }
         }
@@ -582,9 +586,12 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
         indicator_.writeOpt() = IOobject::AUTO_WRITE;
     }
 
-    init(true);
+    if (writeToFile_)
+    {
+        writeFileHeader(file());
+    }
 
-    writeFileHeader(file());
+    init(true);
 }
 
 
@@ -714,13 +721,17 @@ bool Foam::functionObjects::stabilityBlendingFactor::write()
         << "    blended cells  :  " << nCellsBlended << nl
         << endl;
 
-    writeTime(file());
 
-    file()
-        << tab << nCellsScheme1
-        << tab << nCellsScheme2
-        << tab << nCellsBlended
-        << endl;
+    if (writeToFile_)
+    {
+        writeTime(file());
+
+        file()
+            << tab << nCellsScheme1
+            << tab << nCellsScheme2
+            << tab << nCellsBlended
+            << endl;
+    }
 
     return true;
 }

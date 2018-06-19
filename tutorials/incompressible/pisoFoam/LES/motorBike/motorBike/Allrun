@@ -22,6 +22,7 @@ restore0Dir -processor
 
 runParallel renumberMesh -overwrite
 runParallel potentialFoam -initialiseUBCs
+runParallel checkMesh -writeFields '(nonOrthoAngle)' -constant
 runParallel $(getApplication)
 
 #------------------------------------------------------------------------------

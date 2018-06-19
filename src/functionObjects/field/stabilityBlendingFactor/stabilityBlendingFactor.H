@@ -174,7 +174,10 @@ Usage
     {
         type                stabilityBlendingFactor;
         libs                ("libfieldFunctionObjects.so");
+
         log                 true;
+        writeToFile         false;
+
         switchNonOrtho      yes;
         switchGradCc        no;
         switchResiduals     yes;
@@ -218,6 +221,7 @@ Usage
             type            residuals;
             libs            ("libutilityFunctionObjects.so");
             writeFields     true;
+            writeControl    outputTime;
             fields          (p);
         }
 
@@ -228,8 +232,9 @@ Usage
         Property     | Description             | Required    | Default value
         type         | Type name: stabilityBlendingFactor | yes       |
 
-
         log          | Log to standard output  | no          | yes
+        writeToFile  | Log to file             | no          | yes
+
         switchNonOrtho | non-orthogonal method | no | false
         switchGradCc | cell centre gradient method   | no | false
         switchResiduals | residual evolution method   | no | false
@@ -273,6 +278,13 @@ Usage
         | yes
 
     \endtable
+
+    The 'log' flag true write the number of cells on each scheme, plus it
+    writes the field name "blendedIndicator".
+
+    The 'result' entry is the field which is read by the localBlended scheme
+    specified in fvSchemes. This name is determined by the localBlended class.
+
 
 See also
     Foam::functionObjects::fieldExpression

@@ -20,6 +20,9 @@ blendingFactor
     type                stabilityBlendingFactor;
     libs                ("libfieldFunctionObjects.so");
     log                 true;
+    writeToFile         false;
+
+
     switchNonOrtho      yes;
     switchGradCc        no;
     switchResiduals     yes;
