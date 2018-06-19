@@ -330,7 +330,6 @@ Foam::functionObjects::vtkCloud::vtkCloud
     fvMeshFunctionObject(name, runTime, dict),
     writeOpts_(vtk::formatType::INLINE_BASE64),
     printf_(),
-    useTimeName_(false),
     useVerts_(false),
     selectClouds_(),
     selectFields_(),
@@ -394,7 +393,7 @@ bool Foam::functionObjects::vtkCloud::read(const dictionary& dict)
         printf_ = "%0" + std::to_string(padWidth) + "d";
     }
 
-    useTimeName_ = dict.lookupOrDefault<bool>("timeName", false);
+    // useTimeName_ = dict.lookupOrDefault<bool>("useTimeName", false);
 
     useVerts_ = dict.lookupOrDefault<bool>("cellData", false);
 
@@ -436,11 +435,18 @@ bool Foam::functionObjects::vtkCloud::write()
         return true;  // skip - not available
     }
 
+//     const word timeDesc =
+//     (
+//         useTimeName_
+//       ? time_.timeName()
+//       : printf_.empty()
+//       ? Foam::name(time_.timeIndex())
+//       : word::printf(printf_, time_.timeIndex())
+//     );
+
     const word timeDesc =
     (
-        useTimeName_
-      ? time_.timeName()
-      : printf_.empty()
+        printf_.empty()
       ? Foam::name(time_.timeIndex())
       : word::printf(printf_, time_.timeIndex())
     );
