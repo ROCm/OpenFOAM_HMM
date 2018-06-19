@@ -94,7 +94,7 @@ getNumberOfProcessors()
 getApplication()
 {
     # Re-use positional parameters for automatic whitespace elimination
-    set -- $(foamDictionary -disableFunctionEntries -entry application -value system/controlDict)
+    set -- $(foamDictionary -disableFunctionEntries -entry application -value system/controlDict 2>/dev/null)
 
     if [ "$#" -eq 1 ]
     then

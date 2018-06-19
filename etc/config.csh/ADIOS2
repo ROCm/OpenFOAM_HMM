@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -28,16 +28,12 @@ if ($?FOAM_VERBOSE && $?prompt) then
     echo "Using adios ($adios2_version)  ->  $ADIOS2_ARCH_PATH"
 endif
 
-# If *_ARCH_PATH does not end with '-system' or '-none',
-# it is located within ThirdParty, or a central installation
-# outside of ThirdParty and should be added to the path.
-
-set ending="${ADIOS2_ARCH_PATH:t}"
-if ( "$ending" != "adios-none" && "$ending" != "adios-system" ) then
-    # PATH was already cleaned by etc/cshrc caller
+# - only add if the directory really exists
+_foamAddLibAuto $ADIOS2_ARCH_PATH
+if ($status == 0) then
     _foamAddPath $ADIOS2_ARCH_PATH/bin
 endif
 
-unset adios_version ending
+unset adios2_version
 
 #------------------------------------------------------------------------------

@@ -5,49 +5,20 @@
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-FoamFile
+
+forces
 {
-    version     2.0;
-    format      ascii;
-    class       dictionary;
-    location    "system";
-    object      controlDict;
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    type            forces;
+    libs            ("libforces.so");
 
-application     simpleFoam;
+    writeControl    timeStep;
+    writeInterval   10;
+    log             false;
 
-startFrom       latestTime;
-
-startTime       0;
-
-stopAt          endTime;
-
-endTime         3000;
-
-deltaT          1;
-
-writeControl    runTime;
-
-writeInterval   100;
-
-purgeWrite      0;
-
-writeFormat     ascii;
-
-writePrecision  6;
-
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable true;
-
-functions
-{
-    #include "forces"
+    patches         (wing);
+    rho             rhoInf;
+    rhoInf          1;
+    CofR            (0.4974612746 -0.01671895744 0.125);
 }
 
 // ************************************************************************* //

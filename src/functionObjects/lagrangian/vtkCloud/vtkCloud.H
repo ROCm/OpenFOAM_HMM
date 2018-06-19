@@ -28,7 +28,8 @@ Group
     grpUtilitiesFunctionObjects
 
 Description
-    This functionObject writes cloud(s) in VTK format.
+    This functionObject writes cloud(s) in VTK PolyData format
+    (.vtp extension) with the time information saved in a '.series' file.
 
     Example of function object specification:
     \verbatim
@@ -38,11 +39,11 @@ Description
         libs            ("liblagrangianFunctionObjects.so");
         writeControl    writeTime;
         writeInterval   1;
-        format          binary;
+        format          ascii;
 
         cloud           myCloud;
-        width           12;
         fields          (T U rho);
+        width           4;  // file-padding
     }
     \endverbatim
 
@@ -57,20 +58,19 @@ Usage
         cellData     | Emit cellData instead of pointData | no        | false
         directory    | The output directory name        | no          | VTK
         width        | Padding width for file name      | no          | 8
-        timeName     | Use time-name instead of time-index | no       | false
         format       | ascii or binary format           | no          | binary
         writePrecision | write precision in ascii       | no | same as IOstream
     \endtable
 
-    The output filename and fields are added to the cloud's \c OutputProperties
-    dictionary. For the previous example specification:
+    The output filename and fields are added to the functionObjectProperties
+    information. For the previous example specification:
 
     \verbatim
     cloudWrite1
     {
         myCloud
         {
-            file    "<case>/VTK/myCloud_00001.vtp";
+            file    "<case>/VTK/myCloud_0001.vtp";
             fields  (T U rho);
         }
     }
@@ -121,9 +121,6 @@ class vtkCloud
 
         //- The printf format for zero-padding names
         string printf_;
-
-        //- Use time-name instead of time-index
-        bool useTimeName_;
 
         //- Write lagrangian as cell data (verts) instead of point data
         bool useVerts_;

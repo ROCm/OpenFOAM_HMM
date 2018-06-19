@@ -200,6 +200,7 @@ _foamEtc -config  paraview -- "$FOAM_SETTINGS"  # Pass through for evaluation
 _foamEtc -config  vtk
 _foamEtc -config  ensight
 ## _foamEtc -config  ADIOS
+## _foamEtc -config  ADIOS2
 _foamEtc -config  CGAL
 _foamEtc -config  FFTW
 

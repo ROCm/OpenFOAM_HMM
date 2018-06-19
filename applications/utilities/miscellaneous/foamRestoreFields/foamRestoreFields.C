@@ -144,13 +144,9 @@ label restoreFields
         }
     }
 
-    if (dryrun)
+    if (verbose)
     {
-        Info<< "dry-run: " << dirName << nl;
-    }
-    else if (verbose)
-    {
-        Info<< "directory " << dirName << nl;
+        Info<< "directory " << dirName.name() << nl;
     }
 
     // Count of files moved, including backups
@@ -296,7 +292,7 @@ int main(int argc, char *argv[])
     // command-line options
 
     label nProcs = 0;
-    instantList times;
+    wordList timeDirs;
 
     if (args.found("processor") && !Pstream::parRun())
     {
@@ -310,41 +306,47 @@ int main(int argc, char *argv[])
                 << exit(FatalError);
         }
 
-        // Obtain times from "processor0/" only
-        times = timeSelector::select
+        // Obtain time directory names from "processor0/" only
+
+        timeDirs = ListOps::create<word>
         (
-            Time
+            timeSelector::select
             (
-                Time::controlDictName,
-                args.rootPath(),
-                args.caseName()/"processor0"
-            ).times(),
-            args
+                Time
+                (
+                    Time::controlDictName,
+                    args.rootPath(),
+                    args.caseName()/"processor0"
+                ).times(),
+                args
+            ),
+            [](const instant& t){ return t.name(); }
         );
     }
     else
     {
-        if (Pstream::master())
-        {
-            times = timeSelector::select
+        timeDirs = ListOps::create<word>
+        (
+            timeSelector::select
             (
                 Time(Time::controlDictName, args).times(),
                 args
-            );
-        }
+            ),
+            [](const instant& t){ return t.name(); }
+        );
 
-        Pstream::scatter(times);
+        Pstream::scatter(timeDirs);
     }
 
 
-    if (times.empty())
+    if (timeDirs.empty())
     {
         Info<< "no times selected" << nl;
     }
 
-    for (const instant& inst : times)
+    for (const word& dirName : timeDirs)
     {
-        Info<< "\nTime = " << inst.name() << nl;
+        Info<< "\nTime = " << dirName << nl;
 
         label count = 0;
 
@@ -352,7 +354,7 @@ int main(int argc, char *argv[])
         {
             const wordHashSet files
             (
-                getFiles(args.path()/"processor0", inst.name())
+                getFiles(args.path()/"processor0", dirName)
             );
 
             for (label proci=0; proci < nProcs; ++proci)
@@ -360,7 +362,7 @@ int main(int argc, char *argv[])
                 count += restoreFields
                 (
                     method,
-                    args.path()/("processor" + Foam::name(proci))/inst.name(),
+                    args.path()/("processor" + Foam::name(proci))/dirName,
                     files,
                     targetNames
                 );
@@ -371,14 +373,14 @@ int main(int argc, char *argv[])
             wordList files;
             if (Pstream::master())
             {
-                files = getFiles(args.path(), inst.name());
+                files = getFiles(args.path(), dirName);
             }
             Pstream::scatter(files);
 
             count += restoreFields
             (
                 method,
-                args.path()/inst.name(),
+                args.path()/dirName,
                 wordHashSet(files),
                 targetNames
             );

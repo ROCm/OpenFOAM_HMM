@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -16,6 +16,7 @@
 # Description
 #     Setup for ADIOS2 include/libraries (usually ThirdParty installation).
 #
+#     Use with -force when sourcing directly from the command-line
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
@@ -29,21 +30,30 @@ then
     echo "Using adios ($adios2_version)  ->  $ADIOS2_ARCH_PATH" 1>&2
 fi
 
-if command -v _foamAddPath >/dev/null 2>&1      # Normal sourcing
+if command -v _foamAddLibAuto > /dev/null 2>&1
 then
-    # If *_ARCH_PATH does not end with '-system' or '-none',
-    # it is located within ThirdParty, or a central installation
-    # outside of ThirdParty and should be added to the path.
+    # Normal sourcing (not makeADIOS)
+    # - but only add if the directory really exists
 
-    ending="${ADIOS2_ARCH_PATH##*-}"
-    if [ "$ending" != none -a "$ending" != system ]
+    if _foamAddLibAuto $ADIOS2_ARCH_PATH
     then
-        # PATH was already cleaned by etc/bashrc caller
         _foamAddPath $ADIOS2_ARCH_PATH/bin
     fi
 
-    unset adios2_version ending
+    unset adios2_version
 
+elif [ "$1" = "-force" ]
+then
+    # Forced command-line sourcing
+
+    if output="$($WM_PROJECT_DIR/bin/tools/lib-dir -sh $ADIOS2_ARCH_PATH 2>/dev/null)"
+    then
+        eval "$output"
+        PATH="$ADIOS2_ARCH_PATH/bin:$PATH"
+    fi
+
+    unset adios2_version output
 fi
+
 
 #------------------------------------------------------------------------------
