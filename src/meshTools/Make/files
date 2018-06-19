@@ -231,6 +231,11 @@ triSurface/triSurfaceTools/pointToPointPlanarInterpolation.C
 
 twoDPointCorrector/twoDPointCorrector.C
 
+processorLOD/processorLOD/processorLOD.C
+processorLOD/box/box.C
+processorLOD/cellBox/cellBox.C
+processorLOD/faceBox/faceBox.C
+
 AMI=AMIInterpolation
 $(AMI)/AMIInterpolation/AMIInterpolationName.C
 $(AMI)/AMIInterpolation/AMIPatchToPatchInterpolation.C
