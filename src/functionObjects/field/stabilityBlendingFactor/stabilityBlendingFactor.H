@@ -424,6 +424,9 @@ class stabilityBlendingFactor
         //- Init fields
         bool init(bool first);
 
+        //- Calculate statistics
+        void calcStats(label&, label&, label&) const ;
+
         //- Calculate the blending factor field and return true if successful
         virtual bool calc();
 

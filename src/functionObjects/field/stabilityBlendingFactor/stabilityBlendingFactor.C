@@ -48,6 +48,37 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void Foam::functionObjects::stabilityBlendingFactor::calcStats
+(
+    label& nCellsScheme1,
+    label& nCellsScheme2,
+    label& nCellsBlended
+) const
+{
+    forAll(indicator_, celli)
+    {
+        scalar i = indicator_[celli];
+
+        if (i < tolerance_)
+        {
+            nCellsScheme2++;
+        }
+        else if (i > (1 - tolerance_))
+        {
+            nCellsScheme1++;
+        }
+        else
+        {
+            nCellsBlended++;
+        }
+    }
+
+    reduce(nCellsScheme1, sumOp<label>());
+    reduce(nCellsScheme2, sumOp<label>());
+    reduce(nCellsBlended, sumOp<label>());
+}
+
+
 void Foam::functionObjects::stabilityBlendingFactor::writeFileHeader
 (
     Ostream& os
@@ -370,6 +401,21 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
         Log << nl;
     }
 
+    if (log)
+    {
+        label nCellsScheme1 = 0;
+        label nCellsScheme2 = 0;
+        label nCellsBlended = 0;
+
+        calcStats(nCellsScheme1, nCellsScheme2, nCellsBlended);
+
+        Log << nl << type() << " execute :" << nl
+        << "    scheme 1 cells :  " << nCellsScheme1 << nl
+        << "    scheme 2 cells :  " << nCellsScheme2 << nl
+        << "    blended cells  :  " << nCellsBlended << nl
+        << endl;
+    }
+
     indicator_.correctBoundaryConditions();
     indicator_.min(1.0);
     indicator_.max(0.0);
@@ -689,41 +735,15 @@ bool Foam::functionObjects::stabilityBlendingFactor::read
 
 bool Foam::functionObjects::stabilityBlendingFactor::write()
 {
-    // Generate scheme statistics
-    label nCellsScheme1 = 0;
-    label nCellsScheme2 = 0;
-    label nCellsBlended = 0;
-    forAll(indicator_, celli)
-    {
-        scalar i = indicator_[celli];
-
-        if (i < tolerance_)
-        {
-            nCellsScheme2++;
-        }
-        else if (i > (1 - tolerance_))
-        {
-            nCellsScheme1++;
-        }
-        else
-        {
-            nCellsBlended++;
-        }
-    }
-
-    reduce(nCellsScheme1, sumOp<label>());
-    reduce(nCellsScheme2, sumOp<label>());
-    reduce(nCellsBlended, sumOp<label>());
-
-    Log << nl << type() << " execute :" << nl
-        << "    scheme 1 cells :  " << nCellsScheme1 << nl
-        << "    scheme 2 cells :  " << nCellsScheme2 << nl
-        << "    blended cells  :  " << nCellsBlended << nl
-        << endl;
-
-
     if (writeToFile_)
     {
+
+        label nCellsScheme1 = 0;
+        label nCellsScheme2 = 0;
+        label nCellsBlended = 0;
+
+        calcStats(nCellsScheme1, nCellsScheme2, nCellsBlended);
+
         writeTime(file());
 
         file()
@@ -735,6 +755,5 @@ bool Foam::functionObjects::stabilityBlendingFactor::write()
 
     return true;
 }
-
 
 // ************************************************************************* //

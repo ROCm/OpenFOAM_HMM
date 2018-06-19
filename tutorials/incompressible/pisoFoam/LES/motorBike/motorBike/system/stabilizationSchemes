@@ -22,7 +22,6 @@ blendingFactor
     log                 true;
     writeToFile         false;
 
-
     switchNonOrtho      yes;
     switchGradCc        no;
     switchResiduals     yes;
