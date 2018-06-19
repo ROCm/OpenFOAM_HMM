@@ -158,6 +158,7 @@ _foamEtc -config  vtk
 _foamEtc -config  ensight
 _foamEtc -config  gperftools
 ## _foamEtc -config  ADIOS
+## _foamEtc -config  ADIOS2
 _foamEtc -config  CGAL
 _foamEtc -config  scotch
 _foamEtc -config  FFTW
