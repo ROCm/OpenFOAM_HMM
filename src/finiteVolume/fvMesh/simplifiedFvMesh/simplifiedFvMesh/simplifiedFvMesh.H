@@ -52,18 +52,6 @@ class simplifiedFvMesh
 :
     public fvMesh
 {
-protected:
-
-    //- Helper function to initialise empty zones
-    template<class ZoneMeshType>
-    void initialiseZone
-    (
-        const word& zoneTypeName,
-        const fileName& instance,
-        ZoneMeshType& zoneType
-    );
-
-
 public:
 
     //- Runtime type information
@@ -115,12 +103,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "simplifiedFvMeshTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

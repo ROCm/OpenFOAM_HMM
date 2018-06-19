@@ -25,6 +25,7 @@ License
 
 #include "simplifiedFvMesh.H"
 #include "fvPatchField.H"
+#include "topoSet.H"
 
 // * * * * * * * * * * * * * * * Static Members  * * * * * * * * * * * * * * //
 
@@ -56,6 +57,8 @@ bool Foam::simplifiedFvMesh::fvPatchFieldExists(const word& patchType)
     return false;
 }
 
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::simplifiedFvMesh::simplifiedFvMesh
 (

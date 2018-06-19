@@ -75,7 +75,8 @@ bool Foam::simplifiedMeshes::columnFvMeshInfo::setPatchEntries
     {
         polyBoundaryMeshEntries allPatchEntries(boundaryIO);
 
-        Info<< "Creating simplified mesh using " << allPatchEntries.path() << endl;
+        Info<< "Creating simplified mesh using " << allPatchEntries.path()
+            << endl;
 
         for (const entry& e : allPatchEntries)
         {
@@ -134,7 +135,7 @@ bool Foam::simplifiedMeshes::columnFvMeshInfo::setPatchEntries
                     dictionary simplifiedEntries;
                     simplifiedEntries.add("startFace", 0);
                     simplifiedEntries.add("nFaces", 1);
-                    simplifiedEntries.add("type", "wall"); // default to wall type
+                    simplifiedEntries.add("type", "wall"); // default to wall
 
                     patchEntries_.add(e.keyword(), simplifiedEntries);
                 }
@@ -304,7 +305,12 @@ void Foam::simplifiedMeshes::columnFvMeshInfo::initialise(const Time& runTime)
 }
 
 
-void Foam::simplifiedMeshes::columnFvMeshInfo::addLocalPatches(fvMesh& mesh) const
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::simplifiedMeshes::columnFvMeshInfo::addLocalPatches
+(
+    fvMesh& mesh
+) const
 {
     const label nPatch = patchEntries_.size();
 
@@ -367,6 +373,24 @@ void Foam::simplifiedMeshes::columnFvMeshInfo::addLocalPatches(fvMesh& mesh) con
     }
 }
 
+
+void Foam::simplifiedMeshes::columnFvMeshInfo::initialiseZones(fvMesh& mesh)
+{
+    if (createFromMesh_)
+    {
+        // Initialise the zones
+        initialiseZone<pointZoneMesh>
+        (
+            "point",
+            localInstance_,
+            mesh.pointZones()
+        );
+        initialiseZone<faceZoneMesh>("face", localInstance_, mesh.faceZones());
+        initialiseZone<cellZoneMesh>("cell", localInstance_, mesh.cellZones());
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::simplifiedMeshes::columnFvMeshInfo::columnFvMeshInfo(const Time& runTime)
@@ -389,6 +413,11 @@ Foam::simplifiedMeshes::columnFvMeshInfo::columnFvMeshInfo(const Time& runTime)
     nPatchWithFace_(0)
 {
     initialise(runTime);
+
+    // Dummy zones and sets created on demand
+    // Note: zones can be updated post-construction
+    cellZoneMesh::disallowGenericZones = 1;
+    topoSet::disallowGenericSets = 1;
 }
 
 
@@ -423,24 +452,8 @@ Foam::simplifiedMeshes::columnFvMesh::columnFvMesh(const Time& runTime)
     // Add the patches
     addLocalPatches(*this);
 
-    // Add the zones
-
-    if (createFromMesh_)
-    {
-        // Initialise the zones
-        initialiseZone<pointZoneMesh>("point", localInstance_, pointZones());
-        initialiseZone<faceZoneMesh>("face", localInstance_, faceZones());
-        initialiseZone<cellZoneMesh>("cell", localInstance_, cellZones());
-
-        // Dummy sets created on demand
-        topoSet::disallowGenericSets = 1;
-    }
-    else
-    {
-        // Dummy zones and sets created on demand
-        cellZoneMesh::disallowGenericZones = 1;
-        topoSet::disallowGenericSets = 1;
-    }
+    // Add the zones if constructed from mesh
+    initialiseZones(*this);
 
     if (debug)
     {

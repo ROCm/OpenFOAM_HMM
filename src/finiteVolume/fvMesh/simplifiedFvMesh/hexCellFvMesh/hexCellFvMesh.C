@@ -94,6 +94,8 @@ Foam::simplifiedMeshes::hexCellFvMesh::hexCellFvMesh
     );
 
     addFvPatches(patches);
+
+    // Note: no sets or zones created
 }
 
 

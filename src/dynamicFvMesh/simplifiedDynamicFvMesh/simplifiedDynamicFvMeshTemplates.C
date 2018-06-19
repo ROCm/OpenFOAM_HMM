@@ -61,6 +61,9 @@ SimplifiedDynamicFvMesh
 
     // Add the patches
     addLocalPatches(*this);
+
+    // Add the zones if constructed from mesh
+    initialiseZones(*this);
 }
 
 

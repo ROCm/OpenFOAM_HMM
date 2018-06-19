@@ -59,6 +59,15 @@ class columnFvMeshInfo
         //- Initialise
         void initialise(const Time& runTime);
 
+        //- Helper function to initialise empty zones
+        template<class ZoneMeshType>
+        void initialiseZone
+        (
+            const word& zoneTypeName,
+            const fileName& instance,
+            ZoneMeshType& zoneType
+        );
+
 
 protected:
 
@@ -99,6 +108,9 @@ protected:
         //- Add the patches to the mesh
         void addLocalPatches(fvMesh& mesh) const;
 
+        //- Initialise zones if constructed from mesh
+        void initialiseZones(fvMesh& mesh);
+
 
 public:
 
@@ -130,6 +142,12 @@ public:
 
 } // End namespace simplifiedMeshes
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "columnFvMeshTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
