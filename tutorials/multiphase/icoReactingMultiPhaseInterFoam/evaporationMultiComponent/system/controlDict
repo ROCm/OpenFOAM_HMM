@@ -23,7 +23,7 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         0.55;
+endTime         0.5;
 
 deltaT          1e-3;
 
@@ -37,7 +37,7 @@ writeFormat     ascii;
 
 writePrecision  6;
 
-writeCompression uncompressed;
+writeCompression off;
 
 timeFormat      general;
 

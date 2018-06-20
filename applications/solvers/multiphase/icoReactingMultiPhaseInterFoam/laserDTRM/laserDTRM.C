@@ -643,7 +643,7 @@ void Foam::radiation::laserDTRM::calculate()
                 {
                     reflectingCells[cellI] = reflectionModelId;
                     reflectingCellsVol[cellI] = reflectionModelId;
-                    if (!mag(nHat[cellI]) > 0.0)
+                    if (mag(nHat[cellI]) == 0.0)
                     {
                         nHat[cellI] += nHatPhase[cellI];
                     }

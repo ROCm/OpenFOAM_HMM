@@ -68,7 +68,6 @@ int main(int argc, char *argv[])
     #include "createFvOptions.H"
     #include "createTimeControls.H"
     #include "CourantNo.H"
-    //#include "alphaCourantNo.H"
     #include "setInitialDeltaT.H"
 
     turbulence->validate();
