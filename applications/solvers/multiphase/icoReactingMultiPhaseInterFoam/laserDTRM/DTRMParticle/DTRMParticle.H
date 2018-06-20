@@ -62,9 +62,6 @@ class DTRMParticle
 :
     public particle
 {
-private:
-
-
     // Private data
 
         //- Size in bytes of the fields
@@ -98,8 +95,6 @@ public:
     :
         public particle::trackingData
     {
-
-
         // Interpolators for continuous phase fields
 
             const interpolationCell<scalar>& aInterp_;
@@ -135,10 +130,6 @@ public:
                 volScalarField& Q
             );
 
-        // Public data
-
-
-
 
         // Member functions
 
@@ -151,7 +142,6 @@ public:
             inline const UPtrList<reflectionModel>& reflection() const;
 
             inline scalar& Q(label celli);
-
     };
 
      // Static data members
@@ -268,7 +258,6 @@ public:
 
     // Edit
 
-
         //- Return access to the target position
         inline point& p1();
 
@@ -292,7 +281,6 @@ public:
 
 
     // Member Operators
-
 
         //- Overridable function to handle the particle hitting a processorPatch
         void hitProcessorPatch

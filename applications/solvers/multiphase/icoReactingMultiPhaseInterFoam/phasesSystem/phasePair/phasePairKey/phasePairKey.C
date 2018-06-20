@@ -47,12 +47,6 @@ Foam::phasePairKey::phasePairKey
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::phasePairKey::~phasePairKey()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 bool Foam::phasePairKey::ordered() const
@@ -133,14 +127,8 @@ Foam::Istream& Foam::operator>>(Istream& is, phasePairKey& key)
     }
     else
     {
-        FatalErrorIn
-        (
-            "friend Istream& operator>>"
-            "("
-                "Istream& is, "
-                "phasePairKey& key"
-            ")"
-        )   << "Phase pair type is not recognised. "
+        FatalErrorInFunction
+            << "Phase pair type is not recognised. "
             << temp
             << "Use (phaseDispersed to phaseContinuous) for an ordered"
             << "pair, or (phase1 and pase2) for an unordered pair."

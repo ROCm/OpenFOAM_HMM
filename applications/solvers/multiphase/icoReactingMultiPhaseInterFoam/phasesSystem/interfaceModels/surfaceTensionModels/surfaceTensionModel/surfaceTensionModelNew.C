@@ -23,49 +23,36 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "multiphaseSystem.H"
+#include "surfaceTensionModel.H"
+#include "phasePair.H"
 
 // * * * * * * * * * * * * * * * * Selector  * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::multiphaseSystem> Foam::multiphaseSystem::New
+Foam::autoPtr<Foam::surfaceTensionModel> Foam::surfaceTensionModel::New
 (
-    const fvMesh& mesh
+    const dictionary& dict,
+    const phasePair& pair
 )
 {
-    const word multiphaseSystemType
-    (
-        IOdictionary
-        (
-            IOobject
-            (
-                phasePropertiesName,
-                mesh.time().constant(),
-                mesh,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false
-            )
-        ).lookup("type")
-    );
+    word modelType(dict.lookup("type"));
 
-    Info<< "Selecting multiphaseSystem " << multiphaseSystemType << endl;
+    Info<< "Selecting surfaceTensionModel for "
+        << pair << ": " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(multiphaseSystemType);
+   const auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalErrorIn
-        (
-            "multiphaseSystem::New"
-        )   << "Unknown multiphaseSystemType type "
-            << multiphaseSystemType << endl
-            << "Valid multiphaseSystem types are : " << endl
+        FatalIOErrorInFunction(dict)
+            << "Unknown surfaceTensionModel type "
+            << surfaceTensionModelType << endl << endl
+            << "Valid modelType types are : " << endl
             << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+            << exit(FatalIOError);
     }
 
-    return autoPtr<multiphaseSystem> (cstrIter()(mesh));
+    return cstrIter()(dict, pair, true);
 }
+
 
 // ************************************************************************* //

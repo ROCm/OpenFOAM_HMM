@@ -110,7 +110,7 @@ public:
 
 
     //- Destructor
-    virtual ~MassTransferPhaseSystem();
+    virtual ~MassTransferPhaseSystem() = default;
 
 
     // Member Functions

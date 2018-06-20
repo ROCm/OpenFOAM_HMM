@@ -46,7 +46,7 @@ namespace Foam
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
-                           Class porousModel Declaration
+                         Class porousModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class porousModel
@@ -92,7 +92,7 @@ public:
 
 
     //- Destructor
-    virtual ~porousModel();
+    virtual ~porousModel() = default;
 
 
     // Selectors

@@ -23,37 +23,35 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "porousModel.H"
-#include "phasePair.H"
+#include "phaseModel.H"
+#include "phaseSystem.H"
 
 // * * * * * * * * * * * * * * * * Selector  * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::porousModel >
-Foam::porousModel::New
+Foam::autoPtr<Foam::phaseModel> Foam::phaseModel::New
 (
-    const dictionary& dict,
-    const fvMesh& mesh
+    const phaseSystem& fluid,
+    const word& phaseName
 )
 {
-    word porousModelType(dict.lookup("type"));
+    word modelType(fluid.subDict(phaseName).lookup("type"));
 
-    Info<< "Selecting porousModel for "
-        <<  ": " << porousModelType << endl;
+    Info<< "Selecting phaseModel for "
+        << phaseName << ": " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(porousModelType);
+    const auto cstrIter = phaseSystemConstructorTablePtr_->cfind(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalErrorIn("porousModel::New")
-            << "Unknown porousModelType type "
-            << porousModelType << endl << endl
-            << "Valid porousModel types are : " << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
+        FatalErrorInFunction
+            << "Unknown phaseModel type "
+            << modelType << endl << endl
+            << "Valid phaseModel types are : " << endl
+            << phaseSystemConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
-    return cstrIter()(dict, mesh);
+    return cstrIter()(fluid, phaseName);
 }
 
 

@@ -95,6 +95,7 @@ protected:
         //- Calculate Sp and Su
         void calculateSuSp();
 
+
 public:
 
     //- Runtime type information
@@ -121,7 +122,7 @@ public:
 
 
     //- Destructor
-    virtual ~multiphaseSystem();
+    virtual ~multiphaseSystem() = default;
 
 
     // Selectors
@@ -136,7 +137,6 @@ public:
 
 
         // Access
-
 
             //- Return phases
             const UPtrList<phaseModel>& phases() const;
@@ -167,9 +167,6 @@ public:
 
             //- Read thermophysical properties dictionary
             virtual bool read();
-
-
-
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

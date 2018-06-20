@@ -28,7 +28,7 @@ Description
 
 SourceFiles
     surfaceTensionModel.C
-    newAspectRatioModel.C
+    surfaceTensionModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,7 +47,7 @@ namespace Foam
 class phasePair;
 
 /*---------------------------------------------------------------------------*\
-                        Class surfaceTensionModel Declaration
+                     Class surfaceTensionModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class surfaceTensionModel
@@ -95,7 +95,7 @@ public:
 
 
     //- Destructor
-    virtual ~surfaceTensionModel();
+    virtual ~surfaceTensionModel() = default;
 
 
     // Selectors

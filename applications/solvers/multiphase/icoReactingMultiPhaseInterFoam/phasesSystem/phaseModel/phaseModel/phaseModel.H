@@ -52,7 +52,7 @@ namespace Foam
 class phaseSystem;
 
 /*---------------------------------------------------------------------------*\
-                           Class phaseModel Declaration
+                         Class phaseModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class phaseModel
@@ -94,7 +94,7 @@ public:
 
 
     //- Destructor
-    virtual ~phaseModel();
+    virtual ~phaseModel() = default;
 
 
     // Selectors
@@ -212,9 +212,7 @@ public:
         }
 
 
-
     // Transport
-
 
         //- Thermal diffusivity for enthalpy of mixture [kg/m/s]
         const volScalarField& alpha() const;
@@ -265,7 +263,6 @@ public:
         virtual tmp<surfaceScalarField> diffNo() const = 0;
 
 
-
     // Species
 
         //- Constant access the species mass fractions
@@ -275,27 +272,25 @@ public:
         virtual PtrList<volScalarField>& Y() = 0;
 
 
-
     // Momentum
 
+        //- Constant access the volumetric flux
+        virtual tmp<surfaceScalarField> phi() const = 0;
 
-            //- Constant access the volumetric flux
-            virtual tmp<surfaceScalarField> phi() const = 0;
+        //- Access the volumetric flux
+        virtual const surfaceScalarField& phi() = 0;
 
-            //- Access the volumetric flux
-            virtual const surfaceScalarField& phi() = 0;
+        //- Constant access the volumetric flux of the phase
+        virtual tmp<surfaceScalarField> alphaPhi() const = 0;
 
-            //- Constant access the volumetric flux of the phase
-            virtual tmp<surfaceScalarField> alphaPhi() const = 0;
+        //- Access the volumetric flux of the phase
+        virtual surfaceScalarField& alphaPhi() = 0;
 
-            //- Access the volumetric flux of the phase
-            virtual surfaceScalarField& alphaPhi() = 0;
-
-            //- Access const reference to U
-            virtual tmp<volVectorField> U() const = 0;
+        //- Access const reference to U
+        virtual tmp<volVectorField> U() const = 0;
 
 
-    // Turbulence (WIP: possible to add turbulent on each phase)
+    // Turbulence (WIP: possible to add turbulence on each phase)
 
         /*
         //- Return the turbulent dynamic viscosity

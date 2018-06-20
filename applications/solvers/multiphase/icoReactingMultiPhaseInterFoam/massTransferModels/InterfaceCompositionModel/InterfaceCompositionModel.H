@@ -49,7 +49,7 @@ template <class ThermoType> class pureMixture;
 template <class ThermoType> class multiComponentMixture;
 
 /*---------------------------------------------------------------------------*\
-                    Class InterfaceCompositionModel Declaration
+                  Class InterfaceCompositionModel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Thermo, class OtherThermo>
@@ -125,14 +125,11 @@ protected:
 
 public:
 
-    // Constructors
-
-        //- Construct from components
-        InterfaceCompositionModel(const dictionary& dict, const phasePair& pair);
-
+    //- Construct from components
+    InterfaceCompositionModel(const dictionary& dict, const phasePair& pair);
 
     //- Destructor
-    ~InterfaceCompositionModel();
+    ~InterfaceCompositionModel() = default;
 
 
     // Member Functions

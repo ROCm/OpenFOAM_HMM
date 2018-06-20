@@ -57,12 +57,6 @@ Foam::radiation::FresnelLaser::FresnelLaser
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::radiation::FresnelLaser::~FresnelLaser()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::scalar Foam::radiation::FresnelLaser::rho
@@ -75,7 +69,7 @@ Foam::scalar Foam::radiation::FresnelLaser::rho
     scalar rho =
         0.5
       * (
-          (1 + sqr(1 - epsilon_*cosTheta))/(1 + sqr(1 + epsilon_*cosTheta))
+            (1 + sqr(1 - epsilon_*cosTheta))/(1 + sqr(1 + epsilon_*cosTheta))
         +
             (sqr(epsilon_) - 2*epsilon_*cosTheta + 2*sqr(cosTheta))
           /

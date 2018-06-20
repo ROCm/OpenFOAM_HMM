@@ -79,7 +79,7 @@ public:
 
 
     //- Destructor
-    virtual ~PurePhaseModel();
+    virtual ~PurePhaseModel() = default;
 
 
     // Member Functions

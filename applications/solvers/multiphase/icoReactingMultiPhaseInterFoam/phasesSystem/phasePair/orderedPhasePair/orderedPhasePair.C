@@ -33,18 +33,7 @@ Foam::orderedPhasePair::orderedPhasePair
     const phaseModel& to
 )
 :
-    phasePair
-    (
-        from,
-        to,
-        true
-    )
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::orderedPhasePair::~orderedPhasePair()
+    phasePair(from, to, true)
 {}
 
 
@@ -68,5 +57,6 @@ Foam::word Foam::orderedPhasePair::name() const
     namec[0] = toupper(namec[0]);
     return first() + "To" + namec;
 }
+
 
 // ************************************************************************* //

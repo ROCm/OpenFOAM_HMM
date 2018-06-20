@@ -47,8 +47,11 @@ Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::Lee
 
 template<class Thermo, class OtherThermo>
 Foam::tmp<Foam::volScalarField>
-Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>
-::Kexp(label variable, const volScalarField& refValue)
+Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::Kexp
+(
+    label variable,
+    const volScalarField& refValue
+)
 {
     if (this->modelVariable_ == variable)
     {
@@ -92,8 +95,7 @@ Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>
 
 template<class Thermo, class OtherThermo>
 const Foam::dimensionedScalar&
-Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>
-::Tactivate() const
+Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::Tactivate() const
 {
     return Tactivate_;
 }

@@ -49,9 +49,7 @@ namespace Foam
         "pressure",
         "massFraction"
     };
-
-
-} // End namespace Foam
+}
 
 const Foam::NamedEnum
 <
@@ -83,12 +81,6 @@ Foam::interfaceCompositionModel::interfaceCompositionModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::interfaceCompositionModel::~interfaceCompositionModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::word Foam::interfaceCompositionModel::transferSpecie() const
@@ -107,5 +99,6 @@ const Foam::word Foam::interfaceCompositionModel::variable() const
 {
     return modelVariableNames[modelVariable_];
 }
+
 
 // ************************************************************************* //

@@ -438,7 +438,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::Cp
     );
 
     ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); ++ phaseModelIter)
+    for (; phaseModelIter != phaseModels_.end(); ++phaseModelIter)
     {
         tmpCp.ref() += phaseModelIter()()*phaseModelIter()->Cp(p, T, patchI);
     }
@@ -1196,5 +1196,5 @@ bool Foam::phaseSystem::read()
     }
 }
 
-// ************************************************************************* //
 
+// ************************************************************************* //

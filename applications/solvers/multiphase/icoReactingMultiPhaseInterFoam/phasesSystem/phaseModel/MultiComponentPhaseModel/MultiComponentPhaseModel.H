@@ -57,7 +57,6 @@ class MultiComponentPhaseModel
 {
 protected:
 
-
     // Protected data
 
         //- Species table
@@ -82,7 +81,6 @@ protected:
         void calculateVolumeFractions();
 
 
-
 public:
 
     // Constructors
@@ -95,7 +93,7 @@ public:
 
 
     //- Destructor
-    virtual ~MultiComponentPhaseModel();
+    virtual ~MultiComponentPhaseModel() = default;
 
 
     // Member Functions
@@ -135,7 +133,6 @@ public:
 
             //- Return inert species index
             label inertIndex() const;
-
 };
 
 

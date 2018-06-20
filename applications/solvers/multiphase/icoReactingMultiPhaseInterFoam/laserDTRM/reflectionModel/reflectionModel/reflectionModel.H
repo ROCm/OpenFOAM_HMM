@@ -29,8 +29,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef reflectionModel_H
-#define reflectionModel_H
+#ifndef radiation_reflectionModel_H
+#define radiation_reflectionModel_H
 
 #include "IOdictionary.H"
 #include "autoPtr.H"
@@ -46,7 +46,7 @@ namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class reflectionModel Declaration
+                       Class reflectionModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class reflectionModel
@@ -58,6 +58,7 @@ protected:
 
         //- Reference to the fvMesh
         const fvMesh& mesh_;
+
 
 public:
 
@@ -95,7 +96,7 @@ public:
 
 
     //- Destructor
-    virtual ~reflectionModel();
+    virtual ~reflectionModel() = default;
 
 
     // Member Functions
@@ -104,10 +105,7 @@ public:
         virtual vector R(const vector& incident, const vector& n) const = 0;
 
         //- Return reflectivity from medium1 to medium2 and a incident angle.
-        virtual scalar rho
-        (
-            const scalar incidentAngle
-        ) const = 0;
+        virtual scalar rho(const scalar incidentAngle) const = 0;
 };
 
 

@@ -113,13 +113,6 @@ Foam::multiphaseSystem::multiphaseSystem
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::multiphaseSystem::~multiphaseSystem()
-{
-}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void Foam::multiphaseSystem::calculateSuSp()
@@ -623,6 +616,7 @@ Foam::dimensionedScalar Foam::multiphaseSystem::ddtAlphaMax() const
     return ddtAlphaMax_;
 }
 
+
 Foam::scalar Foam::multiphaseSystem::maxDiffNo() const
 {
     phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
@@ -645,24 +639,30 @@ Foam::scalar Foam::multiphaseSystem::maxDiffNo() const
     return DiNum;
 }
 
+
 const Foam::multiphaseSystem::compressionFluxTable&
 Foam::multiphaseSystem::limitedPhiAlphas() const
 {
     return limitedPhiAlphas_;
 }
 
+
 Foam::multiphaseSystem::SuSpTable& Foam::multiphaseSystem::Su()
 {
     return Su_;
 }
+
 
 Foam::multiphaseSystem::SuSpTable& Foam::multiphaseSystem::Sp()
 {
     return Sp_;
 }
 
+
 bool Foam::multiphaseSystem::read()
 {
     return true;
 }
+
+
 // ************************************************************************* //

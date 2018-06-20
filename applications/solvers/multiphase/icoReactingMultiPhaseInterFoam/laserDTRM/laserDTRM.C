@@ -54,20 +54,17 @@ namespace Foam
         0
     );
 
-    namespace radiation
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::radiation::laserDTRM::powerDistributionMode,
+        3
+    >::names[] =
     {
-        template<>
-        const char* Foam::NamedEnum
-        <
-            Foam::radiation::laserDTRM::powerDistributionMode,
-            3
-        >::names[] =
-        {
-            "Gaussian",
-            "manual",
-            "uniform"
-        };
-    }
+        "Gaussian",
+        "manual",
+        "uniform"
+    };
 }
 
 const Foam::NamedEnum
@@ -82,35 +79,32 @@ const Foam::NamedEnum
 Foam::scalar Foam::radiation::laserDTRM::calculateIp(scalar r, scalar theta)
 {
     const scalar t = mesh_.time().value();
+    const scalar power = laserPower_->value(t);
     switch(mode_)
     {
         case pdGaussian:
         {
-            scalar I0 =
-                laserPower_->value(t)/(mathematical::twoPi*sqr(sigma_));
+            scalar I0 = power/(mathematical::twoPi*sqr(sigma_));
 
-            return(I0*exp(-sqr(r)/2.0/sqr(sigma_)));
-
+            return I0*exp(-sqr(r)/2.0/sqr(sigma_));
             break;
         }
         case pdManual:
         {
-            return(laserPower_->value(t)*powerDistribution_()(theta, r));
+            return power*powerDistribution_()(theta, r);
             break;
         }
         case pdUniform:
         {
-            return
-            (
-                laserPower_->value(t)/(mathematical::pi*sqr(focalLaserRadius_))
-            );
+            return power/(mathematical::pi*sqr(focalLaserRadius_));
+            break;
         }
         default:
         {
             FatalErrorInFunction
-                    << "Unhandled type " << powerDistypeNames_
-                    << abort(FatalError);
-            return(0);
+                << "Unhandled type " << powerDistypeNames_
+                << abort(FatalError);
+            return (0);
         }
     }
 }
@@ -125,7 +119,7 @@ Foam::tmp<Foam::volVectorField> Foam::radiation::laserDTRM::nHatfv
     const dimensionedScalar deltaN
     (
         "deltaN",
-        1e-7/pow(average(mesh_.V()), 1.0/3.0)
+        1e-7/cbrt(average(mesh_.V()))
     );
 
     const volVectorField gradAlphaf
@@ -134,8 +128,8 @@ Foam::tmp<Foam::volVectorField> Foam::radiation::laserDTRM::nHatfv
        - alpha1*fvc::grad(alpha2)
     );
 
-   // Face unit interface normal
-   return gradAlphaf/(mag(gradAlphaf)+ deltaN);
+    // Face unit interface normal
+    return gradAlphaf/(mag(gradAlphaf)+ deltaN);
 }
 
 
@@ -203,7 +197,7 @@ void Foam::radiation::laserDTRM::initialise()
 
     nParticles_ = ndr_*ndTheta_;
 
-    switch(mode_)
+    switch (mode_)
     {
         case pdGaussian:
         {
@@ -285,8 +279,8 @@ void Foam::radiation::laserDTRM::initialise()
                 if (cellI != -1)
                 {
                     // Create a new particle
-                    DTRMParticle* pPtr = new DTRMParticle
-                        (mesh_, p0, p1, Ip, cellI, dAi, -1);
+                    DTRMParticle* pPtr =
+                        new DTRMParticle(mesh_, p0, p1, Ip, cellI, dAi, -1);
 
                     // Add to cloud
                     DTRMCloud_.addParticle(pPtr);
@@ -294,7 +288,7 @@ void Foam::radiation::laserDTRM::initialise()
 
                 if (returnReduce(cellI, maxOp<label>()) == -1)
                 {
-                    WarningIn("void Foam::radiation::laserDTRM::initialise()")
+                    WarningInFunction
                         << "Cannot find owner cell for particle at position " << p0
                         << endl;
                 }
@@ -303,18 +297,16 @@ void Foam::radiation::laserDTRM::initialise()
     }
     else
     {
-            FatalErrorIn("void Foam::radiation::laserDTRM::initialise()")
+        FatalErrorInFunction
             << "Current functionality limited to 3-D cases"
             << exit(FatalError);
     }
 
-    if (debug)
-    {
-        Info << "Total Power in the laser : " << power << endl;
-        Info << "Total Area in the laser : " << area << endl;
-        Info << "Number of particles in the laser : "
-             << returnReduce(DTRMCloud_.size(), sumOp<label>()) << endl;
-    }
+    DebugInfo
+        << "Total Power in the laser : " << power << endl
+        << "Total Area in the laser : " << area << endl
+        << "Number of particles in the laser : "
+        << returnReduce(DTRMCloud_.size(), sumOp<label>()) << endl;
 }
 
 
@@ -534,12 +526,6 @@ Foam::radiation::laserDTRM::laserDTRM
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::radiation::laserDTRM::~laserDTRM()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::radiation::laserDTRM::read()
@@ -661,8 +647,6 @@ void Foam::radiation::laserDTRM::calculate()
                     {
                         nHat[cellI] += nHatPhase[cellI];
                     }
-
-
                 }
             }
             reflectionModelId++;
@@ -687,8 +671,8 @@ void Foam::radiation::laserDTRM::calculate()
         Q_
     );
 
-    Info << "Move particles..."
-         << returnReduce(DTRMCloud_.size(), sumOp<label>()) << endl;
+    Info<< "Move particles..."
+        << returnReduce(DTRMCloud_.size(), sumOp<label>()) << endl;
 
     DTRMCloud_.move(DTRMCloud_, td, mesh_.time().deltaTValue());
 
@@ -697,13 +681,10 @@ void Foam::radiation::laserDTRM::calculate()
 
     if (debug)
     {
-         Info<< "Final number of particles..."
-             << returnReduce(DTRMCloud_.size(), sumOp<label>()) << endl;
+        Info<< "Final number of particles..."
+            << returnReduce(DTRMCloud_.size(), sumOp<label>()) << endl;
 
-        OFstream osRef
-        (
-            type() + ":particlePath.obj"
-        );
+        OFstream osRef(type() + ":particlePath.obj");
         label vertI = 0;
 
         List<pointField> positions(Pstream::nProcs());
@@ -727,7 +708,7 @@ void Foam::radiation::laserDTRM::calculate()
         Pstream::gatherList(p0);
         Pstream::scatterList(p0);
 
-        for (label proci = 0; proci < Pstream::nProcs(); proci++)
+        for (label proci = 0; proci < Pstream::nProcs(); ++proci)
         {
             const pointField& pos = positions[proci];
             const pointField& pfinal = p0[proci];
@@ -748,8 +729,8 @@ void Foam::radiation::laserDTRM::calculate()
 
         if (mesh_.time().outputTime())
         {
-             reflectingCellsVol.write();
-             nHat.write();
+            reflectingCellsVol.write();
+            nHat.write();
         }
     }
 
@@ -762,32 +743,29 @@ void Foam::radiation::laserDTRM::calculate()
 
 Foam::tmp<Foam::volScalarField> Foam::radiation::laserDTRM::Rp() const
 {
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "zero",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            "zero",
+            mesh_.time().timeName(),
             mesh_,
-            dimensionedScalar
-            (
-                "zero",
-                dimPower/dimVolume/pow4(dimTemperature),
-                0.0
-            )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh_,
+        dimensionedScalar
+        (
+            "zero",
+            dimPower/dimVolume/pow4(dimTemperature),
+            0.0
         )
     );
 }
 
 
-Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh>>
 Foam::radiation::laserDTRM::Ru() const
 {
     return Q_.internalField();

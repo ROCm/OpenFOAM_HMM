@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::phaseChangeTwoPhaseMixtures::Lee
+    Foam::meltingEvaporationModels::Lee
 
 Description
     Mass tranfer Lee model. Simple model driven by field value difference as:
@@ -85,8 +85,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Lee_H
-#define Lee_H
+#ifndef meltingEvaporationModels_Lee_H
+#define meltingEvaporationModels_Lee_H
 
 #include "InterfaceCompositionModel.H"
 
@@ -99,7 +99,7 @@ namespace meltingEvaporationModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class Lee
+                                  Class Lee
 \*---------------------------------------------------------------------------*/
 
 template<class Thermo, class OtherThermo>
@@ -136,8 +136,7 @@ public:
 
 
     //- Destructor
-    virtual ~Lee()
-    {}
+    virtual ~Lee() = default;
 
 
     // Member Functions
@@ -151,7 +150,6 @@ public:
 
         //- Return T transition between phases
         virtual const dimensionedScalar& Tactivate() const;
-
 };
 
 

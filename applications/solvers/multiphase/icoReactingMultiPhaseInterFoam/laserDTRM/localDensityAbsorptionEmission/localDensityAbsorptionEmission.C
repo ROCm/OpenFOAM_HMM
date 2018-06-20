@@ -52,11 +52,7 @@ Foam::radiation::localDensityAbsorptionEmission::alpha(word alphaName) const
 {
     if (!mesh_.foundObject<volScalarField>(alphaName))
     {
-        FatalErrorIn
-        (
-            "const Foam::volScalarField& "
-            "Foam::radiation::localDensityAbsorptionEmission::alpha() const"
-        )
+        FatalErrorInFunction
             << "Unable to retrieve density field " << alphaName << " from "
             << "database.  Available objects:" << mesh_.sortedNames()
             << exit(FatalError);
@@ -80,13 +76,6 @@ Foam::radiation::localDensityAbsorptionEmission::localDensityAbsorptionEmission
     aCoeff_(coeffsDict_.lookup("aCoeff")),
     eCoeff_(coeffsDict_.lookup("eCoeff")),
     ECoeff_(coeffsDict_.lookup("ECoeff"))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::radiation::localDensityAbsorptionEmission::
-~localDensityAbsorptionEmission()
 {}
 
 

@@ -130,20 +130,17 @@ Foam::meltingEvaporationModels::kineticGasEvaporation<Thermo, OtherThermo>
         const volVectorField gradFrom(fvc::grad(from));
         const volVectorField gradTo(fvc::grad(to));
 
-        const volScalarField areaDensity
-        (
-            "areaDensity", mag(gradFrom)
-        );
+        const volScalarField areaDensity("areaDensity", mag(gradFrom));
 
         const volScalarField gradAlphaf(gradFrom & gradTo);
 
         volScalarField Tmask("Tmask", from*0.0);
 
-        forAll (Tmask, celli)
+        forAll(Tmask, celli)
         {
             if (gradAlphaf[celli] < 0)
             {
-                if (from[celli] > alphaMin_ &&  from[celli] < alphaMax_)
+                if (from[celli] > alphaMin_ && from[celli] < alphaMax_)
                 {
                     {
                         scalar alphaRes = 1.0 - from[celli] - to[celli];

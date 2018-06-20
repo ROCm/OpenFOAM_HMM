@@ -29,7 +29,8 @@ Group
 
 Description
     Solver for n incompressible, non-isothermal immiscible fluids with
-    phase-change.  Uses a VOF (volume of fluid) phase-fraction based interface capturing approach.
+    phase-change.  Uses a VOF (volume of fluid) phase-fraction based interface
+    capturing approach.
 
     The momentum, energy and other fluid properties are of the "mixture" and a
     single momentum equation is solved.
@@ -54,6 +55,8 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "postProcess.H"
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
@@ -61,11 +64,14 @@ int main(int argc, char *argv[])
     pimpleControl pimple(mesh);
 
     #include "createFields.H"
+    #include "createFieldRefs.H"
     #include "createFvOptions.H"
     #include "createTimeControls.H"
     #include "CourantNo.H"
-    #include "alphaCourantNo.H"
+    //#include "alphaCourantNo.H"
     #include "setInitialDeltaT.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -92,6 +98,7 @@ int main(int argc, char *argv[])
             #include "UEqn.H"
             #include "YEqns.H"
             #include "TEqn.H"
+
             // --- Pressure corrector loop
             while (pimple.correct())
             {
@@ -108,9 +115,7 @@ int main(int argc, char *argv[])
 
         runTime.write();
 
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
+        runTime.printExecutionTime(Info);
     }
 
     Info<< "End\n" << endl;

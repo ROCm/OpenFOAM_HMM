@@ -35,10 +35,15 @@ License
                                                                             \
     namespace Foam                                                          \
     {                                                                       \
-        typedef Foam::MomemtumType<Foam::CompType<Foam::Phase, Foam::Thermo> >  \
-            Name;                                                           \
-                                                                            \
-                                                                            \
+        typedef Foam::MomemtumType                                          \
+        <                                                                   \
+            Foam::CompType                                                  \
+            <                                                               \
+                Foam::Phase,                                                \
+                Foam::Thermo                                                \
+            >                                                               \
+        >                                                                   \
+        Name;                                                               \
                                                                             \
         addNamedToRunTimeSelectionTable                                     \
         (                                                                   \

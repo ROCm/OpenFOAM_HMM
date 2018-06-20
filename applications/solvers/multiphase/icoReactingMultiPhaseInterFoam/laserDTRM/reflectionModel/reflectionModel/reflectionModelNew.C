@@ -28,9 +28,8 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::radiation::reflectionModel> Foam::radiation::
-reflectionModel::
-New
+Foam::autoPtr<Foam::radiation::reflectionModel>
+Foam::radiation::reflectionModel::New
 (
     const dictionary& dict,
     const fvMesh& mesh
@@ -40,19 +39,16 @@ New
 
     Info<< "Selecting reflectionModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+   const auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalErrorIn
-        (
-            "reflectionModel::New(const dictionary&, const fvMesh&)"
-        )   << "Unknown reflectionModel type "
+        FatalIOErrorInFunction(dict)
+            << "Unknown reflectionModel type "
             << modelType << nl << nl
             << "Valid reflectionModel types are :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+            << exit(FatalIOError);
     }
 
     return autoPtr<reflectionModel>(cstrIter()(dict, mesh));

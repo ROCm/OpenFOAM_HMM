@@ -59,13 +59,6 @@ constantSurfaceTensionCoefficient
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::surfaceTensionModels::constantSurfaceTensionCoefficient::
-~constantSurfaceTensionCoefficient()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
@@ -74,19 +67,16 @@ Foam::surfaceTensionModels::constantSurfaceTensionCoefficient::sigma() const
     const fvMesh& mesh(this->pair_.phase1().mesh());
 
     return
-        tmp<volScalarField>
+        tmp<volScalarField>::New
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    "zero",
-                    mesh.time().timeName(),
-                    mesh
-                ),
-                mesh,
-                sigma_
-            )
+                "zero",
+                mesh.time().timeName(),
+                mesh
+            ),
+            mesh,
+            sigma_
         );
 }
 

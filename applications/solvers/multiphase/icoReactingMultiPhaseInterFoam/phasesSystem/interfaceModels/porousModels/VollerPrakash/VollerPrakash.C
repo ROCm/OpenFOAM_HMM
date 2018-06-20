@@ -58,13 +58,6 @@ Foam::porousModels::VollerPrakash::VollerPrakash
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::porousModels::VollerPrakash::
-~ VollerPrakash()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>

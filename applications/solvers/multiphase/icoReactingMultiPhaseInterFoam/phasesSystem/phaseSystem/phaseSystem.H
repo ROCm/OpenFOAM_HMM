@@ -235,8 +235,6 @@ protected:
         );
 
 
-
-
 public:
 
     //- Runtime type information
@@ -351,7 +349,6 @@ public:
         //- Return Cv of the mixture
         virtual tmp<volScalarField> Cv() const;
 
-
         //- Heat capacity at constant volume for patch [J/kg/K]
         virtual tmp<scalarField> Cv
         (
@@ -359,7 +356,6 @@ public:
             const scalarField& T,
             const label patchI
         ) const;
-
 
         //- Gamma = Cp/Cv []
         virtual tmp<volScalarField> gamma() const;
@@ -399,7 +395,6 @@ public:
 
 
     // Transport
-
 
         //- Thermal diffusivity for temperature of mixture [J/m/s/K]
         virtual tmp<volScalarField> kappa() const;
@@ -503,7 +498,6 @@ public:
         //- Return interfacial source mass rate per phase pair
         virtual tmp<volScalarField> dmdt(const phasePairKey& key) const = 0;
 
-
         //- Return the heat transfer matrices
         virtual tmp<fvScalarMatrix> heatTransfer
         (
@@ -544,7 +538,6 @@ public:
 
         //- Read base phaseProperties dictionary
         virtual bool read();
-
 
 
     // Access to phases models
@@ -626,7 +619,6 @@ public:
 
         //- Near Interface of alpha'n
         tmp<volScalarField> nearInterface() const;
-
 };
 
 

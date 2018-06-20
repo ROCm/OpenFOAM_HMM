@@ -79,7 +79,7 @@ public:
 
 
     //- Destructor
-    virtual ~MovingPhaseModel();
+    virtual ~MovingPhaseModel() = default;
 
 
     // Member Functions
@@ -89,7 +89,6 @@ public:
 
 
         // Momentum
-
 
             //- Constant access the volumetric flux
             virtual tmp<surfaceScalarField> phi() const;
@@ -108,7 +107,6 @@ public:
 
             //- Diffusion number
             virtual tmp<surfaceScalarField> diffNo() const;
-
 };
 
 

@@ -42,7 +42,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class orderedPhasePair Declaration
+                      Class orderedPhasePair Declaration
 \*---------------------------------------------------------------------------*/
 
 class orderedPhasePair
@@ -62,7 +62,7 @@ public:
 
 
     //- Destructor
-    virtual ~orderedPhasePair();
+    virtual ~orderedPhasePair() = default;
 
 
     // Member Functions
@@ -75,7 +75,6 @@ public:
 
         //- Pair name
         virtual word name() const;
-
 };
 
 

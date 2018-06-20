@@ -42,17 +42,11 @@ Foam::phasePair::phasePair
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::phasePair::~phasePair()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 const Foam::phaseModel& Foam::phasePair::from() const
 {
-    FatalErrorIn("Foam::phasePair::from() const")
+    FatalErrorInFunction
         << "Requested from phase from an unordered pair."
         << exit(FatalError);
 
@@ -62,7 +56,7 @@ const Foam::phaseModel& Foam::phasePair::from() const
 
 const Foam::phaseModel& Foam::phasePair::to() const
 {
-    FatalErrorIn("Foam::phasePair::to() const")
+    FatalErrorInFunction
         << "Requested to phase from an unordered pair."
         << exit(FatalError);
 

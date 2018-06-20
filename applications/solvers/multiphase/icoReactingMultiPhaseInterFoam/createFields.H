@@ -114,9 +114,6 @@
         p_rgh = p - rho*gh;
     }
 
-    // Total volumetric flux
-    surfaceScalarField& phi = fluid.phi();
-
     // Mass flux
     surfaceScalarField& rhoPhi = fluid.rhoPhi();
 

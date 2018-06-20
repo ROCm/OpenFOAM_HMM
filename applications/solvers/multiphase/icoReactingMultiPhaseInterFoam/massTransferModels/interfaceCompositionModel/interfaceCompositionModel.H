@@ -52,7 +52,7 @@ class phaseModel;
 class phasePair;
 
 /*---------------------------------------------------------------------------*\
-                        Class interfaceCompositionModel Declaration
+                  Class interfaceCompositionModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class interfaceCompositionModel
@@ -121,7 +121,7 @@ public:
 
 
     //- Destructor
-    virtual ~interfaceCompositionModel();
+    virtual ~interfaceCompositionModel() = default;
 
 
     // Selectors
@@ -181,8 +181,8 @@ public:
 
         //- Returns the variable on which the model is based
         const word variable() const;
-
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

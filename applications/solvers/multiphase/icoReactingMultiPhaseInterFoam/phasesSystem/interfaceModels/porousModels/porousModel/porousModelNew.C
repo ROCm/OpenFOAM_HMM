@@ -23,37 +23,35 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfaceTensionModel.H"
+#include "porousModel.H"
 #include "phasePair.H"
 
 // * * * * * * * * * * * * * * * * Selector  * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::surfaceTensionModel >
-Foam::surfaceTensionModel::New
+Foam::autoPtr<Foam::porousModel> Foam::porousModel::New
 (
     const dictionary& dict,
-    const phasePair& pair
+    const fvMesh& mesh
 )
 {
-    word surfaceTensionModelType(dict.lookup("type"));
+    word modelType(dict.lookup("type"));
 
-    Info<< "Selecting surfaceTensionModel for "
-        << pair << ": " << surfaceTensionModelType << endl;
+    Info<< "Selecting porousModel for "
+        <<  ": " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(surfaceTensionModelType);
+    const auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalErrorIn("surfaceTensionModel::New")
-            << "Unknown surfaceTensionModelType type "
-            << surfaceTensionModelType << endl << endl
-            << "Valid surfaceTensionModel types are : " << endl
+        FatalErrorInFunction
+            << "Unknown modelType type "
+            << modelType << endl << endl
+            << "Valid porousModel types are : " << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
-    return cstrIter()(dict, pair, true);
+    return cstrIter()(dict, mesh);
 }
 
 

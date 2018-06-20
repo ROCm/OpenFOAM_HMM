@@ -53,11 +53,6 @@ class phasePair
 :
     public phasePairKey
 {
-public:
-
-
-private:
-
     // Private data
 
         //- Phase 1
@@ -81,7 +76,7 @@ public:
 
 
     //- Destructor
-    virtual ~phasePair();
+    virtual ~phasePair() = default;
 
 
     // Member Functions
@@ -96,7 +91,6 @@ public:
         virtual word name() const;
 
 
-
         // Access
 
             // Phase 1
@@ -104,7 +98,6 @@ public:
 
             // Phase 2
             inline const phaseModel& phase2() const;
-
 };
 
 

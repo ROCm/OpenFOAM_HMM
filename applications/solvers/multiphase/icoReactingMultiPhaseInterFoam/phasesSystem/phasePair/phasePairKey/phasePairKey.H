@@ -94,7 +94,7 @@ public:
 
 
     // Destructor
-    virtual ~phasePairKey();
+    virtual ~phasePairKey() = default;
 
 
     // Access

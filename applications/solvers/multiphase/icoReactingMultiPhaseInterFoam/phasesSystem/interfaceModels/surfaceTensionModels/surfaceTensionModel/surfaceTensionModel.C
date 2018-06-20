@@ -60,12 +60,6 @@ Foam::surfaceTensionModel::surfaceTensionModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::surfaceTensionModel::~surfaceTensionModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::surfaceTensionModel::writeData(Ostream& os) const

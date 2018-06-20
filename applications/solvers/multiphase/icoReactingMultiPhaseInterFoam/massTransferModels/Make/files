@@ -1,5 +1,5 @@
 interfaceCompositionModel/interfaceCompositionModel.C
-interfaceCompositionModel/newInterfaceCompositionModel.C
+interfaceCompositionModel/interfaceCompositionModelNew.C
 InterfaceCompositionModel/InterfaceCompositionModels.C
 
 LIB = $(FOAM_LIBBIN)/libmassTransferModels

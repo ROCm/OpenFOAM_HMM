@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::VollerPrakash
+    Foam::porousModels::VollerPrakash
 
 Description
     Porous model to apply a porous media on a solid phase.
@@ -61,8 +61,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef VollerPrakash_H
-#define VollerPrakash_H
+#ifndef porousModels_VollerPrakash_H
+#define porousModels_VollerPrakash_H
 
 #include "porousModel.H"
 
@@ -107,7 +107,7 @@ public:
 
 
     //- Destructor
-    virtual ~VollerPrakash();
+    virtual ~VollerPrakash() = default;
 
 
     // Member Functions

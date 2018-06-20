@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef FresnelLaser_H
-#define FresnelLaser_H
+#ifndef radiation_FresnelLaser_H
+#define radiation_FresnelLaser_H
 
 #include "reflectionModel.H"
 
@@ -71,15 +71,11 @@ public:
     //- Runtime type information
     TypeName("FresnelLaser");
 
-
-    // Constructors
-
-        //- Construct from components
-        FresnelLaser(const dictionary& dict, const fvMesh& mesh);
-
+    //- Construct from components
+    FresnelLaser(const dictionary& dict, const fvMesh& mesh);
 
     //- Destructor
-    virtual ~FresnelLaser();
+    virtual ~FresnelLaser() = default;
 
 
     // Member Functions
@@ -88,11 +84,8 @@ public:
         virtual vector R(const vector& incident, const vector& n) const;
 
         //- Return reflectivity from medium1 to medium2 and a incident angle.
-        // nk1 = (n1 - i k1) from medium 1.
-        virtual scalar rho
-        (
-            const scalar incidentAngle
-        ) const;
+        //  nk1 = (n1 - i k1) from medium 1.
+        virtual scalar rho(const scalar incidentAngle) const;
 };
 
 

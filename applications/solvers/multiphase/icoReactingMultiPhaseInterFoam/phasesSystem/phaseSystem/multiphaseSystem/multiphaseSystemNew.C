@@ -23,36 +23,48 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "phaseModel.H"
-#include "phaseSystem.H"
+#include "multiphaseSystem.H"
 
 // * * * * * * * * * * * * * * * * Selector  * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::phaseModel> Foam::phaseModel::New
+Foam::autoPtr<Foam::multiphaseSystem> Foam::multiphaseSystem::New
 (
-    const phaseSystem& fluid,
-    const word& phaseName
+    const fvMesh& mesh
 )
 {
-    word phaseModelType(fluid.subDict(phaseName).lookup("type"));
+    const word multiphaseSystemType
+    (
+        IOdictionary
+        (
+            IOobject
+            (
+                phasePropertiesName,
+                mesh.time().constant(),
+                mesh,
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE,
+                false
+            )
+        ).lookup("type")
+    );
 
-    Info<< "Selecting phaseModel for "
-        << phaseName << ": " << phaseModelType << endl;
+    Info<< "Selecting multiphaseSystem " << multiphaseSystemType << endl;
 
-    phaseSystemConstructorTable::iterator cstrIter =
-        phaseSystemConstructorTablePtr_->find(phaseModelType);
+    const auto cstrIter =
+        dictionaryConstructorTablePtr_->cfind(multiphaseSystemType);
 
-    if (cstrIter == phaseSystemConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalErrorIn("phaseModel::New")
-            << "Unknown phaseModelType type "
-            << phaseModelType << endl << endl
-            << "Valid phaseModel types are : " << endl
-            << phaseSystemConstructorTablePtr_->sortedToc()
+        FatalErrorInFunction
+            << "Unknown multiphaseSystemType type "
+            << multiphaseSystemType << endl
+            << "Valid multiphaseSystem types are : " << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
-    return cstrIter()(fluid, phaseName);
+    return autoPtr<multiphaseSystem> (cstrIter()(mesh));
 }
+
 
 // ************************************************************************* //

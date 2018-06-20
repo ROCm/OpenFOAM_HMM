@@ -237,7 +237,7 @@ public:
 
 
     //- Destructor
-    virtual ~laserDTRM();
+    virtual ~laserDTRM() = default;
 
 
     // Member functions

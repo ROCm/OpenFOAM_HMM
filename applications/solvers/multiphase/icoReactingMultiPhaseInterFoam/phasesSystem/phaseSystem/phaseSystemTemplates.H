@@ -84,6 +84,7 @@ void Foam::phaseSystem::createSubModels
     }
 }
 
+
 template<class modelType>
 void Foam::phaseSystem::generatePairsAndSubModels
 (
@@ -96,13 +97,11 @@ void Foam::phaseSystem::generatePairsAndSubModels
     >& models
 )
 {
-
     dictTable modelDicts(lookup(modelName));
 
     generatePairs(modelDicts);
 
     createSubModels(modelDicts, models);
-
 }
 
 
@@ -119,13 +118,11 @@ void Foam::phaseSystem::generatePairsAndSubModels
     >& models
 )
 {
-
     dictTable modelDicts(lookup(modelName));
 
     generatePairs(modelDicts);
 
     createSubModels(modelDicts, mesh, models);
-
 }
 
 

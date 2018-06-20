@@ -65,13 +65,6 @@ Foam::MovingPhaseModel<BasePhaseModel>::MovingPhaseModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class BasePhaseModel>
-Foam::MovingPhaseModel<BasePhaseModel>::~MovingPhaseModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasePhaseModel>
@@ -125,20 +118,18 @@ template<class BasePhaseModel>
 Foam::tmp<Foam::surfaceScalarField> Foam::MovingPhaseModel<BasePhaseModel>::
 diffNo() const
 {
-    return tmp<surfaceScalarField>
+    return tmp<surfaceScalarField>::New
     (
-        new surfaceScalarField
+        IOobject
         (
-            IOobject
-            (
-                IOobject::groupName("diffNo", phaseModel::name()),
-                U_.mesh().time().timeName(),
-                U_.mesh()
-            ),
-            U_.mesh(),
-            dimensionedScalar("0", dimless, 0.0)
-        )
+            IOobject::groupName("diffNo", phaseModel::name()),
+            U_.mesh().time().timeName(),
+            U_.mesh()
+        ),
+        U_.mesh(),
+        dimensionedScalar("0", dimless, 0.0)
     );
 }
+
 
 // ************************************************************************* //

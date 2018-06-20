@@ -107,7 +107,8 @@ namespace Foam
             constIncompressibleGasHThermoPhysics
         );
 
-        // From pure liquid (BoussinesqFluid) to a multi-component gas incomp phase
+        // From pure liquid (BoussinesqFluid) to a multi-component gas incomp
+        // phase
         makeInterfaceContSpecieMixtureType
         (
             kineticGasEvaporation,
@@ -283,5 +284,6 @@ namespace Foam
             hConstSolidThermoPhysics
         );
 }
+
 
 // ************************************************************************* //

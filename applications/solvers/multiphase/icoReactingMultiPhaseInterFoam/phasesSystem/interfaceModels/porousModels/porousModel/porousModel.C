@@ -58,12 +58,6 @@ Foam::porousModel::porousModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::porousModel::~porousModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::porousModel::writeData(Ostream& os) const

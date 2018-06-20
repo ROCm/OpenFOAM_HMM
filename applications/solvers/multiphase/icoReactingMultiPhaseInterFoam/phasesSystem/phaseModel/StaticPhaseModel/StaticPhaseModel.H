@@ -75,7 +75,7 @@ public:
 
 
     //- Destructor
-    virtual ~StaticPhaseModel();
+    virtual ~StaticPhaseModel() = default;
 
 
     // Member Functions
@@ -85,7 +85,6 @@ public:
 
 
         // Momentum
-
 
             //- Constant access the volumetric flux. Return zero field
             virtual tmp<surfaceScalarField> phi() const;
@@ -104,7 +103,6 @@ public:
 
             //- Maximum diffusion number
             virtual tmp<surfaceScalarField> diffNo() const;
-
 };
 
 

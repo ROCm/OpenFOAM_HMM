@@ -49,15 +49,15 @@ Foam::interfaceCompositionModel::New
     Info<< "Selecting interfaceCompositionModel for "
         << pair << ": " << interfaceCompositionModelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(interfaceCompositionModelType);
+    const auto cstrIter =
+        dictionaryConstructorTablePtr_->cfind(interfaceCompositionModelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown interfaceCompositionModelType type "
-            << interfaceCompositionModelType << endl << endl
-            << "Valid interfaceCompositionModel types are : " << endl
+            << interfaceCompositionModelType << nl << nl
+            << "Valid interfaceCompositionModel types are : " << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

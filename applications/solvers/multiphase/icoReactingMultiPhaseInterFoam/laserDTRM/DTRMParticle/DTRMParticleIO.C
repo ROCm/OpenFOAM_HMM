@@ -60,7 +60,6 @@ Foam::DTRMParticle::DTRMParticle
         if (is.format() == IOstream::ASCII)
         {
             is >> p0_ >> p1_ >> I0_ >> I_ >> dA_ >> transmissiveId_;
-            DebugVar(transmissiveId_);
         }
         else
         {
@@ -95,7 +94,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const DTRMParticle& p)
     }
 
     // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const DTRMParticle&)");
+    os.check(FUNCTION_NAME);
 
     return os;
 }

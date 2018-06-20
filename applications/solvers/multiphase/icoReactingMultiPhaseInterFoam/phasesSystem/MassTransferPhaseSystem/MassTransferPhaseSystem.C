@@ -35,8 +35,10 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasePhaseSystem>
-Foam::MassTransferPhaseSystem<BasePhaseSystem>::
-MassTransferPhaseSystem(const fvMesh& mesh)
+Foam::MassTransferPhaseSystem<BasePhaseSystem>::MassTransferPhaseSystem
+(
+    const fvMesh& mesh
+)
 :
     BasePhaseSystem(mesh)
 {
@@ -67,13 +69,6 @@ MassTransferPhaseSystem(const fvMesh& mesh)
     }
 }
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class BasePhaseSystem>
-Foam::MassTransferPhaseSystem<BasePhaseSystem>::
-~MassTransferPhaseSystem()
-{}
 
 // * * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * //
 
@@ -136,6 +131,7 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::calculateL
 
     return tL;
 }
+
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
@@ -243,11 +239,7 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::heatTransfer
 
                     // Explicit temperature mass transfer rate
                     tmp<volScalarField> Kexp =
-                        interfacePtr->Kexp
-                        (
-                            interfaceCompositionModel::T,
-                            T
-                        );
+                        interfacePtr->Kexp(interfaceCompositionModel::T, T);
 
                     if (Kexp.valid())
                     {
@@ -264,11 +256,7 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::heatTransfer
 
                     // Explicit temperature mass transfer rate
                     const tmp<volScalarField> Kexp =
-                        interfacePtr->Kexp
-                        (
-                            interfaceCompositionModel::T,
-                            T
-                        );
+                        interfacePtr->Kexp(interfaceCompositionModel::T, T);
 
                     if (Kexp.valid())
                     {
@@ -315,9 +303,9 @@ void Foam::MassTransferPhaseSystem<BasePhaseSystem>::massSpeciesTransfer
             Su +=
                   this->Su()[phase.name()]
                 + this->Sp()[phase.name()]*phase.oldTime();
-
         }
     }
 }
+
 
 // ************************************************************************* //

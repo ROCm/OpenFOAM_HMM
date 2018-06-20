@@ -33,8 +33,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef radiationLocalDensityAbsorptionEmission_H
-#define radiationLocalDensityAbsorptionEmission_H
+#ifndef radiation_localDensityAbsorptionEmission_H
+#define radiation_localDensityAbsorptionEmission_H
 
 #include "absorptionEmissionModel.H"
 
@@ -94,7 +94,7 @@ public:
 
 
     //- Destructor
-    virtual ~localDensityAbsorptionEmission();
+    virtual ~localDensityAbsorptionEmission() = default;
 
 
     // Member Functions

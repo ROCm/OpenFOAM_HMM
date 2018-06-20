@@ -50,10 +50,4 @@ Foam::radiation::reflectionModel::reflectionModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor    * * * * * * * * * * * * * * //
-
-Foam::radiation::reflectionModel::~reflectionModel()
-{}
-
-
 // ************************************************************************* //

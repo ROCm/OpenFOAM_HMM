@@ -99,16 +99,7 @@ MultiComponentPhaseModel
 
     // Init vol fractions from mass fractions
     calculateVolumeFractions();
-
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class BasePhaseModel, class phaseThermo>
-Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::
-~MultiComponentPhaseModel()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -139,13 +130,12 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>
     }
     X_[inertIndex_] = 1.0 - Xtotal;
     X_[inertIndex_].correctBoundaryConditions();
-
 }
 
 
 template<class BasePhaseModel, class phaseThermo>
-void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>
-::calculateMassFractions()
+void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::
+calculateMassFractions()
 {
     volScalarField W(X_[0]*thermo().composition().W(0));
     for(label i=1; i< species_.size(); i++)
@@ -420,5 +410,6 @@ Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::inertIndex() const
 {
     return inertIndex_;
 }
+
 
 // ************************************************************************* //

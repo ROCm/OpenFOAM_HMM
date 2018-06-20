@@ -220,14 +220,6 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::InterfaceCompositionModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Thermo, class OtherThermo>
-Foam::InterfaceCompositionModel<Thermo, OtherThermo>::
-~InterfaceCompositionModel()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class Thermo, class OtherThermo>
@@ -288,17 +280,9 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::L
 ) const
 {
     const typename Thermo::thermoType& fromThermo =
-        getLocalThermo
-        (
-            speciesName,
-            fromThermo_
-        );
+        getLocalThermo(speciesName, fromThermo_);
     const typename OtherThermo::thermoType& toThermo =
-        getLocalThermo
-        (
-            speciesName,
-            toThermo_
-        );
+        getLocalThermo(speciesName, toThermo_);
 
     const volScalarField& p(fromThermo_.p());
 

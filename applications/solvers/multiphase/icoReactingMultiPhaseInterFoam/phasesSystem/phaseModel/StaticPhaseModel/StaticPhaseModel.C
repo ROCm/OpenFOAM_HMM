@@ -68,13 +68,6 @@ Foam::StaticPhaseModel<BasePhaseModel>::StaticPhaseModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class BasePhaseModel>
-Foam::StaticPhaseModel<BasePhaseModel>::~StaticPhaseModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasePhaseModel>
@@ -88,19 +81,16 @@ template<class BasePhaseModel>
 Foam::tmp<Foam::surfaceScalarField>
 Foam::StaticPhaseModel<BasePhaseModel>::phi() const
 {
-    return tmp<surfaceScalarField>
+    return tmp<surfaceScalarField>::New
     (
-        new surfaceScalarField
+        IOobject
         (
-            IOobject
-            (
-                IOobject::groupName("phi", phaseModel::name()),
-                U_.mesh().time().timeName(),
-                U_.mesh()
-            ),
-            U_.mesh(),
-            dimensionedScalar("0", dimensionSet(0, 3, -1, 0, 0), 0)
-        )
+            IOobject::groupName("phi", phaseModel::name()),
+            U_.mesh().time().timeName(),
+            U_.mesh()
+        ),
+        U_.mesh(),
+        dimensionedScalar("0", dimensionSet(0, 3, -1, 0, 0), 0)
     );
 }
 
@@ -178,5 +168,6 @@ Foam::tmp<Foam::surfaceScalarField> Foam::StaticPhaseModel<BasePhaseModel>
 
     return tkapparhoCpbyDelta;
 }
+
 
 // ************************************************************************* //

@@ -22,12 +22,13 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::phaseChangeTwoPhaseMixtures::kineticGasEvaporation
+    Foam::meltingEvaporationModels::kineticGasEvaporation
 
 Description
 
-    Considering the Hertz Knudsen formula, which gives the evaporation-condensation
-    flux based on the kinetic theory for flat interface:
+    Considering the Hertz Knudsen formula, which gives the
+    evaporation-condensation flux based on the kinetic theory for flat
+    interface:
 
     \f[
         Flux = C sqrt(M/(2 \pi \R T_{activate}))(\p - pSat)
@@ -74,8 +75,8 @@ Description
     Hertz-Knudsen-Schrage.
 
     Based on the reference:
-    -# Van P. Carey, “Liquid-Vapor Phase Change Phenomena”, ISBN 0-89116836, 1992,
-    pp. 112-121.
+    - Van P. Carey, “Liquid-Vapor Phase Change Phenomena”, ISBN 0-89116836,
+      1992, pp. 112-121.
 
 
 Usage
@@ -107,15 +108,13 @@ Usage
         species     | Specie name on the other phase | yes
     \endtable
 
-
-
 SourceFiles
     kineticGasEvaporation.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef kineticGasEvaporation_H
-#define kineticGasEvaporation_H
+#ifndef meltingEvaporationModels_kineticGasEvaporation_H
+#define meltingEvaporationModels_kineticGasEvaporation_H
 
 
 #include "InterfaceCompositionModel.H"
@@ -131,7 +130,7 @@ namespace meltingEvaporationModels
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class kineticGasEvaporation
+                         Class kineticGasEvaporation
 \*---------------------------------------------------------------------------*/
 
 template<class Thermo, class OtherThermo>
@@ -177,8 +176,7 @@ public:
 
 
     //- Destructor
-    virtual ~kineticGasEvaporation()
-    {}
+    virtual ~kineticGasEvaporation() = default;
 
 
     // Member Functions
@@ -190,9 +188,8 @@ public:
             const volScalarField& field
         );
 
-        //- Return Tref
+        //- Return Tactivate
         virtual const dimensionedScalar& Tactivate() const;
-
 };
 
 

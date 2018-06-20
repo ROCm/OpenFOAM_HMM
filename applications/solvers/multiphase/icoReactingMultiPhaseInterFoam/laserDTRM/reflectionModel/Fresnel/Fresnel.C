@@ -119,7 +119,7 @@ Foam::scalar Foam::radiation::Fresnel::rho
             (sqr(sqrt(sqrP) + sqrt(n1)*sinTheta1*tanTheta1) + sqrQ)
         )*rhoP;
 
-    return (rhoP + rhoN)/2;
+    return 0.5*(rhoP + rhoN);
 }
 
 
@@ -131,7 +131,6 @@ Foam::vector Foam::radiation::Fresnel::R
 {
     return  i + 2.0*(-i & n) * n;
 }
-
 
 
 // ************************************************************************* //

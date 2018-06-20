@@ -50,13 +50,6 @@ Foam::PurePhaseModel<BasePhaseModel, phaseThermo>::PurePhaseModel
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class BasePhaseModel, class phaseThermo>
-Foam::PurePhaseModel<BasePhaseModel, phaseThermo>::~PurePhaseModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasePhaseModel, class phaseThermo>
@@ -66,14 +59,8 @@ void Foam::PurePhaseModel<BasePhaseModel, phaseThermo>::solveYi
     PtrList<Foam::volScalarField::Internal>&
 )
 {
-    notImplemented
-    (
-        "template<class BasePhaseModel> "
-        "Foam::tmp<Foam::fvScalarMatrix> "
-        "Foam::PurePhaseModel<BasePhaseModel>::solveYi()"
-    );
+    NotImplemented;
 }
-
 
 
 template<class BasePhaseModel, class phaseThermo>
@@ -99,11 +86,12 @@ thermo() const
     return thermoPtr_();
 }
 
+
 template<class BasePhaseModel, class phaseThermo>
-phaseThermo& Foam::PurePhaseModel<BasePhaseModel, phaseThermo>::
-thermo()
+phaseThermo& Foam::PurePhaseModel<BasePhaseModel, phaseThermo>::thermo()
 {
     return thermoPtr_();
 }
+
 
 // ************************************************************************* //

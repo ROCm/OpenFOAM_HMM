@@ -32,8 +32,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef radiationConstantScatter_H
-#define radiationConstantScatter_H
+#ifndef radiation_noReflection_H
+#define radiation_noReflection_H
 
 #include "reflectionModel.H"
 
@@ -45,7 +45,7 @@ namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class noReflection Declaration
+                         Class noReflection Declaration
 \*---------------------------------------------------------------------------*/
 
 class noReflection
@@ -58,15 +58,11 @@ public:
     //- Runtime type information
     TypeName("none");
 
-
-    // Constructors
-
-        //- Construct from components
-        noReflection(const dictionary& dict, const fvMesh& mesh);
-
+    //- Construct from components
+    noReflection(const dictionary& dict, const fvMesh& mesh);
 
     //- Destructor
-    virtual ~noReflection();
+    virtual ~noReflection() = default;
 
 
     // Member Functions
