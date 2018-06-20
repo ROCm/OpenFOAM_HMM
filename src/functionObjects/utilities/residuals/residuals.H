@@ -42,9 +42,17 @@ Usage
     }
     \endverbatim
 
+    Where the entries comprise:
+    \table
+        Property     | Description               | Required    | Default value
+        type         | Type name: residua  ls    | yes         |
+        fields       | List of fields to process | yes         |
+        writeFields  | Write the residual fields | no          | no
+    \endtable
+
     Output data is written to the dir postProcessing/residuals/\<timeDir\>/
     For vector/tensor fields, e.g. U, where an equation is solved for each
-    component, the largest residual of each component is written out.
+    component, the largest residual of each component is written.
 
 See also
     Foam::functionObject
