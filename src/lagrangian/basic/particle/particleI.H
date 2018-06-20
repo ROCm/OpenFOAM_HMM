@@ -280,12 +280,6 @@ inline Foam::vector Foam::particle::normal() const
 }
 
 
-inline Foam::vector Foam::particle::oldNormal() const
-{
-    return currentTetIndices().oldFaceTri(mesh_).normal();
-}
-
-
 inline bool Foam::particle::onFace() const
 {
     return facei_ >= 0;

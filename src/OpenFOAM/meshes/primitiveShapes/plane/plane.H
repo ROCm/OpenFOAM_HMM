@@ -195,7 +195,7 @@ public:
 
     // Member Functions
 
-        //- Return plane normal
+        //- Return the plane unit normal
         const vector& normal() const;
 
         //- Return plane base point

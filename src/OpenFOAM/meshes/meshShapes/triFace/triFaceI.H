@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -171,20 +171,28 @@ inline Foam::point Foam::triFace::centre(const UList<point>& points) const
 }
 
 
-inline Foam::scalar Foam::triFace::mag(const UList<point>& points) const
+inline Foam::vector Foam::triFace::areaNormal(const UList<point>& points) const
 {
-    return ::Foam::mag(normal(points));
-}
-
-
-// could also delegate to triPointRef(...).normal()
-inline Foam::vector Foam::triFace::normal(const UList<point>& points) const
-{
+    // As per triPointRef(...).areaNormal()
     return 0.5*
     (
         (points[operator[](1)] - points[operator[](0)])
        ^(points[operator[](2)] - points[operator[](0)])
     );
+}
+
+
+inline Foam::vector Foam::triFace::unitNormal(const UList<point>& points) const
+{
+    const vector n(areaNormal(points));
+    const scalar s(Foam::mag(n));
+    return s < ROOTVSMALL ? Zero : n/s;
+}
+
+
+inline Foam::scalar Foam::triFace::mag(const UList<point>& points) const
+{
+    return ::Foam::mag(areaNormal(points));
 }
 
 

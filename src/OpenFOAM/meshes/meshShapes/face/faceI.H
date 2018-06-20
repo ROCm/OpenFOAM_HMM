@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,9 +105,17 @@ inline Foam::pointField Foam::face::points
 }
 
 
+inline Foam::vector Foam::face::unitNormal(const UList<point>& p) const
+{
+    const vector n(areaNormal(p));
+    const scalar s(Foam::mag(n));
+    return s < ROOTVSMALL ? Zero : n/s;
+}
+
+
 inline Foam::scalar Foam::face::mag(const UList<point>& p) const
 {
-    return ::Foam::mag(normal(p));
+    return ::Foam::mag(areaNormal(p));
 }
 
 

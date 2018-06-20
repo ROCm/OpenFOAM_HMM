@@ -106,8 +106,9 @@ typename Foam::cut::opAddResult<AboveOp, BelowOp>::type Foam::triCut
 {
     // Set the level set to the signed distance from the plane
     FixedList<scalar, 3> level;
-    for (label i = 0; i < 3; ++ i)
+    for (label i = 0; i < 3; ++i)
     {
+        // uses unit-normal
         level[i] = (tri[i] - p.refPoint()) & p.normal();
     }
 
@@ -251,8 +252,9 @@ typename Foam::cut::opAddResult<AboveOp, BelowOp>::type Foam::tetCut
 {
     // Set the level set to the signed distance from the plane
     FixedList<scalar, 4> level;
-    for (label i = 0; i < 4; ++ i)
+    for (label i = 0; i < 4; ++i)
     {
+        // uses unit-normal
         level[i] = (tet[i] - p.refPoint()) & p.normal();
     }
 

@@ -89,7 +89,7 @@ inline Foam::scalar Foam::pyramid<Point, PointRef, polygonRef>::mag
     const UList<point>& points
 ) const
 {
-    return (1.0/3.0)*(base_.normal(points)&(height(points)));
+    return (1.0/3.0)*(base_.areaNormal(points) & (height(points)));
 }
 
 

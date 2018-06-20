@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -206,11 +206,21 @@ public:
             //- Return centre (centroid)
             inline Point centre() const;
 
+            //- The area normal - with magnitude equal to area of triangle
+            inline vector areaNormal() const;
+
+            //- Return unit normal
+            inline vector unitNormal() const;
+
+            //- Legacy name for areaNormal.
+            //  \deprecated Deprecated for new use (JUN-2018)
+            inline vector normal() const
+            {
+                return areaNormal();
+            }
+
             //- Return scalar magnitude
             inline scalar mag() const;
-
-            //- Return vector normal
-            inline vector normal() const;
 
             //- Return circum-centre
             inline Point circumCentre() const;

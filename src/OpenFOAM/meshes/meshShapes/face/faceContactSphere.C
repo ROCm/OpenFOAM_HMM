@@ -37,10 +37,8 @@ Foam::scalar Foam::face::contactSphereDiameter
     const UList<point>& meshPoints
 ) const
 {
-    scalar magN = Foam::mag(n);
-
-    vector n1 = n/(magN + SMALL);
-    vector n2 = normal(meshPoints);
+    vector n1 = n/(Foam::mag(n) + SMALL);
+    vector n2 = areaNormal(meshPoints);
 
     n2 /= Foam::mag(n2) + SMALL;
 
