@@ -103,11 +103,6 @@ forAll(Y, i)
 }
 fields.add(thermo.he());
 
-bool solvePrimaryRegion
-(
-    pimple.dict().lookupOrDefault("solvePrimaryRegion", true)
-);
-
 volScalarField Qdot
 (
     IOobject

@@ -87,6 +87,7 @@ int main(int argc, char *argv[])
     #include "createUpdatedDynamicFvMesh.H"
     #include "createControl.H"
     #include "createFields.H"
+    #include "createOversetFields.H"
     #include "createFvOptions.H"
     #include "initContinuityErrs.H"
 

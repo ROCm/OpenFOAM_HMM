@@ -55,6 +55,13 @@ int main(int argc, char *argv[])
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    label ntot = 1;
+    forAll(K.nn(), idim)
+    {
+        ntot *= K.nn()[idim];
+    }
+    const scalar recRootN = 1.0/Foam::sqrt(scalar(ntot));
+
     Info<< nl << "Starting time loop" << endl;
 
     while (runTime.loop())

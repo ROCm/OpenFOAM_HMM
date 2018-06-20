@@ -44,4 +44,3 @@ autoPtr<incompressible::turbulenceModel> turbulence
 
 #include "createMRF.H"
 
-#include "createOversetFields.H"

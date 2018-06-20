@@ -65,8 +65,14 @@
         phic += (mixture.cAlpha()*icAlpha)*fvc::interpolate(mag(U));
     }
 
-    surfaceScalarField::Boundary& phicBf =
-        phic.boundaryFieldRef();
+    // Add the optional shear compression contribution
+    if (scAlpha > 0)
+    {
+        phic +=
+            scAlpha*mag(mesh.delta() & fvc::interpolate(symm(fvc::grad(U))));
+    }
+
+    surfaceScalarField::Boundary& phicBf = phic.boundaryFieldRef();
 
     // Do not compress interface at non-coupled boundary faces
     // (inlets, outlets etc.)

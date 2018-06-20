@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     #include "createTimeControls.H"
     #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
-    #include "readPyrolysisTimeControls.H"
+    #include "createRegionControls.H"
 
     turbulence->validate();
 
