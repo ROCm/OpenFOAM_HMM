@@ -76,7 +76,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 class coordinateSystem;
 
@@ -101,7 +101,8 @@ class coordinateSystem
         //- Origin
         point origin_;
 
-        //- Local-to-Global transformation tensor
+        //- Local-to-Global transformation tensor.
+        //  May be invalid after a move assignment or transfer
         autoPtr<coordinateRotation> R_;
 
 
@@ -110,11 +111,11 @@ protected:
     // Protected Member Functions
 
         //- Convert from local coordinate system to the global Cartesian system
-        //  with optional translation for the origin
+        //- with optional translation for the origin
         virtual vector localToGlobal(const vector&, bool translate) const;
 
         //- Convert from local coordinate system to the global Cartesian system
-        //  with optional translation for the origin
+        //- with optional translation for the origin
         virtual tmp<vectorField> localToGlobal
         (
             const vectorField&,
@@ -122,11 +123,11 @@ protected:
         ) const;
 
         //- Convert from global Cartesian system to the local coordinate system
-        //  with optional translation for the origin
+        //- with optional translation for the origin
         virtual vector globalToLocal(const vector&, bool translate) const;
 
         //- Convert from global Cartesian system to the local coordinate system
-        //  with optional translation for the origin
+        //- with optional translation for the origin
         virtual tmp<vectorField> globalToLocal
         (
             const vectorField&,
@@ -134,10 +135,10 @@ protected:
         ) const;
 
         //- Init from dict and obr
-        void init(const dictionary&);
+        void init(const dictionary& dict);
 
         //- Init from dictionary
-        void init(const dictionary&, const objectRegistry&);
+        void init(const dictionary& dict, const objectRegistry& obr);
 
 
 public:
@@ -182,18 +183,18 @@ public:
         );
 
         //- Construct from dictionary with a given name
-        coordinateSystem(const word& name, const dictionary&);
+        coordinateSystem(const word& name, const dictionary& dict);
 
         //- Construct from dictionary with default name
-        coordinateSystem(const dictionary&);
+        explicit coordinateSystem(const dictionary& dict);
 
         //- Construct from dictionary (default name)
         //  With the ability to reference global coordinateSystems
-        coordinateSystem(const objectRegistry&, const dictionary&);
+        coordinateSystem(const objectRegistry& obr, const dictionary& dict);
 
         //- Construct from Istream
         //  The Istream contains a word followed by a dictionary
-        coordinateSystem(Istream&);
+        coordinateSystem(Istream& is);
 
 
     //- Return clone
@@ -322,10 +323,10 @@ public:
         // Write
 
             //- Write
-            virtual void write(Ostream&) const;
+            virtual void write(Ostream& os) const;
 
             //- Write dictionary
-            void writeDict(Ostream&, bool subDict=true) const;
+            void writeDict(Ostream& os, bool subDict=true) const;
 
 
         // Transformations
@@ -396,7 +397,7 @@ public:
         void operator=(coordinateSystem&& cs);
 
 
-        // friend Operators
+        // Friend Operators
 
             friend bool operator!=
             (
@@ -407,7 +408,11 @@ public:
 
         // IOstream Operators
 
-            friend Ostream& operator<<(Ostream&, const coordinateSystem&);
+            friend Ostream& operator<<
+            (
+                Ostream& os,
+                const coordinateSystem& cs
+            );
 };
 
 

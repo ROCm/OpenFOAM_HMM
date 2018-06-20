@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
     #include "createControl.H"
     #include "createFields.H"
     #include "createPorousZones.H"
+    #include "setPorosityTreatment.H"
     #include "initContinuityErrs.H"
 
     turbulence->validate();

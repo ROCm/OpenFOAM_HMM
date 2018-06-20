@@ -581,8 +581,9 @@ bool Foam::functionObjects::regionSizeDistribution::write()
             << token::TAB << "Volume(mesh)"
             << token::TAB << "Volume(" << alpha.name() << "):"
             << endl;
-        for (const label regioni : patchRegions)
+        forAllConstIters(patchRegions, iter)
         {
+            const label regioni = iter.key();
             Info<< "    " << token::TAB << regioni
                 << token::TAB << allRegionVolume[regioni]
                 << token::TAB << allRegionAlphaVolume[regioni] << endl;

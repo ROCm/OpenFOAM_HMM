@@ -876,6 +876,7 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
     }
 
     coordSys_.clear();
+    localSystem_ = false;
 
     // Centre of rotation for moment calculations
     // specified directly, from coordinate system, or implicitly (0 0 0)

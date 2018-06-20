@@ -35,9 +35,9 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
 )
 {
     const dictionary& coordDict = dict.subDict(typeName_());
-    const word coordType = coordDict.lookup("type");
+    const word modelType(coordDict.get<word>("type"));
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(coordType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
@@ -45,9 +45,9 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
         (
             dict
         )   << "Unknown coordinateSystem type "
-            << coordType << nl << nl
-            << "Valid coordinateSystem types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
+            << modelType << nl << nl
+            << "Valid types:  "
+            << flatOutput(dictionaryConstructorTablePtr_->sortedToc())
             << exit(FatalIOError);
     }
 
