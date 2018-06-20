@@ -105,11 +105,6 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
     const IOField<scalar>* residualPtr =
         mesh_.lookupObjectPtr<IOField<scalar>>(residualName_);
 
-    if (log)
-    {
-        Log << nl << type() << " : " << nl;
-    }
-
     if (residuals_)
     {
         if (!residualPtr)
@@ -131,6 +126,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
 
             if (log)
             {
+                Log << nl << name() << " : " << nl;
                 Log << "    Average(mag(residuals)) :  " << meanRes << endl;
             }
 
@@ -409,7 +405,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
 
         calcStats(nCellsScheme1, nCellsScheme2, nCellsBlended);
 
-        Log << nl << type() << " execute :" << nl
+        Log << nl << name() << " execute :" << nl
         << "    scheme 1 cells :  " << nCellsScheme1 << nl
         << "    scheme 2 cells :  " << nCellsScheme2 << nl
         << "    blended cells  :  " << nCellsBlended << nl
@@ -447,7 +443,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
     (
         IOobject
         (
-            "blendedIndicator",
+            "blendedIndicator" + fieldName_,
             time_.timeName(),
             mesh_,
             IOobject::NO_READ,
@@ -630,6 +626,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
     if (log)
     {
         indicator_.writeOpt() = IOobject::AUTO_WRITE;
+
     }
 
     if (writeToFile_)
@@ -735,22 +732,25 @@ bool Foam::functionObjects::stabilityBlendingFactor::read
 
 bool Foam::functionObjects::stabilityBlendingFactor::write()
 {
+    label nCellsScheme1 = 0;
+    label nCellsScheme2 = 0;
+    label nCellsBlended = 0;
+
+    calcStats(nCellsScheme1, nCellsScheme2, nCellsBlended);
+
     if (writeToFile_)
     {
-
-        label nCellsScheme1 = 0;
-        label nCellsScheme2 = 0;
-        label nCellsBlended = 0;
-
-        calcStats(nCellsScheme1, nCellsScheme2, nCellsBlended);
-
         writeTime(file());
+
+        DebugVar("here");
 
         file()
             << tab << nCellsScheme1
             << tab << nCellsScheme2
             << tab << nCellsBlended
             << endl;
+
+        DebugVar("here1");
     }
 
     return true;
