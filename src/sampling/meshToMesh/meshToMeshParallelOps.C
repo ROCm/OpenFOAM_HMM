@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,7 @@ License
 #include "processorPolyPatch.H"
 #include "SubField.H"
 #include "AABBTree.H"
+#include "cellBox.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -98,12 +99,12 @@ Foam::label Foam::meshToMesh::calcOverlappingProcs
     {
         const treeBoundBoxList& bbp = procBb[proci];
 
-        forAll(bbp, bbi)
+        for (const treeBoundBox& b : bbp)
         {
-            if (bbp[bbi].overlaps(bb))
+            if (b.overlaps(bb))
             {
                 overlaps[proci] = true;
-                nOverlaps++;
+                ++nOverlaps;
                 break;
             }
         }
@@ -119,139 +120,179 @@ Foam::autoPtr<Foam::mapDistribute> Foam::meshToMesh::calcProcMap
     const polyMesh& tgt
 ) const
 {
-    // get decomposition of cells on src mesh
-    List<treeBoundBoxList> procBb(Pstream::nProcs());
-
-    if (src.nCells() > 0)
+    switch (procMapMethod_)
     {
-        procBb[Pstream::myProcNo()] = AABBTree<labelList>
-        (
-            src.cellPoints(),
-            src.points(),
-            false
-        ).boundBoxes();
-    }
-    else
-    {
-        procBb[Pstream::myProcNo()] = treeBoundBoxList();
-    }
-
-
-    Pstream::gatherList(procBb);
-    Pstream::scatterList(procBb);
-
-
-    if (debug)
-    {
-        InfoInFunction
-            << "Determining extent of src mesh per processor:" << nl
-            << "\tproc\tbb" << endl;
-        forAll(procBb, proci)
+        case procMapMethod::pmLOD:
         {
-            Info<< '\t' << proci << '\t' << procBb[proci] << endl;
+            Info<< "meshToMesh: Using processorLOD method" << endl;
+
+            // Create processor map of overlapping faces. This map gets
+            // (possibly remote) cells from the tgt mesh such that they
+            // (together) cover all of the src mesh
+            label nGlobalSrcCells =
+                returnReduce(src.cells().size(), sumOp<label>());
+            label cellsPerBox = max(1, 0.001*nGlobalSrcCells);
+            typename processorLODs::cellBox boxLOD
+            (
+                src.cells(),
+                src.faces(),
+                src.points(),
+                tgt.cells(),
+                tgt.faces(),
+                tgt.points(),
+                cellsPerBox,
+                src.nCells()
+            );
+
+            return boxLOD.map();
+            break;
         }
-    }
-
-
-    // determine which cells of tgt mesh overlaps src mesh per proc
-    const cellList& cells = tgt.cells();
-    const faceList& faces = tgt.faces();
-    const pointField& points = tgt.points();
-
-    labelListList sendMap;
-
-    {
-        // per processor indices into all segments to send
-        List<DynamicList<label>> dynSendMap(Pstream::nProcs());
-        label iniSize = floor(tgt.nCells()/Pstream::nProcs());
-
-        forAll(dynSendMap, proci)
+        default:
         {
-            dynSendMap[proci].setCapacity(iniSize);
-        }
+            Info<< "meshToMesh: Using AABBTree method" << endl;
 
-        // work array - whether src processor bb overlaps the tgt cell bounds
-        boolList procBbOverlaps(Pstream::nProcs());
-        forAll(cells, celli)
-        {
-            const cell& c = cells[celli];
+            // get decomposition of cells on src mesh
+            List<treeBoundBoxList> procBb(Pstream::nProcs());
 
-            // determine bounding box of tgt cell
-            boundBox cellBb(boundBox::invertedBox);
-            forAll(c, facei)
+            if (src.nCells() > 0)
             {
-                const face& f = faces[c[facei]];
-                forAll(f, fp)
+                procBb[Pstream::myProcNo()] = AABBTree<labelList>
+                (
+                    src.cellPoints(),
+                    src.points(),
+                    false
+                ).boundBoxes();
+            }
+            else
+            {
+                procBb[Pstream::myProcNo()] = treeBoundBoxList();
+            }
+
+
+            Pstream::gatherList(procBb);
+            Pstream::scatterList(procBb);
+
+
+            if (debug)
+            {
+                InfoInFunction
+                    << "Determining extent of src mesh per processor:" << nl
+                    << "\tproc\tbb" << endl;
+                forAll(procBb, proci)
                 {
-                    cellBb.add(points, f);
+                    Info<< '\t' << proci << '\t' << procBb[proci] << endl;
                 }
             }
 
-            // find the overlapping tgt cells on each src processor
-            (void)calcOverlappingProcs(procBb, cellBb, procBbOverlaps);
 
-            forAll(procBbOverlaps, proci)
+            // determine which cells of tgt mesh overlaps src mesh per proc
+            const cellList& cells = tgt.cells();
+            const faceList& faces = tgt.faces();
+            const pointField& points = tgt.points();
+
+            labelListList sendMap;
+
             {
-                if (procBbOverlaps[proci])
+                // per processor indices into all segments to send
+                List<DynamicList<label>> dynSendMap(Pstream::nProcs());
+                label iniSize = floor(tgt.nCells()/Pstream::nProcs());
+
+                forAll(dynSendMap, proci)
                 {
-                    dynSendMap[proci].append(celli);
+                    dynSendMap[proci].setCapacity(iniSize);
+                }
+
+                // work array - whether src processor bb overlaps the tgt cell
+                // bounds
+                boolList procBbOverlaps(Pstream::nProcs());
+                forAll(cells, celli)
+                {
+                    const cell& c = cells[celli];
+
+                    // determine bounding box of tgt cell
+                    boundBox cellBb(boundBox::invertedBox);
+                    forAll(c, facei)
+                    {
+                        const face& f = faces[c[facei]];
+                        forAll(f, fp)
+                        {
+                            cellBb.add(points, f);
+                        }
+                    }
+
+                    // find the overlapping tgt cells on each src processor
+                    (void)calcOverlappingProcs(procBb, cellBb, procBbOverlaps);
+
+                    forAll(procBbOverlaps, proci)
+                    {
+                        if (procBbOverlaps[proci])
+                        {
+                            dynSendMap[proci].append(celli);
+                        }
+                    }
+                }
+
+                // convert dynamicList to labelList
+                sendMap.setSize(Pstream::nProcs());
+                forAll(sendMap, proci)
+                {
+                    sendMap[proci].transfer(dynSendMap[proci]);
                 }
             }
-        }
 
-        // convert dynamicList to labelList
-        sendMap.setSize(Pstream::nProcs());
-        forAll(sendMap, proci)
-        {
-            sendMap[proci].transfer(dynSendMap[proci]);
+            // debug printing
+            if (debug)
+            {
+                Pout<< "Of my " << cells.size()
+                    << " target cells I need to send to:" << nl
+                    << "\tproc\tcells" << endl;
+                forAll(sendMap, proci)
+                {
+                    Pout<< '\t' << proci << '\t' << sendMap[proci].size()
+                        << endl;
+                }
+            }
+
+
+            // send over how many tgt cells I need to receive from each
+            // processor
+            labelListList sendSizes(Pstream::nProcs());
+            sendSizes[Pstream::myProcNo()].setSize(Pstream::nProcs());
+            forAll(sendMap, proci)
+            {
+                sendSizes[Pstream::myProcNo()][proci] = sendMap[proci].size();
+            }
+            Pstream::gatherList(sendSizes);
+            Pstream::scatterList(sendSizes);
+
+
+            // determine order of receiving
+            labelListList constructMap(Pstream::nProcs());
+
+            label segmentI = 0;
+            forAll(constructMap, proci)
+            {
+                // what I need to receive is what other processor is sending
+                // to me
+                label nRecv = sendSizes[proci][Pstream::myProcNo()];
+                constructMap[proci].setSize(nRecv);
+
+                for (label i = 0; i < nRecv; i++)
+                {
+                    constructMap[proci][i] = segmentI++;
+                }
+            }
+
+            return autoPtr<mapDistribute>::New
+            (
+                segmentI,       // size after construction
+                std::move(sendMap),
+                std::move(constructMap)
+            );
+
+            break;
         }
     }
-
-    // debug printing
-    if (debug)
-    {
-        Pout<< "Of my " << cells.size() << " target cells I need to send to:"
-            << nl << "\tproc\tcells" << endl;
-        forAll(sendMap, proci)
-        {
-            Pout<< '\t' << proci << '\t' << sendMap[proci].size() << endl;
-        }
-    }
-
-
-    // send over how many tgt cells I need to receive from each processor
-    labelListList sendSizes(Pstream::nProcs());
-    sendSizes[Pstream::myProcNo()].setSize(Pstream::nProcs());
-    forAll(sendMap, proci)
-    {
-        sendSizes[Pstream::myProcNo()][proci] = sendMap[proci].size();
-    }
-    Pstream::gatherList(sendSizes);
-    Pstream::scatterList(sendSizes);
-
-
-    // determine order of receiving
-    labelListList constructMap(Pstream::nProcs());
-
-    label segmentI = 0;
-    forAll(constructMap, proci)
-    {
-        // what I need to receive is what other processor is sending to me
-        label nRecv = sendSizes[proci][Pstream::myProcNo()];
-        constructMap[proci].setSize(nRecv);
-
-        for (label i = 0; i < nRecv; i++)
-        {
-            constructMap[proci][i] = segmentI++;
-        }
-    }
-
-    return autoPtr<mapDistribute>::New
-    (
-        segmentI,       // size after construction
-        std::move(sendMap),
-        std::move(constructMap)
-    );
 }
 
 

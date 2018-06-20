@@ -784,9 +784,10 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
             (
                 srcMesh,
                 tgtMesh,
-                meshToMesh::imCellVolumeWeight,
+                meshToMesh::interpolationMethod::imCellVolumeWeight,
                 HashTable<word>(0),     // patchMap,
                 wordList(0),            // cuttingPatches
+                meshToMesh::procMapMethod::pmAABB,
                 false                   // do not normalise
             );
 

@@ -52,6 +52,17 @@ Foam::meshToMesh::interpolationMethodNames_
 };
 
 
+const Foam::Enum
+<
+    Foam::meshToMesh::procMapMethod
+>
+Foam::meshToMesh::procMapMethodNames_
+{
+    { procMapMethod::pmAABB, "AABB" },
+    { procMapMethod::pmLOD, "LOD" },
+};
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<>
@@ -628,18 +639,18 @@ Foam::meshToMesh::interpolationMethodAMI(const interpolationMethod method)
 {
     switch (method)
     {
-        case imDirect:
+        case interpolationMethod::imDirect:
         {
             return AMIPatchToPatchInterpolation::imDirect;
             break;
         }
-        case imMapNearest:
+        case interpolationMethod::imMapNearest:
         {
             return AMIPatchToPatchInterpolation::imMapNearest;
             break;
         }
-        case imCellVolumeWeight:
-        case imCorrectedCellVolumeWeight:
+        case interpolationMethod::imCellVolumeWeight:
+        case interpolationMethod::imCorrectedCellVolumeWeight:
         {
             return AMIPatchToPatchInterpolation::imFaceAreaWeight;
             break;
@@ -647,7 +658,7 @@ Foam::meshToMesh::interpolationMethodAMI(const interpolationMethod method)
         default:
         {
             FatalErrorInFunction
-                << "Unhandled enumeration " << method
+                << "Unhandled enumeration " << interpolationMethodNames_[method]
                 << abort(FatalError);
         }
     }
@@ -827,11 +838,13 @@ Foam::meshToMesh::meshToMesh
     const polyMesh& src,
     const polyMesh& tgt,
     const interpolationMethod& method,
+    const procMapMethod& mapMethod,
     bool interpAllPatches
 )
 :
     srcRegion_(src),
     tgtRegion_(tgt),
+    procMapMethod_(mapMethod),
     srcPatchID_(),
     tgtPatchID_(),
     patchAMIs_(),
@@ -865,11 +878,13 @@ Foam::meshToMesh::meshToMesh
     const polyMesh& tgt,
     const word& methodName,
     const word& AMIMethodName,
+    const procMapMethod& mapMethod,
     bool interpAllPatches
 )
 :
     srcRegion_(src),
     tgtRegion_(tgt),
+    procMapMethod_(mapMethod),
     srcPatchID_(),
     tgtPatchID_(),
     patchAMIs_(),
@@ -896,11 +911,13 @@ Foam::meshToMesh::meshToMesh
     const interpolationMethod& method,
     const HashTable<word>& patchMap,
     const wordList& cuttingPatches,
+    const procMapMethod& mapMethod,
     const bool normalise
 )
 :
     srcRegion_(src),
     tgtRegion_(tgt),
+    procMapMethod_(mapMethod),
     srcPatchID_(),
     tgtPatchID_(),
     patchAMIs_(),
@@ -936,11 +953,13 @@ Foam::meshToMesh::meshToMesh
     const word& AMIMethodName,  // boundary mapping
     const HashTable<word>& patchMap,
     const wordList& cuttingPatches,
+    const procMapMethod& mapMethod,
     const bool normalise
 )
 :
     srcRegion_(src),
     tgtRegion_(tgt),
+    procMapMethod_(mapMethod),
     srcPatchID_(),
     tgtPatchID_(),
     patchAMIs_(),
