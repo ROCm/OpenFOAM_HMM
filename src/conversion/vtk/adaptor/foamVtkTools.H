@@ -28,6 +28,10 @@ Description
     A collection of static methods to assist converting OpenFOAM data
     structures into VTK internal data structures.
 
+    Remapping of the symmTensor order is required in input or output
+    directions. OpenFOAM uses (XX, XY, XZ, YY, YZ, ZZ) order,
+    VTK uses (XX, YY, ZZ, XY, YZ, XZ) order.
+
 Note
     The class is implemented as headers-only.
 
@@ -204,13 +208,13 @@ public:
     };
 
 
-    //- Remapping for some OpenFOAM data types
+    //- Remapping for some OpenFOAM data types (eg, symmTensor)
     template<class Type>
-    inline static void remapTuple(float vec[]) {}
+    inline static void remapTuple(float data[]) {}
 
-    //- Remapping for some OpenFOAM data types
+    //- Remapping for some OpenFOAM data types (eg, symmTensor)
     template<class Type>
-    inline static void remapTuple(double vec[]) {}
+    inline static void remapTuple(double data[]) {}
 
     // Field Conversion Functions
 
@@ -248,21 +252,21 @@ public:
 };
 
 
-//- Template specialization for symmTensor
+//- Template specialization for symmTensor ordering
 template<>
-inline void Foam::vtk::Tools::remapTuple<Foam::symmTensor>(float vec[])
+inline void Foam::vtk::Tools::remapTuple<Foam::symmTensor>(float data[])
 {
-    std::swap(vec[1], vec[3]);   // swap XY <-> YY
-    std::swap(vec[2], vec[5]);   // swap XZ <-> ZZ
+    std::swap(data[1], data[3]);    // swap XY <-> YY
+    std::swap(data[2], data[5]);    // swap XZ <-> ZZ
 }
 
 
-//- Template specialization for symmTensor
+//- Template specialization for symmTensor ordering
 template<>
-inline void Foam::vtk::Tools::remapTuple<Foam::symmTensor>(double vec[])
+inline void Foam::vtk::Tools::remapTuple<Foam::symmTensor>(double data[])
 {
-    std::swap(vec[1], vec[3]);   // swap XY <-> YY
-    std::swap(vec[2], vec[5]);   // swap XZ <-> ZZ
+    std::swap(data[1], data[3]);    // swap XY <-> YY
+    std::swap(data[2], data[5]);    // swap XZ <-> ZZ
 }
 
 

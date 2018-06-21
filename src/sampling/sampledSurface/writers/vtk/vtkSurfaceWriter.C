@@ -161,13 +161,15 @@ namespace Foam
     {
         os  << "6 " << values.size() << " float" << nl;
 
+        // symmTensor ( XX, XY, XZ, YY, YZ, ZZ )
+        // VTK order  ( XX, YY, ZZ, XY, YZ, XZ ) -> (0, 3, 5, 1, 4, 2)
+
         for (const symmTensor& v : values)
         {
-            os  << float(v[0]) << ' ' << float(v[1]) << ' ' << float(v[2])
+            os  << float(v[0]) << ' ' << float(v[3]) << ' ' << float(v[5])
                 << ' '
-                << float(v[3]) << ' ' << float(v[4]) << ' ' << float(v[5])
+                << float(v[1]) << ' ' << float(v[4]) << ' ' << float(v[2])
                 << nl;
-
         }
     }
 

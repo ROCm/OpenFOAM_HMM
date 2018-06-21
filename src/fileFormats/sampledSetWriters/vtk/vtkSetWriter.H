@@ -26,6 +26,9 @@ Class
 
 Description
 
+Note
+    The output order of symmTensor is incorrect.
+
 SourceFiles
     vtkSetWriter.C
 
