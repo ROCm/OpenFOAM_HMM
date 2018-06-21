@@ -52,7 +52,7 @@ functions
     // Demonstrate runtime postprocessing
     #include "streamLines"
     #include "cuttingPlane"
-    #include "runtimePostProcessing"
+    #include "runTimePostProcessing"
 
     // Do some other functionObjects
     #include "forceCoeffs"
