@@ -14,17 +14,17 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-convertToMeters 1;
+scale   1;
 
-L	1;
-nx	50;
+L       1;
+nx      50;
 
 y1     -.05;
-y2	.05;
-ny	1;
+y2      .05;
+ny      1;
 
-H	1;
-nz	50;
+H       1;
+nz      50;
 
 vertices
 (
