@@ -45,12 +45,12 @@ void Foam::fileFormats::VTKedgeFormat::writeHeader
         << "DATASET POLYDATA" << nl;
 
     // Write vertex coords
-    os  << "POINTS " << pointLst.size() << " float" << nl;
-    forAll(pointLst, ptI)
+    os  << "POINTS " << pointLst.size() << " double" << nl;
+    for (const point& pt : pointLst)
     {
-        const point& pt = pointLst[ptI];
-
-        os  << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
+        os  << float(pt.x()) << ' '
+            << float(pt.y()) << ' '
+            << float(pt.z()) << nl;
     }
 }
 
@@ -63,10 +63,8 @@ void Foam::fileFormats::VTKedgeFormat::writeEdges
 {
     os  << "LINES " << edgeLst.size() << ' ' << 3*edgeLst.size() << nl;
 
-    forAll(edgeLst, edgeI)
+    for (const edge& e : edgeLst)
     {
-        const edge& e = edgeLst[edgeI];
-
         os  << "2 " << e[0] << ' ' << e[1] << nl;
     }
 }

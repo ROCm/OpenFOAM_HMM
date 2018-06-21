@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,9 +35,13 @@ void Foam::vtkSurfaceWriter::writeData
     const Field<Type>& values
 )
 {
-    os  << "1 " << values.size() << " float" << nl;
+    // Unspecialized (unknown) data type - map as zeros
 
-    forAll(values, elemI)
+    const label len = values.size();
+
+    os  << "1 " << len << " double" << nl;
+
+    for (label i=0; i < len; ++i)
     {
         os  << float(0) << nl;
     }

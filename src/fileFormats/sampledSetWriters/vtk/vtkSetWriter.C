@@ -71,12 +71,13 @@ void Foam::vtkSetWriter<Type>::write
         << points.name() << nl
         << "ASCII" << nl
         << "DATASET POLYDATA" << nl
-        << "POINTS " << points.size() << " float" << nl;
+        << "POINTS " << points.size() << " double" << nl;
 
-    forAll(points, i)
+    for (const point& pt : points)
     {
-        const vector& pt = points[i];
-        os  << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
+        os  << float(pt.x()) << ' '
+            << float(pt.y()) << ' '
+            << float(pt.z()) << nl;
     }
 
     os  << "POINT_DATA " << points.size() << nl
@@ -132,15 +133,16 @@ void Foam::vtkSetWriter<Type>::write
         << tracks[0].name() << nl
         << "ASCII" << nl
         << "DATASET POLYDATA" << nl
-        << "POINTS " << nPoints << " float" << nl;
+        << "POINTS " << nPoints << " double" << nl;
 
     forAll(tracks, trackI)
     {
         const coordSet& points = tracks[trackI];
-        forAll(points, i)
+        for (const point& pt : points)
         {
-            const vector& pt = points[i];
-            os  << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
+            os  << float(pt.x()) << ' '
+                << float(pt.y()) << ' '
+                << float(pt.z()) << nl;
         }
     }
 

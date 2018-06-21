@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,7 +96,7 @@ namespace Foam
         const Field<scalar>& values
     )
     {
-        os  << "1 " << values.size() << " float" << nl;
+        os  << "1 " << values.size() << " double" << nl;
 
         forAll(values, elemI)
         {
@@ -125,7 +125,7 @@ namespace Foam
         const Field<vector>& values
     )
     {
-        os  << "3 " << values.size() << " float" << nl;
+        os  << "3 " << values.size() << " double" << nl;
 
         for (const vector& v : values)
         {
@@ -143,7 +143,7 @@ namespace Foam
         const Field<sphericalTensor>& values
     )
     {
-        os  << "1 " << values.size() << " float" << nl;
+        os  << "1 " << values.size() << " double" << nl;
 
         for (const sphericalTensor& v : values)
         {
@@ -159,7 +159,7 @@ namespace Foam
         const Field<symmTensor>& values
     )
     {
-        os  << "6 " << values.size() << " float" << nl;
+        os  << "6 " << values.size() << " double" << nl;
 
         // symmTensor ( XX, XY, XZ, YY, YZ, ZZ )
         // VTK order  ( XX, YY, ZZ, XY, YZ, XZ ) -> (0, 3, 5, 1, 4, 2)
@@ -181,7 +181,7 @@ namespace Foam
         const Field<tensor>& values
     )
     {
-        os  << "9 " << values.size() << " float" << nl;
+        os  << "9 " << values.size() << " double" << nl;
 
         for (const tensor& v : values)
         {

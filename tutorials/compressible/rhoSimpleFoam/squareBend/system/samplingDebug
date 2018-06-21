@@ -15,6 +15,7 @@ debug
     sampleScheme  cellPoint;
     interpolationScheme cellPoint;
     surfaceFormat ensight;
+    // surfaceFormat vtk;
 
     formatOptions
     {
