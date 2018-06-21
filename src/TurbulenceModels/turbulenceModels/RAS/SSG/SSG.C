@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -379,6 +379,7 @@ void SSG<BasicTurbulenceModel>::correct()
     this->boundNormalStress(R);
 
     k_ = 0.5*tr(R);
+    bound(k_, this->kMin_);
 
     correctNut();
 
