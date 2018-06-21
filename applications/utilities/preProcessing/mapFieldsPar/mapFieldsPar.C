@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
             meshToMesh::procMapMethod::pmAABB
         ];
 
-    if (args.readIfPresent("prcoMapMethod", procMapMethod))
+    if (args.readIfPresent("procMapMethod", procMapMethod))
     {
         Info<< "Processor map method: " << procMapMethod << endl;
     }
