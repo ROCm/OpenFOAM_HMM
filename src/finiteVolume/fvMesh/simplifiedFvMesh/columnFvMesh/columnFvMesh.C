@@ -120,6 +120,12 @@ bool Foam::simplifiedMeshes::columnFvMeshInfo::setPatchEntries
             << fieldDict.objectPath()
             << endl;
 
+        WarningInFunction
+            << "All boundaries will be approximated using wall-type patches. "
+            << "This may cause your final case to run differntly.  "
+            << "Create you mesh first for improved performance"
+            << endl;
+
         const dictionary& boundaryFieldDict =
             fieldDict.subDict("boundaryField");
 

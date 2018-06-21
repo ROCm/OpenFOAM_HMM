@@ -22,13 +22,13 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::simplifiedFvMesh
+    Foam::simplifiedDynamicFvMesh
 
 Description
     Functions to generate simplified finite volume meshes
 
 SourceFiles
-    simplifiedFvMesh.C
+    simplifiedDynamicFvMesh.C
 
 \*---------------------------------------------------------------------------*/
 
