@@ -59,7 +59,7 @@ PIMPLE
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;
     transonic       no;
-    consistent	    no;
+    consistent      no;
 }
 
 relaxationFactors

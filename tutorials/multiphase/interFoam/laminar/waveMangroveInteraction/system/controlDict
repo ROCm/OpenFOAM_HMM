@@ -48,6 +48,7 @@ runTimeModifiable yes;
 adjustTimeStep  on;
 
 maxCo           0.4;
+
 maxAlphaCo      0.4;
 
 maxDeltaT       0.01;
@@ -62,92 +63,94 @@ functions
         enabled         true;
         writeControl    writeTime;
 
-		interpolationScheme cellPoint;
-		setFormat       raw;
-		sets
-		(
-	    	s1
+        interpolationScheme cellPoint;
+        setFormat       raw;
+        sets
+        (
+            s1
             {
-	      		type 	uniform;
-	      		axis 	distance;
-	      		start   ( 2.065 0.275 0.0 );
-              	end     ( 2.065 0.275 0.5 );
-	      		nPoints 101;
-	    	}
-	    	s2
+                type    uniform;
+                axis    distance;
+                start   ( 2.065 0.275 0.0 );
+                end     ( 2.065 0.275 0.5 );
+                nPoints 101;
+            }
+            s2
             {
-	      		type 	uniform;
-	     		axis 	distance;
-	      		start   ( 3.565 0.275 0.0 );
-              	end     ( 3.565 0.275 0.5 );
-	      		nPoints 101;
-	    	}
-	    	s3
+                type    uniform;
+                axis    distance;
+                start   ( 3.565 0.275 0.0 );
+                end     ( 3.565 0.275 0.5 );
+                nPoints 101;
+            }
+            s3
             {
-	      		type 	uniform;
-	      		axis 	distance;
-	      		start   ( 3.99 0.275 0.0 );
-              	end     ( 3.99 0.275 0.5 );
-	      		nPoints 101;
-	    	}
-	    	s4
+                type    uniform;
+                axis    distance;
+                start   ( 3.99 0.275 0.0 );
+                end     ( 3.99 0.275 0.5 );
+                nPoints 101;
+            }
+            s4
             {
-	      		type 	uniform;
-	      		axis 	distance;
-	      		start   ( 4.055 0.275 0.0 );
-              	end     ( 4.055 0.275 0.5 );
-	      		nPoints 101;
-	    	}
-	    	s5
+                type    uniform;
+                axis    distance;
+                start   ( 4.055 0.275 0.0 );
+                end     ( 4.055 0.275 0.5 );
+                nPoints 101;
+            }
+            s5
             {
-	      		type 	uniform;
-	      		axis 	distance;
-	      		start   ( 4.155 0.275 0.0 );
-              	end     ( 4.155 0.275 0.5 );
-	      		nPoints 101;
-	    	}
-	    	s6
+                type    uniform;
+                axis    distance;
+                start   ( 4.155 0.275 0.0 );
+                end     ( 4.155 0.275 0.5 );
+                nPoints 101;
+            }
+            s6
             {
-	      		type 	uniform;
-	      		axis 	distance;
-	      		start   ( 4.275 0.275 0.0 );
-              	end     ( 4.275 0.275 0.5 );
-	      		nPoints 101;
-	    	}
-	    	s7
+                type    uniform;
+                axis    distance;
+                start   ( 4.275 0.275 0.0 );
+                end     ( 4.275 0.275 0.5 );
+                nPoints 101;
+            }
+            s7
             {
-	      		type 	uniform;
-	      		axis 	distance;
-	      		start   ( 4.395 0.275 0.0 );
-              	end     ( 4.395 0.275 0.5 );
-	      		nPoints 101;
-	    	}
-	    	s8
+                type    uniform;
+                axis    distance;
+                start   ( 4.395 0.275 0.0 );
+                end     ( 4.395 0.275 0.5 );
+                nPoints 101;
+            }
+            s8
             {
-	      		type 	uniform;
-	      		axis 	distance;
-	      		start   ( 4.515 0.275 0.0 );
-              	end     ( 4.515 0.275 0.5 );
-	      		nPoints 101;
-	    	}
-	    	s9
+                type    uniform;
+                axis    distance;
+                start   ( 4.515 0.275 0.0 );
+                end     ( 4.515 0.275 0.5 );
+                nPoints 101;
+            }
+            s9
             {
-	      		type	uniform;
-	      		axis 	distance;
-	      		start   ( 4.635 0.275 0.0 );
-              	end     ( 4.635 0.275 0.5 );
-	      		nPoints 101;
-	    	}
-	    	s10
+                type    uniform;
+                axis    distance;
+                start   ( 4.635 0.275 0.0 );
+                end     ( 4.635 0.275 0.5 );
+                nPoints 101;
+            }
+            s10
             {
-	      		type 	uniform;
-	      		axis 	distance;
-	      		start   ( 4.77 0.275 0.0 );
-              	end     ( 4.77 0.275 0.5 );
-	      		nPoints 101;
-	    	}
-		);
+                type    uniform;
+                axis    distance;
+                start   ( 4.77 0.275 0.0 );
+                end     ( 4.77 0.275 0.5 );
+                nPoints 101;
+            }
+        );
+
         fixedLocations  false;
+
         fields
         (
             p p_rgh U alpha.water

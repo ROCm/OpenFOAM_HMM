@@ -48,6 +48,7 @@ runTimeModifiable yes;
 adjustTimeStep  yes;
 
 maxCo           0.65;
+
 maxAlphaCo      0.65;
 
 maxDeltaT       0.05;
@@ -115,7 +116,7 @@ functions
                 start   ( 9.0 0.01 0.0 );
                 end     ( 9.0 0.01 1.5 );
                 nPoints 1001;
-            }	
+            }
         );
 
         fixedLocations  false;

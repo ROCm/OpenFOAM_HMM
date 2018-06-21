@@ -35,11 +35,11 @@ boundaryField
 
     sides1
     {
-	type            slip;
+        type            slip;
     }
     sides2
     {
-	type            slip;
+        type            slip;
     }
 
     ground

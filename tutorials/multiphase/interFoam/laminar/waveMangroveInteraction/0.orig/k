@@ -42,7 +42,7 @@ boundaryField
     }
     ground
     {
-	type            kqRWallFunction;
+        type            kqRWallFunction;
         value           uniform 0.001;
     }
 }

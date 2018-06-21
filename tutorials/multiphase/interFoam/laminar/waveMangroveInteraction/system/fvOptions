@@ -29,7 +29,7 @@ Mangroves
                 cellZone        c0;
                 a               0.01;
                 N               560;
-                Cm        	1;
+                Cm              1;
                 Cd              1.52;
             }
         }
@@ -51,8 +51,8 @@ TurbulenciaMangroves
                 cellZone        c0;
                 a               0.01;
                 N               560;
-                Ckp        	1;
-                Cep        	3.5;
+                Ckp             1;
+                Cep             3.5;
                 Cd              1.52;
             }
         }

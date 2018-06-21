@@ -41,7 +41,7 @@ boundaryField
     }
     ground
     {
-	type            epsilonWallFunction;
+        type            epsilonWallFunction;
         value           uniform 0.0001;
     }
 }

@@ -38,7 +38,7 @@ boundaryField
 
     sides
     {
-	    type            empty;
+        type            empty;
     }
 
     top

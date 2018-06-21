@@ -48,9 +48,10 @@ runTimeModifiable yes;
 adjustTimeStep  on;
 
 maxCo           0.4;
+
 maxAlphaCo      0.4;
 
-maxDeltaT       0.01; 
+maxDeltaT       0.01;
 
 functions
 {
@@ -63,6 +64,7 @@ functions
 
         interpolationScheme cellPoint;
         setFormat       raw;
+
         sets
         (
             s1
@@ -99,7 +101,7 @@ functions
                 start           ( 4.645 0.275 0.0 );
                 end             ( 4.645 0.275 0.5 );
                 nPoints         101;
-            }	    
+            }
 
             s5
             {
@@ -108,7 +110,7 @@ functions
                 start           ( 5.2 0.275 0.0 );
                 end             ( 5.2 0.275 0.5 );
                 nPoints         101;
-            }	  
+            }
 
             s6
             {
@@ -126,13 +128,14 @@ functions
                 start           ( 6.15 0.275 0.0 );
                 end             ( 6.15 0.275 0.5 );
                 nPoints         101;
-            }  
+            }
         );
 
         fixedLocations  false;
+
         fields          (alpha.water);
     }
-} 
+}
 
 
 // ************************************************************************* //

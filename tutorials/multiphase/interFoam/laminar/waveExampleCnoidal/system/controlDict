@@ -48,6 +48,7 @@ runTimeModifiable yes;
 adjustTimeStep  yes;
 
 maxCo           0.65;
+
 maxAlphaCo      0.65;
 
 maxDeltaT       0.05;
@@ -65,6 +66,7 @@ functions
 
         interpolationScheme cellPoint;
         setFormat       raw;
+
         sets
         (
             line1
@@ -115,7 +117,7 @@ functions
                 start   ( 10.0 0.005 0.0 );
                 end     ( 10.0 0.005 0.8 );
                 nPoints 1001;
-            }	
+            }
             line7
             {
                 type    uniform;
@@ -123,7 +125,7 @@ functions
                 start   ( 12.0 0.005 0.0 );
                 end     ( 12.0 0.005 0.8 );
                 nPoints 1001;
-            }	
+            }
             line8
             {
                 type    uniform;
