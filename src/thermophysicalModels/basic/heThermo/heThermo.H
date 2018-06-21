@@ -104,6 +104,14 @@ public:
             const word& phaseName
         );
 
+        //- Construct from mesh,dictionary,phase name with a single temperature
+        heThermo
+        (
+            const fvMesh&,
+            const word& phaseName,
+            const word& dictionaryName
+        );
+
 
     //- Destructor
     virtual ~heThermo();

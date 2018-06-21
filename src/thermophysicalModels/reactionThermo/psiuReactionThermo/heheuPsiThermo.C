@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,12 +47,15 @@ void Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::calculate()
         const typename MixtureType::thermoType& mixture_ =
             this->cellMixture(celli);
 
-        TCells[celli] = mixture_.THE
-        (
-            hCells[celli],
-            pCells[celli],
-            TCells[celli]
-        );
+        if (this->updateT())
+        {
+            TCells[celli] = mixture_.THE
+            (
+                hCells[celli],
+                pCells[celli],
+                TCells[celli]
+            );
+        }
 
         psiCells[celli] = mixture_.psi(pCells[celli], TCells[celli]);
 
@@ -123,7 +126,10 @@ void Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::calculate()
                 const typename MixtureType::thermoType& mixture_ =
                     this->patchFaceMixture(patchi, facei);
 
-                pT[facei] = mixture_.THE(phe[facei], pp[facei], pT[facei]);
+                if (this->updateT())
+                {
+                    pT[facei] = mixture_.THE(phe[facei], pp[facei], pT[facei]);
+                }
 
                 ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
                 pmu[facei] = mixture_.mu(pp[facei], pT[facei]);
@@ -138,6 +144,94 @@ void Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::calculate()
 }
 
 
+/*
+template<class BasicPsiThermo, class MixtureType>
+void Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::calculateT()
+{
+    //const scalarField& hCells = this->he_.primitiveFieldRef();
+    const scalarField& heuCells = this->heu_.primitiveFieldRef();
+    const scalarField& pCells = this->p_.primitiveFieldRef();
+
+    scalarField& TCells = this->T_.primitiveFieldRef();
+    scalarField& TuCells = this->Tu_.primitiveFieldRef();
+    scalarField& psiCells = this->psi_.primitiveFieldRef();
+    scalarField& muCells = this->mu_.primitiveFieldRef();
+    scalarField& alphaCells = this->alpha_.primitiveFieldRef();
+
+    forAll(TCells, celli)
+    {
+        const typename MixtureType::thermoType& mixture_ =
+            this->cellMixture(celli);
+
+//         TCells[celli] = mixture_.THE
+//         (
+//             hCells[celli],
+//             pCells[celli],
+//             TCells[celli]
+//         );
+
+        psiCells[celli] = mixture_.psi(pCells[celli], TCells[celli]);
+
+        muCells[celli] = mixture_.mu(pCells[celli], TCells[celli]);
+        alphaCells[celli] = mixture_.alphah(pCells[celli], TCells[celli]);
+
+        TuCells[celli] = this->cellReactants(celli).THE
+        (
+            heuCells[celli],
+            pCells[celli],
+            TuCells[celli]
+        );
+    }
+
+    forAll(this->T_.boundaryField(), patchi)
+    {
+        fvPatchScalarField& pp = this->p_.boundaryFieldRef()[patchi];
+        fvPatchScalarField& pT = this->T_.boundaryFieldRef()[patchi];
+        fvPatchScalarField& pTu = this->Tu_.boundaryFieldRef()[patchi];
+        fvPatchScalarField& ppsi = this->psi_.boundaryFieldRef()[patchi];
+
+        fvPatchScalarField& ph = this->he_.boundaryFieldRef()[patchi];
+        fvPatchScalarField& pheu = this->heu_.boundaryFieldRef()[patchi];
+
+        fvPatchScalarField& pmu_ = this->mu_.boundaryFieldRef()[patchi];
+        fvPatchScalarField& palpha_ = this->alpha_.boundaryFieldRef()[patchi];
+
+        if (pT.fixesValue())
+        {
+            forAll(pT, facei)
+            {
+                const typename MixtureType::thermoType& mixture_ =
+                    this->patchFaceMixture(patchi, facei);
+
+                ph[facei] = mixture_.HE(pp[facei], pT[facei]);
+
+                ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
+                pmu_[facei] = mixture_.mu(pp[facei], pT[facei]);
+                palpha_[facei] = mixture_.alphah(pp[facei], pT[facei]);
+            }
+        }
+        else
+        {
+            forAll(pT, facei)
+            {
+                const typename MixtureType::thermoType& mixture_ =
+                    this->patchFaceMixture(patchi, facei);
+
+                //pT[facei] = mixture_.THE(ph[facei], pp[facei], pT[facei]);
+
+                ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
+                pmu_[facei] = mixture_.mu(pp[facei], pT[facei]);
+                palpha_[facei] = mixture_.alphah(pp[facei], pT[facei]);
+
+                pTu[facei] =
+                    this->patchFaceReactants(patchi, facei)
+                   .THE(pheu[facei], pp[facei], pTu[facei]);
+            }
+        }
+    }
+}
+*/
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicPsiThermo, class MixtureType>
@@ -148,6 +242,81 @@ Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::heheuPsiThermo
 )
 :
     heThermo<psiuReactionThermo, MixtureType>(mesh, phaseName),
+    Tu_
+    (
+        IOobject
+        (
+            "Tu",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    ),
+
+    heu_
+    (
+        IOobject
+        (
+            MixtureType::thermoType::heName() + 'u',
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionSet(0, 2, -2, 0, 0),
+        this->heuBoundaryTypes()
+    )
+{
+    scalarField& heuCells = this->heu_.primitiveFieldRef();
+    const scalarField& pCells = this->p_;
+    const scalarField& TuCells = this->Tu_;
+
+    forAll(heuCells, celli)
+    {
+        heuCells[celli] = this->cellReactants(celli).HE
+        (
+            pCells[celli],
+            TuCells[celli]
+        );
+    }
+
+    volScalarField::Boundary& heuBf = heu_.boundaryFieldRef();
+
+    forAll(heuBf, patchi)
+    {
+        fvPatchScalarField& pheu = heuBf[patchi];
+        const fvPatchScalarField& pp = this->p_.boundaryField()[patchi];
+        const fvPatchScalarField& pTu = this->Tu_.boundaryField()[patchi];
+
+        forAll(pheu, facei)
+        {
+            pheu[facei] = this->patchFaceReactants(patchi, facei).HE
+            (
+                pp[facei],
+                pTu[facei]
+            );
+        }
+    }
+
+    this->heuBoundaryCorrection(this->heu_);
+
+    calculate();
+    this->psi_.oldTime();   // Switch on saving old time
+}
+
+
+template<class BasicPsiThermo, class MixtureType>
+Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::heheuPsiThermo
+(
+    const fvMesh& mesh,
+    const word& phaseName,
+    const word& dictName
+)
+:
+    heThermo<psiuReactionThermo, MixtureType>(mesh, phaseName, dictName),
     Tu_
     (
         IOobject
@@ -242,6 +411,16 @@ void Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::correct()
     }
 }
 
+/*
+template<class BasicPsiThermo, class MixtureType>
+void Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::correctT()
+{
+    // force the saving of the old-time values
+    this->psi_.oldTime();
+
+    calculateT();
+}
+*/
 
 template<class BasicPsiThermo, class MixtureType>
 Foam::tmp<Foam::scalarField>

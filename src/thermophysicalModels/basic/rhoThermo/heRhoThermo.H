@@ -87,6 +87,15 @@ public:
         );
 
 
+        //- Construct from mesh,dictionary,phase name with a single temperature
+        heRhoThermo
+        (
+            const fvMesh&,
+            const word& phaseName,
+            const word& dictName
+        );
+
+
     //- Destructor
     virtual ~heRhoThermo();
 
@@ -95,6 +104,9 @@ public:
 
         //- Update properties
         virtual void correct();
+
+        //- Update properties from T
+        //virtual void correctT();
 };
 
 

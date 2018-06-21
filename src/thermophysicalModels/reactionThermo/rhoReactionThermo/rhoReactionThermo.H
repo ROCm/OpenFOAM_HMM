@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,6 +74,17 @@ public:
     );
 
 
+    //- Declare run-time constructor selection table for dictionary based
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        rhoReactionThermo,
+        fvMeshDictPhase,
+        (const fvMesh& mesh, const word& phaseName, const word& dictName),
+        (mesh, phaseName, dictName)
+    );
+
+
     // Constructors
 
         //- Construct from mesh and phase name
@@ -84,6 +95,15 @@ public:
         );
 
 
+        //- Construct from mesh,dictionary,phase name with a single temperature
+        rhoReactionThermo
+        (
+            const fvMesh&,
+            const word& phaseName,
+            const word& dictName
+        );
+
+
     // Selectors
 
         //- Standard selection based on fvMesh
@@ -91,6 +111,15 @@ public:
         (
             const fvMesh&,
             const word& phaseName=word::null
+        );
+
+
+        //- Selector based on mesh, phase name and dictionary
+        static autoPtr<rhoReactionThermo> New
+        (
+            const fvMesh&,
+            const word& phaseName,
+            const word& dictName
         );
 
 

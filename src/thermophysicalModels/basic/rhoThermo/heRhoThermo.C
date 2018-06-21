@@ -71,12 +71,15 @@ void Foam::heRhoThermo<BasicPsiThermo, MixtureType>::calculate
         const typename MixtureType::thermoType& mixture_ =
             this->cellMixture(celli);
 
-        TCells[celli] = mixture_.THE
-        (
-            hCells[celli],
-            pCells[celli],
-            TCells[celli]
-        );
+        if (this->updateT())
+        {
+            TCells[celli] = mixture_.THE
+            (
+                hCells[celli],
+                pCells[celli],
+                TCells[celli]
+            );
+        }
 
         psiCells[celli] = mixture_.psi(pCells[celli], TCells[celli]);
         rhoCells[celli] = mixture_.rho(pCells[celli], TCells[celli]);
@@ -125,7 +128,10 @@ void Foam::heRhoThermo<BasicPsiThermo, MixtureType>::calculate
                 const typename MixtureType::thermoType& mixture_ =
                     this->patchFaceMixture(patchi, facei);
 
-                pT[facei] = mixture_.THE(phe[facei], pp[facei], pT[facei]);
+                if (this->updateT())
+                {
+                    pT[facei] = mixture_.THE(phe[facei], pp[facei], pT[facei]);
+                }
 
                 ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
                 prho[facei] = mixture_.rho(pp[facei], pT[facei]);
@@ -135,7 +141,6 @@ void Foam::heRhoThermo<BasicPsiThermo, MixtureType>::calculate
         }
     }
 }
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -147,6 +152,30 @@ Foam::heRhoThermo<BasicPsiThermo, MixtureType>::heRhoThermo
 )
 :
     heThermo<BasicPsiThermo, MixtureType>(mesh, phaseName)
+{
+    calculate
+    (
+        this->p_,
+        this->T_,
+        this->he_,
+        this->psi_,
+        this->rho_,
+        this->mu_,
+        this->alpha_,
+        true                    // Create old time fields
+    );
+}
+
+
+template<class BasicPsiThermo, class MixtureType>
+Foam::heRhoThermo<BasicPsiThermo, MixtureType>::heRhoThermo
+(
+    const fvMesh& mesh,
+    const word& phaseName,
+    const word& dictName
+)
+:
+    heThermo<BasicPsiThermo, MixtureType>(mesh, phaseName, dictName)
 {
     calculate
     (
@@ -190,6 +219,5 @@ void Foam::heRhoThermo<BasicPsiThermo, MixtureType>::correct()
 
     DebugInFunction << "Finished" << endl;
 }
-
 
 // ************************************************************************* //

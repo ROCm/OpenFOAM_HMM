@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -40,6 +40,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(basicThermo, 0);
     defineRunTimeSelectionTable(basicThermo, fvMesh);
+    defineRunTimeSelectionTable(basicThermo, fvMeshDictPhase);
 }
 
 const Foam::word Foam::basicThermo::dictName("thermophysicalProperties");
@@ -125,10 +126,16 @@ Foam::wordList Foam::basicThermo::heBoundaryTypes()
 Foam::volScalarField& Foam::basicThermo::lookupOrConstruct
 (
     const fvMesh& mesh,
-    const char* name
-) const
+    const word& name,
+    bool& isOwner
+)
 {
-    if (!mesh.objectRegistry::foundObject<volScalarField>(name))
+    const volScalarField* p =
+        mesh.objectRegistry::lookupObjectPtr<volScalarField>(name);
+
+    isOwner = !p;
+
+    if (!p)
     {
         volScalarField* fPtr
         (
@@ -148,12 +155,12 @@ Foam::volScalarField& Foam::basicThermo::lookupOrConstruct
 
         // Transfer ownership of this object to the objectRegistry
         fPtr->store(fPtr);
+        return *fPtr;
     }
-
-    return const_cast<volScalarField&>
-    (
-        mesh.objectRegistry::lookupObject<volScalarField>(name)
-    );
+    else
+    {
+        return const_cast<volScalarField&>(*p);
+    }
 }
 
 
@@ -186,20 +193,10 @@ Foam::basicThermo::basicThermo
 
     phaseName_(phaseName),
 
-    p_(lookupOrConstruct(mesh, "p")),
+    p_(lookupOrConstruct(mesh, "p", pOwner_)),
 
-    T_
-    (
-        IOobject
-        (
-            phasePropertyName("T"),
-            mesh.time().timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    ),
+    T_(lookupOrConstruct(mesh, phasePropertyName("T"), TOwner_)),
+    TOwner_(lookupOrDefault<Switch>("updateT", TOwner_)),
 
     alpha_
     (
@@ -246,26 +243,63 @@ Foam::basicThermo::basicThermo
 
     phaseName_(phaseName),
 
-    p_(lookupOrConstruct(mesh, "p")),
+    p_(lookupOrConstruct(mesh, "p", pOwner_)),
 
-    T_
-    (
-        IOobject
-        (
-            phasePropertyName("T"),
-            mesh.time().timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    ),
+    T_(lookupOrConstruct(mesh, phasePropertyName("T"), TOwner_)),
+    TOwner_(lookupOrDefault<Switch>("updateT", TOwner_)),
 
     alpha_
     (
         IOobject
         (
             phasePropertyName("thermo:alpha"),
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedScalar
+        (
+            "zero",
+            dimensionSet(1, -1, -1, 0, 0),
+            Zero
+        )
+    )
+{}
+
+
+Foam::basicThermo::basicThermo
+(
+    const fvMesh& mesh,
+    const word& phaseName,
+    const word& dictionaryName
+)
+:
+    IOdictionary
+    (
+        IOobject
+        (
+            dictionaryName,
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE
+        )
+    ),
+
+    phaseName_(phaseName),
+
+    p_(lookupOrConstruct(mesh, "p", pOwner_)),
+
+    T_(lookupOrConstruct(mesh, "T", TOwner_)),
+    TOwner_(lookupOrDefault<Switch>("updateT", TOwner_)),
+
+    alpha_
+    (
+        IOobject
+        (
+            "thermo:alpha",
             mesh.time().timeName(),
             mesh,
             IOobject::READ_IF_PRESENT,
@@ -278,8 +312,21 @@ Foam::basicThermo::basicThermo
             dimensionSet(1, -1, -1, 0, 0),
             Zero
         )
-    )
-{}
+    ),
+
+    dpdt_(lookupOrDefault<Switch>("dpdt", true))
+{
+    if (debug)
+    {
+        Pout<< "Constructed shared thermo : mesh:" << mesh.name()
+            << " phase:" << phaseName
+            << " dictionary:" << dictionaryName
+            << " T:" << T_.name()
+            << " updateT:" << TOwner_
+            << " alphaName:" << alpha_.name()
+            << endl;
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //

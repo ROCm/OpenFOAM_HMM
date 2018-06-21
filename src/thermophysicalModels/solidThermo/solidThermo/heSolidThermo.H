@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,6 +81,14 @@ public:
             const fvMesh&,
             const dictionary&,
             const word& phaseName
+        );
+
+         //- Construct from mesh, dictionary name and phase name
+        heSolidThermo
+        (
+            const fvMesh&,
+            const word& phaseName,
+            const word& dictName
         );
 
 

@@ -122,6 +122,7 @@ public:
             virtual Type integrate(const scalar x1, const scalar x2) const;
 
 
+
     // I/O
 
         //- Ostream Operator

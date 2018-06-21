@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(rhoReactionThermo, 0);
     defineRunTimeSelectionTable(rhoReactionThermo, fvMesh);
+    defineRunTimeSelectionTable(rhoReactionThermo, fvMeshDictPhase);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -46,6 +47,17 @@ Foam::rhoReactionThermo::rhoReactionThermo
 {}
 
 
+Foam::rhoReactionThermo::rhoReactionThermo
+(
+    const fvMesh& mesh,
+    const word& phaseName,
+    const word& dictName
+)
+:
+    rhoThermo(mesh, phaseName, dictName)
+{}
+
+
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::rhoReactionThermo> Foam::rhoReactionThermo::New
@@ -57,6 +69,16 @@ Foam::autoPtr<Foam::rhoReactionThermo> Foam::rhoReactionThermo::New
     return basicThermo::New<rhoReactionThermo>(mesh, phaseName);
 }
 
+
+Foam::autoPtr<Foam::rhoReactionThermo> Foam::rhoReactionThermo::New
+(
+    const fvMesh& mesh,
+    const word& phaseName,
+    const word& dictName
+)
+{
+    return basicThermo::New<rhoReactionThermo>(mesh, phaseName, dictName);
+}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 

@@ -100,8 +100,21 @@ addToRunTimeSelectionTable                                                     \
     BaseThermo,                                                                \
     Cthermo##Mixture##Transport##Type##Thermo##EqnOfState##Specie,             \
     dictionary                                                                 \
+);                                                                             \
+                                                                               \
+addToRunTimeSelectionTable                                                     \
+(                                                                              \
+    basicThermo,                                                               \
+    Cthermo##Mixture##Transport##Type##Thermo##EqnOfState##Specie,             \
+    fvMeshDictPhase                                                            \
+);                                                                             \
+                                                                               \
+addToRunTimeSelectionTable                                                     \
+(                                                                              \
+    BaseThermo,                                                                \
+    Cthermo##Mixture##Transport##Type##Thermo##EqnOfState##Specie,             \
+    fvMeshDictPhase                                                            \
 );
-
 
 
 #define makeSolidThermoPhysicsType(BaseThermo,Cthermo,Mixture,SolidPhysicsType)\

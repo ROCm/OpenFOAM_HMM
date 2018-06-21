@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -245,6 +245,39 @@ Foam::autoPtr<Thermo> Foam::basicThermo::New
 
     return autoPtr<Thermo>(cstrIter()(mesh, dict, phaseName));
 }
+
+
+template<class Thermo>
+Foam::autoPtr<Thermo> Foam::basicThermo::New
+(
+    const fvMesh& mesh,
+    const word& phaseName,
+    const word& dictName
+)
+{
+    IOdictionary thermoDict
+    (
+        IOobject
+        (
+            dictName,
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+
+    typename Thermo::fvMeshDictPhaseConstructorTable::iterator cstrIter =
+        lookupThermo<Thermo, typename Thermo::fvMeshDictPhaseConstructorTable>
+        (
+            thermoDict,
+            Thermo::fvMeshDictPhaseConstructorTablePtr_
+        );
+
+    return autoPtr<Thermo>(cstrIter()(mesh, phaseName, dictName));
+}
+
 
 
 // ************************************************************************* //

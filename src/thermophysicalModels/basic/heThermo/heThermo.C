@@ -93,7 +93,6 @@ void Foam::heThermo<BasicThermo, MixtureType>::init
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-
 template<class BasicThermo, class MixtureType>
 Foam::heThermo<BasicThermo, MixtureType>::heThermo
 (
@@ -159,6 +158,41 @@ Foam::heThermo<BasicThermo, MixtureType>::heThermo
 {
     init(this->p_, this->T_, he_);
 }
+
+
+template<class BasicThermo, class MixtureType>
+Foam::heThermo<BasicThermo, MixtureType>::heThermo
+(
+    const fvMesh& mesh,
+    const word& phaseName,
+    const word& dictionaryName
+)
+:
+    BasicThermo(mesh, phaseName, dictionaryName),
+    MixtureType(*this, mesh, phaseName),
+
+    he_
+    (
+        IOobject
+        (
+            BasicThermo::phasePropertyName
+            (
+                MixtureType::thermoType::heName()
+            ),
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimEnergy/dimMass,
+        this->heBoundaryTypes(),
+        this->heBoundaryBaseTypes()
+    )
+{
+    init(this->p_, this->T_, he_);
+}
+
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

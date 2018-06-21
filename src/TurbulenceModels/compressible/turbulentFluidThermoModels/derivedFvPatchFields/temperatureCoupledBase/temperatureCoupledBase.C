@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -164,6 +164,13 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
             {
                 const basicThermo& thermo =
                     mesh.lookupObject<basicThermo>(basicThermo::dictName);
+
+                return thermo.kappa(patchi);
+            }
+            else if (mesh.foundObject<basicThermo>("phaseProperties"))
+            {
+                const basicThermo& thermo =
+                    mesh.lookupObject<basicThermo>("phaseProperties");
 
                 return thermo.kappa(patchi);
             }

@@ -68,12 +68,15 @@ void Foam::hePsiThermo<BasicPsiThermo, MixtureType>::calculate
         const typename MixtureType::thermoType& mixture_ =
             this->cellMixture(celli);
 
-        TCells[celli] = mixture_.THE
-        (
-            hCells[celli],
-            pCells[celli],
-            TCells[celli]
-        );
+        if (this->updateT())
+        {
+            TCells[celli] = mixture_.THE
+            (
+                hCells[celli],
+                pCells[celli],
+                TCells[celli]
+            );
+        }
 
         psiCells[celli] = mixture_.psi(pCells[celli], TCells[celli]);
 
@@ -118,7 +121,10 @@ void Foam::hePsiThermo<BasicPsiThermo, MixtureType>::calculate
                 const typename MixtureType::thermoType& mixture_ =
                     this->patchFaceMixture(patchi, facei);
 
-                pT[facei] = mixture_.THE(phe[facei], pp[facei], pT[facei]);
+                if (this->updateT())
+                {
+                    pT[facei] = mixture_.THE(phe[facei], pp[facei], pT[facei]);
+                }
 
                 ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
                 pmu[facei] = mixture_.mu(pp[facei], pT[facei]);
@@ -127,7 +133,6 @@ void Foam::hePsiThermo<BasicPsiThermo, MixtureType>::calculate
         }
     }
 }
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -151,6 +156,30 @@ Foam::hePsiThermo<BasicPsiThermo, MixtureType>::hePsiThermo
         true                    // Create old time fields
     );
 }
+
+
+template<class BasicPsiThermo, class MixtureType>
+Foam::hePsiThermo<BasicPsiThermo, MixtureType>::hePsiThermo
+(
+    const fvMesh& mesh,
+    const word& phaseName,
+    const word& dictionaryName
+)
+:
+    heThermo<BasicPsiThermo, MixtureType>(mesh, phaseName, dictionaryName)
+{
+    calculate
+    (
+        this->p_,
+        this->T_,
+        this->he_,
+        this->psi_,
+        this->mu_,
+        this->alpha_,
+        true                    // Create old time fields
+    );
+}
+
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -180,6 +209,5 @@ void Foam::hePsiThermo<BasicPsiThermo, MixtureType>::correct()
 
     DebugInFunction << "Finished" << endl;
 }
-
 
 // ************************************************************************* //

@@ -27,6 +27,14 @@ Class
 Description
     Abstract base-class for fluid and solid thermodynamic properties
 
+    An important concept is that the thermo can share an existing T
+    (similar to p) in which case it will not try to update it. This gets
+    triggered purely on construction order - the first one to register
+    T is repsonsible for updating it. Note that the mechanism also means
+    that if multiple thermos are running on the same mesh, only the first one
+    will update the temperature. The behaviour can be overridden using the
+    'updateT' dictionary entry.
+
 SourceFiles
     basicThermo.C
 
@@ -68,8 +76,12 @@ protected:
             //- Pressure [Pa]
             volScalarField& p_;
 
+            bool pOwner_;
+
             //- Temperature [K]
-            volScalarField T_;
+            volScalarField& T_;
+
+            bool TOwner_;
 
             //- Laminar thermal diffusivity [kg/m/s]
             volScalarField alpha_;
@@ -84,11 +96,12 @@ protected:
         basicThermo(const basicThermo&);
 
         //- Look up or construct field
-        volScalarField& lookupOrConstruct
+        static volScalarField& lookupOrConstruct
         (
             const fvMesh& mesh,
-            const char* name
-        ) const;
+            const word&,
+            bool& isOwner
+        );
 
         //- Lookup and check out field
         void lookupAndCheckout(const char* name) const;
@@ -119,6 +132,17 @@ public:
     );
 
 
+    //- Declare run-time constructor selection table for dictionary based
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        basicThermo,
+        fvMeshDictPhase,
+        (const fvMesh& mesh, const word& phaseName, const word& dictName),
+        (mesh, phaseName, dictName)
+    );
+
+
     // Constructors
 
         //- Construct from mesh and phase name
@@ -134,6 +158,15 @@ public:
             const fvMesh&,
             const dictionary&,
             const word& phaseName
+        );
+
+        //- Construct from mesh, phase name and explicit naming of the
+        //  dictionary (so it can be shared amongst phases).
+        basicThermo
+        (
+            const fvMesh&,
+            const word& phaseName,
+            const word& dictionaryName
         );
 
 
@@ -173,6 +206,15 @@ public:
             const fvMesh&,
             const dictionary&,
             const word& phaseName=word::null
+        );
+
+        //- Generic New for each of the related thermodynamics packages
+        template<class Thermo>
+        static autoPtr<Thermo> New
+        (
+            const fvMesh&,
+            const word& phaseName,
+            const word& dictName
         );
 
         //- Specialisation of the Generic New for basicThermo
@@ -270,6 +312,12 @@ public:
         Switch dpdt() const
         {
             return dpdt_;
+        }
+
+        //- Should T be updated
+        Switch updateT() const
+        {
+            return TOwner_;
         }
 
 
