@@ -61,7 +61,7 @@ SourceFiles
 #include "interpolation2DTable.H"
 #include "labelField.H"
 #include "phasePairKey.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -111,8 +111,7 @@ private:
 
     // Private data
 
-
-        static const NamedEnum<powerDistributionMode, 3> powerDistypeNames_;
+        static const Enum<powerDistributionMode> powerDistNames_;
 
         //- Operating mode for power distribution
         powerDistributionMode mode_;
@@ -214,11 +213,11 @@ private:
         ) const;
 
 
-        //- Disallow default bitwise copy construct
-        laserDTRM(const laserDTRM&);
+        //- No copy construct
+        laserDTRM(const laserDTRM&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const laserDTRM&);
+        //- No copy assignment
+        void operator=(const laserDTRM&) = delete;
 
 
 public:
@@ -242,23 +241,22 @@ public:
 
     // Member functions
 
+    // Edit
 
-        // Edit
+        //- Solve radiation equation(s)
+        void calculate();
 
-            //- Solve radiation equation(s)
-            void calculate();
-
-            //- Read radiation properties dictionary
-            bool read();
+        //- Read radiation properties dictionary
+        bool read();
 
 
-        // Access
+    // Access
 
-            //- Source term component (for power of T^4)
-            virtual tmp<volScalarField> Rp() const;
+        //- Source term component (for power of T^4)
+        virtual tmp<volScalarField> Rp() const;
 
-            //- Source term component (constant)
-            virtual tmp<DimensionedField<scalar, volMesh> > Ru() const;
+        //- Source term component (constant)
+        virtual tmp<DimensionedField<scalar, volMesh>> Ru() const;
 };
 
 

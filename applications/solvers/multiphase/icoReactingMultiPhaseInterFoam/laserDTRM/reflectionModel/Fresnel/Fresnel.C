@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C)  2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,12 +56,6 @@ Foam::radiation::Fresnel::Fresnel
     coeffsDict_(dict.subDict(typeName + "Coeffs")),
     nk1_(coeffsDict_.lookup("nk1")),
     nk2_(coeffsDict_.lookup("nk2"))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::radiation::Fresnel::~Fresnel()
 {}
 
 

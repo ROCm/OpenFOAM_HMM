@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C)  2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::radiation::Fresnel
 
 Description
-    Genral Fresnel reflection model bewtween a dialectric and an absorbing
+    General Fresnel reflection model bewtween a dialectric and an absorbing
     medium.
 
     Radiative heat transfer. Micheal Modest. 3dr Edition. Chapter 2.5
@@ -76,7 +76,7 @@ public:
     Fresnel(const dictionary& dict, const fvMesh& mesh);
 
     //- Destructor
-    virtual ~Fresnel();
+    virtual ~Fresnel() = default;
 
 
     // Member Functions

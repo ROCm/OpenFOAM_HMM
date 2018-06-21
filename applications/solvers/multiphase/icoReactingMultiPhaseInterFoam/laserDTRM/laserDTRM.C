@@ -54,24 +54,16 @@ namespace Foam
         0
     );
 
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::radiation::laserDTRM::powerDistributionMode,
-        3
-    >::names[] =
-    {
-        "Gaussian",
-        "manual",
-        "uniform"
-    };
-}
+} // End namespace Foam
 
-const Foam::NamedEnum
-<
-    Foam::radiation::laserDTRM::powerDistributionMode,
-    3
-> Foam::radiation::laserDTRM::powerDistypeNames_;
+
+const Foam::Enum<Foam::radiation::laserDTRM::powerDistributionMode>
+Foam::radiation::laserDTRM::powerDistNames_
+{
+    { powerDistributionMode::pdGaussian, "Gaussian" },
+    { powerDistributionMode::pdManual,   "manual" },
+    { powerDistributionMode::pdUniform,  "uniform" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -80,7 +72,7 @@ Foam::scalar Foam::radiation::laserDTRM::calculateIp(scalar r, scalar theta)
 {
     const scalar t = mesh_.time().value();
     const scalar power = laserPower_->value(t);
-    switch(mode_)
+    switch (mode_)
     {
         case pdGaussian:
         {
@@ -102,11 +94,13 @@ Foam::scalar Foam::radiation::laserDTRM::calculateIp(scalar r, scalar theta)
         default:
         {
             FatalErrorInFunction
-                << "Unhandled type " << powerDistypeNames_
+                << "Unhandled type " << powerDistNames_[mode_]
                 << abort(FatalError);
-            return (0);
+            break;
         }
     }
+
+    return 0;
 }
 
 
@@ -154,7 +148,7 @@ void Foam::radiation::laserDTRM::initialiseReflection()
             );
         }
 
-        if (reflections_.size() > 0)
+        if (reflections_.size())
         {
             reflectionSwitch_ = true;
         }
@@ -183,12 +177,16 @@ void Foam::radiation::laserDTRM::initialise()
     // Find a vector on the area plane. Normal to laser direction
     vector rArea = vector::zero;
     scalar magr = 0.0;
-    while (magr < VSMALL)
+
     {
         Random rnd(1234);
-        vector v = rnd.sample01<vector>();
-        rArea = v - (v & lDir)*lDir;
-        magr = mag(rArea);
+
+        while (magr < VSMALL)
+        {
+            vector v = rnd.sample01<vector>();
+            rArea = v - (v & lDir)*lDir;
+            magr = mag(rArea);
+        }
     }
     rArea /= mag(rArea);
 
@@ -218,6 +216,9 @@ void Foam::radiation::laserDTRM::initialise()
             break;
         }
     }
+
+    // Count the number of missed positions
+    label nMissed = 0;
 
     // Target position
     point p1 = vector::zero;
@@ -288,9 +289,12 @@ void Foam::radiation::laserDTRM::initialise()
 
                 if (returnReduce(cellI, maxOp<label>()) == -1)
                 {
-                    WarningInFunction
-                        << "Cannot find owner cell for particle at position " << p0
-                        << endl;
+                    if (++nMissed <= 10)
+                    {
+                        WarningInFunction
+                            << "Cannot find owner cell for focalPoint at "
+                            << p0 << endl;
+                    }
                 }
             }
         }
@@ -302,11 +306,15 @@ void Foam::radiation::laserDTRM::initialise()
             << exit(FatalError);
     }
 
+    if (nMissed)
+    {
+        Info<< "Seeding missed " << nMissed << " locations" << endl;
+    }
+
     DebugInfo
-        << "Total Power in the laser : " << power << endl
-        << "Total Area in the laser : " << area << endl
-        << "Number of particles in the laser : "
-        << returnReduce(DTRMCloud_.size(), sumOp<label>()) << endl;
+        << "Total Power in the laser : " << power << nl
+        << "Total Area in the laser : " << area << nl
+        << endl;
 }
 
 
@@ -315,7 +323,7 @@ void Foam::radiation::laserDTRM::initialise()
 Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
 :
     radiationModel(typeName, T),
-    mode_(powerDistypeNames_.read(lookup("mode"))),
+    mode_(powerDistNames_.lookup("mode", *this)),
     DTRMCloud_(mesh_, "DTRMCloud", IDLList<DTRMParticle>()),
     nParticles_(0),
     ndTheta_(readLabel(lookup("nTheta"))),
@@ -344,7 +352,7 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
 
     reflectionSwitch_(false),
 
-    alphaCut_( lookupOrDefault<scalar>("alphaCut", 0.5)),
+    alphaCut_(lookupOrDefault<scalar>("alphaCut", 0.5)),
 
     Qin_
     (
@@ -357,7 +365,7 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
             IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedScalar("Qin", dimPower/dimArea, 0.0)
+        dimensionedScalar(dimPower/dimArea, Zero)
     ),
     a_
     (
@@ -370,7 +378,7 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("a", dimless/dimLength, 0.0)
+        dimensionedScalar(dimless/dimLength, Zero)
     ),
     e_
     (
@@ -383,7 +391,7 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("a", dimless/dimLength, 0.0)
+        dimensionedScalar(dimless/dimLength, Zero)
     ),
     E_
     (
@@ -396,7 +404,7 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("E", dimMass/dimLength/pow3(dimTime), 0.0)
+        dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)
     ),
     Q_
     (
@@ -409,7 +417,7 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
             IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedScalar("Q", dimPower/dimVolume, 0.0)
+        dimensionedScalar(dimPower/dimVolume, Zero)
     )
 {
     initialiseReflection();
@@ -425,7 +433,7 @@ Foam::radiation::laserDTRM::laserDTRM
 )
 :
     radiationModel(typeName, dict, T),
-    mode_(powerDistypeNames_.read(lookup("mode"))),
+    mode_(powerDistNames_.lookup("mode", *this)),
     DTRMCloud_(mesh_, "DTRMCloud", IDLList<DTRMParticle>()),
     nParticles_(0),
     ndTheta_(readLabel(lookup("nTheta"))),
@@ -453,7 +461,7 @@ Foam::radiation::laserDTRM::laserDTRM
 
     reflectionSwitch_(false),
 
-    alphaCut_( lookupOrDefault<scalar>("alphaCut", 0.5)),
+    alphaCut_(lookupOrDefault<scalar>("alphaCut", 0.5)),
 
     Qin_
     (
@@ -466,7 +474,7 @@ Foam::radiation::laserDTRM::laserDTRM
             IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedScalar("Qin", dimPower/dimArea, 0.0)
+        dimensionedScalar(dimPower/dimArea, Zero)
     ),
     a_
     (
@@ -479,7 +487,7 @@ Foam::radiation::laserDTRM::laserDTRM
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("a", dimless/dimLength, 0.0)
+        dimensionedScalar(dimless/dimLength, Zero)
     ),
     e_
     (
@@ -492,7 +500,7 @@ Foam::radiation::laserDTRM::laserDTRM
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("a", dimless/dimLength, 0.0)
+        dimensionedScalar(dimless/dimLength, Zero)
     ),
     E_
     (
@@ -505,11 +513,11 @@ Foam::radiation::laserDTRM::laserDTRM
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("E", dimMass/dimLength/pow3(dimTime), 0.0)
+        dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)
     ),
     Q_
     (
-     IOobject
+        IOobject
         (
             "Q",
             mesh_.time().timeName(),
@@ -518,7 +526,7 @@ Foam::radiation::laserDTRM::laserDTRM
             IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedScalar("Q", dimPower/pow3(dimLength), 0.0)
+        dimensionedScalar(dimPower/pow3(dimLength), Zero)
     )
 {
     initialiseReflection();
@@ -575,15 +583,15 @@ void Foam::radiation::laserDTRM::calculate()
                 IOobject::NO_WRITE
             ),
             mesh_,
-            dimensionedVector("zero", dimless, vector::zero)
+            dimensionedVector(dimless, Zero)
         )
     );
     volVectorField& nHat = tnHat.ref();
 
 
     // Reset the fields
-    Qin_ == dimensionedScalar("zero", Qin_.dimensions(), 0);
-    Q_ == dimensionedScalar("zero", Q_.dimensions(), 0);
+    Qin_ == dimensionedScalar(Qin_.dimensions(), Zero);
+    Q_ == dimensionedScalar(Q_.dimensions(), Zero);
 
     a_ = absorptionEmission_->a();
     e_ = absorptionEmission_->e();
@@ -598,18 +606,18 @@ void Foam::radiation::laserDTRM::calculate()
 
     autoPtr<interpolationCellPoint<vector>> nHatIntrPtr;
 
-    UPtrList<reflectionModel> reflactionUPtr;
+    UPtrList<reflectionModel> reflectionUPtr;
 
     if (reflectionSwitch_)
     {
-        reflactionUPtr.resize(reflections_.size());
+        reflectionUPtr.resize(reflections_.size());
 
         label reflectionModelId(0);
         forAllIter(reflectionModelTable, reflections_, iter1)
         {
             reflectionModel& model = iter1()();
 
-            reflactionUPtr.set(reflectionModelId, &model);
+            reflectionUPtr.set(reflectionModelId, &model);
 
             const word alpha1Name = "alpha." + iter1.key().first();
             const word alpha2Name = "alpha." + iter1.key().second();
@@ -667,7 +675,7 @@ void Foam::radiation::laserDTRM::calculate()
         TInterp,
         nHatIntrPtr,
         reflectingCells,
-        reflactionUPtr,
+        reflectionUPtr,
         Q_
     );
 
@@ -755,12 +763,7 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::laserDTRM::Rp() const
             false
         ),
         mesh_,
-        dimensionedScalar
-        (
-            "zero",
-            dimPower/dimVolume/pow4(dimTemperature),
-            0.0
-        )
+        dimensionedScalar(dimPower/dimVolume/pow4(dimTemperature), Zero)
     );
 }
 

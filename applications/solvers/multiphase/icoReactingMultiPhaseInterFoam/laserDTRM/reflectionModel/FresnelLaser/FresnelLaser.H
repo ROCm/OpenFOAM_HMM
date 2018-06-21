@@ -25,7 +25,6 @@ Class
     Foam::radiation::FresnelLaser
 
 Description
-
     Modified Fresnel reflection model.
 
     \verbatim

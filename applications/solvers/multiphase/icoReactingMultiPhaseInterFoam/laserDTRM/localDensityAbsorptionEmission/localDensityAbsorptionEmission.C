@@ -84,7 +84,6 @@ Foam::radiation::localDensityAbsorptionEmission::localDensityAbsorptionEmission
 Foam::tmp<Foam::volScalarField>
 Foam::radiation::localDensityAbsorptionEmission::aCont(const label bandI) const
 {
-
     tmp<volScalarField> ta
     (
         new volScalarField
@@ -99,7 +98,7 @@ Foam::radiation::localDensityAbsorptionEmission::aCont(const label bandI) const
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", inv(dimLength), 0)
+            dimensionedScalar(inv(dimLength), Zero)
         )
     );
 
@@ -132,7 +131,7 @@ Foam::radiation::localDensityAbsorptionEmission::eCont(const label bandI) const
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", inv(dimLength), 0)
+            dimensionedScalar(inv(dimLength), Zero)
         )
     );
 
@@ -165,7 +164,7 @@ Foam::radiation::localDensityAbsorptionEmission::ECont(const label bandI) const
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", dimMass/dimLength/pow3(dimTime), 0.0)
+            dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)
         )
     );
 

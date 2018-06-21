@@ -148,7 +148,7 @@ protected:
 
 
         //- Generate the phases
-        HashTable<autoPtr<phaseModel> > generatePhaseModels
+        HashTable<autoPtr<phaseModel>> generatePhaseModels
         (
             const wordList& names
         ) const;
@@ -156,7 +156,7 @@ protected:
         //- Generate the mixture flux
         tmp<surfaceScalarField> generatePhi
         (
-            const HashTable<autoPtr<phaseModel> >& phaseModels
+            const HashTable<autoPtr<phaseModel>>& phaseModels
         ) const;
 
         //- Generate pairs
@@ -228,7 +228,7 @@ protected:
             const word& modelName,
             HashTable
             <
-                HashTable<autoPtr<modelType> >,
+                HashTable<autoPtr<modelType>>,
                 phasePairKey,
                 phasePairKey::hash
             >& models

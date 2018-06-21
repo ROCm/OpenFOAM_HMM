@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C)  2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,18 +35,17 @@ Foam::radiation::reflectionModel::New
     const fvMesh& mesh
 )
 {
-    const word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Selecting reflectionModel " << modelType << endl;
 
-   const auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    const auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalIOErrorInFunction(dict)
-            << "Unknown reflectionModel type "
-            << modelType << nl << nl
-            << "Valid reflectionModel types are :" << nl
+            << "Unknown reflectionModel type " << modelType << nl << nl
+            << "Valid types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }

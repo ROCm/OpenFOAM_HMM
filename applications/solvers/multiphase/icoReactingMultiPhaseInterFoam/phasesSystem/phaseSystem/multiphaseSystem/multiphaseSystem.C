@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C)  2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -67,14 +67,14 @@ Foam::multiphaseSystem::multiphaseSystem
 {
     label phaseI = 0;
     phases_.setSize(phaseModels_.size());
-    forAllConstIter(HashTable<autoPtr<phaseModel> >, phaseModels_, iter)
+    forAllConstIter(HashTable<autoPtr<phaseModel>>, phaseModels_, iter)
     {
         phaseModel& pm = const_cast<phaseModel&>(iter()());
         phases_.set(phaseI++, &pm);
     }
 
     // Initiate Su and Sp
-    forAllConstIter(HashTable<autoPtr<phaseModel> >, phaseModels_, iter)
+    forAllConstIter(HashTable<autoPtr<phaseModel>>, phaseModels_, iter)
     {
         phaseModel& pm = const_cast<phaseModel&>(iter()());
 
@@ -90,7 +90,7 @@ Foam::multiphaseSystem::multiphaseSystem
                     mesh_
                 ),
                 mesh_,
-                dimensionedScalar("Su", dimless/dimTime, 0.0)
+                dimensionedScalar(dimless/dimTime, Zero)
             )
         );
 
@@ -106,7 +106,7 @@ Foam::multiphaseSystem::multiphaseSystem
                     mesh_
                 ),
                 mesh_,
-                dimensionedScalar("Sp", dimless/dimTime, 0.0)
+                dimensionedScalar(dimless/dimTime, Zero)
             )
         );
     }
@@ -274,7 +274,7 @@ void Foam::multiphaseSystem::solve()
     mesh.solverDict("alpha").lookup("cAlphas") >> cAlphas_;
 
     // Reset ddtAlphaMax
-    ddtAlphaMax_ = dimensionedScalar("zero", dimless, 0.0);
+    ddtAlphaMax_ = dimensionedScalar(dimless, Zero);
 
     PtrList<surfaceScalarField> phiAlphaCorrs(phases_.size());
 
@@ -387,8 +387,8 @@ void Foam::multiphaseSystem::solve()
         forAllIter(UPtrList<phaseModel>, phases_, iter)
         {
             phaseModel& phase = iter();
-            Su_[phase.name()] = dimensionedScalar("Su", dimless/dimTime, 0.0);
-            Sp_[phase.name()] = dimensionedScalar("Sp", dimless/dimTime, 0.0);
+            Su_[phase.name()] = dimensionedScalar("Su", dimless/dimTime, Zero);
+            Sp_[phase.name()] = dimensionedScalar("Sp", dimless/dimTime, Zero);
 
             // Add alpha*div(U)
             const volScalarField& alpha = phase;
@@ -439,7 +439,7 @@ void Foam::multiphaseSystem::solve()
                 mesh_
             ),
             mesh_,
-            dimensionedScalar("sumAlpha", dimless, 0)
+            dimensionedScalar(dimless, Zero)
         );
 
         phasei = 0;
@@ -544,11 +544,11 @@ void Foam::multiphaseSystem::solve()
                     mesh_
                 ),
                 mesh_,
-                dimensionedScalar("sumAlpha", dimless, 0)
+                dimensionedScalar(dimless, Zero)
             );
 
             // Reset rhoPhi
-            rhoPhi_ = dimensionedScalar("rhoPhi", dimMass/dimTime, 0.0);
+            rhoPhi_ = dimensionedScalar("rhoPhi", dimMass/dimTime, Zero);
 
             forAllIter(UPtrList<phaseModel>, phases_, iter)
             {

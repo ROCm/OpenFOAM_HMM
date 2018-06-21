@@ -118,7 +118,7 @@
     surfaceScalarField& rhoPhi = fluid.rhoPhi();
 
     // Construct incompressible turbulence model
-    autoPtr<CompressibleTurbulenceModel<multiphaseSystem> > turbulence
+    autoPtr<CompressibleTurbulenceModel<multiphaseSystem>> turbulence
     (
         CompressibleTurbulenceModel<multiphaseSystem>::New
         (

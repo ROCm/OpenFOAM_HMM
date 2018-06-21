@@ -132,7 +132,7 @@ void Foam::phaseSystem::generatePairsAndSubModels
     const word& modelName,
     HashTable
     <
-        HashTable<autoPtr<modelType> >,
+        HashTable<autoPtr<modelType>>,
         phasePairKey,
         phasePairKey::hash
     >& models
@@ -160,7 +160,7 @@ void Foam::phaseSystem::generatePairsAndSubModels
                 models.insert
                 (
                     key,
-                    HashTable<autoPtr<modelType> >()
+                    HashTable<autoPtr<modelType>>()
                 );
             }
 

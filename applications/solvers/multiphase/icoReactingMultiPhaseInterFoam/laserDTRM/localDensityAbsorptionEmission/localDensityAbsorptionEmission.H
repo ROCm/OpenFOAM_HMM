@@ -99,28 +99,17 @@ public:
 
     // Member Functions
 
-        // Access
+        //- Absorption coefficient for continuous phase
+        tmp<volScalarField> aCont(const label bandI = 0) const;
 
-            // Absorption coefficient
+        //- Emission coefficient for continuous phase
+        tmp<volScalarField> eCont(const label bandI = 0) const;
 
-                //- Absorption coefficient for continuous phase
-                tmp<volScalarField> aCont(const label bandI = 0) const;
-
-
-            // Emission coefficient
-
-                //- Emission coefficient for continuous phase
-                tmp<volScalarField> eCont(const label bandI = 0) const;
+        //- Emission contribution for continuous phase
+        tmp<volScalarField> ECont(const label bandI = 0) const;
 
 
-            // Emission contribution
-
-                //- Emission contribution for continuous phase
-                tmp<volScalarField> ECont(const label bandI = 0) const;
-
-
-    // Member Functions
-
+        //- Is grey
         inline bool isGrey() const
         {
             return true;

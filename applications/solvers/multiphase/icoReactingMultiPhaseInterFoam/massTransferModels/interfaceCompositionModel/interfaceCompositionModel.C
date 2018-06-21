@@ -36,26 +36,13 @@ namespace Foam
 }
 
 
-namespace Foam
+const Foam::Enum<Foam::interfaceCompositionModel::modelVariable>
+Foam::interfaceCompositionModel::modelVariableNames
 {
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::interfaceCompositionModel::modelVariable,
-        3
-    >::names[] =
-    {
-        "temperature",
-        "pressure",
-        "massFraction"
-    };
-}
-
-const Foam::NamedEnum
-<
-    Foam::interfaceCompositionModel::modelVariable,
-    3
-> Foam::interfaceCompositionModel::modelVariableNames;
+    { modelVariable::T, "temperature" },
+    { modelVariable::P, "pressure" },
+    { modelVariable::Y, "massFraction" },
+};
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

@@ -43,7 +43,7 @@ SourceFiles
 #include "dictionary.H"
 #include "hashedWordList.H"
 #include "runTimeSelectionTables.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 namespace Foam
 {
@@ -69,7 +69,7 @@ public:
             Y   /* mass fraction based */
         };
 
-        static const NamedEnum<modelVariable, 3> modelVariableNames;
+        static const Enum<modelVariable> modelVariableNames;
 
         //- Enumeration for model variables
         modelVariable modelVariable_;
