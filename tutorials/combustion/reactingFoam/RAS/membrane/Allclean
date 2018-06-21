@@ -1,7 +1,9 @@
 #!/bin/sh
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/CleanFunctions  # Tutorial clean functions
 
-cd ${0%/*} || exit 1
+cleanCase0
 
-. $WM_PROJECT_DIR/bin/tools/CleanFunctions
+rm constant/triSurface/membrane-*.stl.gz 2> /dev/null
 
-rm -rf 0 constant/triSurface/membrane-*.stl.gz && cleanCase
+#------------------------------------------------------------------------------

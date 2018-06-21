@@ -13,7 +13,8 @@ runApplication blockMesh
 mkdir 0
 
 # Refine over Z, in 6 passes
-for index in 1 2 3 4 5 6; do
+for index in 1 2 3 4 5 6
+do
 
   runApplication -s tier$index  calcRadiusField
 
@@ -30,7 +31,8 @@ for index in 1 2 3 4 5 6; do
 done
 
 # Refine over cylindrical coordinates, in 3 passes
-for index in 1 2 3; do
+for index in 1 2 3
+do
 
   runApplication -s range$index  calcRadiusField -calcDirections
 
