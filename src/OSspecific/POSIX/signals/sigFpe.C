@@ -145,6 +145,17 @@ Foam::sigFpe::sigFpe()
 }
 
 
+Foam::sigFpe::ignore::ignore()
+:
+    wasActive_(sigFpe::active())
+{
+    if (wasActive_)
+    {
+        sigFpe::unset();
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::sigFpe::~sigFpe()
@@ -153,7 +164,23 @@ Foam::sigFpe::~sigFpe()
 }
 
 
+Foam::sigFpe::ignore::~ignore()
+{
+    restore();
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::sigFpe::ignore::restore()
+{
+    if (wasActive_)
+    {
+        sigFpe::set();
+    }
+    wasActive_ = false;
+}
+
 
 bool Foam::sigFpe::requested()
 {

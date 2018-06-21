@@ -93,7 +93,8 @@ class sigFpe
 
     // Private Member Functions
 
-        //- Handler for caught signals
+        //- Handler for caught signals.
+        //  Ends job and prints stack
         static void sigHandler(int);
 
 
@@ -101,15 +102,17 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Constructor calls set() to activate the FPE signal handler if it
+        //- was was not previously activate and requested() returns true.
         sigFpe();
 
 
-    //- Destructor
+    //- Destructor calls unset() to deactivate the FPE signal handler
+    //- as required.
     ~sigFpe();
 
 
-    // Member Functions
+    // Static Member Functions
 
         //- Check if SIGFPE signals handler is to be enabled.
         //  This is controlled by the trapFpe entry or the FOAM_SIGFPE
@@ -142,6 +145,41 @@ public:
 
         //- Fill data block with NaN values
         static void fillNan(UList<scalar>& list);
+
+
+    // Helper classes
+
+        //- Helper to locally ignore SIGFPE handling.
+        //  Restores the original state of the SIGFPE handler on destruction.
+        class ignore
+        {
+            //- The signal handler state when entering
+            bool wasActive_;
+
+            //- No copy construct
+            ignore(const ignore&) = delete;
+
+            //- No copy assignment
+            void operator=(const ignore&) = delete;
+
+            //- No move construct
+            ignore(ignore&&) = delete;
+
+            //- No move assignment
+            void operator=(ignore&&) = delete;
+
+
+        public:
+
+            //- Constructor deactivates any previously active SIGFPE handler
+            ignore();
+
+            //- Destructor restores the original state of SIGFPE handler
+            ~ignore();
+
+            //- Restore the original state of SIGFPE handler
+            void restore();
+        };
 };
 
 
