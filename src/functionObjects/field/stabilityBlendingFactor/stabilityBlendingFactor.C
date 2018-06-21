@@ -554,7 +554,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
             {
                 FatalErrorInFunction
                     << "    Field : " << nonOrthogonalityName_ << " not found."
-                    << " The function object will no be used"
+                    << " The function object will not be used"
                     << exit(FatalError);
             }
         }
@@ -586,7 +586,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
             {
                 FatalErrorInFunction
                     << "    Field : " << faceWeightName_ << " not found."
-                    << " The function object will no be used"
+                    << " The function object will not be used"
                     << exit(FatalError);
             }
         }
@@ -617,7 +617,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
             {
                 FatalErrorInFunction
                     << "    Field : " << skewnessName_ << " not found."
-                    << " The function object will no be used"
+                    << " The function object will not be used"
                     << exit(FatalError);
             }
         }
@@ -694,7 +694,8 @@ bool Foam::functionObjects::stabilityBlendingFactor::read
         if (nonOrthogonality_)
         {
             Info<< "    Including nonOrthogonality between: "
-                << minNonOrthogonality_ <<  " and " << maxNonOrthogonality_ << endl;
+                << minNonOrthogonality_ <<  " and " << maxNonOrthogonality_
+                << endl;
         }
         if (gradCc_)
         {
@@ -742,18 +743,15 @@ bool Foam::functionObjects::stabilityBlendingFactor::write()
     {
         writeTime(file());
 
-        DebugVar("here");
-
         file()
             << tab << nCellsScheme1
             << tab << nCellsScheme2
             << tab << nCellsBlended
             << endl;
-
-        DebugVar("here1");
     }
 
     return true;
 }
+
 
 // ************************************************************************* //
