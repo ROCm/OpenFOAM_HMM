@@ -376,6 +376,8 @@ int main(int argc, char *argv[])
         );
     }
 
+    runTimeSource.printExecutionTime(Info);
+
     Info<< "\nEnd\n" << endl;
 
     return 0;
