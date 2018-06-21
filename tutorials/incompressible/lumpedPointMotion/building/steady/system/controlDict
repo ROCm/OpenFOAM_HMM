@@ -16,7 +16,7 @@ FoamFile
 
 libs            ("liblumpedPointMotion.so");
 
-application     pimpleDyMFoam;
+application     pimpleFoam;
 
 startFrom       startTime;
 

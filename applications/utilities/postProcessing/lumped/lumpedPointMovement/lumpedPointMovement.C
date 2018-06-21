@@ -25,7 +25,7 @@ Application
     lumpedPointMovement
 
 Description
-    Thus utility can be used to produce VTK files to visualize the response
+    This utility can be used to produce VTK files to visualize the response
     points/rotations and the corresponding movement of the building surfaces.
     Uses the tabulated responses from the specified file.
     Optionally, it can also be used to a dummy responder for the
@@ -253,10 +253,11 @@ int main(int argc, char *argv[])
                 }
             }
         }
-
     }
 
-    Info<< args.executable() << ": End\n" << endl;
+    Info<< args.executable() << ": finishing" << nl;
+
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }
