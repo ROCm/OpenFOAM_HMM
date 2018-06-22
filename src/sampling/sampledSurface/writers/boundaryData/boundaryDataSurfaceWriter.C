@@ -88,9 +88,9 @@ Foam::fileName Foam::boundaryDataSurfaceWriter::write
         mkDir(pts.path());
         OFstream os(pts.objectPath());
 
-        pts.writeHeader(os);
+        //pts.writeHeader(os);
         pts.writeData(os);
-        pts.writeEndDivider(os);
+        //pts.writeEndDivider(os);
     }
 
     return baseDir;
