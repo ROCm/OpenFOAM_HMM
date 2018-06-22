@@ -50,7 +50,6 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 bool Foam::argList::argsMandatory_ = true;
-bool Foam::argList::bannerEnabled_ = true;
 bool Foam::argList::checkProcessorDirectories_ = true;
 Foam::SLList<Foam::string>    Foam::argList::validArgs;
 Foam::HashTable<Foam::string> Foam::argList::validOptions;
@@ -295,13 +294,13 @@ void Foam::argList::nonMandatoryArgs()
 
 void Foam::argList::noBanner()
 {
-    bannerEnabled_ = false;
+    ::Foam::infoDetailLevel = 0;
 }
 
 
 bool Foam::argList::bannerEnabled()
 {
-    return bannerEnabled_;
+    return (::Foam::infoDetailLevel > 0);
 }
 
 
@@ -914,7 +913,7 @@ void Foam::argList::parse
         const string timeString = clock::clockTime();
 
         // Print the banner once only for parallel runs
-        if (Pstream::master() && bannerEnabled_)
+        if (Pstream::master() && bannerEnabled())
         {
             IOobject::writeBanner(Info, true)
                 << "Build  : " << Foam::FOAMbuild << nl
@@ -972,7 +971,7 @@ void Foam::argList::parse
             fileOperation::New
             (
                 handlerType,
-                bannerEnabled_
+                bannerEnabled()
             )
         );
         Foam::fileHandler(handler);
@@ -1320,7 +1319,7 @@ void Foam::argList::parse
         }
     }
 
-    if (Pstream::master() && bannerEnabled_)
+    if (Pstream::master() && bannerEnabled())
     {
         Info<< "Case   : " << (rootPath_/globalCase_).c_str() << nl
             << "nProcs : " << nProcs << endl;
@@ -1371,12 +1370,12 @@ void Foam::argList::parse
 
         // Switch on signal trapping. We have to wait until after Pstream::init
         // since this sets up its own ones.
-        sigFpe::set(bannerEnabled_);
-        sigInt::set(bannerEnabled_);
-        sigQuit::set(bannerEnabled_);
-        sigSegv::set(bannerEnabled_);
+        sigFpe::set(bannerEnabled());
+        sigInt::set(bannerEnabled());
+        sigQuit::set(bannerEnabled());
+        sigSegv::set(bannerEnabled());
 
-        if (Pstream::master() && bannerEnabled_)
+        if (Pstream::master() && bannerEnabled())
         {
             Info<< "fileModificationChecking : "
                 << "Monitoring run-time modified files using "

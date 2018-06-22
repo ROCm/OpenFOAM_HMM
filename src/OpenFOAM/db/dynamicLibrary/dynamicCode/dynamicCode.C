@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 #include "dynamicCodeContext.H"
 #include "stringOps.H"
 #include "Fstream.H"
+#include "IOstreams.H"
 #include "OSspecific.H"
 #include "etcFiles.H"
 #include "dictionary.H"
@@ -210,12 +211,12 @@ bool Foam::dynamicCode::createMakeFiles() const
     mkDir(dstFile.path());
 
     OFstream os(dstFile);
-    //Info<< "Writing to " << dstFile << endl;
+    //Debug: Info << "Writing to " << dstFile << endl;
     if (!os.good())
     {
         FatalErrorInFunction
-                << "Failed writing " << dstFile
-                << exit(FatalError);
+            << "Failed writing " << dstFile
+            << exit(FatalError);
     }
 
     writeCommentSHA1(os);
@@ -247,12 +248,12 @@ bool Foam::dynamicCode::createMakeOptions() const
     mkDir(dstFile.path());
 
     OFstream os(dstFile);
-    //Info<< "Writing to " << dstFile << endl;
+    //Debug: Info<< "Writing to " << dstFile << endl;
     if (!os.good())
     {
         FatalErrorInFunction
-                << "Failed writing " << dstFile
-                << exit(FatalError);
+            << "Failed writing " << dstFile
+            << exit(FatalError);
     }
 
     writeCommentSHA1(os);
@@ -403,7 +404,8 @@ bool Foam::dynamicCode::copyOrCreateFiles(const bool verbose) const
 {
     if (verbose)
     {
-        Info<< "Creating new library in " << this->libRelPath() << endl;
+        DetailInfo
+            << "Creating new library in " << this->libRelPath() << endl;
     }
 
     const label nFiles = compileFiles_.size() + copyFiles_.size();
@@ -441,7 +443,7 @@ bool Foam::dynamicCode::copyOrCreateFiles(const bool verbose) const
         const fileName  dstFile(outputDir/srcFile.name());
 
         IFstream is(srcFile);
-        //Info<< "Reading from " << is.name() << endl;
+        //Debug: Info<< "Reading from " << is.name() << endl;
         if (!is.good())
         {
             FatalErrorInFunction
@@ -450,7 +452,7 @@ bool Foam::dynamicCode::copyOrCreateFiles(const bool verbose) const
         }
 
         OFstream os(dstFile);
-        //Info<< "Writing to " << dstFile.name() << endl;
+        //Debug: Info<< "Writing to " << dstFile.name() << endl;
         if (!os.good())
         {
             FatalErrorInFunction
@@ -473,7 +475,7 @@ bool Foam::dynamicCode::copyOrCreateFiles(const bool verbose) const
 
         mkDir(dstFile.path());
         OFstream os(dstFile);
-        //Info<< "Writing to " << createFiles_[fileI].first() << endl;
+        //Debug: Info<< "Writing to " << createFiles_[fileI].first() << endl;
         if (!os.good())
         {
             FatalErrorInFunction
@@ -501,15 +503,25 @@ bool Foam::dynamicCode::wmakeLibso() const
     // NOTE: could also resolve wmake command explicitly
     //   cmd[0] = stringOps::expand("$WM_PROJECT_DIR/wmake/wmake");
 
-    Info<< "Invoking wmake libso " << this->codePath().c_str() << endl;
-    if (Foam::system(cmd))
+    // This can take a bit longer, so report that we are starting wmake
+
+    if (Foam::infoDetailLevel > 0)
     {
-        return false;
+        Info<< "Invoking wmake libso " << this->codePath().c_str() << endl;
     }
     else
     {
+        // Even with details turned off, we want some feedback
+        Serr
+            << "Invoking wmake libso " << this->codePath().c_str() << endl;
+    }
+
+    if (Foam::system(cmd) == 0)
+    {
         return true;
     }
+
+    return false;
 }
 
 

@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
     {
         if (nProcs)
         {
-            // Info<< "Remove " << timeDirs.size()
+            // Serr<< "Remove " << timeDirs.size()
             //     << " processor time directories" << nl;
 
             forAllReverse(timeDirs, timei)
@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            // Info<< "Remove " << timeDirs.size()
+            // Serr<< "Remove " << timeDirs.size()
             //     << " time directories" << nl;
 
             forAllReverse(timeDirs, timei)

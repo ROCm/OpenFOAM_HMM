@@ -121,9 +121,6 @@ class argList
         //- Track enabled/disabled mandatory arguments
         static bool argsMandatory_;
 
-        //- Track enabled/disabled banner state
-        static bool bannerEnabled_;
-
         //- Track enabled/disabled checking of processor directories state
         static bool checkProcessorDirectories_;
 
@@ -494,10 +491,12 @@ public:
         //- Flag command arguments as being non-mandatory
         static void nonMandatoryArgs();
 
-        //- Disable emitting the banner information
+        //- Disable emitting the banner information.
+        //  Adjusts the Foam::infoDetailLevel flag.
         static void noBanner();
 
-        //- Banner status (enabled/disabled)
+        //- Banner status (enabled/disabled).
+        //  Queries the Foam::infoDetailLevel flag.
         static bool bannerEnabled();
 
         //- Remove the 'noFunctionObjects' option,

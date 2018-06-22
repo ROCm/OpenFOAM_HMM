@@ -55,7 +55,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 class error;
 Ostream& operator<<(Ostream& os, const error& err);
 
@@ -215,7 +215,7 @@ public:
 };
 
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 class IOerror;
 Ostream& operator<<(Ostream& os, const IOerror& err);
 
@@ -334,8 +334,14 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Global error declarations: defined in error.C
 
+//- Error stream (uses stdout - output on all processes),
+//- with additional 'FOAM FATAL ERROR' header text and stack trace.
 extern error   FatalError;
+
+//- Error stream (uses stdout - output on all processes),
+//- with additional 'FOAM FATAL IO ERROR' header text and stack trace.
 extern IOerror FatalIOError;
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

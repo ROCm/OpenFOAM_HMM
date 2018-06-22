@@ -141,7 +141,7 @@ bool Foam::functionEntries::includeEntry::execute
     {
         if (Foam::functionEntries::includeEntry::log)
         {
-            Info<< fName << endl;
+            DetailInfo << fName << endl;
         }
 
         // Add watch on included file
@@ -188,7 +188,7 @@ bool Foam::functionEntries::includeEntry::execute
     {
         if (Foam::functionEntries::includeEntry::log)
         {
-            Info<< fName << endl;
+            DetailInfo << fName << endl;
         }
 
         // Add watch on included file
@@ -234,7 +234,7 @@ bool Foam::functionEntries::sincludeEntry::execute
     {
         if (Foam::functionEntries::includeEntry::log)
         {
-            Info<< fName << endl;
+            DetailInfo << fName << endl;
         }
 
         // Add watch on included file
@@ -272,7 +272,7 @@ bool Foam::functionEntries::sincludeEntry::execute
     {
         if (Foam::functionEntries::includeEntry::log)
         {
-            Info<< fName << endl;
+            DetailInfo << fName << endl;
         }
 
         // Add watch on included file

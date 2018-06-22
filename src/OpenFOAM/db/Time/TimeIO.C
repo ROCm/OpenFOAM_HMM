@@ -93,8 +93,6 @@ void Foam::Time::readDict()
     }
 
     // Check for local switches and settings
-    // - echo values, unless the application was invoked with noBanner
-    const bool echo = argList::bannerEnabled();
 
     const dictionary* localDict = nullptr;
 
@@ -105,11 +103,9 @@ void Foam::Time::readDict()
      && localDict->size()
     )
     {
-        if (echo)
-        {
-            Info<< "Overriding DebugSwitches according to "
-                << controlDict_.name() << nl;
-        }
+        DetailInfo
+            << "Overriding DebugSwitches according to "
+            << controlDict_.name() << nl;
 
         simpleObjectRegistry& objs = debug::debugObjects();
 
@@ -123,10 +119,7 @@ void Foam::Time::readDict()
             {
                 const List<simpleRegIOobject*>& objects = *objPtr;
 
-                if (echo)
-                {
-                    Info<< "    " << iter() << nl;
-                }
+                DetailInfo << "    " << iter() << nl;
 
                 if (iter().isDict())
                 {
@@ -157,11 +150,9 @@ void Foam::Time::readDict()
      && localDict->size()
     )
     {
-        if (echo)
-        {
-            Info<< "Overriding InfoSwitches according to "
-                << controlDict_.name() << nl;
-        }
+        DetailInfo
+            << "Overriding InfoSwitches according to "
+            << controlDict_.name() << nl;
 
         simpleObjectRegistry& objs = debug::infoObjects();
 
@@ -175,10 +166,7 @@ void Foam::Time::readDict()
             {
                 const List<simpleRegIOobject*>& objects = *objPtr;
 
-                if (echo)
-                {
-                    Info<< "    " << iter() << nl;
-                }
+                DetailInfo << "    " << iter() << nl;
 
                 if (iter().isDict())
                 {
@@ -208,11 +196,9 @@ void Foam::Time::readDict()
      && localDict->size()
     )
     {
-        if (echo)
-        {
-            Info<< "Overriding OptimisationSwitches according to "
-                << controlDict_.name() << nl;
-        }
+        DetailInfo
+            << "Overriding OptimisationSwitches according to "
+            << controlDict_.name() << nl;
 
         simpleObjectRegistry& objs = debug::optimisationObjects();
 
@@ -224,10 +210,7 @@ void Foam::Time::readDict()
 
             if (objPtr)
             {
-                if (echo)
-                {
-                    Info<< "    " << iter() << nl;
-                }
+                DetailInfo << "    " << iter() << nl;
 
                 const List<simpleRegIOobject*>& objects = *objPtr;
 
@@ -263,10 +246,7 @@ void Foam::Time::readDict()
      && fileHandler().type() != fileHandlerName
     )
     {
-        if (echo)
-        {
-            Info<< "Overriding fileHandler to " << fileHandlerName << nl;
-        }
+        DetailInfo << "Overriding fileHandler to " << fileHandlerName << nl;
 
         // Remove old watches since destroying the file
         fileNameList oldWatched(controlDict_.watchIndices().size());
@@ -304,11 +284,9 @@ void Foam::Time::readDict()
      && localDict->size()
     )
     {
-        if (echo)
-        {
-            Info<< "Overriding DimensionedConstants according to "
-                << controlDict_.name() << nl;
-        }
+        DetailInfo
+            << "Overriding DimensionedConstants according to "
+            << controlDict_.name() << nl;
 
         simpleObjectRegistry& objs = debug::dimensionedConstantObjects();
 
@@ -325,7 +303,7 @@ void Foam::Time::readDict()
             {
                 obj->readData(dummyIs);
 
-                if (echo)
+                if (Foam::infoDetailLevel > 0)
                 {
                     Info<< "    ";
                     obj->writeData(Info);
@@ -343,11 +321,9 @@ void Foam::Time::readDict()
         && localDict->size()
     )
     {
-        if (echo)
-        {
-            Info<< "Overriding DimensionSets according to "
-                << controlDict_.name() << nl;
-        }
+        DetailInfo
+            << "Overriding DimensionSets according to "
+            << controlDict_.name() << nl;
 
         simpleObjectRegistry& objs = debug::dimensionSetObjects();
 
@@ -358,10 +334,7 @@ void Foam::Time::readDict()
 
         if (objPtr)
         {
-            if (echo)
-            {
-                Info<< *localDict << nl;
-            }
+            DetailInfo << *localDict << nl;
 
             const List<simpleRegIOobject*>& objects = *objPtr;
 

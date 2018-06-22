@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
     const scalar scaling = args.lookupOrDefault<scalar>("scale", -1);
     if (scaling > 0)
     {
-        Info<< " -scale " << scaling << nl;
+        DetailInfo << " -scale " << scaling << nl;
         surf.scalePoints(scaling);
     }
 

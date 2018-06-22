@@ -244,10 +244,7 @@ Foam::profiling::profiling
     Information *info = this->create(Zero);
     this->beginTimer(info);
 
-    if (argList::bannerEnabled())
-    {
-        Info<< "profiling initialized" << nl;
-    }
+    DetailInfo << "profiling initialized" << nl;
 }
 
 
@@ -283,10 +280,7 @@ Foam::profiling::profiling
     Information *info = this->create(Zero);
     this->beginTimer(info);
 
-    if (argList::bannerEnabled())
-    {
-        Info<< "profiling initialized" << nl;
-    }
+    DetailInfo << "profiling initialized" << nl;
 }
 
 

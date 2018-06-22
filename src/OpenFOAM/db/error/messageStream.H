@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,9 +28,9 @@ Description
     Class to handle messaging in a simple, consistent stream-based
     manner.
 
-    The messageStream class is globaly instantiated with a title string and
+    The messageStream class is globally instantiated with a title string and
     a severity (which controls the program termination) and a number of
-    errors before termination.  Errors, messages and other data are piped to
+    errors before termination.  Errors, messages and other data are sent to
     the messageStream class in the standard manner.
 
 Usage
@@ -55,7 +55,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class IOstream;
 class Ostream;
 class OSstream;
@@ -71,13 +71,13 @@ class messageStream
 
 public:
 
-    //- Severity flags
+    //- Message type, or error severity flags
     enum errorSeverity
     {
-        INFO,       // Debugging information in event of error
-        WARNING,    // Warning of possible problem
-        SERIOUS,    // A serious problem (data corruption?)
-        FATAL       // Oh bugger!
+        INFO,       //!< General information output, not necessarily an error.
+        WARNING,    //!< Warning of possible problem.
+        SERIOUS,    //!< A serious problem - eg, data corruption.
+        FATAL       //!< A fatal error.
     };
 
 
@@ -93,8 +93,15 @@ protected:
 
 public:
 
-    // Debug switches
+    // Static data
 
+        //- Controls the output verbosity of messageStream
+        //
+        //  - level == 0 : suppress all output
+        //  - level == 1 : normal output
+        //  - level >= 2 : report source file name and line number if available
+        //
+        // \note The default level is normally 2.
         static int level;
 
 
@@ -203,9 +210,30 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Global error declarations: defined in messageStream.C
 
-extern messageStream SeriousError;
-extern messageStream Warning;
+//- Global for selective suppression of Info output.
+//  This is normally accessed implicitly via the DetailInfo macro and is often
+//  associated applications with suppressed banners. For example,
+//
+//  \code
+//      DetailInfo << "Hello, I'm running from program xyz" << nl;
+//      Info<< "Found ... invalid items" << nl;
+//  \endcode
+//
+//  The values are normally 0 or a positive value.
+//  \note This flag is initialized to 1 by default.
+extern int infoDetailLevel;
+
+//- Information stream (uses stdout - output is on the master only)
 extern messageStream Info;
+
+//- Warning stream (uses stdout - output is on the master only),
+//- with additional 'FOAM Warning' header text.
+extern messageStream Warning;
+
+//- Error stream (uses stdout - output on all processes),
+//- with additional 'FOAM Serious Error' header text.
+extern messageStream SeriousError;
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -289,6 +317,10 @@ extern messageStream Info;
 //- Report an information message using Foam::Pout
 //  for FUNCTION_NAME in file __FILE__ at line __LINE__
 #define PoutInFunction PoutIn(FUNCTION_NAME)
+
+//- Write to Foam::Info if the Foam::infoDetailLevel is +ve non-zero (default)
+#define DetailInfo                                                             \
+    if (::Foam::infoDetailLevel > 0) Info
 
 //- Report write to Foam::Info if the local log switch is true
 #define Log                                                                    \

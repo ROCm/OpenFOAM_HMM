@@ -47,10 +47,19 @@ Description
 
 namespace Foam
 {
+    //- An Istream wrapper for std::cin
     extern ISstream Sin;
+
+    //- An Ostream wrapper for std::cout
     extern OSstream Sout;
+
+    //- An Ostream wrapper for std::cerr
     extern OSstream Serr;
+
+    //- An Ostream wrapper for parallel output to std::cout
     extern prefixOSstream Pout;
+
+    //- An Ostream wrapper for parallel output to std::cerr
     extern prefixOSstream Perr;
 }
 

@@ -29,7 +29,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+// Default is 2 : report source file name and line number if available
 int Foam::messageStream::level(Foam::debug::debugSwitch("level", 2));
+
+// Default is 1 : report to Info
+int Foam::infoDetailLevel(1);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -72,10 +76,8 @@ Foam::OSstream& Foam::messageStream::masterStream(const label communicator)
     {
         return operator()();
     }
-    else
-    {
-        return Snull;
-    }
+
+    return Snull;
 }
 
 
@@ -217,7 +219,7 @@ Foam::messageStream::operator Foam::OSstream&()
 
             if (maxErrors_)
             {
-                errorCount_++;
+                ++errorCount_;
 
                 if (errorCount_ >= maxErrors_)
                 {
@@ -244,12 +246,7 @@ Foam::messageStream::operator Foam::OSstream&()
 
 // * * * * * * * * * * * * * * * Global Variables  * * * * * * * * * * * * * //
 
-Foam::messageStream Foam::SeriousError
-(
-    "--> FOAM Serious Error : ",
-    messageStream::SERIOUS,
-    100
-);
+Foam::messageStream Foam::Info("", messageStream::INFO);
 
 Foam::messageStream Foam::Warning
 (
@@ -257,7 +254,12 @@ Foam::messageStream Foam::Warning
     messageStream::WARNING
 );
 
-Foam::messageStream Foam::Info("", messageStream::INFO);
+Foam::messageStream Foam::SeriousError
+(
+    "--> FOAM Serious Error : ",
+    messageStream::SERIOUS,
+    100
+);
 
 
 // ************************************************************************* //

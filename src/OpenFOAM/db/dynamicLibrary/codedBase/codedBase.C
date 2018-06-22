@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -350,7 +350,8 @@ void Foam::codedBase::updateLibrary
         return;
     }
 
-    Info<< "Using dynamicCode for " << this->description().c_str()
+    DetailInfo
+        << "Using dynamicCode for " << this->description().c_str()
         << " at line " << dict.startLineNumber()
         << " in " << dict.name() << endl;
 

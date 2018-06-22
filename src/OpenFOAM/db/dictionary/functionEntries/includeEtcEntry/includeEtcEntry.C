@@ -102,7 +102,7 @@ bool Foam::functionEntries::includeEtcEntry::execute
     {
         if (Foam::functionEntries::includeEtcEntry::log)
         {
-            Info<< fName << endl;
+            DetailInfo << fName << endl;
         }
         parentDict.read(ifs);
         return true;
@@ -137,7 +137,7 @@ bool Foam::functionEntries::includeEtcEntry::execute
     {
         if (Foam::functionEntries::includeEtcEntry::log)
         {
-            Info<< fName << endl;
+            DetailInfo << fName << endl;
         }
         entry.read(parentDict, ifs);
         return true;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,7 +66,8 @@ bool Foam::functionEntries::calcEntry::execute
     Istream& is
 )
 {
-    Info<< "Using #calc at line " << is.lineNumber()
+    DetailInfo
+        << "Using #calc at line " << is.lineNumber()
         << " in file " <<  parentDict.name() << endl;
 
     dynamicCode::checkSecurity
@@ -110,7 +111,8 @@ bool Foam::functionEntries::calcEntry::execute
     Istream& is
 )
 {
-    Info<< "Using #calc at line " << is.lineNumber()
+    DetailInfo
+        << "Using #calc at line " << is.lineNumber()
         << " in file " <<  parentDict.name() << endl;
 
     dynamicCode::checkSecurity

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,7 +83,7 @@ string domainName();
 //- Return the user's login name
 string userName();
 
-//- Is user administrator
+//- Is the current user the administrator (root)
 bool isAdministrator();
 
 //- Return home directory path name for the current user
@@ -208,34 +208,39 @@ bool ping(const std::string& host, const label timeOut=10);
 
 //- Execute the specified command via the shell.
 //  Uses vfork/execl internally.
+//  When Foam::infoDetailLevel is zero, redirects stdout to stderr.
+//
 //  Where possible, use the list version instead.
 //
-//  \param background return immediately to parent process instead of waiting
+//  \param bg return immediately to parent process instead of waiting
 //      for the child. Can be used (with moderation) to create background
 //      processes.
 //
 //  \note treats an empty command as a successful no-op.
-int system(const std::string& command, const bool background=false);
+//      When Foam::infoDetailLevel is zero, redirects stdout to stderr.
+int system(const std::string& command, const bool bg = false);
 
 //- Execute the specified command with arguments.
 //  Uses vfork/execvp internally
+//  When Foam::infoDetailLevel is zero, redirects stdout to stderr.
 //
-//  \param background return immediately to parent process instead of waiting
+//  \param bg return immediately to parent process instead of waiting
 //      for the child. Can be used (with moderation) to create background
 //      processes.
 //
 //  \note treats an empty command as a successful no-op.
-int system(const UList<string>& command, const bool background=false);
+int system(const UList<string>& command, const bool bg = false);
 
 //- Execute the specified command with arguments.
 //  Uses vfork/execvp internally
+//  When Foam::infoDetailLevel is zero, redirects stdout to stderr.
 //
-//  \param background return immediately to parent process instead of waiting
+//  \param bg return immediately to parent process instead of waiting
 //      for the child. Can be used (with moderation) to create background
 //      processes.
 //
 //  \note treats an empty command as a successful no-op.
-int system(const CStringList& command, const bool background=false);
+int system(const CStringList& command, const bool bg = false);
 
 //- Open a shared library and return handle to library.
 //  Print error message if library cannot be loaded (suppress with check=true)

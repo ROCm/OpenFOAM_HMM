@@ -31,9 +31,15 @@ Description
 
 Usage
     \code
-        error << "message1" << "message2" << FoamDataType << exit(error, errNo);
-        error << "message1" << "message2" << FoamDataType << abort(error);
+        error << "message " << someType << abort(error);
+        error << "message " << someType << exit(error, errNo);
     \endcode
+
+Class
+    Foam::errorManipArg
+
+Description
+    Error stream manipulators for functions with an argument.
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,7 +53,7 @@ Usage
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 template<class Err> class errorManip;
 template<class Err> Ostream& operator<<(Ostream&, errorManip<Err>);
 
@@ -90,7 +96,6 @@ inline Ostream& operator<<(Ostream& os, errorManip<Err> m)
                         Class errorManipArg Declaration
 \*---------------------------------------------------------------------------*/
 
-//- errorManipArg
 template<class Err, class T>
 class errorManipArg
 {

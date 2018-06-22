@@ -66,6 +66,7 @@ Description
     #include <link.h>
 #endif
 
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -74,9 +75,7 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * * Static Functions  * * * * * * * * * * * * * * //
-
-//! \cond fileScope
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 // Like fileName "/" global operator, but retain any invalid characters
 static inline Foam::fileName fileNameConcat
@@ -106,7 +105,23 @@ static inline Foam::fileName fileNameConcat
     // Both strings are empty
     return Foam::fileName();
 }
-//! \endcond
+
+
+// After a fork in system(), before the exec() do the following
+// 1. close stdin
+// 2. redirect stdout to stderr when infoDetailLevel == 0
+static inline void redirects()
+{
+    // Close stdin(0) - unchecked return value
+    (void) ::close(STDIN_FILENO);
+
+    // Redirect stdout(1) to stderr(2) '1>&2'
+    if (Foam::infoDetailLevel == 0)
+    {
+        // This is correct.  1>&2 means dup2(2, 1);
+        (void) ::dup2(STDERR_FILENO, STDOUT_FILENO);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1312,6 +1327,7 @@ static int waitpid(const pid_t pid)
     // in parent - blocking wait
     // modest treatment of signals (in child)
     // treat 'stopped' like exit (suspend/continue)
+
     while (true)
     {
         pid_t wpid = ::waitpid(pid, &status, WUNTRACED);
@@ -1354,11 +1370,7 @@ static int waitpid(const pid_t pid)
 }
 
 
-int Foam::system
-(
-    const std::string& command,
-    const bool background
-)
+int Foam::system(const std::string& command, const bool bg)
 {
     if (command.empty())
     {
@@ -1369,17 +1381,22 @@ int Foam::system
         return 0;
     }
 
-    pid_t child_pid = ::vfork();   // NB: vfork, not fork!
+    const pid_t child_pid = ::vfork();   // NB: vfork, not fork!
+
     if (child_pid == -1)
     {
         FatalErrorInFunction
             << "vfork() failed for system command " << command
             << exit(FatalError);
-    }
 
-    if (child_pid == 0)
+        return -1;  // fallback error value
+    }
+    else if (child_pid == 0)
     {
-        // in child
+        // In child
+
+        // Close or redirect file descriptors
+        redirects();
 
         // execl uses the current environ
         (void) ::execl
@@ -1395,27 +1412,19 @@ int Foam::system
         FatalErrorInFunction
             << "exec failed: " << command
             << exit(FatalError);
+
+        return -1;  // fallback error value
     }
 
 
-    // In parent:
+    // In parent
+    // - started as background process, or blocking wait for the child
 
-    if (background)
-    {
-        // Started as background process
-        return 0;
-    }
-
-    // blocking wait for the child
-    return waitpid(child_pid);
+    return (bg ? 0 : waitpid(child_pid));
 }
 
 
-int Foam::system
-(
-    const CStringList& command,
-    const bool background
-)
+int Foam::system(const CStringList& command, const bool bg)
 {
     const int argc = command.size();
 
@@ -1432,17 +1441,25 @@ int Foam::system
     // triggered by fork.
     // The normal system() command has a fork buried in it that causes
     // issues with infiniband and openmpi etc.
-    pid_t child_pid = ::vfork();
+
+    const pid_t child_pid = ::vfork();
+
     if (child_pid == -1)
     {
         FatalErrorInFunction
             << "vfork() failed for system command " << command[0]
             << exit(FatalError);
-    }
 
-    if (child_pid == 0)
+        return -1;  // fallback error value
+    }
+    else if (child_pid == 0)
     {
-        // In child:
+        // In child
+
+        // Close or redirect file descriptors
+        redirects();
+
+
         // Need command and arguments separately.
         // args is a nullptr-terminated list of c-strings
 
@@ -1453,32 +1470,24 @@ int Foam::system
         FatalErrorInFunction
             << "exec(" << command[0] << ", ...) failed"
             << exit(FatalError);
+
+        return -1;  // fallback error value
     }
 
 
-    // In parent:
+    // In parent
+    // - started as background process, or blocking wait for the child
 
-    if (background)
-    {
-        // Started as background process
-        return 0;
-    }
-
-    // blocking wait for the child
-    return waitpid(child_pid);
+    return (bg ? 0 : waitpid(child_pid));
 }
 
 
-int Foam::system
-(
-    const Foam::UList<Foam::string>& command,
-    const bool background
-)
+int Foam::system(const Foam::UList<Foam::string>& command, const bool bg)
 {
     // In the future simply call the CStringList version:
     //
     //     const CStringList cmd(command);
-    //     return Foam::system(cmd, background);
+    //     return Foam::system(cmd, bg);
 
     const int argc = command.size();
 
@@ -1495,17 +1504,25 @@ int Foam::system
     // triggered by fork.
     // The normal system() command has a fork buried in it that causes
     // issues with infiniband and openmpi etc.
-    pid_t child_pid = ::vfork();
+
+    const pid_t child_pid = ::vfork();
+
     if (child_pid == -1)
     {
         FatalErrorInFunction
             << "vfork() failed for system command " << command[0]
             << exit(FatalError);
-    }
 
-    if (child_pid == 0)
+        return -1;  // fallback error value
+    }
+    else if (child_pid == 0)
     {
-        // In child:
+        // In child
+
+        // Close or redirect file descriptors
+        redirects();
+
+
         // Need command and arguments separately.
         // args is a nullptr-terminated list of c-strings
 
@@ -1522,19 +1539,15 @@ int Foam::system
         FatalErrorInFunction
             << "exec(" << command[0] << ", ...) failed"
             << exit(FatalError);
+
+        return -1;  // fallback error value
     }
 
 
-    // In parent:
+    // In parent
+    // - started as background process, or blocking wait for the child
 
-    if (background)
-    {
-        // Started as background process
-        return 0;
-    }
-
-    // blocking wait for the child
-    return waitpid(child_pid);
+    return (bg ? 0 : waitpid(child_pid));
 }
 
 
