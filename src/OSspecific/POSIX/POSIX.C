@@ -1408,7 +1408,7 @@ int Foam::system(const std::string& command, const bool bg)
             reinterpret_cast<char*>(0)
         );
 
-        // obviously failed, since exec should not return at all
+        // Obviously failed, since exec should not return
         FatalErrorInFunction
             << "exec failed: " << command
             << exit(FatalError);
@@ -1426,9 +1426,7 @@ int Foam::system(const std::string& command, const bool bg)
 
 int Foam::system(const CStringList& command, const bool bg)
 {
-    const int argc = command.size();
-
-    if (!argc)
+    if (command.empty())
     {
         // Treat an empty command as a successful no-op.
         // For consistency with POSIX (man sh) behaviour for (sh -c command),
@@ -1459,14 +1457,10 @@ int Foam::system(const CStringList& command, const bool bg)
         // Close or redirect file descriptors
         redirects();
 
+        // execvp searches the path, uses the current environ
+        (void) ::execvp(command[0], command.strings());
 
-        // Need command and arguments separately.
-        // args is a nullptr-terminated list of c-strings
-
-        // execvp uses the current environ
-        (void) ::execvp(command[0], command.strings(1));
-
-        // obviously failed, since exec should not return at all
+        // Obviously failed, since exec should not return
         FatalErrorInFunction
             << "exec(" << command[0] << ", ...) failed"
             << exit(FatalError);
@@ -1484,70 +1478,15 @@ int Foam::system(const CStringList& command, const bool bg)
 
 int Foam::system(const Foam::UList<Foam::string>& command, const bool bg)
 {
-    // In the future simply call the CStringList version:
-    //
-    //     const CStringList cmd(command);
-    //     return Foam::system(cmd, bg);
-
-    const int argc = command.size();
-
-    if (!argc)
+    if (command.empty())
     {
         // Treat an empty command as a successful no-op.
-        // For consistency with POSIX (man sh) behaviour for (sh -c command),
-        // which is what is mostly being replicated here.
         return 0;
     }
 
-    // NB: use vfork, not fork!
-    // vfork behaves more like a thread and avoids copy-on-write problems
-    // triggered by fork.
-    // The normal system() command has a fork buried in it that causes
-    // issues with infiniband and openmpi etc.
-
-    const pid_t child_pid = ::vfork();
-
-    if (child_pid == -1)
-    {
-        FatalErrorInFunction
-            << "vfork() failed for system command " << command[0]
-            << exit(FatalError);
-
-        return -1;  // fallback error value
-    }
-    else if (child_pid == 0)
-    {
-        // In child
-
-        // Close or redirect file descriptors
-        redirects();
-
-
-        // Need command and arguments separately.
-        // args is a nullptr-terminated list of c-strings
-
-        CStringList args(SubList<string>(command, 0));
-        if (argc > 1)
-        {
-            args.reset(SubList<string>(command, argc-1, 1));
-        }
-
-        // execvp uses the current environ
-        (void) ::execvp(command[0].c_str(), args.strings());
-
-        // obviously failed, since exec should not return at all
-        FatalErrorInFunction
-            << "exec(" << command[0] << ", ...) failed"
-            << exit(FatalError);
-
-        return -1;  // fallback error value
-    }
-
-
-    // In parent
-    // - started as background process, or blocking wait for the child
-
-    return (bg ? 0 : waitpid(child_pid));
+    // Make a deep copy as C-strings
+    const CStringList cmd(command);
+    return Foam::system(cmd, bg);
 }
 
 

@@ -111,6 +111,12 @@ inline void Foam::CStringList::clear()
 }
 
 
+inline bool Foam::CStringList::empty() const
+{
+    return !argc_;
+}
+
+
 inline int Foam::CStringList::size() const
 {
     return argc_;

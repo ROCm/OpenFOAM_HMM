@@ -140,6 +140,9 @@ public:
 
     // Access
 
+        //- True if the size is zero.
+        inline bool empty() const;
+
         //- Return the number of C-strings (ie, argc)
         inline int size() const;
 
@@ -158,6 +161,7 @@ public:
 
         //- The flattened character content, with interspersed nul-chars
         inline const char* data() const;
+
 
     // Edit
 

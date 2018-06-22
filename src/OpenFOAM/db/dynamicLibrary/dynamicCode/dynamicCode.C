@@ -498,7 +498,7 @@ bool Foam::dynamicCode::copyOrCreateFiles(const bool verbose) const
 
 bool Foam::dynamicCode::wmakeLibso() const
 {
-    stringList cmd{"wmake", "-s", "libso", this->codePath()};
+    stringList cmd({"wmake", "-s", "libso", this->codePath()});
 
     // NOTE: could also resolve wmake command explicitly
     //   cmd[0] = stringOps::expand("$WM_PROJECT_DIR/wmake/wmake");
