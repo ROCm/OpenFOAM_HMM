@@ -1,0 +1,85 @@
+#!/bin/sh
+cd ${0%/*} || exit 1
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+if notTest $@
+then
+    models="
+    kOmegaSST
+    kEpsilon
+    "
+
+    declare -A grading_vs_yp
+    #level 5 gradings
+    grading_vs_yp[0.05]=50000
+    grading_vs_yp[1]=2200
+    grading_vs_yp[2]=950
+    grading_vs_yp[5]=300
+    grading_vs_yp[10]=130
+    grading_vs_yp[30]=30
+    grading_vs_yp[50]=15
+    grading_vs_yp[100]=5
+
+    # level 3 gradings
+    #grading_vs_yp[1]=9300
+    #grading_vs_yp[2]=4300
+    #grading_vs_yp[5]=1500
+    #grading_vs_yp[10]=650
+    #grading_vs_yp[30]=175
+    #grading_vs_yp[50]=90
+    #grading_vs_yp[100]=35
+
+    \cp constant/turbulenceProperties.orig constant/turbulenceProperties
+
+    for model in $models
+    do
+        echo "Processing model: $model"
+
+        runApplication -s $model foamDictionary -entry RAS.RASModel -set $model constant/turbulenceProperties
+
+        for i in "${!grading_vs_yp[@]}"
+        do
+            yp=$i
+            grading=${grading_vs_yp[$yp]}
+
+            echo "Mesh: y+ $yp"
+
+            \rm -rf 0 [1-9]*
+            \cp -rf 0.${model} 0
+
+            sed "s/GRADING/$grading/g" system/blockMeshDict.template > system/blockMeshDict
+
+            runApplication -s ${model}_${yp} blockMesh
+
+            runApplication -s ${model}_${yp} simpleFoam
+
+            UInf=$(foamDictionary -entry internalField 0/U | sed 's/^.*(\s*\([^ ]*\).*/\1/g')
+            nuInf=$(foamDictionary -entry nu constant/transportProperties | sed 's/^.*\s\(.*\);/\1/g')
+
+            timeDir=$(foamListTimes -latestTime)
+
+            echo "UInf = $UInf"
+
+            foamDictionary -entry boundaryField.bottomWall.value -value $timeDir/Cx | \
+                sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > Cx.$$
+            foamDictionary -entry boundaryField.bottomWall.value -value $timeDir/wallShearStress | \
+                sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > tau.$$
+            foamDictionary -entry boundaryField.bottomWall.value -value $timeDir/yPlus | \
+                sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > yp.$$
+
+            echo "# ccx tau_xx tau_yy tau_zz" > tauw_${model}_${yp}.dat
+            paste -d ' ' Cx.$$ tau.$$ >> tauw_${model}_${yp}.dat
+            echo "# ccx y+" > yplus_${model}_${yp}.dat
+            paste -d ' ' Cx.$$ yp.$$ >> yplus_${model}_${yp}.dat
+            \rm -f Cx.$$ tau.$$ yp.$$
+
+            ./plot $UInf $nuInf $model $yp
+
+            # Optionally store the results
+            #mv $timeDir ${model}_${yp}.${timeDir}
+        done
+        mv postProcessing postProcessing-${model}
+    done
+fi

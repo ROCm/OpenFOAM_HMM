@@ -1,0 +1,26 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
+Uinf=$1
+nuInf=$2
+model=$3
+yp=$4
+gnuplot<<EOF
+    set terminal pngcairo font "arial,16" size 800,600
+    set output "OF_${model}_YP${yp}.png"
+    set xlabel "Re_x"
+    set ylabel "Cf"
+    set grid
+    set key right top
+    set xrange [0:1e7]
+    set yrange [0:0.006]
+    UInf = $Uinf
+    nuInf = $nuInf
+    X0 = 0 # Location of start of plate
+    laminar(x) = 0.664/(sqrt(x)) # Blasius - laminar
+    weighardt(x) = 0.288*(log10(x))**(-2.45) # turbulent
+    plot \
+        weighardt(x) t "Weighardt"  w lines lc "red" lw 2, \
+        "tauw_${model}_${yp}.dat" u (\$1 - X0)*UInf/nuInf:(sqrt(\$2*\$2 + \$3*\$3 + \$4*\$4)/(0.5*UInf*UInf)) title "$model y^+ ${yp}" w lines lc "black" lw 2
+
+EOF

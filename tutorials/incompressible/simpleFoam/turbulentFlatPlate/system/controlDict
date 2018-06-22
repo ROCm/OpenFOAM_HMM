@@ -1,0 +1,68 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     simpleFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         5000;
+
+deltaT          1;
+
+writeControl    timeStep;
+
+writeInterval   100;
+
+purgeWrite      1;
+
+writeFormat     ascii;
+
+writePrecision  8;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   8;
+
+runTimeModifiable true;
+
+functions
+{
+    minMax
+    {
+        type          fieldMinMax;
+        libs          ("libfieldFunctionObjects.so");
+        writeControl  timeStep; //writeTime;
+        fields        (U);
+    }
+    yPlus
+    {
+        type            yPlus;
+        libs            ("libfieldFunctionObjects.so");
+        patches         (fixedWall);
+        writeControl    writeTime;
+    }
+    #includeFunc "writeCellCentres"
+    #includeFunc "wallShearStress"
+}
+
+// ************************************************************************* //

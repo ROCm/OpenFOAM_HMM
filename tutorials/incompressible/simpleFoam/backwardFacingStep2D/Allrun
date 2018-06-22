@@ -1,0 +1,100 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+runApplication blockMesh
+runApplication simpleFoam
+
+if notTest $@
+then
+    # Create validation plots
+
+    # Test if gnuplot exists on the system
+    command -v gnuplot >/dev/null 2>&1 || {
+        echo "gnuplot not found - skipping graph creation" 1>&2
+        exit 1
+    }
+
+    # Copy results to the validation directory 
+    timeDir=$(foamListTimes -latestTime)
+    sampleDir=postProcessing/sample/$timeDir
+
+    [ -d $sampleDir ] || {
+        echo "results directory not found - skipping graph creation" 1>&2
+        exit 1
+    }
+
+    # Test if awk exists on the system
+    command -v awk >/dev/null 2>&1 || {
+        echo "awk not found - skipping graph creation" 1>&2
+        exit 1
+    }
+
+    Uref=$(awk '{print $2}' $sampleDir/Uref_U.xy)
+
+    graphNameU="backwardStep2D_U.png"
+
+    echo "Creating U profiles graph to $graphNameU"
+    gnuplot<<EOF1
+    set terminal pngcairo font "helvetica,20" size 1000, 1000
+
+    set xrange [-0.4:1.2]
+    set yrange [0:3]
+    set xlabel "U/U_0"
+    set ylabel "y/h"
+    set grid
+    set output "$graphNameU"
+
+    href = 0.0127
+    Uref = $Uref
+
+    set lmargin 7.5   
+    set rmargin 1.5
+    set tmargin 0.1
+    set bmargin 3.2
+    set key top left
+
+    set format x "%.1f"
+    set format y "%.1f"
+
+    plot \
+        "$sampleDir/x_by_h_01_U.xy" u (\$2/Uref):(\$1/href) w lines lw 2 lc rgb "red" t "x/h = 1", \
+        "$sampleDir/x_by_h_04_U.xy" u (\$2/Uref):(\$1/href) w lines lw 2 lc rgb "green" t "x/h = 4", \
+        "$sampleDir/x_by_h_06_U.xy" u (\$2/Uref):(\$1/href) w lines lw 2 lc rgb "blue" t "x/h = 6", \
+        "$sampleDir/x_by_h_10_U.xy" u (\$2/Uref):(\$1/href) w lines lw 2 lc rgb "black" t "x/h = 10"
+EOF1
+
+    echo "# ccx tau_xx tau_yy tau_zz" > tauw.dat
+    foamDictionary -entry boundaryField.lowerWall.value -value $timeDir/Cx | \
+	sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > Cx.$$
+    foamDictionary -entry boundaryField.lowerWall.value -value $timeDir/wallShearStress | \
+        sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > tau.$$
+    paste -d ' ' Cx.$$ tau.$$ >> tauw.dat
+    \rm -f Cx.$$ tau.$$
+    
+    graphNameTau="backwardStep2D_tau.png"
+    echo "Creating wallshear stress graph to $graphNameTau"
+    gnuplot<<EOF2
+    set terminal pngcairo font "helvetica,20" size 1000, 1000
+    set xrange [-5:30]
+    set yrange [-0.002:0.004]
+    set grid
+    set key bottom right
+    set xlabel "x/h"
+    set ylabel "c_f"
+    set output "$graphNameTau"
+
+    Uref = $Uref
+    href = 0.0127
+
+    set lmargin 10
+    set rmargin 1.5
+    set tmargin 0.1
+    set bmargin 3.2
+
+    plot "tauw.dat" u (\$1/href):(-\$2/(0.5*Uref*Uref)) t "simpleFoam" w l lw 2 lc rgb "black"
+EOF2
+fi
+
