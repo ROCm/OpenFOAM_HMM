@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -95,11 +95,32 @@ cleanCase()
     rm -f 0/cellDist > /dev/null 2>&1
 
     (
-        cd constant 2>/dev/null && \
+        cd constant 2>/dev/null || exit 0
+
         rm -rf \
           cellDecomposition cellToRegion cellLevel* pointLevel* \
-          polyMesh tetDualMesh \
-          > /dev/null 2>&1 \
+          tetDualMesh \
+          > /dev/null 2>&1
+
+        # Old constant/polyMesh location for blockMeshDict still in use?
+        # - emit a gentle warning
+        if [ -e polyMesh/blockMeshDict.m4 ]
+        then
+            rm -f polyMesh/blockMeshDict > /dev/null 2>&1
+            echo
+            echo "Warning: not removing constant/polyMesh/ "
+            echo "   it contains a blockMeshDict, which should normally be under system/ instead"
+            echo
+        elif [ -e polyMesh/blockMeshDict ]
+        then
+            echo
+            echo "Warning: not removing constant/polyMesh/ "
+            echo "   it contains a blockMeshDict, which should normally be under system/ instead"
+            echo
+        else
+            # Remove polyMesh entirely if there is no blockMeshDict
+            rm -rf polyMesh > /dev/null 2>&1
+        fi
     )
 
     if [ -e system/blockMeshDict.m4 ]
