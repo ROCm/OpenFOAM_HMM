@@ -95,6 +95,93 @@ void Foam::surfMeshSamplers::checkOutNames
 //     return tmpRegistry().subRegistry(subName, true, false);
 // }
 
+bool Foam::surfMeshSamplers::add_rhoU(const word& derivedName)
+{
+    const objectRegistry& db = mesh_.thisDb();
+
+    const bool existed = db.foundObject<volVectorField>(derivedName);
+
+    if (existed)
+    {
+        return false; // Volume field already existed - not added.
+    }
+
+
+    // rhoU = rho * U
+
+    const auto* rhoPtr = mesh_.lookupObjectPtr<volScalarField>("rho");
+    const volVectorField& U = mesh_.lookupObject<volVectorField>("U");
+
+    tmp<volVectorField> tresult;
+
+    if (rhoPtr)
+    {
+        const auto& rho = *rhoPtr;
+
+        tresult = tmp<volVectorField>::New
+        (
+            derivedName, (rho * U)
+        );
+    }
+    else
+    {
+        const dimensionedScalar rho("rho", dimDensity, rhoRef_);
+
+        tresult = tmp<volVectorField>::New
+        (
+            derivedName, (rho * U)
+        );
+    }
+
+    db.store(tresult.ptr());
+
+    return !existed;
+}
+
+
+bool Foam::surfMeshSamplers::add_pTotal(const word& derivedName)
+{
+    const objectRegistry& db = mesh_.thisDb();
+
+    const bool existed = db.foundObject<volVectorField>(derivedName);
+
+    if (existed)
+    {
+        return false; // Volume field already existed - not added.
+    }
+
+    // pTotal = p + rho * U^2 / 2
+
+    const auto* rhoPtr = mesh_.lookupObjectPtr<volScalarField>("rho");
+    const volScalarField& p = mesh_.lookupObject<volScalarField>("p");
+    const volVectorField& U = mesh_.lookupObject<volVectorField>("U");
+
+    tmp<volScalarField> tresult;
+
+    if (rhoPtr)
+    {
+        const auto& rho = *rhoPtr;
+
+        tresult = tmp<volScalarField>::New
+        (
+            derivedName, (p + 0.5 * rho * magSqr(U))
+        );
+    }
+    else
+    {
+        const dimensionedScalar rho("rho", dimDensity, rhoRef_);
+
+        tresult = tmp<volScalarField>::New
+        (
+            derivedName, (rho * (p + 0.5 * magSqr(U)))
+        );
+    }
+
+    db.store(tresult.ptr());
+
+    return !existed;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -110,7 +197,8 @@ Foam::surfMeshSamplers::surfMeshSamplers
     mesh_(refCast<const fvMesh>(obr_)),
     fieldSelection_(),
     derivedNames_(),
-    sampleScheme_(word::null)
+    sampleScheme_(word::null),
+    rhoRef_(1.0)
 {
     read(dict);
 }
@@ -128,7 +216,8 @@ Foam::surfMeshSamplers::surfMeshSamplers
     mesh_(refCast<const fvMesh>(obr)),
     fieldSelection_(),
     derivedNames_(),
-    sampleScheme_(word::null)
+    sampleScheme_(word::null),
+    rhoRef_(1.0)
 {
     read(dict);
 }
@@ -157,79 +246,23 @@ bool Foam::surfMeshSamplers::execute()
 
     for (const word& derivedName : derivedNames_)
     {
+        // This is a fairly ugly dispatch mechanism
+
         if (derivedName == "rhoU")
         {
-            added.append(derivedName);
-
-            if (!db.foundObject<volVectorField>(derivedName))
+            if (add_rhoU(derivedName))
             {
                 cleanup.append(derivedName);
-
-                db.store
-                (
-                    new volVectorField
-                    (
-                        derivedName,
-                        // rhoU = rho * U
-                        (
-                            mesh_.lookupObject<volScalarField>("rho")
-                          * mesh_.lookupObject<volVectorField>("U")
-                        )
-                    )
-                );
             }
+            added.append(derivedName);
         }
         else if (derivedName == "pTotal")
         {
-            added.append(derivedName);
-
-            if (!db.foundObject<volScalarField>(derivedName))
+            if (add_pTotal(derivedName))
             {
                 cleanup.append(derivedName);
-
-                const volScalarField& p =
-                    mesh_.lookupObject<volScalarField>("p");
-
-                if (p.dimensions() == dimPressure)
-                {
-                    db.store
-                    (
-                        new volScalarField
-                        (
-                            derivedName,
-                            // pTotal = p + rho U^2 / 2
-                            (
-                                p
-                              + 0.5
-                              * mesh_.lookupObject<volScalarField>("rho")
-                              * magSqr
-                                (
-                                    mesh_.lookupObject<volVectorField>("U")
-                                )
-                            )
-                        )
-                    );
-                }
-                else
-                {
-                    db.store
-                    (
-                        new volScalarField
-                        (
-                            derivedName,
-                            // pTotal = p + U^2 / 2
-                            (
-                                p
-                              + 0.5
-                              * magSqr
-                                (
-                                    mesh_.lookupObject<volVectorField>("U")
-                                )
-                            )
-                        )
-                    );
-                }
             }
+            added.append(derivedName);
         }
         else
         {
@@ -306,6 +339,8 @@ bool Foam::surfMeshSamplers::read(const dictionary& dict)
 {
     fieldSelection_.clear();
     derivedNames_.clear();
+
+    rhoRef_ = dict.lookupOrDefault<scalar>("rhoRef", 1);
 
     const bool createOnRead = dict.lookupOrDefault("createOnRead", false);
 

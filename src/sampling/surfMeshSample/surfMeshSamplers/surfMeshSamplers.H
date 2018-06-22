@@ -25,7 +25,8 @@ Class
     Foam::surfMeshSamplers
 
 Description
-    Set of surfaces to sample into a surfMesh/surfField.
+    Set of surfaces to sample from a volume field onto surfField that resides
+    on a surfMesh object.
 
     The execute() method is used to sample, and the write() method to write.
     It is fairly common to use for sampling only and have the write disabled.
@@ -53,6 +54,9 @@ Description
         // Optional: pre-defined derived fields to be sampled
         derived         (rhoU pTotal);
 
+        // Reference density for incompressible
+        rhoRef          1.25;
+
         // Optional: create surface immediately on read
         // The default is to create a placeholder without any faces.
         createOnRead    false;
@@ -69,6 +73,23 @@ Description
     }
     \endverbatim
 
+    Entries:
+    \table
+        Property | Description                             | Required | Default
+        type     | surfMeshes                              | yes      |
+        surfaces | the list of sample surfaces             | recommended |
+        fields   | word/regex list of fields to sampled    | yes      |
+        derived  | additional derived fields pTotal/rhoU   | no       |
+        rhoRef | reference density for derived fields (incompressible) | no | 1
+        sampleScheme | scheme to obtain face centre value  | no       | cell
+        createOnRead | Create surface immediately on read  | no       | false;
+    \endtable
+
+Note
+    The default is to create a placeholder surMesh without any faces on
+    construction. This behaviour can be changed by the createOnRead option.
+    For incompressible cases, \c rhoRef can be specified for use in the
+    derived quantities. The default is 1.
 
 See also
     Foam::sampledSurfaces
@@ -93,13 +114,13 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class Time;
 class fvMesh;
 class dictionary;
 
 /*---------------------------------------------------------------------------*\
-                       Class surfMeshSamplers Declaration
+                      Class surfMeshSamplers Declaration
 \*---------------------------------------------------------------------------*/
 
 class surfMeshSamplers
@@ -119,7 +140,7 @@ class surfMeshSamplers
         const fvMesh& mesh_;
 
 
-      // Read from dictonary
+    // Read from dictionary
 
         //- Names of fields to sample
         wordRes fieldSelection_;
@@ -130,6 +151,9 @@ class surfMeshSamplers
         //- Sample scheme to obtain face values
         word sampleScheme_;
 
+        //- Reference density (to convert from kinematic to static pressure)
+        scalar rhoRef_;
+
 
     // Private Member Functions
 
@@ -139,6 +163,16 @@ class surfMeshSamplers
             const objectRegistry& registry,
             const UList<word>& names
         );
+
+
+        //- Hard-coded derived field (rho * U)
+        //  \return true if field did not previously exist
+        bool add_rhoU(const word& derivedName);
+
+        //- Hard-coded derived field (p + 1/2 * rho * U)
+        //  \return true if field did not previously exist
+        bool add_pTotal(const word& derivedName);
+
 
         //- Access the sampling surfaces
         inline const PtrList<surfMeshSample>& surfaces() const

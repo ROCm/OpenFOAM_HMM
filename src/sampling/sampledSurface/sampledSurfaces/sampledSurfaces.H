@@ -49,7 +49,6 @@ Description
 
         // Scheme to obtain node values
         // (only used if interpolate=true for the surfaces below)
-
         interpolationScheme cell;
 
         // Output surface format
@@ -73,6 +72,22 @@ Description
         );
     }
     \endverbatim
+
+    Entries:
+    \table
+        Property | Description                             | Required | Default
+        type     | surfaces                                | yes      |
+        surfaces | the list of sample surfaces             | recommended |
+        fields   | word/regex list of fields to sampled    | yes      |
+        sampleScheme | scheme to obtain face centre value  | no       | cell
+        interpolationScheme | scheme to obtain node values | yes      |
+        surfaceFormat | output surface format              | yes      |
+        formatOptions | dictionary of format options       | no       |
+    \endtable
+
+Note
+    The interpolationScheme is only used if interpolate=true is used by any
+    of the surfaces.
 
 See also
     Foam::surfMeshSamplers

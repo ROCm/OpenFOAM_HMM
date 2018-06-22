@@ -13,8 +13,10 @@ fieldTransfer
     executeControl  timeStep;
     executeInterval 1;
 
-    fields      (p rho U T);
+    fields      (p U);
     derived     (rhoU pTotal);
+
+    rhoRef      1.25;
 
     _plane
     {
