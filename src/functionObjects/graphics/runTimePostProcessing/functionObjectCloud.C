@@ -28,7 +28,6 @@ License
 #include "fvMesh.H"
 #include "runTimePostProcessing.H"
 #include "addToRunTimeSelectionTable.H"
-#include "stringOps.H"
 
 // VTK includes
 #include "vtkActor.h"
@@ -130,7 +129,7 @@ addGeometryToScene
     }
 
 
-    stringOps::inplaceExpand(inputFileName_);
+    inputFileName_.expand();
     if (inputFileName_.empty())
     {
         WarningInFunction
