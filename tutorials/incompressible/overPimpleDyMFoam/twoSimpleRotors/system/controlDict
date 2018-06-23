@@ -50,6 +50,11 @@ adjustTimeStep  yes;
 
 maxCo           1;
 
-// #include "catalyst"
+
+functions
+{
+    // #include "catalyst"
+}
+
 
 // ************************************************************************* //

@@ -1,25 +1,22 @@
 // ParaView Catalyst function object for OpenFOAM (-*- C++ -*-)
 
-functions
+catalyst
 {
-    catalyst
+    #includeEtc "caseDicts/insitu/catalyst/catalyst.cfg"
+
+    scripts
+    (
+        "<system>/scripts/pressure.py"
+        // "<system>/scripts/vorticity.py"
+        // "<etc>/caseDicts/insitu/catalyst/writeMesh.py"
+    );
+
+    inputs
     {
-        #includeEtc "caseDicts/insitu/catalyst/catalyst.cfg"
-
-        scripts
-        (
-            "<system>/scripts/pressure.py"
-            // "<system>/scripts/vorticity.py"
-            // "<etc>/caseDicts/insitu/catalyst/writeMesh.py"
-        );
-
-        inputs
+        region
         {
-            region
-            {
-                // Selected fields (words or regex).
-                fields      ( U p );
-            }
+            // Selected fields (words or regex).
+            fields      ( U p );
         }
     }
 }
