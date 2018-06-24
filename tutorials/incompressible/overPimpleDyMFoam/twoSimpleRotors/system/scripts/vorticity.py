@@ -1,4 +1,3 @@
-
 from paraview.simple import *
 from paraview import coprocessing
 
@@ -67,10 +66,10 @@ def CreateCoProcessor():
 
       # create a new 'XML MultiBlock Data Reader'
       # create a producer from a simulation input
-      regionmesh = coprocessor.CreateProducer(datadescription, 'region/mesh')
+      region = coprocessor.CreateProducer(datadescription, 'region')
 
       # create a new 'Slice'
-      slice1 = Slice(Input=regionmesh)
+      slice1 = Slice(Input=region)
       slice1.SliceType = 'Plane'
       slice1.SliceOffsetValues = [0.0]
 
@@ -179,7 +178,7 @@ def CreateCoProcessor():
 
   coprocessor = CoProcessor()
   # these are the frequencies at which the coprocessor updates.
-  freqs = {'region/mesh': [1, 1, 1]}
+  freqs = {'region': [1, 1, 1]}
   coprocessor.SetUpdateFrequencies(freqs)
   return coprocessor
 

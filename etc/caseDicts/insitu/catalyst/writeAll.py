@@ -4,6 +4,9 @@ from paraview import coprocessing
 # The frequency to output everything
 outputfrequency = 5
 
+# Padding for files
+fileNamePadding = 0
+
 # This is largely identical to the Catalyst allinputsgridwriter.py example
 # but only handle vtkMultiBlockDataSet, since that is what we generate
 
@@ -18,7 +21,7 @@ def CreateCoProcessor():
         grid  = input.GetClientSideObject().GetOutputDataObject(0)
         if grid.IsA('vtkMultiBlockDataSet'):
           writer = servermanager.writers.XMLMultiBlockDataWriter(Input=input)
-          coprocessor.RegisterWriter(writer, filename=name+'_%t.vtm', freq=outputfrequency)
+          coprocessor.RegisterWriter(writer, filename=name+'_%t.vtm', freq=outputfrequency, paddingamount=fileNamePadding)
 
     return Pipeline()
 
