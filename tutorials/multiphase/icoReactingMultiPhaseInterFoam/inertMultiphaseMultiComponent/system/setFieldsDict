@@ -27,7 +27,7 @@ defaultFieldValues
 
     volScalarFieldValue air.gas         1
     volScalarFieldValue vapour.gas      0
-    volScalarFieldValue CoO2.gas        0
+    volScalarFieldValue CO2.gas         0
 
     volScalarFieldValue O2.liquid       0
     volScalarFieldValue water.liquid    1
