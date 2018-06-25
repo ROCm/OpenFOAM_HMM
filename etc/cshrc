@@ -38,11 +38,11 @@ setenv WM_PROJECT_VERSION plus
 #    should work when sourced by CSH or TCSH shells. If this however fails,
 #    set one of the fallback values to an appropriate path.
 # --
-setenv FOAM_INST_DIR `lsof +p $$ |& \
+set FOAM_INST_DIR=`lsof +p $$ |& \
     sed -n -e 's@[^/]*@@' -e 's@/'$WM_PROJECT'[^/]*/etc/cshrc.*@@p'`
-# setenv FOAM_INST_DIR  $HOME/$WM_PROJECT
-# setenv FOAM_INST_DIR  /opt/$WM_PROJECT
-# setenv FOAM_INST_DIR  /usr/local/$WM_PROJECT
+# set FOAM_INST_DIR=$HOME/$WM_PROJECT
+# set FOAM_INST_DIR=/opt/$WM_PROJECT
+# set FOAM_INST_DIR=/usr/local/$WM_PROJECT
 #
 # END OF (NORMAL) USER EDITABLE PART
 ################################################################################
@@ -240,6 +240,7 @@ unalias _foamAddLib
 unalias _foamAddLibAuto
 
 # Variables (done as the last statement for a clean exit code)
+unset FOAM_INST_DIR     # Old variable name (OpenFOAM-v1606) - now unneeded
 unset cleaned foamOldDirs
 
 #------------------------------------------------------------------------------

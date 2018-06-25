@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -38,10 +38,10 @@
 #     \endcode
 #
 # Note
-#     This script must exist in $FOAM_INST_DIR/OpenFOAM-<VERSION>/bin/
-#     or $FOAM_INST_DIR/openfoam<VERSION>/bin/ (for the debian version)
+#     This script must exist in $WM_PROJECT_INST_DIR/OpenFOAM-<VERSION>/bin
+#     or $WM_PROJECT_INST_DIR/openfoam<VERSION>/bin (debian)
 #
-#     foamEtcFile must be found in the same directory as this script
+#     foamEtcFile located in the same directory as this script
 #
 # See also
 #    foamEtcFile
@@ -57,7 +57,7 @@ Usage: ${0##*/} [OPTION] <application> ...
 options:
   -mode=MODE        Any combination of u(user), g(group), o(other)
   -prefix=DIR       Specify an alternative installation prefix
-                    pass through to foamEtcFile and set as FOAM_INST_DIR
+                    pass through to foamEtcFile
   -version=VER      Specify alternative OpenFOAM version (eg, 3.0, 1612, ...)
                     pass through to foamEtcFile
   -help             Print the usage
@@ -71,11 +71,9 @@ USAGE
 #-------------------------------------------------------------------------------
 binDir="${0%/*}"                # The bin dir
 projectDir="${binDir%/bin}"     # The project dir
-prefixDir="${projectDir%/*}"    # The prefix dir (same as $WM_PROJECT_INST_DIR)
+# prefixDir="${projectDir%/*}"    # The prefix dir (same as $WM_PROJECT_INST_DIR)
 
-## projectDirName="${projectDir##*/}"      # The project directory name
-
-version="${WM_PROJECT_VERSION:-unknown}"
+projectVersion="${WM_PROJECT_VERSION:-unknown}"
 
 unset etcOpts
 # parse options
@@ -90,11 +88,10 @@ do
         ;;
     -prefix=/*)
         etcOpts="$etcOpts $1"       # pass-thru to foamEtcFile
-        prefixDir="${1#*=}"
         ;;
     -version=*)
         etcOpts="$etcOpts $1"       # pass-thru to foamEtcFile
-        version="${1#*=}"
+        projectVersion="${1#*=}"    # for reporting
         ;;
     -m | -mode)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
@@ -104,13 +101,12 @@ do
     -p | -prefix)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         etcOpts="$etcOpts $1 $2"    # pass-thru to foamEtcFile
-        prefixDir="$2"
         shift
         ;;
     -v | -version)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         etcOpts="$etcOpts $1 $2"    # pass-thru to foamEtcFile
-        version="$2"
+        projectVersion="$2"         # for reporting
         shift
         ;;
     --)
@@ -127,19 +123,15 @@ do
     shift
 done
 
-#
-# Find and source OpenFOAM settings (bashrc)
+
+# Find and source the OpenFOAM <etc/bashrc>
 # placed in function to preserve command-line arguments
-#
-sourceRc()
+sourceBashrc()
 {
     rcFile="$($binDir/foamEtcFile $etcOpts bashrc)" || {
-        echo "Error : bashrc file could not be found for OpenFOAM-$version" 1>&2
-        exit 1
+        echo "Error: bashrc file could not be found for OpenFOAM-$projectVersion" 1>&2
+        exit 2
     }
-
-    # set to consistent value before sourcing the bashrc
-    export FOAM_INST_DIR="$prefixDir"
 
     . $rcFile $FOAM_SETTINGS
 }
@@ -147,7 +139,7 @@ sourceRc()
 
 [ "$#" -ge 1 ] || usage "no application specified"
 
-sourceRc
+sourceBashrc
 exec "$@"
 
 #------------------------------------------------------------------------------

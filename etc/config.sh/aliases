@@ -65,31 +65,30 @@ wmRefresh()
 }
 
 
-# Change OpenFOAM version
-# ~~~~~~~~~~~~~~~~~~~~~~~
+# Query the current OpenFOAM version
+# or change to another version (if installed in a parallel directory)
 unset -f foamVersion 2>/dev/null
 foamVersion()
 {
     if [ "$#" -gt 0 ]
     then
+        local dir="${WM_PROJECT_DIR%/*}"    # Parent directory
         local ver=$1
         shift
-        # The variable foamInstDir had meaning for older OpenFOAM versions
-        foamInstDir=$FOAM_INST_DIR
-        if [ -f "$foamInstDir/OpenFOAM-$ver/etc/bashrc" ]
+
+        if [ -f "$dir/OpenFOAM-$ver/etc/bashrc" ]
         then
             wmUnset
-            . $foamInstDir/OpenFOAM-$ver/etc/bashrc
-            unset foamInstDir
+            . $dir/OpenFOAM-$ver/etc/bashrc
             foam
             echo "Changed to OpenFOAM-$WM_PROJECT_VERSION" 1>&2
         else
-            unset foamInstDir
-            echo "No OpenFOAM-$ver available" 1>&2
+            echo "No OpenFOAM-$ver available in $dir" 1>&2
             echo "Using OpenFOAM-$WM_PROJECT_VERSION" 1>&2
             return 1
         fi
     else
+        # Treat as query. Report current version
         echo "OpenFOAM-$WM_PROJECT_VERSION" 1>&2
     fi
 }

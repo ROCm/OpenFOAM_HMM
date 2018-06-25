@@ -47,7 +47,6 @@ FOAM_INST_DIR=$HOME/$WM_PROJECT
 # END OF (NORMAL) USER EDITABLE PART
 ################################################################################
 : # Extra safety - if the user commented out all fallback values
-export FOAM_INST_DIR
 unset rc
 
 # Configuration environment variables.
@@ -199,6 +198,7 @@ fi
 . $WM_PROJECT_DIR/etc/config.sh/functions
 
 # Variables (done as the last statement for a clean exit code)
+unset FOAM_INST_DIR     # Old variable name (OpenFOAM-v1606) - now unneeded
 unset cleaned foamOldDirs
 
 #------------------------------------------------------------------------------

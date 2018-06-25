@@ -181,7 +181,7 @@ do
     -foamInstall | --foamInstall)
         # Replace FOAM_INST_DIR=...
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
-        foamInstDir="$2"
+        prefixDir="$2"
         _inlineSed \
             etc/bashrc \
             '\(.*BASH_SOURCE.*\)' \
@@ -195,8 +195,8 @@ do
         _inlineSed \
             etc/bashrc \
             '^ *FOAM_INST_DIR=.*' \
-            'FOAM_INST_DIR='"$foamInstDir" \
-            "Setting FOAM_INST_DIR to '$foamInstDir'"
+            'FOAM_INST_DIR='"$prefixDir" \
+            "Setting fallback FOAM_INST_DIR to '$prefixDir'"
 
         adjusted=true
         shift

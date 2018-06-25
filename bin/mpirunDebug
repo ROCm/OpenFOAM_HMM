@@ -191,6 +191,8 @@ then
 fi
 
 
+sourceFoam=false    # Fallback command
+
 # check ~/.$WM_PROJECT/$WM_PROJECT_VERSION/
 # check ~/.$WM_PROJECT/
 # check <installedProject>/etc/
@@ -210,18 +212,16 @@ then
     done
 fi
 
-# Construct test string for remote execution.
 # Source OpenFOAM settings if OpenFOAM environment not set.
-# attempt to preserve the installation directory 'FOAM_INST_DIR'
 # use FOAM_SETTINGS to pass command-line settings
-if [ -n "$FOAM_INST_DIR" ]
-then
-    sourceFoam="FOAM_INST_DIR=$FOAM_INST_DIR . $sourceFoam $FOAM_SETTINGS"
-else
-    sourceFoam=". $sourceFoam $FOAM_SETTINGS"
-fi
 
-echo "**sourceFoam:$sourceFoam"
+case "$sourceFoam" in
+*/bashrc)
+    sourceFoam=". $sourceFoam $FOAM_SETTINGS"
+    ;;
+esac
+
+echo "**sourceFoam: $sourceFoam"
 
 rm -f $PWD/mpirun.schema
 touch $PWD/mpirun.schema

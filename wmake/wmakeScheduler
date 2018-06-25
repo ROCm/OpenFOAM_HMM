@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -45,7 +45,6 @@
 #
 #     WM_PROJECT_DIR, WM_PROJECT and WM_PROJECT_VERSION will have been set
 #     before calling this routine.
-#     FOAM_INST_DIR may possibly have been set (to find installation)
 #
 #-------------------------------------------------------------------------------
 Script=${0##*/}
@@ -90,7 +89,7 @@ esac
 # Check ~/.$WM_PROJECT/$WM_PROJECT_VERSION/
 # Check ~/.$WM_PROJECT/
 # Check <installedProject>/etc/
-if [ "$WM_PROJECT" ]
+if [ -n "$WM_PROJECT" ]
 then
     for i in \
         $HOME/.$WM_PROJECT/$WM_PROJECT_VERSION \
@@ -108,20 +107,13 @@ fi
 
 # Construct test string for remote execution.
 # Source WM_PROJECT settings if WM_PROJECT environment not set.
-# Attempt to preserve the installation directory 'FOAM_INST_DIR'
 # Use FOAM_SETTINGS to pass command-line settings
-case $sourceFoam in
+case "$sourceFoam" in
 */bashrc)
-    if [ "$FOAM_INST_DIR" ]
-    then
-        sourceFoam='[ "$WM_PROJECT" ] || '"FOAM_INST_DIR=$FOAM_INST_DIR . $sourceFoam $FOAM_SETTINGS"
-    else
-        sourceFoam='[ "$WM_PROJECT" ] || '". $sourceFoam $FOAM_SETTINGS"
-    fi
+    sourceFoam='[ -n "$WM_PROJECT" ] || '". $sourceFoam $FOAM_SETTINGS"
     ;;
 
 */cshrc)
-    # TODO: csh equivalent to bash code (preserving FOAM_INST_DIR)
     sourceFoam='if ( ! $?WM_PROJECT ) source '"$sourceFoam $FOAM_SETTINGS"
     ;;
 esac

@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -42,7 +42,7 @@ options:
   -screen           also sends output to screen
   -append           append to log file instead of overwriting it
   -wait             wait for execution to complete (when not using -screen)
-  -version <ver>    specify an alternative OpenFOAM version
+  -version=VER      specify an alternative OpenFOAM version
   -help             print the usage
 
 * run an OpenFOAM job in background.
@@ -56,8 +56,8 @@ USAGE
 echoArgs() {
     addSpace=""
 
-    for stringItem in "$@"; do
-
+    for stringItem in "$@"
+    do
         echo -n "${addSpace}"
 
         if [ "${stringItem##* }" = "$stringItem" ]
@@ -68,13 +68,11 @@ echoArgs() {
             echo -n "'$stringItem'"
             addSpace=" "
         fi
-
     done
 
     unset stringItem addSpace
 }
 
-unset version
 
 # Replacement for possibly buggy 'which'
 findExec() {
@@ -111,81 +109,79 @@ findExec() {
 # Main script
 #~~~~~~~~~~~~
 unset parallelOpt screenOpt waitOpt
-
+unset projectVersion
 
 # Parse options
 while [ "$#" -gt 0 ]
 do
-   case "$1" in
-   -h | -help*)
-      usage
-      ;;
-   -case)
-      [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-      cd "$2" 2>/dev/null || usage "directory does not exist:  '$2'"
-      shift 2
-      ;;
-   -p | -parallel)
-      parallelOpt=true
-      shift
-      ;;
-   -s | -screen)
-      screenOpt=true
-      shift
-      ;;
-   -a | -append)
-      appendOpt=true
-      shift
-      ;;
-   -w | -wait)
-      waitOpt=true
-      shift
-      ;;
-   -v | -version)
-      [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-      version="$2"
-      shift 2
-      ;;
-   --)
-      shift
-      break
-      ;;
-   -*)
-      usage "invalid option '$1'"
-      ;;
-   *)
-      break
-      ;;
-   esac
+    case "$1" in
+    -h | -help*)
+        usage
+        ;;
+    -case)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        cd "$2" 2>/dev/null || usage "directory does not exist:  '$2'"
+        shift
+        ;;
+    -p | -parallel)
+        parallelOpt=true
+        ;;
+    -s | -screen)
+        screenOpt=true
+        ;;
+    -a | -append)
+        appendOpt=true
+        ;;
+    -w | -wait)
+        waitOpt=true
+        ;;
+    -version=*)
+        projectVersion="${1#*=}"    # for foamExec
+        ;;
+    -v | -version)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        projectVersion="$2"         # for foamExec
+        shift
+        ;;
+    --)
+        shift
+        break
+       ;;
+    -*)
+        usage "invalid option '$1'"
+        ;;
+    *)
+        break
+        ;;
+    esac
+    shift
 done
+
+# ------------------------------------------------------------------------------
 
 [ "$#" -ge 1 ] || usage "No application specified"
 
+# The requested application
+appName="$1"
 
 # Use foamExec for a specified version
 # Also need foamExec for remote (parallel) runs
-if [ -n "$version" -o "$parallelOpt" = true ]
+if [ -n "$projectVersion" -o "$parallelOpt" = true ]
 then
     # When possible, determine if application even exists
-    if [ -z "$version" ]
+    if [ -z "$projectVersion" ]
     then
-        findExec $1 >/dev/null || usage "Application '$1' not found"
+        findExec "$appName" >/dev/null || usage "Application '$appName' not found"
     fi
 
     # Use foamExec for dispatching
-    APPLICATION=`findExec foamExec` || usage "'foamExec' not found"
+    APPLICATION=$(findExec foamExec) || usage "'foamExec' not found"
 
-    [ -n "$version" ] && APPLICATION="$APPLICATION -version $version"
-
-    # Attempt to preserve the installation directory 'FOAM_INST_DIR'
-    if [ -d "$FOAM_INST_DIR" ]
-    then
-        APPLICATION="$APPLICATION -prefix $FOAM_INST_DIR"
-    fi
+    [ -n "$projectVersion" ] && APPLICATION="$APPLICATION -version $projectVersion"
 
 else
-    APPLICATION=`findExec $1` || usage "Application '$1' not found"
-    echo "Application : $1"
+    APPLICATION=$(findExec "$appName") || usage "Application '$appName' not found"
+    echo "Application : $appName"
     shift
 fi
 
@@ -200,7 +196,7 @@ then
     #
     if [ -r "processor0" -o -r "processors" ]
     then
-        NPROCS="$(foamDictionary -entry numberOfSubdomains -value system/decomposeParDict)"
+        nprocs="$(foamDictionary -entry numberOfSubdomains -value system/decomposeParDict 2>/dev/null)"
     else
         echo "Case is not currently decomposed"
         if [ -r system/decomposeParDict ]
@@ -218,16 +214,16 @@ then
     #
     # Find mpirun
     #
-    mpirun=`findExec mpirun` || usage "'mpirun' not found"
-    mpiopts="-np $NPROCS"
+    mpirun=$(findExec mpirun) || usage "'mpirun' not found"
+    mpiopts="-np $nprocs"
 
     #
     # Check if the machine ready to run parallel
     #
-    echo "Parallel processing using $WM_MPLIB with $NPROCS processors"
+    echo "Parallel processing using $WM_MPLIB with $nprocs processors"
     case "$WM_MPLIB" in
     *OPENMPI)
-        # add hostfile info
+        # Add hostfile info
         for hostfile in \
             hostfile \
             machines \
@@ -242,12 +238,9 @@ then
             fi
         done
 
-        #
         # Send FOAM_SETTINGS to parallel processes, so that the proper
         # definitions are sent as well.
-        #
         mpiopts="$mpiopts -x FOAM_SETTINGS"
-
         ;;
     esac
 
