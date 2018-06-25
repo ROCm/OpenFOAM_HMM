@@ -108,12 +108,15 @@ static inline Foam::fileName fileNameConcat
 
 
 // After a fork in system(), before the exec() do the following
-// 1. close stdin
-// 2. redirect stdout to stderr when infoDetailLevel == 0
-static inline void redirects()
+// - close stdin when executing in background (daemon-like)
+// - redirect stdout to stderr when infoDetailLevel == 0
+static inline void redirects(const bool bg)
 {
-    // Close stdin(0) - unchecked return value
-    (void) ::close(STDIN_FILENO);
+    if (bg)
+    {
+        // Close stdin(0) - unchecked return value
+        (void) ::close(STDIN_FILENO);
+    }
 
     // Redirect stdout(1) to stderr(2) '1>&2'
     if (Foam::infoDetailLevel == 0)
@@ -1396,7 +1399,7 @@ int Foam::system(const std::string& command, const bool bg)
         // In child
 
         // Close or redirect file descriptors
-        redirects();
+        redirects(bg);
 
         // execl uses the current environ
         (void) ::execl
@@ -1455,7 +1458,7 @@ int Foam::system(const CStringList& command, const bool bg)
         // In child
 
         // Close or redirect file descriptors
-        redirects();
+        redirects(bg);
 
         // execvp searches the path, uses the current environ
         (void) ::execvp(command[0], command.strings());
