@@ -57,20 +57,7 @@ Foam::solidThermo::solidThermo
     const word& phaseName
 )
 :
-    rhoThermo(mesh, phaseName)
-//     rho_
-//     (
-//         IOobject
-//         (
-//             phasePropertyName("thermo:rho"),
-//             mesh.time().timeName(),
-//             mesh,
-//             IOobject::NO_READ,
-//             IOobject::NO_WRITE
-//         ),
-//         mesh,
-//         dimDensity
-//     )
+    rhoThermo(mesh, dict, phaseName)
 {}
 
 
