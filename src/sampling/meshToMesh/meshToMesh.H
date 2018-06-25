@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,7 +66,7 @@ public:
     // Public data types
 
         //- Enumeration specifying interpolation method
-        enum interpolationMethod
+        enum class interpolationMethod
         {
             imDirect,
             imMapNearest,
@@ -75,6 +75,15 @@ public:
         };
 
         static const Enum<interpolationMethod> interpolationMethodNames_;
+
+        //- Enumeration specifying processor parallel map construction method
+        enum class procMapMethod
+        {
+            pmAABB,
+            pmLOD
+        };
+
+        static const Enum<procMapMethod> procMapMethodNames_;
 
 private:
 
@@ -85,6 +94,9 @@ private:
 
         //- Reference to the target mesh
         const polyMesh& tgtRegion_;
+
+        //- Processor parallel map construction method
+        procMapMethod procMapMethod_;
 
         //- List of target patch IDs per source patch (local index)
         List<label> srcPatchID_;
@@ -301,6 +313,7 @@ public:
         const polyMesh& src,
         const polyMesh& tgt,
         const interpolationMethod& method,
+        const procMapMethod& mapMethod = procMapMethod::pmAABB,
         const bool interpAllPatches = true
     );
 
@@ -311,6 +324,7 @@ public:
         const polyMesh& tgt,
         const word& methodName,     // internal mapping
         const word& AMIMethodName,  // boundary mapping
+        const procMapMethod& mapMethod = procMapMethod::pmAABB,
         const bool interpAllPatches = true
     );
 
@@ -322,6 +336,7 @@ public:
         const interpolationMethod& method,
         const HashTable<word>& patchMap,
         const wordList& cuttingPatches,
+        const procMapMethod& mapMethod = procMapMethod::pmAABB,
         const bool normalise = true
     );
 
@@ -335,6 +350,7 @@ public:
         const word& AMIMethodName,  // boundary mapping
         const HashTable<word>& patchMap,
         const wordList& cuttingPatches,
+        const procMapMethod& mapMethod = procMapMethod::pmAABB,
         const bool normalise = true
     );
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,6 +46,7 @@ void mapConsistentMesh
     const fvMesh& meshTarget,
     const word& mapMethod,
     const word& AMIMapMethod,
+    const word& procMapMethod,
     const bool subtract,
     const wordHashSet& selectedFields,
     const bool noLagrangian
@@ -54,7 +55,14 @@ void mapConsistentMesh
     Info<< nl << "Consistently creating and mapping fields for time "
         << meshSource.time().timeName() << nl << endl;
 
-    meshToMesh interp(meshSource, meshTarget, mapMethod, AMIMapMethod);
+    meshToMesh interp
+    (
+        meshSource,
+        meshTarget,
+        mapMethod,
+        AMIMapMethod,
+        meshToMesh::procMapMethodNames_[procMapMethod]
+    );
 
     if (subtract)
     {
@@ -85,6 +93,7 @@ void mapSubMesh
     const wordList& cuttingPatches,
     const word& mapMethod,
     const word& AMIMapMethod,
+    const word& procMapMethod,
     const bool subtract,
     const wordHashSet& selectedFields,
     const bool noLagrangian
@@ -100,7 +109,8 @@ void mapSubMesh
         mapMethod,
         AMIMapMethod,
         patchMap,
-        cuttingPatches
+        cuttingPatches,
+        meshToMesh::procMapMethodNames_[procMapMethod]
     );
 
     if (subtract)
@@ -171,6 +181,12 @@ int main(int argc, char *argv[])
         "word",
         "specify the patch mapping method (direct|mapNearest|faceAreaWeight)"
     );
+    argList::addOption
+    (
+        "procMapMethod",
+        "word",
+        "specify the processor distribution map method (AABB|LOD)"
+    );
     argList::addBoolOption
     (
         "subtract",
@@ -217,14 +233,13 @@ int main(int argc, char *argv[])
 
     word mapMethod = meshToMesh::interpolationMethodNames_
     [
-        meshToMesh::imCellVolumeWeight
+        meshToMesh::interpolationMethod::imCellVolumeWeight
     ];
 
     if  (args.readIfPresent("mapMethod", mapMethod))
     {
         Info<< "Mapping method: " << mapMethod << endl;
     }
-
 
     word patchMapMethod;
     if (meshToMesh::interpolationMethodNames_.found(mapMethod))
@@ -233,11 +248,24 @@ int main(int argc, char *argv[])
         meshToMesh::interpolationMethod method =
             meshToMesh::interpolationMethodNames_[mapMethod];
 
-        patchMapMethod = AMIPatchToPatchInterpolation::interpolationMethodNames_
-        [
-            meshToMesh::interpolationMethodAMI(method)
-        ];
+        patchMapMethod =
+            AMIPatchToPatchInterpolation::interpolationMethodNames_
+            [
+                meshToMesh::interpolationMethodAMI(method)
+            ];
     }
+
+    word procMapMethod =
+        meshToMesh::procMapMethodNames_
+        [
+            meshToMesh::procMapMethod::pmAABB
+        ];
+
+    if (args.readIfPresent("procMapMethod", procMapMethod))
+    {
+        Info<< "Processor map method: " << procMapMethod << endl;
+    }
+
 
     // Optionally override
     if (args.readIfPresent("patchMapMethod", patchMapMethod))
@@ -325,6 +353,7 @@ int main(int argc, char *argv[])
             meshTarget,
             mapMethod,
             patchMapMethod,
+            procMapMethod,
             subtract,
             selectedFields,
             noLagrangian
@@ -340,11 +369,14 @@ int main(int argc, char *argv[])
             cuttingPatches,
             mapMethod,
             patchMapMethod,
+            procMapMethod,
             subtract,
             selectedFields,
             noLagrangian
         );
     }
+
+    runTimeSource.printExecutionTime(Info);
 
     Info<< "\nEnd\n" << endl;
 
