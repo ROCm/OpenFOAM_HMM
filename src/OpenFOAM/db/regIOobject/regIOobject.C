@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -153,6 +153,8 @@ Foam::regIOobject::~regIOobject()
     {
         Pout<< "Destroying regIOobject called " << name()
             << " of type " << type()
+            << " registered " << registered_
+            << " owned " << ownedByRegistry_
             << " in directory " << path()
             << endl;
     }
