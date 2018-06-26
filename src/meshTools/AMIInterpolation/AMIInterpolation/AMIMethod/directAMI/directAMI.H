@@ -134,6 +134,15 @@ public:
                 label tgtFacei = -1
             );
 
+            //- Set the face areas for parallel runs
+            virtual void setMagSf
+            (
+                const TargetPatch& tgtPatch,
+                const mapDistribute& map,
+                scalarList& srcMagSf,
+                scalarList& tgtMagSf
+            ) const;
+
             //- Normalise the weight. Can optionally subset addressing
             //  (e.g. for mapNearest)
             virtual void normaliseWeights

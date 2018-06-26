@@ -150,4 +150,32 @@ void Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
 }
 
 
+template<class SourcePatch, class TargetPatch>
+void Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::setMagSf
+(
+    const TargetPatch& tgtPatch,
+    const mapDistribute& map,
+    scalarList& srcMagSf,
+    scalarList& tgtMagSf
+) const
+{
+    srcMagSf = std::move(this->srcMagSf_);
+
+    scalarList newTgtMagSf(std::move(this->tgtMagSf_));
+    map.reverseDistribute(tgtPatch.size(), newTgtMagSf);
+
+    // Assign default sizes. Override selected values with
+    // calculated values. This is to support ACMI
+    // where some of the target faces are never used (so never get sent
+    // over and hence never assigned to)
+    tgtMagSf = tgtPatch.magFaceAreas();
+
+    for (const labelList& smap : map.subMap())
+    {
+        UIndirectList<scalar>(tgtMagSf, smap) =
+            UIndirectList<scalar>(newTgtMagSf, smap);
+    }
+}
+
+
 // ************************************************************************* //

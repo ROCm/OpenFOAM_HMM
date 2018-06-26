@@ -605,9 +605,11 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     requireMatch_(requireMatch),
     singlePatchProc_(-999),
     lowWeightCorrection_(lowWeightCorrection),
+    srcMagSf_(),
     srcAddress_(),
     srcWeights_(),
     srcWeightsSum_(),
+    tgtMagSf_(),
     tgtAddress_(),
     tgtWeights_(),
     tgtWeightsSum_(),
@@ -636,9 +638,11 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     requireMatch_(requireMatch),
     singlePatchProc_(-999),
     lowWeightCorrection_(lowWeightCorrection),
+    srcMagSf_(),
     srcAddress_(),
     srcWeights_(),
     srcWeightsSum_(),
+    tgtMagSf_(),
     tgtAddress_(),
     tgtWeights_(),
     tgtWeightsSum_(),
@@ -668,9 +672,11 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     requireMatch_(requireMatch),
     singlePatchProc_(-999),
     lowWeightCorrection_(lowWeightCorrection),
+    srcMagSf_(),
     srcAddress_(),
     srcWeights_(),
     srcWeightsSum_(),
+    tgtMagSf_(),
     tgtAddress_(),
     tgtWeights_(),
     tgtWeightsSum_(),
@@ -700,9 +706,11 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     requireMatch_(requireMatch),
     singlePatchProc_(-999),
     lowWeightCorrection_(lowWeightCorrection),
+    srcMagSf_(),
     srcAddress_(),
     srcWeights_(),
     srcWeightsSum_(),
+    tgtMagSf_(),
     tgtAddress_(),
     tgtWeights_(),
     tgtWeightsSum_(),
@@ -727,9 +735,11 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     requireMatch_(fineAMI.requireMatch_),
     singlePatchProc_(fineAMI.singlePatchProc_),
     lowWeightCorrection_(-1.0),
+    srcMagSf_(),
     srcAddress_(),
     srcWeights_(),
     srcWeightsSum_(),
+    tgtMagSf_(),
     tgtAddress_(),
     tgtWeights_(),
     tgtWeightsSum_(),
@@ -884,7 +894,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             tgtFaceIDs
         );
 
-        TargetPatch
+        const TargetPatch
             newTgtPatch
             (
                 SubList<face>
@@ -917,11 +927,11 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             tgtWeights_
         );
 
+
         // Note: using patch face areas calculated by the AMI method
-        // - TODO: should move into the calculate method
-        srcMagSf_.transfer(AMIPtr->srcMagSf());
-        tgtMagSf_.transfer(AMIPtr->tgtMagSf());
-        map.reverseDistribute(tgtPatch.size(), tgtMagSf_);
+        // - TODO: move into the calculate or normalise method?
+        AMIPtr->setMagSf(tgtPatch, map, srcMagSf_, tgtMagSf_);
+
 
         // Now
         // ~~~

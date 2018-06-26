@@ -649,6 +649,21 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
 
 
 template<class SourcePatch, class TargetPatch>
+void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setMagSf
+(
+    const TargetPatch& tgtPatch,
+    const mapDistribute& map,
+    scalarList& srcMagSf,
+    scalarList& tgtMagSf
+) const
+{
+    srcMagSf = std::move(this->srcMagSf_);
+    tgtMagSf = std::move(this->tgtMagSf_);
+    map.reverseDistribute(tgtPatch.size(), tgtMagSf);
+}
+
+
+template<class SourcePatch, class TargetPatch>
 void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::normaliseWeights
 (
     const bool verbose,

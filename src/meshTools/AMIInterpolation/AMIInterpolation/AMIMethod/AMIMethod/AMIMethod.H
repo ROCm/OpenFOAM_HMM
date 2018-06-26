@@ -84,11 +84,11 @@ protected:
         const TargetPatch& tgtPatch_;
 
         //- Flag to indicate that the two patches are co-directional and
-        //  that the orientation of the target patch should be reversed
+        //- that the orientation of the target patch should be reversed
         const bool reverseTarget_;
 
         //- Flag to indicate that the two patches must be matched/an overlap
-        //  exists between them
+        //- exists between them
         const bool requireMatch_;
 
         //- Source face areas
@@ -98,7 +98,7 @@ protected:
         List<scalar> tgtMagSf_;
 
         //- Labels of faces that are not overlapped by any target faces
-        //  (should be empty for correct functioning)
+        //- (should be empty for correct functioning)
         labelList srcNonOverlap_;
 
         //- Octree used to find face seeds
@@ -254,8 +254,17 @@ public:
                 label tgtFacei = -1
             ) = 0;
 
+            //- Set the face areas for parallel runs
+            virtual void setMagSf
+            (
+                const TargetPatch& tgtPatch,
+                const mapDistribute& map,
+                scalarList& srcMagSf,
+                scalarList& tgtMagSf
+            ) const = 0;
+
             //- Normalise the weight. Can optionally subset addressing
-            //  (e.g. for mapNearest)
+            //- (e.g. for mapNearest)
             virtual void normaliseWeights
             (
                 const bool verbose,

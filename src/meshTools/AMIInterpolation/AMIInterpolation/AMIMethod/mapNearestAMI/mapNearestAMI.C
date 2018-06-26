@@ -348,6 +348,20 @@ void Foam::mapNearestAMI<SourcePatch, TargetPatch>::calculate
 
 
 template<class SourcePatch, class TargetPatch>
+void Foam::mapNearestAMI<SourcePatch, TargetPatch>::setMagSf
+(
+    const TargetPatch& tgtPatch,
+    const mapDistribute& map,
+    scalarList& srcMagSf,
+    scalarList& tgtMagSf
+) const
+{
+    srcMagSf = std::move(this->srcMagSf_);
+    tgtMagSf = scalarList(tgtPatch.size(), 1.0);
+}
+
+
+template<class SourcePatch, class TargetPatch>
 void Foam::mapNearestAMI<SourcePatch, TargetPatch>::normaliseWeights
 (
     const bool verbose,
