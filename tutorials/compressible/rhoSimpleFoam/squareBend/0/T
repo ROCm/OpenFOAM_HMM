@@ -30,7 +30,7 @@ boundaryField
     {
         type            inletOutlet;
         value           $internalField;
-        inletValue      $internalField;;
+        inletValue      $internalField;
     }
 
     ".*"

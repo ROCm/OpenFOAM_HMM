@@ -59,7 +59,7 @@ functions
     line
     {
         type            sets;
-        functionObjectLibs ("libsampling.so");
+        libs            ("libsampling.so");
         enabled         true;
         writeControl    writeTime;
 

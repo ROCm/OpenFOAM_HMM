@@ -68,9 +68,7 @@ code
     const scalar maxRotAngle =
         constant::mathematical::pi*Foam::sin(degToRad(90.0/10.0*tm.value()));
 
-    tmp<pointField> tnewPoints(twistColumn(maxRotAngle, p0));
-
-    return tnewPoints;
+    return twistColumn(maxRotAngle, p0);
 #};
 
 

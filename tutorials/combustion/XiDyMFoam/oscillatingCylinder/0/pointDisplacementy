@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  plus                                  |
@@ -29,7 +29,7 @@ boundaryField
     cylinder
     {
         type            codedFixedValue;
-        redirectType    pointDisplacementy_cylinder;
+        name            pointDisplacementy_cylinder;
         code
         #{
             const scalar t = this->db().time().value();

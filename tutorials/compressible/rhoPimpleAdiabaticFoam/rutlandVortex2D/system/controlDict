@@ -37,7 +37,7 @@ writeFormat       binary;
 
 writePrecision    10;
 
-writeCompression  uncompressed;
+writeCompression  off;
 
 timeFormat        general;
 
@@ -51,7 +51,7 @@ functions
     {
         type probes;
 
-        functionObjectLibs ("libsampling.so");
+        libs ("libsampling.so");
 
         probeLocations
         (

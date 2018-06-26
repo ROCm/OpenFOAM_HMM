@@ -29,10 +29,10 @@ divSchemes
 {
     default         none;
     div(phi,U)      Gauss limitedLinearV 1;
-    div(phi,k)      Gauss limitedLinear 1;;
-    div(phi,epsilon) Gauss limitedLinear 1;;
-    div(phi,R)      Gauss limitedLinear 1;;
-    div(R)          Gauss limitedLinear 1;;
+    div(phi,k)      Gauss limitedLinear 1;
+    div(phi,epsilon) Gauss limitedLinear 1;
+    div(phi,R)      Gauss limitedLinear 1;
+    div(R)          Gauss limitedLinear 1;
     div(phi,omega)  Gauss limitedLinear 1;
     div(phid,p)     Gauss limitedLinear 1;
     div(phi,K)      Gauss limitedLinear 1;

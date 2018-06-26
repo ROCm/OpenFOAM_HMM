@@ -50,7 +50,7 @@ functions
     sample1
     {
         type        sets;
-        functionObjectLibs ("libsampling.so");
+        libs        ("libsampling.so");
         writeControl onEnd;
         setFormat   raw;
         sets

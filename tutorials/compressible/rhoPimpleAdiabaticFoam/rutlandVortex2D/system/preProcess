@@ -20,8 +20,8 @@ functions
     createVortex
     {
         type            coded;
-        functionObjectLibs ("libutilityFunctionObjects.so");
-        redirectType    createVortices;
+        libs            ("libutilityFunctionObjects.so");
+        name            createVortices;
         enabled         yes;
 
         codeInclude
