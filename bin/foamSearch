@@ -37,10 +37,10 @@ Options:
 
 Examples:
 * Default ddtSchemes entries in the fvSchemes files in all tutorials:
-    foamSearch \$FOAM_TUTORIALS ddtSchemes/default fvSchemes
+    foamSearch \$FOAM_TUTORIALS ddtSchemes.default fvSchemes
 
 * Relaxations factors for U in fvSolutions files in all tutorials:
-    foamSearch -count \$FOAM_TUTORIALS relaxationFactors/equations/U fvSolution
+    foamSearch -count \$FOAM_TUTORIALS relaxationFactors.equations.U fvSolution
 
 USAGE
     exit 0  # A clean exit

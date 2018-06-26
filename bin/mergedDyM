@@ -23,10 +23,11 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     supersededByPostProcess
+#     mergedDyM
 #
 # Description
-#     Script to suggest using the new "postProcess" utility.
+#     Script to inform that dynamic mesh (DyM) functionality has been
+#     integrated into its (originally) static-mesh counterpart
 #
 #------------------------------------------------------------------------------
 DyMsolver=${0##*/}
