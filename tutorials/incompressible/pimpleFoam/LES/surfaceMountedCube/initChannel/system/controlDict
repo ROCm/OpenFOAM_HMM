@@ -61,8 +61,8 @@ functions
     {
         type            surfaces;
         surfaceFormat   boundaryData;
-	writeControl    writeTime;
-	interpolationScheme cell;
+        writeControl    writeTime;
+        interpolationScheme cell;
         fields
         (
             U

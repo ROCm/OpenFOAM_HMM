@@ -1,8 +1,6 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # run from this directory
-
-# Source tutorial run functions
-. $WM_PROJECT_DIR/bin/tools/RunFunctions
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
 
 runApplication blockMesh
 runApplication simpleFoam
@@ -17,7 +15,7 @@ then
         exit 1
     }
 
-    # Copy results to the validation directory 
+    # Copy results to the validation directory
     timeDir=$(foamListTimes -latestTime)
     sampleDir=postProcessing/sample/$timeDir
 
@@ -50,7 +48,7 @@ then
     href = 0.0127
     Uref = $Uref
 
-    set lmargin 7.5   
+    set lmargin 7.5
     set rmargin 1.5
     set tmargin 0.1
     set bmargin 3.2
@@ -68,12 +66,12 @@ EOF1
 
     echo "# ccx tau_xx tau_yy tau_zz" > tauw.dat
     foamDictionary -entry boundaryField.lowerWall.value -value $timeDir/Cx | \
-	sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > Cx.$$
+        sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > Cx.$$
     foamDictionary -entry boundaryField.lowerWall.value -value $timeDir/wallShearStress | \
         sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > tau.$$
     paste -d ' ' Cx.$$ tau.$$ >> tauw.dat
     \rm -f Cx.$$ tau.$$
-    
+
     graphNameTau="backwardStep2D_tau.png"
     echo "Creating wallshear stress graph to $graphNameTau"
     gnuplot<<EOF2
@@ -98,3 +96,4 @@ EOF1
 EOF2
 fi
 
+#------------------------------------------------------------------------------
