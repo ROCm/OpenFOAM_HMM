@@ -313,17 +313,17 @@ cloneParallelCase()
         # Only copy some time directories
         echo "    clone processor directories with $# times: $@"
 
-        for proc in $(cd $src && \ls -d processor*)
+        for proc in $(\cd $src && \ls -d processor*)
         do
             srcProc=$src/$proc
             dstProc=$dst/$proc
 
             mkdir $dstProc
-            cp -r $srcProc/constant $dstProc/
+            \cp -r $srcProc/constant $dstProc/
 
             for time
             do
-                [ -d $srcProc/$time ] && cp -r $srcProc/$time $dstProc/
+                [ -d $srcProc/$time ] && \cp -r $srcProc/$time $dstProc/
             done
 
         done
@@ -353,7 +353,7 @@ restore0Dir()
         then
         (
             echo "Filter #include directives in processors/0:"
-            cd processors/0 2>/dev/null || exit 0
+            \cd processors/0 2>/dev/null || exit 0
             for file in $(grep -l "#include" * 2> /dev/null)
             do
                 foamDictionary "$file" > "$file.$$." && mv "$file.$$." "$file"
