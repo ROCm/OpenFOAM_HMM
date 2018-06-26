@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,12 +54,11 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class Istream;
 class Ostream;
 class tetPoints;
 class plane;
-
-// Forward declaration of friend functions and operators
 
 template<class Point, class PointRef> class tetrahedron;
 
@@ -210,13 +209,16 @@ public:
 
         // Properties
 
-            //- Return face normal
+            //- Face area normal for side a
             inline vector Sa() const;
 
+            //- Face area normal for side b
             inline vector Sb() const;
 
+            //- Face area normal for side c
             inline vector Sc() const;
 
+            //- Face area normal for side d
             inline vector Sd() const;
 
             //- Return centre (centroid)

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -124,11 +124,21 @@ public:
         template<class Type>
         Type average(const UList<point>& unused, const Field<Type>& fld) const;
 
+        //- The area normal - with magnitude equal to area of face
+        inline vector areaNormal(const UList<point>& points) const;
+
+        //- The unit normal
+        inline vector unitNormal(const UList<point>& points) const;
+
+        //- Legacy name for areaNormal.
+        //  \deprecated Deprecated for new use (JUN-2018)
+        inline vector normal(const UList<point>& points) const
+        {
+            return areaNormal(points); // Legacy definition
+        }
+
         //- Magnitude of face area
         inline scalar mag(const UList<point>& points) const;
-
-        //- Vector normal; magnitude is equal to area of face
-        inline vector normal(const UList<point>& points) const;
 
         //- Number of triangles after splitting
         inline label nTriangles() const;

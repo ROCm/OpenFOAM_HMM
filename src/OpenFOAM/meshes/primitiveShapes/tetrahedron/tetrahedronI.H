@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -133,28 +133,28 @@ inline Foam::triPointRef Foam::tetrahedron<Point, PointRef>::tri
 template<class Point, class PointRef>
 inline Foam::vector Foam::tetrahedron<Point, PointRef>::Sa() const
 {
-    return triangle<Point, PointRef>(b_, c_, d_).normal();
+    return triangle<Point, PointRef>(b_, c_, d_).areaNormal();
 }
 
 
 template<class Point, class PointRef>
 inline Foam::vector Foam::tetrahedron<Point, PointRef>::Sb() const
 {
-    return triangle<Point, PointRef>(a_, d_, c_).normal();
+    return triangle<Point, PointRef>(a_, d_, c_).areaNormal();
 }
 
 
 template<class Point, class PointRef>
 inline Foam::vector Foam::tetrahedron<Point, PointRef>::Sc() const
 {
-    return triangle<Point, PointRef>(a_, b_, d_).normal();
+    return triangle<Point, PointRef>(a_, b_, d_).areaNormal();
 }
 
 
 template<class Point, class PointRef>
 inline Foam::vector Foam::tetrahedron<Point, PointRef>::Sd() const
 {
-    return triangle<Point, PointRef>(a_, c_, b_).normal();
+    return triangle<Point, PointRef>(a_, c_, b_).areaNormal();
 }
 
 
@@ -415,7 +415,7 @@ bool Foam::tetrahedron<Point, PointRef>::inside(const point& pt) const
     // "definitively" shown otherwise by obtaining a positive dot
     // product greater than a tolerance of SMALL.
 
-    // The tet is defined: tet(Cc, tetBasePt, pA, pB) where the normal
+    // The tet is defined: tet(Cc, tetBasePt, pA, pB) where the area normal
     // vectors and base points for the half-space planes are:
     // area[0] = Sa();
     // area[1] = Sb();
@@ -575,10 +575,11 @@ inline void Foam::tetrahedron<Point, PointRef>::tetSliceWithPlane
     label nPos = 0;
     forAll(tet, i)
     {
+        // with plane unit-normal
         d[i] = ((tet[i] - pl.refPoint()) & pl.normal());
         if (d[i] > 0)
         {
-            nPos++;
+            ++nPos;
         }
     }
 

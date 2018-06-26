@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,16 +106,25 @@ inline Point Foam::triangle<Point, PointRef>::centre() const
 
 
 template<class Point, class PointRef>
-inline Foam::scalar Foam::triangle<Point, PointRef>::mag() const
+inline Foam::vector Foam::triangle<Point, PointRef>::areaNormal() const
 {
-    return Foam::mag(normal());
+    return 0.5*((b_ - a_)^(c_ - a_));
 }
 
 
 template<class Point, class PointRef>
-inline Foam::vector Foam::triangle<Point, PointRef>::normal() const
+inline Foam::vector Foam::triangle<Point, PointRef>::unitNormal() const
 {
-    return 0.5*((b_ - a_)^(c_ - a_));
+    const vector n(areaNormal());
+    const scalar s(Foam::mag(n));
+    return s < ROOTVSMALL ? Zero : n/s;
+}
+
+
+template<class Point, class PointRef>
+inline Foam::scalar Foam::triangle<Point, PointRef>::mag() const
+{
+    return ::Foam::mag(areaNormal());
 }
 
 
@@ -392,7 +401,7 @@ inline Foam::pointHit Foam::triangle<Point, PointRef>::ray
      || (alg == intersection::HALF_RAY && dist > -planarPointTol)
      || (
             alg == intersection::VISIBLE
-         && ((q1 & normal()) < -VSMALL)
+         && ((q1 & areaNormal()) < -VSMALL)
         );
 
     if (hit && eligible)

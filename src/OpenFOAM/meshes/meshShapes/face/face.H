@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,6 @@ SourceFiles
     faceTemplates.C
 
 \*---------------------------------------------------------------------------*/
-
 #ifndef face_H
 #define face_H
 
@@ -194,11 +193,21 @@ public:
             const Field<Type>& fld
         ) const;
 
+        //- The area normal - with magnitude equal to area of face
+        vector areaNormal(const UList<point>& p) const;
+
+        //- The unit normal
+        inline vector unitNormal(const UList<point>& p) const;
+
+        //- Legacy name for areaNormal.
+        //  \deprecated Deprecated for new use (JUN-2018)
+        inline vector normal(const UList<point>& p) const
+        {
+            return areaNormal(p); // Legacy definition
+        }
+
         //- Magnitude of face area
         inline scalar mag(const UList<point>& p) const;
-
-        //- Vector normal; magnitude is equal to area of face
-        vector normal(const UList<point>& p) const;
 
         //- Return face with reverse direction
         //  The starting points of the original and reverse face are identical.

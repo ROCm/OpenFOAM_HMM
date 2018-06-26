@@ -81,7 +81,7 @@ Foam::label Foam::face::mostConcaveAngle
     scalar& maxAngle
 ) const
 {
-    vector n(normal(points));
+    vector n(areaNormal(points));
 
     label index = 0;
     maxAngle = -GREAT;
@@ -542,17 +542,16 @@ Foam::point Foam::face::centre(const UList<point>& points) const
 }
 
 
-Foam::vector Foam::face::normal(const UList<point>& p) const
+Foam::vector Foam::face::areaNormal(const UList<point>& p) const
 {
     const label nPoints = size();
 
-    // Calculate the normal by summing the face triangle normals.
+    // Calculate the area normal by summing the face triangle area normals.
     // Changed to deal with small concavity by using a central decomposition
-    //
 
     // If the face is a triangle, do a direct calculation to avoid round-off
     // error-related problems
-    //
+
     if (nPoints == 3)
     {
         return triPointRef
@@ -560,7 +559,7 @@ Foam::vector Foam::face::normal(const UList<point>& p) const
             p[operator[](0)],
             p[operator[](1)],
             p[operator[](2)]
-        ).normal();
+        ).areaNormal();
     }
 
     label pI;
@@ -594,7 +593,7 @@ Foam::vector Foam::face::normal(const UList<point>& p) const
             p[operator[](pI)],
             nextPoint,
             centrePoint
-        ).normal();
+        ).areaNormal();
     }
 
     return n;
