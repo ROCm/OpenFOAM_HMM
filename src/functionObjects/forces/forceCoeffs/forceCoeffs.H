@@ -75,7 +75,7 @@ Usage
     Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
-        type         | Type name: forces       | yes         |
+        type         | Type name: forceCoeffs  | yes         |
         log          | Write force data to standard output | no | no
         writeFields  | Write the force and moment coefficient fields | no | no
         patches      | Patches included in the forces calculation | yes |
