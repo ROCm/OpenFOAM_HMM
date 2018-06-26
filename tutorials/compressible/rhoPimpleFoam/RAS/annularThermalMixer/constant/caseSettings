@@ -10,8 +10,8 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "";
-    object      caseSummary;
+    location    "constant";
+    object      caseSettings;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

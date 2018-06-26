@@ -12,7 +12,7 @@ FoamFile
     format      ascii;
     location    "";
     class       vectorField;
-    object      coalCloudPositions;
+    object      coalCloud1Positions;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

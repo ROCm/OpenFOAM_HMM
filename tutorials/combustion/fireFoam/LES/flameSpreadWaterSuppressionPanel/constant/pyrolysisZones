@@ -11,7 +11,7 @@ FoamFile
     format      binary;
     class       dictionary;
     location    "constant";
-    object      pyrolysisProperties;
+    object      pyrolysisZones;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

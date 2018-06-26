@@ -10,9 +10,8 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      molConfigDict;
+    object      mdInitialiseDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Euler angles, expressed in degrees as phi, theta, psi, see
