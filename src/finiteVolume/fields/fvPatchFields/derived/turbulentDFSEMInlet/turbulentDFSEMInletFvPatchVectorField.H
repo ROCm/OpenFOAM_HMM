@@ -91,7 +91,6 @@ SourceFiles
 namespace Foam
 {
 
-class cartesianCS;
 class pointToPointPlanarInterpolation;
 
 /*---------------------------------------------------------------------------*\

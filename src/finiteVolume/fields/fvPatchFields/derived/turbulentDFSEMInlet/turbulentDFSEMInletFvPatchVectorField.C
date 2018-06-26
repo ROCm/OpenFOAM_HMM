@@ -28,7 +28,6 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "momentOfInertia.H"
-#include "cartesianCS.H"
 #include "Fstream.H"
 #include "globalIndex.H"
 
