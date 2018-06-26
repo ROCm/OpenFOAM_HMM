@@ -5,24 +5,53 @@ cmake_minimum_required(VERSION 2.8)
 find_package(ParaView REQUIRED)
 include(${PARAVIEW_USE_FILE})
 
+#-----------------------------------------------------------------------------
+# Standard definitions when using OpenFOAM
+
+if (NOT EXISTS "$ENV{WM_PROJECT_DIR}")
+    message(FATAL_ERROR "WM_PROJECT_DIR not set - no OpenFOAM??")
+endif()
+
+# WM_OSTYPE env variable is optional (only POSIX anyhow)
+if (EXISTS "$ENV{WM_OSTYPE}")
+    set(WM_OSTYPE "$ENV{WM_OSTYPE}")
+else()
+    set(WM_OSTYPE "POSIX")
+endif()
+
+# Convenience name, as per wmake internals
+set(LIB_SRC "$ENV{WM_PROJECT_DIR}/src")
+
+# Needed for internal label-size, scalar-size, templates
+add_definitions(
+    -DWM_$ENV{WM_PRECISION_OPTION}
+    -DWM_LABEL_SIZE=$ENV{WM_LABEL_SIZE}
+    -DNoRepository
+
+    -std=c++11
+)
+
+#-----------------------------------------------------------------------------
+
 link_directories(
     $ENV{FOAM_LIBBIN}
 )
 
 include_directories(
-    $ENV{WM_PROJECT_DIR}/src/OpenFOAM/lnInclude
-    $ENV{WM_PROJECT_DIR}/src/OSspecific/$ENV{WM_OSTYPE}/lnInclude
-    $ENV{WM_PROJECT_DIR}/src/conversion/lnInclude
-    $ENV{WM_PROJECT_DIR}/src/finiteArea/lnInclude
-    $ENV{WM_PROJECT_DIR}/src/finiteVolume/lnInclude
+    ${LIB_SRC}/OpenFOAM/lnInclude
+    ${LIB_SRC}/OSspecific/${WM_OSTYPE}/lnInclude
+    ${LIB_SRC}/conversion/lnInclude
+    ${LIB_SRC}/finiteArea/lnInclude
+    ${LIB_SRC}/finiteVolume/lnInclude
     ${PROJECT_SOURCE_DIR}/../foamPv
     ${PROJECT_SOURCE_DIR}/../vtkPVFoam
 )
 
-add_definitions(
-    -std=c++11
-    -DWM_$ENV{WM_PRECISION_OPTION}
-    -DWM_LABEL_SIZE=$ENV{WM_LABEL_SIZE}
+set(OPENFOAM_LIBRARIES
+    OpenFOAM
+    finiteVolume
+    finiteArea
+    conversion
 )
 
 # Set output library destination to plugin directory
@@ -66,10 +95,7 @@ target_link_libraries(
     LINK_PUBLIC
     vtkPVFoam-pv${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}
     foamPv-pv${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}
-    conversion
-    finiteArea
-    finiteVolume
-    OpenFOAM
+    ${OPENFOAM_LIBRARIES}
 )
 
 #-----------------------------------------------------------------------------

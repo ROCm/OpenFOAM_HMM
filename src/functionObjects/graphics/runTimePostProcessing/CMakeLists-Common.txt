@@ -1,3 +1,5 @@
+#-----------------------------------------------------------------------------
+
 include(${VTK_USE_FILE})
 
 if(VTK_LIBRARIES)
@@ -7,15 +9,15 @@ endif()
 if(${VTK_VERSION} VERSION_GREATER "6")
     message("VTK version: " ${VTK_VERSION})
 else()
-    message(FATAL_ERROR " VTK6 required")
+    message(FATAL_ERROR " VTK version is too old - requires VTK6 or newer")
 endif()
 
 include_directories(
-    $ENV{WM_PROJECT_DIR}/src/OpenFOAM/lnInclude
-    $ENV{WM_PROJECT_DIR}/src/OSspecific/$ENV{WM_OSTYPE}/lnInclude
-    $ENV{WM_PROJECT_DIR}/src/surfMesh/lnInclude
-    $ENV{WM_PROJECT_DIR}/src/finiteVolume/lnInclude
-    $ENV{WM_PROJECT_DIR}/src/conversion/lnInclude
+    ${LIB_SRC}/OpenFOAM/lnInclude
+    ${LIB_SRC}/OSspecific/${WM_OSTYPE}/lnInclude
+    ${LIB_SRC}/finiteVolume/lnInclude
+    ${LIB_SRC}/surfMesh/lnInclude
+    ${LIB_SRC}/conversion/lnInclude
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
 )
@@ -24,21 +26,7 @@ link_directories(
     $ENV{FOAM_LIBBIN}
 )
 
-add_definitions(
-    -DWM_$ENV{WM_PRECISION_OPTION} -DNoRepository
-    -DWM_LABEL_SIZE=$ENV{WM_LABEL_SIZE}
-)
-
 set(CMAKE_BUILD_TYPE Release)
-
-set(CMAKE_CXX_FLAGS_DEBUG
-    "-g -O0 -std=c++11 -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wno-overloaded-virtual"
-)
-set(CMAKE_C_FLAGS_DEBUG "-g -O0 -std=c++11")
-
-set(CMAKE_CXX_FLAGS_RELEASE
-    "-O3 -std=c++11 -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wno-overloaded-virtual")
-set(CMAKE_C_FLAGS_RELEASE "-O3 -std=c++11")
 
 # Set output library destination to plugin directory
 set(LIBRARY_OUTPUT_PATH $ENV{FOAM_LIBBIN}
@@ -72,8 +60,8 @@ file(GLOB SOURCE_FILES
 
 set(OPENFOAM_LIBRARIES
     OpenFOAM
-    surfMesh
     finiteVolume
+    surfMesh
     conversion
 )
 
@@ -84,10 +72,10 @@ add_library(
 )
 
 set_target_properties(
-  runTimePostProcessing
-  PROPERTIES
-  VERSION ${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}.${VTK_BUILD_VERSION}
-  SOVERSION ${VTK_MAJOR_VERSION}
+    runTimePostProcessing
+    PROPERTIES
+    VERSION ${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}.${VTK_BUILD_VERSION}
+    SOVERSION ${VTK_MAJOR_VERSION}
 )
 
 target_link_libraries(

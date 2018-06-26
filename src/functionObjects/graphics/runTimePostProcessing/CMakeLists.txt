@@ -17,11 +17,11 @@ elseif (EXISTS "$ENV{ParaView_DIR}")
         VTK_VERSION
         "${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}.${VTK_BUILD_VERSION}"
     )
-else ()
+else()
     message (FATAL_ERROR "VTK not found using VTK_DIR or ParaView_DIR")
-endif ()
+endif()
 
+include(CMakeLists-OpenFOAM.txt)
 include(CMakeLists-Common.txt)
-
 
 #-----------------------------------------------------------------------------
