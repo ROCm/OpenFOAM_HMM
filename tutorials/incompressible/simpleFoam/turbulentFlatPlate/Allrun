@@ -8,7 +8,6 @@ if notTest $@
 then
     models="
     kOmegaSST
-    kEpsilon
     "
 
     declare -A grading_vs_yp

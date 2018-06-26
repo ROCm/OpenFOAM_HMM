@@ -17,13 +17,25 @@ channelDataDir=$channelCase/postProcessing/surfaces/inlet
 mkdir -p constant/boundaryData/inlet/0
 channelTimeDir=$(foamListTimes -case $channelCase -latestTime)
 
-\cp -rf $channelDataDir/points constant/boundaryData/inlet
-\cp -rf $channelDataDir/$channelTimeDir/turbulenceProperties:R constant/boundaryData/inlet/0/R
-\cp -rf $channelDataDir/$channelTimeDir/turbulenceProperties:L constant/boundaryData/inlet/0/L
-\cp -rf $channelDataDir/$channelTimeDir/turbulenceProperties:nuTilda constant/boundaryData/inlet/0/nuTilda
-\cp -rf $channelDataDir/$channelTimeDir/U constant/boundaryData/inlet/0/U
+\cp -f $channelDataDir/points constant/boundaryData/inlet
+\cp -f $channelDataDir/$channelTimeDir/turbulenceProperties:R constant/boundaryData/inlet/0/R
+\cp -f $channelDataDir/$channelTimeDir/turbulenceProperties:L constant/boundaryData/inlet/0/L
+\cp -f $channelDataDir/$channelTimeDir/turbulenceProperties:nuTilda constant/boundaryData/inlet/0/nuTilda
+\cp -f $channelDataDir/$channelTimeDir/U constant/boundaryData/inlet/0/U
 
 runApplication blockMesh
 runApplication decomposePar
 runParallel $(getApplication)
 
+if notTest $@
+then
+    # create validation plot
+    # Test if gnuplot exists on the system
+    command -v gnuplot >/dev/null 2>&1 || {
+        echo "gnuplot not found - skipping graph creation" 1>&2
+        exit 1
+    }
+
+    # Plot the mean velocity profiles
+    ./plot $(foamListTimes -processor -latestTime)
+fi

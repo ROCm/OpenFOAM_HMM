@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs            ("liblumpedPointMotion.so");
+libs            ("libmeshTools.so" "liblumpedPointMotion.so");
 
 application     pimpleFoam;
 
