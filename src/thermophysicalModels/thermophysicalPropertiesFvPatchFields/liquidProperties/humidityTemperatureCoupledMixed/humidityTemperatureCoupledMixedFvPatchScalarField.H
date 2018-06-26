@@ -32,7 +32,7 @@ Description
 
     This boundary condition can operate in four modes:
     - \c constantMass: thermal inertia only
-      - requires \c rho, \c thickness and \c p
+      - requires \c rho, \c thickness and \c cp
     - \c condensation: condensation only
       - when the wall temperature (Tw) is below the dew temperature (Tdew)
         condesation takes place and the resulting condensed mass is stored
