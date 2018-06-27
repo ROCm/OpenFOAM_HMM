@@ -23,7 +23,7 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     mergedDyM
+#     mergedDyMsolver
 #
 # Description
 #     Script to inform that dynamic mesh (DyM) functionality has been
