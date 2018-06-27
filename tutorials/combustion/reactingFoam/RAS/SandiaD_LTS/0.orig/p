@@ -28,8 +28,13 @@ boundaryField
 
     outlet
     {
-        type            totalPressure;
-        p0              $internalField;
+        type            waveTransmissive;
+        psi             thermo:psi;
+        lInf            1;
+        field           p;
+        gamma           1.4;
+        fieldInf        100000;
+        value           $internalField;
     }
 
     inletPilot
