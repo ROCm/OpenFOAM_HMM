@@ -43,7 +43,6 @@ Description
 #include "faceZoneSet.H"
 #include "pointZoneSet.H"
 #include "IOdictionary.H"
-#include "collatedFileOperation.H"
 
 using namespace Foam;
 
@@ -91,6 +90,7 @@ void removeZone
         {
             WarningInFunction << "Failed writing zone " << setName << endl;
         }
+        fileHandler().flush();
     }
 }
 
@@ -199,11 +199,6 @@ polyMesh::readUpdateState meshReadUpdate(polyMesh& mesh)
 
 int main(int argc, char *argv[])
 {
-    // Specific to topoSet/setSet: quite often we want to block upon writing
-    // a set so we can immediately re-read it. So avoid use of threading
-    // for set writing.
-    fileOperations::collatedFileOperation::maxThreadFileBufferSize = 0;
-
     timeSelector::addOptions(true, false);
     #include "addDictOption.H"
     #include "addRegionOption.H"
@@ -307,6 +302,7 @@ int main(int argc, char *argv[])
                             << "Failed writing set "
                             << currentSet().objectPath() << endl;
                     }
+                    fileHandler().flush();
                 }
                 break;
 
@@ -347,6 +343,7 @@ int main(int argc, char *argv[])
                             << "Failed writing set "
                             << currentSet().objectPath() << endl;
                     }
+                    fileHandler().flush();
                 }
                 break;
 
@@ -359,6 +356,7 @@ int main(int argc, char *argv[])
                             << "Failed writing set "
                             << currentSet().objectPath() << endl;
                     }
+                    fileHandler().flush();
                 break;
 
                 case topoSetSource::INVERT:
@@ -370,6 +368,7 @@ int main(int argc, char *argv[])
                             << "Failed writing set "
                             << currentSet().objectPath() << endl;
                     }
+                    fileHandler().flush();
                 break;
 
                 case topoSetSource::REMOVE:
