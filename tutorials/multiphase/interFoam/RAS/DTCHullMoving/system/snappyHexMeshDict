@@ -216,7 +216,16 @@ addLayersControls
 
     // When not to extrude surface. 0 is flat surface, 90 is when two faces
     // are perpendicular
-    featureAngle 60;
+    // Note: featureAngle was wrong in v1712 and earlier. To obtain previous
+    //       behaviour (extrude all edges, including sharp ones) use following
+    //       settings. This is important for this geometry since we do want
+    //       layers at the leading edge of the hull.
+    featureAngle 180;
+
+    // Specified to be consistent with v1712 settings (see 1806 release notes)
+    mergePatchFacesAngle 60;    // featureAngle
+    layerTerminationAngle 30;   // 0.5*featureAngle
+    slipFeatureAngle 30;        // 0.5*featureAngle
 
     // Maximum number of snapping relaxation iterations. Should stop
     // before upon reaching a correct mesh.
