@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
         // Write resulting mesh
         if (!overwrite)
         {
-            runTime++;
+            ++runTime;
         }
         else
         {

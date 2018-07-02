@@ -92,7 +92,7 @@ Foam::Map<Foam::label> Foam::refinementIterator::setRefinement
         if (writeMesh_)
         {
             // Need different times to write meshes.
-            runTime++;
+            ++runTime;
         }
 
         polyTopoChange meshMod(mesh_);

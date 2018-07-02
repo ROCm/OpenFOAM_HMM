@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 
     if (!overwrite)
     {
-        runTime++;
+        ++runTime;
     }
 
     // Create mesh, return map from old to new mesh.

@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     {
         scalar t0 = runTime.userTimeToTime(ca0 - runTime.theta());
         runTime.setDeltaT(t0);
-        runTime++;
+        ++runTime;
         Info<< "CA = " << runTime.theta() << endl;
         mesh.move();
     }
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     {
         scalar t1 = runTime.userTimeToTime(ca1 - runTime.theta());
         runTime.setDeltaT(t1);
-        runTime++;
+        ++runTime;
         Info<< "CA = " << runTime.theta() << endl;
         mesh.move();
     }

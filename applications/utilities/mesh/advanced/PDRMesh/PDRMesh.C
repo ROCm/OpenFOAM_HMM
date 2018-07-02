@@ -1021,7 +1021,7 @@ int main(int argc, char *argv[])
 
     if (!overwrite)
     {
-        runTime++;
+        ++runTime;
     }
 
     Info<< "Writing mesh without blockedCells to time " << runTime.value()
@@ -1157,7 +1157,7 @@ int main(int argc, char *argv[])
 
     if (!overwrite)
     {
-        runTime++;
+        ++runTime;
     }
 
     // Change the mesh. Change points directly (no inflation).

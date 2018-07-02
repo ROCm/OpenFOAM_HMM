@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 
         while (runTime.run())
         {
-            runTime++;
+            ++runTime;
 
             Info<< "Time = " << runTime.timeName() << nl << endl;
 

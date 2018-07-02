@@ -2800,7 +2800,7 @@ void Foam::meshRefinement::handleSnapProblems
 
     if (debug)
     {
-        runTime++;
+        ++runTime;
     }
 
     // Create baffles with same owner and neighbour for now.
@@ -3679,7 +3679,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
     if (debug)
     {
-        runTime++;
+        ++runTime;
     }
 
     splitMeshRegions
@@ -3702,7 +3702,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
     if (debug&MESH)
     {
-        runTime++;
+        ++runTime;
         Pout<< "Writing subsetted mesh to time " << timeName()
             << endl;
         write
@@ -3787,7 +3787,7 @@ void Foam::meshRefinement::mergeFreeStandingBaffles
 
         if (debug)
         {
-            runTime++;
+            ++runTime;
         }
 
         splitMeshRegions

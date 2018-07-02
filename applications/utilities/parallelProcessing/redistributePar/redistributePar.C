@@ -1156,7 +1156,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
     if (!overwrite)
     {
-        runTime++;
+        ++runTime;
         mesh.setInstance(runTime.timeName());
     }
     else

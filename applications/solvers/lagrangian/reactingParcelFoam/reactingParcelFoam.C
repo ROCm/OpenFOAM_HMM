@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
             #include "setMultiRegionDeltaT.H"
         }
 
-        runTime++;
+        ++runTime;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 

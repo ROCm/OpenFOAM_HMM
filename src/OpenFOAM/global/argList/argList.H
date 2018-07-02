@@ -506,6 +506,9 @@ public:
         //- Suppress JobInfo, overriding controlDict setting
         static void noJobInfo();
 
+        //- Add the '-no-libs' command line option
+        static void noLibs();
+
         //- Remove the parallel options
         static void noParallel();
 

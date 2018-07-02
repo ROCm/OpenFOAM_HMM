@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "TimePaths.H"
+#include "argList.H"
+#include "fileOperation.H"
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -36,8 +38,8 @@ bool Foam::TimePaths::detectProcessorCase()
     }
 
     // Look for "processor", but should really check for following digits too
-    const std::string::size_type sep = globalCaseName_.rfind('/');
-    const std::string::size_type pos = globalCaseName_.find
+    const auto sep = globalCaseName_.rfind('/');
+    const auto pos = globalCaseName_.find
     (
         "processor",
         (sep == string::npos ? 0 : sep)
@@ -59,6 +61,28 @@ bool Foam::TimePaths::detectProcessorCase()
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::TimePaths::TimePaths
+(
+    const argList& args,
+    const word& systemName,
+    const word& constantName
+)
+:
+    processorCase_(args.parRunControl().parRun()),
+    rootPath_(args.rootPath()),
+    distributed_(args.distributed()),
+    globalCaseName_(args.globalCaseName()),
+    case_(args.caseName()),
+    system_(systemName),
+    constant_(constantName)
+{
+    // For convenience: find out from case name whether it is a
+    // processor directory and set processorCase flag so file searching
+    // goes up one level.
+    detectProcessorCase();
+}
+
 
 Foam::TimePaths::TimePaths
 (
@@ -115,10 +139,8 @@ Foam::fileName Foam::TimePaths::caseSystem() const
     {
         return ".."/system();
     }
-    else
-    {
-        return system();
-    }
+
+    return system();
 }
 
 
@@ -128,12 +150,91 @@ Foam::fileName Foam::TimePaths::caseConstant() const
     {
         return ".."/constant();
     }
-    else
-    {
-        return constant();
-    }
+
+    return constant();
 }
 
+
+Foam::instantList Foam::TimePaths::findTimes
+(
+    const fileName& directory,
+    const word& constantName
+)
+{
+    return fileHandler().findTimes(directory, constantName);
+}
+
+
+Foam::instantList Foam::TimePaths::times() const
+{
+    return findTimes(path(), constant());
+}
+
+
+Foam::label Foam::TimePaths::findClosestTimeIndex
+(
+    const instantList& timeDirs,
+    const scalar t,
+    const word& constantName
+)
+{
+    const label nTimes = timeDirs.size();
+
+    label nearestIndex = -1;
+    scalar deltaT = GREAT;
+
+    for (label timei=0; timei < nTimes; ++timei)
+    {
+        if (timeDirs[timei].name() == constantName) continue;
+
+        const scalar diff = mag(timeDirs[timei].value() - t);
+        if (diff < deltaT)
+        {
+            deltaT = diff;
+            nearestIndex = timei;
+        }
+    }
+
+    return nearestIndex;
+}
+
+
+Foam::instant Foam::TimePaths::findClosestTime(const scalar t) const
+{
+    instantList timeDirs = findTimes(path(), constant());
+
+    const label nTimes = timeDirs.size();
+
+    // There is only one time (likely "constant") so return it
+    if (nTimes == 1)
+    {
+        return timeDirs.first();
+    }
+
+    if (t < timeDirs[1].value())
+    {
+        return timeDirs[1];
+    }
+    else if (t > timeDirs.last().value())
+    {
+        return timeDirs.last();
+    }
+
+    label nearestIndex = -1;
+    scalar deltaT = GREAT;
+
+    for (label timei=1; timei < nTimes; ++timei)
+    {
+        const scalar diff = mag(timeDirs[timei].value() - t);
+        if (diff < deltaT)
+        {
+            deltaT = diff;
+            nearestIndex = timei;
+        }
+    }
+
+    return timeDirs[nearestIndex];
+}
 
 
 // ************************************************************************* //

@@ -443,7 +443,7 @@ int main(int argc, char *argv[])
 
         if (!overwrite)
         {
-            runTime++;
+            ++runTime;
         }
 
         // Change the mesh. No inflation.
@@ -513,7 +513,7 @@ int main(int argc, char *argv[])
 
         if (!overwrite)
         {
-            runTime++;
+            ++runTime;
         }
 
         // Change the mesh. No inflation.

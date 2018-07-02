@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 
     if (!overwrite)
     {
-        runTime++;
+        ++runTime;
     }
 
     Info<< "Time = " << runTime.timeName() << nl

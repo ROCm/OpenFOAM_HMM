@@ -591,7 +591,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        runTime++;
+        ++runTime;
         subsetter.subMesh().setInstance(runTime.timeName());
     }
 

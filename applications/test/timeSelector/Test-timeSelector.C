@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,26 +22,65 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Searches the current case directory for valid times
-    and sets the time list to these.
-    This is done if a times File does not exist.
-
+    Test TimePaths and timeSelectop
 \*---------------------------------------------------------------------------*/
 
-#include "Time.H"
-#include "OSspecific.H"
-#include "StringStream.H"
+#include "argList.H"
+#include "IOstreams.H"
+#include "TimePaths.H"
+#include "timeSelector.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+using namespace Foam;
 
-Foam::instantList Foam::Time::findTimes
-(
-    const fileName& directory,
-    const word& constantName
-)
+bool print(const instantList& instants)
 {
-    return fileHandler().findTimes(directory, constantName);
+    if (instants.empty())
+    {
+        Info<<"    none" << nl << nl;
+        return false;
+    }
+
+    Info <<"(" << nl;
+
+    for (const instant& t : instants)
+    {
+        Info<<"    " << t << nl;
+    }
+
+    Info<<")" << nl << nl;
+
+    return true;
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+//  Main program:
+
+int main(int argc, char *argv[])
+{
+    argList::addNote("Test timeSelector");
+
+    timeSelector::addOptions(true, true);
+    argList::noLibs();
+    argList::noFunctionObjects();
+
+    #include "setRootCase.H"
+
+    autoPtr<TimePaths> timePaths;
+
+    instantList times(TimePaths(args).times());
+
+    Info<<"Available times" << nl;
+
+    if (print(times))
+    {
+        times = timeSelector::select(times, args);
+
+        Info<< "Selected times" << nl;
+        print(times);
+    }
+
+    return 0;
+}
 
 // ************************************************************************* //

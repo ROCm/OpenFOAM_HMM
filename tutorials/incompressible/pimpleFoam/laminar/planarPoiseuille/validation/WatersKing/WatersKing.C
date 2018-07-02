@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
         }
         scalar U = UInf*(1.5*(1 - sqr(y)) + sum(A*B));
         file<< runTime.timeName() << token::TAB << U << endl;
-        runTime++;
+        ++runTime;
     }
 
     Info<< nl;

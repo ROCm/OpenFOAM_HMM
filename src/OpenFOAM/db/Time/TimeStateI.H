@@ -68,10 +68,4 @@ inline bool Foam::TimeState::writeTime() const
 }
 
 
-inline bool Foam::TimeState::outputTime() const
-{
-    return writeTime_;
-}
-
-
 // ************************************************************************* //

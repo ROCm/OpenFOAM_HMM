@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
         runTime.printExecutionTime(Info);
 
-        runTime++;
+        ++runTime;
         Pout<< "Writing particles to time " << runTime.timeName() << endl;
         particles.write();
     }

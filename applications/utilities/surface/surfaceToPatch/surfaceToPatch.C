@@ -324,7 +324,7 @@ int main(int argc, char *argv[])
         Info<< endl;
 
 
-        runTime++;
+        ++runTime;
 
         // Write resulting mesh
         Info<< "Writing modified mesh to time " << runTime.value() << endl;

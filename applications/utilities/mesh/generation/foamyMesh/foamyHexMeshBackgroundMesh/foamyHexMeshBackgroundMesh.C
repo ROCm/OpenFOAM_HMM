@@ -571,7 +571,7 @@ int main(int argc, char *argv[])
 
     if (writeMesh)
     {
-        runTime++;
+        ++runTime;
         Info<< "Writing mesh to " << runTime.timeName() << endl;
         backgroundMesh.mesh().write();
     }

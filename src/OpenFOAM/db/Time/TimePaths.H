@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::TimePaths
 
 Description
-    A class for addressing time paths without using the Time class.
+    Address the time paths without using the Time class.
 
 SourceFiles
     TimePaths.C
@@ -36,11 +36,15 @@ SourceFiles
 #define TimePaths_H
 
 #include "fileName.H"
+#include "instantList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward declarations
+class argList;
 
 /*---------------------------------------------------------------------------*\
                            Class TimePaths Declaration
@@ -70,13 +74,21 @@ public:
 
     // Constructors
 
+        //- Construct using characteristics given by the argList
+        TimePaths
+        (
+            const argList& args,
+            const word& systemName = "system",
+            const word& constantName = "constant"
+        );
+
         //- Construct given database name, rootPath and casePath
         TimePaths
         (
             const fileName& rootPath,
             const fileName& caseName,
-            const word& systemName,
-            const word& constantName
+            const word& systemName = "system",
+            const word& constantName = "constant"
         );
 
 
@@ -88,87 +100,113 @@ public:
             const bool distributed,
             const fileName& globalCaseName,
             const fileName& caseName,
-            const word& systemName,
-            const word& constantName
+            const word& systemName = "system",
+            const word& constantName = "constant"
         );
 
 
     // Member functions
 
-            //- Return true if this is a processor case
-            bool processorCase() const
-            {
-                return processorCase_;
-            }
+        //- Return true if this is a processor case
+        bool processorCase() const
+        {
+            return processorCase_;
+        }
 
-            //- Return root path
-            const fileName& rootPath() const
-            {
-                return rootPath_;
-            }
+        //- Return root path
+        const fileName& rootPath() const
+        {
+            return rootPath_;
+        }
 
-            //- Return global case name
-            const fileName& globalCaseName() const
-            {
-                return globalCaseName_;
-            }
+        //- Return global case name
+        const fileName& globalCaseName() const
+        {
+            return globalCaseName_;
+        }
 
-            //- Return case name
-            const fileName& caseName() const
-            {
-                return case_;
-            }
+        //- Return case name
+        const fileName& caseName() const
+        {
+            return case_;
+        }
 
-            //- Return case name
-            fileName& caseName()
-            {
-                return case_;
-            }
+        //- Return case name
+        fileName& caseName()
+        {
+            return case_;
+        }
 
-            //- Return system name
-            const word& system() const
-            {
-                return system_;
-            }
+        //- Return system name
+        const word& system() const
+        {
+            return system_;
+        }
 
-            //- Return system name for the case
-            //  which for parallel runs returns ../system()
-            fileName caseSystem() const;
+        //- Return the system name for the case, which is
+        //- \c ../system() for parallel runs.
+        fileName caseSystem() const;
 
-            //- Return constant name
-            const word& constant() const
-            {
-                return constant_;
-            }
+        //- Return constant name
+        const word& constant() const
+        {
+            return constant_;
+        }
 
-            //- Is case running with parallel distributed directories
-            //  (i.e. not NFS mounted)
-            bool distributed() const
-            {
-                return distributed_;
-            }
+        //- Is case running with parallel distributed directories
+        //  (i.e. not NFS mounted)
+        bool distributed() const
+        {
+            return distributed_;
+        }
 
-            //- Return constant name for the case
-            //  which for parallel runs returns ../constant()
-            fileName caseConstant() const;
+        //- Return the constant name for the case, which is
+        //- \c ../constant() for parallel runs.
+        fileName caseConstant() const;
 
-            //- Return path
-            fileName path() const
-            {
-                return rootPath()/caseName();
-            }
+        //- Return path
+        fileName path() const
+        {
+            return rootPath()/caseName();
+        }
 
-            //- Return system path
-            fileName systemPath() const
-            {
-                return path()/system();
-            }
+        //- Return system path
+        fileName systemPath() const
+        {
+            return path()/system();
+        }
 
-            //- Return constant path
-            fileName constantPath() const
-            {
-                return path()/constant();
-            }
+        //- Return constant path
+        fileName constantPath() const
+        {
+            return path()/constant();
+        }
+
+
+    // Searching
+
+        //- Search a given directory for valid time directories
+        //  Forwards to the current fileHandler
+        static instantList findTimes
+        (
+            const fileName& directory,
+            const word& constantName = "constant"
+        );
+
+        //- Search instantList for the time index closest to the specified time
+        static label findClosestTimeIndex
+        (
+            const instantList& timeDirs,
+            const scalar t,
+            const word& constantName = "constant"
+        );
+
+        //- Search the case for valid time directories
+        instantList times() const;
+
+        //- Search the case for the time closest to the given time
+        instant findClosestTime(const scalar t) const;
+
 };
 
 

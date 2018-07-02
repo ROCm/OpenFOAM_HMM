@@ -1096,7 +1096,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::updateCoeffs()
             writeEddyOBJ();
         }
 
-        if (debug && db().time().outputTime())
+        if (debug && db().time().writeTime())
         {
             writeLumleyCoeffs();
         }

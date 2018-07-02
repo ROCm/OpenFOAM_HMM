@@ -603,7 +603,7 @@ int main(int argc, char *argv[])
         // Advance time for intermediate results or only on final
         if (!overwrite && (intermediate || actioni == nActions))
         {
-            runTime++;
+            ++runTime;
         }
 
         // Execute all polyMeshModifiers

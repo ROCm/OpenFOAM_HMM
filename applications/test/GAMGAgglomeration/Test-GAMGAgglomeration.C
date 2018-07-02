@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     labelList cellToCoarse(identity(mesh.nCells()));
     labelListList coarseToCell(invertOneToMany(mesh.nCells(), cellToCoarse));
 
-    runTime++;
+    ++runTime;
 
     // Write initial agglomeration
     {
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 
     for (label level = 0; level < agglom.size(); level++)
     {
-        runTime++;
+        ++runTime;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 

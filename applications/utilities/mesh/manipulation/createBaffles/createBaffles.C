@@ -832,7 +832,7 @@ int main(int argc, char *argv[])
 
     if (!overwrite)
     {
-        runTime++;
+        ++runTime;
     }
 
     // Change the mesh. Change points directly (no inflation).

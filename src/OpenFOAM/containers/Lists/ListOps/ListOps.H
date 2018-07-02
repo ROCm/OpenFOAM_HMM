@@ -244,21 +244,42 @@ void inplaceUniqueSort
 );
 
 
-//- Extract elements of List when select is true
-//  eg, to extract all selected elements:
+//- Extract elements of the input List when select is true.
+//
+//  \param select the bool-list selector, for which the operator[]
+//      returns true or false.  A labelHashSet can also be used since
+//      it satisfies these requirements
+//  \param input the list input values. Cannot be a FixedList since
+//      it doesn't resize.
+//  \param invert set as true to invert the selection logic
+//
+//  Eg, to extract all selected elements:
+//  \code
 //    subset<boolList, labelList>(selectedElems, list);
-//  Note a labelHashSet can also be used as the bool-list.
-//  Do not use FixedList for the input list, since it doesn't resize.
+//  \endcode
 template<class BoolListType, class ListType>
-ListType subset(const BoolListType& select, const ListType& input);
+ListType subset
+(
+    const BoolListType& select,
+    const ListType& input,
+    const bool invert=false
+);
 
-//- Inplace extract elements of List when select is true
-//  eg, to extract all selected elements:
-//    inplaceSubset<boolList, labelList>(selectedElems, list);
-//  Note a labelHashSet can also be used as the bool-list.
-//  Do not use FixedList for the input list, since it doesn't resize.
+//- Inplace extract elements of the input List when select is true.
+//
+//  \param select the bool-list selector, for which the operator[]
+//      returns true or false.  A labelHashSet can also be used since
+//      it satisfies these requirements
+//  \param input the list input values. Cannot be a FixedList since
+//      it doesn't resize.
+//  \param invert set as true to invert the selection logic
 template<class BoolListType, class ListType>
-void inplaceSubset(const BoolListType& select, ListType& input);
+void inplaceSubset
+(
+    const BoolListType& select,
+    ListType& input,
+    const bool invert=false
+);
 
 
 //- Copy a subset of the input list when predicate is true.

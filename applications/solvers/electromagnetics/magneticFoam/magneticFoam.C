@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
 
     Info<< "Calculating the magnetic field potential" << endl;
 
-    runTime++;
+    ++runTime;
 
     while (simple.correctNonOrthogonal())
     {

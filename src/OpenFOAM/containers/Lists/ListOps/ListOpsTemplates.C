@@ -474,7 +474,8 @@ template<class BoolListType, class ListType>
 ListType Foam::subset
 (
     const BoolListType& select,
-    const ListType& input
+    const ListType& input,
+    const bool invert
 )
 {
     const label len = input.size();
@@ -487,7 +488,7 @@ ListType Foam::subset
     label count = 0;
     for (label i=0; i < len; ++i)
     {
-        if (select[i])
+        if (select[i] ? !invert : invert)
         {
             output[count] = input[i];
             ++count;
@@ -503,7 +504,8 @@ template<class BoolListType, class ListType>
 void Foam::inplaceSubset
 (
     const BoolListType& select,
-    ListType& input
+    ListType& input,
+    const bool invert
 )
 {
     const label len = input.size();
@@ -513,7 +515,7 @@ void Foam::inplaceSubset
     label count = 0;
     for (label i=0; i < len; ++i)
     {
-        if (select[i])
+        if (select[i] ? !invert : invert)
         {
             if (count != i)
             {

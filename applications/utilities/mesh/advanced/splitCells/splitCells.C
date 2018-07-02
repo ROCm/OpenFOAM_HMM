@@ -682,7 +682,7 @@ int main(int argc, char *argv[])
 
         if (!overwrite)
         {
-            runTime++;
+            ++runTime;
         }
 
         autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, false);

@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
         #include "capillaryCourantNo.H"
         #include "setDeltaT.H"
 
-        runTime++;
+        ++runTime;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
             Us.correctBoundaryConditions();
         }
 
-        if (runTime.outputTime())
+        if (runTime.writeTime())
         {
             vsm.mapToVolume(h, H.boundaryFieldRef());
             vsm.mapToVolume(Us, U.boundaryFieldRef());

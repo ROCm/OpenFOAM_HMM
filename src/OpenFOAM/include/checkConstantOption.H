@@ -7,5 +7,5 @@ if
  && (Times[startTime].name() == "constant")
 )
 {
-    startTime++;
+    ++startTime;
 }

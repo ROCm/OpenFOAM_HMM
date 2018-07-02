@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     {
         mesh.initialiseForConformation();
 
-        runTime++;
+        ++runTime;
 
         mesh.writeMesh(runTime.timeName());
     }
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 
         while (runTime.run())
         {
-            runTime++;
+            ++runTime;
 
             Info<< nl << "Time = " << runTime.timeName() << endl;
 

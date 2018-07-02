@@ -325,6 +325,16 @@ void Foam::argList::noJobInfo()
 }
 
 
+void Foam::argList::noLibs()
+{
+    addBoolOption
+    (
+        "no-libs",
+        "disable use of the controlDict libs entry"
+    );
+}
+
+
 void Foam::argList::noParallel()
 {
     removeOption("parallel");

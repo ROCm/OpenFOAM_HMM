@@ -968,7 +968,7 @@ void Foam::radiation::solarLoad::calculate()
 
     if (debug)
     {
-        if (mesh_.time().outputTime())
+        if (mesh_.time().writeTime())
         {
             Ru_.write();
         }

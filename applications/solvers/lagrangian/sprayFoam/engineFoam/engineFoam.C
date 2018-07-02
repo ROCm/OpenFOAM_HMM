@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
         #include "compressibleCourantNo.H"
         #include "setDeltaT.H"
 
-        runTime++;
+        ++runTime;
 
         Info<< "Engine time = " << runTime.theta() << runTime.unit() << endl;
 

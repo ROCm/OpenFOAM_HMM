@@ -1647,7 +1647,7 @@ int main(int argc, char *argv[])
     word meshInstance;
     if (!overwrite)
     {
-        runTime++;
+        ++runTime;
         meshInstance = runTime.timeName();
     }
     else

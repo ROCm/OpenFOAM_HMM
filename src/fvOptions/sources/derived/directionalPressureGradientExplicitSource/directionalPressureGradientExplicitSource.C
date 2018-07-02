@@ -134,7 +134,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::writeProps
 ) const
 {
     // Only write on output time
-    if (mesh_.time().outputTime())
+    if (mesh_.time().writeTime())
     {
         IOdictionary propsDict
         (

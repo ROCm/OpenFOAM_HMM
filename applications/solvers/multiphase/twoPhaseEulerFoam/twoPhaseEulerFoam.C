@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
         #include "CourantNos.H"
         #include "setDeltaT.H"
 
-        runTime++;
+        ++runTime;
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
         // --- Pressure-velocity PIMPLE corrector loop

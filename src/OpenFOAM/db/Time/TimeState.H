@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,15 +50,16 @@ class TimeState
 :
     public dimensionedScalar
 {
-
 protected:
 
         label timeIndex_;
-        scalar deltaT_;
-        scalar deltaTSave_;
-        scalar deltaT0_;
-        bool deltaTchanged_;
         label writeTimeIndex_;
+
+        scalar deltaT_;
+        scalar deltaT0_;
+        scalar deltaTSave_;
+
+        bool deltaTchanged_;
         bool writeTime_;
 
 
@@ -66,11 +67,12 @@ public:
 
     // Constructors
 
+        //- Construct a zero time state, using the current time formattin
         TimeState();
 
 
     //- Destructor
-    virtual ~TimeState();
+    virtual ~TimeState() = default;
 
 
     // Member functions
@@ -108,8 +110,8 @@ public:
             inline bool writeTime() const;
 
             //- Return true if this is a write time.
-            //  Provided for backward-compatibility
-            inline bool outputTime() const;
+            //  \deprecated in favour of writeTime() - MAY-2016
+            inline bool outputTime() const { return this->writeTime(); }
 };
 
 
