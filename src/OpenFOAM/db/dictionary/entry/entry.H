@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,13 +51,12 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class ITstream;
 class dictionary;
-
-// Forward declaration of friend functions and operators
-
 class entry;
 Ostream& operator<<(Ostream& os, const entry& e);
+
 
 /*---------------------------------------------------------------------------*\
                            Class entry Declaration
@@ -137,15 +136,36 @@ public:
         //  Note: the parent directory is set to dictionary::null
         virtual autoPtr<entry> clone() const;
 
-        //- Construct from Istream and insert into dictionary
+        //- Construct from an Istream and insert into the dictionary
+        //  \param parentDict dictionary to insert into
+        //  \param is the input stream
+        //  \param inpMode the input mode.
+        //     The default is to use the currently active #globalInputMode
+        //  \param endChar the expected end character (eg, a closing brace).
+        //     The endChar is 0 if no expectations are asserted.
         static bool New
         (
             dictionary& parentDict,
             Istream& is,
-            const inputMode inMode = inputMode::GLOBAL
+            const inputMode inpMode = inputMode::GLOBAL,
+            const int endChar = 0
         );
 
-        //- Construct on freestore from Istream and return
+        //- Construct an entry from Istream.
+        //  The expected input comprises a keyword followed by a
+        //  dictionaryEntry or a primitiveEntry.
+        //
+        //  - The dictionaryEntry starts with a '{' left brace and ends
+        //    with a '}' right brace.
+        //  - The primitiveEntry ends with a ';' semi-colon.
+        //
+        // Example input
+        // \verbatim
+        //     key1 { ... }   // dictionary input
+        //     key2 ... ;     // primitive input
+        // \endverbatim
+        //
+        //  \return The #entry read, or nullptr on error.
         static autoPtr<entry> New(Istream& is);
 
         //- Reset the #globalInputMode to %merge
@@ -153,8 +173,7 @@ public:
 
 
     //- Destructor
-    virtual ~entry()
-    {}
+    virtual ~entry() = default;
 
 
     // Member functions

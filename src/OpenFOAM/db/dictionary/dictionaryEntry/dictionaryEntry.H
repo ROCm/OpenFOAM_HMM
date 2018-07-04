@@ -51,7 +51,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 class dictionaryEntry;
 Ostream& operator<<(Ostream& os, const dictionaryEntry& e);
 
@@ -75,7 +75,8 @@ public:
 
     // Constructors
 
-        //- Construct from the parent dictionary and Istream
+        //- Construct from the parent dictionary and Istream.
+        //  The keyword is extracted from the stream
         dictionaryEntry(const dictionary& parentDict, Istream& is);
 
         //- Construct from the keyword, parent dictionary and a Istream

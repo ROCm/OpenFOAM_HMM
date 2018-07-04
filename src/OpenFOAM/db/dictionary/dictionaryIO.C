@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -100,13 +100,27 @@ bool Foam::dictionary::read(Istream& is, bool keepHeader)
         return false;
     }
 
+    // The expected end character
+    int endChar = token::END_BLOCK;
     token currToken(is);
-    if (currToken != token::BEGIN_BLOCK)
+
+    if (currToken == token::END_BLOCK)
+    {
+        FatalIOErrorInFunction(is)
+            << "Dictionary input cannot start with '}'"
+            << exit(FatalIOError);
+    }
+    else if (currToken != token::BEGIN_BLOCK)
     {
         is.putBack(currToken);
+        endChar = 0;
     }
 
-    while (!is.eof() && entry::New(*this, is))
+    while
+    (
+        !is.eof()
+     && entry::New(*this, is, entry::inputMode::GLOBAL, endChar)
+    )
     {}
 
     if (!keepHeader)

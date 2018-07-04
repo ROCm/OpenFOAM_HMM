@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,7 +78,7 @@ bool Foam::entry::getKeyword(keyType& keyword, Istream& is)
         return true;
     }
 
-    // Do some more checking
+    // Mark as invalid, but allow for some more checking
     if (keyToken == token::END_BLOCK || is.eof())
     {
         return false;
@@ -89,7 +89,7 @@ bool Foam::entry::getKeyword(keyType& keyword, Istream& is)
         << "--> FOAM Warning :" << nl
         << "    From function " << FUNCTION_NAME << nl
         << "    in file " << __FILE__ << " at line " << __LINE__ << nl
-        << "    Reading " << is.name().c_str() << nl
+        << "    Reading " << is.name() << nl
         << "    found " << keyToken << nl
         << "    expected either " << token::END_BLOCK << " or EOF"
         << std::endl;
@@ -101,24 +101,23 @@ bool Foam::entry::New
 (
     dictionary& parentDict,
     Istream& is,
-    const entry::inputMode inMode
+    const entry::inputMode inpMode,
+    const int endChar
 )
 {
     // The inputMode for dealing with duplicate entries
     const entry::inputMode mode =
     (
-        inMode == inputMode::GLOBAL
+        inpMode == inputMode::GLOBAL
       ? globalInputMode
-      : inMode
+      : inpMode
     );
 
     // If somehow the global itself is 'global' - this is a severe logic error.
     if (mode == inputMode::GLOBAL)
     {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "Cannot use 'GLOBAL' as an inputMode"
+        FatalIOErrorInFunction(is)
+            << "Cannot use 'GLOBAL' as an inputMode"
             << exit(FatalIOError);
     }
 
@@ -130,37 +129,63 @@ bool Foam::entry::New
     // Get the next keyword and if a valid keyword return true
     const bool valid = getKeyword(keyword, keyToken, is);
 
+    // Can accept a list of entries too
+    if
+    (
+        keyToken.isLabel()
+     || (keyToken.isPunctuation() && keyToken.pToken() == token::BEGIN_LIST)
+    )
+    {
+        is.putBack(keyToken);
+        return parentDict.add
+        (
+            new dictionaryListEntry(parentDict, is),
+            false
+        );
+    }
+
     if (!valid)
     {
+        // Error processing for invalid or unexpected input
+
         // Do some more checking
-        if (keyToken == token::END_BLOCK || is.eof())
+        if (keyToken == token::END_BLOCK)
         {
+            if (token::END_BLOCK != endChar)
+            {
+                FatalIOErrorInFunction(is)
+                    << "Unexpected '}' while reading dictionary entry"
+                    << exit(FatalIOError);
+            }
+            return false;
+        }
+        if (is.eof())
+        {
+            if (endChar)
+            {
+                FatalIOErrorInFunction(is)
+                    << "Unexpected EOF while reading dictionary entry"
+                    << exit(FatalIOError);
+            }
             return false;
         }
 
-        if
-        (
-            keyToken.isLabel()
-         || (keyToken.isPunctuation() && keyToken.pToken() == token::BEGIN_LIST)
-        )
+
+        if (endChar)
         {
-            is.putBack(keyToken);
-            return parentDict.add
-            (
-                new dictionaryListEntry(parentDict, is),
-                false
-            );
+            FatalIOErrorInFunction(is)
+                << "Found " << keyToken
+                << " but expected " << char(endChar)
+                << exit(FatalIOError);
+        }
+        else
+        {
+            FatalIOErrorInFunction(is)
+                << "Found " << keyToken
+                << " but expected EOF, or perhaps a '}' char"
+                << exit(FatalIOError);
         }
 
-        // Otherwise the token is invalid
-        std::cerr
-            << "--> FOAM Warning :" << nl
-            << "    From function " << FUNCTION_NAME << nl
-            << "    in file " << __FILE__ << " at line " << __LINE__ << nl
-            << "    Reading " << is.name().c_str() << nl
-            << "    found " << keyToken << nl
-            << "    expected either " << token::END_BLOCK << " or EOF"
-            << std::endl;
         return false;
     }
 
