@@ -73,24 +73,29 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
         Info<< "Selecting function " << functionType << endl;
     }
 
-    if (dict.found("functionObjectLibs"))
+    // Load any additional libraries
     {
-        const_cast<Time&>(runTime).libs().open
-        (
-            dict,
-            "functionObjectLibs",
-            dictionaryConstructorTablePtr_
-        );
+        const auto finder =
+            dict.csearchCompat("libs", {{"functionObjectLibs", 1612}});
+
+        if (finder.found())
+        {
+            const_cast<Time&>(runTime).libs().open
+            (
+                dict,
+                finder.ref().keyword(),
+                dictionaryConstructorTablePtr_
+            );
+        }
     }
-    else
-    {
-        const_cast<Time&>(runTime).libs().open
-        (
-            dict,
-            "libs",
-            dictionaryConstructorTablePtr_
-        );
-    }
+
+    // This is the simplified version without compatibility messages
+    // const_cast<Time&>(runTime).libs().open
+    // (
+    //     dict,
+    //     "libs",
+    //     dictionaryConstructorTablePtr_
+    // );
 
     if (!dictionaryConstructorTablePtr_)
     {
