@@ -134,10 +134,7 @@ Foam::dictionary::dictionary
         if (iter().keyword().isPattern())
         {
             patterns_.insert(&iter());
-            regexps_.insert
-            (
-                autoPtr<regExp>(new regExp(iter().keyword()))
-            );
+            regexps_.insert(autoPtr<regExp>::New(iter().keyword()));
         }
     }
 }
@@ -159,10 +156,7 @@ Foam::dictionary::dictionary
         if (iter().keyword().isPattern())
         {
             patterns_.insert(&iter());
-            regexps_.insert
-            (
-                autoPtr<regExp>(new regExp(iter().keyword()))
-            );
+            regexps_.insert(autoPtr<regExp>::New(iter().keyword()));
         }
     }
 }
@@ -612,10 +606,7 @@ Foam::entry* Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
             if (entryPtr->keyword().isPattern())
             {
                 patterns_.insert(entryPtr);
-                regexps_.insert
-                (
-                    autoPtr<regExp>(new regExp(entryPtr->keyword()))
-                );
+                regexps_.insert(autoPtr<regExp>::New(entryPtr->keyword()));
             }
 
             return entryPtr;  // now an entry in the dictionary
@@ -641,10 +632,7 @@ Foam::entry* Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
         if (entryPtr->keyword().isPattern())
         {
             patterns_.insert(entryPtr);
-            regexps_.insert
-            (
-                autoPtr<regExp>(new regExp(entryPtr->keyword()))
-            );
+            regexps_.insert(autoPtr<regExp>::New(entryPtr->keyword()));
         }
 
         return entryPtr;  // now an entry in the dictionary

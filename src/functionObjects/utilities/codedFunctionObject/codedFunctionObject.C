@@ -191,15 +191,7 @@ bool Foam::functionObjects::codedFunctionObject::read(const dictionary& dict)
 {
     functionObject::read(dict);
 
-    // Backward compatibility
-    if (dict.found("redirectType"))
-    {
-        dict.lookup("redirectType") >> name_;
-    }
-    else
-    {
-        dict.lookup("name") >> name_;
-    }
+    dict.readCompat<word>("name", {{"redirectType", 1706}}, name_);
 
     const entry* dataPtr = dict.lookupEntryPtr
     (

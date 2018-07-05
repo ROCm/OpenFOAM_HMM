@@ -689,10 +689,7 @@ bool Foam::dictionary::changeKeyword
     if (newKeyword.isPattern())
     {
         patterns_.insert(iter());
-        regexps_.insert
-        (
-            autoPtr<regExp>(new regExp(newKeyword))
-        );
+        regexps_.insert(autoPtr<regExp>::New(newKeyword));
     }
 
     return true;

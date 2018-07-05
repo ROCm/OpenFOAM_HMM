@@ -19,10 +19,10 @@ functions
 {
     createVortex
     {
-        type            coded;
-        libs            ("libutilityFunctionObjects.so");
-        name            createVortices;
-        enabled         yes;
+        name    createVortices;
+        type    coded;
+        libs    ("libutilityFunctionObjects.so");
+        enabled yes;
 
         codeInclude
         #{

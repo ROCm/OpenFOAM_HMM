@@ -85,13 +85,18 @@ Foam::boxToFace::boxToFace
 )
 :
     topoSetSource(mesh),
-    bbs_
-    (
-        dict.found("box")
-      ? treeBoundBoxList(1, treeBoundBox(dict.lookup("box")))
-      : dict.lookup("boxes")
-    )
-{}
+    bbs_()
+{
+    if (dict.found("box"))
+    {
+        bbs_.resize(1);
+        dict.read("box", bbs_.first());
+    }
+    else
+    {
+        dict.read("boxes", bbs_);
+    }
+}
 
 
 Foam::boxToFace::boxToFace

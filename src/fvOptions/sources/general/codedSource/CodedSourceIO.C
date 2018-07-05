@@ -36,15 +36,7 @@ bool Foam::fv::CodedSource<Type>::read(const dictionary& dict)
         coeffs_.lookup("fields") >> fieldNames_;
         applied_.setSize(fieldNames_.size(), false);
 
-        // Backward compatibility
-        if (coeffs_.found("redirectType"))
-        {
-            coeffs_.lookup("redirectType") >> name_;
-        }
-        else
-        {
-            coeffs_.lookup("name") >> name_;
-        }
+        dict.readCompat<word>("name", {{"redirectType", 1706}}, name_);
 
         // Code snippets
         {

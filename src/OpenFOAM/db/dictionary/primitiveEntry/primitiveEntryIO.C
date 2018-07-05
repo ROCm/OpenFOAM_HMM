@@ -264,17 +264,8 @@ Foam::primitiveEntry::primitiveEntry
 
 Foam::primitiveEntry::primitiveEntry(const keyType& key, Istream& is)
 :
-    entry(key),
-    ITstream
-    (
-        is.name() + '.' + key,
-        tokenList(10),
-        is.format(),
-        is.version()
-    )
-{
-    readEntry(dictionary::null, is);
-}
+    primitiveEntry(key, dictionary::null, is)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
