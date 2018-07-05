@@ -119,18 +119,10 @@ bool Foam::fv::explicitPorositySource::read(const dictionary& dict)
 {
     if (cellSetOption::read(dict))
     {
-        if (coeffs_.found("UNames"))
+        if (!coeffs_.readIfPresent("UNames", fieldNames_))
         {
-            coeffs_.lookup("UNames") >> fieldNames_;
-        }
-        else if (coeffs_.found("U"))
-        {
-            word UName(coeffs_.lookup("U"));
-            fieldNames_ = wordList(1, UName);
-        }
-        else
-        {
-            fieldNames_ = wordList(1, "U");
+            fieldNames_.resize(1);
+            fieldNames_.first() = coeffs_.lookupOrDefault<word>("U", "U");
         }
 
         applied_.setSize(fieldNames_.size(), false);

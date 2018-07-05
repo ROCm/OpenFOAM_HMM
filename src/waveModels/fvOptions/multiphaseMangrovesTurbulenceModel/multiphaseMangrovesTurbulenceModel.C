@@ -205,19 +205,19 @@ void Foam::fv::multiphaseMangrovesTurbulenceModel::addSup
 
     if (eqn.psi().name() == epsilonName_)
     {
-	    fvMatrix<scalar> epsilonEqn
-	    (
+        fvMatrix<scalar> epsilonEqn
+        (
           - fvm::Sp(rho*epsilonCoeff(U), eqn.psi())
         );
         eqn += epsilonEqn;
     }
     else if (eqn.psi().name() == kName_)
     {
-	    fvMatrix<scalar> kEqn
-	    (
+        fvMatrix<scalar> kEqn
+        (
           - fvm::Sp(rho*kCoeff(U), eqn.psi())
         );
-	    eqn += kEqn;
+        eqn += kEqn;
     }
 }
 
@@ -226,20 +226,19 @@ bool Foam::fv::multiphaseMangrovesTurbulenceModel::read(const dictionary& dict)
 {
     if (option::read(dict))
     {
-        if (coeffs_.found("epsilonNames"))
+        if (!coeffs_.readIfPresent("epsilonNames", fieldNames_))
         {
-            coeffs_.lookup("epsilonNames") >> fieldNames_;
-        }
-        else if (coeffs_.found("epsilon"))
-        {
-            word UName(coeffs_.lookup("epsilon"));
-            fieldNames_ = wordList(1, UName);
-        }
-        else
-        {
-	        fieldNames_.setSize(2);
-	        fieldNames_[0] = "epsilon";
-    	    fieldNames_[1] = "k";
+            if (coeffs_.found("epsilon"))
+            {
+                fieldNames_.resize(1);
+                coeffs_.read("epsilon", fieldNames_.first());
+            }
+            else
+            {
+                fieldNames_.resize(2);
+                fieldNames_[0] = "epsilon";
+                fieldNames_[1] = "k";
+            }
         }
 
         applied_.setSize(fieldNames_.size(), false);
