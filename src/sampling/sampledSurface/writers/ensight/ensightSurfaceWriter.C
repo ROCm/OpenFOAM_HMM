@@ -142,7 +142,10 @@ void Foam::ensightSurfaceWriter::updateMesh
 
         const fileName baseDir = outputDir.path()/surfName;
         const fileName timeDir = outputDir.name();
-        const scalar timeValue = readScalar(timeDir);
+
+        // Convert timeDir to a value (if possible - use 0.0 otherwise)
+        scalar timeValue = 0.0;
+        readScalar(timeDir, timeValue);
 
         if (!isDir(baseDir))
         {
