@@ -215,12 +215,7 @@ Foam::codedMixedFvPatchField<Type>::codedMixedFvPatchField
     mixedFvPatchField<Type>(p, iF, dict),
     codedBase(),
     dict_(dict),
-    name_
-    (
-        dict.found("redirectType")
-      ? dict.lookup("redirectType")
-      : dict.lookup("name")
-    ),
+    name_(dict.getCompat<word>("name", {{"redirectType", 1706}})),
     redirectPatchFieldPtr_()
 {
     updateLibrary(name_);

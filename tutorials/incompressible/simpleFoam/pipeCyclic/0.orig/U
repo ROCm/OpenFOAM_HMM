@@ -24,8 +24,8 @@ boundaryField
 
     inlet
     {
-        type    codedFixedValue;
         name    swirl;
+        type    codedFixedValue;
 
         code
         #{

@@ -23,13 +23,13 @@ boundaryField
 {
     walls
     {
-        type            fixedValue;
-        value           $internalField;
+        type    fixedValue;
+        value   $internalField;
     }
     cylinder
     {
-        type            codedFixedValue;
-        name            pointDisplacementy_cylinder;
+        name    pointDisplacementy_cylinder;
+        type    codedFixedValue;
         code
         #{
             const scalar t = this->db().time().value();
@@ -37,21 +37,21 @@ boundaryField
             const scalar f = 200;
             operator==(a*sin(constant::mathematical::twoPi*f*t));
         #};
-        value           $internalField;
+        value   $internalField;
     }
     "inlet.*"
     {
-        type            fixedValue;
-        value           $internalField;
+        type    fixedValue;
+        value   $internalField;
     }
     outlet
     {
-        type            fixedValue;
-        value           $internalField;
+        type    fixedValue;
+        value   $internalField;
     }
     frontAndBack
     {
-        type            empty;
+        type    empty;
     }
 }
 
