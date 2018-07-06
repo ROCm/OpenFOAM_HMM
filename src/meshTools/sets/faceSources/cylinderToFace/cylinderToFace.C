@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,7 @@ Foam::topoSetSource::addToUsageTable Foam::cylinderToFace::usage_
 
 void Foam::cylinderToFace::combine(topoSet& set, const bool add) const
 {
-    const vector axis = p2_ - p1_;
+    const vector axis = (point2_ - point1_);
     const scalar rad2 = sqr(radius_);
     const scalar magAxis2 = magSqr(axis);
 
@@ -57,12 +57,12 @@ void Foam::cylinderToFace::combine(topoSet& set, const bool add) const
 
     forAll(ctrs, facei)
     {
-        vector d = ctrs[facei] - p1_;
-        scalar magD = d & axis;
+        const vector d = ctrs[facei] - point1_;
+        const scalar magD = d & axis;
 
         if ((magD > 0) && (magD < magAxis2))
         {
-            scalar d2 = (d & d) - sqr(magD)/magAxis2;
+            const scalar d2 = (d & d) - sqr(magD)/magAxis2;
             if (d2 < rad2)
             {
                 addOrDelete(set, facei, add);
@@ -77,14 +77,14 @@ void Foam::cylinderToFace::combine(topoSet& set, const bool add) const
 Foam::cylinderToFace::cylinderToFace
 (
     const polyMesh& mesh,
-    const vector& p1,
-    const vector& p2,
+    const point& point1,
+    const point& point2,
     const scalar radius
 )
 :
     topoSetSource(mesh),
-    p1_(p1),
-    p2_(p2),
+    point1_(point1),
+    point2_(point2),
     radius_(radius)
 {}
 
@@ -96,9 +96,9 @@ Foam::cylinderToFace::cylinderToFace
 )
 :
     topoSetSource(mesh),
-    p1_(dict.lookup("p1")),
-    p2_(dict.lookup("p2")),
-    radius_(readScalar(dict.lookup("radius")))
+    point1_(dict.get<point>("p1")),
+    point2_(dict.get<point>("p2")),
+    radius_(dict.get<scalar>("radius"))
 {}
 
 
@@ -109,15 +109,9 @@ Foam::cylinderToFace::cylinderToFace
 )
 :
     topoSetSource(mesh),
-    p1_(checkIs(is)),
-    p2_(checkIs(is)),
+    point1_(checkIs(is)),
+    point2_(checkIs(is)),
     radius_(readScalar(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cylinderToFace::~cylinderToFace()
 {}
 
 
@@ -131,15 +125,17 @@ void Foam::cylinderToFace::applyToSet
 {
     if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
     {
-        Info<< "    Adding faces with centre within cylinder, with p1 = "
-            << p1_ << ", p2 = " << p2_ << " and radius = " << radius_ << endl;
+        Info<< "    Adding faces with centre within cylinder, with  p1 = "
+            << point1_ << ", p2 = " << point2_ << ", radius = " << radius_
+            << endl;
 
         combine(set, true);
     }
     else if (action == topoSetSource::DELETE)
     {
         Info<< "    Removing faces with centre within cylinder, with p1 = "
-            << p1_ << ", p2 = " << p2_ << " and radius = " << radius_ << endl;
+            << point1_ << ", p2 = " << point2_ << ", radius = " << radius_
+            << endl;
 
         combine(set, false);
     }

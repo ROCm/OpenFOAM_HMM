@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,11 +34,10 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(pointSet, 0);
-
-addToRunTimeSelectionTable(topoSet, pointSet, word);
-addToRunTimeSelectionTable(topoSet, pointSet, size);
-addToRunTimeSelectionTable(topoSet, pointSet, set);
+    defineTypeNameAndDebug(pointSet, 0);
+    addToRunTimeSelectionTable(topoSet, pointSet, word);
+    addToRunTimeSelectionTable(topoSet, pointSet, size);
+    addToRunTimeSelectionTable(topoSet, pointSet, set);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -91,11 +90,11 @@ Foam::pointSet::pointSet
 (
     const polyMesh& mesh,
     const word& name,
-    const labelHashSet& set,
+    const labelHashSet& labels,
     writeOption w
 )
 :
-    topoSet(mesh, name, set, w)
+    topoSet(mesh, name, labels, w)
 {}
 
 
@@ -103,17 +102,23 @@ Foam::pointSet::pointSet
 (
     const polyMesh& mesh,
     const word& name,
-    const labelUList& set,
+    labelHashSet&& labels,
     writeOption w
 )
 :
-    topoSet(mesh, name, set, w)
+    topoSet(mesh, name, std::move(labels), w)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::pointSet::~pointSet()
+Foam::pointSet::pointSet
+(
+    const polyMesh& mesh,
+    const word& name,
+    const labelUList& labels,
+    writeOption w
+)
+:
+    topoSet(mesh, name, labels, w)
 {}
 
 
@@ -125,10 +130,13 @@ void Foam::pointSet::sync(const polyMesh& mesh)
 
     boolList contents(mesh.nPoints(), false);
 
-    forAllConstIter(pointSet, *this, iter)
+    const labelHashSet& labels = *this;
+
+    for (const label pointi : labels)
     {
-        contents[iter.key()] = true;
+        contents[pointi] = true;
     }
+
     syncTools::syncPointList
     (
         mesh,
@@ -168,10 +176,14 @@ void Foam::pointSet::updateMesh(const mapPolyMesh& morphMap)
 void Foam::pointSet::distribute(const mapDistributePolyMesh& map)
 {
     boolList inSet(map.nOldPoints());
-    forAllConstIter(pointSet, *this, iter)
+
+    const labelHashSet& labels = *this;
+
+    for (const label pointi : labels)
     {
-        inSet[iter.key()] = true;
+        inSet[pointi] = true;
     }
+
     map.distributePointData(inSet);
 
     // Count
@@ -180,7 +192,7 @@ void Foam::pointSet::distribute(const mapDistributePolyMesh& map)
     {
         if (inSet[pointi])
         {
-            n++;
+            ++n;
         }
     }
 

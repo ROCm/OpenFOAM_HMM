@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,12 @@ Class
 
 Description
     A topoSetSource to select faces based on usage in another faceSet.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        set         | Name of the input faceSet         | yes   |
+    \endtable
 
 SourceFiles
     faceToFace.C
@@ -73,22 +79,14 @@ public:
         );
 
         //- Construct from dictionary
-        faceToFace
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        faceToFace(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        faceToFace
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        faceToFace(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~faceToFace();
+    virtual ~faceToFace() = default;
 
 
     // Member Functions
@@ -101,7 +99,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

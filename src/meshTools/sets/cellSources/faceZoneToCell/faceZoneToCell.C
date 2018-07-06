@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,12 +63,12 @@ void Foam::faceZoneToCell::combine(topoSet& set, const bool add) const
 {
     bool hasMatched = false;
 
-    forAll(mesh_.faceZones(), i)
+    for (const faceZone& zone : mesh_.faceZones())
     {
-        const faceZone& zone = mesh_.faceZones()[i];
-
         if (zoneName_.match(zone.name()))
         {
+            hasMatched = true;
+
             const labelList& cellLabels =
             (
                 option_ == MASTER
@@ -80,14 +80,12 @@ void Foam::faceZoneToCell::combine(topoSet& set, const bool add) const
                 << " with " << cellLabels.size() << " cells on selected side."
                 << endl;
 
-            hasMatched = true;
-
-            forAll(cellLabels, i)
+            for (const label celli : cellLabels)
             {
                 // Only do active cells
-                if (cellLabels[i] >= 0 && cellLabels[i] < mesh_.nCells())
+                if (celli >= 0 && celli < mesh_.nCells())
                 {
-                    addOrDelete(set, cellLabels[i], add);
+                    addOrDelete(set, celli, add);
                 }
             }
         }
@@ -96,8 +94,9 @@ void Foam::faceZoneToCell::combine(topoSet& set, const bool add) const
     if (!hasMatched)
     {
         WarningInFunction
-            << "Cannot find any faceZone named " << zoneName_ << endl
-            << "Valid names are " << mesh_.faceZones().names() << endl;
+            << "Cannot find any faceZone named " << zoneName_ << nl
+            << "Valid names: " << flatOutput(mesh_.faceZones().names())
+            << endl;
     }
 }
 
@@ -124,7 +123,7 @@ Foam::faceZoneToCell::faceZoneToCell
 )
 :
     topoSetSource(mesh),
-    zoneName_(dict.lookup("name")),
+    zoneName_(dict.get<wordRe>("name")),
     option_(faceActionNames_.lookup("option", dict))
 {}
 
@@ -138,12 +137,6 @@ Foam::faceZoneToCell::faceZoneToCell
     topoSetSource(mesh),
     zoneName_(checkIs(is)),
     option_(faceActionNames_.read(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::faceZoneToCell::~faceZoneToCell()
 {}
 
 

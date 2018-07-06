@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,20 +61,20 @@ void Foam::cellToPoint::combine(topoSet& set, const bool add) const
 {
     // Load the set
     cellSet loadedSet(mesh_, setName_);
+    const labelHashSet& cellLabels = loadedSet;
 
     // Add all point from cells in loadedSet
-    forAllConstIter(cellSet, loadedSet, iter)
+    for (const label celli : cellLabels)
     {
-        const label celli = iter.key();
         const labelList& cFaces = mesh_.cells()[celli];
 
-        forAll(cFaces, cFacei)
+        for (const label facei : cFaces)
         {
-            const face& f = mesh_.faces()[cFaces[cFacei]];
+            const face& f = mesh_.faces()[facei];
 
-            forAll(f, fp)
+            for (const label pointi : f)
             {
-                addOrDelete(set, f[fp], add);
+                addOrDelete(set, pointi, add);
             }
         }
     }
@@ -103,7 +103,7 @@ Foam::cellToPoint::cellToPoint
 )
 :
     topoSetSource(mesh),
-    setName_(dict.lookup("set")),
+    setName_(dict.get<word>("set")),
     option_(cellActionNames_.lookup("option", dict))
 {}
 
@@ -117,12 +117,6 @@ Foam::cellToPoint::cellToPoint
     topoSetSource(mesh),
     setName_(checkIs(is)),
     option_(cellActionNames_.read(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cellToPoint::~cellToPoint()
 {}
 
 

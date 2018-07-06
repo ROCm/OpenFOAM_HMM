@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,12 +51,11 @@ void Foam::sphereToCell::combine(topoSet& set, const bool add) const
 {
     const pointField& ctrs = mesh_.cellCentres();
 
-    const scalar radSquared = radius_*radius_;
+    const scalar rad2 = radius_*radius_;
 
     forAll(ctrs, celli)
     {
-        scalar offset = magSqr(centre_ - ctrs[celli]);
-        if (offset <= radSquared)
+        if (magSqr(ctrs[celli] - centre_) <= rad2)
         {
             addOrDelete(set, celli, add);
         }
@@ -69,7 +68,7 @@ void Foam::sphereToCell::combine(topoSet& set, const bool add) const
 Foam::sphereToCell::sphereToCell
 (
     const polyMesh& mesh,
-    const vector& centre,
+    const point& centre,
     const scalar radius
 )
 :
@@ -86,8 +85,8 @@ Foam::sphereToCell::sphereToCell
 )
 :
     topoSetSource(mesh),
-    centre_(dict.lookup("centre")),
-    radius_(readScalar(dict.lookup("radius")))
+    centre_(dict.get<point>("centre")),
+    radius_(dict.get<scalar>("radius"))
 {}
 
 
@@ -100,12 +99,6 @@ Foam::sphereToCell::sphereToCell
     topoSetSource(mesh),
     centre_(checkIs(is)),
     radius_(readScalar(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::sphereToCell::~sphereToCell()
 {}
 
 

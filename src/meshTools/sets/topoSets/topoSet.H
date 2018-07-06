@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,6 +51,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class mapPolyMesh;
 class polyMesh;
 class primitiveMesh;
@@ -196,13 +197,13 @@ public:
 
     // Constructors
 
-
         //- Construct from IOobject as explicitly passed type.
         //  Can't use typeName info here since subclasses not yet instantiated
         topoSet(const IOobject& obj, const word& wantedType);
 
-        //- Construct from polyMesh and name. Searches for a polyMesh/sets
-        //  directory but not beyond mesh.facesInstance.
+        //- Construct from polyMesh and name.
+        //  Searches for a polyMesh/sets directory but not beyond the
+        //  mesh.facesInstance().
         topoSet
         (
             const polyMesh& mesh,
@@ -213,8 +214,8 @@ public:
         );
 
         //- Construct empty from additional size of labelHashSet.
-        //  Searches for a polyMesh/sets
-        //  directory but not beyond mesh.facesInstance.
+        //  Searches for a polyMesh/sets directory but not beyond the
+        //  mesh.facesInstance().
         topoSet
         (
             const polyMesh& mesh,
@@ -223,34 +224,47 @@ public:
             writeOption w=NO_WRITE
         );
 
-        //- Construct empty from additional labelHashSet
-        //  Searches for a polyMesh/sets
-        //  directory but not beyond mesh.facesInstance.
+        //- Construct (no-read) with copy of labelHashSet
+        //  Searches for a polyMesh/sets directory but not beyond the
+        //  mesh.facesInstance().
         topoSet
         (
             const polyMesh& mesh,
             const word& name,
-            const labelHashSet& set,
+            const labelHashSet& labels,
             writeOption w=NO_WRITE
         );
 
-        //- Construct empty from additional labelHashSet
-        //  Searches for a polyMesh/sets
-        //  directory but not beyond mesh.facesInstance.
+        //- Construct (no-read) with moving labelHashSet
+        //  Searches for a polyMesh/sets directory but not beyond the
+        //  mesh.facesInstance().
         topoSet
         (
             const polyMesh& mesh,
             const word& name,
-            const labelUList& set,
+            labelHashSet&& labels,
             writeOption w=NO_WRITE
         );
 
-        //- Construct empty from IOobject and size.
-        topoSet(const IOobject&, const label size);
+        //- Construct (no-read) with copy of labels
+        //  Searches for a polyMesh/sets directory but not beyond the
+        //  mesh.facesInstance().
+        topoSet
+        (
+            const polyMesh& mesh,
+            const word& name,
+            const labelUList& labels,
+            writeOption w=NO_WRITE
+        );
 
-        //- Construct from IOobject and labelHashSet.
-        topoSet(const IOobject&, const labelHashSet&);
+        //- Construct empty from IOobject and HashSet size.
+        topoSet(const IOobject& io, const label size);
 
+        //- Construct from IOobject and copy of labelHashSet.
+        topoSet(const IOobject& io, const labelHashSet& labels);
+
+        //- Construct from IOobject and move labelHashSet.
+        topoSet(const IOobject& io, labelHashSet&& labels);
 
 
         //- Clone
@@ -295,13 +309,13 @@ public:
 
 
     //- Destructor
-    virtual ~topoSet();
+    virtual ~topoSet() = default;
 
 
     // Member functions
 
-        //- Invert contents. (insert all members 0..maxLen-1 which were not in
-        //  set)
+        //- Invert contents.
+        //  Insert all members [0,maxLen) which were not in set.
         virtual void invert(const label maxLen);
 
         //- Subset contents. Only elements present in both sets remain.
@@ -320,7 +334,7 @@ public:
         virtual void writeDebug(Ostream& os, const label maxLen) const;
 
         //- Like above but also writes mesh related quantity
-        //  (usually coordinate).
+        //- (usually coordinate).
         virtual void writeDebug
         (
             Ostream& os,

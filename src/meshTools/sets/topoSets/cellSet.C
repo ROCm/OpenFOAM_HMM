@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +41,8 @@ addToRunTimeSelectionTable(topoSet, cellSet, size);
 addToRunTimeSelectionTable(topoSet, cellSet, set);
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::cellSet::cellSet(const IOobject& obj)
 :
@@ -92,11 +93,11 @@ Foam::cellSet::cellSet
 (
     const polyMesh& mesh,
     const word& name,
-    const labelHashSet& set,
+    const labelHashSet& labels,
     writeOption w
 )
 :
-    topoSet(mesh, name, set, w)
+    topoSet(mesh, name, labels, w)
 {}
 
 
@@ -104,11 +105,23 @@ Foam::cellSet::cellSet
 (
     const polyMesh& mesh,
     const word& name,
-    const labelUList& set,
+    labelHashSet&& labels,
     writeOption w
 )
 :
-    topoSet(mesh, name, set, w)
+    topoSet(mesh, name, std::move(labels), w)
+{}
+
+
+Foam::cellSet::cellSet
+(
+    const polyMesh& mesh,
+    const word& name,
+    const labelUList& labels,
+    writeOption w
+)
+:
+    topoSet(mesh, name, labels, w)
 {}
 
 
@@ -149,21 +162,15 @@ Foam::cellSet::cellSet
 (
     const Time& runTime,
     const word& name,
-    const labelHashSet& set,
+    const labelHashSet& labels,
     writeOption w
 )
 :
     topoSet
     (
         findIOobject(runTime, name, IOobject::NO_READ, w),
-        set
+        labels
     )
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cellSet::~cellSet()
 {}
 
 
@@ -184,10 +191,14 @@ void Foam::cellSet::updateMesh(const mapPolyMesh& morphMap)
 void Foam::cellSet::distribute(const mapDistributePolyMesh& map)
 {
     boolList inSet(map.nOldCells());
-    forAllConstIter(cellSet, *this, iter)
+
+    const labelHashSet& labels = *this;
+
+    for (const label celli : labels)
     {
-        inSet[iter.key()] = true;
+        inSet[celli] = true;
     }
+
     map.distributeCellData(inSet);
 
     // Count
@@ -196,7 +207,7 @@ void Foam::cellSet::distribute(const mapDistributePolyMesh& map)
     {
         if (inSet[celli])
         {
-            n++;
+            ++n;
         }
     }
 

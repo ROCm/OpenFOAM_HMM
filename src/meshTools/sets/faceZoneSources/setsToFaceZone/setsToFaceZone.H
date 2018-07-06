@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,14 @@ Class
 Description
     A topoSetSource to select faces based on usage in a faceSet and cellSet
 
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        cellSet     | Name of input cellSet             | yes   |
+        faceSet     | Name of input faceSet             | yes   |
+        flip        | Force flip of faces               | no    | false
+    \endtable
+
 SourceFiles
     setsToFaceZone.C
 
@@ -36,7 +44,6 @@ SourceFiles
 #define setsToFaceZone_H
 
 #include "topoSetSource.H"
-#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,7 +70,7 @@ class setsToFaceZone
         const word cellSetName_;
 
         //- Whether cellSet is slave cells or master cells
-        const Switch flip_;
+        const bool flip_;
 
 public:
 
@@ -78,26 +85,18 @@ public:
             const polyMesh& mesh,
             const word& faceSetName,
             const word& cellSetName,
-            const Switch& flip
+            const bool flip
         );
 
         //- Construct from dictionary
-        setsToFaceZone
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        setsToFaceZone(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        setsToFaceZone
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        setsToFaceZone(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~setsToFaceZone();
+    virtual ~setsToFaceZone() = default;
 
 
     // Member Functions

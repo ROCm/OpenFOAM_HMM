@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,13 @@ Description
     A topoSetSource to select faces belonging to topological connected region
     (that contains given point)
 
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        set         | The face set name to use          | yes   |
+        nearPoint   | The point on/near to the region   | yes   |
+    \endtable
+
 SourceFiles
     regionToFace.C
 
@@ -37,7 +44,6 @@ SourceFiles
 #define regionToFace_H
 
 #include "topoSetSource.H"
-#include "bitSet.H"
 #include "indirectPrimitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -63,6 +69,7 @@ class regionToFace
 
         //- Coordinate that is nearest/on connected region
         point nearPoint_;
+
 
     // Private Member Functions
 
@@ -94,22 +101,14 @@ public:
         );
 
         //- Construct from dictionary
-        regionToFace
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        regionToFace(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        regionToFace
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        regionToFace(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~regionToFace();
+    virtual ~regionToFace() = default;
 
 
     // Member Functions

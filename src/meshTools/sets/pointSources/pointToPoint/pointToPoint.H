@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,13 @@ Class
     Foam::pointToPoint
 
 Description
-    A topoSetSource to select points based on usage in pointSet.
+    A topoSetSource to select the points from another pointSet.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        set         | The point set name                | yes   |
+    \endtable
 
 SourceFiles
     pointToPoint.C
@@ -73,22 +79,14 @@ public:
         );
 
         //- Construct from dictionary
-        pointToPoint
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        pointToPoint(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        pointToPoint
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        pointToPoint(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~pointToPoint();
+    virtual ~pointToPoint() = default;
 
 
     // Member Functions
@@ -101,7 +99,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

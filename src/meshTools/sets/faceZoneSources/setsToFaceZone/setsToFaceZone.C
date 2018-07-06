@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,6 @@ License
 #include "polyMesh.H"
 #include "faceZoneSet.H"
 #include "cellSet.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -56,7 +55,7 @@ Foam::setsToFaceZone::setsToFaceZone
     const polyMesh& mesh,
     const word& faceSetName,
     const word& cellSetName,
-    const Switch& flip
+    const bool flip
 )
 :
     topoSetSource(mesh),
@@ -73,8 +72,8 @@ Foam::setsToFaceZone::setsToFaceZone
 )
 :
     topoSetSource(mesh),
-    faceSetName_(dict.lookup("faceSet")),
-    cellSetName_(dict.lookup("cellSet")),
+    faceSetName_(dict.get<word>("faceSet")),
+    cellSetName_(dict.get<word>("cellSet")),
     flip_(dict.lookupOrDefault("flip", false))
 {}
 
@@ -89,12 +88,6 @@ Foam::setsToFaceZone::setsToFaceZone
     faceSetName_(checkIs(is)),
     cellSetName_(checkIs(is)),
     flip_(false)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::setsToFaceZone::~setsToFaceZone()
 {}
 
 
@@ -136,8 +129,8 @@ void Foam::setsToFaceZone::applyToSet
                 {
                     bool flipFace = false;
 
-                    label own = mesh_.faceOwner()[facei];
-                    bool ownFound = cSet.found(own);
+                    const label own = mesh_.faceOwner()[facei];
+                    const bool ownFound = cSet.found(own);
 
                     if (mesh_.isInternalFace(facei))
                     {

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,7 +76,7 @@ public:
             writeOption w=NO_WRITE
         );
 
-        //- Construct empty from size of labelHashSet
+        //- Construct empty with initial size for labelHashSet
         cellSet
         (
             const polyMesh& mesh,
@@ -94,21 +94,30 @@ public:
             writeOption w=NO_WRITE
         );
 
-        //- Construct from labelHashSet
+        //- Construct (no-read) with copy of labelHashSet
         cellSet
         (
             const polyMesh& mesh,
             const word& name,
-            const labelHashSet& set,
+            const labelHashSet& labels,
             writeOption w=NO_WRITE
         );
 
-        //- Construct from additional list of labels for the labelHashSet
+        //- Construct (no-read) with moving labelHashSet
         cellSet
         (
             const polyMesh& mesh,
             const word& name,
-            const labelUList& set,
+            labelHashSet&& labels,
+            writeOption w=NO_WRITE
+        );
+
+        //- Construct (no-read) with copy labels
+        cellSet
+        (
+            const polyMesh& mesh,
+            const word& name,
+            const labelUList& labels,
             writeOption w=NO_WRITE
         );
 
@@ -138,13 +147,13 @@ public:
             (
                 const Time&,
                 const word& name,
-                const labelHashSet&,
+                const labelHashSet& labels,
                 writeOption w=NO_WRITE
             );
 
 
     //- Destructor
-    virtual ~cellSet();
+    virtual ~cellSet() = default;
 
 
     // Member functions
@@ -160,7 +169,7 @@ public:
         virtual void updateMesh(const mapPolyMesh& morphMap);
 
         //- Update any stored data for mesh redistribution.
-        virtual void distribute(const mapDistributePolyMesh&);
+        virtual void distribute(const mapDistributePolyMesh& map);
 
         //- Write maxLen items with label and coordinates.
         virtual void writeDebug

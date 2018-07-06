@@ -45,6 +45,8 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward declarations
 class primitiveMesh;
 class cellSet;
 class fileName;

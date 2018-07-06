@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,9 +73,9 @@ void Foam::regionToFace::markZone
     if (Pstream::myProcNo() == proci)
     {
         const labelList& fEdges = patch.faceEdges()[facei];
-        forAll(fEdges, i)
+        for (const label edgei : fEdges)
         {
-            changedEdges.append(fEdges[i]);
+            changedEdges.append(edgei);
             changedInfo.append(zoneI);
         }
     }
@@ -108,8 +108,9 @@ void Foam::regionToFace::markZone
 
 void Foam::regionToFace::combine(topoSet& set, const bool add) const
 {
-    Info<< "    Loading subset " << setName_ << " to delimit search region."
-        << endl;
+    Info<< "    Loading subset " << setName_
+        << " to delimit search region." << endl;
+
     faceSet subSet(mesh_, setName_);
 
     indirectPrimitivePatch patch
@@ -192,8 +193,8 @@ Foam::regionToFace::regionToFace
 )
 :
     topoSetSource(mesh),
-    setName_(dict.lookup("set")),
-    nearPoint_(dict.lookup("nearPoint"))
+    setName_(dict.get<word>("set")),
+    nearPoint_(dict.get<point>("nearPoint"))
 {}
 
 
@@ -206,12 +207,6 @@ Foam::regionToFace::regionToFace
     topoSetSource(mesh),
     setName_(checkIs(is)),
     nearPoint_(checkIs(is))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::regionToFace::~regionToFace()
 {}
 
 

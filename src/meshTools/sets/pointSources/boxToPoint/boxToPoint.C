@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,11 +53,12 @@ void Foam::boxToPoint::combine(topoSet& set, const bool add) const
 
     forAll(pts, pointi)
     {
-        forAll(bbs_, i)
+        for (const auto& bb : bbs_)
         {
-            if (bbs_[i].contains(pts[pointi]))
+            if (bb.contains(pts[pointi]))
             {
                 addOrDelete(set, pointi, add);
+                break;
             }
         }
     }
@@ -106,12 +107,6 @@ Foam::boxToPoint::boxToPoint
 :
     topoSetSource(mesh),
     bbs_(1, treeBoundBox(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::boxToPoint::~boxToPoint()
 {}
 
 

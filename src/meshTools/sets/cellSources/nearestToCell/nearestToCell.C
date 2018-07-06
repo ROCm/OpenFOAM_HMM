@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,8 +55,9 @@ void Foam::nearestToCell::combine(topoSet& set, const bool add) const
 
     forAll(points_, pointi)
     {
-        label celli = mesh_.findNearestCell(points_[pointi]);
+        const label celli = mesh_.findNearestCell(points_[pointi]);
         const point& cc = mesh_.cellCentres()[celli];
+
         nearest[pointi].first() = pointIndexHit(true, cc, celli);
         nearest[pointi].second() = Tuple2<scalar, label>
         (
@@ -68,11 +69,11 @@ void Foam::nearestToCell::combine(topoSet& set, const bool add) const
     Pstream::listCombineGather(nearest, mappedPatchBase::nearestEqOp());
     Pstream::listCombineScatter(nearest);
 
-    forAll(nearest, pointi)
+    for (const auto& near : nearest)
     {
-        if (nearest[pointi].second().second() == Pstream::myProcNo())
+        if (near.second().second() == Pstream::myProcNo())
         {
-            addOrDelete(set, nearest[pointi].first().index(), add);
+            addOrDelete(set, near.first().index(), add);
         }
     }
 }
@@ -98,7 +99,7 @@ Foam::nearestToCell::nearestToCell
 )
 :
     topoSetSource(mesh),
-    points_(dict.lookup("points"))
+    points_(dict.get<pointField>("points"))
 {}
 
 
@@ -110,12 +111,6 @@ Foam::nearestToCell::nearestToCell
 :
     topoSetSource(mesh),
     points_(checkIs(is))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::nearestToCell::~nearestToCell()
 {}
 
 

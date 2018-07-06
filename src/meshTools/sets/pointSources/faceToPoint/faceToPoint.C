@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,15 +60,16 @@ void Foam::faceToPoint::combine(topoSet& set, const bool add) const
 {
     // Load the set
     faceSet loadedSet(mesh_, setName_);
+    const labelHashSet& faceLabels = loadedSet;
 
     // Add all points from faces in loadedSet
-    forAllConstIter(faceSet, loadedSet, iter)
+    for (const label facei : faceLabels)
     {
-        const face& f = mesh_.faces()[iter.key()];
+        const face& f = mesh_.faces()[facei];
 
-        forAll(f, fp)
+        for (const label pointi : f)
         {
-            addOrDelete(set, f[fp], add);
+            addOrDelete(set, pointi, add);
         }
     }
 }
@@ -96,7 +97,7 @@ Foam::faceToPoint::faceToPoint
 )
 :
     topoSetSource(mesh),
-    setName_(dict.lookup("set")),
+    setName_(dict.get<word>("set")),
     option_(faceActionNames_.lookup("option", dict))
 {}
 
@@ -110,12 +111,6 @@ Foam::faceToPoint::faceToPoint
     topoSetSource(mesh),
     setName_(checkIs(is)),
     option_(faceActionNames_.read(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::faceToPoint::~faceToPoint()
 {}
 
 

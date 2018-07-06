@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,7 @@ void Foam::boundaryToFace::combine(topoSet& set, const bool add) const
     (
         label facei = mesh().nInternalFaces();
         facei < mesh().nFaces();
-        facei++
+        ++facei
     )
     {
         addOrDelete(set, facei, add);
@@ -69,7 +69,11 @@ Foam::boundaryToFace::boundaryToFace(const polyMesh& mesh)
 {}
 
 
-Foam::boundaryToFace::boundaryToFace(const polyMesh& mesh, const dictionary&)
+Foam::boundaryToFace::boundaryToFace
+(
+    const polyMesh& mesh,
+    const dictionary&
+)
 :
     topoSetSource(mesh)
 {}
@@ -78,16 +82,10 @@ Foam::boundaryToFace::boundaryToFace(const polyMesh& mesh, const dictionary&)
 Foam::boundaryToFace::boundaryToFace
 (
     const polyMesh& mesh,
-    Istream& is
+    Istream&
 )
 :
     topoSetSource(mesh)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::boundaryToFace::~boundaryToFace()
 {}
 
 

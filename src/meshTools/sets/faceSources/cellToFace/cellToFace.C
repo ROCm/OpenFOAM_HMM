@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,18 +71,18 @@ void Foam::cellToFace::combine(topoSet& set, const bool add) const
     }
 
     cellSet loadedSet(mesh_, setName_);
+    const labelHashSet& cellLabels = loadedSet;
 
     if (option_ == ALL)
     {
         // Add all faces from cell
-        forAllConstIter(cellSet, loadedSet, iter)
+        for (const label celli : cellLabels)
         {
-            const label celli = iter.key();
             const labelList& cFaces = mesh_.cells()[celli];
 
-            forAll(cFaces, cFacei)
+            for (const label facei : cFaces)
             {
-                addOrDelete(set, cFaces[cFacei], add);
+                addOrDelete(set, facei, add);
             }
         }
     }
@@ -97,9 +97,9 @@ void Foam::cellToFace::combine(topoSet& set, const bool add) const
 
 
         // Check all internal faces
-        for (label facei = 0; facei < nInt; facei++)
+        for (label facei = 0; facei < nInt; ++facei)
         {
-            if (loadedSet.found(own[facei]) && loadedSet.found(nei[facei]))
+            if (cellLabels.found(own[facei]) && cellLabels.found(nei[facei]))
             {
                 addOrDelete(set, facei, add);
             }
@@ -109,17 +109,15 @@ void Foam::cellToFace::combine(topoSet& set, const bool add) const
         // Get coupled cell status
         boolList neiInSet(mesh_.nFaces()-nInt, false);
 
-        forAll(patches, patchi)
+        for (const polyPatch& pp : patches)
         {
-            const polyPatch& pp = patches[patchi];
-
             if (pp.coupled())
             {
                 label facei = pp.start();
                 forAll(pp, i)
                 {
-                    neiInSet[facei-nInt] = loadedSet.found(own[facei]);
-                    facei++;
+                    neiInSet[facei-nInt] = cellLabels.found(own[facei]);
+                    ++facei;
                 }
             }
         }
@@ -127,20 +125,18 @@ void Foam::cellToFace::combine(topoSet& set, const bool add) const
 
 
         // Check all boundary faces
-        forAll(patches, patchi)
+        for (const polyPatch& pp : patches)
         {
-            const polyPatch& pp = patches[patchi];
-
             if (pp.coupled())
             {
                 label facei = pp.start();
                 forAll(pp, i)
                 {
-                    if (loadedSet.found(own[facei]) && neiInSet[facei-nInt])
+                    if (cellLabels.found(own[facei]) && neiInSet[facei-nInt])
                     {
                         addOrDelete(set, facei, add);
                     }
-                    facei++;
+                    ++facei;
                 }
             }
         }
@@ -170,7 +166,7 @@ Foam::cellToFace::cellToFace
 )
 :
     topoSetSource(mesh),
-    setName_(dict.lookup("set")),
+    setName_(dict.get<word>("set")),
     option_(cellActionNames_.lookup("option", dict))
 {}
 
@@ -184,12 +180,6 @@ Foam::cellToFace::cellToFace
     topoSetSource(mesh),
     setName_(checkIs(is)),
     option_(cellActionNames_.read(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cellToFace::~cellToFace()
 {}
 
 

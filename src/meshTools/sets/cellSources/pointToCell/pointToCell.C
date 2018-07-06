@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,31 +64,36 @@ void Foam::pointToCell::combine(topoSet& set, const bool add) const
     // Load the set
     pointSet loadedSet(mesh_, setName_);
 
+    const labelHashSet& pointLabels = loadedSet;
 
     // Handle any selection
     if (option_ == ANY)
     {
-        forAllConstIter(pointSet, loadedSet, iter)
+        for (const label pointi : pointLabels)
         {
-            const label pointi = iter.key();
             const labelList& pCells = mesh_.pointCells()[pointi];
 
-            forAll(pCells, pCelli)
+            for (const label celli : pCells)
             {
-                addOrDelete(set, pCells[pCelli], add);
+                addOrDelete(set, celli, add);
             }
         }
     }
     else if (option_ == EDGE)
     {
         const faceList& faces = mesh_.faces();
+
         forAll(faces, facei)
         {
             const face& f = faces[facei];
 
             forAll(f, fp)
             {
-                if (loadedSet.found(f[fp]) && loadedSet.found(f.nextLabel(fp)))
+                if
+                (
+                    pointLabels.found(f[fp])
+                 && pointLabels.found(f.nextLabel(fp))
+                )
                 {
                     addOrDelete(set, mesh_.faceOwner()[facei], add);
                     if (mesh_.isInternalFace(facei))
@@ -124,7 +129,7 @@ Foam::pointToCell::pointToCell
 )
 :
     topoSetSource(mesh),
-    setName_(dict.lookup("set")),
+    setName_(dict.get<word>("set")),
     option_(pointActionNames_.lookup("option", dict))
 {}
 
@@ -138,12 +143,6 @@ Foam::pointToCell::pointToCell
     topoSetSource(mesh),
     setName_(checkIs(is)),
     option_(pointActionNames_.read(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::pointToCell::~pointToCell()
 {}
 
 

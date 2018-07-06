@@ -232,7 +232,8 @@ void Foam::regionToCell::shrinkRegions
             }
         }
     }
-    Info<< "    Eroded " << returnReduce(nChanged, sumOp<label>())
+    Info<< "    Eroded "
+        << returnReduce(nChanged, sumOp<label>())
         << " cells." << endl;
 }
 
@@ -255,7 +256,6 @@ void Foam::regionToCell::erode
 
     //Info<< "After shrinking:" << count(shrunkSelectedCell) << endl;
     //generateField("shrunkSelectedCell", shrunkSelectedCell)().write();
-
 
 
     // Determine faces on the edge of shrunkSelectedCell
@@ -281,7 +281,6 @@ void Foam::regionToCell::erode
 
     //Info<< "removeCell before:" << count(removeCell) << endl;
     //generateField("removeCell_before", removeCell)().write();
-
 
 
     // Grow removeCell
@@ -345,8 +344,10 @@ void Foam::regionToCell::combine(topoSet& set, const bool add) const
 
     if (setName_.size() && setName_ != "none")
     {
-        Info<< "    Loading subset " << setName_ << " to delimit search region."
+        Info<< "    Loading subset " << setName_
+            << " to delimit search region."
             << endl;
+
         cellSet subSet(mesh_, setName_);
 
         selectedCell = false;
@@ -402,11 +403,9 @@ Foam::regionToCell::regionToCell
     setName_(dict.lookupOrDefault<word>("set", "none")),
     insidePoints_
     (
-        dict.found("insidePoints")
-      ? dict.lookup("insidePoints")
-      : dict.lookup("insidePoint")
+        dict.getCompat<pointField>("insidePoints", {{ "insidePoint", 0 }})
     ),
-    nErode_(dict.lookupOrDefault("nErode", 0))
+    nErode_(dict.lookupOrDefault<label>("nErode", 0))
 {}
 
 
@@ -420,12 +419,6 @@ Foam::regionToCell::regionToCell
     setName_(checkIs(is)),
     insidePoints_(checkIs(is)),
     nErode_(readLabel(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::regionToCell::~regionToCell()
 {}
 
 

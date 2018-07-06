@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,6 @@ License
 
 #include "zoneToPoint.H"
 #include "polyMesh.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -53,25 +52,23 @@ void Foam::zoneToPoint::combine(topoSet& set, const bool add) const
 {
     bool hasMatched = false;
 
-    forAll(mesh_.pointZones(), i)
+    for (const pointZone& zone : mesh_.pointZones())
     {
-        const pointZone& zone = mesh_.pointZones()[i];
-
         if (zoneName_.match(zone.name()))
         {
-            const labelList& pointLabels = mesh_.pointZones()[i];
+            hasMatched = true;
+
+            const labelList& pointLabels = zone;
 
             Info<< "    Found matching zone " << zone.name()
                 << " with " << pointLabels.size() << " points." << endl;
 
-            hasMatched = true;
-
-            forAll(pointLabels, i)
+            for (const label pointi : pointLabels)
             {
                 // Only do active points
-                if (pointLabels[i] < mesh_.nPoints())
+                if (pointi >= 0 && pointi < mesh_.nPoints())
                 {
-                    addOrDelete(set, pointLabels[i], add);
+                    addOrDelete(set, pointi, add);
                 }
             }
         }
@@ -80,8 +77,9 @@ void Foam::zoneToPoint::combine(topoSet& set, const bool add) const
     if (!hasMatched)
     {
         WarningInFunction
-            << "Cannot find any pointZone named " << zoneName_ << endl
-            << "Valid names are " << mesh_.pointZones().names() << endl;
+            << "Cannot find any pointZone named " << zoneName_ << nl
+            << "Valid names: " << flatOutput(mesh_.pointZones().names())
+            << endl;
     }
 }
 
@@ -106,7 +104,7 @@ Foam::zoneToPoint::zoneToPoint
 )
 :
     topoSetSource(mesh),
-    zoneName_(dict.lookup("name"))
+    zoneName_(dict.get<wordRe>("name"))
 {}
 
 
@@ -118,12 +116,6 @@ Foam::zoneToPoint::zoneToPoint
 :
     topoSetSource(mesh),
     zoneName_(checkIs(is))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::zoneToPoint::~zoneToPoint()
 {}
 
 

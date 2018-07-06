@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,16 @@ Class
 
 Description
     A topoSetSource to select points based on whether they are inside box.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        box         | A single bounding box             | partly    |
+        boxes       | Multiple bounding boxes           | partly    |
+    \endtable
+
+Note
+    Must specify either "box" or "boxes"
 
 SourceFiles
     boxToPoint.C
@@ -57,7 +67,7 @@ class boxToPoint
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Bounding box.
+        //- Bounding boxes
         treeBoundBoxList bbs_;
 
 
@@ -77,26 +87,18 @@ public:
         boxToPoint
         (
             const polyMesh& mesh,
-            const treeBoundBoxList& bb
+            const treeBoundBoxList& bbs
         );
 
         //- Construct from dictionary
-        boxToPoint
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        boxToPoint(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        boxToPoint
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        boxToPoint(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~boxToPoint();
+    virtual ~boxToPoint() = default;
 
 
     // Member Functions
@@ -109,7 +111,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

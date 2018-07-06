@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -136,10 +136,10 @@ Foam::rotatedBoxToCell::rotatedBoxToCell
 )
 :
     topoSetSource(mesh),
-    origin_(dict.lookup("origin")),
-    i_(dict.lookup("i")),
-    j_(dict.lookup("j")),
-    k_(dict.lookup("k"))
+    origin_(dict.get<point>("origin")),
+    i_(dict.get<vector>("i")),
+    j_(dict.get<vector>("j")),
+    k_(dict.get<vector>("k"))
 {}
 
 
@@ -150,12 +150,6 @@ Foam::rotatedBoxToCell::rotatedBoxToCell(const polyMesh& mesh, Istream& is)
     i_(is),
     j_(is),
     k_(is)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::rotatedBoxToCell::~rotatedBoxToCell()
 {}
 
 

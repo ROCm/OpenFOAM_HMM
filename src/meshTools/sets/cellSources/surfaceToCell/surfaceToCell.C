@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,14 +113,12 @@ bool Foam::surfaceToCell::differingPointNormals
 
     const labelList& cFaces = mesh().cells()[celli];
 
-    forAll(cFaces, cFacei)
+    for (const label facei : cFaces)
     {
-        const face& f = faces[cFaces[cFacei]];
+        const face& f = faces[facei];
 
-        forAll(f, fp)
+        for (const label pointi : f)
         {
-            label pointi = f[fp];
-
             label pointTriI =
                 getNearest
                 (
@@ -186,10 +184,8 @@ void Foam::surfaceToCell::combine(topoSet& set, const bool add) const
 
 
         // Check all 'outside' points
-        forAll(outsidePoints_, outsideI)
+        for (const point& outsidePoint : outsidePoints_)
         {
-            const point& outsidePoint = outsidePoints_[outsideI];
-
             // Find cell point is in. Linear search.
             label celli = queryMesh.findCell(outsidePoint, -1, false);
             if (returnReduce(celli, maxOp<label>()) == -1)
@@ -424,17 +420,17 @@ Foam::surfaceToCell::surfaceToCell
 )
 :
     topoSetSource(mesh),
-    surfName_(fileName(dict.lookup("file")).expand()),
-    outsidePoints_(dict.lookup("outsidePoints")),
-    includeCut_(readBool(dict.lookup("includeCut"))),
-    includeInside_(readBool(dict.lookup("includeInside"))),
-    includeOutside_(readBool(dict.lookup("includeOutside"))),
+    surfName_(dict.get<fileName>("file").expand()),
+    outsidePoints_(dict.get<pointField>("outsidePoints")),
+    includeCut_(dict.get<bool>("includeCut")),
+    includeInside_(dict.get<bool>("includeInside")),
+    includeOutside_(dict.get<bool>("includeOutside")),
     useSurfaceOrientation_
     (
         dict.lookupOrDefault("useSurfaceOrientation", false)
     ),
-    nearDist_(readScalar(dict.lookup("nearDistance"))),
-    curvature_(readScalar(dict.lookup("curvature"))),
+    nearDist_(dict.get<scalar>("nearDistance")),
+    curvature_(dict.get<scalar>("curvature")),
     surfPtr_
     (
         new triSurface

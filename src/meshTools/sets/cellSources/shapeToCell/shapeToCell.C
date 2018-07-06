@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ void Foam::shapeToCell::combine(topoSet& set, const bool add) const
 {
     if (type_ == "splitHex")
     {
-        for (label celli = 0; celli < mesh_.nCells(); celli++)
+        for (label celli = 0; celli < mesh_.nCells(); ++celli)
         {
             cellFeatures superCell(mesh_, featureCos, celli);
 
@@ -91,11 +91,11 @@ void Foam::shapeToCell::combine(topoSet& set, const bool add) const
 Foam::shapeToCell::shapeToCell
 (
     const polyMesh& mesh,
-    const word& type
+    const word& shapeName
 )
 :
     topoSetSource(mesh),
-    type_(type)
+    type_(shapeName)
 {
     if (!cellModel::ptr(type_) && type_ != "splitHex")
     {
@@ -112,7 +112,7 @@ Foam::shapeToCell::shapeToCell
 )
 :
     topoSetSource(mesh),
-    type_(dict.lookup("type"))
+    type_(dict.get<word>("type"))
 {
     if (!cellModel::ptr(type_) && type_ != "splitHex")
     {
@@ -137,12 +137,6 @@ Foam::shapeToCell::shapeToCell
             << "Illegal cell type " << type_ << exit(FatalError);
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::shapeToCell::~shapeToCell()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

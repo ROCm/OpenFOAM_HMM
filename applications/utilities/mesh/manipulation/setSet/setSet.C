@@ -384,7 +384,7 @@ bool doCommand
     try
     {
         topoSetSource::setAction action =
-            topoSetSource::toAction(actionName);
+            topoSetSource::actionNames[actionName];
 
 
         IOobject::readOption r;
@@ -713,26 +713,11 @@ commandStatus parseType
 
 commandStatus parseAction(const word& actionName)
 {
-    commandStatus stat = INVALID;
-
-    if (actionName.size())
-    {
-        try
-        {
-            (void)topoSetSource::toAction(actionName);
-
-            stat = VALIDSETCMD;
-        }
-        catch (Foam::IOerror& fIOErr)
-        {
-            stat = INVALID;
-        }
-        catch (Foam::error& fErr)
-        {
-            stat = INVALID;
-        }
-    }
-    return stat;
+    return
+    (
+        actionName.size() && topoSetSource::actionNames.found(actionName)
+      ? VALIDSETCMD : INVALID
+    );
 }
 
 

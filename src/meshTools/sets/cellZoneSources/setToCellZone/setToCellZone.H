@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,12 @@ Class
 
 Description
     A topoSetSource to select cells based on usage in a cellSet.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        set         | The cell set name                 | yes   |
+    \endtable
 
 SourceFiles
     setToCellZone.C
@@ -73,22 +79,14 @@ public:
         );
 
         //- Construct from dictionary
-        setToCellZone
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        setToCellZone(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        setToCellZone
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        setToCellZone(const polyMesh& mesh, Istream& is );
 
 
     //- Destructor
-    virtual ~setToCellZone();
+    virtual ~setToCellZone() = default;
 
 
     // Member Functions
@@ -101,7 +99,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,8 +84,8 @@ Foam::normalToFace::normalToFace
 Foam::normalToFace::normalToFace(const polyMesh& mesh, const dictionary& dict)
 :
     topoSetSource(mesh),
-    normal_(dict.lookup("normal")),
-    tol_(readScalar(dict.lookup("cos")))
+    normal_(dict.get<vector>("normal")),
+    tol_(dict.get<scalar>("cos"))
 {
     setNormal();
 }
@@ -99,12 +99,6 @@ Foam::normalToFace::normalToFace(const polyMesh& mesh, Istream& is)
 {
     setNormal();
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::normalToFace::~normalToFace()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -135,7 +129,6 @@ void Foam::normalToFace::applyToSet
     {
         Info<< "    Removing faces according to normal being aligned with "
             << normal_ << " (to within " << tol_ << ") ..." << endl;
-
 
         DynamicList<label> toBeRemoved(set.size()/10);
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,11 +33,10 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(cellZoneSet, 0);
-
-addToRunTimeSelectionTable(topoSet, cellZoneSet, word);
-addToRunTimeSelectionTable(topoSet, cellZoneSet, size);
-addToRunTimeSelectionTable(topoSet, cellZoneSet, set);
+    defineTypeNameAndDebug(cellZoneSet, 0);
+    addToRunTimeSelectionTable(topoSet, cellZoneSet, word);
+    addToRunTimeSelectionTable(topoSet, cellZoneSet, size);
+    addToRunTimeSelectionTable(topoSet, cellZoneSet, set);
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -50,10 +49,7 @@ void Foam::cellZoneSet::updateSet()
 
     cellSet::clearStorage();
     cellSet::resize(2*addressing_.size());
-    forAll(addressing_, i)
-    {
-        cellSet::insert(addressing_[i]);
-    }
+    cellSet::insert(addressing_);
 }
 
 
@@ -67,9 +63,9 @@ Foam::cellZoneSet::cellZoneSet
     writeOption w
 )
 :
-    cellSet(mesh, name, 1000),  // do not read cellSet
+    cellSet(mesh, name, 1024),  // do not read cellSet
     mesh_(mesh),
-    addressing_(0)
+    addressing_()
 {
     const cellZoneMesh& cellZones = mesh.cellZones();
     label zoneID = cellZones.findZoneID(name);
@@ -101,7 +97,7 @@ Foam::cellZoneSet::cellZoneSet
 :
     cellSet(mesh, name, size, w),
     mesh_(mesh),
-    addressing_(0)
+    addressing_()
 {
     updateSet();
 }
@@ -123,12 +119,6 @@ Foam::cellZoneSet::cellZoneSet
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cellZoneSet::~cellZoneSet()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::cellZoneSet::invert(const label maxLen)
@@ -136,11 +126,11 @@ void Foam::cellZoneSet::invert(const label maxLen)
     // Count
     label n = 0;
 
-    for (label celli = 0; celli < maxLen; celli++)
+    for (label celli = 0; celli < maxLen; ++celli)
     {
         if (!found(celli))
         {
-            n++;
+            ++n;
         }
     }
 
@@ -148,12 +138,12 @@ void Foam::cellZoneSet::invert(const label maxLen)
     addressing_.setSize(n);
     n = 0;
 
-    for (label celli = 0; celli < maxLen; celli++)
+    for (label celli = 0; celli < maxLen; ++celli)
     {
         if (!found(celli))
         {
             addressing_[n] = celli;
-            n++;
+            ++n;
         }
     }
 
@@ -165,12 +155,10 @@ void Foam::cellZoneSet::subset(const topoSet& set)
 {
     DynamicList<label> newAddressing(addressing_.size());
 
-    const cellZoneSet& fSet = refCast<const cellZoneSet>(set);
+    const cellZoneSet& zoneSet = refCast<const cellZoneSet>(set);
 
-    forAll(fSet.addressing(), i)
+    for (const label celli : zoneSet.addressing())
     {
-        label celli = fSet.addressing()[i];
-
         if (found(celli))
         {
             newAddressing.append(celli);
@@ -186,12 +174,10 @@ void Foam::cellZoneSet::addSet(const topoSet& set)
 {
     DynamicList<label> newAddressing(addressing_);
 
-    const cellZoneSet& fSet = refCast<const cellZoneSet>(set);
+    const cellZoneSet& zoneSet = refCast<const cellZoneSet>(set);
 
-    forAll(fSet.addressing(), i)
+    for (const label celli : zoneSet.addressing())
     {
-        label celli = fSet.addressing()[i];
-
         if (!found(celli))
         {
             newAddressing.append(celli);
@@ -207,15 +193,13 @@ void Foam::cellZoneSet::deleteSet(const topoSet& set)
 {
     DynamicList<label> newAddressing(addressing_.size());
 
-    const cellZoneSet& fSet = refCast<const cellZoneSet>(set);
+    const cellZoneSet& zoneSet = refCast<const cellZoneSet>(set);
 
-    forAll(addressing_, i)
+    for (const label celli : addressing_)
     {
-        label celli = addressing_[i];
-
-        if (!fSet.found(celli))
+        if (!zoneSet.found(celli))
         {
-            // Not found in fSet so add
+            // Not found in zoneSet so add
             newAddressing.append(celli);
         }
     }
@@ -299,7 +283,7 @@ void Foam::cellZoneSet::updateMesh(const mapPolyMesh& morphMap)
         if (newCelli >= 0)
         {
             newAddressing[n] = newCelli;
-            n++;
+            ++n;
         }
     }
     newAddressing.setSize(n);

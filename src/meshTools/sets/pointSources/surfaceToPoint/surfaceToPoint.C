@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,7 +75,11 @@ void Foam::surfaceToPoint::combine(topoSet& set, const bool add) const
         {
             bool isInside = pointInside[pointi];
 
-            if ((isInside && includeInside_) || (!isInside && includeOutside_))
+            if
+            (
+                (isInside && includeInside_)
+             || (!isInside && includeOutside_)
+            )
             {
                 addOrDelete(set, pointi, add);
             }
@@ -147,11 +151,11 @@ Foam::surfaceToPoint::surfaceToPoint
 )
 :
     topoSetSource(mesh),
-    surfName_(fileName(dict.lookup("file")).expand()),
-    scale_(dict.lookupOrDefault<scalar>("scale", 1.0)),
-    nearDist_(readScalar(dict.lookup("nearDistance"))),
-    includeInside_(readBool(dict.lookup("includeInside"))),
-    includeOutside_(readBool(dict.lookup("includeOutside")))
+    surfName_(dict.get<fileName>("file").expand()),
+    scale_(dict.lookupOrDefault<scalar>("scale", -1)),
+    nearDist_(dict.get<scalar>("nearDistance")),
+    includeInside_(dict.get<bool>("includeInside")),
+    includeOutside_(dict.get<bool>("includeOutside"))
 {
     checkSettings();
 }
@@ -174,12 +178,6 @@ Foam::surfaceToPoint::surfaceToPoint
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::surfaceToPoint::~surfaceToPoint()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::surfaceToPoint::applyToSet
@@ -188,7 +186,7 @@ void Foam::surfaceToPoint::applyToSet
     topoSet& set
 ) const
 {
-    if ( (action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
     {
         Info<< "    Adding points in relation to surface " << surfName_
             << " ..." << endl;

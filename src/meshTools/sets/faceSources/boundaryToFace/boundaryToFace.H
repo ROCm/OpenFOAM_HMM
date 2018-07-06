@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,9 @@ Class
 
 Description
     A topoSetSource to select all external (boundary) faces.
+
+    \heading Dictionary parameters
+    None
 
 SourceFiles
     boundaryToFace.C
@@ -69,25 +72,17 @@ public:
     // Constructors
 
         //- Construct from components
-        boundaryToFace(const polyMesh&);
+        boundaryToFace(const polyMesh& mesh);
 
         //- Construct from dictionary
-        boundaryToFace
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        boundaryToFace(const polyMesh& mesh, const dictionary& unused);
 
         //- Construct from Istream
-        boundaryToFace
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        boundaryToFace(const polyMesh& mesh, Istream& unused);
 
 
     //- Destructor
-    virtual ~boundaryToFace();
+    virtual ~boundaryToFace() = default;
 
 
     // Member Functions
@@ -100,7 +95,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

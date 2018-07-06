@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,17 +54,15 @@ void Foam::nbrToCell::combine(topoSet& set, const bool add) const
 
     boolList isCoupled(mesh_.nFaces()-mesh_.nInternalFaces(), false);
 
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        const polyPatch& pp = patches[patchi];
-
         if (pp.coupled())
         {
             label facei = pp.start();
             forAll(pp, i)
             {
                 isCoupled[facei-mesh_.nInternalFaces()] = true;
-                facei++;
+                ++facei;
             }
         }
     }
@@ -75,17 +73,15 @@ void Foam::nbrToCell::combine(topoSet& set, const bool add) const
 
         label nNbrCells = 0;
 
-        forAll(cFaces, i)
+        for (const label facei : cFaces)
         {
-            label facei = cFaces[i];
-
             if (mesh_.isInternalFace(facei))
             {
-                nNbrCells++;
+                ++nNbrCells;
             }
             else if (isCoupled[facei-mesh_.nInternalFaces()])
             {
-                nNbrCells++;
+                ++nNbrCells;
             }
         }
 
@@ -117,7 +113,7 @@ Foam::nbrToCell::nbrToCell
 )
 :
     topoSetSource(mesh),
-    minNbrs_(readLabel(dict.lookup("neighbours")))
+    minNbrs_(dict.get<label>("neighbours"))
 {}
 
 
@@ -129,12 +125,6 @@ Foam::nbrToCell::nbrToCell
 :
     topoSetSource(mesh),
     minNbrs_(readLabel(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::nbrToCell::~nbrToCell()
 {}
 
 

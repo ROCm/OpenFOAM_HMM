@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,13 @@ Class
 
 Description
     A topoSetSource to select cells based on side of faceZone.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        name        | The face zone name or regex       | yes   |
+        option      | Selection type (master / slave)   | yes   |
+    \endtable
 
 SourceFiles
     faceZoneToCell.C
@@ -96,22 +103,14 @@ public:
         );
 
         //- Construct from dictionary
-        faceZoneToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        faceZoneToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        faceZoneToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        faceZoneToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~faceZoneToCell();
+    virtual ~faceZoneToCell() = default;
 
 
     // Member Functions
@@ -124,7 +123,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

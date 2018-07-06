@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,12 @@ Class
 
 Description
     A topoSetSource to select points nearest to points.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        points      | List of selection points          | yes   |
+    \endtable
 
 SourceFiles
     nearestToPoint.C
@@ -80,22 +86,14 @@ public:
         );
 
         //- Construct from dictionary
-        nearestToPoint
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        nearestToPoint(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        nearestToPoint
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        nearestToPoint(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~nearestToPoint();
+    virtual ~nearestToPoint() = default;
 
 
     // Member Functions
@@ -108,7 +106,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

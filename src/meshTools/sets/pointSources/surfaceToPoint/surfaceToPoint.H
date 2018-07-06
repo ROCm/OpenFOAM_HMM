@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +33,16 @@ Description
       (Uses normal of nearest surface triangle so requires valid surface
       topology!)
 
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        file        | The surface "filename"            | yes   |
+        scale       | surface scaling factor            | no    | -1
+        nearDistance   | Near distance to the surface   | yes   |
+        includeInside  | Include inside cells (bool)    | yes   |
+        includeOutside | Include outside cells (bool)   | yes   |
+    \endtable
+
 SourceFiles
     surfaceToPoint.C
 
@@ -42,12 +52,13 @@ SourceFiles
 #define surfaceToPoint_H
 
 #include "topoSetSource.H"
-#include "Map.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward declarations
 class triSurfaceSearch;
 
 /*---------------------------------------------------------------------------*\
@@ -106,22 +117,14 @@ public:
         );
 
         //- Construct from dictionary
-        surfaceToPoint
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        surfaceToPoint(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        surfaceToPoint
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        surfaceToPoint(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~surfaceToPoint();
+    virtual ~surfaceToPoint() = default;
 
 
     // Member Functions
@@ -134,7 +137,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

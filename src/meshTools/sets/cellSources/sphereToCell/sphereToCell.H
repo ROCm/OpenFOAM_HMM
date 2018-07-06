@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,13 @@ Class
 
 Description
     A topoSetSource to select cells based on cell centres inside sphere.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        centre      | The sphere centre                 | yes   |
+        radius      | The (outside) radius of sphere    | yes   |
+    \endtable
 
 SourceFiles
     sphereToCell.C
@@ -56,10 +63,10 @@ class sphereToCell
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Centre
-        vector centre_;
+        //- Centre point of the sphere
+        point centre_;
 
-        //- Radius
+        //- The outer radius of the sphere
         scalar radius_;
 
 
@@ -80,27 +87,19 @@ public:
         sphereToCell
         (
             const polyMesh& mesh,
-            const vector& centre,
+            const point& centre,
             const scalar radius
         );
 
         //- Construct from dictionary
-        sphereToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        sphereToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        sphereToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        sphereToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~sphereToCell();
+    virtual ~sphereToCell() = default;
 
 
     // Member Functions
@@ -113,7 +112,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

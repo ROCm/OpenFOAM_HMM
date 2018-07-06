@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class polyMesh;
 class topoSet;
 
@@ -92,6 +92,10 @@ public:
             REMOVE
         };
 
+        //- The setActions text representations
+        static const Enum<setAction> actionNames;
+
+
 protected:
 
         //- A table of usage strings
@@ -124,15 +128,29 @@ protected:
 
     // Protected data
 
+        //- Reference to the mesh
         const polyMesh& mesh_;
 
-        //- Add (if bool) celli to set or delete celli from set.
-        void addOrDelete(topoSet& set, const label celli, const bool) const;
+
+    // Protected Member Functions
+
+        //- Detect and remove any values less than 0 or ge maxLabel.
+        //  \return false if invalid elements were detected (and removed)
+        static bool check(labelList& list, const label maxLabel);
+
+        //- Add or delete id from set. Add when 'add' is true
+        void addOrDelete(topoSet& set, const label id, const bool add) const;
+
+        //- Add or delete labels from set. Add when 'add' is true
+        void addOrDelete
+        (
+            topoSet& set,
+            const labelUList& labels,
+            const bool add
+        ) const;
 
 
 private:
-
-        static const Enum<setAction> actionNames_;
 
         static const string illegalSource_;
 
@@ -155,13 +173,15 @@ public:
     // Static Functions
 
         //- Convert string to action
+        //  \deprecated use direct access to actionNames (JUL-2018)
         static setAction toAction(const word& actionName)
         {
-            return actionNames_[actionName];
+            return actionNames[actionName];
         }
 
         //- Check state of stream.
         static Istream& checkIs(Istream& is);
+
 
     // Declare run-time constructor selection table
 
@@ -207,9 +227,9 @@ public:
 
             autoPtr<topoSetSource> operator()(Istream& is) const
             {
-                word topoSetSourceType(is);
+                const word sourceTypeName(is);
                 dictionary dict(is);
-                return topoSetSource::New(topoSetSourceType, mesh_, dict);
+                return topoSetSource::New(sourceTypeName, mesh_, dict);
             }
         };
 
@@ -221,25 +241,16 @@ public:
                 usageTablePtr_ = new HashTable<string>();
             }
 
-            const HashTable<string>& usageTable = *usageTablePtr_;
-
-            if (usageTable.found(name))
-            {
-                return usageTable[name];
-            }
-            else
-            {
-                return illegalSource_;
-            }
+            return usageTablePtr_->lookup(name, illegalSource_);
         }
 
 
     // Constructors
 
         //- Construct from components
-        topoSetSource(const polyMesh& mesh);
+        explicit topoSetSource(const polyMesh& mesh);
 
-        //- Clone
+        //- Clone (disallowed)
         autoPtr<topoSetSource> clone() const
         {
             NotImplemented;
@@ -267,11 +278,12 @@ public:
 
 
     //- Destructor
-    virtual ~topoSetSource();
+    virtual ~topoSetSource() = default;
 
 
     // Member Functions
 
+        //- Reference to the mesh
         const polyMesh& mesh() const
         {
             return mesh_;
@@ -280,9 +292,11 @@ public:
 
     // Member Functions
 
+        //- The type of set being used by the source
         virtual sourceType setType() const = 0;
 
-        virtual void applyToSet(const setAction action, topoSet&) const = 0;
+        //- Apply specified action to the topoSet
+        virtual void applyToSet(const setAction action, topoSet& set) const = 0;
 
 };
 

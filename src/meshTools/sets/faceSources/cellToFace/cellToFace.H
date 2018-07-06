@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,9 +27,18 @@ Class
 Description
     A topoSetSource to select a faceSet from cells.
 
-    Either all faces of cell or some other criterion.
-    See implementation.
-    Note: when picking up coupled faces uses cells on neighbouring processors.
+    Either use 'all' cell faces, or only faces that have cells
+    on 'both' sides.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        set         | Name of input cellSet             | yes   |
+        option      | Selection (all/both)              | yes   |
+    \endtable
+
+Note
+    When picking up coupled faces uses cells on neighbouring processors.
 
 SourceFiles
     cellToFace.C
@@ -100,22 +109,14 @@ public:
         );
 
         //- Construct from dictionary
-        cellToFace
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        cellToFace(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        cellToFace
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        cellToFace(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~cellToFace();
+    virtual ~cellToFace() = default;
 
 
     // Member Functions
@@ -128,7 +129,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

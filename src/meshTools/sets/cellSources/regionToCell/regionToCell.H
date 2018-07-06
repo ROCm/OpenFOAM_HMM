@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,7 @@ Description
     (that contains given points)
 
     In dictionary input:
-
+    \verbatim
         // optional name of cellSet delimiting search
         set         c0;
 
@@ -39,7 +39,15 @@ Description
 
         // points inside region to select
         insidePoints ((1 2 3));
+    \endverbatim
 
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        insidePoints | Points inside regions            | yes   |
+        nErode      | Cell layers to erode to detect holes | no | 0
+        set         | Restrict to named cellSet         | no    | ''
+    \endtable
 
 SourceFiles
     regionToCell.C
@@ -126,22 +134,14 @@ public:
         );
 
         //- Construct from dictionary
-        regionToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        regionToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        regionToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        regionToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~regionToCell();
+    virtual ~regionToCell() = default;
 
 
     // Member Functions
@@ -151,8 +151,11 @@ public:
             return CELLSETSOURCE;
         }
 
-        virtual void applyToSet(const topoSetSource::setAction action, topoSet&)
-         const;
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet& set
+        ) const;
 
 };
 

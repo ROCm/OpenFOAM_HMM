@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,13 @@ Class
 
 Description
     A topoSetSource to select faces based on use of points.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        set         | The point set name to use         | yes   |
+        option      | Selection type (all/any/edge)     | yes   |
+    \endtable
 
 SourceFiles
     pointToFace.C
@@ -99,22 +106,14 @@ public:
         );
 
         //- Construct from dictionary
-        pointToFace
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        pointToFace(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        pointToFace
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        pointToFace(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~pointToFace();
+    virtual ~pointToFace() = default;
 
 
     // Member Functions
@@ -127,7 +126,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

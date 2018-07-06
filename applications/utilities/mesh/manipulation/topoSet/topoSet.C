@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
     const word dictName("topoSetDict");
     #include "setSystemMeshDictionaryIO.H"
 
-    Info<< "Reading " << dictName << "\n" << endl;
+    Info<< "Reading " << dictName << nl << endl;
 
     IOdictionary topoSetDict(dictIO);
 
@@ -238,19 +238,13 @@ int main(int argc, char *argv[])
         meshReadUpdate(mesh);
 
         // Execute all actions
-        forAll(actions, i)
+        for (const dictionary& dict : actions)
         {
-            const dictionary& dict = actions[i];
+            const word setName(dict.get<word>("name"));
+            const word setType(dict.get<word>("type"));
 
-            const word setName(dict.lookup("name"));
-            const word actionName(dict.lookup("action"));
-            const word setType(dict.lookup("type"));
-
-
-            topoSetSource::setAction action = topoSetSource::toAction
-            (
-                actionName
-            );
+            const topoSetSource::setAction action =
+                topoSetSource::actionNames.lookup("action", dict);
 
             autoPtr<topoSet> currentSet;
             if
@@ -283,20 +277,20 @@ int main(int argc, char *argv[])
             }
 
 
-
-            // Handle special actions (clear, invert) locally, rest through
-            // sources.
+            // Handle special actions (clear, invert) locally,
+            // the other actions through sources.
             switch (action)
             {
                 case topoSetSource::NEW:
                 case topoSetSource::ADD:
                 case topoSetSource::DELETE:
                 {
-                    Info<< "    Applying source " << word(dict.lookup("source"))
-                        << endl;
+                    const word sourceName(dict.get<word>("source"));
+
+                    Info<< "    Applying source " << sourceName << endl;
                     autoPtr<topoSetSource> source = topoSetSource::New
                     (
-                        dict.lookup("source"),
+                        sourceName,
                         mesh,
                         dict.subDict("sourceInfo")
                     );
@@ -310,11 +304,12 @@ int main(int argc, char *argv[])
 
                 case topoSetSource::SUBSET:
                 {
-                    Info<< "    Applying source " << word(dict.lookup("source"))
-                        << endl;
+                    const word sourceName(dict.get<word>("source"));
+
+                    Info<< "    Applying source " << sourceName << endl;
                     autoPtr<topoSetSource> source = topoSetSource::New
                     (
-                        dict.lookup("source"),
+                        sourceName,
                         mesh,
                         dict.subDict("sourceInfo")
                     );
@@ -359,7 +354,6 @@ int main(int argc, char *argv[])
                     removeSet(mesh, setType, setName);
                 break;
 
-
                 default:
                     WarningInFunction
                         << "Unhandled action " << action << endl;
@@ -368,16 +362,16 @@ int main(int argc, char *argv[])
 
             if (currentSet.valid())
             {
-                Info<< "    " << currentSet().type() << " "
-                    << currentSet().name()
-                    << " now size "
+                Info<< "    "
+                    << currentSet().type() << " "
+                    << currentSet().name() << " now size "
                     << returnReduce(currentSet().size(), sumOp<label>())
                     << endl;
             }
         }
     }
 
-    Info<< "End\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

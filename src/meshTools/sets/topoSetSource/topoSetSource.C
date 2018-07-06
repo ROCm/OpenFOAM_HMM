@@ -44,7 +44,7 @@ const Foam::Enum
 <
     Foam::topoSetSource::setAction
 >
-Foam::topoSetSource::actionNames_
+Foam::topoSetSource::actionNames
 {
     { setAction::CLEAR, "clear" },
     { setAction::NEW, "new" },
@@ -62,6 +62,40 @@ const Foam::string Foam::topoSetSource::illegalSource_
     "Illegal topoSetSource name"
 );
 
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+bool Foam::topoSetSource::check(labelList& list, const label maxLabel)
+{
+    const label len = list.size();
+
+    label nGood = 0;
+
+    for (label i=0; i < len; ++i)
+    {
+        const label val = list[i];
+
+        if (val >= 0 && val < maxLabel)
+        {
+            if (nGood != i)
+            {
+                list[nGood] = val;
+            }
+            ++nGood;
+        }
+    }
+
+    const label nReject = (len - nGood);
+
+    if (nReject)
+    {
+        list.resize(nGood);
+
+        // Report?
+    }
+
+    return !nReject;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -122,9 +156,9 @@ Foam::Istream& Foam::topoSetSource::checkIs(Istream& is)
     {
         FatalErrorInFunction
             << exit(FatalError);
-
-        return is;
     }
+
+    return is;
 }
 
 
@@ -133,17 +167,35 @@ Foam::Istream& Foam::topoSetSource::checkIs(Istream& is)
 void Foam::topoSetSource::addOrDelete
 (
     topoSet& set,
-    const label celli,
+    const label id,
     const bool add
 ) const
 {
     if (add)
     {
-        set.insert(celli);
+        set.insert(id);
     }
     else
     {
-        set.erase(celli);
+        set.erase(id);
+    }
+}
+
+
+void Foam::topoSetSource::addOrDelete
+(
+    topoSet& set,
+    const labelUList& labels,
+    const bool add
+) const
+{
+    if (add)
+    {
+        set.insert(labels);
+    }
+    else
+    {
+        set.erase(labels);
     }
 }
 
@@ -153,12 +205,6 @@ void Foam::topoSetSource::addOrDelete
 Foam::topoSetSource::topoSetSource(const polyMesh& mesh)
 :
     mesh_(mesh)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::topoSetSource::~topoSetSource()
 {}
 
 

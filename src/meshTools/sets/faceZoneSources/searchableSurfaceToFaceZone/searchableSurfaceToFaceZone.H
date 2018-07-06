@@ -28,6 +28,13 @@ Description
     A topoSetSource to select faces based on intersection (of cell-cell
     vector) with a surface.
 
+    \heading Dictionary parameters
+    \table
+        Property    | Description                        | Required  | Default
+        surface     | The searchable surface type        | yes   |
+        name        | Name for the IOobject              | no    | mesh-name
+    \endtable
+
 SourceFiles
     searchableSurfaceToFaceZone.C
 
@@ -90,7 +97,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,25 +52,23 @@ void Foam::zoneToCell::combine(topoSet& set, const bool add) const
 {
     bool hasMatched = false;
 
-    forAll(mesh_.cellZones(), i)
+    for (const cellZone& zone : mesh_.cellZones())
     {
-        const cellZone& zone = mesh_.cellZones()[i];
-
         if (zoneName_.match(zone.name()))
         {
-            const labelList& cellLabels = mesh_.cellZones()[i];
+            hasMatched = true;
+
+            const labelList& cellLabels = zone;
 
             Info<< "    Found matching zone " << zone.name()
                 << " with " << cellLabels.size() << " cells." << endl;
 
-            hasMatched = true;
-
-            forAll(cellLabels, i)
+            for (const label celli : cellLabels)
             {
                 // Only do active cells
-                if (cellLabels[i] < mesh_.nCells())
+                if (celli >= 0 && celli < mesh_.nCells())
                 {
-                    addOrDelete(set, cellLabels[i], add);
+                    addOrDelete(set, celli, add);
                 }
             }
         }
@@ -79,8 +77,9 @@ void Foam::zoneToCell::combine(topoSet& set, const bool add) const
     if (!hasMatched)
     {
         WarningInFunction
-            << "Cannot find any cellZone named " << zoneName_ << endl
-            << "Valid names are " << mesh_.cellZones().names() << endl;
+            << "Cannot find any cellZone named " << zoneName_ << nl
+            << "Valid names: " << flatOutput(mesh_.cellZones().names())
+            << endl;
     }
 }
 
@@ -105,7 +104,7 @@ Foam::zoneToCell::zoneToCell
 )
 :
     topoSetSource(mesh),
-    zoneName_(dict.lookup("name"))
+    zoneName_(dict.get<wordRe>("name"))
 {}
 
 
@@ -117,12 +116,6 @@ Foam::zoneToCell::zoneToCell
 :
     topoSetSource(mesh),
     zoneName_(checkIs(is))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::zoneToCell::~zoneToCell()
 {}
 
 

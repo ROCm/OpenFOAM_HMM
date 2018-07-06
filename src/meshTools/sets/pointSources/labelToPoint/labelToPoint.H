@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,12 @@ Class
 
 Description
     A topoSetSource to select points given explicitly provided labels.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        value       | The point labels                  | yes   |
+    \endtable
 
 SourceFiles
     labelToPoint.C
@@ -60,11 +66,6 @@ class labelToPoint
         labelList labels_;
 
 
-    // Private Member Functions
-
-        void combine(topoSet& set, const bool add) const;
-
-
 public:
 
     //- Runtime type information
@@ -72,7 +73,7 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Copy construct from components
         labelToPoint
         (
             const polyMesh& mesh,
@@ -80,22 +81,14 @@ public:
         );
 
         //- Construct from dictionary
-        labelToPoint
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        labelToPoint(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        labelToPoint
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        labelToPoint(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~labelToPoint();
+    virtual ~labelToPoint() = default;
 
 
     // Member Functions
@@ -108,7 +101,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

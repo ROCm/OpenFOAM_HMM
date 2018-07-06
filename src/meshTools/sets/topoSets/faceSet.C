@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,18 +28,16 @@ License
 #include "polyMesh.H"
 #include "syncTools.H"
 #include "mapDistributePolyMesh.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-defineTypeNameAndDebug(faceSet, 0);
-
-addToRunTimeSelectionTable(topoSet, faceSet, word);
-addToRunTimeSelectionTable(topoSet, faceSet, size);
-addToRunTimeSelectionTable(topoSet, faceSet, set);
+    defineTypeNameAndDebug(faceSet, 0);
+    addToRunTimeSelectionTable(topoSet, faceSet, word);
+    addToRunTimeSelectionTable(topoSet, faceSet, size);
+    addToRunTimeSelectionTable(topoSet, faceSet, set);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -92,11 +90,11 @@ Foam::faceSet::faceSet
 (
     const polyMesh& mesh,
     const word& name,
-    const labelHashSet& set,
+    const labelHashSet& labels,
     writeOption w
 )
 :
-    topoSet(mesh, name, set, w)
+    topoSet(mesh, name, labels, w)
 {}
 
 
@@ -104,17 +102,23 @@ Foam::faceSet::faceSet
 (
     const polyMesh& mesh,
     const word& name,
-    const labelUList& set,
+    labelHashSet&& labels,
     writeOption w
 )
 :
-    topoSet(mesh, name, set, w)
+    topoSet(mesh, name, std::move(labels), w)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::faceSet::~faceSet()
+Foam::faceSet::faceSet
+(
+    const polyMesh& mesh,
+    const word& name,
+    const labelUList& labels,
+    writeOption w
+)
+:
+    topoSet(mesh, name, labels, w)
 {}
 
 
@@ -124,10 +128,13 @@ void Foam::faceSet::sync(const polyMesh& mesh)
 {
     boolList set(mesh.nFaces(), false);
 
-    forAllConstIter(faceSet, *this, iter)
+    const labelHashSet& labels = *this;
+
+    for (const label facei : labels)
     {
-        set[iter.key()] = true;
+        set[facei] = true;
     }
+
     syncTools::syncFaceList(mesh, set, orEqOp<bool>());
 
     label nAdded = 0;
@@ -138,7 +145,7 @@ void Foam::faceSet::sync(const polyMesh& mesh)
         {
             if (insert(facei))
             {
-                nAdded++;
+                ++nAdded;
             }
         }
         else if (found(facei))
@@ -174,10 +181,14 @@ void Foam::faceSet::updateMesh(const mapPolyMesh& morphMap)
 void Foam::faceSet::distribute(const mapDistributePolyMesh& map)
 {
     boolList inSet(map.nOldFaces());
-    forAllConstIter(faceSet, *this, iter)
+
+    const labelHashSet& labels = *this;
+
+    for (const label facei : labels)
     {
-        inSet[iter.key()] = true;
+        inSet[facei] = true;
     }
+
     map.distributeFaceData(inSet);
 
     // Count
@@ -186,7 +197,7 @@ void Foam::faceSet::distribute(const mapDistributePolyMesh& map)
     {
         if (inSet[facei])
         {
-            n++;
+            ++n;
         }
     }
 

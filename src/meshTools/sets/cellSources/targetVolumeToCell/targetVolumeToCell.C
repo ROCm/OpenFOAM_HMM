@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 #include "polyMesh.H"
 #include "globalMeshData.H"
 #include "plane.H"
+#include "bitSet.H"
 #include "cellSet.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -57,13 +58,12 @@ Foam::scalar Foam::targetVolumeToCell::volumeOfSet
 {
     scalar sumVol = 0.0;
 
-    forAll(selected, celli)
+    // Loop over selected cells only
+    for (const label celli : selected)
     {
-        if (selected.test(celli))
-        {
-            sumVol += mesh_.cellVolumes()[celli];
-        }
+        sumVol += mesh_.cellVolumes()[celli];
     }
+
     return returnReduce(sumVol, sumOp<scalar>());
 }
 
@@ -84,12 +84,13 @@ Foam::label Foam::targetVolumeToCell::selectCells
     {
         const point& cc = mesh_.cellCentres()[celli];
 
-        if (maskSet.test(celli) && ((cc&n_) < normalComp))
+        if (maskSet.test(celli) && ((cc & normal_) < normalComp))
         {
             selected.set(celli);
-            nSelected++;
+            ++nSelected;
         }
     }
+
     return returnReduce(nSelected, sumOp<label>());
 }
 
@@ -114,10 +115,8 @@ void Foam::targetVolumeToCell::combine(topoSet& set, const bool add) const
         maskSet = false;
         cellSet subset(mesh_, maskSetName_);
 
-        forAllConstIter(cellSet, subset, iter)
-        {
-            maskSet.set(iter.key());
-        }
+        const labelHashSet& cellLabels = subset;
+        maskSet.setMany(cellLabels.begin(), cellLabels.end());
 
         nTotCells = returnReduce(subset.size(), sumOp<label>());
     }
@@ -139,7 +138,7 @@ void Foam::targetVolumeToCell::combine(topoSet& set, const bool add) const
         label maxPointi = -1;
         forAll(points, pointi)
         {
-            scalar c = (points[pointi]&n_);
+            scalar c = (points[pointi] & normal_);
             if (c > maxComp)
             {
                 maxComp = c;
@@ -160,13 +159,12 @@ void Foam::targetVolumeToCell::combine(topoSet& set, const bool add) const
         if (maxCells != nTotCells)
         {
             WarningInFunction
-                << "Plane " << plane(points[maxPointi], n_)
+                << "Plane " << plane(points[maxPointi], normal_)
                 << " selects " << maxCells
                 << " cells instead of all " << nTotCells
                 << " cells. Results might be wrong." << endl;
         }
     }
-
 
 
     // Bisection
@@ -185,7 +183,7 @@ void Foam::targetVolumeToCell::combine(topoSet& set, const bool add) const
 
     while ((high-low) > tolerance)
     {
-        scalar mid = 0.5*(low + high);
+        const scalar mid = 0.5*(low + high);
 
         nSelected = selectCells(mid, maskSet, selected);
         selectedVol = volumeOfSet(selected);
@@ -240,24 +238,23 @@ void Foam::targetVolumeToCell::combine(topoSet& set, const bool add) const
             WarningInFunction
                 << "Did not converge onto plane. " << nl
                 << "high plane:"
-                << plane(high*n_, n_)
+                << plane(high*normal_, normal_)
                 << nl
                 << "low plane :"
-                << plane(low*n_, n_)
+                << plane(low*normal_, normal_)
                 << endl;
         }
     }
 
 
-    Info<< "    Selected " << nSelected << " with actual volume " << selectedVol
-        << endl;
+    Info<< "    Selected " << nSelected << " with actual volume "
+        << selectedVol << endl;
 
-    forAll(selected, celli)
+
+    // Loop over selected cells only
+    for (const label celli : selected)
     {
-        if (selected.test(celli))
-        {
-            addOrDelete(set, celli, add);
-        }
+        addOrDelete(set, celli, add);
     }
 }
 
@@ -268,12 +265,12 @@ Foam::targetVolumeToCell::targetVolumeToCell
 (
     const polyMesh& mesh,
     const scalar vol,
-    const vector& n
+    const vector& normal
 )
 :
     topoSetSource(mesh),
     vol_(vol),
-    n_(n)
+    normal_(normal)
 {}
 
 
@@ -284,8 +281,8 @@ Foam::targetVolumeToCell::targetVolumeToCell
 )
 :
     topoSetSource(mesh),
-    vol_(readScalar(dict.lookup("volume"))),
-    n_(dict.lookup("normal")),
+    vol_(dict.get<scalar>("volume")),
+    normal_(dict.get<vector>("normal")),
     maskSetName_(dict.lookupOrDefault<word>("set", ""))
 {}
 
@@ -298,12 +295,7 @@ Foam::targetVolumeToCell::targetVolumeToCell
 :
     topoSetSource(mesh),
     vol_(readScalar(checkIs(is))),
-    n_(checkIs(is))
-{}
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::targetVolumeToCell::~targetVolumeToCell()
+    normal_(checkIs(is))
 {}
 
 

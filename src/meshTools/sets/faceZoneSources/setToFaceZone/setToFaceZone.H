@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,8 +25,19 @@ Class
     Foam::setToFaceZone
 
 Description
-    A topoSetSource to select faces based on usage in a faceSet. Sets flipMap
-    to true.
+    A topoSetSource to select faces based on usage in a faceSet.
+    Sets flipMap to true.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        faceSet     | Name of input faceSet             | yes   |
+    \endtable
+
+Note
+    The use of keyword \c faceSet is consistent with the setsToFaceZone,
+    but inconsistent with setToCellZone and setToPointZone.
+    Both of which use \c set instead.
 
 SourceFiles
     setToFaceZone.C
@@ -74,22 +85,14 @@ public:
         );
 
         //- Construct from dictionary
-        setToFaceZone
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        setToFaceZone(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        setToFaceZone
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        setToFaceZone(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~setToFaceZone();
+    virtual ~setToFaceZone() = default;
 
 
     // Member Functions
@@ -102,7 +105,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

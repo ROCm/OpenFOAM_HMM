@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,20 +26,15 @@ License
 #include "setAndNormalToFaceZone.H"
 #include "polyMesh.H"
 #include "faceZoneSet.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(setAndNormalToFaceZone, 0);
-
-addToRunTimeSelectionTable(topoSetSource, setAndNormalToFaceZone, word);
-
-addToRunTimeSelectionTable(topoSetSource, setAndNormalToFaceZone, istream);
-
+    defineTypeNameAndDebug(setAndNormalToFaceZone, 0);
+    addToRunTimeSelectionTable(topoSetSource, setAndNormalToFaceZone, word);
+    addToRunTimeSelectionTable(topoSetSource, setAndNormalToFaceZone, istream);
 }
 
 
@@ -73,8 +68,8 @@ Foam::setAndNormalToFaceZone::setAndNormalToFaceZone
 )
 :
     topoSetSource(mesh),
-    setName_(dict.lookup("faceSet")),
-    normal_(dict.lookup("normal"))
+    setName_(dict.get<word>("faceSet")),
+    normal_(dict.get<vector>("normal"))
 {}
 
 
@@ -87,12 +82,6 @@ Foam::setAndNormalToFaceZone::setAndNormalToFaceZone
     topoSetSource(mesh),
     setName_(checkIs(is)),
     normal_(checkIs(is))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::setAndNormalToFaceZone::~setAndNormalToFaceZone()
 {}
 
 
@@ -119,7 +108,8 @@ void Foam::setAndNormalToFaceZone::applyToSet
                 << " ..." << endl;
 
             // Load the sets
-            faceSet fSet(mesh_, setName_);
+            faceSet loadedSet(mesh_, setName_);
+            labelHashSet& faceIds = loadedSet;
 
             // Start off from copy
             DynamicList<label> newAddressing(fzSet.addressing());
@@ -128,10 +118,8 @@ void Foam::setAndNormalToFaceZone::applyToSet
             const faceList& faces = mesh_.faces();
             const pointField& points = mesh_.points();
 
-            forAllConstIter(faceSet, fSet, iter)
+            for (const label facei : faceIds)
             {
-                label facei = iter.key();
-
                 if (!fzSet.found(facei))
                 {
                     newAddressing.append(facei);

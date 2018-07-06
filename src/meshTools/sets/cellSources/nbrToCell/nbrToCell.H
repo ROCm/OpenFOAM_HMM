@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,12 @@ Class
 Description
     A topoSetSource to select cells based on number of neighbouring cells
     (i.e. number of internal or coupled faces)
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        neighbours  | Number of neighbours              | yes   |
+    \endtable
 
 SourceFiles
     nbrToCell.C
@@ -71,6 +77,7 @@ public:
     //- Runtime type information
     TypeName("nbrToCell");
 
+
     // Constructors
 
         //- Construct from components
@@ -81,22 +88,14 @@ public:
         );
 
         //- Construct from dictionary
-        nbrToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        nbrToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        nbrToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        nbrToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~nbrToCell();
+    virtual ~nbrToCell() = default;
 
 
     // Member Functions
@@ -109,7 +108,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

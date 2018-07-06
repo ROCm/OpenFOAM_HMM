@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,12 @@ Description
 
     Handles all known ones from static collection in cellModel
     and splitHex with 10 degrees feature angle.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        type        | The cell model type (hex, ..)     | yes   |
+    \endtable
 
 SourceFiles
     shapeToCell.C
@@ -62,6 +68,7 @@ class shapeToCell
         //- Name of cell type
         word type_;
 
+
     // Private Member Functions
 
         //- Depending on cell type add to or delete from cellSet.
@@ -79,32 +86,25 @@ public:
         //- Cos of feature angle for polyHedral to be splitHex
         static scalar featureCos;
 
+
     // Constructors
 
         //- Construct from components
         shapeToCell
         (
             const polyMesh& mesh,
-            const word& type
+            const word& shapeName
         );
 
         //- Construct from dictionary
-        shapeToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        shapeToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        shapeToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        shapeToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~shapeToCell();
+    virtual ~shapeToCell() = default;
 
 
     // Member Functions
@@ -117,7 +117,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

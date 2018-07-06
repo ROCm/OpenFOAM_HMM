@@ -60,15 +60,12 @@ void Foam::vtk::writeCellSetFaces
 
     Map<label> cellFaces(2*set.size());
 
-    forAllConstIters(set, iter)
+    for (const label celli : static_cast<const labelHashSet&>(set))
     {
-        label celli = iter.key();
         const cell& cFaces = mesh.cells()[celli];
 
-        forAll(cFaces, i)
+        for (const label facei : cFaces)
         {
-            label facei = cFaces[i];
-
             if (mesh.isInternalFace(facei))
             {
                 label otherCelli = mesh.faceOwner()[facei];
@@ -90,7 +87,7 @@ void Foam::vtk::writeCellSetFaces
         }
     }
 
-    const labelList faceLabels = cellFaces.sortedToc();
+    const labelList faceLabels(cellFaces.sortedToc());
     labelList faceValues(cellFaces.size());
 
     forAll(faceLabels, facei)

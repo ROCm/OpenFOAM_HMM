@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,6 +38,15 @@ Description
        k        ( 0.0 0.0  100);
     \endverbatim
 
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        origin      | The box  centre                   | yes   |
+        i           |                                   | yes   |
+        j           |                                   | yes   |
+        k           |                                   | yes   |
+    \endtable
+
 SourceFiles
     rotatedBoxToCell.C
 
@@ -70,7 +79,7 @@ class rotatedBoxToCell
 
 
         //- Skewed box
-        const vector origin_;
+        const point origin_;
         const vector i_;
         const vector j_;
         const vector k_;
@@ -102,11 +111,11 @@ public:
         rotatedBoxToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        rotatedBoxToCell(const polyMesh& mesh, Istream&);
+        rotatedBoxToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~rotatedBoxToCell();
+    virtual ~rotatedBoxToCell() = default;
 
 
     // Member Functions
@@ -119,7 +128,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

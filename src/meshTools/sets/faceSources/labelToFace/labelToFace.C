@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,17 +45,6 @@ Foam::topoSetSource::addToUsageTable Foam::labelToFace::usage_
 );
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::labelToFace::combine(topoSet& set, const bool add) const
-{
-    forAll(labels_, labelI)
-    {
-        addOrDelete(set, labels_[labelI], add);
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::labelToFace::labelToFace
@@ -76,7 +65,7 @@ Foam::labelToFace::labelToFace
 )
 :
     topoSetSource(mesh),
-    labels_(dict.lookup("value"))
+    labels_(dict.get<labelList>("value"))
 {}
 
 
@@ -88,13 +77,9 @@ Foam::labelToFace::labelToFace
 :
     topoSetSource(mesh),
     labels_(checkIs(is))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::labelToFace::~labelToFace()
-{}
+{
+    check(labels_, mesh.nFaces());
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -109,13 +94,13 @@ void Foam::labelToFace::applyToSet
     {
         Info<< "    Adding faces mentioned in dictionary" << " ..." << endl;
 
-        combine(set, true);
+        addOrDelete(set, labels_, true);
     }
     else if (action == topoSetSource::DELETE)
     {
         Info<< "    Removing faces mentioned dictionary" << " ..." << endl;
 
-        combine(set, false);
+        addOrDelete(set, labels_, false);
     }
 }
 

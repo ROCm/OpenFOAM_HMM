@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,14 @@ Class
     Foam::faceToCell
 
 Description
-    A topoSetSource to select cells based on usage in faces.
+    A topoSetSource to select cells based on usage in a face set.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        set         | The face set name to use          | yes   |
+        option      | Selection type (all/any/owner/neighbour)  | yes   |
+    \endtable
 
 SourceFiles
     faceToCell.C
@@ -55,10 +62,10 @@ public:
         //- Enumeration defining the valid options
         enum faceAction
         {
-            NEIGHBOUR,
-            OWNER,
             ANY,
-            ALL
+            ALL,
+            OWNER,
+            NEIGHBOUR
         };
 
 private:
@@ -99,22 +106,14 @@ public:
         );
 
         //- Construct from dictionary
-        faceToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        faceToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        faceToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        faceToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~faceToCell();
+    virtual ~faceToCell() = default;
 
 
     // Member Functions
@@ -127,7 +126,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

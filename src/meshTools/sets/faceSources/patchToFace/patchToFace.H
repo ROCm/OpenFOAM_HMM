@@ -27,6 +27,12 @@ Class
 Description
     A topoSetSource to select faces based on usage in patches.
 
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        name        | Patch name or regex to select     | yes   |
+    \endtable
+
 SourceFiles
     patchToFace.C
 
@@ -81,22 +87,14 @@ public:
         );
 
         //- Construct from dictionary
-        patchToFace
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        patchToFace(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        patchToFace
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        patchToFace(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~patchToFace();
+    virtual ~patchToFace() = default;
 
 
     // Member Functions
@@ -109,7 +107,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

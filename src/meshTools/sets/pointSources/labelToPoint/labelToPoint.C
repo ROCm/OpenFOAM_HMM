@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,17 +45,6 @@ Foam::topoSetSource::addToUsageTable Foam::labelToPoint::usage_
 );
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::labelToPoint::combine(topoSet& set, const bool add) const
-{
-    forAll(labels_, labelI)
-    {
-        addOrDelete(set, labels_[labelI], add);
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::labelToPoint::labelToPoint
@@ -76,7 +65,7 @@ Foam::labelToPoint::labelToPoint
 )
 :
     topoSetSource(mesh),
-    labels_(dict.lookup("value"))
+    labels_(dict.get<labelList>("value"))
 {}
 
 
@@ -88,13 +77,9 @@ Foam::labelToPoint::labelToPoint
 :
     topoSetSource(mesh),
     labels_(checkIs(is))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::labelToPoint::~labelToPoint()
-{}
+{
+    check(labels_, mesh.nPoints());
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -109,14 +94,13 @@ void Foam::labelToPoint::applyToSet
     {
         Info<< "    Adding points mentioned in dictionary" << " ..." << endl;
 
-        combine(set, true);
+        addOrDelete(set, labels_, true);
     }
     else if (action == topoSetSource::DELETE)
     {
-        Info<< "    Removing points mentioned in dictionary" << " ..."
-            << endl;
+        Info<< "    Removing points mentioned in dictionary" << " ..." << endl;
 
-        combine(set, false);
+        addOrDelete(set, labels_, false);
     }
 }
 

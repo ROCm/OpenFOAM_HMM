@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,15 @@ Class
 Description
     A topoSetSource to select faces based on face centres inside a
     cylinder annulus.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        p1          | coordinate of endpoint            | yes   |
+        p2          | coordinate of endpoint            | yes   |
+        outerRadius | cylinder outer radius             | yes   |
+        innerRadius | cylinder inner radius             | yes   |
+    \endtable
 
 SourceFiles
     cylinderAnnulusToFace.C
@@ -58,10 +67,10 @@ class cylinderAnnulusToFace
         static addToUsageTable usage_;
 
         //- First point on cylinder axis
-        vector p1_;
+        point point1_;
 
         //- Second point on cylinder axis
-        vector p2_;
+        point point2_;
 
         //- Outer Radius
         scalar outerRadius_;
@@ -87,29 +96,22 @@ public:
         cylinderAnnulusToFace
         (
             const polyMesh& mesh,
-            const vector& p1,
-            const vector& p2,
+            const point& point1,
+            const point& point2,
             const scalar outerRadius,
             const scalar innerRadius
         );
 
         //- Construct from dictionary
-        cylinderAnnulusToFace
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        cylinderAnnulusToFace(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        cylinderAnnulusToFace
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        cylinderAnnulusToFace(const polyMesh& mesh, Istream& is);
 
 
-    // Destructor
-    virtual ~cylinderAnnulusToFace();
+    //- Destructor
+    virtual ~cylinderAnnulusToFace() = default;
+
 
     // Member Functions
 

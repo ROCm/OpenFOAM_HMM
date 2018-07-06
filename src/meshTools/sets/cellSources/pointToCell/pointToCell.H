@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,13 @@ Class
 
 Description
     A topoSetSource to select cells based on usage of points.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        set         | The point set name                | yes   |
+        option      | Selection type (any / edge)       | yes   |
+    \endtable
 
 SourceFiles
     pointToCell.C
@@ -96,22 +103,14 @@ public:
         );
 
         //- Construct from dictionary
-        pointToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        pointToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        pointToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        pointToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~pointToCell();
+    virtual ~pointToCell() = default;
 
 
     // Member Functions
@@ -124,7 +123,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

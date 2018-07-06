@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,12 @@ Class
 
 Description
     A topoSetSource to select cells based on explicitly given labels.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        value       | The cell labels                   | yes   |
+    \endtable
 
 SourceFiles
     labelToCell.C
@@ -60,11 +66,6 @@ class labelToCell
         labelList labels_;
 
 
-    // Private Member Functions
-
-        void combine(topoSet& set, const bool add) const;
-
-
 public:
 
     //- Runtime type information
@@ -80,22 +81,14 @@ public:
         );
 
         //- Construct from dictionary
-        labelToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        labelToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        labelToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        labelToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~labelToCell();
+    virtual ~labelToCell() = default;
 
 
     // Member Functions
@@ -108,7 +101,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

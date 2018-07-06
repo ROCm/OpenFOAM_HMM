@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,25 +52,23 @@ void Foam::zoneToFace::combine(topoSet& set, const bool add) const
 {
     bool hasMatched = false;
 
-    forAll(mesh_.faceZones(), i)
+    for (const faceZone& zone : mesh_.faceZones())
     {
-        const faceZone& zone = mesh_.faceZones()[i];
-
         if (zoneName_.match(zone.name()))
         {
-            const labelList& faceLabels = mesh_.faceZones()[i];
+            hasMatched = true;
+
+            const labelList& faceLabels = zone;
 
             Info<< "    Found matching zone " << zone.name()
                 << " with " << faceLabels.size() << " faces." << endl;
 
-            hasMatched = true;
-
-            forAll(faceLabels, i)
+            for (const label facei : faceLabels)
             {
                 // Only do active faces
-                if (faceLabels[i] < mesh_.nFaces())
+                if (facei >= 0 && facei < mesh_.nFaces())
                 {
-                    addOrDelete(set, faceLabels[i], add);
+                    addOrDelete(set, facei, add);
                 }
             }
         }
@@ -105,7 +103,7 @@ Foam::zoneToFace::zoneToFace
 )
 :
     topoSetSource(mesh),
-    zoneName_(dict.lookup("name"))
+    zoneName_(dict.get<wordRe>("name"))
 {}
 
 
@@ -117,12 +115,6 @@ Foam::zoneToFace::zoneToFace
 :
     topoSetSource(mesh),
     zoneName_(checkIs(is))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::zoneToFace::~zoneToFace()
 {}
 
 

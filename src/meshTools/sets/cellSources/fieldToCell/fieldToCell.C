@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,6 @@ License
 #include "Time.H"
 #include "IFstream.H"
 #include "fieldDictionary.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -115,9 +114,9 @@ Foam::fieldToCell::fieldToCell
 )
 :
     topoSetSource(mesh),
-    fieldName_(dict.lookup("field")),
-    min_(readScalar(dict.lookup("min"))),
-    max_(readScalar(dict.lookup("max")))
+    fieldName_(dict.get<word>("field")),
+    min_(dict.get<scalar>("min")),
+    max_(dict.get<scalar>("max"))
 {}
 
 
@@ -131,12 +130,6 @@ Foam::fieldToCell::fieldToCell
     fieldName_(checkIs(is)),
     min_(readScalar(checkIs(is))),
     max_(readScalar(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fieldToCell::~fieldToCell()
 {}
 
 
@@ -170,22 +163,22 @@ void Foam::fieldToCell::applyToSet
     // Note: should use volScalarField::typeName instead below
     //       but that would introduce linkage problems (finiteVolume needs
     //       meshTools)
-    else if (fieldObject.headerClassName() == "volScalarField")
+    else if ("volScalarField" == fieldObject.headerClassName())
     {
         IFstream str(typeFilePath<labelIOList>(fieldObject));
 
-        // Read dictionary
+        // Read as dictionary
         fieldDictionary fieldDict(fieldObject, fieldObject.headerClassName());
 
         scalarField internalVals("internalField", fieldDict, mesh().nCells());
 
         applyToSet(action, internalVals, set);
     }
-    else if (fieldObject.headerClassName() == "volVectorField")
+    else if ("volVectorField" == fieldObject.headerClassName())
     {
         IFstream str(typeFilePath<labelIOList>(fieldObject));
 
-        // Read dictionary
+        // Read as dictionary
         fieldDictionary fieldDict(fieldObject, fieldObject.headerClassName());
 
         vectorField internalVals("internalField", fieldDict, mesh().nCells());

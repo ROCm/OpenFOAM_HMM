@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,6 @@ License
 #include "searchableSurface.H"
 #include "syncTools.H"
 #include "Time.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -68,7 +67,7 @@ Foam::searchableSurfaceToFaceZone::searchableSurfaceToFaceZone
     (
         searchableSurface::New
         (
-            word(dict.lookup("surface")),
+            dict.get<word>("surface"),
             IOobject
             (
                 dict.lookupOrDefault("name", mesh.objectRegistry::db().name()),
@@ -128,10 +127,8 @@ void Foam::searchableSurfaceToFaceZone::applyToSet
 
         const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
 
-        forAll(pbm, patchi)
+        for (const polyPatch& pp : pbm)
         {
-            const polyPatch& pp = pbm[patchi];
-
             if (pp.coupled())
             {
                 forAll(pp, i)

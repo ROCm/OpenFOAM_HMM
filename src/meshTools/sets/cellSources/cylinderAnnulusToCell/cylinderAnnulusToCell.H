@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,15 @@ Class
 Description
     A topoSetSource to select cells based on cell centres inside a
     cylinder annulus.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        p1          | coordinate of endpoint            | yes   |
+        p2          | coordinate of endpoint            | yes   |
+        outerRadius | cylinder outer radius             | yes   |
+        innerRadius | cylinder inner radius             | yes   |
+    \endtable
 
 SourceFiles
     cylinderAnnulusToCell.C
@@ -58,10 +67,10 @@ class cylinderAnnulusToCell
         static addToUsageTable usage_;
 
         //- First point on cylinder axis
-        vector p1_;
+        point point1_;
 
         //- Second point on cylinder axis
-        vector p2_;
+        point point2_;
 
         //- Outer Radius
         scalar outerRadius_;
@@ -87,29 +96,22 @@ public:
         cylinderAnnulusToCell
         (
             const polyMesh& mesh,
-            const vector& p1,
-            const vector& p2,
+            const point& point1,
+            const point& point2,
             const scalar outerRadius,
             const scalar innerRadius
         );
 
         //- Construct from dictionary
-        cylinderAnnulusToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        cylinderAnnulusToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        cylinderAnnulusToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        cylinderAnnulusToCell(const polyMesh& mesh, Istream& is);
 
 
-    // Destructor
-    virtual ~cylinderAnnulusToCell();
+    //- Destructor
+    virtual ~cylinderAnnulusToCell() = default;
+
 
     // Member Functions
 
@@ -121,7 +123,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

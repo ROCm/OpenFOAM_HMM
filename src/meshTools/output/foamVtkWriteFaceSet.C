@@ -57,7 +57,7 @@ void Foam::vtk::writeFaceSet
     //-------------------------------------------------------------------------
 
     // Faces of set with OpenFOAM faceID as value
-    const labelList faceLabels = set.sortedToc();
+    const labelList faceLabels(set.sortedToc());
 
     uindirectPrimitivePatch pp
     (

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,7 +67,7 @@ Foam::setToFaceZone::setToFaceZone
 )
 :
     topoSetSource(mesh),
-    setName_(dict.lookup("faceSet"))
+    setName_(dict.get<word>("faceSet"))
 {}
 
 
@@ -79,12 +79,6 @@ Foam::setToFaceZone::setToFaceZone
 :
     topoSetSource(mesh),
     setName_(checkIs(is))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::setToFaceZone::~setToFaceZone()
 {}
 
 
@@ -111,16 +105,15 @@ void Foam::setToFaceZone::applyToSet
                 << " ..." << endl;
 
             // Load the sets
-            faceSet fSet(mesh_, setName_);
+            faceSet loadedSet(mesh_, setName_);
+            const labelHashSet& faceLabels = loadedSet;
 
             // Start off from copy
             DynamicList<label> newAddressing(fzSet.addressing());
             DynamicList<bool> newFlipMap(fzSet.flipMap());
 
-            forAllConstIter(faceSet, fSet, iter)
+            for (const label facei : faceLabels)
             {
-                label facei = iter.key();
-
                 if (!fzSet.found(facei))
                 {
                     newAddressing.append(facei);

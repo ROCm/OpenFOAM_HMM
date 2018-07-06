@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,12 @@ Class
 
 Description
     A topoSetSource to select the cells from another cellSet.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        set         | The cell set name                 | yes   |
+    \endtable
 
 SourceFiles
     cellToCell.C
@@ -73,22 +79,14 @@ public:
         );
 
         //- Construct from dictionary
-        cellToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        cellToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        cellToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        cellToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~cellToCell();
+    virtual ~cellToCell() = default;
 
 
     // Member Functions
@@ -101,7 +99,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

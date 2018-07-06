@@ -67,7 +67,7 @@ void Foam::patchToFace::combine(topoSet& set, const bool add) const
         (
             label facei = pp.start();
             facei < pp.start() + pp.size();
-            facei++
+            ++facei
         )
         {
             addOrDelete(set, facei, add);
@@ -103,7 +103,7 @@ Foam::patchToFace::patchToFace
 )
 :
     topoSetSource(mesh),
-    patchName_(dict.lookup("name"))
+    patchName_(dict.get<wordRe>("name"))
 {}
 
 
@@ -115,12 +115,6 @@ Foam::patchToFace::patchToFace
 :
     topoSetSource(mesh),
     patchName_(checkIs(is))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::patchToFace::~patchToFace()
 {}
 
 
