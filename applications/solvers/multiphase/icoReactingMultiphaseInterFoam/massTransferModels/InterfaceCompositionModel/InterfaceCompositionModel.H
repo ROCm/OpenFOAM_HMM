@@ -172,12 +172,11 @@ public:
 // Instantiation for multi-component (from) to single-component (to)
 #define makeInterfaceDispSpecieMixtureType(Type, Thermo, Comp, Mix, Phys, OtherThermo, OtherComp, OtherMix, OtherPhys)\
                                                                                \
-    typedef Thermo<Comp, SpecieMixture<Mix<Phys> > >                           \
+    typedef Thermo<Comp, SpecieMixture<Mix<Phys>>>                             \
         Type##Thermo##Comp##Mix##Phys;                                         \
                                                                                \
-    typedef OtherThermo<OtherComp, OtherMix<OtherPhys> >                       \
+    typedef OtherThermo<OtherComp, OtherMix<OtherPhys>>                        \
         Type##Other##OtherThermo##OtherComp##OtherMix##OtherPhys;              \
-                                                                               \
                                                                                \
     addInterfaceCompositionToRunTimeSelectionTable                             \
     (                                                                          \
@@ -190,12 +189,11 @@ public:
 // Instantiation for single-component (from) to multi-component (to)
 #define makeInterfaceContSpecieMixtureType(Type, Thermo, Comp, Mix, Phys, OtherThermo, OtherComp, OtherMix, OtherPhys)\
                                                                                \
-    typedef Thermo<Comp, Mix<Phys> >                                           \
+    typedef Thermo<Comp, Mix<Phys>>                                            \
         Type##Thermo##Comp##Mix##Phys;                                         \
                                                                                \
-    typedef OtherThermo<OtherComp, SpecieMixture<OtherMix<OtherPhys> > >       \
+    typedef OtherThermo<OtherComp, SpecieMixture<OtherMix<OtherPhys>>>         \
         Type##Other##OtherThermo##OtherComp##OtherMix##OtherPhys;              \
-                                                                               \
                                                                                \
     addInterfaceCompositionToRunTimeSelectionTable                             \
     (                                                                          \
@@ -208,12 +206,11 @@ public:
 // Instantiation for single-component-single-component pairs
 #define makeInterfacePureType(Type, Thermo, Comp, Mix, Phys, OtherThermo, OtherComp, OtherMix, OtherPhys)\
                                                                                \
-    typedef Thermo<Comp, Mix<Phys> >                                           \
+    typedef Thermo<Comp, Mix<Phys>>                                            \
         Type##Thermo##Comp##Mix##Phys;                                         \
                                                                                \
-    typedef OtherThermo<OtherComp, OtherMix<OtherPhys> >                       \
+    typedef OtherThermo<OtherComp, OtherMix<OtherPhys>>                        \
         Type##Other##OtherThermo##OtherComp##OtherMix##OtherPhys;              \
-                                                                               \
                                                                                \
     addInterfaceCompositionToRunTimeSelectionTable                             \
     (                                                                          \
@@ -226,10 +223,10 @@ public:
 // Instantiation for multi-component-multi-component pairs
 #define makeSpecieInterfaceSpecieMixtures(Type, Thermo, Comp, Mix, Phys, OtherThermo, OtherComp, OtherMix, OtherPhys)\
                                                                                \
-    typedef Thermo<Comp, SpecieMixture<Mix<Phys> > >                           \
+    typedef Thermo<Comp, SpecieMixture<Mix<Phys>>>                             \
         Type##Thermo##Comp##Mix##Phys;                                         \
                                                                                \
-    typedef OtherThermo<OtherComp, SpecieMixture<OtherMix<OtherPhys> > >       \
+    typedef OtherThermo<OtherComp, SpecieMixture<OtherMix<OtherPhys>>>         \
         Type##Other##OtherThermo##OtherComp##OtherMix##OtherPhys;              \
                                                                                \
     addInterfaceCompositionToRunTimeSelectionTable                             \

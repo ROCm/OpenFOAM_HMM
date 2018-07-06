@@ -36,19 +36,19 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::faPatchField, Foam::areaMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::faPatchField, Foam::areaMesh>>
 Foam::faFieldReconstructor::reconstructFaAreaField
 (
     const IOobject& fieldIoObject
 )
 {
     // Read the field for all the processors
-    PtrList<GeometricField<Type, faPatchField, areaMesh> > procFields
+    PtrList<GeometricField<Type, faPatchField, areaMesh>> procFields
     (
         procMeshes_.size()
     );
 
-    forAll (procMeshes_, procI)
+    forAll(procMeshes_, procI)
     {
         procFields.set
         (
@@ -72,7 +72,7 @@ Foam::faFieldReconstructor::reconstructFaAreaField
     Field<Type> internalField(mesh_.nFaces());
 
     // Create the patch fields
-    PtrList<faPatchField<Type> > patchFields(mesh_.boundary().size());
+    PtrList<faPatchField<Type>> patchFields(mesh_.boundary().size());
 
 
     // Create global mesh patches starts
@@ -89,7 +89,7 @@ Foam::faFieldReconstructor::reconstructFaAreaField
         gStarts[i] = gStarts[i-1] + mesh_.boundary()[i-1].labelList::size();
     }
 
-    forAll (procMeshes_, procI)
+    forAll(procMeshes_, procI)
     {
         const GeometricField<Type, faPatchField, areaMesh>& procField =
             procFields[procI];
@@ -203,7 +203,7 @@ Foam::faFieldReconstructor::reconstructFaAreaField
 //                         label curBPatch = mesh_.boundary().whichPatch(curE);
                         label curBPatch = -1;
 
-                        forAll (mesh_.boundary(), pI)
+                        forAll(mesh_.boundary(), pI)
                         {
                             if
                             (
@@ -273,7 +273,7 @@ Foam::faFieldReconstructor::reconstructFaAreaField
 
     // Now construct and write the field
     // setting the internalField and patchFields
-    return tmp<GeometricField<Type, faPatchField, areaMesh> >
+    return tmp<GeometricField<Type, faPatchField, areaMesh>>
     (
         new GeometricField<Type, faPatchField, areaMesh>
         (
@@ -295,19 +295,19 @@ Foam::faFieldReconstructor::reconstructFaAreaField
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::faePatchField, Foam::edgeMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::faePatchField, Foam::edgeMesh>>
 Foam::faFieldReconstructor::reconstructFaEdgeField
 (
     const IOobject& fieldIoObject
 )
 {
     // Read the field for all the processors
-    PtrList<GeometricField<Type, faePatchField, edgeMesh> > procFields
+    PtrList<GeometricField<Type, faePatchField, edgeMesh>> procFields
     (
         procMeshes_.size()
     );
 
-    forAll (procMeshes_, procI)
+    forAll(procMeshes_, procI)
     {
         procFields.set
         (
@@ -332,7 +332,7 @@ Foam::faFieldReconstructor::reconstructFaEdgeField
     Field<Type> internalField(mesh_.nInternalEdges());
 
     // Create the patch fields
-    PtrList<faePatchField<Type> > patchFields(mesh_.boundary().size());
+    PtrList<faePatchField<Type>> patchFields(mesh_.boundary().size());
 
 
     labelList gStarts(mesh_.boundary().size(), -1);
@@ -348,7 +348,7 @@ Foam::faFieldReconstructor::reconstructFaEdgeField
     }
 
 
-    forAll (procMeshes_, procI)
+    forAll(procMeshes_, procI)
     {
         const GeometricField<Type, faePatchField, edgeMesh>& procField =
             procFields[procI];
@@ -361,7 +361,7 @@ Foam::faFieldReconstructor::reconstructFaEdgeField
         {
             labelList curAddr(edgeProcAddressing_[procI]);
 
-//             forAll (curAddr, addrI)
+//             forAll(curAddr, addrI)
 //             {
 //                 curAddr[addrI] -= 1;
 //             }
@@ -476,7 +476,7 @@ Foam::faFieldReconstructor::reconstructFaEdgeField
 
                             label curBPatch = -1;
 
-                            forAll (mesh_.boundary(), pI)
+                            forAll(mesh_.boundary(), pI)
                             {
                                 if
                                 (
@@ -553,7 +553,7 @@ Foam::faFieldReconstructor::reconstructFaEdgeField
 
     // Now construct and write the field
     // setting the internalField and patchFields
-    return tmp<GeometricField<Type, faePatchField, edgeMesh> >
+    return tmp<GeometricField<Type, faePatchField, edgeMesh>>
     (
         new GeometricField<Type, faePatchField, edgeMesh>
         (

@@ -184,7 +184,7 @@ void Foam::isoAdvection::timeIntegratedFlux()
     }
 
     // Storage for isoFace points. Only used if writeIsoFacesToFile_
-    DynamicList<List<point> > isoFacePts;
+    DynamicList<List<point>> isoFacePts;
 
     // Loop through all cells
     forAll(alpha1In_, celli)

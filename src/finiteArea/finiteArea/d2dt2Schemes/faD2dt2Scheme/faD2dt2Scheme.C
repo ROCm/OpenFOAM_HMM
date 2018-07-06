@@ -45,7 +45,7 @@ namespace fa
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<faD2dt2Scheme<Type> > faD2dt2Scheme<Type>::New
+tmp<faD2dt2Scheme<Type>> faD2dt2Scheme<Type>::New
 (
     const faMesh& mesh,
     Istream& schemeData

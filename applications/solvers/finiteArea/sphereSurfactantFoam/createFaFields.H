@@ -48,7 +48,7 @@ areaVectorField Us
 
 dimensioned<scalar> Uinf("Uinf", dimVelocity, 1.0);
 
-forAll (Us, faceI)
+forAll(Us, faceI)
 {
     Us[faceI].x() =
         Uinf.value()*(0.25*(3.0 + sqr(R[faceI].x()/mag(R[faceI]))) - 1.0);

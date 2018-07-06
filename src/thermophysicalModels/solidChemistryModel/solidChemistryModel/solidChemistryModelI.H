@@ -126,7 +126,7 @@ Foam::solidChemistryModel<CompType, SolidThermo>::RRsHs() const
 
         for (label i=0; i < nSolids_; i++)
         {
-            forAll (RRs, cellI)
+            forAll(RRs, cellI)
             {
                 RRs[cellI] +=
                     RRs_[i][cellI]*solidThermo_[i].Hs(p[cellI], T[cellI]);

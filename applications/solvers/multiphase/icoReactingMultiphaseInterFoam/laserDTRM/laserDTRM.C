@@ -720,7 +720,7 @@ void Foam::radiation::laserDTRM::calculate()
         {
             const pointField& pos = positions[proci];
             const pointField& pfinal = p0[proci];
-            forAll (pos, i)
+            forAll(pos, i)
             {
                 meshTools::writeOBJ(osRef, pos[i]);
                 vertI++;
