@@ -73,7 +73,7 @@ geometry
         type        triSurfaceMesh;
         name        walls;
     }
-};
+}
 
 castellatedMeshControls
 {

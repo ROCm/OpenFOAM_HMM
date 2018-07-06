@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,10 +30,20 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(searchableDisk, 0);
-addToRunTimeSelectionTable(searchableSurface, searchableDisk, dict);
-
+    defineTypeNameAndDebug(searchableDisk, 0);
+    addToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchableDisk,
+        dict
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchableDisk,
+        dict,
+        disk
+    );
 }
 
 
@@ -50,7 +60,7 @@ Foam::pointIndexHit Foam::searchableDisk::findNearest
     vector v(sample - origin_);
 
     // Decompose sample-origin into normal and parallel component
-    scalar parallel = (v & normal_);
+    const scalar parallel = (v & normal_);
 
     // Remove the parallel component and normalise
     v -= parallel*normal_;
@@ -90,7 +100,7 @@ void Foam::searchableDisk::findLine
     vector v(start - origin_);
 
     // Decompose sample-origin into normal and parallel component
-    scalar parallel = (v & normal_);
+    const scalar parallel = (v & normal_);
 
     if (sign(parallel) == sign((end - origin_) & normal_))
     {
@@ -160,9 +170,9 @@ Foam::searchableDisk::searchableDisk
 )
 :
     searchableSurface(io),
-    origin_(dict.lookup("origin")),
-    normal_(dict.lookup("normal")),
-    radius_(readScalar(dict.lookup("radius")))
+    origin_(dict.get<point>("origin")),
+    normal_(dict.get<vector>("normal")),
+    radius_(dict.get<scalar>("radius"))
 {
     normal_ /= mag(normal_);
 
@@ -181,12 +191,6 @@ Foam::searchableDisk::searchableDisk
     bounds().min() = origin_ - span;
     bounds().max() = origin_ + span;
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::searchableDisk::~searchableDisk()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

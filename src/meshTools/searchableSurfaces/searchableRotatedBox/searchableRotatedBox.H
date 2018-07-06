@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,11 +33,21 @@ Description
     E.g. box with sides 1 1 1 rotated 45 degrees around z-axis at
          origin (0.5 0.5 0.5)
     \verbatim
-        span     (1 1 1);
+        span    (1 1 1);
         origin  (0.5 0.5 0.5);
         e1      (1 1 0);
         e3      (0 0 1);
     \endverbatim
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required | Default
+        type        | rotatedBox / searchableRotatedBox | selector |
+        span        | The box dimensions                | yes   |
+        origin      | The box corner                    | yes   |
+        e1          | Local x-axis of the box           | yes   |
+        e3          | Local z-axis of the box           | yes   |
+    \endtable
 
 SourceFiles
     searchableRotatedBox.C
@@ -68,13 +78,13 @@ private:
 
     // Private Member Data
 
-        //- box in local coordinate system
+        //- Box in local coordinate system
         searchableBox box_;
 
-        //- transformation from local to global coordinates
+        //- Transformation from local to global coordinates
         coordinateSystem transform_;
 
-        //- (global) corner points (in treeBoundBox order)
+        //- The (global) corner points (in treeBoundBox order)
         pointField points_;
 
 
@@ -104,11 +114,12 @@ public:
 
 
     //- Destructor
-    virtual ~searchableRotatedBox();
+    virtual ~searchableRotatedBox() = default;
 
 
     // Member Functions
 
+        //- Names of regions
         virtual const wordList& regions() const;
 
         //- Whether supports volume type below
@@ -236,8 +247,8 @@ public:
             //  cannot be determined (e.g. non-manifold surface)
             virtual void getVolumeType
             (
-                const pointField&,
-                List<volumeType>&
+                const pointField& points,
+                List<volumeType>& volType
             ) const;
 
 

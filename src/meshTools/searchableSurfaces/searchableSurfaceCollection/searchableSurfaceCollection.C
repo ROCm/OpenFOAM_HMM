@@ -33,15 +33,13 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(searchableSurfaceCollection, 0);
-addToRunTimeSelectionTable
-(
-    searchableSurface,
-    searchableSurfaceCollection,
-    dict
-);
-
+    defineTypeNameAndDebug(searchableSurfaceCollection, 0);
+    addToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchableSurfaceCollection,
+        dict
+    );
 }
 
 
@@ -182,7 +180,7 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
     scale_(dict.size()),
     transform_(dict.size()),
     subGeom_(dict.size()),
-    mergeSubRegions_(dict.lookup("mergeSubRegions")),
+    mergeSubRegions_(dict.get<bool>("mergeSubRegions")),
     indexOffset_(dict.size()+1)
 {
     Info<< "SearchableCollection : " << name() << endl;
@@ -197,7 +195,7 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
 
             const dictionary& subDict = dict.subDict(instance_[surfI]);
 
-            scale_[surfI] = subDict.lookup("scale");
+            subDict.read("scale", scale_[surfI]);
             transform_.set
             (
                 surfI,
@@ -207,7 +205,7 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
                 )
             );
 
-            const word subGeomName(subDict.lookup("surface"));
+            const word subGeomName(subDict.get<word>("surface"));
             //Pout<< "Trying to find " << subGeomName << endl;
 
             const searchableSurface& s =
@@ -223,7 +221,7 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
                     << exit(FatalError);
             }
 
-            subGeom_.set(surfI, &const_cast<searchableSurface&>(s));
+            subGeom_.set(surfI, &(const_cast<searchableSurface&>(s)));
 
             indexOffset_[surfI] = startIndex;
             startIndex += subGeom_[surfI].size();
@@ -303,9 +301,9 @@ const Foam::wordList& Foam::searchableSurfaceCollection::regions() const
             {
                 const wordList& subRegions = subGeom_[surfI].regions();
 
-                forAll(subRegions, i)
+                for (const word& regionName : subRegions)
                 {
-                    allRegions.append(instance_[surfI] + "_" + subRegions[i]);
+                    allRegions.append(instance_[surfI] + "_" + regionName);
                 }
             }
         }
@@ -324,8 +322,8 @@ Foam::label Foam::searchableSurfaceCollection::size() const
 Foam::tmp<Foam::pointField>
 Foam::searchableSurfaceCollection::coordinates() const
 {
-    tmp<pointField> tCtrs(new pointField(size()));
-    pointField& ctrs = tCtrs.ref();
+    auto tctrs = tmp<pointField>::New(size());
+    auto& ctrs = tctrs.ref();
 
     // Append individual coordinates
     label coordI = 0;
@@ -347,7 +345,7 @@ Foam::searchableSurfaceCollection::coordinates() const
         }
     }
 
-    return tCtrs;
+    return tctrs;
 }
 
 
@@ -399,8 +397,8 @@ Foam::searchableSurfaceCollection::points() const
         nPoints += subGeom_[surfI].points()().size();
     }
 
-    tmp<pointField> tPts(new pointField(nPoints));
-    pointField& pts = tPts.ref();
+    auto tpts = tmp<pointField>::New(nPoints);
+    auto& pts = tpts.ref();
 
     // Append individual coordinates
     nPoints = 0;
@@ -422,7 +420,7 @@ Foam::searchableSurfaceCollection::points() const
         }
     }
 
-    return tPts;
+    return tpts;
 }
 
 

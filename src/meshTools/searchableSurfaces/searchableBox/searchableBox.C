@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,19 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(searchableBox, 0);
-    addToRunTimeSelectionTable(searchableSurface, searchableBox, dict);
+    addToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchableBox,
+        dict
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchableBox,
+        dict,
+        box
+    );
 }
 
 
@@ -47,6 +59,7 @@ void Foam::searchableBox::projectOntoCoordPlane
 {
     // Set point
     info.rawPoint()[dir] = planePt[dir];
+
     // Set face
     if (planePt[dir] == min()[dir])
     {
@@ -92,7 +105,7 @@ Foam::pointIndexHit Foam::searchableBox::findNearest
     // (for internal points) per direction what nearest cube side is
     point near;
 
-    for (direction dir = 0; dir < vector::nComponents; dir++)
+    for (direction dir = 0; dir < vector::nComponents; ++dir)
     {
         if (info.rawPoint()[dir] < min()[dir])
         {
@@ -188,7 +201,7 @@ Foam::searchableBox::searchableBox
 )
 :
     searchableSurface(io),
-    treeBoundBox(dict.lookup("min"), dict.lookup("max"))
+    treeBoundBox(dict.get<point>("min"), dict.get<point>("max"))
 {
     if (!contains(midpoint()))
     {
@@ -199,12 +212,6 @@ Foam::searchableBox::searchableBox
 
     bounds() = static_cast<boundBox>(*this);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::searchableBox::~searchableBox()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -222,8 +229,8 @@ const Foam::wordList& Foam::searchableBox::regions() const
 
 Foam::tmp<Foam::pointField> Foam::searchableBox::coordinates() const
 {
-    tmp<pointField> tCtrs(new pointField(6));
-    pointField& ctrs = tCtrs.ref();
+    auto tctrs = tmp<pointField>::New(6);
+    auto& ctrs = tctrs.ref();
 
     const pointField pts(treeBoundBox::points());
     const faceList& fcs = treeBoundBox::faces;
@@ -233,7 +240,7 @@ Foam::tmp<Foam::pointField> Foam::searchableBox::coordinates() const
         ctrs[i] = fcs[i].centre(pts);
     }
 
-    return tCtrs;
+    return tctrs;
 }
 
 
@@ -255,9 +262,9 @@ void Foam::searchableBox::boundingSpheres
         const face& f = fcs[i];
 
         centres[i] = f.centre(pts);
-        forAll(f, fp)
+        for (const label pointi : f)
         {
-            const point& pt = pts[f[fp]];
+            const point& pt = pts[pointi];
 
             radiusSqr[i] = Foam::max
             (
@@ -303,7 +310,7 @@ Foam::pointIndexHit Foam::searchableBox::findNearestOnEdge
     // (for internal points) per direction what nearest cube side is
     point near;
 
-    for (direction dir = 0; dir < vector::nComponents; dir++)
+    for (direction dir = 0; dir < vector::nComponents; ++dir)
     {
         if (info.rawPoint()[dir] < min()[dir])
         {
@@ -405,7 +412,7 @@ Foam::pointIndexHit Foam::searchableBox::findLine
     {
         info.setHit();
 
-        for (direction dir = 0; dir < vector::nComponents; dir++)
+        for (direction dir = 0; dir < vector::nComponents; ++dir)
         {
             if (info.rawPoint()[dir] == min()[dir])
             {
@@ -602,20 +609,23 @@ void Foam::searchableBox::getVolumeType
 ) const
 {
     volType.setSize(points.size());
-    volType = volumeType::INSIDE;
 
     forAll(points, pointi)
     {
         const point& pt = points[pointi];
 
-        for (direction dir = 0; dir < vector::nComponents; dir++)
+        volumeType vt = volumeType::INSIDE;
+
+        for (direction dir=0; dir < vector::nComponents; ++dir)
         {
             if (pt[dir] < min()[dir] || pt[dir] > max()[dir])
             {
-                volType[pointi] = volumeType::OUTSIDE;
+                vt = volumeType::OUTSIDE;
                 break;
             }
         }
+
+        volType[pointi] = vt;
     }
 }
 

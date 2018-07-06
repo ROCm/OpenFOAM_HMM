@@ -659,14 +659,14 @@ void Foam::searchableSurfacesQueries::signedDistance
 Foam::boundBox Foam::searchableSurfacesQueries::bounds
 (
     const PtrList<searchableSurface>& allSurfaces,
-    const labelList& surfacesToTest
+    const labelUList& surfacesToTest
 )
 {
     boundBox bb(boundBox::invertedBox);
 
-    forAll(surfacesToTest, testi)
+    for (const label surfi : surfacesToTest)
     {
-        bb.add(allSurfaces[surfacesToTest[testi]].bounds());
+        bb.add(allSurfaces[surfi].bounds());
     }
 
     return bb;

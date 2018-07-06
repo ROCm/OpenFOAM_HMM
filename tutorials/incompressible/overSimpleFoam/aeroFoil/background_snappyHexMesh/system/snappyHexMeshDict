@@ -30,11 +30,11 @@ geometry
 
     refinementBox
     {
-        type    searchableBox;
+        type    box;
         min     (-5 -1 -1);
         max     ( 5  1  1);
     }
-};
+}
 
 // Settings for the castellatedMesh generation.
 castellatedMeshControls

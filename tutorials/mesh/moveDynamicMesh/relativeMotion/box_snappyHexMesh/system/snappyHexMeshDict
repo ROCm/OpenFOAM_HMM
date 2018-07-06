@@ -30,37 +30,37 @@ geometry
 {
     v_dualWing
     {
-        type        searchableCylinder;
-        name        v_dualWing;
-        point1 (-0.43 0 -10);
-        point2 (-0.43 0  10);
-        radius 0.1;
+        type    cylinder;
+        name    v_dualWing;
+        point1  (-0.43 0 -10);
+        point2  (-0.43 0  10);
+        radius  0.1;
     }
 
 
     v_rotor
     {
-        type        searchableCylinder;
-        name        v_rotor;
-        point1 (0 0 -10);
-        point2 (0 0  10);
-        radius 0.75;
+        type    cylinder;
+        name    v_rotor;
+        point1  (0 0 -10);
+        point2  (0 0  10);
+        radius  0.75;
     }
     wing1
     {
-        type        searchableBox;
-        name        wing1;
-        min (-0.5  -0.01  -10);
-        max (-0.44  0.01  10);
+        type    box;
+        name    wing1;
+        min     (-0.5  -0.01  -10);
+        max     (-0.44  0.01  10);
     }
     wing2
     {
-        type        searchableBox;
-        name        wing2;
-        min (-0.42 -0.0025  -10);
-        max (-0.36  0.0025   10);
+        type    box;
+        name    wing2;
+        min     (-0.42 -0.0025  -10);
+        max     (-0.36  0.0025   10);
     }
-};
+}
 
 
 

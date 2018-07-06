@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,15 @@ Description
     Searching on circular disk given as origin, normal (gets normalised)
     and radius
 
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required | Default
+        type        | disk / searchableDisk             | selector |
+        origin      | centre of disk                    | yes   |
+        normal      | normal vector                     | yes   |
+        radius      | disk radius                       | yes   |
+    \endtable
+
 SourceFiles
     searchableDisk.C
 
@@ -45,7 +54,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class searchableDisk Declaration
+                       Class searchableDisk Declaration
 \*---------------------------------------------------------------------------*/
 
 class searchableDisk
@@ -56,13 +65,13 @@ private:
 
     // Private Member Data
 
-        //- origin
+        //- Origin
         const point origin_;
 
-        //- normal
+        //- Normal
         vector normal_;
 
-        //- radius
+        //- Radius
         const scalar radius_;
 
         //- Names of regions
@@ -120,14 +129,15 @@ public:
         );
 
     //- Destructor
-    virtual ~searchableDisk();
+    virtual ~searchableDisk() = default;
 
 
     // Member Functions
 
+        //- Names of regions
         virtual const wordList& regions() const;
 
-        //- Whether supports volume type below
+        //- Whether supports volume type (below)
         virtual bool hasVolumeType() const
         {
             return false;
@@ -143,8 +153,7 @@ public:
         //  Usually the element centres (should be of length size()).
         virtual tmp<pointField> coordinates() const
         {
-            tmp<pointField> tCtrs(new pointField(1, origin_));
-            return tCtrs;
+            return tmp<pointField>::New(1, origin_);
         }
 
         //- Get bounding spheres (centre and radius squared), one per element.
@@ -165,7 +174,6 @@ public:
         virtual bool overlaps(const boundBox& bb) const
         {
             NotImplemented;
-
             return false;
         }
 
@@ -215,12 +223,12 @@ public:
                 vectorField& normal
             ) const;
 
-            //- Determine type (inside/outside/mixed) for point. unknown if
-            //  cannot be determined (e.g. non-manifold surface)
+            //- Determine type (inside/outside/mixed) for point.
+            //  Unknown if cannot be determined (e.g. non-manifold surface)
             virtual void getVolumeType
             (
-                const pointField&,
-                List<volumeType>&
+                const pointField& points,
+                List<volumeType>& volType
             ) const;
 
 

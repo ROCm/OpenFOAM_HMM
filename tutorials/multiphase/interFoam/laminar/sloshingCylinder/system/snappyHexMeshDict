@@ -27,7 +27,7 @@ geometry
         type closedTriSurfaceMesh;
         name sloshingCylinder;
     }
-};
+}
 
 castellatedMeshControls
 {

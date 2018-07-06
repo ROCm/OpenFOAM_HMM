@@ -130,7 +130,8 @@ geometry
         name rotating;
         type triSurfaceMesh;
     }
-};
+}
+
 
 // Settings for the castellatedMesh generation.
 castellatedMeshControls

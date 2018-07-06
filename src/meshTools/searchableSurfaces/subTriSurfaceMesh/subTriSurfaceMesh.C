@@ -30,22 +30,26 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(subTriSurfaceMesh, 0);
-addToRunTimeSelectionTable(searchableSurface, subTriSurfaceMesh, dict);
-
+    defineTypeNameAndDebug(subTriSurfaceMesh, 0);
+    addToRunTimeSelectionTable
+    (
+        searchableSurface,
+        subTriSurfaceMesh,
+        dict
+    );
 }
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::wordList Foam::subTriSurfaceMesh::patchNames(const triSurface& s)
 {
-    const geometricSurfacePatchList& patches = s.patches();
+    const auto& patches = s.patches();
 
     wordList names(patches.size());
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        names[patchI] = patches[patchI].name();
+        names[patchi] = patches[patchi].name();
     }
     return names;
 }
@@ -54,30 +58,25 @@ Foam::wordList Foam::subTriSurfaceMesh::patchNames(const triSurface& s)
 Foam::labelList Foam::subTriSurfaceMesh::selectedRegions
 (
     const triSurface& s,
-    const UList<wordRe>& regionNames
+    const wordRes& regionNameMatcher
 )
 {
     const wordList names(patchNames(s));
 
-    labelList regions(names.size());
+    labelList regionIds(names.size());
 
-    label compactI = 0;
+    label count = 0;
 
-    forAll(names, regionI)
+    forAll(names, regioni)
     {
-        const word& name = names[regionI];
-
-        forAll(regionNames, i)
+        if (regionNameMatcher.match(names[regioni]))
         {
-            if (regionNames[i].match(name))
-            {
-                regions[compactI++] = regionI;
-            }
+            regionIds[count++] = regioni;
         }
     }
-    regions.setSize(compactI);
+    regionIds.setSize(count);
 
-    return regions;
+    return regionIds;
 }
 
 
@@ -87,16 +86,16 @@ Foam::triSurface Foam::subTriSurfaceMesh::subset
     const dictionary& dict
 )
 {
-    const word subGeomName(dict.lookup("surface"));
+    const word subGeomName(dict.get<word>("surface"));
 
     const triSurfaceMesh& s =
         io.db().lookupObject<triSurfaceMesh>(subGeomName);
 
-    const wordRes regionNames(dict.lookup("patches"));
+    const wordRes regionNames(dict.get<wordRes>("patches"));
 
     labelList regionMap(selectedRegions(s, regionNames));
 
-    if (regionMap.size() == 0)
+    if (regionMap.empty())
     {
         FatalIOErrorInFunction(dict)
             << "Found no regions in triSurface matching " << regionNames

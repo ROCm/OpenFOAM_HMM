@@ -35,12 +35,11 @@ geometry
     }
     wake
     {
-        type searchableBox;
-        min (0.8 -0.1 -0.1);
-        max (2.0  0.1  0.1);
+        type box;
+        min  (0.8 -0.1 -0.1);
+        max  (2.0  0.1  0.1);
     }
-};
-
+}
 
 
 // Settings for the castellatedMesh generation.

@@ -33,7 +33,7 @@ geometry
         type triSurfaceMesh;
         name motorBike;
     }
-};
+}
 
 
 //// Optional: avoid patch-face merging. Allows mesh to be used for

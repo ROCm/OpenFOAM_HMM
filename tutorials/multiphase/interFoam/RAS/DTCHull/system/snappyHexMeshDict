@@ -39,8 +39,7 @@ geometry
             type wall;
         }
     }
-};
-
+}
 
 
 // Settings for the castellatedMesh generation.

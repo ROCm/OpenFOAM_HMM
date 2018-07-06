@@ -65,7 +65,6 @@ bool Foam::searchableSurfaces::connected
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct with length.
 Foam::searchableSurfaces::searchableSurfaces(const label size)
 :
     PtrList<searchableSurface>(size),
@@ -90,7 +89,7 @@ Foam::searchableSurfaces::searchableSurfaces(const label size)
 //
 //        // Make IOobject with correct name
 //        autoPtr<IOobject> namedIO(io.clone());
-//        namedIO().rename(dict.lookup("name"));
+//        namedIO().rename(dict.get<word>("name"));
 //
 //        // Create and hook surface
 //        set
@@ -98,7 +97,7 @@ Foam::searchableSurfaces::searchableSurfaces(const label size)
 //            surfI,
 //            searchableSurface::New
 //            (
-//                dict.lookup("type"),
+//                dict.get<word>("type"),
 //                namedIO(),
 //                dict
 //            )
@@ -140,7 +139,7 @@ Foam::searchableSurfaces::searchableSurfaces(const label size)
 //                            << exit(FatalError);
 //                    }
 //
-//                    globalNames[index] = word(regionDict.lookup("name"));
+//                    globalNames[index] = regionDict.get<word>("name");
 //                }
 //            }
 //        }
@@ -193,8 +192,7 @@ Foam::searchableSurfaces::searchableSurfaces
 
         const dictionary& dict = topDict.subDict(key);
 
-        names_[surfI] = key;
-        dict.readIfPresent("name", names_[surfI]);
+        names_[surfI] = dict.lookupOrDefault<word>("name", key);
 
         // Make IOobject with correct name
         autoPtr<IOobject> namedIO(io.clone());
@@ -211,7 +209,7 @@ Foam::searchableSurfaces::searchableSurfaces
             surfI,
             searchableSurface::New
             (
-                dict.lookup("type"),
+                dict.get<word>("type"),
                 namedIO(),
                 dict
             )
@@ -262,7 +260,7 @@ Foam::searchableSurfaces::searchableSurfaces
                             << exit(FatalError);
                     }
 
-                    rNames[index] = word(regionDict.lookup("name"));
+                    rNames[index] = regionDict.get<word>("name");
                 }
             }
         }

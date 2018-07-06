@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,10 +30,20 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(searchableSphere, 0);
-addToRunTimeSelectionTable(searchableSurface, searchableSphere, dict);
-
+    defineTypeNameAndDebug(searchableSphere, 0);
+    addToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchableSphere,
+        dict
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchableSphere,
+        dict,
+        sphere
+    );
 }
 
 
@@ -148,8 +158,8 @@ Foam::searchableSphere::searchableSphere
 )
 :
     searchableSurface(io),
-    centre_(dict.lookup("centre")),
-    radius_(readScalar(dict.lookup("radius")))
+    centre_(dict.get<point>("centre")),
+    radius_(dict.get<scalar>("radius"))
 {
     bounds() = boundBox
     (
@@ -157,12 +167,6 @@ Foam::searchableSphere::searchableSphere
         centre_ + radius_*vector::one
     );
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::searchableSphere::~searchableSphere()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -351,20 +355,18 @@ void Foam::searchableSphere::getVolumeType
 ) const
 {
     volType.setSize(points.size());
-    volType = volumeType::INSIDE;
+
+    const scalar rad2 = sqr(radius_);
 
     forAll(points, pointi)
     {
         const point& pt = points[pointi];
 
-        if (magSqr(pt - centre_) <= sqr(radius_))
-        {
-            volType[pointi] = volumeType::INSIDE;
-        }
-        else
-        {
-            volType[pointi] = volumeType::OUTSIDE;
-        }
+        volType[pointi] =
+        (
+            (magSqr(pt - centre_) <= rad2)
+          ? volumeType::INSIDE : volumeType::OUTSIDE
+        );
     }
 }
 

@@ -28,6 +28,13 @@ Description
     Set of transformed searchableSurfaces. Does not do boolean operations
     so when meshing might find parts 'inside'.
 
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required | Default
+        type        | searchableSurfaceCollection       | selector |
+        mergeSubRegions | boolean                       | yes   |
+    \endtable
+
 SourceFiles
     searchableSurfaceCollection.C
 
@@ -40,7 +47,6 @@ SourceFiles
 #include "treeBoundBox.H"
 #include "coordinateSystem.H"
 #include "UPtrList.H"
-#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,13 +76,13 @@ class searchableSurfaceCollection
 
             UPtrList<searchableSurface> subGeom_;
 
-            Switch mergeSubRegions_;
+            bool mergeSubRegions_;
 
             //- Offsets for indices coming from different surfaces
             //  (sized with size() of each surface)
             labelList indexOffset_;
 
-        //- Region names
+        //- Names of regions
         mutable wordList regions_;
 
         //- From individual regions to collection regions
@@ -164,9 +170,10 @@ public:
             return transform_;
         }
 
+        //- Names of regions
         virtual const wordList& regions() const;
 
-        //- Whether supports volume type below
+        //- Whether supports volume type (below)
         virtual bool hasVolumeType() const
         {
             return false;
@@ -194,7 +201,6 @@ public:
         virtual bool overlaps(const boundBox& bb) const
         {
             NotImplemented;
-
             return false;
         }
 
@@ -244,12 +250,12 @@ public:
                 vectorField& normal
             ) const;
 
-            //- Determine type (inside/outside/mixed) for point. unknown if
-            //  cannot be determined (e.g. non-manifold surface)
+            //- Determine type (inside/outside/mixed) for point.
+            //  Unknown if cannot be determined (e.g. non-manifold surface)
             virtual void getVolumeType
             (
-                const pointField&,
-                List<volumeType>&
+                const pointField& points,
+                List<volumeType>& volType
             ) const;
 
         // Other

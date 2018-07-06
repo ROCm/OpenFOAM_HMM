@@ -32,7 +32,19 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(searchablePlate, 0);
-    addToRunTimeSelectionTable(searchableSurface, searchablePlate, dict);
+    addToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchablePlate,
+        dict
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchablePlate,
+        dict,
+        plate
+    );
 }
 
 
@@ -42,7 +54,7 @@ Foam::direction Foam::searchablePlate::calcNormal(const point& span)
 {
     direction normalDir = 3;
 
-    for (direction dir = 0; dir < vector::nComponents; dir++)
+    for (direction dir = 0; dir < vector::nComponents; ++dir)
     {
         if (span[dir] < 0)
         {
@@ -96,7 +108,7 @@ Foam::pointIndexHit Foam::searchablePlate::findNearest
     info.rawPoint()[normalDir_] = origin_[normalDir_];
 
     // Clip to edges if outside
-    for (direction dir = 0; dir < vector::nComponents; dir++)
+    for (direction dir = 0; dir < vector::nComponents; ++dir)
     {
         if (dir != normalDir_)
         {
@@ -158,7 +170,7 @@ Foam::pointIndexHit Foam::searchablePlate::findLine
             info.rawPoint()[normalDir_] = origin_[normalDir_];
 
             // Clip to edges
-            for (direction dir = 0; dir < vector::nComponents; dir++)
+            for (direction dir = 0; dir < vector::nComponents; ++dir)
             {
                 if (dir != normalDir_)
                 {
@@ -236,8 +248,8 @@ Foam::searchablePlate::searchablePlate
 )
 :
     searchableSurface(io),
-    origin_(dict.lookup("origin")),
-    span_(dict.lookup("span")),
+    origin_(dict.get<point>("origin")),
+    span_(dict.get<vector>("span")),
     normalDir_(calcNormal(span_))
 {
     if (debug)
@@ -251,12 +263,6 @@ Foam::searchablePlate::searchablePlate
 
     bounds() = boundBox(origin_, origin_ + span_);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::searchablePlate::~searchablePlate()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -297,8 +303,8 @@ void Foam::searchablePlate::boundingSpheres
 
 Foam::tmp<Foam::pointField> Foam::searchablePlate::points() const
 {
-    tmp<pointField> tPts(new pointField(4));
-    pointField& pts = tPts.ref();
+    auto tpts = tmp<pointField>::New(4);
+    auto& pts = tpts.ref();
 
     pts[0] = origin_;
     pts[2] = origin_ + span_;
@@ -319,7 +325,7 @@ Foam::tmp<Foam::pointField> Foam::searchablePlate::points() const
         pts[3] = origin_ + point(0, span_.y(), 0);
     }
 
-    return tPts;
+    return tpts;
 }
 
 

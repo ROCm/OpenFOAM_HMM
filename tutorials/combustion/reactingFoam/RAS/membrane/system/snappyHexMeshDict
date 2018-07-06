@@ -61,7 +61,7 @@ geometry
         type triSurfaceMesh;
         file "membrane-membrane.stl";
     }
-};
+}
 
 castellatedMeshControls
 {

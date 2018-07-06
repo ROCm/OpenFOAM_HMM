@@ -38,12 +38,11 @@ geometry
     //- Refine a bit extra around the small centre hole
     refineHole
     {
-        type searchableSphere;
-        centre (0 0 -0.012);
-        radius 0.003;
+        type    sphere;
+        centre  (0 0 -0.012);
+        radius  0.003;
     }
-};
-
+}
 
 
 // Settings for the castellatedMesh generation.

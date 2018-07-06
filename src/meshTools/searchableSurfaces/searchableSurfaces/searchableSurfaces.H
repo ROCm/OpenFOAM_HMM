@@ -26,6 +26,28 @@ Class
 
 Description
     Container for searchableSurfaces.
+    The collection is specified as a dictionary. For example,
+
+    \verbatim
+    geometry
+    {
+        surface1
+        {
+            type  ...;
+        }
+        surface2
+        {
+            type  ...;
+        }
+    }
+    \endverbatim
+
+    \heading The Sub-dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        name        | alternative name for surface      | no    | dict name
+        regions     | Region names sub-dictionary       | no    |
+    \endtable
 
 SourceFiles
     searchableSurfaces.C
@@ -44,7 +66,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class triSurface;
 
 /*---------------------------------------------------------------------------*\
@@ -99,10 +121,11 @@ public:
         ////- Construct from list of dictionaries
         //searchableSurfaces(const IOobject&, const PtrList<dictionary>&);
 
-        //- Construct from dictionary and whether to construct names always
-        //  as surfaceName "_" regionName (singleRegionName false) or
-        //  for single region surfaces as surfaceName only (singleRegionName
-        //  true)
+        //- Construct from dictionary.
+        //  \param singleRegionName controls if names are constructed as
+        //      surfaceName "_" regionName (singleRegionName false) or for
+        //      single region surfaces as surfaceName only (singleRegionName
+        //      true)
         searchableSurfaces
         (
             const IOobject&,
@@ -113,21 +136,25 @@ public:
 
     // Member Functions
 
+        //- Surface names, not region names
         const wordList& names() const
         {
             return names_;
         }
 
+        //- Surface names, not region names
         wordList& names()
         {
             return names_;
         }
 
+        //- Region names per surface
         const List<wordList>& regionNames() const
         {
             return regionNames_;
         }
 
+        //- Region names per surface
         List<wordList>& regionNames()
         {
             return regionNames_;

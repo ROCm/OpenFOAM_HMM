@@ -38,7 +38,7 @@ geometry
         type triSurfaceMesh;
         name rotatingZone;
     }
-};
+}
 
 castellatedMeshControls
 {

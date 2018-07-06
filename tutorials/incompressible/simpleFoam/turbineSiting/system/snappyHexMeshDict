@@ -31,16 +31,16 @@ geometry
 {
     windTurbine1
     {
-        type searchableBox;
-        min (581845 4785805 1061);
-        max (581855 4785815 1071);
+        type box;
+        min  (581845 4785805 1061);
+        max  (581855 4785815 1071);
     }
 
     windTurbine2
     {
-        type searchableBox;
-        min (581740 4785658 1065);
-        max (581771 4785671 1079);
+        type box;
+        min  (581740 4785658 1065);
+        max  (581771 4785671 1079);
     }
 
     terrain.stl
@@ -48,8 +48,7 @@ geometry
         type triSurfaceMesh;
         name terrain;
     }
-};
-
+}
 
 
 // Settings for the castellatedMesh generation.

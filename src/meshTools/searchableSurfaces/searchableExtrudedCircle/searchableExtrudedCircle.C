@@ -43,6 +43,13 @@ namespace Foam
         searchableExtrudedCircle,
         dict
     );
+    addNamedToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchableExtrudedCircle,
+        dict,
+        extrudedCircle
+    );
 }
 
 
@@ -61,7 +68,7 @@ Foam::searchableExtrudedCircle::searchableExtrudedCircle
         (
             IOobject
             (
-                dict.lookup("file"),                // name
+                dict.get<word>("file"),             // name
                 io.time().constant(),               // instance
                 "geometry",                         // local
                 io.time(),                          // registry
@@ -71,7 +78,7 @@ Foam::searchableExtrudedCircle::searchableExtrudedCircle
             ).objectPath()
         )
     ),
-    radius_(readScalar(dict.lookup("radius")))
+    radius_(dict.get<scalar>("radius"))
 {
     const edgeMesh& eMesh = eMeshPtr_();
 

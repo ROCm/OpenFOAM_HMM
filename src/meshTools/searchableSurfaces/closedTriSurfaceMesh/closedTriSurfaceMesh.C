@@ -30,10 +30,8 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(closedTriSurfaceMesh, 0);
-addToRunTimeSelectionTable(searchableSurface, closedTriSurfaceMesh, dict);
-
+    defineTypeNameAndDebug(closedTriSurfaceMesh, 0);
+    addToRunTimeSelectionTable(searchableSurface, closedTriSurfaceMesh, dict);
 }
 
 
@@ -62,12 +60,6 @@ Foam::closedTriSurfaceMesh::closedTriSurfaceMesh
 )
 :
     triSurfaceMesh(io, dict)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::closedTriSurfaceMesh::~closedTriSurfaceMesh()
 {}
 
 

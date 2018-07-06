@@ -45,20 +45,19 @@ geometry
 
     refinement1
     {
-        type searchableSphere;
+        type   sphere;
         centre (0 0 0.0025);
         radius 0.0075;
     }
 
     refinement2
     {
-        type searchableCylinder;
+        type   cylinder;
         point1 (0 0 0);
         point2 (0 0 0.03);
         radius 0.0075;
     }
-};
-
+}
 
 
 // Settings for the castellatedMesh generation.

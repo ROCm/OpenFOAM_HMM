@@ -34,8 +34,7 @@ geometry
         type triSurfaceMesh;
         name geom;
     }
-};
-
+}
 
 
 // Settings for the castellatedMesh generation.

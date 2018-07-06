@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,19 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(searchableRotatedBox, 0);
-    addToRunTimeSelectionTable(searchableSurface, searchableRotatedBox, dict);
+    addToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchableRotatedBox,
+        dict
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchableRotatedBox,
+        dict,
+        rotatedBox
+    );
 }
 
 
@@ -57,24 +69,18 @@ Foam::searchableRotatedBox::searchableRotatedBox
             io.writeOpt(),
             false      //io.registerObject(),
         ),
-        treeBoundBox(Zero, dict.lookup("span"))
+        treeBoundBox(Zero, dict.get<vector>("span"))
     ),
     transform_
     (
         "rotation",
-        dict.lookup("origin"),
-        dict.lookup("e3"),
-        dict.lookup("e1")
+        dict.get<point>("origin"),
+        dict.get<vector>("e3"),
+        dict.get<vector>("e1")
     )
 {
     points_ = transform_.globalPosition(box_.points());
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::searchableRotatedBox::~searchableRotatedBox()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -135,10 +141,8 @@ bool Foam::searchableRotatedBox::overlaps(const boundBox& bb) const
 
     // 3a. my edges through bb faces
     const edgeList& edges = treeBoundBox::edges;
-    forAll(edges, edgeI)
+    for (const edge& e : edges)
     {
-        const edge& e = edges[edgeI];
-
         point inter;
         if (treeBb.intersects(points_[e[0]], points_[e[1]], inter))
         {
@@ -150,15 +154,12 @@ bool Foam::searchableRotatedBox::overlaps(const boundBox& bb) const
 
     const pointField bbPoints(bb.points());
 
-    forAll(fcs, faceI)
+    for (const face& f : fcs)
     {
-        const face& f = fcs[faceI];
         point fc = f.centre(points_);
 
-        forAll(edges, edgeI)
+        for (const edge& e : edges)
         {
-            const edge& e = edges[edgeI];
-
             pointHit inter = f.intersection
             (
                 bbPoints[e[0]],

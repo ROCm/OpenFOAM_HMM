@@ -36,7 +36,7 @@ geometry
         {
             ascii
             {
-                 name       innerCylinder;
+                name    innerCylinder;
             }
         }
     }
@@ -48,7 +48,7 @@ geometry
         {
             ascii
             {
-                 name       innerCylinderSmall;
+                name    innerCylinderSmall;
             }
         }
     }
@@ -60,7 +60,7 @@ geometry
         {
             ascii
             {
-                 name       outerCylinder;
+                name    outerCylinder;
             }
         }
     }
@@ -72,7 +72,7 @@ geometry
         {
             ascii
             {
-                 name       propellerTip;
+                name    propellerTip;
             }
         }
     }
@@ -84,7 +84,7 @@ geometry
         {
             ascii
             {
-                 name       propellerStem1;
+                name    propellerStem1;
             }
         }
     }
@@ -96,7 +96,7 @@ geometry
         {
             ascii
             {
-                 name       propellerStem2;
+                name    propellerStem2;
             }
         }
     }
@@ -108,11 +108,11 @@ geometry
         {
             ascii
             {
-                 name       propellerStem3;
+                name    propellerStem3;
             }
         }
     }
-};
+}
 
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,14 @@ Class
 Description
     Searching on bounding box
 
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required | Default
+        type        | box / searchableBox               | selector |
+        min         | minimum point for bounding box    | yes   |
+        max         | maximum point for bounding box    | yes   |
+    \endtable
+
 SourceFiles
     searchableBox.C
 
@@ -43,8 +51,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-
 /*---------------------------------------------------------------------------*\
                            Class searchableBox Declaration
 \*---------------------------------------------------------------------------*/
@@ -54,8 +60,6 @@ class searchableBox
     public searchableSurface,
     public treeBoundBox
 {
-private:
-
     // Private Member Data
 
         mutable wordList regions_;
@@ -109,14 +113,15 @@ public:
         );
 
     //- Destructor
-    virtual ~searchableBox();
+    virtual ~searchableBox() = default;
 
 
     // Member Functions
 
+        //- Names of regions
         virtual const wordList& regions() const;
 
-        //- Whether supports volume type below
+        //- Whether surface supports volume type (below)
         virtual bool hasVolumeType() const
         {
             return true;
@@ -248,12 +253,11 @@ public:
                 vectorField& normal
             ) const;
 
-            //- Determine type (inside/outside/mixed) for point. unknown if
-            //  cannot be determined (e.g. non-manifold surface)
+            //- Determine type (inside/outside) for points.
             virtual void getVolumeType
             (
-                const pointField&,
-                List<volumeType>&
+                const pointField& points,
+                List<volumeType>& volType
             ) const;
 
 

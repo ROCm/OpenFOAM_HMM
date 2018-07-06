@@ -23,7 +23,7 @@ addLayers       true;
 // Geometry. Definition of all surfaces. All surfaces are of class
 // searchableSurface.
 geometry
-{};
+{}
 
 
 
