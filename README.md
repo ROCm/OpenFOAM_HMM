@@ -24,4 +24,4 @@ Violations of the Trademark are continuously monitored, and will be duly prosecu
 - [OpenFOAM Community](http://www.openfoam.com/community/)
 - [Contacting OpenCFD](http://www.openfoam.com/contact/)
 
-Copyright 2016-2017 OpenCFD Ltd
+Copyright 2016-2018 OpenCFD Ltd
