@@ -31,7 +31,7 @@
 #------------------------------------------------------------------------------
 
 export WM_PROJECT=OpenFOAM
-export WM_PROJECT_VERSION=v1806
+export WM_PROJECT_VERSION=plus
 
 # [FOAM_INST_DIR] - parent directory containing the OpenFOAM installation.
 # \- When this file is located as $WM_PROJECT_DIR/etc/bashrc, the next lines
