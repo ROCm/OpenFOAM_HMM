@@ -119,8 +119,7 @@ public:
 
 
     //- Destructor
-    virtual ~velocityDampingConstraint()
-    {}
+    virtual ~velocityDampingConstraint() = default;
 
 
     // Member Functions

@@ -132,8 +132,7 @@ public:
 
 
     //- Destructor
-    virtual ~acousticDampingSource()
-    {}
+    virtual ~acousticDampingSource() = default;
 
 
     // Member Functions
