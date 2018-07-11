@@ -644,8 +644,7 @@ void Foam::searchableSurfacesQueries::signedDistance
                             << " point:" << surfPoints[i]
                             << " surface:"
                             << allSurfaces[surfacesToTest[testI]].name()
-                            << " volType:"
-                            << volumeType::names[vT]
+                            << " volType:" << vT.str()
                             << exit(FatalError);
                         break;
                     }

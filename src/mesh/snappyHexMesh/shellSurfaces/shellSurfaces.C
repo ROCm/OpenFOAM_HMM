@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -682,19 +682,9 @@ Foam::shellSurfaces::shellSurfaces
             extendedGapLevel_[shellI].setSize(regionNames.size());
             extendedGapLevel_[shellI] = gapSpec;
 
-            volumeType gapModeSpec
-            (
-                volumeType::names
-                [
-                    dict.lookupOrDefault<word>
-                    (
-                        "gapMode",
-                        volumeType::names[volumeType::MIXED]
-                    )
-                ]
-            );
             extendedGapMode_[shellI].setSize(regionNames.size());
-            extendedGapMode_[shellI] = gapModeSpec;
+            extendedGapMode_[shellI] =
+                volumeType("gapMode", dict, volumeType::MIXED);
 
 
             // Override on a per-region basis?
@@ -721,22 +711,16 @@ Foam::shellSurfaces::shellSurfaces
                         );
                         extendedGapLevel_[shellI][regionI] = gapSpec;
 
-                        volumeType gapModeSpec
-                        (
-                            volumeType::names
-                            [
-                                regionDict.lookupOrDefault<word>
-                                (
-                                    "gapMode",
-                                    volumeType::names[volumeType::MIXED]
-                                )
-                            ]
-                        );
-                        extendedGapMode_[shellI][regionI] = gapModeSpec;
+                        extendedGapMode_[shellI][regionI] =
+                            volumeType
+                            (
+                                "gapMode",
+                                regionDict,
+                                volumeType::MIXED
+                            );
                     }
                 }
             }
-
 
             checkGapLevels(dict, shellI, extendedGapLevel_[shellI]);
 

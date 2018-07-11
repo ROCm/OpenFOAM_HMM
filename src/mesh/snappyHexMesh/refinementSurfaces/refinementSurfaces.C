@@ -227,14 +227,9 @@ Foam::refinementSurfaces::refinementSurfaces
                 "gapLevel",
                 nullGapLevel
             );
-            globalGapMode[surfI] = volumeType::names
-            [
-                dict.lookupOrDefault<word>
-                (
-                    "gapMode",
-                    volumeType::names[volumeType::MIXED]
-                )
-            ];
+            globalGapMode[surfI] =
+                volumeType("gapMode", dict, volumeType::MIXED);
+
             if
             (
                 globalGapMode[surfI] == volumeType::UNKNOWN
@@ -248,7 +243,7 @@ Foam::refinementSurfaces::refinementSurfaces
                     << "Illegal gapLevel specification for surface "
                     << names_[surfI]
                     << " : gapLevel:" << globalGapLevel[surfI]
-                    << " gapMode:" << volumeType::names[globalGapMode[surfI]]
+                    << " gapMode:" << globalGapMode[surfI].str()
                     << exit(FatalIOError);
             }
 
@@ -327,14 +322,9 @@ Foam::refinementSurfaces::refinementSurfaces
                         regionGapLevel[surfI].insert(regionI, gapSpec);
                         volumeType gapModeSpec
                         (
-                            volumeType::names
-                            [
-                                regionDict.lookupOrDefault<word>
-                                (
-                                    "gapMode",
-                                    volumeType::names[volumeType::MIXED]
-                                )
-                            ]
+                            "gapMode",
+                            regionDict,
+                            volumeType::MIXED
                         );
                         regionGapMode[surfI].insert(regionI, gapModeSpec);
                         if
@@ -350,7 +340,7 @@ Foam::refinementSurfaces::refinementSurfaces
                                 << "Illegal gapLevel specification for surface "
                                 << names_[surfI]
                                 << " : gapLevel:" << gapSpec
-                                << " gapMode:" << volumeType::names[gapModeSpec]
+                                << " gapMode:" << gapModeSpec.str()
                                 << exit(FatalIOError);
                         }
 

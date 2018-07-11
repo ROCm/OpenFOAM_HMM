@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "volumeType.H"
+#include "dictionary.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -34,10 +35,31 @@ const Foam::Enum
 Foam::volumeType::names
 {
     { type::UNKNOWN, "unknown" },
-    { type::MIXED, "mixed" },
     { type::INSIDE, "inside" },
     { type::OUTSIDE, "outside" },
+    { type::MIXED, "mixed" },
 };
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::volumeType::volumeType
+(
+    const word& key,
+    const dictionary& dict,
+    const type deflt
+)
+:
+    t_(names.lookupOrDefault(key, dict, deflt))
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * * //
+
+const Foam::word& Foam::volumeType::str() const
+{
+    return names[t_];
+}
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
@@ -47,10 +69,10 @@ Foam::Istream& Foam::operator>>(Istream& is, volumeType& vt)
     // Read beginning of volumeType
     is.readBegin("volumeType");
 
-    int type;
-    is  >> type;
+    int val;
+    is  >> val;
 
-    vt.t_ = static_cast<volumeType::type>(type);
+    vt.t_ = static_cast<volumeType::type>(val);
 
     // Read end of volumeType
     is.readEnd("volumeType");

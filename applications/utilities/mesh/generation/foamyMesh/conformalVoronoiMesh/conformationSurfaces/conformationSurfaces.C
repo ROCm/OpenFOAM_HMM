@@ -32,7 +32,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(conformationSurfaces, 0);
+    defineTypeNameAndDebug(conformationSurfaces, 0);
 }
 
 
@@ -71,8 +71,7 @@ void Foam::conformationSurfaces::hasBoundedVolume
 
             referenceVolumeTypes[s] = vTypes[0];
 
-            Info<< "    is "
-                << volumeType::names[referenceVolumeTypes[s]]
+            Info<< "    is " << referenceVolumeTypes[s].str()
                 << " surface " << surface.name()
                 << endl;
         }
