@@ -107,7 +107,7 @@ Foam::radiation::localDensityAbsorptionEmission::aCont(const label bandI) const
     forAll(alphaNames_, i)
     {
         dimensionedScalar aPhase("a", dimless/dimLength, aCoeff_[i]);
-        a += max(alpha(alphaNames_[i]), 0.0)*aPhase;
+        a += max(alpha(alphaNames_[i]), scalar(0))*aPhase;
     }
 
     return ta;
@@ -140,7 +140,7 @@ Foam::radiation::localDensityAbsorptionEmission::eCont(const label bandI) const
     forAll(alphaNames_, i)
     {
         dimensionedScalar ePhase("e", dimless/dimLength, eCoeff_[i]);
-        e += max(alpha(alphaNames_[i]), 0.0)*ePhase;
+        e += max(alpha(alphaNames_[i]), scalar(0))*ePhase;
     }
 
     return te;
@@ -179,7 +179,7 @@ Foam::radiation::localDensityAbsorptionEmission::ECont(const label bandI) const
             ECoeff_[i]
         );
 
-        E += max(alpha(alphaNames_[i]), 0.0)*EPhase;
+        E += max(alpha(alphaNames_[i]), scalar(0))*EPhase;
     }
 
     return tE;
