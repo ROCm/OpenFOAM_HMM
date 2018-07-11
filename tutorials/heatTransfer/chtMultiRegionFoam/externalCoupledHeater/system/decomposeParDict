@@ -16,9 +16,6 @@ FoamFile
 
 numberOfSubdomains  4;
 
-//- Keep owner and neighbour on same processor for faces in zones:
-// preserveFaceZones (heater solid1 solid3);
-
 method          scotch;
 // method          hierarchical;
 // method          simple;
@@ -27,9 +24,8 @@ method          scotch;
 coeffs
 {
     n           (2 2 1);
-    //delta       0.001; // default=0.001
-    //order       xyz;   // default=xzy
     dataFile    "decompositionData";
 }
+
 
 // ************************************************************************* //

@@ -17,27 +17,6 @@ FoamFile
 
 numberOfSubdomains  2;
 
-//- Keep owner and neighbour on same processor for faces in zones:
-// preserveFaceZones (heater solid1 solid3);
-
-//- Keep owner and neighbour on same processor for faces in patches:
-//  (makes sense only for cyclic patches)
-//preservePatches (cyclic_half0 cyclic_half1);
-
-//- Keep all of faceSet on a single processor. This puts all cells
-//  connected with a point, edge or face on the same processor.
-//  (just having face connected cells might not guarantee a balanced
-//  decomposition)
-// The processor can be -1 (the decompositionMethod chooses the processor
-// for a good load balance) or explicitly provided (upsets balance).
-//singleProcessorFaceSets ((f0 -1));
-
-
-//- Keep owner and neighbour of baffles on same processor (i.e. keep it
-//  detectable as a baffle). Baffles are two boundary face sharing the
-//  same points.
-//preserveBaffles true;
-
 //- Use the volScalarField named here as a weight for each cell in the
 //  decomposition.  For example, use a particle population field to decompose
 //  for a balanced number of particles in a lagrangian simulation.
@@ -129,6 +108,37 @@ structuredCoeffs
     // Method to use on the 2D subset
     method      scotch;
 }
+
+/*
+constraints
+{
+    //- Keep owner and neighbour on same processor for faces in zones:
+    faces
+    {
+        type    preserveFaceZones,
+        zones   (heater solid1 solid3);
+    }
+    //- Keep owner and neighbour on same processor for faces in patches:
+    //  (makes sense only for cyclic patches)
+    patches
+    {
+        type    preservePatches,
+        patches (cyclic_half0 cyclic_half1);
+    }
+    //- Keep all of faceSet on a single processor. This puts all cells
+    //  connected with a point, edge or face on the same processor.
+    //  (just having face connected cells might not guarantee a balanced
+    //  decomposition)
+    // The processor can be -1 (the decompositionMethod chooses the processor
+    // for a good load balance) or explicitly provided (upsets balance).
+    processors
+    {
+        type    singleProcessorFaceSets;
+        sets    ((f0 -1));
+    }
+}
+*/
+
 
 //// Is the case distributed? Note: command-line argument -roots takes
 //// precedence
