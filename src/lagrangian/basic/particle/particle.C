@@ -424,14 +424,18 @@ void Foam::particle::locate
             << exit(FatalError);
     }
 
-    // Put the particle at the cell centre and in a random tet
-    coordinates_ = barycentric(1, 0, 0, 0);
+    // Put the particle at (almost) the cell centre and in a random tet.
+    // Note perturbing the cell centre to make sure we find at least one
+    // tet containing it. With start point exactly at the cell centre very
+    // occasionally it would not get found in any of the tets
+    coordinates_ = barycentric(1-3*SMALL, SMALL, SMALL, SMALL);
     tetFacei_ = mesh_.cells()[celli_][0];
     tetPti_ = 1;
     facei_ = -1;
 
     // Track to the injection point
-    track(position - mesh_.cellCentres()[celli_], 0);
+    track(position - this->position(), 0);
+
     if (!onFace())
     {
         return;
