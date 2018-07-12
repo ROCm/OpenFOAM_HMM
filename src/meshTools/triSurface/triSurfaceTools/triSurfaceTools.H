@@ -617,10 +617,20 @@ public:
     // Surface checking functionality
 
         //- Check single triangle for (topological) validity
-        static bool validTri(const triSurface&, const label facei);
+        static bool validTri
+        (
+            const triSurface&,
+            const label facei,
+            const bool verbose = true
+        );
 
         //- Check single triangle for (topological) validity
-        static bool validTri(const MeshedSurface<face>&, const label facei);
+        static bool validTri
+        (
+            const MeshedSurface<face>&,
+            const label facei,
+            const bool verbose = true
+        );
 
 
     // Tracking

@@ -2776,7 +2776,8 @@ void Foam::triSurfaceTools::calcInterpolationWeights
 bool Foam::triSurfaceTools::validTri
 (
     const triSurface& surf,
-    const label facei
+    const label facei,
+    const bool verbose
 )
 {
     typedef labelledTri FaceType;
@@ -2787,22 +2788,26 @@ bool Foam::triSurfaceTools::validTri
     {
         if (f[fp] < 0 || f[fp] >= surf.points().size())
         {
-            WarningInFunction
-                << "triangle " << facei << " vertices " << f
-                << " uses point indices outside point range 0.."
-                << surf.points().size()-1
-                << endl;
+            if (verbose)
+            {
+                WarningInFunction
+                    << "triangle " << facei << " vertices " << f
+                    << " uses point indices outside point range 0.."
+                    << surf.points().size()-1 << endl;
+            }
             return false;
         }
     }
 
     if (f[0] == f[1] || f[0] == f[2] || f[1] == f[2])
     {
-        WarningInFunction
-            << "triangle " << facei
-            << " uses non-unique vertices " << f
-            << " coords:" << f.points(surf.points())
-            << endl;
+        if (verbose)
+        {
+            WarningInFunction
+                << "triangle " << facei
+                << " uses non-unique vertices " << f
+                << " coords:" << f.points(surf.points()) << endl;
+        }
         return false;
     }
 
@@ -2832,12 +2837,14 @@ bool Foam::triSurfaceTools::validTri
          && (f[2] == nbrF[0] || f[2] == nbrF[1] || f[2] == nbrF[2])
         )
         {
-            WarningInFunction
-                << "triangle " << facei << " vertices " << f
-                << " has the same vertices as triangle " << nbrFacei
-                << " vertices " << nbrF
-                << " coords:" << f.points(surf.points())
-                << endl;
+            if (verbose)
+            {
+                WarningInFunction
+                    << "triangle " << facei << " vertices " << f
+                    << " has the same vertices as triangle " << nbrFacei
+                    << " vertices " << nbrF
+                    << " coords:" << f.points(surf.points()) << endl;
+            }
 
             return false;
         }
@@ -2850,7 +2857,8 @@ bool Foam::triSurfaceTools::validTri
 bool Foam::triSurfaceTools::validTri
 (
     const MeshedSurface<face>& surf,
-    const label facei
+    const label facei,
+    const bool verbose
 )
 {
     typedef face FaceType;
@@ -2858,11 +2866,13 @@ bool Foam::triSurfaceTools::validTri
 
     if (f.size() != 3)
     {
-        WarningInFunction
-            << "face " << facei
-            << " is not a triangle, it has " << f.size()
-            << " indices"
-            << endl;
+        if (verbose)
+        {
+            WarningInFunction
+                << "face " << facei
+                << " is not a triangle, it has " << f.size()
+                << " indices" << endl;
+        }
         return false;
     }
 
@@ -2871,22 +2881,26 @@ bool Foam::triSurfaceTools::validTri
     {
         if (f[fp] < 0 || f[fp] >= surf.points().size())
         {
-            WarningInFunction
-                << "triangle " << facei << " vertices " << f
-                << " uses point indices outside point range 0.."
-                << surf.points().size()-1
-                << endl;
+            if (verbose)
+            {
+                WarningInFunction
+                    << "triangle " << facei << " vertices " << f
+                    << " uses point indices outside point range 0.."
+                    << surf.points().size()-1 << endl;
+            }
             return false;
         }
     }
 
     if (f[0] == f[1] || f[0] == f[2] || f[1] == f[2])
     {
-        WarningInFunction
-            << "triangle " << facei
-            << " uses non-unique vertices " << f
-            << " coords:" << f.points(surf.points())
-            << endl;
+        if (verbose)
+        {
+            WarningInFunction
+                << "triangle " << facei
+                << " uses non-unique vertices " << f
+                << " coords:" << f.points(surf.points()) << endl;
+        }
         return false;
     }
 
@@ -2916,13 +2930,14 @@ bool Foam::triSurfaceTools::validTri
          && (f[2] == nbrF[0] || f[2] == nbrF[1] || f[2] == nbrF[2])
         )
         {
-            WarningInFunction
-                << "triangle " << facei << " vertices " << f
-                << " has the same vertices as triangle " << nbrFacei
-                << " vertices " << nbrF
-                << " coords:" << f.points(surf.points())
-                << endl;
-
+            if (verbose)
+            {
+                WarningInFunction
+                    << "triangle " << facei << " vertices " << f
+                    << " has the same vertices as triangle " << nbrFacei
+                    << " vertices " << nbrF
+                    << " coords:" << f.points(surf.points()) << endl;
+            }
             return false;
         }
     }
