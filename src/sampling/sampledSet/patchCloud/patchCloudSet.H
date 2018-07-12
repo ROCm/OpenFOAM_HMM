@@ -34,7 +34,7 @@ Description
         axis     | x, y, z, xyz, distance                  | yes      |
         patches  | List of patch names or regexs           | yes      |
         points   | List of selected locations              | yes      |
-        maxDistance | Max serach distance                  | yes      |
+        maxDistance | Max search distance                  | yes      |
     \endtable
 
 SourceFiles
