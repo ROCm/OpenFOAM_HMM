@@ -90,9 +90,6 @@ PIMPLE
     turbOnFinalIterOnly no;
 
     oversetAdjustPhi    no;
-
-    moveMeshOuterCorrectors no;
-    turbOnFinalIterOnly no;
 }
 
 relaxationFactors
