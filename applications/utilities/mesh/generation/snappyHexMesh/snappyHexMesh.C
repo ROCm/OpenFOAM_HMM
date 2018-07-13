@@ -554,7 +554,7 @@ scalar getMergeDistance(const polyMesh& mesh, const scalar mergeTol)
     {
         const scalar writeTol = std::pow
         (
-            scalar(10.0),
+            scalar(10),
             -scalar(IOstream::defaultPrecision())
         );
 

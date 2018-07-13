@@ -60,7 +60,7 @@ Foam::MovingPhaseModel<BasePhaseModel>::MovingPhaseModel
             fluid.mesh()
         ),
         fluid.mesh(),
-        dimensionedScalar("0", dimensionSet(0, 3, -1, 0, 0), 0)
+        dimensionedScalar(dimensionSet(0, 3, -1, 0, 0), Zero)
     )
 {}
 
@@ -127,7 +127,7 @@ diffNo() const
             U_.mesh()
         ),
         U_.mesh(),
-        dimensionedScalar("0", dimless, 0.0)
+        dimensionedScalar(dimless, Zero)
     );
 }
 

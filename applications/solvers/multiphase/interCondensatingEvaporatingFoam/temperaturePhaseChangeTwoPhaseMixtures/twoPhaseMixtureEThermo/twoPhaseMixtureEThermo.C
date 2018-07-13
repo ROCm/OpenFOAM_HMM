@@ -355,7 +355,7 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::rho
 
     return
     (
-        alpha1p*rho1().value() + (scalar(1.0) - alpha1p)*rho2().value()
+        alpha1p*rho1().value() + (scalar(1) - alpha1p)*rho2().value()
     );
 }
 

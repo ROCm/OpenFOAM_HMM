@@ -532,7 +532,7 @@ Foam::radiation::fvDOM::Ru() const
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", dimensionSet(1, -1, -3, 0, 0), 0)
+            dimensionedScalar(dimensionSet(1, -1, -3, 0, 0), Zero)
         )
     );
 

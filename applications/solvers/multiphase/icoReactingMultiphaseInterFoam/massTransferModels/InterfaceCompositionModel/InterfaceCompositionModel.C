@@ -90,7 +90,7 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::getSpecieMassFraction
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensionedScalar("zero", dimless, 0),
+            dimensionedScalar(dimless, Zero),
             zeroGradientFvPatchScalarField::typeName
         )
     );
@@ -126,7 +126,7 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::getSpecieMassFraction
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensionedScalar("zero", dimless, 1),
+            dimensionedScalar("one", dimless, 1),
             zeroGradientFvPatchScalarField::typeName
         )
     );
@@ -251,7 +251,7 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::D
                 p.mesh()
             ),
             p.mesh(),
-            dimensionedScalar("zero", dimArea/dimTime, 0)
+            dimensionedScalar(dimArea/dimTime, Zero)
         )
     );
 
@@ -297,7 +297,7 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::L
                 p.mesh()
             ),
             p.mesh(),
-            dimensionedScalar("zero", dimEnergy/dimMass, 0),
+            dimensionedScalar(dimEnergy/dimMass, Zero),
             zeroGradientFvPatchScalarField::typeName
         )
     );

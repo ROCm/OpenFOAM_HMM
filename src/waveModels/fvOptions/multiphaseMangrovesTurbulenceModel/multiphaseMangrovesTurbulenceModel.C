@@ -66,7 +66,7 @@ Foam::fv::multiphaseMangrovesTurbulenceModel::kCoeff
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("0", dimless/dimTime, 0)
+        dimensionedScalar(dimless/dimTime, Zero)
     );
 
     volScalarField& kCoeff = tkCoeff.ref();
@@ -112,7 +112,7 @@ Foam::fv::multiphaseMangrovesTurbulenceModel::epsilonCoeff
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("0", dimless/dimTime, 0)
+        dimensionedScalar(dimless/dimTime, Zero)
     );
 
     volScalarField& epsilonCoeff = tepsilonCoeff.ref();

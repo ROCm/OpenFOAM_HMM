@@ -63,7 +63,7 @@ Foam::viscosityModels::powerLaw::calcNu() const
                     dimensionedScalar("one", dimTime, 1.0)*strainRate(),
                     dimensionedScalar("SMALL", dimless, SMALL)
                 ),
-                n_.value() - scalar(1.0)
+                n_.value() - scalar(1)
             )
         )
     );

@@ -110,7 +110,7 @@
             pcorrEqn.setReferences
             (
                 validCells,
-                scalar(0.0),
+                scalar(0),
                 true
             );
         }

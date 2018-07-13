@@ -209,7 +209,7 @@ public:
                     (
                         blendingFactor
                       * tScheme1_().correction(vf)
-                      + (scalar(1.0) - blendingFactor)
+                      + (scalar(1) - blendingFactor)
                       * tScheme2_().correction(vf)
                     );
                 }
@@ -226,7 +226,7 @@ public:
             {
                 return
                 (
-                    (scalar(1.0) - blendingFactor)
+                    (scalar(1) - blendingFactor)
                   * tScheme2_().correction(vf)
                 );
             }

@@ -52,7 +52,7 @@ Foam::StaticPhaseModel<BasePhaseModel>::StaticPhaseModel
             fluid.mesh()
         ),
         fluid.mesh(),
-        dimensionedScalar("0", dimensionSet(0, 3, -1, 0, 0), 0)
+        dimensionedScalar(dimensionSet(0, 3, -1, 0, 0), Zero)
     ),
     alphaPhi_
     (
@@ -63,7 +63,7 @@ Foam::StaticPhaseModel<BasePhaseModel>::StaticPhaseModel
             fluid.mesh()
         ),
         fluid.mesh(),
-        dimensionedScalar("0", dimensionSet(0, 3, -1, 0, 0), 0)
+        dimensionedScalar(dimensionSet(0, 3, -1, 0, 0), Zero)
     )
 {}
 
@@ -90,7 +90,7 @@ Foam::StaticPhaseModel<BasePhaseModel>::phi() const
             U_.mesh()
         ),
         U_.mesh(),
-        dimensionedScalar("0", dimensionSet(0, 3, -1, 0, 0), 0)
+        dimensionedScalar(dimensionSet(0, 3, -1, 0, 0), Zero)
     );
 }
 
@@ -99,7 +99,7 @@ template<class BasePhaseModel>
 const Foam::surfaceScalarField&
 Foam::StaticPhaseModel<BasePhaseModel>::phi()
 {
-    phi_ = dimensionedScalar("0", dimensionSet(0, 3, -1, 0, 0), 0);
+    phi_ = dimensionedScalar(dimensionSet(0, 3, -1, 0, 0), Zero);
     return phi_;
 }
 
@@ -119,7 +119,7 @@ Foam::StaticPhaseModel<BasePhaseModel>::alphaPhi() const
                 U_.mesh()
             ),
             U_.mesh(),
-            dimensionedScalar("0", dimensionSet(0, 3, -1, 0, 0), 0)
+            dimensionedScalar(dimensionSet(0, 3, -1, 0, 0), Zero)
         )
     );
 }
@@ -129,7 +129,7 @@ template<class BasePhaseModel>
 Foam::surfaceScalarField&
 Foam::StaticPhaseModel<BasePhaseModel>::alphaPhi()
 {
-    alphaPhi_ = dimensionedScalar("0", dimensionSet(0, 3, -1, 0, 0), 0);
+    alphaPhi_ = dimensionedScalar(dimensionSet(0, 3, -1, 0, 0), Zero);
     return alphaPhi_;
 }
 
@@ -149,7 +149,7 @@ Foam::StaticPhaseModel<BasePhaseModel>::U() const
                 U_.mesh()
             ),
             U_.mesh(),
-            dimensionedVector("zero", dimVelocity, vector::zero)
+            dimensionedVector(dimVelocity, Zero)
         )
     );
 }

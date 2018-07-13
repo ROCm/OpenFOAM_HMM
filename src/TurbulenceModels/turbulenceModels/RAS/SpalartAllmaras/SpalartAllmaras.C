@@ -106,7 +106,7 @@ tmp<volScalarField> SpalartAllmaras<BasicTurbulenceModel>::fw
                )
               *sqr(kappa_*y_)
             ),
-            scalar(10.0)
+            scalar(10)
         )
     );
     r.boundaryFieldRef() == 0.0;

@@ -174,7 +174,7 @@ tmp<volScalarField> kkLOmega::phiBP(const volScalarField& Omega) const
               - CbpCrit_,
                 scalar(0)
             ),
-            scalar(50.0)
+            scalar(50)
         )
     );
 }

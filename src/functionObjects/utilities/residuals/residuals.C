@@ -130,7 +130,7 @@ void Foam::functionObjects::residuals::writeField(const word& fieldName) const
                 false
             ),
             mesh_,
-            dimensionedScalar("0", dimless, 0),
+            dimensionedScalar(dimless, Zero),
             zeroGradientFvPatchField<scalar>::typeName
         );
 

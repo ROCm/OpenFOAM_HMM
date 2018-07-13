@@ -166,7 +166,7 @@ Foam::meltingEvaporationModels::kineticGasEvaporation<Thermo, OtherThermo>
                     IOobject::NO_WRITE
                 ),
                 mesh,
-                dimensionedScalar("zero", dimDensity, 0)
+                dimensionedScalar(dimDensity, Zero)
             )
         );
         volScalarField& rhom = tRhom.ref();
@@ -184,7 +184,7 @@ Foam::meltingEvaporationModels::kineticGasEvaporation<Thermo, OtherThermo>
                     IOobject::NO_WRITE
                 ),
                 mesh,
-                dimensionedScalar("zero", dimTemperature, 0)
+                dimensionedScalar(dimTemperature, Zero)
             )
         );
         volScalarField& tDelta = tTdelta.ref();
@@ -198,7 +198,7 @@ Foam::meltingEvaporationModels::kineticGasEvaporation<Thermo, OtherThermo>
             tDelta = max
             (
                 (T*Tmask - Tactivate_),
-                dimensionedScalar("T0", dimTemperature, 0.0)
+                dimensionedScalar("T0", dimTemperature, Zero)
             );
         }
         else
@@ -210,7 +210,7 @@ Foam::meltingEvaporationModels::kineticGasEvaporation<Thermo, OtherThermo>
             tDelta = max
             (
                 Tmask*(Tactivate_ - T),
-                dimensionedScalar("T0", dimTemperature, 0.0)
+                dimensionedScalar("T0", dimTemperature, Zero)
             );
         }
 

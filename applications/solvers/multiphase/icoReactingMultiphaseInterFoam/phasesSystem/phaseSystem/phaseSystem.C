@@ -221,7 +221,7 @@ Foam::phaseSystem::phaseSystem
             IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedScalar("zero", dimVolume/dimTime, 0.0)
+        dimensionedScalar(dimVolume/dimTime, Zero)
     ),
     rhoPhi_
     (
@@ -234,7 +234,7 @@ Foam::phaseSystem::phaseSystem
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("zero", dimMass/dimTime, 0.0)
+        dimensionedScalar(dimMass/dimTime, Zero)
     ),
     phaseModels_(generatePhaseModels(phaseNames_)),
     phasePairs_(),
@@ -945,12 +945,7 @@ Foam::phaseSystem::surfaceTensionForce() const
                 mesh_
             ),
             mesh_,
-            dimensionedScalar
-            (
-                "surfaceTensionForce",
-                dimensionSet(1, -2, -2, 0, 0),
-                0.0
-            )
+            dimensionedScalar(dimensionSet(1, -2, -2, 0, 0), Zero)
         )
     );
 
@@ -1118,7 +1113,7 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::nearInterface() const
                 mesh_
             ),
             mesh_,
-            dimensionedScalar("zero", dimless, 0.0)
+            dimensionedScalar(dimless, Zero)
         )
     );
 

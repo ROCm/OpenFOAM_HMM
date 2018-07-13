@@ -65,7 +65,7 @@ scalar getMergeDistance
     args.readIfPresent("mergeTol", mergeTol);
 
     scalar writeTol =
-        Foam::pow(scalar(10.0), -scalar(IOstream::defaultPrecision()));
+        Foam::pow(scalar(10), -scalar(IOstream::defaultPrecision()));
 
     Info<< "Merge tolerance : " << mergeTol << nl
         << "Write tolerance : " << writeTol << endl;

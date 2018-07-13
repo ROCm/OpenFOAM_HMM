@@ -144,11 +144,11 @@ void Foam::singleStepReactingMixture<ThermoType>::fresCorrect()
         const label speciei = reaction.lhs()[i].index;
         if (speciei == fuelIndex_)
         {
-            fres_[speciei] =  max(YFuel - YO2/s_, scalar(0.0));
+            fres_[speciei] =  max(YFuel - YO2/s_, scalar(0));
         }
         else if (speciei == O2Index)
         {
-            fres_[speciei] =  max(YO2 - YFuel*s_, scalar(0.0));
+            fres_[speciei] =  max(YO2 - YFuel*s_, scalar(0));
         }
     }
 

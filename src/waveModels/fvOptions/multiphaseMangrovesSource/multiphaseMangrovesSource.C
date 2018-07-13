@@ -64,7 +64,7 @@ Foam::fv::multiphaseMangrovesSource::dragCoeff(const volVectorField& U) const
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("0", dimless/dimTime, 0)
+        dimensionedScalar(dimless/dimTime, Zero)
     );
 
     volScalarField& dragCoeff = tdragCoeff.ref();
@@ -110,7 +110,7 @@ Foam::fv::multiphaseMangrovesSource::inertiaCoeff() const
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("0", dimless, 0)
+        dimensionedScalar(dimless, Zero)
     );
 
     volScalarField& inertiaCoeff = tinertiaCoeff.ref();

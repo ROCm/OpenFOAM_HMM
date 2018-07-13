@@ -25,7 +25,7 @@
                             mesh
                         ),
                         mesh,
-                        dimensionedScalar("zero", dimless/dimTime, 0.0)
+                        dimensionedScalar(dimless/dimTime, Zero)
                     )
                 );
                 Sps.set
@@ -40,7 +40,7 @@
                             mesh
                         ),
                         mesh,
-                        dimensionedScalar("zero", dimless/dimTime, 0.0)
+                        dimensionedScalar(dimless/dimTime, Zero)
                     )
                 );
             }
