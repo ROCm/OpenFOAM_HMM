@@ -59,6 +59,7 @@ Usage
         directory    | The output directory name        | no          | VTK
         width        | Padding width for file name      | no          | 8
         format       | ascii or binary format           | no          | binary
+        prune        | suppress writing of empty clouds | no          | false
         writePrecision | write precision in ascii       | no | same as IOstream
     \endtable
 
@@ -124,6 +125,9 @@ class vtkCloud
 
         //- Write lagrangian as cell data (verts) instead of point data
         bool useVerts_;
+
+        //- Suppress writing of empty clouds
+        bool pruneEmpty_;
 
         //- Requested names of clouds to process
         wordRes selectClouds_;

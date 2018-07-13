@@ -139,7 +139,7 @@ bool Foam::functionObjects::vtkCloud::writeCloud
     label nTotParcels = pointsPtr->size();
     reduce(nTotParcels, sumOp<label>());
 
-    if (!nTotParcels)
+    if (pruneEmpty_ && !nTotParcels)
     {
         return false;
     }
@@ -331,6 +331,7 @@ Foam::functionObjects::vtkCloud::vtkCloud
     writeOpts_(vtk::formatType::INLINE_BASE64),
     printf_(),
     useVerts_(false),
+    pruneEmpty_(false),
     selectClouds_(),
     selectFields_(),
     dirName_("VTK"),
@@ -396,6 +397,7 @@ bool Foam::functionObjects::vtkCloud::read(const dictionary& dict)
     // useTimeName_ = dict.lookupOrDefault<bool>("useTimeName", false);
 
     useVerts_ = dict.lookupOrDefault<bool>("cellData", false);
+    pruneEmpty_ = dict.lookupOrDefault<bool>("prune", false);
 
 
     //

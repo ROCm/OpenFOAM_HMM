@@ -26,10 +26,7 @@ preserveFaceZones
 
 coeffs
 {
-    n           (2 2 1);
-    //delta       0.001; // default=0.001
-    //order       xyz;   // default=xzy
-    dataFile    "";
+    n       (2 2 1);
 }
 
 // ************************************************************************* //

@@ -235,7 +235,14 @@ Foam::scalar Foam::faceAreaIntersect::triangleIntersect
     // Cut source triangle with all inward pointing faces of target triangle
     // - triangles in workTris1 are inside target triangle
 
-    const scalar t = sqrt(triArea(src));
+    const scalar srcArea(triArea(src));
+    if (srcArea < ROOTVSMALL)
+    {
+        return 0.0;
+    }
+
+    // Typical length scale
+    const scalar t = sqrt(srcArea);
 
     // Edge 0
     {
@@ -243,9 +250,28 @@ Foam::scalar Foam::faceAreaIntersect::triangleIntersect
         // workTris1 list
 
         scalar s = mag(tgt1 - tgt0);
-        //plane pl0(tgt0, tgt1, tgt1 + s*n);
-        plane pl0(tgt0, (tgt0 - tgt1)^(-s*n), true);
-        triSliceWithPlane(src, pl0, workTris1, nWorkTris1, t);
+        if (s < ROOTVSMALL)
+        {
+            return 0.0;
+        }
+
+        // Note: outer product with n pre-scaled with edge length. This is
+        //       purely to avoid numerical errors because of drastically
+        //       different vector lengths.
+        const vector n0((tgt0 - tgt1)^(-s*n));
+        const scalar magSqrN0(magSqr(n0));
+        if (magSqrN0 < ROOTVSMALL)
+        {
+            // Triangle either zero edge length (s == 0) or
+            // perpendicular to face normal n. In either case zero
+            // overlap area
+            return 0.0;
+        }
+        else
+        {
+            plane pl0(tgt0, n0/Foam::sqrt(magSqrN0), false);
+            triSliceWithPlane(src, pl0, workTris1, nWorkTris1, t);
+        }
     }
 
     if (nWorkTris1 == 0)
@@ -259,19 +285,35 @@ Foam::scalar Foam::faceAreaIntersect::triangleIntersect
         // workTris2 list (re-use tris storage)
 
         scalar s = mag(tgt2 - tgt1);
-        //plane pl1(tgt1, tgt2, tgt2 + s*n);
-        plane pl1(tgt1, (tgt1 - tgt2)^(-s*n), true);
-
-        nWorkTris2 = 0;
-
-        for (label i = 0; i < nWorkTris1; ++i)
-        {
-            triSliceWithPlane(workTris1[i], pl1, workTris2, nWorkTris2, t);
-        }
-
-        if (nWorkTris2 == 0)
+        if (s < ROOTVSMALL)
         {
             return 0.0;
+        }
+        const vector n1((tgt1 - tgt2)^(-s*n));
+        const scalar magSqrN1(magSqr(n1));
+
+        if (magSqrN1 < ROOTVSMALL)
+        {
+            // Triangle either zero edge length (s == 0) or
+            // perpendicular to face normal n. In either case zero
+            // overlap area
+            return 0.0;
+        }
+        else
+        {
+            plane pl1(tgt1, n1/Foam::sqrt(magSqrN1), false);
+
+            nWorkTris2 = 0;
+
+            for (label i = 0; i < nWorkTris1; ++i)
+            {
+                triSliceWithPlane(workTris1[i], pl1, workTris2, nWorkTris2, t);
+            }
+
+            if (nWorkTris2 == 0)
+            {
+                return 0.0;
+            }
         }
     }
 
@@ -281,35 +323,51 @@ Foam::scalar Foam::faceAreaIntersect::triangleIntersect
         // workTris1 list (re-use workTris1 storage)
 
         scalar s = mag(tgt2 - tgt0);
-        //plane pl2(tgt2, tgt0, tgt0 + s*n);
-        plane pl2(tgt2, (tgt2 - tgt0)^(-s*n), true);
-
-        nWorkTris1 = 0;
-
-        for (label i = 0; i < nWorkTris2; ++i)
+        if (s < ROOTVSMALL)
         {
-            triSliceWithPlane(workTris2[i], pl2, workTris1, nWorkTris1, t);
+            return 0.0;
         }
+        const vector n2((tgt2 - tgt0)^(-s*n));
+        const scalar magSqrN2(magSqr(n2));
 
-        if (nWorkTris1 == 0)
+        if (magSqrN2 < ROOTVSMALL)
         {
+            // Triangle either zero edge length (s == 0) or
+            // perpendicular to face normal n. In either case zero
+            // overlap area
             return 0.0;
         }
         else
         {
-            // Calculate area of sub-triangles
-            scalar area = 0.0;
-            for (label i = 0; i < nWorkTris1; ++i)
-            {
-                area += triArea(workTris1[i]);
+            plane pl2(tgt2, n2/Foam::sqrt(magSqrN2), false);
 
-                if (cacheTriangulation_)
-                {
-                    triangles_.append(workTris1[i]);
-                }
+            nWorkTris1 = 0;
+
+            for (label i = 0; i < nWorkTris2; ++i)
+            {
+                triSliceWithPlane(workTris2[i], pl2, workTris1, nWorkTris1, t);
             }
 
-            return area;
+            if (nWorkTris1 == 0)
+            {
+                return 0.0;
+            }
+            else
+            {
+                // Calculate area of sub-triangles
+                scalar area = 0.0;
+                for (label i = 0; i < nWorkTris1; ++i)
+                {
+                    area += triArea(workTris1[i]);
+
+                    if (cacheTriangulation_)
+                    {
+                        triangles_.append(workTris1[i]);
+                    }
+                }
+
+                return area;
+            }
         }
     }
 }
