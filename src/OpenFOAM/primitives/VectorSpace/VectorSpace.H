@@ -49,33 +49,32 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 template<class Form, class Cmpt, direction Ncmpts> class VectorSpace;
 
 template<class Form, class Cmpt, direction Ncmpts>
 Istream& operator>>
 (
-    Istream&,
-    VectorSpace<Form, Cmpt, Ncmpts>&
+    Istream& is,
+    VectorSpace<Form, Cmpt, Ncmpts>& vs
 );
 
 template<class Form, class Cmpt, direction Ncmpts>
 Ostream& operator<<
 (
-    Ostream&,
-    const VectorSpace<Form, Cmpt, Ncmpts>&
+    Ostream& os,
+    const VectorSpace<Form, Cmpt, Ncmpts>& vs
 );
 
 
 /*---------------------------------------------------------------------------*\
-                           Class VectorSpace Declaration
+                         Class VectorSpace Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Form, class Cmpt, direction Ncmpts>
 class VectorSpace
 {
-
 public:
 
     //- The components of this vector space

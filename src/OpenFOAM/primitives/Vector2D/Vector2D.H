@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,31 +78,38 @@ public:
         //- Construct initialized to zero
         inline Vector2D(const Foam::zero);
 
-        //- Construct given VectorSpace
-        inline Vector2D(const VectorSpace<Vector2D<Cmpt>, Cmpt, 2>&);
+        //- Copy construct from VectorSpace of the same rank
+        inline Vector2D(const VectorSpace<Vector2D<Cmpt>, Cmpt, 2>& vs);
 
-        //- Construct given two components
+        //- Construct from two components
         inline Vector2D(const Cmpt& vx, const Cmpt& vy);
 
         //- Construct from Istream
-        inline Vector2D(Istream&);
+        inline Vector2D(Istream& is);
 
 
     // Member Functions
 
-        // Access
+        //- Access to the vector x component
+        inline const Cmpt& x() const;
 
-            inline const Cmpt& x() const;
-            inline const Cmpt& y() const;
+        //- Access to the vector y component
+        inline const Cmpt& y() const;
 
-            inline Cmpt& x();
-            inline Cmpt& y();
+        //- Access to the vector x component
+        inline Cmpt& x();
+
+        //- Access to the vector y component
+        inline Cmpt& y();
 
 
-        // Operators
+        //- Normalise the vector by its magnitude
+        inline Vector2D<Cmpt>& normalise();
 
-            //- Perp dot product (dot product with perpendicular vector)
-            inline scalar perp(const Vector2D<Cmpt>& b) const;
+
+        //- Perp dot product (dot product with perpendicular vector)
+        inline scalar perp(const Vector2D<Cmpt>& b) const;
+
 };
 
 
