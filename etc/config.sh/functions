@@ -16,7 +16,7 @@
 # Description
 #     Shell functions and variables used when sourcing the OpenFOAM environment
 #
-#     Some functionality is shadowed in bin/tools/lib-dir
+#     Some functionality mirrored by bin/tools/lib-dir
 #
 #------------------------------------------------------------------------------
 
@@ -33,10 +33,26 @@ then
     # Cleaning environment variables
     _foamClean()
     {
-         local var=$1
+         foamVar_name=$1
          shift
-         eval $($WM_PROJECT_DIR/bin/foamCleanPath -sh-env=$var "$@")
+         eval $($WM_PROJECT_DIR/bin/foamCleanPath -sh-env=$foamVar_name "$@")
+         unset foamVar_name
     }
+
+    # Source an etc file, possibly with some verbosity
+    # - use eval to avoid intermediate variables (ksh doesn't have 'local')
+    if [ "$FOAM_VERBOSE" -a "$PS1" ]
+    then
+        _foamEtc()
+        {
+            eval "$($WM_PROJECT_DIR/bin/foamEtcFile -sh-verbose ${FOAM_CONFIG_NOUSER:+-mode=o} $@)";
+        }
+    else
+        _foamEtc()
+        {
+            eval "$($WM_PROJECT_DIR/bin/foamEtcFile -sh ${FOAM_CONFIG_NOUSER:+-mode=o} $@)";
+        }
+    fi
 
     # Prepend PATH
     _foamAddPath()
@@ -132,15 +148,6 @@ then
         }
     fi
 
-
-    # Source an etc file, possibly with some verbosity
-    # - use eval to avoid intermediate variables (ksh doesn't have 'local')
-    if [ "$FOAM_VERBOSE" -a "$PS1" ]
-    then
-        _foamEtc(){ eval "$($WM_PROJECT_DIR/bin/foamEtcFile -sh-verbose $@)"; }
-    else
-        _foamEtc(){ eval "$($WM_PROJECT_DIR/bin/foamEtcFile -sh $@)"; }
-    fi
 
     # Evaluate command-line parameters
     _foamEval()

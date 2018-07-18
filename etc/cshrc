@@ -27,7 +27,15 @@
 #         -  $WM_PROJECT_SITE/site/$WM_PROJECT_VERSION/prefs.csh
 #         -  $WM_PROJECT_SITE/site/prefs.csh
 #
-# Note: Changes made to this cshrc file may be lost with the next upgrade.
+# Environment
+#     FOAM_VERBOSE (set/unset)
+#         - add extra verbosity when sourcing files
+#     FOAM_CONFIG_NOUSER (set/unset)
+#         - suppress use of user/group configuration files
+#
+# Note
+#     Changes made to this cshrc file may be lost with the next upgrade.
+#
 #------------------------------------------------------------------------------
 
 setenv WM_PROJECT OpenFOAM
@@ -141,8 +149,13 @@ setenv WM_PROJECT_USER_DIR $HOME/$WM_PROJECT/$LOGNAME-$WM_PROJECT_VERSION
 source $WM_PROJECT_DIR/etc/config.csh/functions
 
 # Overrides via <prefs.csh>
-_foamEtc -mode=o  prefs.csh     # 1) other (system) systems
-_foamEtc -mode=ug prefs.csh     # 2) user or group settings
+# 1. other (system) values
+_foamEtc -mode=o prefs.csh
+
+# 2. user or group values (unless disabled)
+if (! $?FOAM_CONFIG_NOUSER ) then
+    _foamEtc -mode=ug prefs.csh
+endif
 
 # Evaluate command-line parameters and record settings for later.
 # These can be used to set/unset values, specify additional files etc.
@@ -187,7 +200,6 @@ if (! $?MANPATH ) setenv MANPATH
 _foamClean PATH "$foamOldDirs"
 _foamClean MANPATH "$foamOldDirs"
 _foamClean LD_LIBRARY_PATH "$foamOldDirs"
-
 
 # Setup for OpenFOAM compilation etc
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

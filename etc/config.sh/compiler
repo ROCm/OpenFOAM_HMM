@@ -15,6 +15,7 @@
 #
 # Description
 #     Setup for custom compiler versions for OpenFOAM
+#     Per-compiler overrides in "compiler-$WM_COMPILER" files
 #
 #------------------------------------------------------------------------------
 
@@ -100,6 +101,9 @@ Please check your settings
 UNKNOWN_COMPILER
         ;;
     esac
+
+    # Per-compiler overrides in "compiler-$WM_COMPILER" files
+    _foamEtc -config "compiler-$WM_COMPILER"
     ;;
 esac
 

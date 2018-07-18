@@ -15,12 +15,14 @@
 #
 # Description
 #     Setup for custom compiler versions for OpenFOAM
+#     Per-compiler overrides in "compiler-$WM_COMPILER" files
 #
 #------------------------------------------------------------------------------
 
 switch ("$WM_COMPILER_TYPE")
 case ThirdParty:
     # Default versions of GMP, MPFR, MPC - override as necessary
+
     set gmp_version=gmp-system
     set mpfr_version=mpfr-system
     set mpc_version=mpc-system
@@ -102,6 +104,9 @@ Please check your settings
 UNKNOWN_COMPILER
         breaksw
     endsw
+
+    # Per-compiler overrides in "compiler-$WM_COMPILER" files
+    _foamEtc -config "compiler-$WM_COMPILER"
     breaksw
 endsw
 

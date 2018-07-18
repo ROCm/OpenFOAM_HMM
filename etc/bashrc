@@ -27,7 +27,15 @@
 #         -  $WM_PROJECT_SITE/site/$WM_PROJECT_VERSION/prefs.sh
 #         -  $WM_PROJECT_SITE/site/prefs.sh
 #
-# Note: Changes made to this bashrc file may be lost with the next upgrade.
+# Environment
+#     FOAM_VERBOSE (set/unset)
+#         - add extra verbosity when sourcing files
+#     FOAM_CONFIG_NOUSER (set/unset)
+#         - suppress use of user/group configuration files
+#
+# Note
+#     Changes made to this bashrc file may be lost with the next upgrade.
+#
 #------------------------------------------------------------------------------
 
 export WM_PROJECT=OpenFOAM
@@ -130,13 +138,22 @@ export WM_PROJECT_USER_DIR=$HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION
 . $WM_PROJECT_DIR/etc/config.sh/functions
 
 # Overrides via <prefs.sh>
-_foamEtc -mode=o  prefs.sh      # 1) other (system) values
-_foamEtc -mode=ug prefs.sh      # 2) user or group values
+# 1. other (system) values
+_foamEtc -mode=o prefs.sh
+
+# 2. user or group values (unless disabled)
+[ -z "$FOAM_CONFIG_NOUSER" ] && _foamEtc -mode=ug prefs.sh
 
 # Evaluate command-line parameters and record settings for later.
 # These can be used to set/unset values, specify additional files etc.
-export FOAM_SETTINGS="$@"
-_foamEval $@
+FOAM_SETTINGS="$@"
+if [ -z "$FOAM_SETTINGS" ]
+then
+    unset FOAM_SETTINGS
+else
+    export FOAM_SETTINGS
+    _foamEval $@
+fi
 
 # Clean standard environment variables (PATH, MANPATH, LD_LIBRARY_PATH)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
