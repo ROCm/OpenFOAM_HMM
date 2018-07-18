@@ -128,21 +128,23 @@ public:
         //- Decompose with uniform weights.
         virtual labelList decompose
         (
-            const polyMesh&,
+            const polyMesh& mesh,
             const pointField& points
         ) const
         {
+            checkDecompositionDirections(mesh.geometricD());
             return decompose(points);
         }
 
         //- Return for every coordinate the wanted processor number.
         virtual labelList decompose
         (
-            const polyMesh&,
+            const polyMesh& mesh,
             const pointField& points,
             const scalarField& weights
         ) const
         {
+            checkDecompositionDirections(mesh.geometricD());
             return decompose(points, weights);
         }
 

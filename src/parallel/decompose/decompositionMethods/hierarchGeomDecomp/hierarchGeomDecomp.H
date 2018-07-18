@@ -224,6 +224,7 @@ public:
             const scalarField& cWeights
         ) const
         {
+            checkDecompositionDirections(mesh.geometricD());
             return decompose(cc, cWeights);
         }
 
@@ -236,6 +237,7 @@ public:
             const pointField& cc
         ) const
         {
+            checkDecompositionDirections(mesh.geometricD());
             return decompose(cc);
         }
 

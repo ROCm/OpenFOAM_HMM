@@ -76,6 +76,13 @@ protected:
 
         tensor rotDelta_;
 
+
+    // Protected Member Functions
+
+        //- Check that mesh directions are compatible with decomposition
+        void checkDecompositionDirections(const Vector<label>&) const;
+
+
 public:
 
     // Constructors
