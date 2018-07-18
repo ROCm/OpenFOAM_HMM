@@ -132,16 +132,18 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
         coeffDict.lookup("nSmoothSurfaceNormals")
     );
 
-    //- When is medial axis
-    word angleKey = "minMedialAxisAngle";
-    if (!coeffDict.found(angleKey))
-    {
-        // Backwards compatibility
-        angleKey = "minMedianAxisAngle";
-    }
+    // Note: parameter name changed
+    // "minMedianAxisAngle" -> "minMedialAxisAngle" (DEC-2013)
+    // but not previously reported.
     scalar minMedialAxisAngleCos = Foam::cos
     (
-        degToRad(readScalar(coeffDict.lookup(angleKey)))
+        degToRad
+        (
+            coeffDict.getCompat<scalar>
+            (
+                "minMedialAxisAngle", {{ "minMedianAxisAngle", 1712 }}
+            )
+        )
     );
 
     //- Feature angle when to stop adding layers

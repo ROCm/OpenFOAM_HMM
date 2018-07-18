@@ -212,7 +212,7 @@ addLayersControls
 
     // Angle used to pick up medial axis points
     // Note: changed(corrected) w.r.t 16x! 90 degrees corresponds to 130 in 16x.
-    minMedianAxisAngle 90;
+    minMedialAxisAngle 90;
 
     // Create buffer region for new layer terminations
     nBufferCellsNoExtrude 0;
