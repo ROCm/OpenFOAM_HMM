@@ -47,13 +47,13 @@ Description
 
 Usage
     \table
-        Property     | Description                | Required    | Default value
-        setAverage   | Switch to activate setting of average value | no | false
-        perturb      | Perturb points for regular geometries    | no | 1e-5
-        points       | Name of points file        | no          | points
+        Property     | Description                      | Required | Default
+        setAverage   | Use average value                | no    | false
+        perturb      | Perturb points for regular geometries | no | 1e-5
+        points       | Name of points file              | no    | points
         fieldTable   | Alternative field name to sample | no | this field name
-        mapMethod    | Type of mapping            | no | planarInterpolation
-        offset       | Offset to mapped values    | no | Zero
+        mapMethod    | Type of mapping              | no | planarInterpolation
+        offset       | Offset to mapped values      | no | Zero
     \endtable
 
     \verbatim

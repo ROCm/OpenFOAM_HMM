@@ -38,6 +38,14 @@ Description
         interpolationScheme cellPoint;  // default is cell
     }
 
+    \table
+        Property     | Description                      | Required | Default
+        field        | name of field to be mapped       | no  | this field name
+        setAverage   | use average value                | no  | false |
+        average      | average value to apply if \c setAverage = yes | partly |
+        interpolationScheme | interpolation scheme      | partly | cell |
+    \endtable
+
 SourceFiles
     mappedPatchFieldBase.C
 
@@ -54,6 +62,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class mappedPatchBase;
 template<class> class interpolation;
 
@@ -64,6 +73,10 @@ template<class> class interpolation;
 template<class Type>
 class mappedPatchFieldBase
 {
+    // Private Member Functions
+
+        //- Selective retrieval of "average" entry from the dictionary
+        static Type getAverage(const dictionary& dict, bool mandatory);
 
 protected:
 
@@ -82,7 +95,7 @@ protected:
         const bool setAverage_;
 
         //- Average value the mapped field is adjusted to maintain if
-        //  setAverage_ is set true
+        //- setAverage_ is set true
         const Type average_;
 
         //- Interpolation scheme to use for nearestcell mode
@@ -135,11 +148,10 @@ public:
 
 
     //- Destructor
-    virtual ~mappedPatchFieldBase<Type>()
-    {}
+    virtual ~mappedPatchFieldBase<Type>() = default;
 
 
-    // Member functions
+    // Member Functions
 
         //- Field to sample. Either on my or nbr mesh
         const GeometricField<Type, fvPatchField, volMesh>& sampleField() const;
@@ -148,7 +160,7 @@ public:
         virtual tmp<Field<Type>> mappedField() const;
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 };
 
 

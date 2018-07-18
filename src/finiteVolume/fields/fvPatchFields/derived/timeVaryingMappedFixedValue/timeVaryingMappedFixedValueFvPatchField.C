@@ -580,7 +580,10 @@ void Foam::timeVaryingMappedFixedValueFvPatchField<Type>::write
         fieldTableName_
     );
 
-    os.writeEntryIfDifferent("setAverage", Switch(false), setAverage_);
+    if (setAverage_)
+    {
+        os.writeEntry("setAverage", setAverage_);
+    }
 
     os.writeEntryIfDifferent<scalar>("perturb", 1e-5, perturb_);
 
