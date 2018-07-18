@@ -186,13 +186,13 @@ void Foam::refinementFeatures::read
 
         if (dict.found("levels"))
         {
-            List<Tuple2<scalar, label>> distLevels(dict["levels"]);
+            List<Tuple2<scalar, label>> distLevels(dict.lookup("levels"));
 
             if (dict.size() < 1)
             {
                 FatalErrorInFunction
                     << " : levels should be at least size 1" << endl
-                    << "levels : "  << dict["levels"]
+                    << "levels : "  << dict.lookup("levels")
                     << exit(FatalError);
             }
 

@@ -61,8 +61,8 @@ Foam::surfZoneIOList::surfZoneIOList
         {
             const dictionary& dict = dictEntries[zoneI].dict();
 
-            label zoneSize = readLabel(dict.lookup("nFaces"));
-            label startFacei = readLabel(dict.lookup("startFace"));
+            const label zoneSize = dict.get<label>("nFaces");
+            const label startFacei = dict.get<label>("startFace");
 
             zones[zoneI] = surfZone
             (

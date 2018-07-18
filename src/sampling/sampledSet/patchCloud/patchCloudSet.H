@@ -65,7 +65,7 @@ class patchCloudSet
     // Private data
 
         //- Sampling points
-        const List<point> sampleCoords_;
+        const pointField sampleCoords_;
 
         //- Patches to sample
         const labelHashSet patchSet_;

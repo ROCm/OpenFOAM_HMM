@@ -810,12 +810,6 @@ void Foam::dictionary::transfer(dictionary& dict)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-Foam::ITstream& Foam::dictionary::operator[](const word& keyword) const
-{
-    return lookup(keyword);
-}
-
-
 void Foam::dictionary::operator=(const dictionary& rhs)
 {
     if (this == &rhs)

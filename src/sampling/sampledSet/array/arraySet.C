@@ -175,8 +175,8 @@ Foam::arraySet::arraySet
 :
     sampledSet(name, mesh, searchEngine, dict),
     coordSys_(dict),
-    pointsDensity_(dict.lookup("pointsDensity")),
-    spanBox_(dict.lookup("spanBox"))
+    pointsDensity_(dict.get<labelVector>("pointsDensity")),
+    spanBox_(dict.get<vector>("spanBox"))
 {
     genSamples();
 }

@@ -440,8 +440,8 @@ Foam::uniformSet::uniformSet
 )
 :
     sampledSet(name, mesh, searchEngine, dict),
-    start_(dict.lookup("start")),
-    end_(dict.lookup("end")),
+    start_(dict.get<point>("start")),
+    end_(dict.get<point>("end")),
     nPoints_(dict.get<label>("nPoints"))
 {
     genSamples();

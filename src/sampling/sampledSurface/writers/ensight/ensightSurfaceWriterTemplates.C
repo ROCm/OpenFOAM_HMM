@@ -349,7 +349,7 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
             forAllConstIter(dictionary, fieldsDict, iter)
             {
                 const dictionary& subDict = iter().dict();
-                const word fieldType(subDict.lookup("type"));
+                const word fieldType(subDict.get<word>("type"));
                 const word varName = subDict.lookupOrDefault
                 (
                     "name",

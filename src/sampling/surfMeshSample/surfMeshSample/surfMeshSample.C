@@ -75,7 +75,7 @@ Foam::surfMeshSample::New
     const dictionary& dict
 )
 {
-    const word sampleType(dict.lookup("type"));
+    const word sampleType(dict.get<word>("type"));
 
     auto cstrIter = wordConstructorTablePtr_->cfind(sampleType);
 

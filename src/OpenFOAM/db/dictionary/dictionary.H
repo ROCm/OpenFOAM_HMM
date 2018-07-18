@@ -1113,11 +1113,13 @@ public:
     // Member Operators
 
         //- Find and return an entry data stream (identical to #lookup method).
-        //  Default search: non-recursive with patterns.
+        //  Search: non-recursive with patterns.
         //
-        //  \param recursive search parent dictionaries
-        //  \param patternMatch use regular expressions
-        ITstream& operator[](const word& keyword) const;
+        //  \deprecated use lookup() method instead (deprecated JUL-2018)
+        ITstream& operator[](const word& keyword) const
+        {
+            return lookup(keyword);
+        }
 
         //- Copy assignment
         void operator=(const dictionary& rhs);

@@ -544,7 +544,7 @@ Foam::Istream& Foam::dimensionSet::read
                 scalar exponent = readScalar(exp);
 
                 dimensionedScalar s;
-                s.read(readSet[symbol], readSet);
+                s.read(readSet.lookup(symbol), readSet);
 
                 symbolSet.reset(pow(s.dimensions(), exponent));
                 // Round to nearest integer if close to it
@@ -554,7 +554,7 @@ Foam::Istream& Foam::dimensionSet::read
             else
             {
                 dimensionedScalar s;
-                s.read(readSet[symbolPow], readSet);
+                s.read(readSet.lookup(symbolPow), readSet);
 
                 symbolSet.reset(s.dimensions());
                 multiplier *= s.value();

@@ -196,8 +196,8 @@ Foam::sampledIsoSurfaceCell::sampledIsoSurfaceCell
 :
     sampledSurface(name, mesh, dict),
     MeshStorage(),
-    isoField_(dict.lookup("isoField")),
-    isoVal_(readScalar(dict.lookup("isoValue"))),
+    isoField_(dict.get<word>("isoField")),
+    isoVal_(dict.get<scalar>("isoValue")),
     bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox)),
     regularise_(dict.lookupOrDefault("regularise", true)),
     average_(dict.lookupOrDefault("average", true)),

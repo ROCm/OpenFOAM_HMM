@@ -315,8 +315,8 @@ Foam::probes::probes
 
 bool Foam::probes::read(const dictionary& dict)
 {
-    dict.lookup("probeLocations") >> *this;
-    dict.lookup("fields") >> fieldSelection_;
+    dict.read("probeLocations", static_cast<pointField&>(*this));
+    dict.read("fields", fieldSelection_);
 
     dict.readIfPresent("fixedLocations", fixedLocations_);
     if (dict.readIfPresent("interpolationScheme", interpolationScheme_))

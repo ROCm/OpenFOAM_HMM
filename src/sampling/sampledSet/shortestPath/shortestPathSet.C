@@ -325,8 +325,8 @@ Foam::shortestPathSet::shortestPathSet
 )
 :
     sampledSet(name, mesh, searchEngine, dict),
-    insidePoints_(dict.lookup("insidePoints")),
-    outsidePoints_(dict.lookup("outsidePoints"))
+    insidePoints_(dict.get<pointField>("insidePoints")),
+    outsidePoints_(dict.get<pointField>("outsidePoints"))
 {
     genSamples(mesh);
 }

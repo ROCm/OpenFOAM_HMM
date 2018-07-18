@@ -563,7 +563,7 @@ public:
 const fileOperation& fileHandler();
 
 //- Reset file handler
-void fileHandler(autoPtr<fileOperation>&);
+void fileHandler(autoPtr<fileOperation>& newHandler);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

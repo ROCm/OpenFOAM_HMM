@@ -342,7 +342,8 @@ Foam::nastranSurfaceWriter::nastranSurfaceWriter(const dictionary& options)
         separator_ = ",";
     }
 
-    List<Pair<word>> fieldPairs(options.lookup("fields"));
+    List<Pair<word>> fieldPairs;
+    options.read("fields", fieldPairs);
 
     for (const Pair<word>& item : fieldPairs)
     {

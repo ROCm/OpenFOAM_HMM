@@ -312,7 +312,7 @@ Foam::sampledCuttingPlane::sampledCuttingPlane
 {
     if (zoneID_.index() != -1)
     {
-        dict.lookup("exposedPatchName") >> exposedPatchName_;
+        dict.read("exposedPatchName", exposedPatchName_);
 
         if (mesh.boundaryMesh().findPatchID(exposedPatchName_) == -1)
         {

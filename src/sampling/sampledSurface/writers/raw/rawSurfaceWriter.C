@@ -217,7 +217,7 @@ Foam::rawSurfaceWriter::rawSurfaceWriter(const dictionary& options)
     if (options.found("compression"))
     {
         writeCompression_ =
-            IOstream::compressionEnum(options.lookup("compression"));
+            IOstream::compressionEnum(options.get<word>("compression"));
     }
 }
 

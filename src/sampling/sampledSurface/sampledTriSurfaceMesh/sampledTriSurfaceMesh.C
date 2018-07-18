@@ -668,7 +668,7 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
     (
         IOobject
         (
-            dict.lookup("surface"),
+            dict.get<word>("surface"),
             mesh.time().constant(), // instance
             "triSurface",           // local
             mesh.time(),            // registry

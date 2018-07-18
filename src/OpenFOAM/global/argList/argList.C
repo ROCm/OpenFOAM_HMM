@@ -966,24 +966,15 @@ void Foam::argList::parse
     // 5. '-fileHandler' commmand-line option
 
     {
-        word handlerType
-        (
-            options_.lookup("fileHandler", getEnv("FOAM_FILEHANDLER"))
-        );
+        word handlerType =
+            options_.lookup("fileHandler", getEnv("FOAM_FILEHANDLER"));
 
         if (handlerType.empty())
         {
             handlerType = fileOperation::defaultFileHandler;
         }
 
-        autoPtr<fileOperation> handler
-        (
-            fileOperation::New
-            (
-                handlerType,
-                bannerEnabled()
-            )
-        );
+        auto handler = fileOperation::New(handlerType, bannerEnabled());
         Foam::fileHandler(handler);
     }
 
@@ -1159,15 +1150,12 @@ void Foam::argList::parse
 
                 dictionary decompDict(decompDictStream);
 
-                dictNProcs = readLabel
-                (
-                    decompDict.lookup("numberOfSubdomains")
-                );
+                dictNProcs = decompDict.get<label>("numberOfSubdomains");
 
                 if (decompDict.lookupOrDefault("distributed", false))
                 {
                     distributed_ = true;
-                    decompDict.lookup("roots") >> roots;
+                    decompDict.read("roots", roots);
                 }
             }
 
@@ -1700,8 +1688,8 @@ void Foam::argList::printCompat() const
 void Foam::argList::displayDoc(bool source) const
 {
     const dictionary& docDict = debug::controlDict().subDict("Documentation");
-    List<fileName> docDirs(docDict.lookup("doxyDocDirs"));
-    fileName docExt(docDict.lookup("doxySourceFileExt"));
+    fileNameList docDirs(docDict.get<fileNameList>("doxyDocDirs"));
+    fileName docExt(docDict.get<fileName>("doxySourceFileExt"));
 
     // For source code: change xxx_8C.html to xxx_8C_source.html
     if (source)
@@ -1746,7 +1734,7 @@ void Foam::argList::displayDoc(bool source) const
     string docBrowser = getEnv("FOAM_DOC_BROWSER");
     if (docBrowser.empty())
     {
-        docDict.lookup("docBrowser") >> docBrowser;
+        docDict.read("docBrowser", docBrowser);
     }
 
     // Can use FOAM_DOC_BROWSER='application file://%f' if required

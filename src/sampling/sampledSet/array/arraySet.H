@@ -47,6 +47,7 @@ SourceFiles
 #define arraySet_H
 
 #include "sampledSet.H"
+#include "labelVector.H"
 #include "DynamicList.H"
 #include "coordinateSystem.H"
 
@@ -73,10 +74,10 @@ class arraySet
         coordinateSystem coordSys_;
 
         //- Point density vector
-        Vector<label> pointsDensity_;
+        labelVector pointsDensity_;
 
         //- Span box
-        Vector<scalar> spanBox_;
+        vector spanBox_;
 
 
     // Private Member Functions

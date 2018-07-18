@@ -1179,7 +1179,7 @@ const Foam::fileOperation& Foam::fileHandler()
     {
         word handler(getEnv("FOAM_FILEHANDLER"));
 
-        if (!handler.size())
+        if (handler.empty())
         {
             handler = fileOperation::defaultFileHandler;
         }
@@ -1191,14 +1191,14 @@ const Foam::fileOperation& Foam::fileHandler()
 }
 
 
-void Foam::fileHandler(autoPtr<fileOperation>& newHandlerPtr)
+void Foam::fileHandler(autoPtr<fileOperation>& newHandler)
 {
     if (fileOperation::fileHandlerPtr_.valid())
     {
         if
         (
-            newHandlerPtr.valid()
-         && newHandlerPtr->type() == fileOperation::fileHandlerPtr_->type()
+            newHandler.valid()
+         && newHandler->type() == fileOperation::fileHandlerPtr_->type()
         )
         {
             return;
@@ -1206,9 +1206,9 @@ void Foam::fileHandler(autoPtr<fileOperation>& newHandlerPtr)
     }
     fileOperation::fileHandlerPtr_.clear();
 
-    if (newHandlerPtr.valid())
+    if (newHandler.valid())
     {
-        fileOperation::fileHandlerPtr_ = std::move(newHandlerPtr);
+        fileOperation::fileHandlerPtr_ = std::move(newHandler);
     }
 }
 

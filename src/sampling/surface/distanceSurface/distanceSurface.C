@@ -52,7 +52,7 @@ Foam::distanceSurface::distanceSurface
     (
         searchableSurface::New
         (
-            dict.lookup("surfaceType"),
+            dict.get<word>("surfaceType"),
             IOobject
             (
                 dict.lookupOrDefault("surfaceName", defaultSurfaceName),
@@ -65,7 +65,7 @@ Foam::distanceSurface::distanceSurface
             dict
         )
     ),
-    distance_(readScalar(dict.lookup("distance"))),
+    distance_(dict.get<scalar>("distance")),
     signed_(dict.get<bool>("signed")),
     cell_(dict.lookupOrDefault("cell", true)),
     regularise_(dict.lookupOrDefault("regularise", true)),

@@ -95,7 +95,7 @@ void rewriteBoundary
     {
         const dictionary& patchDict = patches[patchi].dict();
 
-        if (word(patchDict["type"]) == cyclicPolyPatch::typeName)
+        if (patchDict.get<word>("type") == cyclicPolyPatch::typeName)
         {
             if (!patchDict.found("neighbourPatch"))
             {
@@ -130,7 +130,7 @@ void rewriteBoundary
 
         if
         (
-            word(patchDict["type"]) == cyclicPolyPatch::typeName
+            patchDict.get<word>("type") == cyclicPolyPatch::typeName
         )
         {
             const word& name = oldPatches[patchi].keyword();
@@ -167,10 +167,10 @@ void rewriteBoundary
             }
             else
             {
-                label nFaces = readLabel(patchDict["nFaces"]);
-                label startFace = readLabel(patchDict["startFace"]);
+                label nFaces = patchDict.get<label>("nFaces");
+                label startFace = patchDict.get<label>("startFace");
 
-                Info<< "Detected old style " << word(patchDict["type"])
+                Info<< "Detected old style " << patchDict.get<word>("type")
                     << " patch " << name << " with" << nl
                     << "    nFaces    : " << nFaces << nl
                     << "    startFace : " << startFace << endl;
@@ -213,17 +213,15 @@ void rewriteBoundary
                 Info<< "Replaced with patches" << nl
                     << patches[patchi].keyword() << " with" << nl
                     << "    nFaces    : "
-                    << readLabel(thisPatchDict.lookup("nFaces"))
-                    << nl
+                    << thisPatchDict.get<label>("nFaces") << nl
                     << "    startFace : "
-                    << readLabel(thisPatchDict.lookup("startFace")) << nl
+                    << thisPatchDict.get<label>("startFace") << nl
                     << patches[addedPatchi].keyword() << " with" << nl
                     << "    nFaces    : "
-                    << readLabel(nbrPatchDict.lookup("nFaces"))
-                    << nl
+                    << nbrPatchDict.get<label>("nFaces") << nl
                     << "    startFace : "
-                    << readLabel(nbrPatchDict.lookup("startFace"))
-                    << nl << endl;
+                    << nbrPatchDict.get<label>("startFace") << nl
+                    << endl;
 
                 addedPatchi++;
             }

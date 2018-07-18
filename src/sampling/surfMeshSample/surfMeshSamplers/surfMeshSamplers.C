@@ -348,7 +348,7 @@ bool Foam::surfMeshSamplers::read(const dictionary& dict)
     {
         sampleScheme_ = dict.lookupOrDefault<word>("sampleScheme", "cell");
 
-        dict.lookup("fields") >> fieldSelection_;
+        dict.read("fields", fieldSelection_);
         fieldSelection_.uniq();
 
         Info<< type() << " fields:  " << flatOutput(fieldSelection_) << nl;

@@ -320,8 +320,8 @@ int main(int argc, char *argv[])
             }
 
             // Patch names
-            const word masterPatchName(dict["master"]);
-            const word slavePatchName(dict["slave"]);
+            const word masterPatchName(dict.get<word>("master"));
+            const word slavePatchName(dict.get<word>("slave"));
 
             // Patch names
             Info<< "    " <<  masterPatchName
@@ -454,8 +454,8 @@ int main(int argc, char *argv[])
         }
 
         // Patch names
-        const word masterPatchName(dict["master"]);
-        const word slavePatchName(dict["slave"]);
+        const word masterPatchName(dict.get<word>("master"));
+        const word slavePatchName(dict.get<word>("slave"));
 
         // Zone names
         const word mergePatchName(masterPatchName + slavePatchName);

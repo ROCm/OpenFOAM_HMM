@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
         // message.
         if (surfaceDict.found("surfaces") || !dictName.hasExt())
         {
-            loader.select(wordReList(surfaceDict.lookup("surfaces")));
+            loader.select(surfaceDict.get<wordRes>("surfaces"));
         }
         else
         {
@@ -508,7 +508,7 @@ int main(int argc, char *argv[])
         boolList surfBaffleRegions(surf.patches().size(), false);
         if (surfaceDict.found("baffles"))
         {
-            wordReList baffleSelect(surfaceDict.lookup("baffles"));
+            wordRes baffleSelect(surfaceDict.get<wordRes>("baffles"));
 
             wordList patchNames(surf.patches().size());
             forAll(surf.patches(), patchi)
@@ -549,7 +549,11 @@ int main(int argc, char *argv[])
 
         if (surfaceDict.isDict("addFeatures"))
         {
-            const word addFeName = surfaceDict.subDict("addFeatures")["name"];
+            const word addFeName
+            (
+                surfaceDict.subDict("addFeatures").get<word>("name")
+            );
+
             Info<< "Adding (without merging) features from " << addFeName
                 << nl << endl;
 
@@ -736,7 +740,7 @@ int main(int argc, char *argv[])
                     outputName,
                     feMesh,
                     surf,
-                    readScalar(surfaceDict.lookup("maxFeatureProximity"))
+                    surfaceDict.get<scalar>("maxFeatureProximity")
                 );
 
             if (writeVTK)

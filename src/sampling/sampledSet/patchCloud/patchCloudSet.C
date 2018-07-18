@@ -295,13 +295,10 @@ Foam::patchCloudSet::patchCloudSet
 )
 :
     sampledSet(name, mesh, searchEngine, dict),
-    sampleCoords_(dict.lookup("points")),
+    sampleCoords_(dict.get<pointField>("points")),
     patchSet_
     (
-        mesh.boundaryMesh().patchSet
-        (
-            wordReList(dict.lookup("patches"))
-        )
+        mesh.boundaryMesh().patchSet(dict.get<wordRes>("patches"))
     ),
     searchDist_(dict.get<scalar>("maxDistance"))
 {

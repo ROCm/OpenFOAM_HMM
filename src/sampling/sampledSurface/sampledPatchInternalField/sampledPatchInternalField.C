@@ -61,17 +61,14 @@ Foam::sampledPatchInternalField::sampledPatchInternalField
     mappedPatchBase::offsetMode mode = mappedPatchBase::NORMAL;
     if (dict.found("offsetMode"))
     {
-        mode = mappedPatchBase::offsetModeNames_.read
-        (
-            dict.lookup("offsetMode")
-        );
+        mode = mappedPatchBase::offsetModeNames_.lookup("offsetMode", dict);
     }
 
     switch (mode)
     {
         case mappedPatchBase::NORMAL:
         {
-            const scalar distance = readScalar(dict.lookup("distance"));
+            const scalar distance(dict.get<scalar>("distance"));
             forAll(patchIDs(), i)
             {
                 mappers_.set
@@ -92,7 +89,7 @@ Foam::sampledPatchInternalField::sampledPatchInternalField
 
         case mappedPatchBase::UNIFORM:
         {
-            const point offset(dict.lookup("offset"));
+            const point offset(dict.get<point>("offset"));
             forAll(patchIDs(), i)
             {
                 mappers_.set
@@ -113,7 +110,7 @@ Foam::sampledPatchInternalField::sampledPatchInternalField
 
         case mappedPatchBase::NONUNIFORM:
         {
-            const pointField offsets(dict.lookup("offsets"));
+            const pointField offsets(dict.get<pointField>("offsets"));
             forAll(patchIDs(), i)
             {
                 mappers_.set

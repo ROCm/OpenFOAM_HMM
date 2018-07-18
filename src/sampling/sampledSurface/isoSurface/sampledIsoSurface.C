@@ -466,8 +466,8 @@ Foam::sampledIsoSurface::sampledIsoSurface
 )
 :
     sampledSurface(name, mesh, dict),
-    isoField_(dict.lookup("isoField")),
-    isoVal_(readScalar(dict.lookup("isoValue"))),
+    isoField_(dict.get<word>("isoField")),
+    isoVal_(dict.get<scalar>("isoValue")),
     bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox)),
     mergeTol_(dict.lookupOrDefault("mergeTol", 1e-6)),
     regularise_(dict.lookupOrDefault("regularise", true)),
@@ -491,7 +491,7 @@ Foam::sampledIsoSurface::sampledIsoSurface
 
     if (zoneID_.index() != -1)
     {
-        dict.lookup("exposedPatchName") >> exposedPatchName_;
+        dict.read("exposedPatchName", exposedPatchName_);
 
         if (mesh.boundaryMesh().findPatchID(exposedPatchName_) == -1)
         {

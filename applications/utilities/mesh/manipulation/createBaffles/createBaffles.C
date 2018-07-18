@@ -641,7 +641,8 @@ int main(int argc, char *argv[])
                 const dictionary& patchSources = dict.subDict("patches");
                 forAllConstIter(dictionary, patchSources, iter)
                 {
-                    const word patchName(iter().dict()["name"]);
+                    const word patchName(iter().dict().get<word>("name"));
+
                     bafflePatches.insert(patchName);
                 }
             }
@@ -649,6 +650,7 @@ int main(int argc, char *argv[])
             {
                 const word masterName = selectors[selectorI].name() + "_master";
                 bafflePatches.insert(masterName);
+
                 const word slaveName = selectors[selectorI].name() + "_slave";
                 bafflePatches.insert(slaveName);
             }
@@ -685,7 +687,7 @@ int main(int argc, char *argv[])
                 const dictionary& patchSources = dict.subDict("patches");
                 forAllConstIter(dictionary, patchSources, iter)
                 {
-                    const word patchName(iter().dict()["name"]);
+                    const word patchName(iter().dict().get<word>("name"));
 
                     if (pbm.findPatchID(patchName) == -1)
                     {
@@ -789,7 +791,7 @@ int main(int argc, char *argv[])
             bool master = true;
             forAllConstIter(dictionary, patchSources, iter)
             {
-                const word patchName(iter().dict()["name"]);
+                const word patchName(iter().dict().get<word>("name"));
                 label patchi = pbm.findPatchID(patchName);
                 if (master)
                 {
@@ -884,7 +886,7 @@ int main(int argc, char *argv[])
 
                 forAllConstIter(dictionary, patchSources, iter)
                 {
-                    const word patchName(iter().dict()["name"]);
+                    const word patchName(iter().dict().get<word>("name"));
                     label patchi = pbm.findPatchID(patchName);
 
                     if (iter().dict().found("patchFields"))

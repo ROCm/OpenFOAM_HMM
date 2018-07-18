@@ -198,14 +198,11 @@ Foam::circleSet::circleSet
 )
 :
     sampledSet(name, mesh, searchEngine, dict),
-    origin_(dict.lookup("origin")),
-    circleAxis_(dict.lookup("circleAxis")),
-    startPoint_(dict.lookup("startPoint")),
+    origin_(dict.get<point>("origin")),
+    circleAxis_(normalised(dict.get<vector>("circleAxis"))),
+    startPoint_(dict.get<point>("startPoint")),
     dTheta_(dict.get<scalar>("dTheta"))
 {
-    // Normalise circleAxis
-    circleAxis_ /= mag(circleAxis_);
-
     genSamples();
 }
 

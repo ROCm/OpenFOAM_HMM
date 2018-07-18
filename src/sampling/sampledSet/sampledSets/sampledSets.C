@@ -224,14 +224,13 @@ bool Foam::sampledSets::read(const dictionary& dict)
 {
     dict_ = dict;
 
-    bool setsFound = dict_.found("sets");
-    if (setsFound)
+    if (dict_.found("sets"))
     {
-        dict_.lookup("fields") >> fieldSelection_;
+        dict_.read("fields", fieldSelection_);
         clearFieldGroups();
 
-        dict.lookup("interpolationScheme") >> interpolationScheme_;
-        dict.lookup("setFormat") >> writeFormat_;
+        dict.read("interpolationScheme", interpolationScheme_);
+        dict.read("setFormat", writeFormat_);
 
         PtrList<sampledSet> newList
         (
@@ -270,8 +269,7 @@ bool Foam::sampledSets::read(const dictionary& dict)
 
 void Foam::sampledSets::correct()
 {
-    bool setsFound = dict_.found("sets");
-    if (setsFound)
+    if (dict_.found("sets"))
     {
         searchEngine_.correct();
 

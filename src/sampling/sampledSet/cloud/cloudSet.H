@@ -66,7 +66,7 @@ class cloudSet
     // Private data
 
         //- Sampling points
-        List<point> sampleCoords_;
+        pointField sampleCoords_;
 
 
     // Private Member Functions

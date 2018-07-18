@@ -359,8 +359,8 @@ Foam::faceOnlySet::faceOnlySet
 )
 :
     sampledSet(name, mesh, searchEngine, dict),
-    start_(dict.lookup("start")),
-    end_(dict.lookup("end"))
+    start_(dict.get<point>("start")),
+    end_(dict.get<point>("end"))
 {
     genSamples();
 }

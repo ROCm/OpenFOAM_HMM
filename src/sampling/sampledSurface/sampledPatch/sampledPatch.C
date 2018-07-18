@@ -66,7 +66,7 @@ Foam::sampledPatch::sampledPatch
 )
 :
     sampledSurface(name, mesh, dict),
-    patchNames_(dict.lookup("patches")),
+    patchNames_(dict.get<wordRes>("patches")),
     triangulate_(dict.lookupOrDefault("triangulate", false)),
     needsUpdate_(true)
 {}

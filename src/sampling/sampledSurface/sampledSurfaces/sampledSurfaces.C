@@ -259,11 +259,11 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
     {
         sampleFaceScheme_ = dict.lookupOrDefault<word>("sampleScheme", "cell");
 
-        dict.lookup("interpolationScheme") >> sampleNodeScheme_;
+        dict.read("interpolationScheme", sampleNodeScheme_);
 
-        dict.lookup("fields") >> fieldSelection_;
+        dict.read("fields", fieldSelection_);
 
-        const word writeType(dict.lookup("surfaceFormat"));
+        const word writeType(dict.get<word>("surfaceFormat"));
 
         // Define the surface formatter
         // Optionally defined extra controls for the output formats

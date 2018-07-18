@@ -346,10 +346,7 @@ Foam::patchSeedSet::patchSeedSet
     sampledSet(name, mesh, searchEngine, dict),
     patchSet_
     (
-        mesh.boundaryMesh().patchSet
-        (
-            wordReList(dict.lookup("patches"))
-        )
+        mesh.boundaryMesh().patchSet(dict.get<wordRes>("patches"))
     ),
     maxPoints_(dict.get<label>("maxPoints")),
     selectedLocations_
