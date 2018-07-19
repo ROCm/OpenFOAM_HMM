@@ -25,7 +25,6 @@ License
 
 #include "argList.H"
 
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
@@ -34,8 +33,8 @@ inline void Foam::argList::readList(ITstream& is, List<T>& list)
     if (is.size() == 1)
     {
         // Single token - treat like List with one entry
-        list.setSize(1);
-        is >> list[0];
+        list.resize(1);
+        is >> list.first();
     }
     else
     {
@@ -226,7 +225,8 @@ inline T Foam::argList::read(const label index) const
     T val;
     is >> val;
 
-    // Could also check is.nRemainingTokens() to detect trailing rubbish
+    warnTrailing(is, index);
+
     return val;
 }
 
@@ -239,7 +239,8 @@ inline T Foam::argList::opt(const word& optName) const
     T val;
     is >> val;
 
-    // Could also check is.nRemainingTokens() to detect trailing rubbish
+    warnTrailing(is, optName);
+
     return val;
 }
 
@@ -303,6 +304,8 @@ inline Foam::List<T> Foam::argList::readList(const label index) const
     List<T> list;
     readList(is, list);
 
+    warnTrailing(is, index);
+
     return list;
 }
 
@@ -314,6 +317,8 @@ inline Foam::List<T> Foam::argList::readList(const word& optName) const
 
     List<T> list;
     readList(is, list);
+
+    warnTrailing(is, optName);
 
     return list;
 }
@@ -330,6 +335,8 @@ inline bool Foam::argList::readListIfPresent
     {
         ITstream is(optName, options_[optName]);
         readList(is, list);
+
+        warnTrailing(is, optName);
 
         return true;
     }

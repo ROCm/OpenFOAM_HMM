@@ -82,7 +82,7 @@ public:
     // Constructors
 
         //- Construct null
-        uncollatedFileOperation(const bool verbose);
+        uncollatedFileOperation(bool verbose);
 
 
     //- Destructor

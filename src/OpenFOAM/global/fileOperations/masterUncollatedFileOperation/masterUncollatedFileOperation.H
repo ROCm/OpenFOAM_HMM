@@ -494,10 +494,10 @@ public:
     // Constructors
 
         //- Construct null
-        masterUncollatedFileOperation(const bool verbose);
+        masterUncollatedFileOperation(bool verbose);
 
         //- Construct from communicator
-        masterUncollatedFileOperation(const label comm, const bool verbose);
+        masterUncollatedFileOperation(const label comm, bool verbose);
 
 
     //- Destructor

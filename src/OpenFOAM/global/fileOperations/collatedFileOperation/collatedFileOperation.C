@@ -242,7 +242,7 @@ bool Foam::fileOperations::collatedFileOperation::appendObject
 
 Foam::fileOperations::collatedFileOperation::collatedFileOperation
 (
-    const bool verbose
+    bool verbose
 )
 :
     masterUncollatedFileOperation
@@ -263,6 +263,8 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
     nProcs_(Pstream::nProcs()),
     ioRanks_(ioRanks())
 {
+    verbose = (verbose && Foam::infoDetailLevel > 0);
+
     if (verbose)
     {
         Info<< "I/O    : " << typeName
@@ -300,12 +302,12 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
             }
             Pstream::gatherList(ioRanks);
 
-            Info<< "         IO nodes:" << endl;
-            forAll(ioRanks, proci)
+            Info<< "         IO nodes:" << nl;
+            for (const string& ranks : ioRanks)
             {
-                if (!ioRanks[proci].empty())
+                if (!ranks.empty())
                 {
-                    Info<< "             " << ioRanks[proci] << endl;
+                    Info<< "             " << ranks << nl;
                 }
             }
         }
@@ -339,7 +341,7 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
     const label comm,
     const labelList& ioRanks,
     const word& typeName,
-    const bool verbose
+    bool verbose
 )
 :
     masterUncollatedFileOperation(comm, false),
@@ -348,6 +350,8 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
     nProcs_(Pstream::nProcs()),
     ioRanks_(ioRanks)
 {
+    verbose = (verbose && Foam::infoDetailLevel > 0);
+
     if (verbose)
     {
         Info<< "I/O    : " << typeName

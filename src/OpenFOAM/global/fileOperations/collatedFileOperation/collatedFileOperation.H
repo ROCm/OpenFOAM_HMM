@@ -115,7 +115,7 @@ public:
     // Constructors
 
         //- Construct null
-        collatedFileOperation(const bool verbose);
+        collatedFileOperation(bool verbose);
 
         //- Construct from user communicator
         collatedFileOperation
@@ -123,7 +123,7 @@ public:
             const label comm,
             const labelList& ioRanks,
             const word& typeName,
-            const bool verbose
+            bool verbose
         );
 
 

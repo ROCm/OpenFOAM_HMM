@@ -259,14 +259,7 @@ void Foam::Time::readDict()
         controlDict_.watchIndices().clear();
 
         // Installing the new handler
-        autoPtr<fileOperation> handler
-        (
-            fileOperation::New
-            (
-                fileHandlerName,
-                true
-            )
-        );
+        auto handler = fileOperation::New(fileHandlerName, true);
         Foam::fileHandler(handler);
 
         // Reinstall old watches

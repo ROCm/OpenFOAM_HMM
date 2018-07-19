@@ -178,14 +178,15 @@ Foam::fileOperations::uncollatedFileOperation::lookupProcessorsPath
 
 Foam::fileOperations::uncollatedFileOperation::uncollatedFileOperation
 (
-    const bool verbose
+    bool verbose
 )
 :
     fileOperation(Pstream::worldComm)
 {
     if (verbose)
     {
-        Info<< "I/O    : " << typeName << endl;
+        DetailInfo
+            << "I/O    : " << typeName << endl;
     }
 }
 

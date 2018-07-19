@@ -428,7 +428,7 @@ Foam::fileOperation::fileOperation(label comm)
 Foam::autoPtr<Foam::fileOperation> Foam::fileOperation::New
 (
     const word& handlerType,
-    const bool verbose
+    bool verbose
 )
 {
     if (debug)
@@ -1173,6 +1173,8 @@ Foam::label Foam::fileOperation::detectProcessorPath(const fileName& fName)
 }
 
 
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
 const Foam::fileOperation& Foam::fileHandler()
 {
     if (!fileOperation::fileHandlerPtr_.valid())
@@ -1193,17 +1195,15 @@ const Foam::fileOperation& Foam::fileHandler()
 
 void Foam::fileHandler(autoPtr<fileOperation>& newHandler)
 {
-    if (fileOperation::fileHandlerPtr_.valid())
+    if
+    (
+        newHandler.valid() && fileOperation::fileHandlerPtr_.valid()
+     && newHandler->type() == fileOperation::fileHandlerPtr_->type()
+    )
     {
-        if
-        (
-            newHandler.valid()
-         && newHandler->type() == fileOperation::fileHandlerPtr_->type()
-        )
-        {
-            return;
-        }
+        return;
     }
+
     fileOperation::fileHandlerPtr_.clear();
 
     if (newHandler.valid())

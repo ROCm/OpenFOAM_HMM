@@ -80,7 +80,7 @@ public:
 
 
     //- Destructor
-    virtual ~fileOperationInitialise();
+    virtual ~fileOperationInitialise() = default;
 
 
     // Member Functions

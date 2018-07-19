@@ -194,6 +194,36 @@ static void printBuildInfo(const bool full=true)
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
+void Foam::argList::warnTrailing(const ITstream& is, const label index)
+{
+    const label nExcess = is.nRemainingTokens();
+
+    if (nExcess)
+    {
+        std::cerr
+            << nl
+            << "--> FOAM WARNING:" << nl
+            << "argument " << index << " has "
+            << nExcess << " excess tokens" << nl << nl;
+    }
+}
+
+
+void Foam::argList::warnTrailing(const ITstream& is, const word& optName)
+{
+    const label nExcess = is.nRemainingTokens();
+
+    if (nExcess)
+    {
+        std::cerr
+            << nl
+            << "--> FOAM WARNING:" << nl
+            << "option -" << optName << " has "
+            << nExcess << " excess tokens" << nl << nl;
+    }
+}
+
+
 void Foam::argList::addArgument(const string& argName)
 {
     validArgs.append(argName);
@@ -637,7 +667,7 @@ void Foam::argList::getRootCase()
     fileName casePath;
 
     // [-case dir] specified
-    auto optIter = options_.cfind("case");
+    const auto optIter = options_.cfind("case");
 
     if (optIter.found())
     {
@@ -704,16 +734,17 @@ Foam::argList::argList
     options_(argc),
     distributed_(false)
 {
-    // Check for fileHandler
+    // Check for -fileHandler, which requires an argument.
     word handlerType(getEnv("FOAM_FILEHANDLER"));
-    for (int argI = 0; argI < argc; ++argI)
+    for (int argi = argc-2; argi > 0; --argi)
     {
-        if (argv[argI][0] == '-')
+        if (argv[argi][0] == '-')
         {
-            const char *optionName = &argv[argI][1];
-            if (string(optionName) == "fileHandler")
+            const char *optName = &argv[argi][1];
+
+            if (strcmp(optName, "fileHandler") == 0)
             {
-                handlerType = argv[argI+1];
+                handlerType = argv[argi+1];
                 break;
             }
         }
@@ -757,7 +788,6 @@ Foam::argList::argList
 
     // Check arguments and options, argv[0] was already handled
     int nArgs = 1;
-    HashTable<string>::const_iterator optIter;
     for (int argi = 1; argi < args_.size(); ++argi)
     {
         argListStr_ += ' ';
@@ -774,14 +804,8 @@ Foam::argList::argList
             }
             else if
             (
-                (
-                    (optIter = validOptions.cfind(optName)).found()
-                 && !optIter.object().empty()
-                )
-             || (
-                    (optIter = validParOptions.cfind(optName)).found()
-                 && !optIter.object().empty()
-                )
+                validOptions.lookup(optName, "").size()
+             || validParOptions.lookup(optName, "").size()
             )
             {
                 // If the option is known to require an argument,
@@ -966,15 +990,15 @@ void Foam::argList::parse
     // 5. '-fileHandler' commmand-line option
 
     {
-        word handlerType =
+        word fileHandlerName =
             options_.lookup("fileHandler", getEnv("FOAM_FILEHANDLER"));
 
-        if (handlerType.empty())
+        if (fileHandlerName.empty())
         {
-            handlerType = fileOperation::defaultFileHandler;
+            fileHandlerName = fileOperation::defaultFileHandler;
         }
 
-        auto handler = fileOperation::New(handlerType, bannerEnabled());
+        auto handler = fileOperation::New(fileHandlerName, bannerEnabled());
         Foam::fileHandler(handler);
     }
 

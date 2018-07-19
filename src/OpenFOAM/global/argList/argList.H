@@ -157,6 +157,12 @@ class argList
             const string& str
         );
 
+        //- Warn if there are input tokens remaining on the stream
+        static void warnTrailing(const ITstream& is, const label index);
+
+        //- Warn if there are input tokens remaining on the stream
+        static void warnTrailing(const ITstream& is, const word& optName);
+
         //- Read a List of values from ITstream,
         //- treating a single entry like a list of size 1.
         template<class T>

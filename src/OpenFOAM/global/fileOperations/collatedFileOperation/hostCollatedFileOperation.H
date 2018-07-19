@@ -117,8 +117,7 @@ public:
 
 
     //- Destructor
-    virtual ~hostCollatedFileOperationInitialise()
-    {}
+    virtual ~hostCollatedFileOperationInitialise() = default;
 };
 
 

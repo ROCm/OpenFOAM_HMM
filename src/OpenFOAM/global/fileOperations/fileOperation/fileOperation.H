@@ -186,7 +186,7 @@ public:
             fileOperation,
             word,
             (
-                const bool verbose
+                bool verbose
             ),
             (verbose)
         );
@@ -198,7 +198,7 @@ public:
         static autoPtr<fileOperation> New
         (
             const word& handlerType,
-            const bool verbose
+            bool verbose = false
         );
 
 

@@ -751,7 +751,7 @@ Foam::fileOperations::masterUncollatedFileOperation::read
 Foam::fileOperations::masterUncollatedFileOperation::
 masterUncollatedFileOperation
 (
-    const bool verbose
+    bool verbose
 )
 :
     fileOperation
@@ -764,9 +764,12 @@ masterUncollatedFileOperation
     ),
     myComm_(comm_)
 {
+    verbose = (verbose && Foam::infoDetailLevel > 0);
+
     if (verbose)
     {
-        Info<< "I/O    : " << typeName
+        Info
+            << "I/O    : " << typeName
             << " (maxMasterFileBufferSize " << maxMasterFileBufferSize << ')'
             << endl;
     }
@@ -801,15 +804,18 @@ Foam::fileOperations::masterUncollatedFileOperation::
 masterUncollatedFileOperation
 (
     const label comm,
-    const bool verbose
+    bool verbose
 )
 :
     fileOperation(comm),
     myComm_(-1)
 {
+    verbose = (verbose && Foam::infoDetailLevel > 0);
+
     if (verbose)
     {
-        Info<< "I/O    : " << typeName
+        Info
+            << "I/O    : " << typeName
             << " (maxMasterFileBufferSize " << maxMasterFileBufferSize << ')'
             << endl;
     }
