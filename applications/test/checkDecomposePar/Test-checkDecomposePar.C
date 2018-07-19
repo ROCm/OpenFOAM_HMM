@@ -108,16 +108,12 @@ int main(int argc, char *argv[])
     }
     else
     {
-        word regionName;
-        if (args.readIfPresent("region", regionName))
+        regionNames.resize(1, fvMesh::defaultRegion);
+        regionDirs.resize(1, word::null);
+
+        if (args.readIfPresent("region", regionNames.first()))
         {
-            regionNames = wordList(1, regionName);
-            regionDirs = regionNames;
-        }
-        else
-        {
-            regionNames = wordList(1, fvMesh::defaultRegion);
-            regionDirs = wordList(1, word::null);
+            regionDirs.first() = regionNames.first();
         }
     }
 

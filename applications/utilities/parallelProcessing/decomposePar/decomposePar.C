@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "copyZero",
-        "Copy \a 0 directory to processor* rather than decompose the fields"
+        "Copy a 0 directory to processor* rather than decompose the fields"
     );
     argList::addBoolOption
     (
@@ -318,15 +318,16 @@ int main(int argc, char *argv[])
     }
     else
     {
-        regionNames = {fvMesh::defaultRegion};
-        args.readIfPresent("region", regionNames[0]);
+        regionNames.resize(1);
+        regionNames.first() =
+            args.lookupOrDefault<word>("region", fvMesh::defaultRegion);
     }
 
     forAll(regionNames, regioni)
     {
         const word& regionName = regionNames[regioni];
         const word& regionDir =
-            regionName == fvMesh::defaultRegion ? word::null : regionName;
+            (regionName == fvMesh::defaultRegion ? word::null : regionName);
 
         Info<< "\n\nDecomposing mesh " << regionName << nl << endl;
 
