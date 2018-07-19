@@ -95,25 +95,26 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New
     const Time& runTime
 )
 {
-    if (args.optionFound("dry-run") || args.optionFound("dry-run-write"))
+    if (args.found("dry-run") || args.found("dry-run-write"))
     {
         Info
             << "Operating in 'dry-run' mode: case will run for 1 time step.  "
-            << "All checks assumed OK on a clean exit" << Foam::endl;
+            << "All checks assumed OK on a clean exit" << endl;
 
         FieldBase::allowConstructFromLargerSize = true;
 
-        // Stopping after 1 iteration of the simplified mesh
-        // Note: using saNoWriteNow will only trigger the function object execute
-        // function and not the write function
-        runTime.stopAt(Foam::Time::saNoWriteNow);
+        // Stop after 1 iteration of the simplified mesh
 
-        if (args.optionFound("dry-run-write"))
+        if (args.found("dry-run-write"))
         {
-            // Stopping after 1 iteration of the simplified mesh
-            // Note: using saWriteNow to trigger writing/execution of function
-            // objects
+            // Using saWriteNow triggers function objects execute(), write()
             runTime.stopAt(Foam::Time::saWriteNow);
+        }
+        else
+        {
+            // Using saNoWriteNow triggers function objects execute(),
+            // but not write()
+            runTime.stopAt(Foam::Time::saNoWriteNow);
         }
 
         functionObject::outputPrefix = "postProcessing-dry-run";

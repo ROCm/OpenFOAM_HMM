@@ -360,10 +360,9 @@ int main(int argc, char *argv[])
     const fileName surfFileName = args[1];
     const bool checkSelfIntersect = args.found("checkSelfIntersection");
     const bool splitNonManifold = args.found("splitNonManifold");
-    const label outputThreshold =
-        args.lookupOrDefault("outputThreshold", 10);
+    const label outputThreshold = args.lookupOrDefault("outputThreshold", 10);
     word surfaceFormat;
-    const bool writeSets = args.optionReadIfPresent("writeSets", surfaceFormat);
+    const bool writeSets = args.readIfPresent("writeSets", surfaceFormat);
 
     autoPtr<surfaceWriter> surfWriter;
     word edgeFormat;
