@@ -158,9 +158,9 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
 
             label groupi = condition.groupID();
 
-            Map<label>::const_iterator conditionIter = groupMap_.find(groupi);
+            auto conditionIter = groupMap_.cfind(groupi);
 
-            if (conditionIter == groupMap_.end())
+            if (!conditionIter.found())
             {
                 FatalErrorInFunction
                     << "group " << groupi << " not found in map"

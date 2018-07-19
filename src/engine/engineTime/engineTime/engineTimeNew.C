@@ -49,10 +49,9 @@ Foam::autoPtr<Foam::engineTime> Foam::engineTime::New
 
     Info<< "Selecting engine type " << engineType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(engineType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(engineType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown engine type "

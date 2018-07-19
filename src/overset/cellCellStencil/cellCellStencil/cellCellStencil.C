@@ -68,11 +68,11 @@ Foam::autoPtr<Foam::cellCellStencil> Foam::cellCellStencil::New
         InfoInFunction << "Constructing cellCellStencil" << endl;
     }
 
-    const word stencilType(dict.lookup("method"));
+    const word stencilType(dict.get<word>("method"));
 
     auto cstrIter = meshConstructorTablePtr_->cfind(stencilType);
 
-    if (cstrIter == meshConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown cellCellStencil type "

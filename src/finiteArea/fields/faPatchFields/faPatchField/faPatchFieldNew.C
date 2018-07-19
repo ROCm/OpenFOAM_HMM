@@ -39,7 +39,7 @@ Foam::tmp<Foam::faPatchField<Type>> Foam::faPatchField<Type>::New
         << "constructing faPatchField<Type>"
         << endl;
 
-    auto cstrIter =  patchConstructorTablePtr_->cfind(patchFieldType);
+    auto cstrIter = patchConstructorTablePtr_->cfind(patchFieldType);
 
     if (!cstrIter.found())
     {
@@ -83,7 +83,7 @@ Foam::tmp<Foam::faPatchField<Type>> Foam::faPatchField<Type>::New
     {
         if (!disallowGenericFaPatchField)
         {
-            cstrIter = dictionaryConstructorTablePtr_->find("generic");
+            cstrIter = dictionaryConstructorTablePtr_->cfind("generic");
         }
 
         if (!cstrIter.found())
