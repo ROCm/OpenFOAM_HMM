@@ -36,6 +36,8 @@ Description
 #include "rigidBodyRestraint.H"
 #include "rigidBodyModelState.H"
 #include "Fstream.H"
+#include "argList.H"
+#include "Time.H"
 
 using namespace Foam;
 using namespace RBD;
@@ -44,10 +46,13 @@ using namespace RBD;
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
+    #include "createTime.H"
+
     dictionary sphericalJointDict(IFstream("sphericalJoint")());
 
     // Create the sphericalJoint model from dictionary
-    rigidBodyMotion sphericalJoint(sphericalJointDict);
+    rigidBodyMotion sphericalJoint(runTime, sphericalJointDict);
 
     label nIter(readLabel(sphericalJointDict.lookup("nIter")));
 

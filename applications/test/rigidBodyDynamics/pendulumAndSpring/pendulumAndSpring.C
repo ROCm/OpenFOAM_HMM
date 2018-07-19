@@ -37,6 +37,8 @@ Description
 #include "rigidBodyModelState.H"
 #include "Fstream.H"
 #include "constants.H"
+#include "argList.H"
+#include "Time.H"
 
 using namespace Foam;
 using namespace RBD;
@@ -46,10 +48,12 @@ using namespace Foam::constant::mathematical;
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
+    #include "createTime.H"
     dictionary pendulumAndSpringDict(IFstream("pendulumAndSpring")());
 
     // Create the pendulumAndSpring model from dictionary
-    rigidBodyMotion pendulumAndSpring(pendulumAndSpringDict);
+    rigidBodyMotion pendulumAndSpring(runTime, pendulumAndSpringDict);
 
     label nIter(readLabel(pendulumAndSpringDict.lookup("nIter")));
 
