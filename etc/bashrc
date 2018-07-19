@@ -135,6 +135,7 @@ fi
 export WM_PROJECT_USER_DIR=$HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION
 
 # Load shell functions
+unset WM_SHELL_FUNCTIONS
 . $WM_PROJECT_DIR/etc/config.sh/functions
 
 # Overrides via <prefs.sh>

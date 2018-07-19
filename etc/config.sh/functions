@@ -31,6 +31,7 @@ then
     foamClean=$WM_PROJECT_DIR/bin/foamCleanPath
 
     # Cleaning environment variables
+    unset -f _foamClean 2>/dev/null
     _foamClean()
     {
          foamVar_name=$1
@@ -41,6 +42,7 @@ then
 
     # Source an etc file, possibly with some verbosity
     # - use eval to avoid intermediate variables (ksh doesn't have 'local')
+    unset -f _foamEtc 2>/dev/null
     if [ "$FOAM_VERBOSE" -a "$PS1" ]
     then
         _foamEtc()
@@ -55,18 +57,21 @@ then
     fi
 
     # Prepend PATH
+    unset -f _foamAddPath 2>/dev/null
     _foamAddPath()
     {
         [ -n "$1" ] && export PATH=$1:$PATH
     }
 
     # Prepend MANPATH
+    unset -f _foamAddMan 2>/dev/null
     _foamAddMan()
     {
         [ -n "$1" ] && export MANPATH=$1:$MANPATH
     }
 
     # Prepend LD_LIBRARY_PATH
+    unset -f _foamAddLib 2>/dev/null
     _foamAddLib()
     {
         [ -n "$1" ] && export LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH
@@ -83,6 +88,7 @@ then
     # 2) Use fallback if the previous failed
     #
     # Return 0 on success
+    unset -f _foamAddLibAuto 2>/dev/null
     _foamAddLibAuto()
     {
         # Note ksh does not have 'local' thus these ugly variable names
@@ -150,6 +156,7 @@ then
 
 
     # Evaluate command-line parameters
+    unset -f _foamEval 2>/dev/null
     _foamEval()
     {
         while [ $# -gt 0 ]
