@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,9 +35,12 @@ Usage
     \b decomposePar [OPTION]
 
     Options:
+      - \par -dry-run
+        Test without actually decomposing
+
       - \par -cellDist
         Write the cell distribution as a labelList, for use with 'manual'
-        decomposition method or as a volScalarField for post-processing.
+        decomposition method and as a volScalarField for visualization.
 
       - \par -region \<regionName\>
         Decompose named region. Does not check for existence of processor*.
@@ -83,6 +86,7 @@ Usage
 #include "fvCFD.H"
 #include "IOobjectList.H"
 #include "domainDecomposition.H"
+#include "domainDecompositionDryRun.H"
 #include "labelIOField.H"
 #include "labelFieldIOField.H"
 #include "scalarIOField.H"
@@ -240,9 +244,20 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
+        "dry-run",
+        "Test without writing the decomposition. "
+        "Changes -cellDist to only write volScalarField."
+    );
+    argList::addBoolOption
+    (
+        "verbose",
+        "Additional verbosity"
+    );
+    argList::addBoolOption
+    (
         "cellDist",
-        "write cell distribution as a labelList - for use with 'manual' "
-        "decomposition method or as a volScalarField for post-processing."
+        "Write cell distribution as a labelList - for use with 'manual' "
+        "decomposition method and as a volScalarField for visualization."
     );
     argList::addBoolOption
     (
@@ -280,13 +295,17 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
+    const bool dryrun           = args.found("dry-run");
     const bool optRegion        = args.found("region");
     const bool allRegions       = args.found("allRegions");
     const bool writeCellDist    = args.found("cellDist");
+    const bool verbose          = args.found("verbose");
+
+    // Most of these are ignored for dry-run (not triggered anywhere)
     const bool copyZero         = args.found("copyZero");
     const bool copyUniform      = args.found("copyUniform");
     const bool decomposeSets    = !args.found("noSets");
-    const bool ifRequiredDecomposition = args.found("ifRequired");
+    const bool decomposeIfRequired = args.found("ifRequired");
 
     bool decomposeFieldsOnly = args.found("fields");
     bool forceOverwrite      = args.found("force");
@@ -294,8 +313,18 @@ int main(int argc, char *argv[])
 
     // Set time from database
     #include "createTime.H"
-    // Allow override of time
-    instantList times = timeSelector::selectIfPresent(runTime, args);
+
+    // Allow override of time (unless dry-run)
+    instantList times;
+    if (dryrun)
+    {
+        Info<< "\ndry-run: ignoring -copy*, -fields, -force, time selection"
+            << nl;
+    }
+    else
+    {
+        times = timeSelector::selectIfPresent(runTime, args);
+    }
 
 
     // Allow override of decomposeParDict location
@@ -305,7 +334,7 @@ int main(int argc, char *argv[])
     wordList regionNames;
     if (allRegions)
     {
-        Info<< "Decomposing all regions in regionProperties" << nl << endl;
+        Info<< "Decomposing all regions in regionProperties" << nl << nl;
         regionProperties rp(runTime);
 
         wordHashSet names;
@@ -329,6 +358,29 @@ int main(int argc, char *argv[])
         const word& regionDir =
             (regionName == fvMesh::defaultRegion ? word::null : regionName);
 
+        if (dryrun)
+        {
+            Info<< "dry-run: decomposing mesh " << regionName << nl << nl
+                << "Create mesh..." << flush;
+
+            domainDecompositionDryRun decompTest
+            (
+                IOobject
+                (
+                    regionName,
+                    runTime.timeName(),
+                    runTime,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                decompDictFile
+            );
+
+            decompTest.execute(writeCellDist, verbose);
+            continue;
+        }
+
         Info<< "\n\nDecomposing mesh " << regionName << nl << endl;
 
         // Determine the existing processor count directly
@@ -346,7 +398,7 @@ int main(int argc, char *argv[])
                     (
                         "decomposeParDict",
                         runTime.time().system(),
-                        regionDir,          // use region if non-standard
+                        regionDir,  // region (if non-default)
                         runTime,
                         IOobject::MUST_READ,
                         IOobject::NO_WRITE,
@@ -378,9 +430,9 @@ int main(int argc, char *argv[])
         {
             bool procDirsProblem = true;
 
-            if (ifRequiredDecomposition && nProcs == nDomains)
+            if (decomposeIfRequired && nProcs == nDomains)
             {
-                // we can reuse the decomposition
+                // We can reuse the decomposition
                 decomposeFieldsOnly = true;
                 procDirsProblem = false;
                 forceOverwrite = false;
@@ -485,28 +537,7 @@ int main(int argc, char *argv[])
             {
                 const labelList& procIds = mesh.cellToProc();
 
-                // Write the decomposition as labelList for use with 'manual'
-                // decomposition method.
-                labelIOList cellDecomposition
-                (
-                    IOobject
-                    (
-                        "cellDecomposition",
-                        mesh.facesInstance(),
-                        mesh,
-                        IOobject::NO_READ,
-                        IOobject::NO_WRITE,
-                        false
-                    ),
-                    procIds
-                );
-                cellDecomposition.write();
-
-                Info<< nl << "Wrote decomposition to "
-                    << cellDecomposition.objectPath()
-                    << " for use in manual decomposition." << endl;
-
-                // Write as volScalarField for postprocessing.
+                // Write decomposition as volScalarField for visualization
                 volScalarField cellDist
                 (
                     IOobject
@@ -531,8 +562,29 @@ int main(int argc, char *argv[])
                 cellDist.write();
 
                 Info<< nl << "Wrote decomposition as volScalarField to "
-                    << cellDist.name() << " for use in postprocessing."
+                    << cellDist.name() << " for visualization."
                     << endl;
+
+                // Write decomposition as labelList for use with 'manual'
+                // decomposition method.
+                labelIOList cellDecomposition
+                (
+                    IOobject
+                    (
+                        "cellDecomposition",
+                        mesh.facesInstance(),
+                        mesh,
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE,
+                        false
+                    ),
+                    procIds
+                );
+                cellDecomposition.write();
+
+                Info<< nl << "Wrote decomposition to "
+                    << cellDecomposition.objectPath()
+                    << " for use in manual decomposition." << endl;
             }
 
             fileOperations::collatedFileOperation::maxThreadFileBufferSize =

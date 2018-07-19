@@ -135,8 +135,10 @@ public:
 
     // Constructors
 
-        //- Construct from fvMesh (for mesh and optional non-standard
-        //- decomposeParDict location)
+        //- Construct from components.
+        //  \param mesh the fvMesh
+        //  \param decompDictFile optional non-standard location for the
+        //      decomposeParDict file
         faMeshDecomposition
         (
             const fvMesh& mesh,
