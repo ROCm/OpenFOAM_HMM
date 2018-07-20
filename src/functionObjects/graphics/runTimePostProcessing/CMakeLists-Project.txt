@@ -1,4 +1,5 @@
 #-----------------------------------------------------------------------------
+project(runTimePostProcessing)
 
 include(${VTK_USE_FILE})
 
@@ -28,7 +29,8 @@ link_directories(
 
 set(CMAKE_BUILD_TYPE Release)
 
-# Set output library destination to plugin directory
+# Build intermediate (library) directly into the OpenFOAM libdir
+# - implies CMAKE_INSTALL_PREFIX is ignored and there is no 'install' phase
 set(LIBRARY_OUTPUT_PATH $ENV{FOAM_LIBBIN}
     CACHE INTERNAL
     ""
