@@ -145,13 +145,11 @@ bool Foam::functionObjects::runTimePostProcessing::write()
     Info<< type() << " " << name() <<  " output:" << nl
         << "    Constructing scene" << endl;
 
-    // Unset any floating point trapping
+
+    // Disable any floating point trapping
     // (some low-level rendering functionality does not like it)
-    const bool oldFpe = sigFpe::active();
-    if (oldFpe)
-    {
-        sigFpe::unset();
-    }
+
+    sigFpe::ignore sigFpeHandling; //<- disable in local scope
 
     // Initialise render window
     auto renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
@@ -240,11 +238,12 @@ bool Foam::functionObjects::runTimePostProcessing::write()
         surfaces_[i].clear();
     }
 
-    // Restore floating point trapping
-    if (oldFpe)
-    {
-        sigFpe::set();
-    }
+
+    // Instead of relying on the destructor, manually restore the previous
+    // SIGFPE state.
+    // This is only to avoid compiler complaints about unused variables.
+
+    sigFpeHandling.restore();
 
     return true;
 }
