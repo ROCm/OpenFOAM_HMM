@@ -70,14 +70,17 @@ void Foam::swirlFanVelocityFvPatchField::calcFanJump()
 
         if (useRealRadius_)
         {
-            const scalarField rMag(mag(patch().Cf() - origin_));
-            forAll (rMag, i)
+            const vectorField& pCf = patch().Cf();
+
+            forAll(pCf, i)
             {
-                if (rMag[i] > rInner_ &&  rMag[i] < rOuter_)
+                const scalar rMag = mag(pCf[i] - origin_);
+
+                if (rMag > rInner_ && rMag < rOuter_)
                 {
-                    magTangU =
-                        deltaP
-                       /rMag[i]
+                    magTangU[i] =
+                        deltaP[i]
+                       /rMag
                        /fanEff_
                        /(rpm_*constant::mathematical::pi/30.0);
                 }
@@ -95,6 +98,7 @@ void Foam::swirlFanVelocityFvPatchField::calcFanJump()
             magTangU =
                 deltaP/rEff_/fanEff_/(rpm_*constant::mathematical::pi/30.0);
         }
+
         // Calculate the tangential velocity
         const vectorField tangentialVelocity(magTangU*tanDir);
 
