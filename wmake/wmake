@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -53,10 +53,8 @@
 #     wclean, wcleanPlatform, wcleanLnIncludeAll
 #
 #------------------------------------------------------------------------------
-Script=${0##*/}     # Note: need 'Script' for some functions in wmakeFunctions
-
-# Source the wmake functions
-. ${0%/*}/scripts/wmakeFunctions
+Script=${0##*/}             # Use 'Script' for error messages in wmakeFunctions
+. ${0%/*}/scripts/wmakeFunctions        # Source wmake functions
 
 usage() {
     exec 1>&2
@@ -106,13 +104,11 @@ make="make"
 
 #------------------------------------------------------------------------------
 
-# Set nCores to the number of cores on the local machine
+# Set nCores to the number of cores on the machine
 nCores=0
 allCores()
 {
-    nCores=$(egrep -c "^processor" /proc/cpuinfo 2>/dev/null) || \
-    nCores=$(getconf _NPROCESSORS_ONLN 2>/dev/null) || \
-    nCores=1
+    nCores=$(getconf _NPROCESSORS_ONLN 2>/dev/null) || nCores=1
     : ${nCores:=1}
 }
 
@@ -132,7 +128,7 @@ do
             usage
             ;;
         -s | -silent)
-            export WM_QUIET=1
+            export WM_QUIET=true
             ;;
         -a | -all | all)
             all=all
@@ -146,10 +142,7 @@ do
             test $# -ge 2 && expr $2 + 1 > /dev/null 2>&1 \
                 && shift && nCores=$1
 
-            if [ "$nCores" = 0 ]
-            then
-                allCores
-            fi
+            [ "$nCores" = 0 ] && allCores
             export WM_NCOMPPROCS=$nCores
             echo "Compiling enabled on $WM_NCOMPPROCS cores"
             ;;

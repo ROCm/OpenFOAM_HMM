@@ -35,10 +35,8 @@
 #     the first occurrence.
 #
 #------------------------------------------------------------------------------
-Script=${0##*/}
-
-# Source the wmake functions
-. ${0%/*}/scripts/wmakeFunctions
+Script=${0##*/}             # Use 'Script' for error messages in wmakeFunctions
+. ${0%/*}/scripts/wmakeFunctions        # Source wmake functions
 
 usage() {
     exec 1>&2
@@ -92,7 +90,7 @@ sourceFile=$1
 
 if [ ! -e "$sourceFile" ]
 then
-    sourceFile=$(find . -name $sourceFile -print -quit)
+    sourceFile=$(find . -name "$sourceFile" -print -quit)
     if [ -z "$sourceFile" ]
     then
         echo "$Script: cannot find source file $1" 1>&2

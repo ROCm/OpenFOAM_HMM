@@ -34,10 +34,8 @@
 #     lnInclude directories generated for libraries.
 #
 #------------------------------------------------------------------------------
-Script=${0##*/}     # Note: need 'Script' for some functions in wmakeFunctions
-
-# Source the wmake functions
-. ${0%/*}/scripts/wmakeFunctions
+Script=${0##*/}             # Use 'Script' for error messages in wmakeFunctions
+. ${0%/*}/scripts/wmakeFunctions        # Source wmake functions
 
 usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done

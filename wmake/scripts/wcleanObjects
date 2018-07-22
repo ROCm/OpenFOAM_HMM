@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -11,14 +11,14 @@
 #     <http://www.gnu.org/licenses/>.
 #
 # Script
-#     wcleanBuild
+#     wcleanBuild, wcleanPlatform
 #
 # Usage
 #     wcleanBuild <option | platform> [.. <option | platform>]
 #
 # Description
 #     Deletes the specified 'build/' object files directories from the
-#     the project top-level 'build/' directory $WM_PROJECT_DIR.
+#     project top-level 'build/' directory $WM_PROJECT_DIR.
 #
 #     special platforms
 #     - 'all' removes all platforms.
@@ -57,7 +57,7 @@ Usage: ${0##*/} <option | platform> [.. <option | platform>]
 
 options:
   -a, -all              Same as 'all'
-  -c, -current          Use \$WM_OPTIONS ($WM_OPTIONS)
+  -curr, -current       Use \$WM_OPTIONS ($WM_OPTIONS)
   -comp, -compiler      Use \$WM_ARCH\$WM_COMPILER*  ($WM_ARCH$WM_COMPILER)
   -compiler=NAME        Use \$WM_ARCH<NAME>*  ($WM_ARCH<NAME>*)
   -h, -help             Print the usage
@@ -124,7 +124,7 @@ do
         echo
         break # Removed everything - can stop now
         ;;
-    -c | -current | current)
+    -curr | -current | current)
         name="$WM_OPTIONS"
         ;;
     -comp | -compiler | compiler)

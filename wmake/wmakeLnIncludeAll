@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -79,10 +79,7 @@ do
             test $# -ge 2 && expr $2 + 1 > /dev/null 2>&1 \
                 && shift && nCores=$1
 
-            if [ "$nCores" = 0 ]
-            then
-                nCores=1
-            fi
+            [ "$nCores" = 0 ] && nCores=1
             ;;
         # Parallel compilation on specified number of cores
         -j[1-9]*)
