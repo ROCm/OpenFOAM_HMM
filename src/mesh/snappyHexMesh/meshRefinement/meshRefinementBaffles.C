@@ -2034,11 +2034,19 @@ void Foam::meshRefinement::findCellZoneTopo
 
     if (debug)
     {
+        Pout<< "meshRefinement::findCellZoneTopo :"
+            << " nRegions:" << regionToCellZone.size()
+            << " of which visited (-1 = background, >= 0 : cellZone) :"
+            << endl;
+
         forAll(regionToCellZone, regionI)
         {
-            Pout<< "Region " << regionI
-                << " becomes cellZone:" << regionToCellZone[regionI]
-                << endl;
+            if (regionToCellZone[regionI] != -2)
+            {
+                Pout<< "Region " << regionI
+                    << " becomes cellZone:" << regionToCellZone[regionI]
+                    << endl;
+            }
         }
     }
 
