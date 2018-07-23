@@ -2015,12 +2015,23 @@ Foam::vectorField Foam::snappySnapDriver::calcNearestSurface
         {
             if (snapSurf[pointi] == -1)
             {
-                WarningInFunction
-                    << "For point:" << pointi
-                    << " coordinate:" << localPoints[pointi]
-                    << " did not find any surface within:"
-                    << minSnapDist[pointi]
-                    << " metre." << endl;
+                static label nWarn = 0;
+
+                if (nWarn < 100)
+                {
+                    WarningInFunction
+                        << "For point:" << pointi
+                        << " coordinate:" << localPoints[pointi]
+                        << " did not find any surface within:"
+                        << minSnapDist[pointi] << " metre." << endl;
+                    nWarn++;
+                    if (nWarn == 100)
+                    {
+                        WarningInFunction
+                            << "Reached warning limit " << nWarn
+                            << ". Suppressing further warnings." << endl;
+                    }
+                }
             }
         }
 

@@ -233,10 +233,6 @@ public:
                     {
                         return minAreaRatio_;
                     }
-
-
-
-
 };
 
 

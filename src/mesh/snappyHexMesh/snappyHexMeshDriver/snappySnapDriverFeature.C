@@ -328,9 +328,21 @@ void Foam::snappySnapDriver::calcNearestFace
             }
             else
             {
-                WarningInFunction
-                    << "Did not find surface near face centre " << fc[hiti]
+                static label nWarn = 0;
+
+                if (nWarn < 100)
+                {
+                    WarningInFunction
+                        << "Did not find surface near face centre " << fc[hiti]
                     << endl;
+                    nWarn++;
+                    if (nWarn == 100)
+                    {
+                        WarningInFunction
+                            << "Reached warning limit " << nWarn
+                            << ". Suppressing further warnings." << endl;
+                    }
+                }
             }
         }
     }
@@ -392,9 +404,22 @@ void Foam::snappySnapDriver::calcNearestFace
         }
         else
         {
-            WarningInFunction
-                << "Did not find surface near face centre " << fc[hiti]
-                << endl;
+            static label nWarn = 0;
+
+            if (nWarn < 100)
+            {
+                WarningInFunction
+                    << "Did not find surface near face centre " << fc[hiti]
+                    << endl;
+
+                nWarn++;
+                if (nWarn == 100)
+                {
+                    WarningInFunction
+                        << "Reached warning limit " << nWarn
+                        << ". Suppressing further warnings." << endl;
+                }
+            }
         }
     }
 
@@ -3283,9 +3308,22 @@ void Foam::snappySnapDriver::reverseAttractMeshPoints
                 }
                 else
                 {
-                    WarningInFunction
-                        << "Did not find pp point near " << featPt
-                        << endl;
+                    static label nWarn = 0;
+
+                    if (nWarn < 100)
+                    {
+                        WarningInFunction
+                            << "Did not find pp point near " << featPt
+                            << endl;
+                        nWarn++;
+                        if (nWarn == 100)
+                        {
+                            WarningInFunction
+                                << "Reached warning limit " << nWarn
+                                << ". Suppressing further warnings." << endl;
+                        }
+                    }
+
                 }
             }
         }
