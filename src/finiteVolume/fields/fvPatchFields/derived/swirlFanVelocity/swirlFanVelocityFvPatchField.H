@@ -32,36 +32,39 @@ Description
     cyclic pressure jump condition and applies a transformation to U.
 
     The U-jump is specified with a swirl component as follows:
-
+    \verbatim
          Utan = deltaP/rEff/fanEff/(rpm*pi/30.0);
 
-         where:
+         where
 
             deltaP : pressure drop across the cyclic.
             rEff   : effective radius
             fanEff : fan efficiency coefficient
-            rmp    : RPM of the fan
+            rpm    : RPM of the fan
+    \endverbatim
 
     Alternatively an inner and outer radii can be used instead of rEff. The
     Utan is as follow for r > rInner and r < rOuter
-
+    \verbatim
             Utan = deltaP/r/fanEff/(rpm/pi/30.0);
 
-            where:
+            where
 
                 r : p - origin, p is the face center
+    \endverbatim
 
     Outside rInner and rOuter, Utan = 0. The input for this mode is:
-
+    \verbatim
             useRealRadius   true;
             rInner          0.005;
             rOuter          0.01;
+    \endverbatim
 
     The radial velocity is zero in the present model.
 
 Usage
     \table
-        Property     | Description             | Required    | Default value
+        Property     | Description             | Required    | Default
         patchType    | underlying patch type should be \c cyclic| yes |
         phi          | flux field name         | no          | phi
         rho          | density field name      | no          | rho
@@ -79,7 +82,7 @@ Usage
     \verbatim
     <patchName>
     {
-         cyclicFaces_master
+        cyclicFaces_master
         {
             type            swirlFanVelocity;
             patchType       cyclic;
@@ -90,7 +93,6 @@ Usage
         }
     }
     \endverbatim
-
 
 SourceFiles
     swirlFanVelocityFvPatchField.C
@@ -116,7 +118,6 @@ class swirlFanVelocityFvPatchField
      public fixedJumpFvPatchField<vector>
 {
     // Private data
-
 
         //- Name of the flux field
         const word phiName_;
@@ -178,7 +179,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given swirlFanVelocityFvPatchField onto a new patch
+        //- Construct by mapping given swirlFanVelocityFvPatchField
+        //- onto a new patch
         swirlFanVelocityFvPatchField
         (
             const swirlFanVelocityFvPatchField&,
@@ -228,7 +230,7 @@ public:
         virtual void updateCoeffs();
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 };
 
 

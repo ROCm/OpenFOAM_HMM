@@ -1,0 +1,11 @@
+# An angled plane that extends beyond the geometry
+o angledPlane
+
+v -0.03 -0.08 -0.03
+v -0.03 -0.08 0.03
+v -0.07 -0.02 0.03
+v -0.07 -0.02 -0.03
+
+f 1 2 4
+f 2 3 4
+# EOF
