@@ -16,7 +16,7 @@ FoamFile
 
 libs            ("libmeshTools.so" "liblumpedPointMotion.so");
 
-application     pimpleFoam;
+application     simpleFoam;     // Change to pimpleFoam for transient
 
 startFrom       startTime;
 

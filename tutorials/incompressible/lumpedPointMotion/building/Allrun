@@ -84,6 +84,10 @@ then
 
     copyParallelPointDisplacement transient $latestTime
 
+    # Adjust application (from simpleFoam -> pimpleFoam)
+    foamDictionary transient/system/controlDict \
+        -entry application -set pimpleFoam
+
     # Do the transient case
     \cp files/Allrun.transient transient/Allrun
     (\cd transient && foamRunTutorials)
