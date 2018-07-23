@@ -85,6 +85,11 @@ Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
     const label celli
 ) const
 {
+    if (ignoreCells_.test(celli))
+    {
+        return NOTCUT;
+    }
+
     const cell& cFaces = mesh_.cells()[celli];
 
     if (isTet.test(celli))
@@ -174,8 +179,9 @@ Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
         {
             return SPHERE;
         }
-        else
+        else if (nCuts > 1)
         {
+            // Need at least two edge cuts, otherwise this is a spurious cut
             return CUT;
         }
     }
@@ -1268,20 +1274,22 @@ Foam::triSurface Foam::isoSurfaceCell::subsetMesh
 Foam::isoSurfaceCell::isoSurfaceCell
 (
     const polyMesh& mesh,
-    const scalarField& cVals,
-    const scalarField& pVals,
+    const scalarField& cellValues,
+    const scalarField& pointValues,
     const scalar iso,
     const bool regularise,
     const boundBox& bounds,
-    const scalar mergeTol
+    const scalar mergeTol,
+    const bitSet& ignoreCells
 )
 :
     MeshStorage(),
     mesh_(mesh),
-    cVals_(cVals),
-    pVals_(pVals),
+    cVals_(cellValues),
+    pVals_(pointValues),
     iso_(iso),
     bounds_(bounds),
+    ignoreCells_(ignoreCells),
     mergeDistance_(mergeTol*mesh.bounds().mag())
 {
     if (debug)
@@ -1298,6 +1306,8 @@ Foam::isoSurfaceCell::isoSurfaceCell
             << "    mergeTol      : " << mergeTol << nl
             << "    mesh span     : " << mesh.bounds().mag() << nl
             << "    mergeDistance : " << mergeDistance_ << nl
+            << "    ignoreCells   : " << ignoreCells_.count()
+            << " / " << cVals_.size() << nl
             << endl;
     }
 
@@ -1317,7 +1327,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
 
 
     // Determine if any cut through cell
-    calcCutTypes(isTet, cVals, pVals);
+    calcCutTypes(isTet, cellValues, pointValues);
 
     if (debug && isA<fvMesh>(mesh))
     {
@@ -1361,8 +1371,8 @@ Foam::isoSurfaceCell::isoSurfaceCell
         calcSnappedCc
         (
             isTet,
-            cVals,
-            pVals,
+            cellValues,
+            pointValues,
             snappedPoints,
             snappedCc
         );
@@ -1389,8 +1399,8 @@ Foam::isoSurfaceCell::isoSurfaceCell
         calcSnappedPoint
         (
             isTet,
-            cVals,
-            pVals,
+            cellValues,
+            pointValues,
             snappedPoints,
             snappedPoint
         );
@@ -1417,8 +1427,8 @@ Foam::isoSurfaceCell::isoSurfaceCell
 
         generateTriPoints
         (
-            cVals,
-            pVals,
+            cellValues,
+            pointValues,
 
             mesh_.cellCentres(),
             mesh_.points(),

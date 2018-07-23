@@ -406,14 +406,17 @@ public:
         //- Construct from cell values and point values.
         //  Uses boundaryField for boundary values.
         //  Holds reference to cellIsoVals and pointIsoVals.
+        //
+        //  \param bounds optional bounding box for trimming
+        //  \param mergeTol fraction of mesh bounding box for merging points
         isoSurface
         (
-            const volScalarField& cellIsoVals,
-            const scalarField& pointIsoVals,
+            const volScalarField& cellValues,
+            const scalarField& pointValues,
             const scalar iso,
             const bool regularise,
             const boundBox& bounds = boundBox::invertedBox,
-            const scalar mergeTol = 1e-6    // fraction of bounding box
+            const scalar mergeTol = 1e-6
         );
 
 

@@ -38,9 +38,17 @@ Usage
         regularise | point snapping                        | yes      |
         bounds   | limit with bounding box                 | no       |
         surfaceType | type of surface                      | yes      |
-        surfaceName | name of surface in triSurface/       | no  | dict name
+        surfaceName | name of surface in \c triSurface/    | no  | dict name
     \endtable
 
+Note
+    Some special adjustments are undertaken for distance = 0.
+    - Always treated as signed (ignoring the input value), since it is
+      nearly impossible to generate any surface otherwise.
+    - With the isoSurfaceCell algorithm is used, additional checks for open
+      surfaces edges are used to limit the extend of resulting distance
+      surface. The resulting surface elements will not, however, contain
+      partial cell coverage.
 
 SourceFiles
     distanceSurface.C

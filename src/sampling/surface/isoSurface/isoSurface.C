@@ -138,17 +138,17 @@ void Foam::isoSurface::syncUnseparatedPoints
     if (Pstream::parRun())
     {
         // Send
-        forAll(patches, patchi)
+        for (const polyPatch& p : patches)
         {
             if
             (
-                isA<processorPolyPatch>(patches[patchi])
-             && patches[patchi].nPoints() > 0
-             && collocatedPatch(patches[patchi])
+                isA<processorPolyPatch>(p)
+             && p.nPoints() > 0
+             && collocatedPatch(p)
             )
             {
                 const processorPolyPatch& pp =
-                    refCast<const processorPolyPatch>(patches[patchi]);
+                    refCast<const processorPolyPatch>(p);
 
                 const labelList& meshPts = pp.meshPoints();
                 const labelList& nbrPts = pp.neighbPoints();
@@ -171,18 +171,17 @@ void Foam::isoSurface::syncUnseparatedPoints
         }
 
         // Receive and combine.
-
-        forAll(patches, patchi)
+        for (const polyPatch& p : patches)
         {
             if
             (
-                isA<processorPolyPatch>(patches[patchi])
-             && patches[patchi].nPoints() > 0
-             && collocatedPatch(patches[patchi])
+                isA<processorPolyPatch>(p)
+             && p.nPoints() > 0
+             && collocatedPatch(p)
             )
             {
                 const processorPolyPatch& pp =
-                    refCast<const processorPolyPatch>(patches[patchi]);
+                    refCast<const processorPolyPatch>(p);
 
                 pointField nbrPatchInfo(pp.nPoints());
                 {
@@ -200,7 +199,7 @@ void Foam::isoSurface::syncUnseparatedPoints
 
                 forAll(meshPts, pointi)
                 {
-                    label meshPointi = meshPts[pointi];
+                    const label meshPointi = meshPts[pointi];
                     minEqOp<point>()
                     (
                         pointValues[meshPointi],
@@ -212,12 +211,12 @@ void Foam::isoSurface::syncUnseparatedPoints
     }
 
     // Do the cyclics.
-    forAll(patches, patchi)
+    for (const polyPatch& p : patches)
     {
-        if (isA<cyclicPolyPatch>(patches[patchi]))
+        if (isA<cyclicPolyPatch>(p))
         {
             const cyclicPolyPatch& cycPatch =
-                refCast<const cyclicPolyPatch>(patches[patchi]);
+                refCast<const cyclicPolyPatch>(p);
 
             if (cycPatch.owner() && collocatedPatch(cycPatch))
             {
@@ -241,8 +240,8 @@ void Foam::isoSurface::syncUnseparatedPoints
                 forAll(coupledPoints, i)
                 {
                     const edge& e = coupledPoints[i];
-                    label p0 = meshPts[e[0]];
-                    label p1 = nbrMeshPoints[e[1]];
+                    const label p0 = meshPts[e[0]];
+                    const label p1 = nbrMeshPoints[e[1]];
 
                     minEqOp<point>()(pointValues[p0], half1Values[i]);
                     minEqOp<point>()(pointValues[p1], half0Values[i]);
@@ -410,10 +409,8 @@ void Foam::isoSurface::calcCutTypes
         }
     }
 
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        const polyPatch& pp = patches[patchi];
-
         label facei = pp.start();
 
         forAll(pp, i)
@@ -1339,8 +1336,8 @@ Foam::triSurface Foam::isoSurface::subsetMesh
 
 Foam::isoSurface::isoSurface
 (
-    const volScalarField& cVals,
-    const scalarField& pVals,
+    const volScalarField& cellValues,
+    const scalarField& pointValues,
     const scalar iso,
     const bool regularise,
     const boundBox& bounds,
@@ -1348,8 +1345,8 @@ Foam::isoSurface::isoSurface
 )
 :
     MeshStorage(),
-    mesh_(cVals.mesh()),
-    pVals_(pVals),
+    mesh_(cellValues.mesh()),
+    pVals_(pointValues),
     iso_(iso),
     regularise_(regularise),
     bounds_(bounds),
@@ -1358,10 +1355,10 @@ Foam::isoSurface::isoSurface
     if (debug)
     {
         Pout<< "isoSurface:" << nl
-            << "    isoField      : " << cVals.name() << nl
+            << "    isoField      : " << cellValues.name() << nl
             << "    cell min/max  : "
-            << min(cVals.primitiveField()) << " / "
-            << max(cVals.primitiveField()) << nl
+            << min(cellValues.primitiveField()) << " / "
+            << max(cellValues.primitiveField()) << nl
             << "    point min/max : "
             << min(pVals_) << " / "
             << max(pVals_) << nl
@@ -1379,7 +1376,7 @@ Foam::isoSurface::isoSurface
     // Rewrite input volScalarField to have interpolated values
     // on separated patches.
 
-    cValsPtr_.reset(adaptPatchFields(cVals).ptr());
+    cValsPtr_.reset(adaptPatchFields(cellValues).ptr());
 
 
     // Construct cell centres field consistent with cVals
@@ -1411,7 +1408,7 @@ Foam::isoSurface::isoSurface
         // Adapt separated coupled (proc and cyclic) patches
         if (pp.coupled())
         {
-            fvPatchVectorField& pfld = const_cast<fvPatchVectorField&>
+            auto& pfld = const_cast<fvPatchVectorField&>
             (
                 meshC.boundaryField()[patchi]
             );
@@ -1431,9 +1428,10 @@ Foam::isoSurface::isoSurface
         }
         else if (isA<emptyPolyPatch>(pp))
         {
-            typedef slicedVolVectorField::Boundary bType;
-
-            bType& bfld = const_cast<bType&>(meshC.boundaryField());
+            auto& bfld = const_cast<slicedVolVectorField::Boundary&>
+            (
+                meshC.boundaryField()
+            );
 
             // Clear old value. Cannot resize it since is a slice.
             bfld.set(patchi, nullptr);
@@ -1551,18 +1549,15 @@ Foam::isoSurface::isoSurface
         // Determine if point is on boundary.
         bitSet isBoundaryPoint(mesh_.nPoints());
 
-        forAll(patches, patchi)
+        for (const polyPatch& pp : patches)
         {
             // Mark all boundary points that are not physically coupled
             // (so anything but collocated coupled patches)
 
-            if (patches[patchi].coupled())
+            if (pp.coupled())
             {
                 const coupledPolyPatch& cpp =
-                    refCast<const coupledPolyPatch>
-                    (
-                        patches[patchi]
-                    );
+                    refCast<const coupledPolyPatch>(pp);
 
                 bitSet isCollocated(collocatedFaces(cpp));
 
@@ -1578,8 +1573,6 @@ Foam::isoSurface::isoSurface
             }
             else
             {
-                const polyPatch& pp = patches[patchi];
-
                 forAll(pp, i)
                 {
                     const face& f = mesh_.faces()[pp.start()+i];
