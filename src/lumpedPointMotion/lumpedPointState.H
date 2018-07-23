@@ -25,10 +25,31 @@ Class
     Foam::lumpedPointState
 
 Description
-    The 'state' of lumped points corresponds to positions and rotations.
+    The \a state of lumped points corresponds to positions and rotations.
 
-    Encapsulates the response from the external application.
-    Entry place for applying relaxation and sub-stepping etc.
+    This class encapsulates the response from the external application and
+    serves as the entry point for applying relaxation, sub-stepping etc.
+
+    \heading Dictionary input format
+    \table
+        Property    | Description                           | Required | Default
+        points      | List of points                        | yes |
+        angles      | List of Euler rotation angles         | yes |
+        degrees     | Rotation angles in degrees            | no  | false
+    \endtable
+
+    \heading Plain input format.
+    Blank and comment lines starting with a '#' character are ignored.
+    The angles are always in radians.
+    \verbatim
+    NumPoints
+    x0 y0 z0 eulerz0 eulerx'0 eulerz''0
+    x1 y1 z1 eulerz1 eulerx'1 eulerz''1
+    ...
+    \endverbatim
+
+SeeAlso
+    EulerCoordinateRotation
 
 SourceFiles
     lumpedPointState.C
@@ -58,7 +79,6 @@ class Ostream;
                       Class lumpedPointState Declaration
 \*---------------------------------------------------------------------------*/
 
-//- Bundling of position/rotation
 class lumpedPointState
 {
 public:
@@ -66,8 +86,8 @@ public:
     //- Input format types
     enum class inputFormatType
     {
-        PLAIN,
-        DICTIONARY
+        PLAIN,      //!< "plain" is a simple ASCII format
+        DICTIONARY  //!< "dictionary" is the OpenFOAM dictionary format
     };
 
     // Static data

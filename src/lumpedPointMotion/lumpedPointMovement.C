@@ -54,7 +54,7 @@ const Foam::Enum
 >
 Foam::lumpedPointMovement::scalingNames
 {
-    { scalingType::LENGTH, "plain" },
+    { scalingType::LENGTH, "length" },
     { scalingType::FORCE, "force" },
     { scalingType::MOMENT, "moment" }
 };
@@ -266,7 +266,7 @@ void Foam::lumpedPointMovement::readDict(const dictionary& dict)
     // assume the worst
     deleteDemandDrivenData(thresholdPtr_);
 
-    dict.lookup("axis") >> axis_;
+    dict.read("axis", axis_);
 
     division_ = 0;
     if (dict.readIfPresent("division", division_))
@@ -283,7 +283,7 @@ void Foam::lumpedPointMovement::readDict(const dictionary& dict)
 
     dict.readIfPresent("relax", relax_);
 
-    dict.lookup("locations") >> locations_;
+    dict.read("locations", locations_);
 
     if (dict.readIfPresent("interpolationScheme", interpolationScheme_))
     {
@@ -304,8 +304,8 @@ void Foam::lumpedPointMovement::readDict(const dictionary& dict)
 
     // TODO: calcFrequency_  = dict.lookupOrDefault("calcFrequency", 1);
 
-    commDict.lookup("inputName")  >> inputName_;
-    commDict.lookup("outputName") >> outputName_;
+    commDict.read("inputName", inputName_);
+    commDict.read("outputName", outputName_);
     commDict.readIfPresent("logName", logName_);
 
     inputFormat_ = lumpedPointState::formatNames.lookup
@@ -512,8 +512,7 @@ bool Foam::lumpedPointMovement::forcesAndMoments
 
     const polyBoundaryMesh& patches = pmesh.boundaryMesh();
 
-    const word pName = forcesDict_.lookupOrDefault<word>("p", "p");
-
+    const word pName(forcesDict_.lookupOrDefault<word>("p", "p"));
     scalar pRef   = forcesDict_.lookupOrDefault<scalar>("pRef",   0.0);
     scalar rhoRef = forcesDict_.lookupOrDefault<scalar>("rhoRef", 1.0);
 

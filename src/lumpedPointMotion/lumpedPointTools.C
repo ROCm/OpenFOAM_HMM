@@ -83,7 +83,7 @@ Foam::lumpedPointTools::lumpedPointStates(Istream& is)
         (
             lumpedPointStateTuple
             (
-                readScalar(dict.lookup("time")),
+                dict.get<scalar>("time"),
                 lumpedPointState(dict)
             )
         );

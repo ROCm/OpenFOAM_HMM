@@ -99,14 +99,7 @@ Foam::lumpedPointIOMovement::lumpedPointIOMovement
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::lumpedPointIOMovement::~lumpedPointIOMovement()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 
 bool Foam::lumpedPointIOMovement::readData(Istream& is)
 {

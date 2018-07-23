@@ -83,8 +83,8 @@ void Foam::lumpedPointState::calcRotations() const
 
 void Foam::lumpedPointState::readDict(const dictionary& dict)
 {
-    dict.lookup("points") >> points_;
-    dict.lookup("angles") >> angles_;
+    dict.read("points", points_);
+    dict.read("angles", angles_);
     degrees_ = dict.lookupOrDefault("degrees", false);
     deleteDemandDrivenData(rotationPtr_);
 }
@@ -228,8 +228,8 @@ bool Foam::lumpedPointState::readPlain(Istream& is)
 
     points_.setSize(count);
     angles_.setSize(count);
-
     degrees_ = false;
+
     deleteDemandDrivenData(rotationPtr_);
 
     return count;

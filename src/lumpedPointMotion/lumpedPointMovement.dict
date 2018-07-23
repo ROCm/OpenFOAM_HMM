@@ -72,9 +72,6 @@ communication
     inputFormat     dictionary;
     outputFormat    dictionary;
 
-    debugTable      "$FOAM_CASE/output.txt";
-
-
     // Scaling applied to values read from 'inputName'
     scaleInput
     {

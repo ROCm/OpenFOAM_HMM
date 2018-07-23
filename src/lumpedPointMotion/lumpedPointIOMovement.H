@@ -100,7 +100,7 @@ public:
 
 
     //- Destructor
-    ~lumpedPointIOMovement();
+    ~lumpedPointIOMovement() = default;
 
 
     // Member Functions

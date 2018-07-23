@@ -25,10 +25,6 @@ Class
     Foam::lumpedPointDisplacementPointPatchVectorField
 
 Description
-
-    Interpolates pre-specified motion with motion specified as
-    pointVectorFields.
-
     This is the point-patch responsible for managing the force
     integration on a 'lumped-point' basis, waiting for the external
     application, reading back the response from the external program
@@ -38,23 +34,14 @@ Description
     The internal patch type name is 'lumpedPointDisplacement'.
 
     \heading Patch usage
-
     Example:
     \verbatim
     walls
     {
-        type                lumpedPointDisplacement;
-        value               uniform (0 0 0);
-        fieldName           wantedDisplacement;
-        interpolationScheme linear;
+        type    lumpedPointDisplacement;
+        value   uniform (0 0 0);
     }
     \endverbatim
-
-    This will scan the case for \a wantedDisplacement pointVectorFields
-    and interpolate those in time (using \c linear interpolation) to
-    obtain the current displacement.
-    The advantage of specifying displacement in this way is that it
-    automatically works through decomposePar.
 
 SourceFiles
     lumpedPointDisplacementPointPatchVectorField.C
@@ -78,6 +65,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class interpolationWeights;
 
 /*---------------------------------------------------------------------------*\
@@ -94,15 +82,16 @@ class lumpedPointDisplacementPointPatchVectorField
     typedef lumpedPointDisplacementPointPatchVectorField patchType;
     typedef DimensionedField<vector, pointMesh> fieldType;
 
-    // Private Member Functions
 
 protected:
 
-    //- The starting locations (obtained from the motionSolver).
-    const pointField& points0() const;
+    // Protected Member Functions
 
-    //- The auto-vivifying singleton for movement.
-    const lumpedPointMovement& movement() const;
+        //- The starting locations (obtained from the motionSolver).
+        const pointField& points0() const;
+
+        //- The auto-vivifying singleton for movement.
+        const lumpedPointMovement& movement() const;
 
 
 public:
@@ -172,7 +161,7 @@ public:
             );
         }
 
-    //- Destructor
+    //- Destructor. De-register movement if in use and managed by this patch
     virtual ~lumpedPointDisplacementPointPatchVectorField();
 
 
@@ -185,7 +174,7 @@ public:
         virtual void updateCoeffs();
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 };
 
 
