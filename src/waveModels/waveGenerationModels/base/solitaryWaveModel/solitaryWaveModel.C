@@ -26,11 +26,7 @@ License
 #include "solitaryWaveModel.H"
 #include "polyPatch.H"
 #include "SubField.H"
-
-#include "mathematicalConstants.H"
-
-using namespace Foam::constant;
-
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -82,12 +78,6 @@ Foam::waveModels::solitaryWaveModel::solitaryWaveModel
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::waveModels::solitaryWaveModel::~solitaryWaveModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::waveModels::solitaryWaveModel::readDict
@@ -112,7 +102,7 @@ void Foam::waveModels::solitaryWaveModel::info(Ostream& os) const
     waveGenerationModel::info(os);
 
     os  << "    Wave height : " << waveHeight_ << nl
-        << "    Wave angle  : " << 180/mathematical::pi*waveAngle_ << nl
+        << "    Wave angle  : " << radToDeg(waveAngle_) << nl
         << "    x0: " << x0_ << nl;
 }
 

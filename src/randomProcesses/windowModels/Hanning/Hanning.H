@@ -97,7 +97,7 @@ public:
     Hanning(const dictionary& dict, const label nSamples);
 
     //- Destructor
-    virtual ~Hanning();
+    virtual ~Hanning() = default;
 
 
     // Public Member Functions

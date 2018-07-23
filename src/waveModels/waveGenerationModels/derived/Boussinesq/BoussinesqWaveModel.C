@@ -225,12 +225,6 @@ Foam::waveModels::Boussinesq::Boussinesq
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::waveModels::Boussinesq::~Boussinesq()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::waveModels::Boussinesq::readDict(const dictionary& overrideDict)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ License
 
 Foam::autoPtr<Foam::noiseModel> Foam::noiseModel::New(const dictionary& dict)
 {
-    const word modelType(dict.lookup("noiseModel"));
+    const word modelType(dict.get<word>("noiseModel"));
 
     Info<< "Selecting noiseModel " << modelType << endl;
 

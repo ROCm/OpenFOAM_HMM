@@ -192,12 +192,6 @@ Foam::waveModels::Grimshaw::Grimshaw
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::waveModels::Grimshaw::~Grimshaw()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::waveModels::Grimshaw::readDict(const dictionary& overrideDict)

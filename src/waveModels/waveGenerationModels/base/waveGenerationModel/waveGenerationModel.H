@@ -74,7 +74,7 @@ public:
     );
 
     //- Destructor
-    virtual ~waveGenerationModel();
+    virtual ~waveGenerationModel() = default;
 
 
     // Public Member Functions

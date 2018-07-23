@@ -99,7 +99,7 @@ public:
     );
 
     //- Destructor
-    virtual ~regularWaveModel();
+    virtual ~regularWaveModel() = default;
 
 
     // Public Member Functions

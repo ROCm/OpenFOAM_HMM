@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,17 +45,11 @@ addToRunTimeSelectionTable(windowModel, uniform, dictionary);
 uniform::uniform(const dictionary& dict, const label nSamples)
 :
     windowModel(dict, nSamples),
-    value_(readScalar(dict.lookup("value")))
+    value_(dict.get<scalar>("value"))
 {
     scalarField& wf = *this;
     wf = value_;
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-uniform::~uniform()
-{}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

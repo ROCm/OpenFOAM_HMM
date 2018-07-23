@@ -63,10 +63,10 @@ UOprocess::UOprocess
     RootDeltaT(sqrt(DeltaT)),
     UOfield(Mesh.size()),
 
-    Alpha(readScalar(UOdict.lookup("UOalpha"))),
-    Sigma(readScalar(UOdict.lookup("UOsigma"))),
-    Kupper(readScalar(UOdict.lookup("UOKupper"))),
-    Klower(readScalar(UOdict.lookup("UOKlower"))),
+    Alpha(UOdict.get<scalar>("UOalpha")),
+    Sigma(UOdict.get<scalar>("UOsigma")),
+    Kupper(UOdict.get<scalar>("UOKupper")),
+    Klower(UOdict.get<scalar>("UOKlower")),
     Scale((Kupper - Klower)*pow(scalar(Mesh.size()), 1.0/vector::dim))
 {
     const vectorField& K = Mesh;

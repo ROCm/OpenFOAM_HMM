@@ -87,7 +87,7 @@ public:
     );
 
     //- Destructor
-    virtual ~solitaryWaveModel();
+    virtual ~solitaryWaveModel() = default;
 
 
     // Public Member Functions

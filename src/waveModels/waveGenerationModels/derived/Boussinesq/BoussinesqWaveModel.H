@@ -127,7 +127,7 @@ public:
     );
 
     //- Destructor
-    virtual ~Boussinesq();
+    virtual ~Boussinesq() = default;
 
 
     // Public Member Functions

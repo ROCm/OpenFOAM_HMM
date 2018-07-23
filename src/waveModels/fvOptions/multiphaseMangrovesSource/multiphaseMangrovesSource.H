@@ -47,11 +47,11 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class MangrovesModel;
 
 namespace fv
 {
-
 
 /*---------------------------------------------------------------------------*\
                    Class multiphaseMangrovesSource Declaration
@@ -63,12 +63,11 @@ class multiphaseMangrovesSource
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        multiphaseMangrovesSource(const multiphaseMangrovesSource&);
+        //- No copy construct
+        multiphaseMangrovesSource(const multiphaseMangrovesSource&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const multiphaseMangrovesSource&);
-
+        //- No copy assignment
+        void operator=(const multiphaseMangrovesSource&) = delete;
 
 
 protected:
@@ -124,8 +123,7 @@ public:
 
 
     //- Destructor
-    virtual ~multiphaseMangrovesSource()
-    {}
+    virtual ~multiphaseMangrovesSource() = default;
 
 
     // Member Functions

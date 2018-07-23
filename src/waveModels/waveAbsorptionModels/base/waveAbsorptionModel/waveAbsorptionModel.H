@@ -71,7 +71,7 @@ public:
     );
 
     //- Destructor
-    virtual ~waveAbsorptionModel();
+    virtual ~waveAbsorptionModel() = default;
 
 
     // Public Member Functions

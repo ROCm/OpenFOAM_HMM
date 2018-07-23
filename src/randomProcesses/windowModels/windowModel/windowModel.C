@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,15 +42,11 @@ Foam::windowModel::windowModel(const dictionary& dict, const label nSamples)
     nOverlapSamples_(0),
     nWindow_(dict.lookupOrDefault("nWindow", -1))
 {
-    scalar prc = readScalar(dict.lookup("overlapPercent"));
-    nOverlapSamples_ = floor(prc/scalar(100)*nSamples);
+    nOverlapSamples_ = floor
+    (
+        dict.get<scalar>("overlapPercent")/scalar(100)*nSamples
+    );
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::windowModel::~windowModel()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -87,7 +83,7 @@ Foam::label Foam::windowModel::validate(const label nSamplesTotal)
             << exit(FatalError);
     }
 
-    label nWindowAvailable = nWindowsTotal(nSamplesTotal);
+    const label nWindowAvailable = nWindowsTotal(nSamplesTotal);
 
     if (nWindow_ == -1)
     {
@@ -107,7 +103,7 @@ Foam::label Foam::windowModel::validate(const label nSamplesTotal)
             << exit(FatalError);
     }
 
-    label nRequiredSamples =
+    const label nRequiredSamples =
         nWindow_*nSamples - (nWindow_ - 1)*nOverlapSamples_;
 
     Info<< "Windowing:" << nl

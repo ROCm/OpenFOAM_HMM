@@ -130,7 +130,7 @@ public:
     pointNoise(const dictionary& dict, const bool readFields = true);
 
     //- Destructor
-    virtual ~pointNoise();
+    virtual ~pointNoise() = default;
 
 
     // Public Member Functions

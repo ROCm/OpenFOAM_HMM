@@ -43,10 +43,10 @@ Foam::tmp<Foam::scalarField> Foam::noiseFFT::frequencies
     const scalar deltaT
 )
 {
-    tmp<scalarField> tf(new scalarField(N/2, 0));
-    scalarField& f = tf.ref();
+    auto tf = tmp<scalarField>::New(N/2, Zero);
+    auto& f = tf.ref();
 
-    scalar deltaf = 1.0/(N*deltaT);
+    const scalar deltaf = 1.0/(N*deltaT);
     forAll(f, i)
     {
         f[i] = i*deltaf;
@@ -297,8 +297,8 @@ Foam::tmp<Foam::scalarField> Foam::noiseFFT::Pf
 
         const label n = planInfo_.windowSize;
         const label nBy2 = n/2;
-        tmp<scalarField> tresult(new scalarField(nBy2 + 1));
-        scalarField& result = tresult.ref();
+        auto tresult = tmp<scalarField>::New(nBy2 + 1);
+        auto& result = tresult.ref();
 
         // 0 th value = DC component
         // nBy2 th value = real only if n is even
@@ -312,10 +312,8 @@ Foam::tmp<Foam::scalarField> Foam::noiseFFT::Pf
 
         return tresult;
     }
-    else
-    {
-        return mag(fft::realTransform1D(tpn));
-    }
+
+    return mag(fft::realTransform1D(tpn));
 }
 
 

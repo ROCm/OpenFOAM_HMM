@@ -282,12 +282,6 @@ Foam::waveModels::McCowan::McCowan
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::waveModels::McCowan::~McCowan()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::waveModels::McCowan::readDict(const dictionary& overrideDict)

@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "regularWaveModel.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 using namespace Foam::constant;
 
@@ -83,12 +83,6 @@ Foam::waveModels::regularWaveModel::regularWaveModel
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::waveModels::regularWaveModel::~regularWaveModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::waveModels::regularWaveModel::readDict
@@ -101,7 +95,7 @@ bool Foam::waveModels::regularWaveModel::readDict
         waveHeight_ = readWaveHeight();
         waveAngle_ = readWaveAngle();
 
-        lookup("wavePeriod") >> wavePeriod_;
+        wavePeriod_ = get<scalar>("wavePeriod");
         if (wavePeriod_ < 0)
         {
             FatalIOErrorInFunction(*this)
@@ -126,7 +120,7 @@ void Foam::waveModels::regularWaveModel::info(Ostream& os) const
     irregularWaveModel::info(os);
 
     os  << "    Wave height : " << waveHeight_ << nl
-        << "    Wave angle  : " << 180/mathematical::pi*waveAngle_ << nl
+        << "    Wave angle  : " << radToDeg(waveAngle_) << nl
         << "    Wave period : " << wavePeriod_ << nl
         << "    Wave length : " << waveLength_ << nl
         << "    Wave phase : " << wavePhase_ << nl;

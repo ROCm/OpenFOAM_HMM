@@ -209,12 +209,6 @@ Foam::waveModels::StokesI::StokesI
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::waveModels::StokesI::~StokesI()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::waveModels::StokesI::readDict(const dictionary& overrideDict)

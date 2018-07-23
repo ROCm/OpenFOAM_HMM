@@ -45,13 +45,13 @@ addToRunTimeSelectionTable(windowModel, Hanning, dictionary);
 Hanning::Hanning(const dictionary& dict, const label nSamples)
 :
     windowModel(dict, nSamples),
-    symmetric_(readBool(dict.lookup("symmetric"))),
-    extended_(readBool(dict.lookup("extended"))),
+    symmetric_(dict.get<bool>("symmetric")),
+    extended_(dict.get<bool>("extended")),
     alpha_(dict.lookupOrDefault("alpha", 0.5)) // Hamming = 0.54
 {
     // Extend range if required
-    label offset = extended_ ? 1 : 0;
-    scalar m = nSamples - 1 + 2*offset;
+    const label offset = extended_ ? 1 : 0;
+    const scalar m = nSamples - 1 + 2*offset;
 
     scalarField t(nSamples);
     forAll(t, i)
@@ -81,17 +81,11 @@ Hanning::Hanning(const dictionary& dict, const label nSamples)
         }
     }
 
-    scalar sumSqr = sum(sqr(wf));
+    const scalar sumSqr = sum(sqr(wf));
 
     // Normalisation
     wf *= sqrt(nSamples/sumSqr);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Hanning::~Hanning()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

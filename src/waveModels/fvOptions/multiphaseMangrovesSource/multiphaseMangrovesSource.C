@@ -53,7 +53,7 @@ namespace fv
 Foam::tmp<Foam::volScalarField>
 Foam::fv::multiphaseMangrovesSource::dragCoeff(const volVectorField& U) const
 {
-    tmp<volScalarField> tdragCoeff = tmp<volScalarField>::New
+    auto tdragCoeff = tmp<volScalarField>::New
     (
         IOobject
         (
@@ -66,8 +66,7 @@ Foam::fv::multiphaseMangrovesSource::dragCoeff(const volVectorField& U) const
         mesh_,
         dimensionedScalar(dimless/dimTime, Zero)
     );
-
-    volScalarField& dragCoeff = tdragCoeff.ref();
+    auto& dragCoeff = tdragCoeff.ref();
 
     forAll(zoneIDs_, i)
     {
@@ -99,7 +98,7 @@ Foam::fv::multiphaseMangrovesSource::dragCoeff(const volVectorField& U) const
 Foam::tmp<Foam::volScalarField>
 Foam::fv::multiphaseMangrovesSource::inertiaCoeff() const
 {
-    tmp<volScalarField> tinertiaCoeff = tmp<volScalarField>::New
+    auto tinertiaCoeff = tmp<volScalarField>::New
     (
         IOobject
         (
@@ -112,8 +111,7 @@ Foam::fv::multiphaseMangrovesSource::inertiaCoeff() const
         mesh_,
         dimensionedScalar(dimless, Zero)
     );
-
-    volScalarField& inertiaCoeff = tinertiaCoeff.ref();
+    auto& inertiaCoeff = tinertiaCoeff.ref();
 
     const scalar pi = constant::mathematical::pi;
 
@@ -229,7 +227,7 @@ bool Foam::fv::multiphaseMangrovesSource::read(const dictionary& dict)
             const word& regionName = regionNames[i];
             const dictionary& modelDict = regionsDict.subDict(regionName);
 
-            const word& zoneName = modelDict.lookup("cellZone");
+            const word zoneName(modelDict.get<word>("cellZone"));
             zoneIDs_[i] = mesh_.cellZones().findIndices(zoneName);
             if (zoneIDs_[i].empty())
             {
@@ -239,18 +237,16 @@ bool Foam::fv::multiphaseMangrovesSource::read(const dictionary& dict)
                     << exit(FatalError);
             }
 
-            modelDict.lookup("a") >> aZone_[i];
-            modelDict.lookup("N") >> NZone_[i];
-            modelDict.lookup("Cm") >> CmZone_[i];
-            modelDict.lookup("Cd") >> CdZone_[i];
+            modelDict.read("a", aZone_[i]);
+            modelDict.read("N", NZone_[i]);
+            modelDict.read("Cm", CmZone_[i]);
+            modelDict.read("Cd", CdZone_[i]);
         }
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

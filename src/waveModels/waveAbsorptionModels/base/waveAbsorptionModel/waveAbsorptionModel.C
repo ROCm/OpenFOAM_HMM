@@ -43,7 +43,7 @@ Foam::scalar Foam::waveModels::waveAbsorptionModel::timeCoeff
     const scalar t
 ) const
 {
-    // No time ramping applied applied for absorption
+    // No time ramping applied for absorption
     return 1;
 }
 
@@ -65,12 +65,6 @@ Foam::waveModels::waveAbsorptionModel::waveAbsorptionModel
         readDict(dict);
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::waveModels::waveAbsorptionModel::~waveAbsorptionModel()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

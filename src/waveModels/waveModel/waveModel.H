@@ -222,7 +222,7 @@ public:
 
 
     //- Destructor
-    virtual ~waveModel();
+    virtual ~waveModel() = default;
 
     //- Dictionary name
     static const word dictName;

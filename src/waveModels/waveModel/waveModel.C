@@ -126,8 +126,8 @@ void Foam::waveModel::initialiseGeometry()
 Foam::tmp<Foam::scalarField> Foam::waveModel::waterLevel() const
 {
     // Note: initialising as initial depth
-    tmp<scalarField> tlevel(new scalarField(nPaddle_, initialDepth_));
-    scalarField& level = tlevel.ref();
+    auto tlevel = tmp<scalarField>::New(nPaddle_, initialDepth_);
+    auto& level = tlevel.ref();
 
     const volScalarField& alpha =
         mesh_.lookupObject<volScalarField>(alphaName_);
@@ -288,12 +288,6 @@ Foam::waveModel::waveModel
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::waveModel::~waveModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::waveModel::readDict(const dictionary& overrideDict)
@@ -309,7 +303,7 @@ bool Foam::waveModel::readDict(const dictionary& overrideDict)
     readIfPresent("U", UName_);
     readIfPresent("alpha", alphaName_);
 
-    lookup("nPaddle") >> nPaddle_;
+    nPaddle_ = get<label>("nPaddle");
     if (nPaddle_ < 1)
     {
         FatalIOErrorInFunction(*this)

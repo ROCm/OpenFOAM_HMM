@@ -183,12 +183,6 @@ Foam::noiseModel::noiseModel(const dictionary& dict, const bool readFields)
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::noiseModel::~noiseModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::noiseModel::read(const dictionary& dict)

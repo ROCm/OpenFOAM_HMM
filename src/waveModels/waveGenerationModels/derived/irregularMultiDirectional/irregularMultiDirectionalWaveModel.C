@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "irregularMultiDirectionalWaveModel.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "addToRunTimeSelectionTable.H"
 
 using namespace Foam::constant;
@@ -253,12 +253,6 @@ Foam::waveModels::irregularMultiDirectional::irregularMultiDirectional
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::waveModels::irregularMultiDirectional::~irregularMultiDirectional()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::waveModels::irregularMultiDirectional::readDict
@@ -268,10 +262,10 @@ bool Foam::waveModels::irregularMultiDirectional::readDict
 {
     if (irregularWaveModel::readDict(overrideDict))
     {
-        lookup("wavePeriods") >> irregWavePeriods_;
-        lookup("waveHeights") >> irregWaveHeights_;
-        lookup("wavePhases") >> irregWavePhases_;
-        lookup("waveDirs") >> irregWaveDirs_;
+        dictionary::read("wavePeriods", irregWavePeriods_);
+        dictionary::read("waveHeights", irregWaveHeights_);
+        dictionary::read("wavePhases", irregWavePhases_);
+        dictionary::read("waveDirs", irregWaveDirs_);
 
         irregWaveLengths_ = irregWaveHeights_;
 
@@ -282,7 +276,7 @@ bool Foam::waveModels::irregularMultiDirectional::readDict
                 irregWaveLengths_[ii][jj] =
                     waveLength(waterDepthRef_, irregWavePeriods_[ii][jj]);
                 irregWaveDirs_[ii][jj] =
-                    irregWaveDirs_[ii][jj]*mathematical::pi/180;
+                    degToRad(irregWaveDirs_[ii][jj]);
             }
         }
 

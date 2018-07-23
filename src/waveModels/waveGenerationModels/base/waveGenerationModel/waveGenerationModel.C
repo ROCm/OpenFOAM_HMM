@@ -24,9 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "waveGenerationModel.H"
-#include "mathematicalConstants.H"
-
-using namespace Foam::constant;
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -43,7 +41,7 @@ namespace waveModels
 
 Foam::scalar Foam::waveModels::waveGenerationModel::readWaveHeight() const
 {
-    scalar h(readScalar(lookup("waveHeight")));
+    const scalar h(get<scalar>("waveHeight"));
     if (h < 0)
     {
         FatalIOErrorInFunction(*this)
@@ -58,8 +56,7 @@ Foam::scalar Foam::waveModels::waveGenerationModel::readWaveHeight() const
 
 Foam::scalar Foam::waveModels::waveGenerationModel::readWaveAngle() const
 {
-    scalar angle(readScalar(lookup("waveAngle")));
-    return angle* mathematical::pi/180;
+    return degToRad(get<scalar>("waveAngle"));
 }
 
 
@@ -82,12 +79,6 @@ Foam::waveModels::waveGenerationModel::waveGenerationModel
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::waveModels::waveGenerationModel::~waveGenerationModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::waveModels::waveGenerationModel::readDict
@@ -97,7 +88,7 @@ bool Foam::waveModels::waveGenerationModel::readDict
 {
     if (waveModel::readDict(overrideDict))
     {
-        lookup("activeAbsorption") >> activeAbsorption_;
+        activeAbsorption_ = get<bool>("activeAbsorption");
 
         return true;
     }

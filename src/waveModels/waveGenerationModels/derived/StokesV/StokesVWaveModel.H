@@ -195,7 +195,7 @@ public:
     );
 
     //- Destructor
-    virtual ~StokesV();
+    virtual ~StokesV() = default;
 
 
     // Public Member Functions

@@ -132,7 +132,7 @@ public:
     );
 
     //- Destructor
-    virtual ~streamFunction();
+    virtual ~streamFunction() = default;
 
 
     // Public Member Functions

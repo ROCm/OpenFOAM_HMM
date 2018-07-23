@@ -48,13 +48,11 @@ class irregularWaveModel
 :
     public waveGenerationModel
 {
-    // Private Member Functions
+        //- No copy construct
+        irregularWaveModel(const irregularWaveModel&) = delete;
 
-        //- Disallow default bitwise copy construct
-        irregularWaveModel(const irregularWaveModel&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const irregularWaveModel&);
+        //- No copy assignment
+        void operator=(const irregularWaveModel&) = delete;
 
 
 protected:
@@ -86,7 +84,7 @@ public:
     );
 
     //- Destructor
-    virtual ~irregularWaveModel();
+    virtual ~irregularWaveModel() = default;
 
 
     // Public Member Functions

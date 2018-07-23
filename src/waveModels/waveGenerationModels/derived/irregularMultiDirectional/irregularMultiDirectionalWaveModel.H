@@ -33,6 +33,7 @@ Description
 #define waveModels_irregularMultiDirectional_H
 
 #include "irregularWaveModel.H"
+#include "scalarList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,20 +55,20 @@ private:
     // Proteced Data
 
         //- Wave periods for irregularMultiDirectional case [seconds]
-        List<List<scalar>> irregWavePeriods_;
+        List<scalarList> irregWavePeriods_;
 
         //- Wave heights for irregularMultiDirectional case [metres]
-        List<List<scalar>> irregWaveHeights_;
+        List<scalarList> irregWaveHeights_;
 
         //- Wave lengths for irregularMultiDirectional case [metres]
-        List<List<scalar>> irregWaveLengths_;
+        List<scalarList> irregWaveLengths_;
 
         //- Wave phases for irregularMultiDirectional case [radians]
-        List<List<scalar>> irregWavePhases_;
+        List<scalarList> irregWavePhases_;
 
         //- Direction of propagation for irregularMultiDirectional case
         //- [degrees] from X axis
-        List<List<scalar>> irregWaveDirs_;
+        List<scalarList> irregWaveDirs_;
 
 
     // Private Member Functions
@@ -151,7 +152,7 @@ public:
     );
 
     //- Destructor
-    virtual ~irregularMultiDirectional();
+    virtual ~irregularMultiDirectional() = default;
 
 
     // Public Member Functions

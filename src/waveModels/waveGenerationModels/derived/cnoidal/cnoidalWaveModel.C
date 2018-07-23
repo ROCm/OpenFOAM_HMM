@@ -329,12 +329,6 @@ Foam::waveModels::cnoidal::cnoidal
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::waveModels::cnoidal::~cnoidal()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::waveModels::cnoidal::readDict(const dictionary& overrideDict)

@@ -50,7 +50,6 @@ namespace Foam
 namespace fv
 {
 
-
 /*---------------------------------------------------------------------------*\
               Class multiphaseMangrovesTurbulenceModel Declaration
 \*---------------------------------------------------------------------------*/
@@ -61,14 +60,14 @@ class multiphaseMangrovesTurbulenceModel
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         multiphaseMangrovesTurbulenceModel
         (
             const multiphaseMangrovesTurbulenceModel&
-        );
+        ) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const multiphaseMangrovesTurbulenceModel&);
+        //- No copy assignment
+        void operator=(const multiphaseMangrovesTurbulenceModel&) = delete;
 
 
 
@@ -137,8 +136,7 @@ public:
 
 
     //- Destructor
-    virtual ~multiphaseMangrovesTurbulenceModel()
-    {}
+    virtual ~multiphaseMangrovesTurbulenceModel() = default;
 
 
     // Member Functions

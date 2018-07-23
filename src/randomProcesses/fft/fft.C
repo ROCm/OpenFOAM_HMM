@@ -144,8 +144,8 @@ Foam::fft::realTransform1D(const scalarField& field)
     fftw_execute(plan);
 
     // field[0] = DC component
-    tmp<complexField> tresult(new complexField(nBy2 + 1));
-    complexField& result = tresult.ref();
+    auto tresult = tmp<complexField>::New(nBy2 + 1);
+    auto& result = tresult.ref();
 
     result[0].Re() = out[0];
     result[nBy2].Re() = out[nBy2];
@@ -237,7 +237,7 @@ Foam::tmp<Foam::complexField> Foam::fft::forwardTransform
     const UList<int>& nn
 )
 {
-    tmp<complexField> tresult(new complexField(tfield));
+    auto tresult = tmp<complexField>::New(tfield);
 
     transform(tresult.ref(), nn, FORWARD_TRANSFORM);
 
@@ -253,7 +253,7 @@ Foam::tmp<Foam::complexField> Foam::fft::reverseTransform
     const UList<int>& nn
 )
 {
-    tmp<complexField> tresult(new complexField(tfield));
+    auto tresult = tmp<complexField>::New(tfield);
 
     transform(tresult.ref(), nn, REVERSE_TRANSFORM);
 
