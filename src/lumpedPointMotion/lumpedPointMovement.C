@@ -54,7 +54,7 @@ const Foam::Enum
 >
 Foam::lumpedPointMovement::scalingNames
 {
-    { scalingType::LENGTH, "plain" },
+    { scalingType::LENGTH, "length" },
     { scalingType::FORCE, "force" },
     { scalingType::MOMENT, "moment" }
 };
