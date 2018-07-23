@@ -42,6 +42,8 @@ int main(int argc, char *argv[])
     Info<< "degToRad(30): " << degToRad(30) << nl;
 
     Info<< "cos(30_deg): " << ::cos(30_deg) << nl;
+    Info<< "1000 rpm = " << rpmToRads(1000) << " 1/s" << nl;
+    Info<< "100 1/s  = " << radsToRpm(100) << " rpm" << nl;
 
     return 0;
 }

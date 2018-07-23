@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,14 +82,13 @@ public:
 
 
     //- Destructor
-    ~rpm();
+    ~rpm() = default;
+
 
     // Member functions
 
-        // I-O
-
-            //- Read
-            bool read();
+        //- Read coefficients
+        bool read();
 };
 
 

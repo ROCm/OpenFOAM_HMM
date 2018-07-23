@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "fvMatrices.H"
 #include "geometricOneField.H"
 #include "syncTools.H"
+#include "unitConversion.H"
 
 using namespace Foam::constant;
 
@@ -84,15 +85,12 @@ void Foam::fv::rotorDiskSource::checkData()
             {
                 case ifFixed:
                 {
-                    coeffs_.lookup("inletVelocity") >> inletVelocity_;
+                    coeffs_.read("inletVelocity", inletVelocity_);
                     break;
                 }
                 case ifSurfaceNormal:
                 {
-                    scalar UIn
-                    (
-                        readScalar(coeffs_.lookup("inletNormalVelocity"))
-                    );
+                    scalar UIn(coeffs_.get<scalar>("inletNormalVelocity"));
                     inletVelocity_ = -coordSys_.R().e3()*UIn;
                     break;
                 }
@@ -263,7 +261,7 @@ void Foam::fv::rotorDiskSource::setFaceArea(vector& axis, const bool correct)
 
 void Foam::fv::rotorDiskSource::createCoordinateSystem()
 {
-    // Construct the local rotor co-ordinate system
+    // Construct the local rotor coordinate system
     vector origin(Zero);
     vector axis(Zero);
     vector refDir(Zero);
@@ -324,7 +322,7 @@ void Foam::fv::rotorDiskSource::createCoordinateSystem()
 
             // Correct the axis direction using a point above the rotor
             {
-                vector pointAbove(coeffs_.lookup("pointAbove"));
+                vector pointAbove(coeffs_.get<vector>("pointAbove"));
                 vector dir = pointAbove - origin;
                 dir /= mag(dir);
                 if ((dir & axis) < 0)
@@ -333,7 +331,7 @@ void Foam::fv::rotorDiskSource::createCoordinateSystem()
                 }
             }
 
-            coeffs_.lookup("refDirection") >> refDir;
+            coeffs_.read("refDirection", refDir);
 
             cylindrical_.reset
             (
@@ -354,9 +352,9 @@ void Foam::fv::rotorDiskSource::createCoordinateSystem()
         }
         case gmSpecified:
         {
-            coeffs_.lookup("origin") >> origin;
-            coeffs_.lookup("axis") >> axis;
-            coeffs_.lookup("refDirection") >> refDir;
+            coeffs_.read("origin", origin);
+            coeffs_.read("axis", axis);
+            coeffs_.read("refDirection", refDir);
 
             cylindrical_.reset
             (
@@ -407,7 +405,7 @@ void Foam::fv::rotorDiskSource::constructGeometry()
         {
             const label celli = cells_[i];
 
-            // Position in (planar) rotor co-ordinate system
+            // Position in (planar) rotor coordinate system
             x_[i] = coordSys_.localPosition(C[celli]);
 
             // Cache max radius
@@ -523,7 +521,7 @@ void Foam::fv::rotorDiskSource::addSup
     );
 
     // Read the reference density for incompressible flow
-    coeffs_.lookup("rhoRef") >> rhoRef_;
+    coeffs_.read("rhoRef", rhoRef_);
 
     const vectorField Uin(inflowVelocity(eqn.psi()));
     trim_->correct(Uin, force);
@@ -576,32 +574,28 @@ bool Foam::fv::rotorDiskSource::read(const dictionary& dict)
 {
     if (cellSetOption::read(dict))
     {
-        coeffs_.lookup("fields") >> fieldNames_;
+        coeffs_.read("fields", fieldNames_);
         applied_.setSize(fieldNames_.size(), false);
 
-        // Read co-ordinate system/geometry invariant properties
-        scalar rpm(readScalar(coeffs_.lookup("rpm")));
-        omega_ = rpm/60.0*mathematical::twoPi;
+        // Read coordinate system/geometry invariant properties
+        omega_ = rpmToRads(coeffs_.get<scalar>("rpm"));
 
-        coeffs_.lookup("nBlades") >> nBlades_;
+        coeffs_.read("nBlades", nBlades_);
 
         inletFlow_ = inletFlowTypeNames_.lookup("inletFlowType", coeffs_);
 
-        coeffs_.lookup("tipEffect") >> tipEffect_;
+        coeffs_.read("tipEffect", tipEffect_);
 
         const dictionary& flapCoeffs(coeffs_.subDict("flapCoeffs"));
-        flapCoeffs.lookup("beta0") >> flap_.beta0;
-        flapCoeffs.lookup("beta1c") >> flap_.beta1c;
-        flapCoeffs.lookup("beta2s") >> flap_.beta2s;
-        flap_.beta0 = degToRad(flap_.beta0);
-        flap_.beta1c = degToRad(flap_.beta1c);
-        flap_.beta2s = degToRad(flap_.beta2s);
+        flap_.beta0 = degToRad(flapCoeffs.get<scalar>("beta0"));
+        flap_.beta1c = degToRad(flapCoeffs.get<scalar>("beta1c"));
+        flap_.beta2s = degToRad(flapCoeffs.get<scalar>("beta2s"));
 
 
-        // Create co-ordinate system
+        // Create coordinate system
         createCoordinateSystem();
 
-        // Read co-ordinate system dependent properties
+        // Read coordinate system dependent properties
         checkData();
 
         constructGeometry();
@@ -616,10 +610,8 @@ bool Foam::fv::rotorDiskSource::read(const dictionary& dict)
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

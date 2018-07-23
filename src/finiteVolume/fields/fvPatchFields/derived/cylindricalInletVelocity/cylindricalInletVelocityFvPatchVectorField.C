@@ -28,7 +28,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "surfaceFields.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -126,7 +126,7 @@ void Foam::cylindricalInletVelocityFvPatchVectorField::updateCoeffs()
     const scalar t = this->db().time().timeOutputValue();
     const scalar axialVelocity = axialVelocity_->value(t);
     const scalar radialVelocity = radialVelocity_->value(t);
-    const scalar rpm = rpm_->value(t);
+    const scalar omega = rpmToRads(rpm_->value(t));
 
     const vector axisHat = axis_/mag(axis_);
 
@@ -135,7 +135,7 @@ void Foam::cylindricalInletVelocityFvPatchVectorField::updateCoeffs()
 
     tmp<vectorField> tangVel
     (
-        (rpm*constant::mathematical::pi/30.0)*(axisHat) ^ d
+        (omega * axisHat) ^ d
     );
 
     operator==(tangVel + axisHat*axialVelocity + radialVelocity*d/mag(d));

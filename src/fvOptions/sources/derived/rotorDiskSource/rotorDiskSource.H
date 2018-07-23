@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,8 +78,8 @@ Usage
 
     Where:
     Valid options for the \c geometryMode entry include:
-    - auto          : determine rototor co-ord system from cells
-    - specified     : specified co-ord system
+    - auto          : determine rotor coordinate system from cells
+    - specified     : specified coordinate system
 
     Valid options for the \c inletFlowType entry include:
     - fixed         : specified velocity
@@ -113,7 +113,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class trimModel;
 
 namespace fv
@@ -196,7 +196,7 @@ protected:
         //- Area [m2]
         List<scalar> area_;
 
-        //- Rotor local cylindrical co-ordinate system (r, theta, z)
+        //- Rotor local cylindrical coordinate system (r, theta, z)
         cylindricalCS coordSys_;
 
          //- Rotor transformation co-ordinate system
@@ -223,7 +223,7 @@ protected:
         //- Set the face areas per cell, and optionally correct the rotor axis
         void setFaceArea(vector& axis, const bool correct);
 
-        //- Create the co-ordinate system
+        //- Create the coordinate system
         void createCoordinateSystem();
 
         //- Construct geometry
@@ -249,7 +249,6 @@ public:
 
 
     // Constructors
-
 
         //- Construct from components
         rotorDiskSource
@@ -280,7 +279,7 @@ public:
             // (Cylindrical r, theta, z)
             inline const List<point>& x() const;
 
-            //- Return the rotor co-ordinate system (r, theta, z)
+            //- Return the rotor coordinate system (r, theta, z)
             inline const cylindricalCS& coordSys() const;
 
 

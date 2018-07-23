@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ License
 
 #include "rpm.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -46,23 +46,14 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::SRF::rpm::rpm
-(
-    const volVectorField& U
-)
+Foam::SRF::rpm::rpm(const volVectorField& U)
 :
     SRFModel(typeName, U),
-    rpm_(readScalar(SRFModelCoeffs_.lookup("rpm")))
+    rpm_(SRFModelCoeffs_.get<scalar>("rpm"))
 {
-    // Initialise the angular velocity
-    omega_.value() = axis_*rpm_*constant::mathematical::twoPi/60.0;
+    // The angular velocity
+    omega_.value() = axis_*rpmToRads(rpm_);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::SRF::rpm::~rpm()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -71,18 +62,14 @@ bool Foam::SRF::rpm::read()
 {
     if (SRFModel::read())
     {
-        // Re-read rpm
-        SRFModelCoeffs_.lookup("rpm") >> rpm_;
+        rpm_ = SRFModelCoeffs_.get<scalar>("rpm");
 
-        // Update angular velocity
-        omega_.value() = axis_*rpm_*(constant::mathematical::twoPi/60.0);
+        omega_.value() = axis_*rpmToRads(rpm_);
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

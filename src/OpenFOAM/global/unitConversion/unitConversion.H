@@ -65,6 +65,32 @@ inline constexpr scalar radToDeg() noexcept
     return (180.0/M_PI);
 }
 
+
+//- Conversion from revolutions/minute to radians/sec
+inline constexpr scalar rpmToRads(const scalar rpm) noexcept
+{
+    return (rpm*M_PI/30.0);
+}
+
+//- Conversion from radians/sec to revolutions/minute
+inline constexpr scalar radsToRpm(const scalar rads) noexcept
+{
+    return (rads*30.0/M_PI);
+}
+
+//- Multiplication factor for revolutions/minute to radians/sec
+inline constexpr scalar rpmToRads() noexcept
+{
+    return (M_PI/30.0);
+}
+
+//- Multiplication factor for radians/sec to revolutions/minute
+inline constexpr scalar radsToRpm() noexcept
+{
+    return (30.0/M_PI);
+}
+
+
 //- Conversion from atm to Pa
 inline constexpr scalar atmToPa(const scalar atm) noexcept
 {

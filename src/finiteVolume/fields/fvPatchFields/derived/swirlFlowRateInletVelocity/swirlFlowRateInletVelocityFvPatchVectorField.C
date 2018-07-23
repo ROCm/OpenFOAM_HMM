@@ -28,7 +28,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "surfaceFields.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -151,18 +151,16 @@ void Foam::swirlFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
     {
         const scalar t = this->db().time().timeOutputValue();
         const scalar flowRate = flowRate_->value(t);
-        const scalar rpm = rpm_->value(t);
+        const scalar omega = rpmToRads(rpm_->value(t));
 
         const scalar avgU = -flowRate/totArea;
 
         const vector axisHat = axis_/mag(axis_);
 
-        // Update angular velocity - convert [rpm] to [rad/s]
+        // Update angular velocity
         tmp<vectorField> tangentialVelocity
         (
-            axisHat
-           ^(rpm*constant::mathematical::pi/30.0)
-           *(patch().Cf() - origin_)
+            axisHat ^ omega*(patch().Cf() - origin_)
         );
 
         tmp<vectorField> n = patch().nf();
