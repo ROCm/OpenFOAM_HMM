@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,8 +72,10 @@ void Foam::meshSubsetHelper::correct(bool verbose)
             Info<< "Subsetting mesh based on cellSet " << name_ << endl;
         }
 
-        cellSet subset(baseMesh_, name_);
-        subsetter_.setLargeCellSubset(subset);
+        subsetter_.setLargeCellSubset
+        (
+            cellSet(baseMesh_, name_)
+        );
     }
     else if (type_ == ZONE)
     {

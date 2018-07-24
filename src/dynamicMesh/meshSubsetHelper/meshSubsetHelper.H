@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ public:
         //- Internal book-keeping for subset type
         enum subsetType
         {
-            NONE,       //<! Not a subset
+            NONE = 0,   //<! Not a subset
             SET,        //<! Using a cellSet for the subset
             ZONE        //<! Using a cellZone for the subset
         };
@@ -134,10 +134,14 @@ public:
             {
                 return subsetter_.subMesh();
             }
-            else
-            {
-                return baseMesh_;
-            }
+
+            return baseMesh_;
+        }
+
+        //- The associated (set or zone) name if any.
+        inline const word& name() const
+        {
+            return name_;
         }
 
 
