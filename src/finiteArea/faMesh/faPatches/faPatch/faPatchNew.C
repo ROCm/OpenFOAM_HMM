@@ -41,7 +41,7 @@ Foam::autoPtr<Foam::faPatch> Foam::faPatch::New
     DebugInFunction
         << "constructing faPatch" << endl;
 
-    word patchType(dict.lookup("type"));
+    const word patchType(dict.get<word>("type"));
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(patchType);
 

@@ -84,7 +84,7 @@ Foam::faPatch::faPatch
 :
     labelList(dict.lookup("edgeLabels")),
     patchIdentifier(name, dict, index),
-    ngbPolyPatchIndex_(readInt(dict.lookup("ngbPolyPatchIndex"))),
+    ngbPolyPatchIndex_(dict.get<label>("ngbPolyPatchIndex")),
     boundaryMesh_(bm),
     edgeFacesPtr_(nullptr),
     pointLabelsPtr_(nullptr),
