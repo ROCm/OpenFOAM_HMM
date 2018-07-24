@@ -71,6 +71,9 @@ Note
 #include <unordered_set>
 #include <vector>
 
+// Ragel switchs may have several implicit fallthroughs
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+
 // Length of the input read buffer
 #define INBUFLEN 16384
 
