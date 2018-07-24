@@ -41,15 +41,13 @@ namespace Foam
 {
 
 // Forward declarations
-
 class phasePairKey;
 
-bool operator==(const phasePairKey&, const phasePairKey&);
-bool operator!=(const phasePairKey&, const phasePairKey&);
+bool operator==(const phasePairKey& a, const phasePairKey& b);
+bool operator!=(const phasePairKey& a, const phasePairKey& b);
 
-Istream& operator>>(Istream&, phasePairKey&);
-Ostream& operator<<(Ostream&, const phasePairKey&);
-
+Istream& operator>>(Istream& is, phasePairKey& key);
+Ostream& operator<<(Ostream& os, const phasePairKey& key);
 
 /*---------------------------------------------------------------------------*\
                          Class phasePairKey Declaration
@@ -66,9 +64,10 @@ class phasePairKey
 
 public:
 
+        //- Ordered or unordered hashing of word pair
         struct hash
         {
-            // Generate a hash from a phase pair key
+            //- Generate a hash from a phase pair key
             label operator()(const phasePairKey& key) const;
         };
 
@@ -78,31 +77,37 @@ public:
         //- Construct null
         phasePairKey() {} // = default
 
-        //- Construct from names and the ordering flag
+        //- Construct from names and optional ordering flag
         phasePairKey
         (
             const word& name1,
             const word& name2,
-            const bool ordered
+            const bool ordered = false
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~phasePairKey() = default;
+
+
+    // Access
+
+        //- Return the ordered flag
+        bool ordered() const;
 
 
     // Friend Operators
 
-        //- Test if keys are equal
+        //- Test for equality
         friend bool operator==(const phasePairKey& a, const phasePairKey& b);
 
-        //- Test if keys are unequal
+        //- Test for inequality
         friend bool operator!=(const phasePairKey& a, const phasePairKey& b);
 
-        //- Read from stdin
+        //- Read from Istream
         friend Istream& operator>>(Istream& is, phasePairKey& key);
 
-        //- Write to stdout
+        //- Write to Ostream
         friend Ostream& operator<<(Ostream& os, const phasePairKey& key);
 };
 

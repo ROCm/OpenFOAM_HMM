@@ -39,6 +39,14 @@ Foam::phasePairKey::phasePairKey
 {}
 
 
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+bool Foam::phasePairKey::ordered() const
+{
+    return ordered_;
+}
+
+
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
 Foam::label Foam::phasePairKey::hash::operator()
@@ -55,12 +63,8 @@ Foam::label Foam::phasePairKey::hash::operator()
                 word::hash()(key.second())
             );
     }
-    else
-    {
-        return
-            word::hash()(key.first())
-          + word::hash()(key.second());
-    }
+
+    return word::hash()(key.first()) + word::hash()(key.second());
 }
 
 
@@ -72,14 +76,13 @@ bool Foam::operator==
     const phasePairKey& b
 )
 {
-    const label cmp = Pair<word>::compare(a,b);
+    const auto cmp = Pair<word>::compare(a,b);
 
     return
+    (
         (a.ordered_ == b.ordered_)
-     && (
-            (a.ordered_ && (cmp == 1))
-         || (!a.ordered_ && (cmp != 0))
-        );
+     && (a.ordered_ ? (cmp == 1) : cmp)
+    );
 }
 
 
@@ -114,8 +117,8 @@ Foam::Istream& Foam::operator>>(Istream& is, phasePairKey& key)
         FatalErrorInFunction
             << "Phase pair type is not recognised. "
             << temp
-            << "Use (phaseDispersed in phaseContinuous) for an ordered"
-            << "pair, or (phase1 and pase2) for an unordered pair."
+            << "Use (phaseDispersed in phaseContinuous) for an ordered pair, "
+            << "or (phase1 and phase2) for an unordered pair."
             << exit(FatalError);
     }
 

@@ -40,6 +40,15 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+class phasePairKey;
+
+bool operator==(const phasePairKey& a, const phasePairKey& b);
+bool operator!=(const phasePairKey& a, const phasePairKey& b);
+
+Istream& operator>>(Istream& is, phasePairKey& key);
+Ostream& operator<<(Ostream& os, const phasePairKey& key);
+
 /*---------------------------------------------------------------------------*\
                          Class phasePairKey Declaration
 \*---------------------------------------------------------------------------*/
@@ -48,29 +57,6 @@ class phasePairKey
 :
     public Pair<word>
 {
-public:
-
-        class hash
-        :
-            public Hash<phasePairKey>
-        {
-        public:
-
-            // Constructors
-
-                //- Construct null
-                hash();
-
-
-            // Member operators
-
-                //- Generate a hash from a phase pair key
-                label operator()(const phasePairKey& key) const;
-        };
-
-
-private:
-
     // Private data
 
         //- Flag to indicate whether ordering is important
@@ -79,12 +65,20 @@ private:
 
 public:
 
+        //- Ordered or unordered hashing of word pair
+        struct hash
+        {
+            //- Generate a hash from a phase pair key
+            label operator()(const phasePairKey& key) const;
+        };
+
+
     // Constructors
 
         //- Construct null
-        phasePairKey();
+        phasePairKey() {} // = default
 
-        //- Construct from names and the ordering flag
+        //- Construct from names and optional ordering flag
         phasePairKey
         (
             const word& name1,
@@ -93,7 +87,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~phasePairKey() = default;
 
 
@@ -105,16 +99,16 @@ public:
 
     // Friend Operators
 
-        //- Test if keys are equal
+        //- Test for equality
         friend bool operator==(const phasePairKey& a, const phasePairKey& b);
 
-        //- Test if keys are unequal
+        //- Test for inequality
         friend bool operator!=(const phasePairKey& a, const phasePairKey& b);
 
-        //- Read from stdin
+        //- Read from Istream
         friend Istream& operator>>(Istream& is, phasePairKey& key);
 
-        //- Write to stdout
+        //- Write to Ostream
         friend Ostream& operator<<(Ostream& os, const phasePairKey& key);
 };
 

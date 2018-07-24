@@ -63,12 +63,8 @@ Foam::label Foam::phasePairKey::hash::operator()
                 word::hash()(key.second())
             );
     }
-    else
-    {
-        return
-            word::hash()(key.first())
-          + word::hash()(key.second());
-    }
+
+    return word::hash()(key.first()) + word::hash()(key.second());
 }
 
 
@@ -80,14 +76,13 @@ bool Foam::operator==
     const phasePairKey& b
 )
 {
-    const label cmp = Pair<word>::compare(a,b);
+    const auto cmp = Pair<word>::compare(a,b);
 
     return
+    (
         (a.ordered_ == b.ordered_)
-     && (
-            (a.ordered_ && (cmp == 1))
-         || (!a.ordered_ && (cmp != 0))
-        );
+     && (a.ordered_ ? (cmp == 1) : cmp)
+    );
 }
 
 
