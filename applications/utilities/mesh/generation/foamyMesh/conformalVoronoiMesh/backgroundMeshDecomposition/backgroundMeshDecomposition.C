@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -801,14 +801,14 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
     allBackgroundMeshBounds_(Pstream::nProcs()),
     globalBackgroundBounds_(),
     mergeDist_(1e-6*mesh_.bounds().mag()),
-    spanScale_(readScalar(coeffsDict.lookup("spanScale"))),
+    spanScale_(coeffsDict.get<scalar>("spanScale")),
     minCellSizeLimit_
     (
         coeffsDict.lookupOrDefault<scalar>("minCellSizeLimit", 0.0)
     ),
-    minLevels_(readLabel(coeffsDict.lookup("minLevels"))),
-    volRes_(readLabel(coeffsDict.lookup("sampleResolution"))),
-    maxCellWeightCoeff_(readScalar(coeffsDict.lookup("maxCellWeightCoeff")))
+    minLevels_(coeffsDict.get<label>("minLevels")),
+    volRes_(coeffsDict.get<label>("sampleResolution")),
+    maxCellWeightCoeff_(coeffsDict.get<scalar>("maxCellWeightCoeff"))
 {
     if (!Pstream::parRun())
     {

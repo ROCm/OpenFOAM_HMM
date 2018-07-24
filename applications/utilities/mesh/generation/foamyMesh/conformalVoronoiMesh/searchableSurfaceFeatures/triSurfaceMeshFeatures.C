@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,15 +32,13 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(triSurfaceMeshFeatures, 0);
-addToRunTimeSelectionTable
-(
-    searchableSurfaceFeatures,
-    triSurfaceMeshFeatures,
-    dict
-);
-
+    defineTypeNameAndDebug(triSurfaceMeshFeatures, 0);
+    addToRunTimeSelectionTable
+    (
+        searchableSurfaceFeatures,
+        triSurfaceMeshFeatures,
+        dict
+    );
 }
 
 
@@ -53,7 +51,7 @@ Foam::triSurfaceMeshFeatures::triSurfaceMeshFeatures
 )
 :
     searchableSurfaceFeatures(surface, dict),
-    includedAngle_(readScalar(dict.lookup("includedAngle"))),
+    includedAngle_(dict.get<scalar>("includedAngle")),
     mode_
     (
         extendedFeatureEdgeMesh::sideVolumeTypeNames_
@@ -70,19 +68,11 @@ Foam::triSurfaceMeshFeatures::triSurfaceMeshFeatures
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::triSurfaceMeshFeatures::~triSurfaceMeshFeatures()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::extendedFeatureEdgeMesh>
 Foam::triSurfaceMeshFeatures::features() const
 {
-    autoPtr<extendedFeatureEdgeMesh> features;
-
     const triSurfaceMesh& surfMesh = refCast<const triSurfaceMesh>(surface());
 
     surfaceFeatures sFeat(surfMesh, includedAngle_);
@@ -94,18 +84,14 @@ Foam::triSurfaceMeshFeatures::features() const
         (mode_ == extendedFeatureEdgeMesh::BOTH ? true : false)
     );
 
-    features.reset
-    (
-        new extendedFeatureEdgeMesh
-        (
-            sFeat,
-            surface().db(),
-            surface().name() + ".extendedFeatureEdgeMesh",
-            surfBaffleRegions
-        )
-    );
 
-    return features;
+    return autoPtr<extendedFeatureEdgeMesh>::New
+    (
+        sFeat,
+        surface().db(),
+        surface().name() + ".extendedFeatureEdgeMesh",
+        surfBaffleRegions
+    );
 }
 
 

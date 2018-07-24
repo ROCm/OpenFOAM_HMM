@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,35 +28,37 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(piecewiseLinearRamp, 0);
-addToRunTimeSelectionTable
-(
-    faceAreaWeightModel,
-    piecewiseLinearRamp,
-    dictionary
-);
+namespace Foam
+{
+    defineTypeNameAndDebug(piecewiseLinearRamp, 0);
+    addToRunTimeSelectionTable
+    (
+        faceAreaWeightModel,
+        piecewiseLinearRamp,
+        dictionary
+    );
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-piecewiseLinearRamp::piecewiseLinearRamp
+Foam::piecewiseLinearRamp::piecewiseLinearRamp
 (
     const dictionary& faceAreaWeightDict
 )
 :
     faceAreaWeightModel(typeName, faceAreaWeightDict),
-    lAF_(readScalar(coeffDict().lookup("lowerAreaFraction"))),
-    uAF_(readScalar(coeffDict().lookup("upperAreaFraction")))
+    lAF_(coeffDict().get<scalar>("lowerAreaFraction")),
+    uAF_(coeffDict().get<scalar>("upperAreaFraction"))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar piecewiseLinearRamp::faceAreaWeight(scalar faceAreaFraction) const
+Foam::scalar
+Foam::piecewiseLinearRamp::faceAreaWeight(scalar faceAreaFraction) const
 {
     if (faceAreaFraction < lAF_)
     {
@@ -66,15 +68,9 @@ scalar piecewiseLinearRamp::faceAreaWeight(scalar faceAreaFraction) const
     {
         return faceAreaFraction/((uAF_ - lAF_)) - lAF_/(uAF_ - lAF_);
     }
-    else
-    {
-        return 1;
-    }
+
+    return 1;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

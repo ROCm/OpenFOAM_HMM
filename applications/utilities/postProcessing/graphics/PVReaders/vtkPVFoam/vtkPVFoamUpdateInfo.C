@@ -365,7 +365,7 @@ void Foam::vtkPVFoam::updateInfoPatches
                 const dictionary& patchDict = patchEntries[patchi].dict();
                 wordList groupNames;
 
-                sizes[patchi] = readLabel(patchDict.lookup("nFaces"));
+                sizes[patchi] = patchDict.get<label>("nFaces");
                 names[patchi] = patchEntries[patchi].keyword();
 
                 if

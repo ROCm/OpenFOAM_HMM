@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,7 +58,7 @@ Foam::uniformValue::uniformValue
     ),
     surfaceCellSize_
     (
-        readScalar(coeffsDict().lookup("surfaceCellSizeCoeff"))*defaultCellSize
+        coeffsDict().get<scalar>("surfaceCellSizeCoeff") * defaultCellSize
     )
 {}
 

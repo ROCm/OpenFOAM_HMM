@@ -90,7 +90,7 @@ public:
         );
 
     //- Destructor
-    ~fileControl();
+    ~fileControl() = default;
 
 
     // Member Functions

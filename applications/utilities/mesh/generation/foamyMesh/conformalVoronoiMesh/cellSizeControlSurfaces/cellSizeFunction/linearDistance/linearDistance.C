@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,20 +29,18 @@ License
 #include "triSurfaceFields.H"
 #include "volumeType.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(linearDistance, 0);
-addToRunTimeSelectionTable(cellSizeFunction, linearDistance, dictionary);
+    defineTypeNameAndDebug(linearDistance, 0);
+    addToRunTimeSelectionTable(cellSizeFunction, linearDistance, dictionary);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-linearDistance::linearDistance
+Foam::linearDistance::linearDistance
 (
     const dictionary& initialPointsDict,
     const searchableSurface& surface,
@@ -60,12 +58,11 @@ linearDistance::linearDistance
     ),
     distanceCellSize_
     (
-        readScalar(coeffsDict().lookup("distanceCellSizeCoeff"))
-       *defaultCellSize
+        coeffsDict().get<scalar>("distanceCellSizeCoeff") * defaultCellSize
     ),
     distance_
     (
-        readScalar(coeffsDict().lookup("distanceCoeff"))*defaultCellSize
+        coeffsDict().get<scalar>("distanceCoeff") * defaultCellSize
     ),
     distanceSqr_(sqr(distance_))
 {}
@@ -73,7 +70,7 @@ linearDistance::linearDistance
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-scalar linearDistance::sizeFunction
+Foam::scalar Foam::linearDistance::sizeFunction
 (
     const point& pt,
     scalar d,
@@ -83,7 +80,7 @@ scalar linearDistance::sizeFunction
     const scalar interpolatedSize
         = surfaceCellSizeFunction_().interpolate(pt, index);
 
-    scalar gradient
+    const scalar gradient
         = (distanceCellSize_ - interpolatedSize)
           /distance_;
 
@@ -95,7 +92,7 @@ scalar linearDistance::sizeFunction
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool linearDistance::sizeLocations
+bool Foam::linearDistance::sizeLocations
 (
     const pointIndexHit& hitPt,
     const vector& n,
@@ -111,9 +108,9 @@ bool linearDistance::sizeLocations
         shapeSizes.resize(2);
 
         shapePts[0] = pt - n*distance_;
-        shapeSizes[0] = distanceCellSize_;
-
         shapePts[1] = pt + n*distance_;
+
+        shapeSizes[0] = distanceCellSize_;
         shapeSizes[1] = distanceCellSize_;
     }
     else if (sideMode_ == smInside)
@@ -137,7 +134,7 @@ bool linearDistance::sizeLocations
 }
 
 
-bool linearDistance::cellSize(const point& pt, scalar& size) const
+bool Foam::linearDistance::cellSize(const point& pt, scalar& size) const
 {
     size = 0;
 
@@ -211,7 +208,7 @@ bool linearDistance::cellSize(const point& pt, scalar& size) const
 }
 
 
-bool linearDistance::setCellSize(const pointField& pts)
+bool Foam::linearDistance::setCellSize(const pointField& pts)
 {
 //    labelHashSet surfaceAlreadyHit(surfaceCellSize_.size());
 
@@ -248,9 +245,5 @@ bool linearDistance::setCellSize(const pointField& pts)
     return false;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

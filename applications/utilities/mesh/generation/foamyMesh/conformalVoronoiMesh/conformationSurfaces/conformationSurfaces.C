@@ -133,12 +133,15 @@ void Foam::conformationSurfaces::readFeatures
     label& featureIndex
 )
 {
-    word featureMethod =
+    const word featureMethod =
         featureDict.lookupOrDefault<word>("featureMethod", "none");
 
     if (featureMethod == "extendedFeatureEdgeMesh")
     {
-        fileName feMeshName(featureDict.lookup("extendedFeatureEdgeMesh"));
+        fileName feMeshName
+        (
+            featureDict.get<fileName>("extendedFeatureEdgeMesh")
+        );
 
         Info<< "    features: " << feMeshName << endl;
 
@@ -213,12 +216,15 @@ void Foam::conformationSurfaces::readFeatures
     label& featureIndex
 )
 {
-    word featureMethod =
+    const word featureMethod =
         featureDict.lookupOrDefault<word>("featureMethod", "none");
 
     if (featureMethod == "extendedFeatureEdgeMesh")
     {
-        fileName feMeshName(featureDict.lookup("extendedFeatureEdgeMesh"));
+        fileName feMeshName
+        (
+            featureDict.get<fileName>("extendedFeatureEdgeMesh")
+        );
 
         Info<< "    features: " << feMeshName << ", id: " << featureIndex
             << endl;
@@ -271,7 +277,7 @@ Foam::conformationSurfaces::conformationSurfaces
     rndGen_(rndGen),
     allGeometry_(allGeometry),
     features_(),
-    locationInMesh_(surfaceConformationDict.lookup("locationInMesh")),
+    locationInMesh_(surfaceConformationDict.get<point>("locationInMesh")),
     surfaces_(),
     allGeometryToSurfaces_(),
     normalVolumeTypes_(),
@@ -298,13 +304,11 @@ Foam::conformationSurfaces::conformationSurfaces
 
     // Count number of surfaces.
     label surfI = 0;
-    forAll(allGeometry.names(), geomI)
+    for (const word& geomName : allGeometry_.names())
     {
-        const word& geomName = allGeometry_.names()[geomI];
-
         if (surfacesDict.found(geomName))
         {
-            surfI++;
+            ++surfI;
         }
     }
 
@@ -594,12 +598,6 @@ Foam::conformationSurfaces::conformationSurfaces
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::conformationSurfaces::~conformationSurfaces()
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

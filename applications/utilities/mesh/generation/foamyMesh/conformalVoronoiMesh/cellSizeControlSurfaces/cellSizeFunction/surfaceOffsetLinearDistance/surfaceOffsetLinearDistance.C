@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,22 +29,22 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(surfaceOffsetLinearDistance, 0);
-addToRunTimeSelectionTable
-(
-    cellSizeFunction,
-    surfaceOffsetLinearDistance,
-    dictionary
-);
+namespace Foam
+{
+    defineTypeNameAndDebug(surfaceOffsetLinearDistance, 0);
+    addToRunTimeSelectionTable
+    (
+        cellSizeFunction,
+        surfaceOffsetLinearDistance,
+        dictionary
+    );
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-surfaceOffsetLinearDistance::surfaceOffsetLinearDistance
+Foam::surfaceOffsetLinearDistance::surfaceOffsetLinearDistance
 (
     const dictionary& initialPointsDict,
     const searchableSurface& surface,
@@ -62,47 +62,33 @@ surfaceOffsetLinearDistance::surfaceOffsetLinearDistance
     ),
     distanceCellSize_
     (
-        readScalar(coeffsDict().lookup("distanceCellSizeCoeff"))
-       *defaultCellSize
+        coeffsDict().get<scalar>("distanceCellSizeCoeff") * defaultCellSize
     ),
     surfaceOffset_
     (
-        readScalar(coeffsDict().lookup("surfaceOffsetCoeff"))*defaultCellSize
+        coeffsDict().get<scalar>("surfaceOffsetCoeff") * defaultCellSize
     ),
     totalDistance_(),
     totalDistanceSqr_()
 {
-    if
-    (
-        coeffsDict().found("totalDistanceCoeff")
-     || coeffsDict().found("linearDistanceCoeff")
-    )
+    if (coeffsDict().found("totalDistanceCoeff"))
     {
-        if
-        (
-            coeffsDict().found("totalDistanceCoeff")
-         && coeffsDict().found("linearDistanceCoeff")
-        )
+        totalDistance_ =
+            coeffsDict().get<scalar>("totalDistanceCoeff") * defaultCellSize;
+
+        if (coeffsDict().found("linearDistanceCoeff"))
         {
             FatalErrorInFunction
                 << "totalDistanceCoeff and linearDistanceCoeff found, "
                 << "specify one or other, not both."
                 << nl << exit(FatalError) << endl;
         }
-
-        if (coeffsDict().found("totalDistanceCoeff"))
-        {
-            totalDistance_ =
-                readScalar(coeffsDict().lookup("totalDistanceCoeff"))
-               *defaultCellSize;
-        }
-        else
-        {
-            totalDistance_ =
-                readScalar(coeffsDict().lookup("linearDistanceCoeff"))
-               *defaultCellSize
-              + surfaceOffset_;
-        }
+    }
+    else if (coeffsDict().found("linearDistanceCoeff"))
+    {
+        totalDistance_ =
+            coeffsDict().get<scalar>("linearDistanceCoeff") * defaultCellSize
+            + surfaceOffset_;
     }
     else
     {
@@ -117,7 +103,7 @@ surfaceOffsetLinearDistance::surfaceOffsetLinearDistance
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-scalar surfaceOffsetLinearDistance::sizeFunction
+Foam::scalar Foam::surfaceOffsetLinearDistance::sizeFunction
 (
     const point& pt,
     scalar d,
@@ -144,7 +130,7 @@ scalar surfaceOffsetLinearDistance::sizeFunction
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool surfaceOffsetLinearDistance::sizeLocations
+bool Foam::surfaceOffsetLinearDistance::sizeLocations
 (
     const pointIndexHit& hitPt,
     const vector& n,
@@ -197,7 +183,7 @@ bool surfaceOffsetLinearDistance::sizeLocations
 }
 
 
-bool surfaceOffsetLinearDistance::cellSize
+bool Foam::surfaceOffsetLinearDistance::cellSize
 (
     const point& pt,
     scalar& size
@@ -274,9 +260,5 @@ bool surfaceOffsetLinearDistance::cellSize
     return false;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

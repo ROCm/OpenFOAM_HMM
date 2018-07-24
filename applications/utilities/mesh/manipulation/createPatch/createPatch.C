@@ -557,10 +557,9 @@ int main(int argc, char *argv[])
     PtrList<dictionary> patchSources(dict.lookup("patches"));
 
     wordHashSet addedPatchNames;
-    forAll(patchSources, addedI)
+    for (const dictionary& dict : patchSources)
     {
-        const dictionary& dict = patchSources[addedI];
-        addedPatchNames.insert(dict.lookup("name"));
+        addedPatchNames.insert(dict.get<word>("name"));
     }
 
 
@@ -595,11 +594,9 @@ int main(int argc, char *argv[])
             }
         }
 
-        forAll(patchSources, addedI)
+        for (const dictionary& dict : patchSources)
         {
-            const dictionary& dict = patchSources[addedI];
-
-            word patchName(dict.lookup("name"));
+            const word patchName(dict.get<word>("name"));
 
             label destPatchi = patches.findPatchID(patchName);
 
@@ -671,11 +668,9 @@ int main(int argc, char *argv[])
     polyTopoChange meshMod(mesh);
 
 
-    forAll(patchSources, addedI)
+    for (const dictionary& dict : patchSources)
     {
-        const dictionary& dict = patchSources[addedI];
-
-        const word patchName(dict.lookup("name"));
+        const word patchName(dict.get<word>("name"));
         label destPatchi = patches.findPatchID(patchName);
 
         if (destPatchi == -1)
@@ -685,16 +680,13 @@ int main(int argc, char *argv[])
                 << abort(FatalError);
         }
 
-        const word sourceType(dict.lookup("constructFrom"));
+        const word sourceType(dict.get<word>("constructFrom"));
 
         if (sourceType == "patches")
         {
             labelHashSet patchSources
             (
-                patches.patchSet
-                (
-                    wordReList(dict.lookup("patches"))
-                )
+                patches.patchSet(dict.get<wordRes>("patches"))
             );
 
             // Repatch faces of the patches.
@@ -719,7 +711,7 @@ int main(int argc, char *argv[])
         }
         else if (sourceType == "set")
         {
-            const word setName(dict.lookup("set"));
+            const word setName(dict.get<word>("set"));
 
             faceSet faces(mesh, setName);
 

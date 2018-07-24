@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
 
     if (refineDict.size())
     {
-        const word setName(refineDict.lookup("set"));
+        const word setName(refineDict.get<word>("set"));
 
         cellSet cells(mesh, setName);
 

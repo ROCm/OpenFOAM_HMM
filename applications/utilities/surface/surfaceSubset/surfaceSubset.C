@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
     {
         const dictionary& surfDict = meshSubsetDict.subDict("surface");
 
-        fileName surfName(surfDict.lookup("name"));
+        const fileName surfName(surfDict.get<fileName>("name"));
 
         const bool outside(surfDict.get<bool>("outside"));
 
@@ -282,8 +282,8 @@ int main(int argc, char *argv[])
         const dictionary& planeDict = meshSubsetDict.subDict("plane");
 
         const plane pl(planeDict);
-        const scalar distance(readScalar(planeDict.lookup("distance")));
-        const scalar cosAngle(readScalar(planeDict.lookup("cosAngle")));
+        const scalar distance(planeDict.get<scalar>("distance"));
+        const scalar cosAngle(planeDict.get<scalar>("cosAngle"));
 
         // Select all triangles that are close to the plane and
         // whose normal aligns with the plane as well.

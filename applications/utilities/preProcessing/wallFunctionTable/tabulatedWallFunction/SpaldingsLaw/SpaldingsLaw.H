@@ -105,8 +105,9 @@ public:
     // Constructors
     SpaldingsLaw(const dictionary& dict, const polyMesh& mesh);
 
+
     //- Destructor
-    virtual ~SpaldingsLaw();
+    virtual ~SpaldingsLaw() = default;
 
 
     // Member Functions

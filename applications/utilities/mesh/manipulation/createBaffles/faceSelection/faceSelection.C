@@ -66,7 +66,7 @@ Foam::autoPtr<Foam::faceSelection> Foam::faceSelection::New
     const dictionary& dict
 )
 {
-    const word sampleType(dict.lookup("type"));
+    const word sampleType(dict.get<word>("type"));
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(sampleType);
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,19 +26,17 @@ License
 #include "faceCentredCubic.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 defineTypeNameAndDebug(faceCentredCubic, 0);
 addToRunTimeSelectionTable(initialPointsMethod, faceCentredCubic, dictionary);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-faceCentredCubic::faceCentredCubic
+Foam::faceCentredCubic::faceCentredCubic
 (
     const dictionary& initialPointsDict,
     const Time& runTime,
@@ -58,18 +56,18 @@ faceCentredCubic::faceCentredCubic
         cellShapeControls,
         decomposition
     ),
-    initialCellSize_(readScalar(detailsDict().lookup("initialCellSize"))),
-    randomiseInitialGrid_(detailsDict().lookup("randomiseInitialGrid")),
+    initialCellSize_(detailsDict().get<scalar>("initialCellSize")),
+    randomiseInitialGrid_(detailsDict().get<Switch>("randomiseInitialGrid")),
     randomPerturbationCoeff_
     (
-        readScalar(detailsDict().lookup("randomPerturbationCoeff"))
+        detailsDict().get<scalar>("randomPerturbationCoeff")
     )
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-List<Vb::Point> faceCentredCubic::initialPoints() const
+Foam::List<Vb::Point> Foam::faceCentredCubic::initialPoints() const
 {
     boundBox bb;
 
@@ -256,9 +254,5 @@ List<Vb::Point> faceCentredCubic::initialPoints() const
     return initialPoints.shrink();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

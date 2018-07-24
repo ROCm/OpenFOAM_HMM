@@ -139,7 +139,7 @@ public:
 
 
     //- Destructor
-    virtual ~cellSizeAndAlignmentControl();
+    virtual ~cellSizeAndAlignmentControl() = default;
 
 
     // Member Functions

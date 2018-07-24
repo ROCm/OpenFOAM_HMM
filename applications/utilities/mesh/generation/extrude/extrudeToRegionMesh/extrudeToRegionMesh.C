@@ -1505,7 +1505,7 @@ int main(int argc, char *argv[])
     autoPtr<extrudeModel> model(extrudeModel::New(dict));
 
     // Region
-    const word shellRegionName(dict.lookup("region"));
+    const word shellRegionName(dict.get<word>("region"));
 
     // Faces to extrude - either faceZones or faceSets (boundary faces only)
     wordList zoneNames;
@@ -1534,7 +1534,7 @@ int main(int argc, char *argv[])
 
 
     mappedPatchBase::sampleMode sampleMode =
-        mappedPatchBase::sampleModeNames_[dict.lookup("sampleMode")];
+        mappedPatchBase::sampleModeNames_.lookup("sampleMode", dict);
 
     const bool oneD(dict.get<bool>("oneD"));
     bool oneDNonManifoldEdges(false);
@@ -1542,7 +1542,7 @@ int main(int argc, char *argv[])
     if (oneD)
     {
         oneDNonManifoldEdges = dict.lookupOrDefault("nonManifold", false);
-        dict.lookup("oneDPolyPatchType") >> oneDPatchType;
+        oneDPatchType = dict.get<word>("oneDPolyPatchType");
     }
 
     const bool adaptMesh(dict.get<bool>("adaptMesh"));

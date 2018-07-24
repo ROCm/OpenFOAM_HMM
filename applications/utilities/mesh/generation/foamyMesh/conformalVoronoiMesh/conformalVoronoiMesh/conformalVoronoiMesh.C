@@ -516,10 +516,8 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
     const dictionary& motionControlDict
         = foamyHexMeshControls().foamyHexMeshDict().subDict("motionControl");
 
-    label nMaxIter = readLabel
-    (
-        motionControlDict.lookup("maxRefinementIterations")
-    );
+    const label nMaxIter =
+        motionControlDict.get<label>("maxRefinementIterations");
 
     Info<< "Maximum number of refinement iterations : " << nMaxIter << endl;
 
@@ -553,11 +551,10 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
         }
     }
 
-    label maxSmoothingIterations = readLabel
+    meshAlignmentSmoother.smoothAlignments
     (
-        motionControlDict.lookup("maxSmoothingIterations")
+        motionControlDict.get<label>("maxSmoothingIterations")
     );
-    meshAlignmentSmoother.smoothAlignments(maxSmoothingIterations);
 
     Info<< "Background cell size and alignment mesh:" << endl;
     cellSizeMesh.printInfo(Info);

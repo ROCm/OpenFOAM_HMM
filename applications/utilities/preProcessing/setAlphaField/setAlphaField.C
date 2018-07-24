@@ -95,10 +95,10 @@ int main(int argc, char *argv[])
 
     const shapeSelector::shapeType surfType
     (
-        shapeSelector::shapeTypeNames.read(dict.lookup("type"))
+        shapeSelector::shapeTypeNames.lookup("type", dict)
     );
-    const vector centre(dict.lookup("centre"));
-    const word fieldName(dict.lookup("field"));
+    const vector centre(dict.get<vector>("centre"));
+    const word fieldName(dict.get<word>("field"));
 
     Info<< "Reading field " << fieldName << "\n" << endl;
     volScalarField alpha1
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
     {
         case shapeSelector::shapeType::PLANE:
         {
-            const vector direction(dict.lookup("direction"));
+            const vector direction(dict.get<vector>("direction"));
 
             f = -(mesh.points() - centre) & (direction/mag(direction));
             f0 = 0.0;
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
         }
         case shapeSelector::shapeType::SPHERE:
         {
-            const scalar radius(readScalar(dict.lookup("radius")));
+            const scalar radius(dict.get<scalar>("radius"));
 
             f = -mag(mesh.points() - centre);
             f0 = -radius;
@@ -140,8 +140,8 @@ int main(int argc, char *argv[])
         }
         case shapeSelector::shapeType::CYLINDER:
         {
-            const scalar radius(readScalar(dict.lookup("radius")));
-            const vector direction(dict.lookup("direction"));
+            const scalar radius(dict.get<scalar>("radius"));
+            const vector direction(dict.get<vector>("direction"));
 
             f = -sqrt
             (
@@ -153,10 +153,10 @@ int main(int argc, char *argv[])
         }
         case shapeSelector::shapeType::SIN:
         {
-            const scalar period(readScalar(dict.lookup("period")));
-            const scalar amplitude(readScalar(dict.lookup("amplitude")));
-            const vector up(dict.lookup("up"));
-            const vector direction(dict.lookup("direction"));
+            const scalar period(dict.get<scalar>("period"));
+            const scalar amplitude(dict.get<scalar>("amplitude"));
+            const vector up(dict.get<vector>("up"));
+            const vector direction(dict.get<vector>("direction"));
 
             const scalarField xx
             (

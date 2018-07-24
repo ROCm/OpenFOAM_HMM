@@ -164,7 +164,7 @@ public:
 
 
     //- Destructor
-    ~cv2DControls();
+    ~cv2DControls() = default;
 
 
     // Member Functions

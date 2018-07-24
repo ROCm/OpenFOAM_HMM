@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,15 +55,13 @@ void Foam::autoDensity::writeOBJ
 
     pointField bbPoints(bb.points());
 
-    forAll(bbPoints, i)
+    for (const point& pt : bbPoints)
     {
-        meshTools::writeOBJ(str, bbPoints[i]);
+        meshTools::writeOBJ(str, pt);
     }
 
-    forAll(treeBoundBox::edges, i)
+    for (const edge& e : treeBoundBox::edges)
     {
-        const edge& e = treeBoundBox::edges[i];
-
         str << "l " << e[0] + 1 << ' ' << e[1] + 1 << nl;
     }
 }
@@ -884,9 +882,9 @@ autoDensity::autoDensity
     (
         detailsDict().lookupOrDefault<scalar>("minCellSizeLimit", 0.0)
     ),
-    minLevels_(readLabel(detailsDict().lookup("minLevels"))),
-    maxSizeRatio_(readScalar(detailsDict().lookup("maxSizeRatio"))),
-    volRes_(readLabel(detailsDict().lookup("sampleResolution"))),
+    minLevels_(detailsDict().get<label>("minLevels")),
+    maxSizeRatio_(detailsDict().get<scalar>("maxSizeRatio")),
+    volRes_(detailsDict().get<label>("sampleResolution")),
     surfRes_
     (
         detailsDict().lookupOrDefault<label>("surfaceSampleResolution", volRes_)

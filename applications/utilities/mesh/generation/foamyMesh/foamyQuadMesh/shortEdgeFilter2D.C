@@ -152,7 +152,7 @@ Foam::shortEdgeFilter2D::shortEdgeFilter2D
 )
 :
     cv2Dmesh_(cv2Dmesh),
-    shortEdgeFilterFactor_(readScalar(dict.lookup("shortEdgeFilterFactor"))),
+    shortEdgeFilterFactor_(dict.get<scalar>("shortEdgeFilterFactor")),
     edgeAttachedToBoundaryFactor_
     (
         dict.lookupOrDefault<scalar>("edgeAttachedToBoundaryFactor", 2.0)
@@ -226,8 +226,7 @@ Foam::shortEdgeFilter2D::~shortEdgeFilter2D()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void
-Foam::shortEdgeFilter2D::filter()
+void Foam::shortEdgeFilter2D::filter()
 {
     // These are global indices.
     const pointField& points = ms_.points();

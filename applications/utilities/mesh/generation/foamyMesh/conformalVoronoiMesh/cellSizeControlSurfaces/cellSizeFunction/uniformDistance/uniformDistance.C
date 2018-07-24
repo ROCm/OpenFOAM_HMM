@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,19 +27,17 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "volumeType.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(uniformDistance, 0);
-addToRunTimeSelectionTable(cellSizeFunction, uniformDistance, dictionary);
+    defineTypeNameAndDebug(uniformDistance, 0);
+    addToRunTimeSelectionTable(cellSizeFunction, uniformDistance, dictionary);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-uniformDistance::uniformDistance
+Foam::uniformDistance::uniformDistance
 (
     const dictionary& initialPointsDict,
     const searchableSurface& surface,
@@ -57,7 +55,7 @@ uniformDistance::uniformDistance
     ),
     distance_
     (
-        readScalar(coeffsDict().lookup("distanceCoeff"))*defaultCellSize
+        coeffsDict().get<scalar>("distanceCoeff") * defaultCellSize
     ),
     distanceSqr_(sqr(distance_))
 {}
@@ -66,7 +64,7 @@ uniformDistance::uniformDistance
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
-bool uniformDistance::sizeLocations
+bool Foam::uniformDistance::sizeLocations
 (
     const pointIndexHit& hitPt,
     const vector& n,
@@ -85,9 +83,9 @@ bool uniformDistance::sizeLocations
         shapeSizes.resize(2);
 
         shapePts[0] = pt - n*distance_;
-        shapeSizes[0] = distanceCellSize;
-
         shapePts[1] = pt + n*distance_;
+
+        shapeSizes[0] = distanceCellSize;
         shapeSizes[1] = distanceCellSize;
     }
     else if (sideMode_ == smInside)
@@ -111,7 +109,7 @@ bool uniformDistance::sizeLocations
 }
 
 
-bool uniformDistance::cellSize
+bool Foam::uniformDistance::cellSize
 (
     const point& pt,
     scalar& size
@@ -187,7 +185,7 @@ bool uniformDistance::cellSize
 }
 
 
-bool uniformDistance::setCellSize
+bool Foam::uniformDistance::setCellSize
 (
     const pointField& pts
 )
@@ -221,9 +219,5 @@ bool uniformDistance::setCellSize
     return false;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

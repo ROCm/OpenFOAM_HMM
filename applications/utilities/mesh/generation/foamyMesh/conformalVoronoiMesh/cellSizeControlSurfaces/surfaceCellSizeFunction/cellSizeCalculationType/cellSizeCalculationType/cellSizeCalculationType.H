@@ -52,8 +52,9 @@ class triSurfaceMesh;
 
 class cellSizeCalculationType
 {
-
 protected:
+
+    // Protected Data
 
         const dictionary& cellSizeCalculationTypeDict_;
 
@@ -63,9 +64,7 @@ protected:
         const scalar& defaultCellSize_;
 
 
-private:
-
-    // Private Member Functions
+    // Protected Member Functions
 
         //- No copy construct
         cellSizeCalculationType(const cellSizeCalculationType&) = delete;
@@ -120,7 +119,7 @@ public:
 
 
     //- Destructor
-    virtual ~cellSizeCalculationType();
+    virtual ~cellSizeCalculationType() = default;
 
 
     // Member Functions

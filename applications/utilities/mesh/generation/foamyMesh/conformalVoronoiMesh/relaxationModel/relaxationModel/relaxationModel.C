@@ -58,7 +58,7 @@ Foam::autoPtr<Foam::relaxationModel> Foam::relaxationModel::New
     const Time& runTime
 )
 {
-    const word modelType(relaxationDict.lookup("relaxationModel"));
+    const word modelType(relaxationDict.get<word>("relaxationModel"));
 
     Info<< nl << "Selecting relaxationModel " << modelType << endl;
 
@@ -76,12 +76,6 @@ Foam::autoPtr<Foam::relaxationModel> Foam::relaxationModel::New
 
     return autoPtr<relaxationModel>(cstrIter()(relaxationDict, runTime));
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::relaxationModel::~relaxationModel()
-{}
 
 
 // ************************************************************************* //

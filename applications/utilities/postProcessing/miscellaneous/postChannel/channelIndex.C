@@ -223,12 +223,12 @@ Foam::channelIndex::channelIndex
     const dictionary& dict
 )
 :
-    symmetric_(readBool(dict.lookup("symmetric"))),
+    symmetric_(dict.get<bool>("symmetric")),
     dir_(vectorComponentsNames_.lookup("component", dict))
 {
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    const wordList patchNames(dict.lookup("patches"));
+    const wordList patchNames(dict.get<wordList>("patches"));
 
     label nFaces = 0;
 

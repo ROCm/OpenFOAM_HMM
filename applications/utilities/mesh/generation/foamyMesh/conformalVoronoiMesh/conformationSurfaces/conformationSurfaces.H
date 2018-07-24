@@ -151,7 +151,7 @@ public:
         );
 
     //- Destructor
-    ~conformationSurfaces();
+    ~conformationSurfaces() = default;
 
 
     // Member Functions

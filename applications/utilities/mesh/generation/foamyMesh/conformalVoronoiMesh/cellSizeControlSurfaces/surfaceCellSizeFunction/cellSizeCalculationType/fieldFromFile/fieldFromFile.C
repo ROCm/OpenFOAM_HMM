@@ -64,7 +64,7 @@ Foam::fieldFromFile::fieldFromFile
         cellSizeCalcTypeDict.optionalSubDict
         (
             typeName + "Coeffs"
-        ).lookup("fieldFile")
+        ).get<word>("fieldFile")
     ),
     cellSizeMultipleCoeff_
     (

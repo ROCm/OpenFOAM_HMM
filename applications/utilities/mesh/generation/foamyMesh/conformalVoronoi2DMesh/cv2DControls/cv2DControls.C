@@ -27,7 +27,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-
 Foam::cv2DControls::cv2DControls
 (
     const dictionary& controlDict,
@@ -39,43 +38,61 @@ Foam::cv2DControls::cv2DControls
     motionControl_(controlDict.subDict("motionControl")),
     conformationControl_(controlDict.subDict("surfaceConformation")),
 
-    minCellSize_(readScalar(motionControl_.lookup("minCellSize"))),
+    minCellSize_(motionControl_.get<scalar>("minCellSize")),
     minCellSize2_(Foam::sqr(minCellSize_)),
 
-    maxQuadAngle_(readScalar(conformationControl_.lookup("maxQuadAngle"))),
+    maxQuadAngle_(conformationControl_.get<scalar>("maxQuadAngle")),
 
     nearWallAlignedDist_
     (
-        readScalar(motionControl_.lookup("nearWallAlignedDist"))*minCellSize_
+        motionControl_.get<scalar>("nearWallAlignedDist") * minCellSize_
     ),
     nearWallAlignedDist2_(Foam::sqr(nearWallAlignedDist_)),
 
     insertSurfaceNearestPointPairs_
     (
-            conformationControl_.lookup("insertSurfaceNearestPointPairs")
+        conformationControl_.get<Switch>
+        (
+            "insertSurfaceNearestPointPairs"
+        )
     ),
-    mirrorPoints_(conformationControl_.lookup("mirrorPoints")),
+    mirrorPoints_
+    (
+        conformationControl_.get<Switch>
+        (
+            "mirrorPoints"
+        )
+    ),
     insertSurfaceNearPointPairs_
     (
-        conformationControl_.lookup("insertSurfaceNearPointPairs")
+        conformationControl_.get<Switch>
+        (
+            "insertSurfaceNearPointPairs"
+        )
     ),
 
-    objOutput_(motionControl_.lookupOrDefault<Switch>("objOutput", false)),
+    objOutput_
+    (
+        motionControl_.lookupOrDefault<Switch>("objOutput", false)
+    ),
 
     meshedSurfaceOutput_
     (
         motionControl_.lookupOrDefault<Switch>("meshedSurfaceOutput", false)
     ),
 
-    randomiseInitialGrid_(conformationControl_.lookup("randomiseInitialGrid")),
+    randomiseInitialGrid_
+    (
+        conformationControl_.get<Switch>("randomiseInitialGrid")
+    ),
     randomPerturbation_
     (
-        readScalar(conformationControl_.lookup("randomPerturbation"))
+        conformationControl_.get<scalar>("randomPerturbation")
     ),
 
     maxBoundaryConformingIter_
     (
-        readLabel(conformationControl_.lookup("maxBoundaryConformingIter"))
+        conformationControl_.get<label>("maxBoundaryConformingIter")
     ),
 
     span_
@@ -87,36 +104,26 @@ Foam::cv2DControls::cv2DControls
 
     minEdgeLen_
     (
-        readScalar(conformationControl_.lookup("minEdgeLenCoeff"))
-       *minCellSize_
+        conformationControl_.get<scalar>("minEdgeLenCoeff") * minCellSize_
     ),
     minEdgeLen2_(Foam::sqr(minEdgeLen_)),
 
     maxNotchLen_
     (
-        readScalar(conformationControl_.lookup("maxNotchLenCoeff"))
-       *minCellSize_
+        conformationControl_.get<scalar>("maxNotchLenCoeff") * minCellSize_
     ),
     maxNotchLen2_(Foam::sqr(maxNotchLen_)),
 
     minNearPointDist_
     (
-        readScalar(conformationControl_.lookup("minNearPointDistCoeff"))
-       *minCellSize_
+        conformationControl_.get<scalar>("minNearPointDistCoeff")*minCellSize_
     ),
     minNearPointDist2_(Foam::sqr(minNearPointDist_)),
 
     ppDist_
     (
-        readScalar(conformationControl_.lookup("pointPairDistanceCoeff"))
-       *minCellSize_
+        conformationControl_.get<scalar>("pointPairDistanceCoeff")*minCellSize_
     )
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cv2DControls::~cv2DControls()
 {}
 
 

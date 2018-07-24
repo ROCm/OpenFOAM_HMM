@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,27 +26,25 @@ License
 #include "adaptiveLinear.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(adaptiveLinear, 0);
-addToRunTimeSelectionTable(relaxationModel, adaptiveLinear, dictionary);
+    defineTypeNameAndDebug(adaptiveLinear, 0);
+    addToRunTimeSelectionTable(relaxationModel, adaptiveLinear, dictionary);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-adaptiveLinear::adaptiveLinear
+Foam::adaptiveLinear::adaptiveLinear
 (
     const dictionary& relaxationDict,
     const Time& runTime
 )
 :
     relaxationModel(typeName, relaxationDict, runTime),
-    relaxationStart_(readScalar(coeffDict().lookup("relaxationStart"))),
-    relaxationEnd_(readScalar(coeffDict().lookup("relaxationEnd"))),
+    relaxationStart_(coeffDict().get<scalar>("relaxationStart")),
+    relaxationEnd_(coeffDict().get<scalar>("relaxationEnd")),
     lastTimeValue_(runTime_.time().timeOutputValue()),
     relaxation_(relaxationStart_)
 {}
@@ -54,7 +52,7 @@ adaptiveLinear::adaptiveLinear
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar adaptiveLinear::relaxation()
+Foam::scalar Foam::adaptiveLinear::relaxation()
 {
     if (runTime_.time().timeOutputValue() > lastTimeValue_)
     {
@@ -79,9 +77,5 @@ scalar adaptiveLinear::relaxation()
     return relaxation_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

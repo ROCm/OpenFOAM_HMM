@@ -26,19 +26,18 @@ License
 #include "uniformGrid.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(uniformGrid, 0);
+    addToRunTimeSelectionTable(initialPointsMethod, uniformGrid, dictionary);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(uniformGrid, 0);
-addToRunTimeSelectionTable(initialPointsMethod, uniformGrid, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-uniformGrid::uniformGrid
+Foam::uniformGrid::uniformGrid
 (
     const dictionary& initialPointsDict,
     const Time& runTime,
@@ -58,18 +57,18 @@ uniformGrid::uniformGrid
         cellShapeControls,
         decomposition
     ),
-    initialCellSize_(readScalar(detailsDict().lookup("initialCellSize"))),
-    randomiseInitialGrid_(detailsDict().lookup("randomiseInitialGrid")),
+    initialCellSize_(detailsDict().get<scalar>("initialCellSize")),
+    randomiseInitialGrid_(detailsDict().get<Switch>("randomiseInitialGrid")),
     randomPerturbationCoeff_
     (
-        readScalar(detailsDict().lookup("randomPerturbationCoeff"))
+        detailsDict().get<scalar>("randomPerturbationCoeff")
     )
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-List<Vb::Point> uniformGrid::initialPoints() const
+Foam::List<Vb::Point> Foam::uniformGrid::initialPoints() const
 {
     boundBox bb;
 
@@ -175,9 +174,5 @@ List<Vb::Point> uniformGrid::initialPoints() const
     return initialPoints.shrink();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

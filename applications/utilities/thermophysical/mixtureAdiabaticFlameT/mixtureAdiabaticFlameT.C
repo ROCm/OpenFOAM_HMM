@@ -81,8 +81,8 @@ int main(int argc, char *argv[])
     dictionary control(controlFile);
 
 
-    scalar P(readScalar(control.lookup("P")));
-    scalar T0(readScalar(control.lookup("T0")));
+    const scalar P(control.get<scalar>("P"));
+    const scalar T0(control.get<scalar>("T0"));
     mixture rMix(control.lookup("reactants"));
     mixture pMix(control.lookup("products"));
 

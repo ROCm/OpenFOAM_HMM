@@ -54,13 +54,7 @@ Foam::searchableSurfaceModifiers::autoPatch::autoPatch
 )
 :
     searchableSurfaceModifier(geometry, dict),
-    featureAngle_(readScalar(dict.lookup("featureAngle")))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::searchableSurfaceModifiers::autoPatch::~autoPatch()
+    featureAngle_(dict.get<scalar>("featureAngle"))
 {}
 
 

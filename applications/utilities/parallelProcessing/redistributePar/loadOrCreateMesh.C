@@ -175,7 +175,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
         forAll(patchEntries, patchi)
         {
             const entry& e = patchEntries[patchi];
-            const word type(e.dict().lookup("type"));
+            const word type(e.dict().get<word>("type"));
             const word& name = e.keyword();
 
             if
@@ -270,7 +270,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
         forAll(patchEntries, patchi)
         {
             const entry& e = patchEntries[patchi];
-            const word type(e.dict().lookup("type"));
+            const word type(e.dict().get<word>("type"));
             const word& name = e.keyword();
 
             if (type == processorPolyPatch::typeName)

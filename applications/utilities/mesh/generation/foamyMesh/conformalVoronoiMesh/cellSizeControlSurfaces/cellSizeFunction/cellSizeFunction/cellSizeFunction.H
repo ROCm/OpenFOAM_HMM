@@ -106,9 +106,7 @@ protected:
         label priority_;
 
 
-private:
-
-    // Private Member Functions
+    // Protected Member Functions
 
         //- No copy construct
         cellSizeFunction(const cellSizeFunction&) = delete;

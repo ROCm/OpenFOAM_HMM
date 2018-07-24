@@ -61,7 +61,7 @@ Foam::faceSelections::searchableSurfaceSelection::searchableSurfaceSelection
     (
         searchableSurface::New
         (
-            word(dict.lookup("surface")),
+            dict.get<word>("surface"),
             IOobject
             (
                 dict.lookupOrDefault("name", mesh.objectRegistry::db().name()),

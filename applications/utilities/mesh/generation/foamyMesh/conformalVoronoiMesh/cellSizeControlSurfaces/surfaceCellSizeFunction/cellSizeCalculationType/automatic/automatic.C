@@ -120,11 +120,11 @@ Foam::automatic::automatic
 
     curvatureCellSizeCoeff_
     (
-        readScalar(coeffsDict_.lookup("curvatureCellSizeCoeff"))
+        coeffsDict_.get<scalar>("curvatureCellSizeCoeff")
     ),
     maximumCellSize_
     (
-        readScalar(coeffsDict_.lookup("maximumCellSizeCoeff"))*defaultCellSize
+        coeffsDict_.get<scalar>("maximumCellSizeCoeff") * defaultCellSize
     )
 {}
 

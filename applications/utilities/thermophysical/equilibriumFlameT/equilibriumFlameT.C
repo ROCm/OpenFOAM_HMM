@@ -85,10 +85,10 @@ int main(int argc, char *argv[])
     dictionary control(controlFile);
 
 
-    scalar P(readScalar(control.lookup("P")));
-    const word fuelName(control.lookup("fuel"));
-    scalar n(readScalar(control.lookup("n")));
-    scalar m(readScalar(control.lookup("m")));
+    const scalar P(control.get<scalar>("P"));
+    const word fuelName(control.get<word>("fuel"));
+    const scalar n(control.get<scalar>("n"));
+    const scalar m(control.get<scalar>("m"));
 
 
     Info<< nl << "Reading thermodynamic data dictionary" << endl;

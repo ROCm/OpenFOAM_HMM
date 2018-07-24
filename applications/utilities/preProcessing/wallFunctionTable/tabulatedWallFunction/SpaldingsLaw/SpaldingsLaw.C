@@ -124,8 +124,8 @@ Foam::tabulatedWallFunctions::SpaldingsLaw::SpaldingsLaw
 )
 :
     tabulatedWallFunction(dict, mesh, typeName),
-    kappa_(readScalar(coeffDict_.lookup("kappa"))),
-    E_(readScalar(coeffDict_.lookup("E")))
+    kappa_(coeffDict_.get<scalar>("kappa")),
+    E_(coeffDict_.get<scalar>("E"))
 {
     invertFunction();
 
@@ -134,12 +134,6 @@ Foam::tabulatedWallFunctions::SpaldingsLaw::SpaldingsLaw
         writeData(Info);
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::tabulatedWallFunctions::SpaldingsLaw::~SpaldingsLaw()
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

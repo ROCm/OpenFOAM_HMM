@@ -138,7 +138,7 @@ Foam::RASModel<BasicTurbulenceModel>::New
                 IOobject::NO_WRITE,
                 false
             )
-        ).subDict("RAS").lookup("RASModel")
+        ).subDict("RAS").get<word>("RASModel")
     );
 
     Info<< "Selecting RAS turbulence model " << modelType << endl;

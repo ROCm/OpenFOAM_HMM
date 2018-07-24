@@ -148,7 +148,7 @@ Foam::LESModel<BasicTurbulenceModel>::New
                 IOobject::NO_WRITE,
                 false
             )
-        ).subDict("LES").lookup("LESModel")
+        ).subDict("LES").get<word>("LESModel")
     );
 
     Info<< "Selecting LES turbulence model " << modelType << endl;

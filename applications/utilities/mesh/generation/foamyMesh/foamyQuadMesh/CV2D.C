@@ -150,10 +150,8 @@ Foam::CV2D::CV2D
     ),
     z_
     (
-        Foam::point
-        (
-            cvMeshDict.subDict("surfaceConformation").lookup("locationInMesh")
-        ).z()
+        cvMeshDict.subDict("surfaceConformation")
+       .get<Foam::point>("locationInMesh").z()
     ),
     startOfInternalPoints_(0),
     startOfSurfacePointPairs_(0),
@@ -187,10 +185,8 @@ void Foam::CV2D::insertPoints
     label nVert = startOfInternalPoints_;
 
     // Add the points and index them
-    forAll(points, i)
+    for (const point2D& p : points)
     {
-        const point2D& p = points[i];
-
         if (qSurf_.wellInside(toPoint3D(p), nearness))
         {
             insert(toPoint(p))->index() = nVert++;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,30 +26,29 @@ License
 #include "rampHoldFall.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(rampHoldFall, 0);
+    addToRunTimeSelectionTable(relaxationModel, rampHoldFall, dictionary);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(rampHoldFall, 0);
-addToRunTimeSelectionTable(relaxationModel, rampHoldFall, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-rampHoldFall::rampHoldFall
+Foam::rampHoldFall::rampHoldFall
 (
     const dictionary& relaxationDict,
     const Time& runTime
 )
 :
     relaxationModel(typeName, relaxationDict, runTime),
-    rampStartRelaxation_(readScalar(coeffDict().lookup("rampStartRelaxation"))),
-    holdRelaxation_(readScalar(coeffDict().lookup("holdRelaxation"))),
-    fallEndRelaxation_(readScalar(coeffDict().lookup("fallEndRelaxation"))),
-    rampEndFraction_(readScalar(coeffDict().lookup("rampEndFraction"))),
-    fallStartFraction_(readScalar(coeffDict().lookup("fallStartFraction"))),
+    rampStartRelaxation_(coeffDict().get<scalar>("rampStartRelaxation")),
+    holdRelaxation_(coeffDict().get<scalar>("holdRelaxation")),
+    fallEndRelaxation_(coeffDict().get<scalar>("fallEndRelaxation")),
+    rampEndFraction_(coeffDict().get<scalar>("rampEndFraction")),
+    fallStartFraction_(coeffDict().get<scalar>("fallStartFraction")),
     rampGradient_((holdRelaxation_ - rampStartRelaxation_)/(rampEndFraction_)),
     fallGradient_
     (
@@ -60,7 +59,7 @@ rampHoldFall::rampHoldFall
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar rampHoldFall::relaxation()
+Foam::scalar Foam::rampHoldFall::relaxation()
 {
     scalar t = runTime_.time().timeOutputValue();
 
@@ -98,6 +97,5 @@ scalar rampHoldFall::relaxation()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
 
 // ************************************************************************* //

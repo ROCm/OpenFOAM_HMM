@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 
     wordList polyMeshPatches
     (
-        faMeshDefinition.lookup("polyMeshPatches")
+        faMeshDefinition.get<wordList>("polyMeshPatches")
     );
 
     const dictionary& bndDict = faMeshDefinition.subDict("boundary");
@@ -107,9 +107,9 @@ int main(int argc, char *argv[])
 
         faPatches[patchI].name_ = faPatchNames[patchI];
 
-        faPatches[patchI].type_ = word(curPatchDict.lookup("type"));
+        faPatches[patchI].type_ = curPatchDict.get<word>("type");
 
-        const word ownName = curPatchDict.lookup("ownerPolyPatch");
+        const word ownName(curPatchDict.get<word>("ownerPolyPatch"));
 
         faPatches[patchI].ownPolyPatchID_ =
             mesh.boundaryMesh().findPatchID(ownName);
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
                 << exit(FatalError);
         }
 
-        const word neiName = curPatchDict.lookup("neighbourPolyPatch");
+        const word neiName(curPatchDict.get<word>("neighbourPolyPatch"));
 
         faPatches[patchI].ngbPolyPatchID_ =
             mesh.boundaryMesh().findPatchID(neiName);

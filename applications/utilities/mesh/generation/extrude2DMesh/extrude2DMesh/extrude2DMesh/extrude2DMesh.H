@@ -77,6 +77,7 @@ class extrude2DMesh
         const word patchType_;
 
         label frontPatchi_;
+
         label backPatchi_;
 
     // Private Member Functions
@@ -109,7 +110,7 @@ public:
 
 
     //- Destructor
-    ~extrude2DMesh();
+    ~extrude2DMesh() = default;
 
 
     // Member Functions

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +44,6 @@ Usage
 
       - \par -dict \<dictionary\>
         Specify a dictionary to read actions from.
-
 
 Note
     - can only handle pairwise boundary faces. So three faces using
@@ -201,10 +200,10 @@ labelList patchFaces(const polyMesh& mesh, const labelList& patchIDs)
         }
     }
 
-if (faceIDs.size() != sz)
-{
-    FatalErrorInFunction << exit(FatalError);
-}
+    if (faceIDs.size() != sz)
+    {
+        FatalErrorInFunction << exit(FatalError);
+    }
 
     return faceIDs;
 }
@@ -332,8 +331,11 @@ int main(int argc, char *argv[])
 
         if (dict.found("detect"))
         {
-            wordReList patchNames(dict.subDict("detect").lookup("patches"));
-            detectPatchIDs = patches.patchSet(patchNames).sortedToc();
+            detectPatchIDs = patches.patchSet
+            (
+                dict.subDict("detect").get<wordRes>("patches")
+            ).sortedToc();
+
             Info<< "Detecting baffles on " << detectPatchIDs.size()
                 << " patches with "
                 << returnReduce(patchSize(mesh, detectPatchIDs), sumOp<label>())
@@ -341,8 +343,11 @@ int main(int argc, char *argv[])
         }
         if (dict.found("merge"))
         {
-            wordReList patchNames(dict.subDict("merge").lookup("patches"));
-            mergePatchIDs = patches.patchSet(patchNames).sortedToc();
+            mergePatchIDs = patches.patchSet
+            (
+                dict.subDict("merge").get<wordRes>("patches")
+            ).sortedToc();
+
             Info<< "Detecting baffles on " << mergePatchIDs.size()
                 << " patches with "
                 << returnReduce(patchSize(mesh, mergePatchIDs), sumOp<label>())
@@ -350,8 +355,11 @@ int main(int argc, char *argv[])
         }
         if (dict.found("split"))
         {
-            wordReList patchNames(dict.subDict("split").lookup("patches"));
-            splitPatchIDs = patches.patchSet(patchNames).sortedToc();
+            splitPatchIDs = patches.patchSet
+            (
+                dict.subDict("split").get<wordRes>("patches")
+            ).sortedToc();
+
             Info<< "Detecting baffles on " << splitPatchIDs.size()
                 << " patches with "
                 << returnReduce(patchSize(mesh, splitPatchIDs), sumOp<label>())

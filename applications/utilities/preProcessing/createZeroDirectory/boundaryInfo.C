@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +27,6 @@ License
 #include "Time.H"
 #include "polyMesh.H"
 #include "processorPolyPatch.H"
-
-using namespace Foam;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -67,13 +65,13 @@ Foam::IOPtrList<Foam::entry> Foam::boundaryInfo::readBoundaryDict
     forAll(boundaryPatchList, patchI)
     {
         const dictionary& dict = boundaryPatchList[patchI].dict();
-        const word pType = dict.lookup("type");
+        const word pType = dict.get<word>("type");
         bool procPatch = pType == processorPolyPatch::typeName;
 
         bool addPatch = true;
         if (!procPatch)
         {
-            label nFaces = readLabel(dict.lookup("nFaces"));
+            label nFaces = dict.get<label>("nFaces");
             reduce(nFaces, sumOp<label>());
             if (nFaces == 0)
             {
@@ -114,15 +112,14 @@ Foam::boundaryInfo::boundaryInfo(const Time& runTime, const word& regionName)
         const dictionary& dict = boundaryDict_[patchI].dict();
 
         names_[patchI] = dict.dictName();
-        dict.lookup("type") >> types_[patchI];
+        dict.read("type", types_[patchI]);
         if (polyPatch::constraintType(types_[patchI]))
         {
             constraint_[patchI] = true;
         }
 
-        if (dict.found("inGroups"))
+        if (dict.readIfPresent("inGroups", groups_[patchI]))
         {
-            dict.lookup("inGroups") >> groups_[patchI];
             allGroupNames_.insert(groups_[patchI]);
         }
     }

@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     // Read control dictionary
     const IOdictionary agglomDict(dictIO);
 
-    bool writeAgglom = readBool(agglomDict.lookup("writeFacesAgglomeration"));
+    const bool writeAgglom(agglomDict.get<bool>("writeFacesAgglomeration"));
 
     const polyBoundaryMesh& boundary = mesh.boundaryMesh();
 

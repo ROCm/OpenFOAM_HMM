@@ -46,9 +46,9 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
 {
     plane mirrorPlane(mirrorMeshDict_);
 
-    scalar planeTolerance
+    const scalar planeTolerance
     (
-        readScalar(mirrorMeshDict_.lookup("planeTolerance"))
+        mirrorMeshDict_.get<scalar>("planeTolerance")
     );
 
     const pointField& oldPoints = points();
