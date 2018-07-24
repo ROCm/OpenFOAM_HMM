@@ -65,25 +65,25 @@ public:
 
     // Constructors
 
-        //- Construct as copy
-        inline explicit FileName(const FileName&);
+        //- Copy construct
+        inline FileName(const FileName& fn);
 
         //- Construct as copy of character array
-        inline explicit FileName(const char*);
+        inline explicit FileName(const char* s);
 
         //- Construct as copy of std::string
-        inline explicit FileName(const std::string&);
+        inline explicit FileName(const std::string& s);
 
 
     // Member functions
 
         //- Is this character valid for an ensight file-name
-        inline static bool valid(char);
+        inline static bool valid(char c);
 
 
-    // Member operators
+    // Member Operators
 
-    // Assignment (disabled)
+        // Assignment (disabled)
 
         void operator=(const fileName&) = delete;
         void operator=(const word&) = delete;

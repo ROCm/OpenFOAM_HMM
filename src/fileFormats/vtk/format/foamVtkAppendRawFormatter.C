@@ -55,12 +55,6 @@ Foam::vtk::appendRawFormatter::appendRawFormatter(std::ostream& os)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::vtk::appendRawFormatter::~appendRawFormatter()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 const Foam::vtk::outputOptions&

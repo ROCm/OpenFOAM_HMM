@@ -91,7 +91,7 @@ public:
 
 
     //- Destructor
-    ~ensightGeoFile();
+    ~ensightGeoFile() = default;
 
 
     // Output
@@ -102,6 +102,7 @@ public:
 
     // Convenience Output Methods
 
+        //- Begin a part (0-based index).
         using ensightFile::beginPart;
 
         //- Begin a "part" (0-based index), with a description.

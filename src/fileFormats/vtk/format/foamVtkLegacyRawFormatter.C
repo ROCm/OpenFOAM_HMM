@@ -58,12 +58,6 @@ Foam::vtk::legacyRawFormatter::legacyRawFormatter
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::vtk::legacyRawFormatter::~legacyRawFormatter()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 const Foam::vtk::outputOptions&

@@ -80,7 +80,7 @@ public:
 
 
     //- Destructor
-    virtual ~legacyAsciiFormatter();
+    virtual ~legacyAsciiFormatter() = default;
 
 
     // Member Functions

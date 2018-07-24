@@ -98,14 +98,14 @@ private:
 
         // Parallel merged points
 
-            //- Global numbering for merged points
-            autoPtr<globalIndex> globalPointsPtr_;
+        //- Global numbering for merged points
+        autoPtr<globalIndex> globalPointsPtr_;
 
-            //- From mesh point to global merged point
-            labelList pointToGlobal_;
+        //- From mesh point to global merged point
+        labelList pointToGlobal_;
 
-            //- Local points that are unique
-            labelList uniquePointMap_;
+        //- Local points that are unique
+        labelList uniquePointMap_;
 
 
     // Private Member Functions
@@ -117,122 +117,130 @@ private:
         //- Inplace renumber of cell-shapes
         static cellShapeList& renumberShapes
         (
-            cellShapeList&,
+            cellShapeList& shapes,
             const labelUList& pointToGlobal
         );
 
         static cellShapeList map
         (
-            const cellShapeList&,
-            const labelUList& prims,
+            const cellShapeList& shapes,
+            const labelUList& addr,
             const labelUList& pointToGlobal
         );
 
         //- Write list of faces
         static void writeFaceList
         (
-            const faceList&,
-            ensightGeoFile&
+            const faceList& faces,
+            ensightGeoFile& os
         );
 
         //- Write list of faces
         static void writeFaceList
         (
-            const UIndirectList<face>&,
-            ensightGeoFile&
+            const UIndirectList<face>& faces,
+            ensightGeoFile& os
         );
 
         //- Write sizes of faces in the list
         static void writeFaceSizes
         (
-            const faceList&,
-            ensightGeoFile&
+            const faceList& faces,
+            ensightGeoFile& os
         );
 
         //- Write sizes of faces in the list
         static void writeFaceSizes
         (
-            const UIndirectList<face>&,
-            ensightGeoFile&
+            const UIndirectList<face>& faces,
+            ensightGeoFile& os
         );
 
-        //- Write cell connectivity via shell shapes
+        //- Write cell connectivity via cell shapes
         static void writeCellShapes
         (
-            const cellShapeList&,
-            ensightGeoFile&
+            const cellShapeList& shapes,
+            ensightGeoFile& os
         );
 
+        //- Write the number of faces per poly element
         void writePolysNFaces
         (
-            const labelList& polys,
+            const labelUList& polys,
             const cellList& cellFaces,
-            ensightGeoFile&
+            ensightGeoFile& os
         ) const;
 
+        //- Write the number of points per poly element
         void writePolysNPointsPerFace
         (
-            const labelList& polys,
+            const labelUList& polys,
             const cellList& cellFaces,
             const faceList& faces,
             ensightGeoFile&
         ) const;
 
+        //- Write the point ids per poly element
         void writePolysPoints
         (
-            const labelList& polys,
+            const labelUList& addr,
             const cellList& cellFaces,
             const faceList& faces,
             const labelList& faceOwner,
             ensightGeoFile&
         ) const;
 
+        //- Write the poly connectivity
         void writePolysConnectivity
         (
-            const labelList& addr,
+            const labelUList& polys,
             const labelList& pointToGlobal,
             ensightGeoFile&
         ) const;
 
+        //- Write the regular cell connectivity for all types
         void writeCellConnectivity
         (
-            const ensightCells&,
+            const ensightCells& ensCells,
             const labelList& pointToGlobal,
-            ensightGeoFile&
+            ensightGeoFile& os
         ) const;
 
+        //- Write the regular cell connectivity for specified type
         void writeCellConnectivity
         (
             ensightCells::elemType elemType,
-            const ensightCells&,
+            const ensightCells& ensCells,
             const labelList& pointToGlobal,
-            ensightGeoFile&
+            ensightGeoFile& os
         ) const;
 
+        //- Write the regular face connectivity for specified type and
+        //- and specified faces
         void writeFaceConnectivity
         (
             ensightFaces::elemType elemType,
             const label nTotal,
-            const faceList& faceLst,
-            const labelList& addr,
+            const faceList& faces,
+            const labelUList& addr,
             ensightGeoFile&
         ) const;
 
-
+        //- Write the regular face connectivity for specified type
         void writeFaceConnectivity
         (
             ensightFaces::elemType elemType,
             const label nTotal,
-            const faceList& faceLst,
-            ensightGeoFile&
+            const faceList& faces,
+            ensightGeoFile& os
         ) const;
 
 
         void writeFaceConnectivity
         (
-            const ensightFaces&,
-            const faceList& faceLst,
-            ensightGeoFile&,
+            const ensightFaces& ensFaces,
+            const faceList& faces,
+            ensightGeoFile& os,
             const bool raw = false
         ) const;
 

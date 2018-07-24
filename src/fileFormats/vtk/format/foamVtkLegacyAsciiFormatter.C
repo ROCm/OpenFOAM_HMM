@@ -55,12 +55,6 @@ Foam::vtk::legacyAsciiFormatter::legacyAsciiFormatter
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::vtk::legacyAsciiFormatter::~legacyAsciiFormatter()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 const Foam::vtk::outputOptions&

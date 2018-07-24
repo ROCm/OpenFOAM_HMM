@@ -144,7 +144,9 @@ bool Foam::ensightOutput::writeFaceSubField
         label start = 0; // start of sublist
         for (label typei=0; typei < ensightFaces::nTypes; ++typei)
         {
-            const ensightFaces::elemType what = ensightFaces::elemType(typei);
+            const ensightFaces::elemType what =
+                ensightFaces::elemType(typei);
+
             const label size = ensFaces.faceIds(what).size();
 
             writeFieldContent
@@ -159,10 +161,8 @@ bool Foam::ensightOutput::writeFaceSubField
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -183,7 +183,8 @@ bool Foam::ensightOutput::writeCellField
 
         for (label typei=0; typei < ensightCells::nTypes; ++typei)
         {
-            const ensightCells::elemType what = ensightCells::elemType(typei);
+            const ensightCells::elemType what =
+                ensightCells::elemType(typei);
 
             writeFieldContent
             (
@@ -195,10 +196,8 @@ bool Foam::ensightOutput::writeCellField
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -229,9 +228,8 @@ bool Foam::ensightOutput::writeField
     // use sortedToc for extra safety
     //
     const labelList patchIds = patchLookup.sortedToc();
-    forAll(patchIds, listi)
+    for (const label patchId : patchIds)
     {
-        const label patchId   = patchIds[listi];
         const word& patchName = patchLookup[patchId];
         const ensightFaces& ensFaces = patchFaces[patchName];
 
@@ -293,9 +291,8 @@ bool Foam::ensightOutput::writeField
             }
         }
 
-        forAll(zoneNames, zonei)
+        for (const word& zoneName : zoneNames)
         {
-            const word& zoneName = zoneNames[zonei];
             const ensightFaces& ensFaces = zoneFaces[zoneName];
 
             // field (local size)
@@ -362,9 +359,8 @@ bool Foam::ensightOutput::ensightPointField
     // use sortedToc for extra safety
     //
     const labelList patchIds = patchLookup.sortedToc();
-    forAll(patchIds, listi)
+    for (const label patchId : patchIds)
     {
-        const label patchId   = patchIds[listi];
         const word& patchName = patchLookup[patchId];
         const ensightFaces& ensFaces = patchFaces[patchName];
 
@@ -399,9 +395,8 @@ bool Foam::ensightOutput::ensightPointField
     // write faceZones, if requested
     //
     const wordList zoneNames = zoneFaces.sortedToc();
-    forAll(zoneNames, zonei)
+    for (const word& zoneName : zoneNames)
     {
-        const word& zoneName = zoneNames[zonei];
         const ensightFaces& ensFaces = zoneFaces[zoneName];
 
         uindirectPrimitivePatch p

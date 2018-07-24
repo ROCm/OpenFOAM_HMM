@@ -163,7 +163,7 @@ private:
         (
             Istream& inFile,
             const label n,
-            List<T>& lst
+            List<T>& list
         ) const;
 
         void warnUnhandledType

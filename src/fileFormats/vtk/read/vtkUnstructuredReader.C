@@ -376,18 +376,10 @@ void Foam::vtkUnstructuredReader::readField
             case VTK_ULONG:
             case VTK_ID:
             {
-                autoPtr<labelIOField> fieldVals
+                auto fieldVals = autoPtr<labelIOField>::New
                 (
-                    new labelIOField
-                    (
-                        IOobject
-                        (
-                            arrayName,
-                            "",
-                            obj
-                        ),
-                        size
-                    )
+                    IOobject(arrayName, "", obj),
+                    size
                 );
                 readBlock(inFile, fieldVals().size(), fieldVals());
                 regIOobject::store(fieldVals);
@@ -397,18 +389,10 @@ void Foam::vtkUnstructuredReader::readField
             case VTK_FLOAT:
             case VTK_DOUBLE:
             {
-                autoPtr<scalarIOField> fieldVals
+                auto fieldVals = autoPtr<scalarIOField>::New
                 (
-                    new scalarIOField
-                    (
-                        IOobject
-                        (
-                            arrayName,
-                            "",
-                            obj
-                        ),
-                        size
-                    )
+                    IOobject(arrayName, "", obj),
+                    size
                 );
                 readBlock(inFile, fieldVals().size(), fieldVals());
                 regIOobject::store(fieldVals);
@@ -421,18 +405,10 @@ void Foam::vtkUnstructuredReader::readField
                 {
                     Info<< "Reading strings:" << size << endl;
                 }
-                autoPtr<stringIOList> fieldVals
+                auto fieldVals = autoPtr<stringIOList>::New
                 (
-                    new stringIOList
-                    (
-                        IOobject
-                        (
-                            arrayName,
-                            "",
-                            obj
-                        ),
-                        size
-                    )
+                    IOobject(arrayName, "", obj),
+                    size
                 );
                 // Consume current line.
                 inFile.getLine(fieldVals()[0]);
@@ -536,10 +512,8 @@ Foam::objectRegistry& Foam::vtkUnstructuredReader::selectRegistry
     {
         return pointData_;
     }
-    else
-    {
-        return otherData_;
-    }
+
+    return otherData_;
 }
 
 
@@ -827,18 +801,10 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
                 objectRegistry::iterator iter = reg.find(dataName);
                 scalarField s(*dynamic_cast<const scalarField*>(iter()));
                 reg.erase(iter);
-                autoPtr<vectorIOField> fieldVals
+                auto fieldVals = autoPtr<vectorIOField>::New
                 (
-                    new vectorIOField
-                    (
-                        IOobject
-                        (
-                            dataName,
-                            "",
-                            reg
-                        ),
-                        s.size()/3
-                    )
+                    IOobject(dataName, "", reg),
+                    s.size()/3
                 );
 
                 label elemI = 0;

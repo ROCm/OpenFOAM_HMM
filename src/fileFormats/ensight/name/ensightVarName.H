@@ -67,25 +67,26 @@ public:
 
     // Constructors
 
-        //- Construct as copy
-        inline explicit VarName(const VarName&);
+        //- Copy construct
+        inline VarName(const VarName& vn);
 
         //- Construct as copy of character array
-        inline explicit VarName(const char*);
+        inline explicit VarName(const char* s);
 
         //- Construct as copy of std::string
-        inline explicit VarName(const std::string&);
+        inline explicit VarName(const std::string& s);
 
 
-    // Member functions
+    // Member Functions
 
         //- Is this character valid for an ensight var-name
-        inline static bool valid(char);
+        inline static bool valid(char c);
 
 
-    // Member operators
+    // Member Operators
 
-    // Assignment (disabled)
+        // Assignment (disabled)
+
         void operator=(const word&) = delete;
         void operator=(const string&) = delete;
         void operator=(const std::string&) = delete;

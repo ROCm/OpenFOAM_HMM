@@ -92,7 +92,7 @@ public:
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- The output format type
         inline formatType fmt() const;
@@ -116,7 +116,7 @@ public:
         inline unsigned precision() const;
 
 
-      // Edit
+    // Edit
 
         //- Toggle ASCII mode on/off.
         //  In XML append mode, this switches between base64 and raw binary.

@@ -87,7 +87,7 @@ public:
 
 
     //- Destructor
-    virtual ~legacyRawFormatter();
+    virtual ~legacyRawFormatter() = default;
 
 
     // Member Functions

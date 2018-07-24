@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -123,12 +123,6 @@ Foam::ensightFile::ensightFile
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::ensightFile::~ensightFile()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::ensightFile::allowUndef()
@@ -137,10 +131,10 @@ bool Foam::ensightFile::allowUndef()
 }
 
 
-bool Foam::ensightFile::allowUndef(bool value)
+bool Foam::ensightFile::allowUndef(bool enabled)
 {
     bool old = allowUndef_;
-    allowUndef_ = value;
+    allowUndef_ = enabled;
     return old;
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,8 +29,6 @@ License
 #include "cellModel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::label Foam::ensightCells::nTypes = 5;
 
 const char* Foam::ensightCells::elemNames[5] =
     { "tetra4", "pyramid5", "penta6", "hexa8", "nfaced" };
@@ -62,6 +60,12 @@ void Foam::ensightCells::resizeAll()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::ensightCells::ensightCells()
+:
+    ensightCells(0)
+{}
+
+
 Foam::ensightCells::ensightCells(const label partIndex)
 :
     index_(partIndex),
@@ -91,12 +95,6 @@ Foam::ensightCells::ensightCells(const ensightCells& obj)
     // Restore total (reduced) sizes
     this->sizes_ = totSizes;
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::ensightCells::~ensightCells()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
