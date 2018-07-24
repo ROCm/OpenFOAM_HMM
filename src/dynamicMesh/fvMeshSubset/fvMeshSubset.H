@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,6 @@ Description
     - a user supplied patch
     - a newly created patch "oldInternalFaces"
 
-    - setCellSubset is for small subsets. Uses Maps to minimize memory.
     - setLargeCellSubset is for largish subsets (>10% of mesh).
       Uses labelLists instead.
 
@@ -73,9 +72,6 @@ namespace Foam
 
 class fvMeshSubset
 {
-
-private:
-
     // Private data
 
         //- Mesh to subset from
@@ -105,17 +101,17 @@ private:
         //- Check if subset has been performed
         bool checkCellSubset() const;
 
-        //- Mark points in Map
-        static void markPoints(const labelList&, Map<label>&);
-
         //- Mark points (with 0) in labelList
-        static void markPoints(const labelList&, labelList&);
+        static void markPoints
+        (
+            const labelUList& curPoints,
+            labelList& pointMap
+        );
 
         //- Adapt nCellsUsingFace for coupled faces becoming 'uncoupled'.
         void doCoupledPatches
         (
             const bool syncPar,
-            Map<label>& facesToSubset,
             labelList& nCellsUsingFace
         ) const;
 
@@ -143,6 +139,7 @@ private:
         //- No copy assignment
         void operator=(const fvMeshSubset&) = delete;
 
+
 public:
 
     // Constructors
@@ -154,17 +151,6 @@ public:
     // Member Functions
 
         // Edit
-
-            //- Set the subset. Create "oldInternalFaces" patch for exposed
-            //  internal faces (patchID==-1) or use supplied patch.
-            //  Does not handle coupled patches correctly if only one side
-            //  gets deleted.
-            void setCellSubset
-            (
-                const labelHashSet& globalCellMap,
-                const label patchID = -1,
-                const bool syncPar = true
-            );
 
             //- Set the subset from all cells with region == currentRegion.
             //  Create "oldInternalFaces" patch for exposed
