@@ -73,9 +73,9 @@ protected:
 
     // Protected Member Functions
 
-        //- Read from Istream using given Istream constructor class
+        //- Read from Istream using Istream constructor class
         template<class INew>
-        void read(Istream& is, const INew& inew);
+        void readIstream(Istream& is, const INew& inew);
 
         //- Delete the allocated entries, but retain the list size.
         inline void free();

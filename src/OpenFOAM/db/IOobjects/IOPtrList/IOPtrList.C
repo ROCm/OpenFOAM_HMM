@@ -45,7 +45,7 @@ Foam::IOPtrList<T>::IOPtrList(const IOobject& io, const INew& inewt)
         // For if MUST_READ_IF_MODIFIED
         addWatch();
 
-        PtrList<T>::read(readStream(typeName), inewt);
+        PtrList<T>::readIstream(readStream(typeName), inewt);
         close();
     }
 }
@@ -68,7 +68,7 @@ Foam::IOPtrList<T>::IOPtrList(const IOobject& io)
         // For if MUST_READ_IF_MODIFIED
         addWatch();
 
-        PtrList<T>::read(readStream(typeName), INew<T>());
+        PtrList<T>::readIstream(readStream(typeName), INew<T>());
         close();
     }
 }
@@ -106,7 +106,7 @@ Foam::IOPtrList<T>::IOPtrList(const IOobject& io, const PtrList<T>& content)
         // For if MUST_READ_IF_MODIFIED
         addWatch();
 
-        PtrList<T>::read(readStream(typeName), INew<T>());
+        PtrList<T>::readIstream(readStream(typeName), INew<T>());
         close();
     }
     else
@@ -135,7 +135,7 @@ Foam::IOPtrList<T>::IOPtrList(const IOobject& io, PtrList<T>&& content)
         // For if MUST_READ_IF_MODIFIED
         addWatch();
 
-        PtrList<T>::read(readStream(typeName), INew<T>());
+        PtrList<T>::readIstream(readStream(typeName), INew<T>());
         close();
     }
 }

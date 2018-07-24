@@ -33,7 +33,11 @@ License
 
 template<class T, class Key, class Hash>
 template<class INew>
-void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inew)
+void Foam::HashPtrTable<T, Key, Hash>::readIstream
+(
+    Istream& is,
+    const INew& inew
+)
 {
     is.fatalCheck(FUNCTION_NAME);
 
@@ -41,7 +45,7 @@ void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inew)
 
     is.fatalCheck
     (
-        "HashPtrTable::read(Istream&, const INew&) : "
+        "HashPtrTable::readIstream : "
         "reading first token"
     );
 
@@ -69,7 +73,7 @@ void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inew)
 
                     is.fatalCheck
                     (
-                        "HashPtrTable::read(Istream&, const INew&) : "
+                        "HashPtrTable::readIstream : "
                         "reading entry"
                     );
                 }
@@ -114,7 +118,7 @@ void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inew)
 
             is.fatalCheck
             (
-                "HashPtrTable::read(Istream&, const INew&) : "
+                "HashPtrTable::readIstream : "
                 "reading entry"
             );
 
@@ -172,14 +176,14 @@ template<class T, class Key, class Hash>
 template<class INew>
 Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(Istream& is, const INew& inew)
 {
-    this->read(is, inew);
+    this->readIstream(is, inew);
 }
 
 
 template<class T, class Key, class Hash>
 Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(Istream& is)
 {
-    this->read(is, INew<T>());
+    this->readIstream(is, INew<T>());
 }
 
 
@@ -196,7 +200,7 @@ template<class T, class Key, class Hash>
 Foam::Istream& Foam::operator>>(Istream& is, HashPtrTable<T, Key, Hash>& tbl)
 {
     tbl.clear();
-    tbl.read(is, INew<T>());
+    tbl.readIstream(is, INew<T>());
 
     return is;
 }

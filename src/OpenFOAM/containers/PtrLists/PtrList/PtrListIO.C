@@ -32,7 +32,7 @@ License
 
 template<class T>
 template<class INew>
-void Foam::PtrList<T>::read(Istream& is, const INew& inew)
+void Foam::PtrList<T>::readIstream(Istream& is, const INew& inew)
 {
     clear();  // Delete old pointers and reset the list size
 
@@ -42,7 +42,7 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inew)
 
     is.fatalCheck
     (
-        "PtrList::read(Istream&) : "
+        "PtrList::readIstream : "
         "reading first token"
     );
 
@@ -70,7 +70,7 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inew)
 
                     is.fatalCheck
                     (
-                        "PtrList::read(Istream&) : "
+                        "PtrList::readIstream : "
                         "reading entry"
                     );
                 }
@@ -82,7 +82,7 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inew)
 
                 is.fatalCheck
                 (
-                    "PtrList::read(Istream&) : "
+                    "PtrList::readIstream : "
                     "reading the single entry"
                 );
 
@@ -167,14 +167,14 @@ template<class T>
 template<class INew>
 Foam::PtrList<T>::PtrList(Istream& is, const INew& inew)
 {
-    read(is, inew);
+    this->readIstream(is, inew);
 }
 
 
 template<class T>
 Foam::PtrList<T>::PtrList(Istream& is)
 {
-    read(is, INew<T>());
+    this->readIstream(is, INew<T>());
 }
 
 
@@ -183,7 +183,7 @@ Foam::PtrList<T>::PtrList(Istream& is)
 template<class T>
 Foam::Istream& Foam::operator>>(Istream& is, PtrList<T>& list)
 {
-    list.read(is, INew<T>());
+    list.readIstream(is, INew<T>());
     return is;
 }
 

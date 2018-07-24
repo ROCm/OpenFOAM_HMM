@@ -69,11 +69,11 @@ class HashPtrTable
 {
     // Private Member Functions
 
-        //- Read from Istream using given Istream constructor class
+        //- Read from Istream using Istream constructor class
         template<class INew>
-        void read(Istream& is, const INew& inew);
+        void readIstream(Istream& is, const INew& inew);
 
-        //- Read from dictionary using given dictionary constructor class
+        //- Read from dictionary using Istream constructor class
         template<class INew>
         void read(const dictionary& dict, const INew& inew);
 
