@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,7 @@ namespace Foam
 template<class GeoField>
 label readFields
 (
-    const meshSubsetHelper& helper,
+    const fvMeshSubsetProxy& proxy,
     const typename GeoField::Mesh& mesh,
     const IOobjectList& objects,
     const wordHashSet& selectedFields,
@@ -58,7 +58,7 @@ label readFields
             fields.set
             (
                 nFields++,
-                helper.interpolate
+                proxy.interpolate
                 (
                     GeoField(*(objects[fieldName]), mesh)
                 ).ptr()

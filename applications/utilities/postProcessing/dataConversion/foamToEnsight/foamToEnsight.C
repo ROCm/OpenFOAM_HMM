@@ -90,7 +90,7 @@ Note
 #include "ensightOutput.H"
 
 // local files
-#include "meshSubsetHelper.H"
+#include "fvMeshSubsetProxy.H"
 #include "ensightOutputCloud.H"
 
 #include "memInfo.H"
@@ -256,11 +256,12 @@ int main(int argc, char *argv[])
     if (args.readIfPresent("cellZone", cellZoneName))
     {
         Info<< "Converting cellZone " << cellZoneName
-            << " only (puts outside faces into patch "
-            << mesh.boundaryMesh()[0].name() << ")"
-            << endl;
+            << " only. Places new outside faces into \"oldInternalFaces\"."
+            << nl;
     }
-    meshSubsetHelper meshRef(mesh, meshSubsetHelper::ZONE, cellZoneName);
+
+    // fvMeshSubset is ignored if cellZoneName is empty
+    fvMeshSubsetProxy meshRef(mesh, fvMeshSubsetProxy::ZONE, cellZoneName);
 
     //
     // Open new ensight case file, initialize header etc.

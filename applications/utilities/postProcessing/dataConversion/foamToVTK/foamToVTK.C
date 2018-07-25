@@ -108,7 +108,7 @@ Usage
         use the time index in the VTK file name instead of the time index
 
 Note
-    mesh subset is handled by meshSubsetHelper. Slight inconsistency in
+    The mesh subset is handled by fvMeshSubsetProxy. Slight inconsistency in
     interpolation: on the internal field it interpolates the whole volField
     to the whole-mesh pointField and then selects only those values it
     needs for the subMesh (using the fvMeshSubset cellMap(), pointMap()
@@ -158,7 +158,7 @@ Note
 #include "passiveParticle.H"
 #include "wordRes.H"
 #include "areaFields.H"
-#include "meshSubsetHelper.H"
+#include "fvMeshSubsetProxy.H"
 #include "readFields.H"
 #include "faceSet.H"
 #include "pointSet.H"
@@ -482,17 +482,17 @@ int main(int argc, char *argv[])
 
     string vtkName = runTime.caseName();
 
-    meshSubsetHelper::subsetType cellSubsetType = meshSubsetHelper::NONE;
+    fvMeshSubsetProxy::subsetType cellSubsetType = fvMeshSubsetProxy::NONE;
     word cellSubsetName;
     if (args.readIfPresent("cellSet", cellSubsetName))
     {
         vtkName = cellSubsetName;
-        cellSubsetType = meshSubsetHelper::SET;
+        cellSubsetType = fvMeshSubsetProxy::SET;
     }
     else if (args.readIfPresent("cellZone", cellSubsetName))
     {
         vtkName = cellSubsetName;
-        cellSubsetType = meshSubsetHelper::ZONE;
+        cellSubsetType = fvMeshSubsetProxy::ZONE;
     }
     else if (Pstream::parRun())
     {
@@ -554,7 +554,7 @@ int main(int argc, char *argv[])
     instantList timeDirs = timeSelector::select0(runTime, args);
 
     // Mesh wrapper: does subsetting and decomposition
-    meshSubsetHelper meshRef(mesh, cellSubsetType, cellSubsetName);
+    fvMeshSubsetProxy meshRef(mesh, cellSubsetType, cellSubsetName);
 
     // Collect decomposition information etc.
     vtk::vtuCells vtuMeshCells(fmtType, decomposePoly);

@@ -22,19 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::meshSubsetHelper
+    Foam::fvMeshSubsetProxy
 
 Description
-    Simple helper to hold a mesh or mesh-subset and provide uniform access.
+    Simple proxy for holding a mesh, or mesh-subset.
+    The subMeshes are currently limited to cellSet or cellZone definitions.
 
 SourceFiles
-    meshSubsetHelper.C
-    meshSubsetHelperTemplates.C
+    fvMeshSubsetProxy.C
+    fvMeshSubsetProxyTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef meshSubsetHelper_H
-#define meshSubsetHelper_H
+#ifndef fvMeshSubsetProxy_H
+#define fvMeshSubsetProxy_H
 
 #include "fvMeshSubset.H"
 #include "zeroGradientFvPatchField.H"
@@ -48,10 +49,10 @@ namespace Foam
 class Time;
 
 /*---------------------------------------------------------------------------*\
-                      Class meshSubsetHelper Declaration
+                      Class fvMeshSubsetProxy Declaration
 \*---------------------------------------------------------------------------*/
 
-class meshSubsetHelper
+class fvMeshSubsetProxy
 {
 public:
 
@@ -87,10 +88,10 @@ private:
     // Private Member Functions
 
         //- No copy construct
-        meshSubsetHelper(const meshSubsetHelper&) = delete;
+        fvMeshSubsetProxy(const fvMeshSubsetProxy&) = delete;
 
         //- No copy assignment
-        void operator=(const meshSubsetHelper&) = delete;
+        void operator=(const fvMeshSubsetProxy&) = delete;
 
 
 public:
@@ -98,10 +99,10 @@ public:
     // Constructors
 
         //- Construct from components
-        meshSubsetHelper(fvMesh& baseMesh);
+        fvMeshSubsetProxy(fvMesh& baseMesh);
 
         //- Construct from components
-        meshSubsetHelper
+        fvMeshSubsetProxy
         (
             fvMesh& baseMesh,
             const subsetType,
@@ -211,9 +212,8 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "meshSubsetHelperTemplates.C"
+    #include "fvMeshSubsetProxyTemplates.C"
 #endif
-
 
 #endif
 

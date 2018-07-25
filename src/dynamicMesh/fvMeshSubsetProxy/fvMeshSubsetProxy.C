@@ -23,14 +23,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "meshSubsetHelper.H"
+#include "fvMeshSubsetProxy.H"
 #include "cellSet.H"
 #include "cellZone.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::meshSubsetHelper::meshSubsetHelper
+Foam::fvMeshSubsetProxy::fvMeshSubsetProxy
 (
     fvMesh& baseMesh
 )
@@ -45,7 +45,7 @@ Foam::meshSubsetHelper::meshSubsetHelper
 }
 
 
-Foam::meshSubsetHelper::meshSubsetHelper
+Foam::fvMeshSubsetProxy::fvMeshSubsetProxy
 (
     fvMesh& baseMesh,
     const subsetType type,
@@ -65,7 +65,7 @@ Foam::meshSubsetHelper::meshSubsetHelper
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::meshSubsetHelper::correct(bool verbose)
+void Foam::fvMeshSubsetProxy::correct(bool verbose)
 {
     if (type_ == SET)
     {
@@ -96,7 +96,7 @@ void Foam::meshSubsetHelper::correct(bool verbose)
 }
 
 
-Foam::polyMesh::readUpdateState Foam::meshSubsetHelper::readUpdate()
+Foam::polyMesh::readUpdateState Foam::fvMeshSubsetProxy::readUpdate()
 {
     const polyMesh::readUpdateState meshState = baseMesh_.readUpdate();
 

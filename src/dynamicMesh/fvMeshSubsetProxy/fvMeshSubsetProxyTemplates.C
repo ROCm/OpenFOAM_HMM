@@ -23,14 +23,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "meshSubsetHelper.H"
+#include "fvMeshSubsetProxy.H"
 #include "volFields.H"
 
 // * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
-Foam::meshSubsetHelper::zeroGradientField
+Foam::fvMeshSubsetProxy::zeroGradientField
 (
     const typename GeometricField
     <
@@ -62,7 +62,7 @@ Foam::meshSubsetHelper::zeroGradientField
 
 template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
-Foam::meshSubsetHelper::interpolate
+Foam::fvMeshSubsetProxy::interpolate
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf
 ) const
@@ -82,7 +82,7 @@ Foam::meshSubsetHelper::interpolate
 
 template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
-Foam::meshSubsetHelper::interpolate
+Foam::fvMeshSubsetProxy::interpolate
 (
     const typename GeometricField
     <
@@ -105,7 +105,7 @@ Foam::meshSubsetHelper::interpolate
 
 template<class GeoField>
 Foam::tmp<GeoField>
-Foam::meshSubsetHelper::interpolate
+Foam::fvMeshSubsetProxy::interpolate
 (
     const GeoField& fld
 ) const
