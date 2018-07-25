@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::removeCells
 
 Description
-    Given list of cells to remove insert all the topology changes.
+    Given list of cells to remove, insert all the topology changes.
 
     Works in two passes:
     - get faces that will become boundary faces
@@ -48,7 +48,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
+class bitSet;
 class polyMesh;
 class polyTopoChange;
 class mapPolyMesh;
@@ -67,17 +68,6 @@ class removeCells
         //- Whether or not to synchronize parallel case.
         const bool syncPar_;
 
-
-    // Private Member Functions
-
-        //- Decrease count of elements of f
-        static void uncount
-        (
-            const labelList& f,
-            labelList& nUsage
-        );
-
-
 public:
 
     //- Runtime type information
@@ -86,35 +76,58 @@ public:
 
     // Constructors
 
-        //- Construct from mesh. syncPar: do parallel synchronization.
-        removeCells(const polyMesh& mesh, const bool syncPar = true);
+        //- Construct from mesh. With parallel synchronization.
+        explicit removeCells(const polyMesh& mesh);
+
+        //- Construct from mesh, optionally with parallel synchronization.
+        removeCells(const polyMesh& mesh, const bool syncPar);
+
+
+    //- Destructor
+    ~removeCells() = default;
 
 
     // Member Functions
 
-        // Topology changes
+        //- Get labels of faces exposed after cells removal.
+        //  These are
+        //  - internal faces that become boundary faces
+        //  - coupled faces that become uncoupled (since one of the sides
+        //    gets deleted)
+        labelList getExposedFaces(const bitSet& removedCell) const;
 
-            //- Get labels of exposed faces.
-            //  These are
-            //  - internal faces that become boundary faces
-            //  - coupled faces that become uncoupled (since one of the sides
-            //    gets deleted)
-            labelList getExposedFaces(const labelList& cellsToRemove) const;
+        //- Get labels of faces exposed after cells removal.
+        //  These are
+        //  - internal faces that become boundary faces
+        //  - coupled faces that become uncoupled (since one of the sides
+        //    gets deleted)
+        labelList getExposedFaces(const labelUList& cellsToRemove) const;
 
-            //- Play commands into polyTopoChange to remove cells.
-            //  patchIDs is for every element in facesToExpose (see above) the
-            //  patch it has to go into. This cannot be a coupled patch!
-            void setRefinement
-            (
-                const labelList& cellsToRemove,
-                const labelList& facesToExpose,
-                const labelList& patchIDs,
-                polyTopoChange&
-            ) const;
+        //- Play commands into polyTopoChange to remove cells.
+        //  patchIDs is for every element in facesToExpose (see above) the
+        //  patch it has to go into. This cannot be a coupled patch!
+        void setRefinement
+        (
+            const bitSet& removedCell,
+            const labelUList& facesToExpose,
+            const labelUList& patchIDs,
+            polyTopoChange&
+        ) const;
 
-            //- Force recalculation of locally stored data on topological change
-            void updateMesh(const mapPolyMesh&)
-            {}
+        //- Play commands into polyTopoChange to remove cells.
+        //  patchIDs is for every element in facesToExpose (see above) the
+        //  patch it has to go into. This cannot be a coupled patch!
+        void setRefinement
+        (
+            const labelUList& cellsToRemove,
+            const labelUList& facesToExpose,
+            const labelUList& patchIDs,
+            polyTopoChange&
+        ) const;
+
+        //- Force recalculation of locally stored data on topological change
+        void updateMesh(const mapPolyMesh&)
+        {}
 };
 
 

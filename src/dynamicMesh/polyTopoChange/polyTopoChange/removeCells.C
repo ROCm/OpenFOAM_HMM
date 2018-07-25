@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "removeCells.H"
+#include "bitSet.H"
 #include "polyMesh.H"
 #include "polyTopoChange.H"
 #include "polyRemoveCell.H"
@@ -39,22 +40,42 @@ namespace Foam
     defineTypeNameAndDebug(removeCells, 0);
 }
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-void Foam::removeCells::uncount
-(
-    const labelList& f,
-    labelList& nUsage
-)
+namespace
 {
-    forAll(f, fp)
+
+// Increase count (usage) of elements of list
+inline void incrCount(const Foam::labelUList& list, Foam::labelList& counter)
+{
+    for (auto idx : list)
     {
-        nUsage[f[fp]]--;
+        ++counter[idx];
     }
 }
 
+// Decrease count (usage) of elements of list
+inline void decrCount(const Foam::labelUList& list, Foam::labelList& counter)
+{
+    for (auto idx : list)
+    {
+        --counter[idx];
+    }
+}
+
+} // End anonymous namespace
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::removeCells::removeCells
+(
+    const polyMesh& mesh
+)
+:
+    removeCells(mesh, true)
+{}
+
 
 Foam::removeCells::removeCells
 (
@@ -71,47 +92,37 @@ Foam::removeCells::removeCells
 
 Foam::labelList Foam::removeCells::getExposedFaces
 (
-    const labelList& cellLabels
+    const bitSet& removedCell
 ) const
 {
-    // Create list of cells to be removed
-    boolList removedCell(mesh_.nCells(), false);
-
-    // Go from labelList of cells-to-remove to a boolList.
-    forAll(cellLabels, i)
-    {
-        removedCell[cellLabels[i]] = true;
-    }
-
-
     const labelList& faceOwner = mesh_.faceOwner();
     const labelList& faceNeighbour = mesh_.faceNeighbour();
 
     // Count cells using face.
     labelList nCellsUsingFace(mesh_.nFaces(), 0);
 
-    for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
+    for (label facei = 0; facei < mesh_.nInternalFaces(); ++facei)
     {
-        label own = faceOwner[facei];
-        label nei = faceNeighbour[facei];
+        const label own = faceOwner[facei];
+        const label nei = faceNeighbour[facei];
 
         if (!removedCell[own])
         {
-            nCellsUsingFace[facei]++;
+            ++nCellsUsingFace[facei];
         }
         if (!removedCell[nei])
         {
-            nCellsUsingFace[facei]++;
+            ++nCellsUsingFace[facei];
         }
     }
 
-    for (label facei = mesh_.nInternalFaces(); facei < mesh_.nFaces(); facei++)
+    for (label facei = mesh_.nInternalFaces(); facei < mesh_.nFaces(); ++facei)
     {
-        label own = faceOwner[facei];
+        const label own = faceOwner[facei];
 
         if (!removedCell[own])
         {
-            nCellsUsingFace[facei]++;
+            ++nCellsUsingFace[facei];
         }
     }
 
@@ -147,7 +158,7 @@ Foam::labelList Foam::removeCells::getExposedFaces
 
     DynamicList<label> exposedFaces(mesh_.nFaces()/10);
 
-    for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
+    for (label facei = 0; facei < mesh_.nInternalFaces(); ++facei)
     {
         if (nCellsUsingFace[facei] == 1)
         {
@@ -157,17 +168,15 @@ Foam::labelList Foam::removeCells::getExposedFaces
 
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        const polyPatch& pp = patches[patchi];
-
         if (pp.coupled())
         {
             label facei = pp.start();
 
             forAll(pp, i)
             {
-                label own = faceOwner[facei];
+                const label own = faceOwner[facei];
 
                 if (nCellsUsingFace[facei] == 1 && !removedCell[own])
                 {
@@ -176,7 +185,7 @@ Foam::labelList Foam::removeCells::getExposedFaces
                     exposedFaces.append(facei);
                 }
 
-                facei++;
+                ++facei;
             }
         }
     }
@@ -187,9 +196,9 @@ Foam::labelList Foam::removeCells::getExposedFaces
 
 void Foam::removeCells::setRefinement
 (
-    const labelList& cellLabels,
-    const labelList& exposedFaceLabels,
-    const labelList& exposedPatchIDs,
+    const bitSet& removedCell,
+    const labelUList& exposedFaceLabels,
+    const labelUList& exposedPatchIDs,
     polyTopoChange& meshMod
 ) const
 {
@@ -209,13 +218,14 @@ void Foam::removeCells::setRefinement
 
     forAll(exposedFaceLabels, i)
     {
-        label patchi = exposedPatchIDs[i];
+        const label facei = exposedFaceLabels[i];
+        const label patchi = exposedPatchIDs[i];
 
         if (patchi < 0 || patchi >= patches.size())
         {
             FatalErrorInFunction
                 << "Invalid patch " << patchi
-                << " for exposed face " << exposedFaceLabels[i] << endl
+                << " for exposed face " << facei << nl
                 << "Valid patches 0.." << patches.size()-1
                 << abort(FatalError);
         }
@@ -223,28 +233,20 @@ void Foam::removeCells::setRefinement
         if (patches[patchi].coupled())
         {
             FatalErrorInFunction
-                << "Trying to put exposed face " << exposedFaceLabels[i]
+                << "Trying to put exposed face " << facei
                 << " into a coupled patch : " << patches[patchi].name()
-                << endl
+                << nl
                 << "This is illegal."
                 << abort(FatalError);
         }
 
-        newPatchID[exposedFaceLabels[i]] = patchi;
+        newPatchID[facei] = patchi;
     }
 
 
-    // Create list of cells to be removed
-    boolList removedCell(mesh_.nCells(), false);
-
-    // Go from labelList of cells-to-remove to a boolList and remove all
-    // cells mentioned.
-    forAll(cellLabels, i)
+    // Walk all the cells mentioned for removal
+    for (const label celli : removedCell)
     {
-        label celli = cellLabels[i];
-
-        removedCell[celli] = true;
-
         //Pout<< "Removing cell " << celli
         //    << " cc:" << mesh_.cellCentres()[celli] << endl;
 
@@ -260,26 +262,21 @@ void Foam::removeCells::setRefinement
     const labelList& faceNeighbour = mesh_.faceNeighbour();
     const faceZoneMesh& faceZones = mesh_.faceZones();
 
-    // Count starting number of faces using each point. Keep up to date whenever
-    // removing a face.
+    // Count starting number of faces using each point.
+    // Update whenever removing a face.
     labelList nFacesUsingPoint(mesh_.nPoints(), 0);
 
-    forAll(faces, facei)
+    for (const face& f : faces)
     {
-        const face& f = faces[facei];
-
-        forAll(f, fp)
-        {
-            nFacesUsingPoint[f[fp]]++;
-        }
+        incrCount(f, nFacesUsingPoint);
     }
 
 
-    for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
+    for (label facei = 0; facei < mesh_.nInternalFaces(); ++facei)
     {
         const face& f = faces[facei];
-        label own = faceOwner[facei];
-        label nei = faceNeighbour[facei];
+        const label own = faceOwner[facei];
+        const label nei = faceNeighbour[facei];
 
         if (removedCell[own])
         {
@@ -290,7 +287,7 @@ void Foam::removeCells::setRefinement
                 //    << " fc:" << mesh_.faceCentres()[facei] << endl;
 
                 meshMod.setAction(polyRemoveFace(facei));
-                uncount(f, nFacesUsingPoint);
+                decrCount(f, nFacesUsingPoint);
             }
             else
             {
@@ -305,7 +302,7 @@ void Foam::removeCells::setRefinement
 
                 // nei is remaining cell. Facei becomes external cell
 
-                label zoneID = faceZones.whichZone(facei);
+                const label zoneID = faceZones.whichZone(facei);
                 bool zoneFlip = false;
 
                 if (zoneID >= 0)
@@ -353,7 +350,7 @@ void Foam::removeCells::setRefinement
             //    << " into patch " << newPatchID[facei] << endl;
 
             // own is remaining cell. Facei becomes external cell.
-            label zoneID = faceZones.whichZone(facei);
+            const label zoneID = faceZones.whichZone(facei);
             bool zoneFlip = false;
 
             if (zoneID >= 0)
@@ -380,10 +377,8 @@ void Foam::removeCells::setRefinement
         }
     }
 
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        const polyPatch& pp = patches[patchi];
-
         if (pp.coupled())
         {
             label facei = pp.start();
@@ -396,7 +391,7 @@ void Foam::removeCells::setRefinement
                     //    << " fc:" << mesh_.faceCentres()[facei]
                     //    << " into patch " << newPatchID[facei] << endl;
 
-                    label zoneID = faceZones.whichZone(facei);
+                    const label zoneID = faceZones.whichZone(facei);
                     bool zoneFlip = false;
 
                     if (zoneID >= 0)
@@ -429,10 +424,10 @@ void Foam::removeCells::setRefinement
                     //    << endl;
 
                     meshMod.setAction(polyRemoveFace(facei));
-                    uncount(faces[facei], nFacesUsingPoint);
+                    decrCount(faces[facei], nFacesUsingPoint);
                 }
 
-                facei++;
+                ++facei;
             }
         }
         else
@@ -457,10 +452,10 @@ void Foam::removeCells::setRefinement
                     //    << endl;
 
                     meshMod.setAction(polyRemoveFace(facei));
-                    uncount(faces[facei], nFacesUsingPoint);
+                    decrCount(faces[facei], nFacesUsingPoint);
                 }
 
-                facei++;
+                ++facei;
             }
         }
     }
@@ -488,6 +483,37 @@ void Foam::removeCells::setRefinement
                 << endl;
         }
     }
+}
+
+
+Foam::labelList Foam::removeCells::getExposedFaces
+(
+    const labelUList& cellsToRemove
+) const
+{
+    bitSet removeCell(mesh_.nCells(), cellsToRemove);
+
+    return getExposedFaces(removeCell);
+}
+
+
+void Foam::removeCells::setRefinement
+(
+    const labelUList& cellsToRemove,
+    const labelUList& exposedFaceLabels,
+    const labelUList& exposedPatchIDs,
+    polyTopoChange& meshMod
+) const
+{
+    bitSet removedCell(mesh_.nCells(), cellsToRemove);
+
+    setRefinement
+    (
+        removedCell,
+        exposedFaceLabels,
+        exposedPatchIDs,
+        meshMod
+    );
 }
 
 
