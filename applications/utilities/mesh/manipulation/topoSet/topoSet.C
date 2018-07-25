@@ -87,7 +87,10 @@ void removeZone
         // Remove last element
         zones.setSize(zones.size()-1);
         zones.clearAddressing();
-        zones.write();
+        if (!zones.write())
+        {
+            WarningInFunction << "Failed writing zone " << setName << endl;
+        }
     }
 }
 
@@ -298,7 +301,12 @@ int main(int argc, char *argv[])
                     source().applyToSet(action, currentSet());
                     // Synchronize for coupled patches.
                     if (!noSync) currentSet().sync(mesh);
-                    currentSet().write();
+                    if (!currentSet().write())
+                    {
+                        WarningInFunction
+                            << "Failed writing set "
+                            << currentSet().objectPath() << endl;
+                    }
                 }
                 break;
 
@@ -333,20 +341,35 @@ int main(int argc, char *argv[])
                     currentSet().subset(oldSet());
                     // Synchronize for coupled patches.
                     if (!noSync) currentSet().sync(mesh);
-                    currentSet().write();
+                    if (!currentSet().write())
+                    {
+                        WarningInFunction
+                            << "Failed writing set "
+                            << currentSet().objectPath() << endl;
+                    }
                 }
                 break;
 
                 case topoSetSource::CLEAR:
                     Info<< "    Clearing " << currentSet().type() << endl;
                     currentSet().clear();
-                    currentSet().write();
+                    if (!currentSet().write())
+                    {
+                        WarningInFunction
+                            << "Failed writing set "
+                            << currentSet().objectPath() << endl;
+                    }
                 break;
 
                 case topoSetSource::INVERT:
                     Info<< "    Inverting " << currentSet().type() << endl;
                     currentSet().invert(currentSet().maxSize(mesh));
-                    currentSet().write();
+                    if (!currentSet().write())
+                    {
+                        WarningInFunction
+                            << "Failed writing set "
+                            << currentSet().objectPath() << endl;
+                    }
                 break;
 
                 case topoSetSource::REMOVE:

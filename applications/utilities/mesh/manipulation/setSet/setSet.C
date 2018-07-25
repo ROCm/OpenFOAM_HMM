@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -282,7 +282,10 @@ void removeZone
         // Remove last element
         zones.setSize(zones.size()-1);
         zones.clearAddressing();
-        zones.write();
+        if (!zones.write())
+        {
+            WarningInFunction << "Failed writing zone " << setName << endl;
+        }
     }
 }
 
@@ -535,7 +538,12 @@ bool doCommand
                 {
                     currentSet.instance() = mesh.time().timeName();
                 }
-                currentSet.write();
+                if (!currentSet.write())
+                {
+                    WarningInFunction
+                        << "Failed writing set "
+                        << currentSet.objectPath() << endl;
+                }
             }
         }
     }
