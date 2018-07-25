@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -366,7 +366,7 @@ Foam::labelList Foam::ZoneMesh<ZoneType, MeshType>::findIndices
     }
     else
     {
-        indices.setSize(this->size());
+        indices.resize(this->size());
         label count = 0;
         forAll(*this, i)
         {
@@ -375,7 +375,7 @@ Foam::labelList Foam::ZoneMesh<ZoneType, MeshType>::findIndices
                 indices[count++] = i;
             }
         }
-        indices.setSize(count);
+        indices.resize(count);
     }
 
     return indices;
@@ -487,15 +487,60 @@ Foam::bitSet Foam::ZoneMesh<ZoneType, MeshType>::findMatching
     bitSet bitset;
 
     const labelList indices = this->findIndices(key);
-    forAll(indices, i)
+
+    for (const label zonei : indices)
     {
         bitset.set
         (
-            static_cast<const labelList&>(this->operator[](indices[i]))
+            static_cast<const labelList&>(this->operator[](zonei))
         );
     }
 
     return bitset;
+}
+
+
+template<class ZoneType, class MeshType>
+const ZoneType* Foam::ZoneMesh<ZoneType, MeshType>::zonePtr
+(
+    const word& zoneName
+) const
+{
+    const PtrList<ZoneType>& zones = *this;
+
+    for (auto iter = zones.begin(); iter != zones.end(); ++iter)
+    {
+        const ZoneType* ptr = iter.get();
+
+        if (ptr && zoneName == ptr->name())
+        {
+            return ptr;
+        }
+    }
+
+    return nullptr;
+}
+
+
+template<class ZoneType, class MeshType>
+ZoneType* Foam::ZoneMesh<ZoneType, MeshType>::zonePtr
+(
+    const word& zoneName
+)
+{
+    PtrList<ZoneType>& zones = *this;
+
+    for (auto iter = zones.begin(); iter != zones.end(); ++iter)
+    {
+        ZoneType* ptr = iter.get();
+
+        if (ptr && zoneName == ptr->name())
+        {
+            return ptr;
+        }
+    }
+
+    return nullptr;
 }
 
 

@@ -32,7 +32,7 @@ Description
 Note
     The class definition is such that it contains a list of pointers, but
     itself does not inherit from a list of pointers since this would
-    wreak havoc later inheritance resolution.
+    wreak havoc later with inheritance resolution.
 
 See Also
     Foam::PtrList
@@ -226,6 +226,11 @@ public:
             //- Construct for a given entry
             inline iterator(T** ptr);
 
+            // Member functions
+
+            //- Return pointer, can be nullptr.
+            inline pointer get() const;
+
             // Member operators
 
             inline bool operator==(const iterator& iter) const;
@@ -279,6 +284,11 @@ public:
 
             //- Copy construct from non-const iterator
             inline const_iterator(const iterator& iter);
+
+            // Member functions
+
+            //- Return pointer, can be nullptr.
+            inline pointer get() const;
 
             // Member operators
 

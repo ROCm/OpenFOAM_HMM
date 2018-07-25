@@ -238,6 +238,13 @@ inline Foam::UPtrList<T>::iterator::iterator(T** ptr)
 
 
 template<class T>
+inline T* Foam::UPtrList<T>::iterator::get() const
+{
+    return *ptr_;
+}
+
+
+template<class T>
 inline bool Foam::UPtrList<T>::iterator::operator==(const iterator& iter) const
 {
     return ptr_ == iter.ptr_;
@@ -401,6 +408,13 @@ inline Foam::UPtrList<T>::const_iterator::const_iterator(const iterator& iter)
 :
     ptr_(iter.ptr_)
 {}
+
+
+template<class T>
+inline const T* Foam::UPtrList<T>::const_iterator::get() const
+{
+    return *ptr_;
+}
 
 
 template<class T>

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,12 +49,13 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 template<class ZoneType, class MeshType> class ZoneMesh;
 
 template<class ZoneType, class MeshType>
 Ostream& operator<<(Ostream& os, const ZoneMesh<ZoneType, MeshType>& zones);
+
 
 /*---------------------------------------------------------------------------*\
                            Class ZoneMesh Declaration
@@ -186,6 +187,14 @@ public:
         //- Mark items (cells, faces, points) that match the zone specification
         bitSet findMatching(const keyType& key) const;
 
+
+        //- Lookup zone by name and return const pointer, nullptr on error.
+        const ZoneType* zonePtr(const word& zoneName) const;
+
+        //- Lookup zone by name and return pointer, nullptr on error.
+        ZoneType* zonePtr(const word& zoneName);
+
+
         //- Clear addressing
         void clearAddressing();
 
@@ -204,6 +213,7 @@ public:
 
         //- writeData member function required by regIOobject
         bool writeData(Ostream& os) const;
+
 
     // Member Operators
 
