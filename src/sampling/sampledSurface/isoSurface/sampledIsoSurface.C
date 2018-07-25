@@ -376,14 +376,16 @@ bool Foam::sampledIsoSurface::updateGeometry() const
                 << patches[exposedPatchi].name() << endl;
         }
 
+        // Remove old mesh if any
+        subMeshPtr_.clear();
         subMeshPtr_.reset
         (
-            new fvMeshSubset(fvm)
-        );
-        subMeshPtr_().setLargeCellSubset
-        (
-            labelHashSet(mesh().cellZones()[zoneID_.index()]),
-            exposedPatchi
+            new fvMeshSubset
+            (
+                fvm,
+                mesh().cellZones()[zoneID_.index()],
+                exposedPatchi
+            )
         );
     }
 

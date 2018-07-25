@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,6 +45,7 @@ Description
 #include "volFields.H"
 #include "topoDistanceData.H"
 #include "FaceCellWave.H"
+#include "BitOps.H"
 #include "cellSet.H"
 #include "faceSet.H"
 #include "pointSet.H"
@@ -311,7 +312,7 @@ void subsetTopoSets
         label nSet = 0;
         forAll(map, i)
         {
-            if (isSet[map[i]])
+            if (isSet.test(map[i]))
             {
                 ++nSet;
             }
@@ -325,7 +326,7 @@ void subsetTopoSets
         TopoSet& subSet = subSets[i];
         forAll(map, i)
         {
-            if (isSet[map[i]])
+            if (isSet.test(map[i]))
             {
                 subSet.insert(i);
             }
@@ -371,7 +372,7 @@ int main(int argc, char *argv[])
 
     #include "createNamedMesh.H"
 
-    const word setName = args[1];
+    const word selectionName = args[1];
 
     word meshInstance = mesh.pointsInstance();
     word fieldsInstance = runTime.timeName();
@@ -389,30 +390,13 @@ int main(int argc, char *argv[])
     }
 
 
-    Info<< "Reading cell set from " << setName << nl << endl;
+    Info<< "Reading cell set from " << selectionName << nl << endl;
 
-    // Create mesh subsetting engine
-    fvMeshSubset subsetter(mesh);
 
-    labelList exposedPatchIDs;
+    // Default exposed patch id
+    labelList exposedPatchIDs(one(), -1);
 
-    if (args.found("patch"))
-    {
-        const word patchName = args["patch"];
-
-        exposedPatchIDs = { mesh.boundaryMesh().findPatchID(patchName) };
-
-        if (exposedPatchIDs[0] == -1)
-        {
-            FatalErrorInFunction
-                << nl << "Valid patches are " << mesh.boundaryMesh().names()
-                << exit(FatalError);
-        }
-
-        Info<< "Adding exposed internal faces to patch " << patchName
-            << nl << endl;
-    }
-    else if (args.found("patches"))
+    if (args.found("patches"))
     {
         const wordRes patchNames(args.readList<wordRe>("patches"));
 
@@ -420,42 +404,77 @@ int main(int argc, char *argv[])
 
         Info<< "Adding exposed internal faces to nearest of patches "
             << patchNames << nl << endl;
+
+        if (exposedPatchIDs.empty())
+        {
+            FatalErrorInFunction
+                << nl << "No patches matched. Patches: "
+                << mesh.boundaryMesh().names()
+                << exit(FatalError);
+        }
+
+    }
+    else if (args.found("patch"))
+    {
+        const word patchName = args["patch"];
+
+        exposedPatchIDs.first() = mesh.boundaryMesh().findPatchID(patchName);
+
+        Info<< "Adding exposed internal faces to patch " << patchName
+            << nl << endl;
+
+        if (exposedPatchIDs.first() == -1)
+        {
+            FatalErrorInFunction
+                << nl << "No such patch. Patches: "
+                << mesh.boundaryMesh().names()
+                << exit(FatalError);
+        }
     }
     else
     {
         Info<< "Adding exposed internal faces to a patch called"
             << " \"oldInternalFaces\" (created if necessary)" << endl
             << endl;
-        exposedPatchIDs = { -1 };
     }
 
 
-    cellSet currentSet(mesh, setName);
+    // Mesh subsetting engine
+    fvMeshSubset subsetter(mesh);
 
-    if (exposedPatchIDs.size() == 1)
-    {
-        subsetter.setLargeCellSubset(currentSet, exposedPatchIDs[0], true);
-    }
-    else
-    {
-        // Find per face the nearest patch
-        labelList nearestExposedPatch(nearestPatch(mesh, exposedPatchIDs));
+    cellSet currentSet(mesh, selectionName);
 
-        labelList region(mesh.nCells(), 0);
-        forAllConstIter(cellSet, currentSet, iter)
+    {
+        bitSet selectedCells = BitSetOps::create(mesh.nCells(), currentSet);
+
+        if (exposedPatchIDs.size() == 1)
         {
-            region[iter.key()] = 1;
+            // Single patch for exposed faces
+            subsetter.setCellSubset
+            (
+                selectedCells,
+                exposedPatchIDs.first(),
+                true
+            );
         }
+        else
+        {
+            // The nearest patch per face
+            labelList nearestExposedPatch(nearestPatch(mesh, exposedPatchIDs));
 
-        labelList exposedFaces(subsetter.getExposedFaces(region, 1, true));
-        subsetter.setLargeCellSubset
-        (
-            region,
-            1,
-            exposedFaces,
-            labelUIndList(nearestExposedPatch, exposedFaces)(),
-            true
-        );
+            labelList exposedFaces
+            (
+                subsetter.getExposedFaces(selectedCells, true)
+            );
+
+            subsetter.setCellSubset
+            (
+                selectedCells,
+                exposedFaces,
+                labelUIndList(nearestExposedPatch, exposedFaces)(),
+                true
+            );
+        }
     }
 
 

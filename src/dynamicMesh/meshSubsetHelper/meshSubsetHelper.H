@@ -39,13 +39,12 @@ SourceFiles
 #include "fvMeshSubset.H"
 #include "zeroGradientFvPatchField.H"
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class Time;
 
 /*---------------------------------------------------------------------------*\
@@ -65,6 +64,8 @@ public:
         };
 
 
+private:
+
     // Private data
 
         //- Reference to mesh
@@ -78,6 +79,9 @@ public:
 
         //- Name of current cellSet/cellZone (or empty)
         const word name_;
+
+        //- Patch ID for exposed internal faces
+        const label exposedPatchId_;
 
 
     // Private Member Functions
@@ -101,7 +105,8 @@ public:
         (
             fvMesh& baseMesh,
             const subsetType,
-            const word& name
+            const word& name,
+            const label exposedPatchId = -1
         );
 
 
@@ -121,13 +126,13 @@ public:
             return subsetter_;
         }
 
-        //- Check if running a sub-mesh is being used
+        //- Check if a sub-mesh is being used
         inline bool useSubMesh() const
         {
             return type_ != NONE;
         }
 
-        //- Access either mesh or submesh
+        //- Access either base-mesh or sub-mesh
         inline const fvMesh& mesh() const
         {
             if (useSubMesh())
@@ -164,7 +169,7 @@ public:
                 Type,
                 fvPatchField,
                 volMesh
-            >::Internal&
+            >::Internal& fld
         );
 
 
@@ -175,7 +180,7 @@ public:
         tmp<GeometricField<Type, fvPatchField, volMesh>>
         interpolate
         (
-            const GeometricField<Type, fvPatchField, volMesh>&
+            const GeometricField<Type, fvPatchField, volMesh>& fld
         ) const;
 
 
@@ -189,12 +194,11 @@ public:
                 Type,
                 fvPatchField,
                 volMesh
-            >::Internal&
+            >::Internal& fld
         ) const;
 
 
-        //- Map volume field (does in fact do very little interpolation;
-        //  just copied from fvMeshSubset)
+        //- Map volume field. Just forwards to fvMeshSubset
         template<class GeoField>
         tmp<GeoField> interpolate(const GeoField& fld) const;
 };

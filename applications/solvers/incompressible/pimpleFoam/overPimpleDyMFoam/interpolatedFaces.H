@@ -25,10 +25,15 @@ labelList receptorNeigCell(mesh.nInternalFaces(), -1);
     PtrList<fvMeshSubset> meshParts(nZones);
     labelList nCellsPerZone(nZones, 0);
 
-    forAll(nCellsPerZone, zoneI)
+    // A mesh subset for each zone
+    forAll(meshParts, zonei)
     {
-        meshParts.set(zoneI, new fvMeshSubset(mesh));
-        meshParts[zoneI].setLargeCellSubset(zoneID, zoneI);
+        meshParts.set
+        (
+            zonei,
+            // Select cells where the zoneID == zonei
+            new fvMeshSubset(mesh, zonei, zoneID)
+        );
     }
 
     for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)

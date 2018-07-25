@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -462,10 +462,14 @@ Foam::cellCellStencils::trackingInverseDistance::trackingInverseDistance
         meshParts_.setSize(nZones);
         forAll(meshParts_, zonei)
         {
-            meshParts_.set(zonei, new fvMeshSubset(mesh_));
-            meshParts_[zonei].setLargeCellSubset(zoneID, zonei);
-            // Trigger early evaluation of mesh dimension (in case there are
-            // locally zero cells in mesh)
+            meshParts_.set
+            (
+                zonei,
+                new fvMeshSubset(mesh_, zonei, zoneID)
+            );
+
+            // Trigger early evaluation of mesh dimension
+            // (in case there are locally zero cells in mesh)
             (void)meshParts_[zonei].subMesh().nGeometricD();
         }
 

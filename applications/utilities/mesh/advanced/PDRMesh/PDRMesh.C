@@ -51,6 +51,7 @@ Description
 #include "fvMeshSubset.H"
 #include "argList.H"
 #include "cellSet.H"
+#include "BitOps.H"
 #include "IOobjectList.H"
 #include "volFields.H"
 #include "mapPolyMesh.H"
@@ -774,19 +775,19 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //
 
-    // Create mesh subsetting engine
-    fvMeshSubset subsetter(mesh);
-
-    {
-
-        cellSet blockedCells(mesh, blockedSetName);
-
-        // invert
-        blockedCells.invert(mesh.nCells());
-
-        // Create subsetted mesh.
-        subsetter.setLargeCellSubset(blockedCells, defaultPatchi, true);
-    }
+    // Mesh subsetting engine
+    fvMeshSubset subsetter
+    (
+        mesh,
+        BitSetOps::create
+        (
+            mesh.nCells(),
+            cellSet(mesh, blockedSetName), // Blocked cells as labelHashSet
+            false  // on=false: invert logic => retain the unblocked cells
+        ),
+        defaultPatchi,
+        true
+    );
 
 
     // Subset wantedPatch. Note that might also include boundary faces

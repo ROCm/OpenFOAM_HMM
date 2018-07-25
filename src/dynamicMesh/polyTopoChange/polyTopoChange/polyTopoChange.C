@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +39,7 @@ License
 #include "processorPolyPatch.H"
 #include "fvMesh.H"
 #include "CompactListList.H"
+#include "HashOps.H"
 #include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -181,23 +182,6 @@ void Foam::polyTopoChange::countMap
             nMerge++;
         }
     }
-}
-
-
-Foam::labelHashSet Foam::polyTopoChange::getSetIndices
-(
-    const bitSet& lst
-)
-{
-    labelHashSet values(lst.count());
-    forAll(lst, i)
-    {
-        if (lst[i])
-        {
-            values.insert(i);
-        }
-    }
-    return values;
 }
 
 
@@ -3192,7 +3176,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
     labelListList faceZonePointMap(mesh.faceZones().size());
     calcFaceZonePointMap(mesh, oldFaceZoneMeshPointMaps, faceZonePointMap);
 
-    labelHashSet flipFaceFluxSet(getSetIndices(flipFaceFlux_));
+    labelHashSet flipFaceFluxSet(HashSetOps::used(flipFaceFlux_));
 
     return autoPtr<mapPolyMesh>::New
     (
@@ -3483,7 +3467,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
         writeMeshStats(mesh, Pout);
     }
 
-    labelHashSet flipFaceFluxSet(getSetIndices(flipFaceFlux_));
+    labelHashSet flipFaceFluxSet(HashSetOps::used(flipFaceFlux_));
 
     return autoPtr<mapPolyMesh>::New
     (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2014-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -721,12 +721,16 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
     PtrList<fvMeshSubset> meshParts(nZones);
 
     Info<< incrIndent;
-    forAll(nCellsPerZone, zoneI)
+    forAll(meshParts, zonei)
     {
-        Info<< indent<< "zone:" << zoneI << " nCells:" << nCellsPerZone[zoneI]
-            << endl;
-        meshParts.set(zoneI, new fvMeshSubset(mesh_));
-        meshParts[zoneI].setLargeCellSubset(zoneID, zoneI);
+        Info<< indent<< "zone:" << zonei << " nCells:"
+            << nCellsPerZone[zonei] << nl;
+
+        meshParts.set
+        (
+            zonei,
+            new fvMeshSubset(mesh_, zonei, zoneID)
+        );
     }
     Info<< decrIndent;
 

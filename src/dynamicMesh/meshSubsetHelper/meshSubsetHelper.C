@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "meshSubsetHelper.H"
-
 #include "cellSet.H"
 #include "cellZone.H"
 #include "Time.H"
@@ -39,7 +38,8 @@ Foam::meshSubsetHelper::meshSubsetHelper
     baseMesh_(baseMesh),
     subsetter_(baseMesh),
     type_(NONE),
-    name_()
+    name_(),
+    exposedPatchId_(-1)
 {
     correct();
 }
@@ -49,13 +49,15 @@ Foam::meshSubsetHelper::meshSubsetHelper
 (
     fvMesh& baseMesh,
     const subsetType type,
-    const word& name
+    const word& name,
+    const label exposedPatchId
 )
 :
     baseMesh_(baseMesh),
     subsetter_(baseMesh),
     type_(name.empty() ? NONE : type),
-    name_(name)
+    name_(name),
+    exposedPatchId_(exposedPatchId)
 {
     correct();
 }
@@ -72,9 +74,10 @@ void Foam::meshSubsetHelper::correct(bool verbose)
             Info<< "Subsetting mesh based on cellSet " << name_ << endl;
         }
 
-        subsetter_.setLargeCellSubset
+        subsetter_.setCellSubset
         (
-            cellSet(baseMesh_, name_)
+            cellSet(baseMesh_, name_),
+            exposedPatchId_
         );
     }
     else if (type_ == ZONE)
@@ -84,8 +87,11 @@ void Foam::meshSubsetHelper::correct(bool verbose)
             Info<< "Subsetting mesh based on cellZone " << name_ << endl;
         }
 
-        labelHashSet subset(baseMesh_.cellZones()[name_]);
-        subsetter_.setLargeCellSubset(subset, 0);
+        subsetter_.setCellSubset
+        (
+            baseMesh_.cellZones()[name_],
+            exposedPatchId_
+        );
     }
 }
 

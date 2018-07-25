@@ -2022,14 +2022,12 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             //OPstream str(Pstream::commsTypes::blocking, recvProc);
             UOPstream str(recvProc, pBufs);
 
-            // Mesh subsetting engine
-            fvMeshSubset subsetter(mesh_);
-
-            // Subset the cells of the current domain.
-            subsetter.setLargeCellSubset
+            // Mesh subsetting engine - subset the cells of the current domain.
+            fvMeshSubset subsetter
             (
-                distribution,
+                mesh_,
                 recvProc,
+                distribution,
                 oldInternalPatchi,  // oldInternalFaces patch
                 false               // no parallel sync
             );

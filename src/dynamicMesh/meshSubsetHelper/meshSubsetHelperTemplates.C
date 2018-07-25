@@ -24,11 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "meshSubsetHelper.H"
-#include "fvMesh.H"
 #include "volFields.H"
-#include "globalIndex.H"
-#include "zeroGradientFvPatchField.H"
-
 
 // * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * * //
 
@@ -49,20 +45,18 @@ Foam::meshSubsetHelper::zeroGradientField
     io.writeOpt() = IOobject::NO_WRITE;
     io.registerObject() = false;
 
-    tmp<GeometricField<Type, fvPatchField, volMesh>> tvf
+    auto tfield = tmp<GeometricField<Type, fvPatchField, volMesh>>::New
     (
-        new GeometricField<Type, fvPatchField, volMesh>
-        (
-            io,
-            df.mesh(),
-            dimensioned<Type>(df.dimensions(), Zero),
-            zeroGradientFvPatchField<Type>::typeName
-        )
+        io,
+        df.mesh(),
+        dimensioned<Type>(df.dimensions(), Zero),
+        zeroGradientFvPatchField<Type>::typeName
     );
-    tvf.ref().primitiveFieldRef() = df;
-    tvf.ref().correctBoundaryConditions();
+    tfield.ref().primitiveFieldRef() = df;
+    tfield.ref().oriented() = df.oriented();
+    tfield.ref().correctBoundaryConditions();
 
-    return tvf;
+    return tfield;
 }
 
 
@@ -75,18 +69,14 @@ Foam::meshSubsetHelper::interpolate
 {
     if (subsetter_.hasSubMesh())
     {
-        tmp<GeometricField<Type, fvPatchField, volMesh>> tfld
-        (
-            subsetter_.interpolate(vf)
-        );
-        tfld.ref().checkOut();
-        tfld.ref().rename(vf.name());
-        return tfld;
+        auto tfield(subsetter_.interpolate(vf));
+
+        tfield.ref().checkOut();
+        tfield.ref().rename(vf.name());
+        return tfield;
     }
-    else
-    {
-        return vf;
-    }
+
+    return vf;
 }
 
 
@@ -102,17 +92,14 @@ Foam::meshSubsetHelper::interpolate
     >::Internal& df
 ) const
 {
-    tmp<GeometricField<Type, fvPatchField, volMesh>> tvf =
-        zeroGradientField<Type>(df);
+    auto tfield = zeroGradientField<Type>(df);
 
     if (subsetter_.hasSubMesh())
     {
-        return interpolate<Type>(tvf());
+        return interpolate<Type>(tfield());
     }
-    else
-    {
-        return tvf;
-    }
+
+    return tfield;
 }
 
 
@@ -125,15 +112,13 @@ Foam::meshSubsetHelper::interpolate
 {
     if (subsetter_.hasSubMesh())
     {
-        tmp<GeoField> subFld = subsetter_.interpolate(fld);
-        subFld.ref().checkOut();
-        subFld.ref().rename(fld.name());
-        return subFld;
+        tmp<GeoField> tfield = subsetter_.interpolate(fld);
+        tfield.ref().checkOut();
+        tfield.ref().rename(fld.name());
+        return tfield;
     }
-    else
-    {
-        return fld;
-    }
+
+    return fld;
 }
 
 

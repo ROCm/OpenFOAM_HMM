@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1657,11 +1657,14 @@ bool Foam::cellCellStencils::inverseDistance::update()
         List<treeBoundBoxList> procBb(Pstream::nProcs());
         procBb[Pstream::myProcNo()].setSize(nZones);
 
-        forAll(nCellsPerZone, zoneI)
+        forAll(meshParts, zonei)
         {
-            meshParts.set(zoneI, new fvMeshSubset(mesh_));
-            meshParts[zoneI].setLargeCellSubset(zoneID, zoneI);
-            const fvMesh& subMesh = meshParts[zoneI].subMesh();
+            meshParts.set
+            (
+                zonei,
+                new fvMeshSubset(mesh_, zonei, zoneID)
+            );
+            const fvMesh& subMesh = meshParts[zonei].subMesh();
 
             // Trigger early evaluation of mesh dimension (in case there are
             // zero cells in mesh)
@@ -1669,19 +1672,19 @@ bool Foam::cellCellStencils::inverseDistance::update()
 
             if (subMesh.nPoints())
             {
-                procBb[Pstream::myProcNo()][zoneI] =
+                procBb[Pstream::myProcNo()][zonei] =
                     treeBoundBox(subMesh.points());
-                procBb[Pstream::myProcNo()][zoneI].inflate(1e-6);
+                procBb[Pstream::myProcNo()][zonei].inflate(1e-6);
             }
             else
             {
                 // No part of zone on this processor. Make up bb.
-                procBb[Pstream::myProcNo()][zoneI] = treeBoundBox
+                procBb[Pstream::myProcNo()][zonei] = treeBoundBox
                 (
                     allBb.min() - 2*allBb.span(),
                     allBb.min() - allBb.span()
                 );
-                procBb[Pstream::myProcNo()][zoneI].inflate(1e-6);
+                procBb[Pstream::myProcNo()][zonei].inflate(1e-6);
             }
         }
 

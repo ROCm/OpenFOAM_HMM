@@ -78,12 +78,12 @@ void Foam::sampledCuttingPlane::createGeometry()
 
         subMeshPtr_.reset
         (
-            new fvMeshSubset(static_cast<const fvMesh&>(mesh()))
-        );
-        subMeshPtr_().setLargeCellSubset
-        (
-            labelHashSet(mesh().cellZones()[zoneID_.index()]),
-            exposedPatchi
+            new fvMeshSubset
+            (
+                static_cast<const fvMesh&>(mesh()),
+                mesh().cellZones()[zoneID_.index()],
+                exposedPatchi
+            )
         );
     }
 

@@ -89,8 +89,11 @@ Foam::labelList Foam::structuredDecomp::decompose
     }
 
     // Subset the layer of cells next to the patch
-    fvMeshSubset subsetter(dynamic_cast<const fvMesh&>(mesh));
-    subsetter.setLargeCellSubset(patchCells);
+    fvMeshSubset subsetter
+    (
+        dynamic_cast<const fvMesh&>(mesh),
+        patchCells
+    );
     const fvMesh& subMesh = subsetter.subMesh();
     pointField subCc(cc, subsetter.cellMap());
     scalarField subWeights(cWeights, subsetter.cellMap());

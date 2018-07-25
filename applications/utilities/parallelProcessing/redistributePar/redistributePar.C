@@ -872,30 +872,23 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             // Find last non-processor patch.
             const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-            label nonProcI = -1;
+            const label nonProcI = (patches.nNonProcessor() - 1);
 
-            forAll(patches, patchI)
-            {
-                if (isA<processorPolyPatch>(patches[patchI]))
-                {
-                    break;
-                }
-                nonProcI++;
-            }
-
-            if (nonProcI == -1)
+            if (nonProcI < 0)
             {
                 FatalErrorInFunction
                     << "Cannot find non-processor patch on processor "
-                    << Pstream::myProcNo() << endl
+                    << Pstream::myProcNo() << nl
                     << " Current patches:" << patches.names()
                     << abort(FatalError);
             }
 
-            // Subset 0 cells, no parallel comms. This is used to create
-            // zero-sized fields.
-            subsetterPtr.reset(new fvMeshSubset(mesh));
-            subsetterPtr().setLargeCellSubset(labelHashSet(0), nonProcI, false);
+            // Subset 0 cells, no parallel comms.
+            // This is used to create zero-sized fields.
+            subsetterPtr.reset
+            (
+                new fvMeshSubset(mesh, bitSet(), nonProcI, false)
+            );
         }
 
 

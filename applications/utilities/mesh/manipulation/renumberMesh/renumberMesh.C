@@ -570,17 +570,16 @@ labelList regionRenumber
 
     label celli = 0;
 
-    forAll(regionToCells, regionI)
+    forAll(regionToCells, regioni)
     {
-        Info<< "    region " << regionI << " starts at " << celli << endl;
+        Info<< "    region " << regioni << " starts at " << celli << endl;
 
         // Make sure no parallel comms
-        bool oldParRun = UPstream::parRun();
+        const bool oldParRun = UPstream::parRun();
         UPstream::parRun() = false;
 
         // Per region do a reordering.
-        fvMeshSubset subsetter(mesh);
-        subsetter.setLargeCellSubset(cellToRegion, regionI);
+        fvMeshSubset subsetter(mesh, regioni, cellToRegion);
 
         const fvMesh& subMesh = subsetter.subMesh();
 
