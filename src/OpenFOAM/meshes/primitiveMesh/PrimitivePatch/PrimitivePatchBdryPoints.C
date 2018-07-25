@@ -65,8 +65,7 @@ calcBdryPoints() const
         bp.insert(curEdge.end());
     }
 
-    boundaryPointsPtr_ = new labelList(bp.toc());
-    sort(*boundaryPointsPtr_);
+    boundaryPointsPtr_ = new labelList(bp.sortedToc());
 
     if (debug)
     {

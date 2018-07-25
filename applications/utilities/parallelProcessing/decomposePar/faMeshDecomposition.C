@@ -1049,8 +1049,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
         }
 
         // Grab the result from the hash list
-        globallySharedPoints_ = gSharedPoints.toc();
-        sort(globallySharedPoints_);
+        globallySharedPoints_ = gSharedPoints.sortedToc();
     }
 
 

@@ -720,12 +720,9 @@ bool Foam::polyMeshZipUpCells(polyMesh& mesh)
         if (problemCells.size())
         {
             // This cycle has failed.  Print out the problem cells
-            labelList toc(problemCells.toc());
-            sort(toc);
-
             FatalErrorInFunction
                 << "Found " << problemCells.size() << " problem cells." << nl
-                << "Cells: " << toc
+                << "Cells: " << problemCells.sortedToc()
                 << abort(FatalError);
         }
 
