@@ -48,7 +48,6 @@ namespace Foam
 {
 
 // Forward declarations
-
 class bitSet;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -98,13 +97,13 @@ labelHashSet used(const UList<bool>& select);
 
 
 //- Transform the \a on locations to a bitSet.
+//  Ignored any negative values (invalid positions in a bitset).
 //
 //  \param locations the list of positions corresponding to an \a on bit.
 //
 //  \return a bitset
 //
-//  \note The operation necessarily discards any negative values since these
-//     are invalid positions in a bitset.
+//  \see BitSetOps::create for other possiblities
 bitSet bitset(const labelHashSet& locations);
 
 

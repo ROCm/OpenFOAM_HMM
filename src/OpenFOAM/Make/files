@@ -151,6 +151,7 @@ primitives/Barycentric2D/barycentric2D/barycentric2D.C
 
 containers/Bits/bitSet/bitSet.C
 containers/Bits/bitSet/bitSetIO.C
+containers/Bits/BitOps/BitOps.C
 containers/Bits/PackedList/PackedListCore.C
 containers/HashTables/HashOps/HashOps.C
 containers/HashTables/HashTable/HashTableCore.C
