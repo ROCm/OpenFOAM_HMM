@@ -86,7 +86,8 @@ Foam::argList::initValidTables::initValidTables()
     argList::addOption
     (
         "hostRoots", "(((host1 dir1) .. (hostN dirN))",
-        "slave root directories (per host) for distributed running"
+        "slave root directories (per host) for distributed running. "
+        "The host specification can use a regex."
     );
     validParOptions.set("hostRoots", "((host1 dir1) .. (hostN dirN))");
 
@@ -647,7 +648,7 @@ bool Foam::argList::regroupArgv(int& argc, char**& argv)
         args_[nArgs++] = group;
     }
 
-    args_.setSize(nArgs);
+    args_.resize(nArgs);
 
     std::string::size_type len = (nArgs-1); // Spaces between args
     forAll(args_, argi)
@@ -848,7 +849,7 @@ Foam::argList::argList
         }
     }
 
-    args_.setSize(nArgs);
+    args_.resize(nArgs);
 
     parse(checkArgs, checkOpts, initialise);
 }
@@ -1012,8 +1013,8 @@ void Foam::argList::parse
     {
         if (Pstream::master())
         {
-            slaveProcs.setSize(Pstream::nProcs() - 1);
-            slaveMachine.setSize(Pstream::nProcs() - 1);
+            slaveProcs.resize(Pstream::nProcs()-1);
+            slaveMachine.resize(Pstream::nProcs()-1);
             label proci = 0;
             for
             (
@@ -1027,11 +1028,11 @@ void Foam::argList::parse
                 string slaveBuild;
                 label slavePid;
                 fromSlave >> slaveBuild >> slaveMachine[proci] >> slavePid;
+
                 slaveProcs[proci] = slaveMachine[proci] + "." + name(slavePid);
                 proci++;
 
-                // Check build string to make sure all processors are running
-                // the same build
+                // Verify that all processors are running the same build
                 if (slaveBuild != Foam::FOAMbuild)
                 {
                     FatalErrorIn(executable())
@@ -1113,37 +1114,35 @@ void Foam::argList::parse
             }
             else if (options_.found("hostRoots"))
             {
-                source = "-hostRoots";
-                IStringStream is(options_["hostRoots"]);
-                List<Tuple2<wordRe, fileName>> hostRoots(is);
+                roots.resize(Pstream::nProcs()-1, fileName::null);
 
-                roots.setSize(Pstream::nProcs()-1);
-                forAll(hostRoots, i)
+                source = "-hostRoots";
+                ITstream is = this->lookup("hostRoots");
+                List<Tuple2<wordRe, fileName>> hostRoots(is);
+                warnTrailing(is, "hostRoots");
+
+                for (const auto& hostRoot : hostRoots)
                 {
-                    const Tuple2<wordRe, fileName>& hostRoot = hostRoots[i];
                     const wordRe& re = hostRoot.first();
-                    labelList matchedRoots(findStrings(re, slaveMachine));
-                    forAll(matchedRoots, matchi)
+                    labelList matched(findStrings(re, slaveMachine));
+                    for (const label slavei : matched)
                     {
-                        label slavei = matchedRoots[matchi];
-                        if (roots[slavei] != wordRe())
+                        if (!roots[slavei].empty())
                         {
                             FatalErrorInFunction
                                 << "Slave " << slaveMachine[slavei]
                                 << " has multiple matching roots in "
                                 << hostRoots << exit(FatalError);
                         }
-                        else
-                        {
-                            roots[slavei] = hostRoot.second();
-                        }
+
+                        roots[slavei] = hostRoot.second();
                     }
                 }
 
                 // Check
                 forAll(roots, slavei)
                 {
-                    if (roots[slavei] == wordRe())
+                    if (roots[slavei].empty())
                     {
                         FatalErrorInFunction
                             << "Slave " << slaveMachine[slavei]
@@ -1188,7 +1187,7 @@ void Foam::argList::parse
             if (roots.size() == 1)
             {
                 const fileName rootName(roots[0]);
-                roots.setSize(Pstream::nProcs()-1, rootName);
+                roots.resize(Pstream::nProcs()-1, rootName);
 
                 // adjust dictNProcs for command-line '-roots' option
                 if (dictNProcs < 0)

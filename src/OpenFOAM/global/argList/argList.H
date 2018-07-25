@@ -105,6 +105,9 @@ SourceFiles
 #include "ITstream.H"
 #include <utility>
 
+// Transitional features - older style access (including 1712 release)
+#define Foam_argList_1712
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -374,65 +377,6 @@ public:
         inline bool readListIfPresent(const word& optName, List<T>& list) const;
 
 
-    // Older style access (including 1712 release)
-
-        //- Read a value from the argument at index.
-        //  Index 1 is the first non-option argument.
-        //  \deprecated in favour of read() - JAN-2018
-        template<class T>
-        inline T argRead(const label index) const;
-
-        //- Return true if the named option is found
-        //  \deprecated in favour of found() - JAN-2018
-        inline bool optionFound(const word& optName) const;
-
-        //- Return an input stream from the named option
-        //  \deprecated in favour of lookup() - JAN-2018
-        inline ITstream optionLookup(const word& optName) const;
-
-        //- Read a value from the named option
-        //  \deprecated in favour of opt() - JAN-2018
-        template<class T>
-        inline T optionRead(const word& optName) const;
-
-        //- Read a value from the named option if present.
-        //  Return true if the named option was found.
-        //  \deprecated in favour of readIfPresent() - JAN-2018
-        template<class T>
-        inline bool optionReadIfPresent
-        (
-            const word& optName,
-            T& val
-        ) const;
-
-        //- Read a value from the named option if present.
-        //  Return true if the named option was found, otherwise
-        //  use the supplied default and return false.
-        //  \deprecated in favour of readIfPresent() - JAN-2018
-        template<class T>
-        inline bool optionReadIfPresent
-        (
-            const word& optName,
-            T& val,
-            const T& deflt
-        ) const;
-
-        //- Read a value from the named option if present.
-        //  Return supplied default otherwise.
-        //  \deprecated in favour of lookupOrDefault() - JAN-2018
-        template<class T>
-        inline T optionLookupOrDefault
-        (
-            const word& optName,
-            const T& deflt
-        ) const;
-
-        //- Read a List of values from the named option
-        //  \deprecated in favour of readList() - JAN-2018
-        template<class T>
-        inline List<T> optionReadList(const word& optName) const;
-
-
     // Edit
 
         //- Append a (mandatory) argument to validArgs
@@ -571,6 +515,93 @@ public:
 
         //- The string associated with the named option
         inline const string& operator[](const word& optName) const;
+
+
+    // Older style access (including 1712 release)
+
+    #ifdef Foam_argList_1712
+
+        //- Read a value from the argument at index.
+        //  Index 1 is the first non-option argument.
+        //  \deprecated in favour of read() - JAN-2018
+        template<class T>
+        inline T argRead(const label index) const
+        {
+            return this->read<T>(index);
+        }
+
+        //- Return true if the named option is found
+        //  \deprecated in favour of found() - JAN-2018
+        inline bool optionFound(const word& optName) const
+        {
+            return found(optName);
+        }
+
+        //- Return an input stream from the named option
+        //  \deprecated in favour of lookup() - JAN-2018
+        inline ITstream optionLookup(const word& optName) const
+        {
+            return lookup(optName);
+        }
+
+        //- Read a value from the named option
+        //  \deprecated in favour of opt() - JAN-2018
+        template<class T>
+        inline T optionRead(const word& optName) const
+        {
+            return opt<T>(optName);
+        }
+
+        //- Read a value from the named option if present.
+        //  Return true if the named option was found.
+        //  \deprecated in favour of readIfPresent() - JAN-2018
+        template<class T>
+        inline bool optionReadIfPresent
+        (
+            const word& optName,
+            T& val
+        ) const
+        {
+            return readIfPresent<T>(optName, val);
+        }
+
+        //- Read a value from the named option if present.
+        //  Return true if the named option was found, otherwise
+        //  use the supplied default and return false.
+        //  \deprecated in favour of readIfPresent() - JAN-2018
+        template<class T>
+        inline bool optionReadIfPresent
+        (
+            const word& optName,
+            T& val,
+            const T& deflt
+        ) const
+        {
+            return readIfPresent<T>(optName, val, deflt);
+        }
+
+        //- Read a value from the named option if present.
+        //  Return supplied default otherwise.
+        //  \deprecated in favour of lookupOrDefault() - JAN-2018
+        template<class T>
+        inline T optionLookupOrDefault
+        (
+            const word& optName,
+            const T& deflt
+        ) const
+        {
+            return lookupOrDefault<T>(optName, deflt);
+        }
+
+        //- Read a List of values from the named option
+        //  \deprecated in favour of readList() - JAN-2018
+        template<class T>
+        inline List<T> optionReadList(const word& optName) const
+        {
+            return this->readList<T>(optName);
+        }
+
+    #endif  /* Foam_argList_1712 */
 
 };
 

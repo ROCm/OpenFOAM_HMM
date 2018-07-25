@@ -211,7 +211,6 @@ namespace Foam
     {
         return options_[optName];
     }
-
 }
 
 
@@ -356,74 +355,6 @@ inline const Foam::string& Foam::argList::operator[](const label index) const
 inline const Foam::string& Foam::argList::operator[](const word& optName) const
 {
     return options_[optName];
-}
-
-
-// * * * * * * * * * * * * * * * Compatibility * * * * * * * * * * * * * * * //
-
-
-template<class T>
-inline T Foam::argList::argRead(const label index) const
-{
-    return this->read<T>(index);
-}
-
-
-inline bool Foam::argList::optionFound(const word& optName) const
-{
-    return found(optName);
-}
-
-
-inline Foam::ITstream Foam::argList::optionLookup(const word& optName) const
-{
-    return lookup(optName);
-}
-
-
-template<class T>
-inline T Foam::argList::optionRead(const word& optName) const
-{
-    return opt<T>(optName);
-}
-
-
-template<class T>
-inline bool
-Foam::argList::optionReadIfPresent(const word& optName, T& val) const
-{
-    return readIfPresent<T>(optName, val);
-}
-
-
-template<class T>
-inline bool Foam::argList::optionReadIfPresent
-(
-    const word& optName,
-    T& val,
-    const T& deflt
-) const
-{
-    return readIfPresent<T>(optName, val, deflt);
-}
-
-
-template<class T>
-inline T Foam::argList::optionLookupOrDefault
-(
-    const word& optName,
-    const T& deflt
-) const
-{
-    return lookupOrDefault<T>(optName, deflt);
-}
-
-
-template<class T>
-inline Foam::List<T>
-Foam::argList::optionReadList(const word& optName) const
-{
-    return this->readList<T>(optName);
 }
 
 
