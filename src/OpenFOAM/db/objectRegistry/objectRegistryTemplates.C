@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +69,8 @@ Foam::wordList Foam::objectRegistry::namesImpl
     {
         if (isA<Type>(*iter()) && matcher(iter()->name()))
         {
-            objNames[count++] = iter()->name();
+            objNames[count] = iter()->name();
+            ++count;
         }
     }
 
@@ -101,10 +102,14 @@ Foam::wordList Foam::objectRegistry::names(const wordRe& matcher) const
 
 
 template<class Type>
-Foam::wordList Foam::objectRegistry::names
-(
-    const wordRes& matcher
-) const
+Foam::wordList Foam::objectRegistry::names(const wordRes& matcher) const
+{
+    return namesImpl<Type>(*this, matcher, false);
+}
+
+
+template<class Type>
+Foam::wordList Foam::objectRegistry::names(const wordHashSet& matcher) const
 {
     return namesImpl<Type>(*this, matcher, false);
 }
@@ -118,10 +123,14 @@ Foam::wordList Foam::objectRegistry::sortedNames() const
 
 
 template<class Type>
-Foam::wordList Foam::objectRegistry::sortedNames
-(
-    const wordRe& matcher
-) const
+Foam::wordList Foam::objectRegistry::sortedNames(const wordRe& matcher) const
+{
+    return namesImpl<Type>(*this, matcher, true);
+}
+
+
+template<class Type>
+Foam::wordList Foam::objectRegistry::sortedNames(const wordRes& matcher) const
 {
     return namesImpl<Type>(*this, matcher, true);
 }
@@ -130,7 +139,7 @@ Foam::wordList Foam::objectRegistry::sortedNames
 template<class Type>
 Foam::wordList Foam::objectRegistry::sortedNames
 (
-    const wordRes& matcher
+    const wordHashSet& matcher
 ) const
 {
     return namesImpl<Type>(*this, matcher, true);
@@ -198,10 +207,8 @@ bool Foam::objectRegistry::foundObject
     {
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

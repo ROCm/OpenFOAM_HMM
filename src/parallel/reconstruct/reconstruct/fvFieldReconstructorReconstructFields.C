@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,15 +56,12 @@ Foam::fvFieldReconstructor::reconstructFvVolumeInternalField
         );
     }
 
-    tmp<DimensionedField<Type, volMesh>> tfield
+    auto tfield = tmp<DimensionedField<Type, volMesh>>::New
     (
-        new DimensionedField<Type, volMesh>
-        (
-            fieldIoObject,
-            mesh_,
-            procFields[0].dimensions(),
-            internalField
-        )
+        fieldIoObject,
+        mesh_,
+        procFields[0].dimensions(),
+        internalField
     );
 
     tfield.ref().oriented() = procFields[0].oriented();
@@ -105,7 +102,6 @@ Foam::fvFieldReconstructor::reconstructFvVolumeInternalField
             )
         );
     }
-
 
     return reconstructFvVolumeInternalField
     (
@@ -286,16 +282,13 @@ Foam::fvFieldReconstructor::reconstructFvVolumeField
 
     // Now construct and write the field
     // setting the internalField and patchFields
-    tmp<GeometricField<Type, fvPatchField, volMesh>> tfield
+    auto tfield = tmp<GeometricField<Type, fvPatchField, volMesh>>::New
     (
-        new GeometricField<Type, fvPatchField, volMesh>
-        (
-            fieldIoObject,
-            mesh_,
-            procFields[0].dimensions(),
-            internalField,
-            patchFields
-        )
+        fieldIoObject,
+        mesh_,
+        procFields[0].dimensions(),
+        internalField,
+        patchFields
     );
 
     tfield.ref().oriented() = procFields[0].oriented();
@@ -531,16 +524,13 @@ Foam::fvFieldReconstructor::reconstructFvSurfaceField
 
     // Now construct and write the field
     // setting the internalField and patchFields
-    tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> tfield
+    auto tfield = tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>::New
     (
-        new GeometricField<Type, fvsPatchField, surfaceMesh>
-        (
-            fieldIoObject,
-            mesh_,
-            procFields[0].dimensions(),
-            internalField,
-            patchFields
-        )
+        fieldIoObject,
+        mesh_,
+        procFields[0].dimensions(),
+        internalField,
+        patchFields
     );
 
     tfield.ref().oriented() = procFields[0].oriented();
@@ -604,31 +594,30 @@ void Foam::fvFieldReconstructor::reconstructFvVolumeInternalFields
     const wordHashSet& selectedFields
 )
 {
-    const word& fieldClassName = DimensionedField<Type, volMesh>::typeName;
+    const word& clsName = DimensionedField<Type, volMesh>::typeName;
 
-    IOobjectList fields = objects.lookupClass(fieldClassName);
+    const wordList fieldNames =
+    (
+        selectedFields.empty()
+      ? objects.sortedNames(clsName)
+      : objects.sortedNames(clsName, selectedFields)
+    );
 
-    if (fields.size())
+    if (fieldNames.size())
     {
-        Info<< "    Reconstructing " << fieldClassName << "s\n" << endl;
-
-        forAllConstIter(IOobjectList, fields, fieldIter)
-        {
-            if
-            (
-                selectedFields.empty()
-             || selectedFields.found(fieldIter()->name())
-            )
-            {
-                Info<< "        " << fieldIter()->name() << endl;
-
-                reconstructFvVolumeInternalField<Type>(*fieldIter())().write();
-
-                nReconstructed_++;
-            }
-        }
-        Info<< endl;
+        Info<< "    Reconstructing " << clsName << "s\n" << nl;
     }
+
+    for (const word& fieldName : fieldNames)
+    {
+        Info<< "        " << fieldName << endl;
+
+        reconstructFvVolumeInternalField<Type>(*(objects[fieldName]))().write();
+
+        ++nReconstructed_;
+    }
+
+    if (fieldNames.size()) Info<< endl;
 }
 
 
@@ -639,32 +628,31 @@ void Foam::fvFieldReconstructor::reconstructFvVolumeFields
     const wordHashSet& selectedFields
 )
 {
-    const word& fieldClassName =
+    const word& clsName =
         GeometricField<Type, fvPatchField, volMesh>::typeName;
 
-    IOobjectList fields = objects.lookupClass(fieldClassName);
+    const wordList fieldNames =
+    (
+        selectedFields.empty()
+      ? objects.sortedNames(clsName)
+      : objects.sortedNames(clsName, selectedFields)
+    );
 
-    if (fields.size())
+    if (fieldNames.size())
     {
-        Info<< "    Reconstructing " << fieldClassName << "s\n" << endl;
-
-        forAllConstIter(IOobjectList, fields, fieldIter)
-        {
-            if
-            (
-                selectedFields.empty()
-             || selectedFields.found(fieldIter()->name())
-            )
-            {
-                Info<< "        " << fieldIter()->name() << endl;
-
-                reconstructFvVolumeField<Type>(*fieldIter())().write();
-
-                nReconstructed_++;
-            }
-        }
-        Info<< endl;
+        Info<< "    Reconstructing " << clsName << "s\n" << nl;
     }
+
+    for (const word& fieldName : fieldNames)
+    {
+        Info<< "        " << fieldName << endl;
+
+        reconstructFvVolumeField<Type>(*(objects[fieldName]))().write();
+
+        ++nReconstructed_;
+    }
+
+    if (fieldNames.size()) Info<< endl;
 }
 
 
@@ -675,32 +663,31 @@ void Foam::fvFieldReconstructor::reconstructFvSurfaceFields
     const wordHashSet& selectedFields
 )
 {
-    const word& fieldClassName =
+    const word& clsName =
         GeometricField<Type, fvsPatchField, surfaceMesh>::typeName;
 
-    IOobjectList fields = objects.lookupClass(fieldClassName);
+    const wordList fieldNames =
+    (
+        selectedFields.empty()
+      ? objects.sortedNames(clsName)
+      : objects.sortedNames(clsName, selectedFields)
+    );
 
-    if (fields.size())
+    if (fieldNames.size())
     {
-        Info<< "    Reconstructing " << fieldClassName << "s\n" << endl;
-
-        forAllConstIter(IOobjectList, fields, fieldIter)
-        {
-            if
-            (
-                selectedFields.empty()
-             || selectedFields.found(fieldIter()->name())
-            )
-            {
-                Info<< "        " << fieldIter()->name() << endl;
-
-                reconstructFvSurfaceField<Type>(*fieldIter())().write();
-
-                nReconstructed_++;
-            }
-        }
-        Info<< endl;
+        Info<< "    Reconstructing " << clsName << "s\n" << nl;
     }
+
+    for (const word& fieldName : fieldNames)
+    {
+        Info<< "        " << fieldName << endl;
+
+        reconstructFvSurfaceField<Type>(*(objects[fieldName]))().write();
+
+        ++nReconstructed_;
+    }
+
+    if (fieldNames.size()) Info<< endl;
 }
 
 

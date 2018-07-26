@@ -52,7 +52,7 @@ void Foam::lagrangianFieldDecomposer::readFields
     );
 
     label lagrangianFieldi = 0;
-    forAllIter(IOobjectList, lagrangianTypeObjects, iter)
+    forAllConstIters(lagrangianTypeObjects, iter)
     {
         lagrangianFields[cloudI].set
         (
@@ -97,7 +97,7 @@ void Foam::lagrangianFieldDecomposer::readFieldFields
 
     label lagrangianFieldi = 0;
 
-    forAllIter(IOobjectList, lagrangianTypeObjectsA, iter)
+    forAllConstIters(lagrangianTypeObjectsA, iter)
     {
         lagrangianFields[cloudI].set
         (
@@ -106,7 +106,7 @@ void Foam::lagrangianFieldDecomposer::readFieldFields
         );
     }
 
-    forAllIter(IOobjectList, lagrangianTypeObjectsB, iter)
+    forAllConstIters(lagrangianTypeObjectsB, iter)
     {
         lagrangianFields[cloudI].set
         (
@@ -129,22 +129,19 @@ Foam::lagrangianFieldDecomposer::decomposeField
     Field<Type> procField(field, particleIndices_);
 
     // Create the field for the processor
-    return tmp<IOField<Type>>
+    return tmp<IOField<Type>>::New
     (
-        new IOField<Type>
+        IOobject
         (
-            IOobject
-            (
-                field.name(),
-                procMesh_.time().timeName(),
-                cloud::prefix/cloudName,
-                procMesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            procField
-        )
+            field.name(),
+            procMesh_.time().timeName(),
+            cloud::prefix/cloudName,
+            procMesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        procField
     );
 }
 
@@ -161,22 +158,19 @@ Foam::lagrangianFieldDecomposer::decomposeFieldField
     Field<Field<Type>> procField(field, particleIndices_);
 
     // Create the field for the processor
-    return tmp<CompactIOField<Field<Type>, Type>>
+    return tmp<CompactIOField<Field<Type>, Type>>::New
     (
-        new CompactIOField<Field<Type>, Type>
+        IOobject
         (
-            IOobject
-            (
-                field.name(),
-                procMesh_.time().timeName(),
-                cloud::prefix/cloudName,
-                procMesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            procField
-        )
+            field.name(),
+            procMesh_.time().timeName(),
+            cloud::prefix/cloudName,
+            procMesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        procField
     );
 }
 

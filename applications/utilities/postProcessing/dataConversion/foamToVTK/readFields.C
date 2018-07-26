@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "readFields.H"
-#include "IOobjectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,37 +42,37 @@ label readFields
     PtrList<const GeoField>& fields
 )
 {
-    label nFields = 0;
-
-    // Available fields of type GeomField
-    const wordList fieldNames = objects.sortedNames(GeoField::typeName);
-
-    fields.setSize(fieldNames.size());
+    // Available fields of type GeoField, sorted order
+    const wordList fieldNames =
+    (
+        selectedFields.empty()
+      ? objects.sortedNames(GeoField::typeName)
+      : objects.sortedNames(GeoField::typeName, selectedFields)
+    );
 
     // Construct the fields
+    fields.resize(fieldNames.size());
+
+    label nFields = 0;
+
     for (const word& fieldName : fieldNames)
     {
-        if (selectedFields.empty() || selectedFields.found(fieldName))
-        {
-            fields.set
+        fields.set
+        (
+            nFields++,
+            proxy.interpolate
             (
-                nFields++,
-                proxy.interpolate
-                (
-                    GeoField(*(objects[fieldName]), mesh)
-                ).ptr()
-            );
-        }
+                GeoField(*(objects[fieldName]), mesh)
+            ).ptr()
+        );
     }
-
-    fields.setSize(nFields);
 
     return nFields;
 }
 
 
 template<class GeoField>
-void readFields
+label readFields
 (
     const typename GeoField::Mesh& mesh,
     const IOobjectList& objects,
@@ -81,26 +80,29 @@ void readFields
     PtrList<const GeoField>& fields
 )
 {
-    // Search list of objects for fields of type GeomField
-    IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
+    // Available fields of type GeoField, sorted order
+    const wordList fieldNames =
+    (
+        selectedFields.empty()
+      ? objects.sortedNames(GeoField::typeName)
+      : objects.sortedNames(GeoField::typeName, selectedFields)
+    );
 
     // Construct the fields
-    fields.setSize(fieldObjects.size());
+    fields.resize(fieldNames.size());
+
     label nFields = 0;
 
-    forAllIters(fieldObjects, iter)
+    for (const word& fieldName : fieldNames)
     {
-        if (selectedFields.empty() || selectedFields.found(iter()->name()))
-        {
-            fields.set
-            (
-                nFields++,
-                new GeoField(*iter(), mesh)
-            );
-        }
+        fields.set
+        (
+            nFields++,
+            new GeoField(*(objects[fieldName]), mesh)
+        );
     }
 
-    fields.setSize(nFields);
+    return nFields;
 }
 
 

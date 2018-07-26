@@ -81,9 +81,10 @@ int main(int argc, char *argv[])
                 << endl;
         }
 
-
-        const IOobjectList fieldObjs(mesh, runTime.timeName());
-        const wordList objNames = fieldObjs.names();
+        const wordList objNames
+        (
+            IOobjectList(mesh, runTime.timeName()).sortedNames()
+        );
 
         PtrList<volScalarField> vsf(objNames.size());
         PtrList<volVectorField> vvf(objNames.size());

@@ -39,7 +39,7 @@ void UnMapped(const IOobjectList& objects)
 {
     IOobjectList fields = objects.lookupClass(Type::typeName);
 
-    forAllConstIter(IOobjectList, fields, fieldIter)
+    forAllConstIters(fields, fieldIter)
     {
         mvBak(fieldIter()->objectPath(), "unmapped");
     }

@@ -29,7 +29,7 @@ License
 #include "IOList.H"
 #include "predicates.H"
 
-// * * * * * * * * * * * * * * Static Functions * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 namespace Foam
 {
@@ -45,18 +45,48 @@ namespace Foam
 
         forAllConstIters(list, iter)
         {
-            if (matcher(iter.key()))
+            const word& key = iter.key();
+            const IOobject* io = iter.object();
+
+            if (matcher(key))
             {
                 if (IOobject::debug)
                 {
-                    InfoInFunction << "Found " << iter.key() << endl;
+                    InfoInFunction << "Found " << key << endl;
                 }
 
-                results.set
-                (
-                    iter.key(),
-                    new IOobject(*(iter.object()))
-                );
+                results.set(key, new IOobject(*io));
+            }
+        }
+
+        return results;
+    }
+
+
+    // Templated implementation for lookupClass() - file-scope
+    template<class UnaryMatchPredicate>
+    static IOobjectList lookupClassImpl
+    (
+        const IOobjectList& list,
+        const word& clsName,
+        const UnaryMatchPredicate& matcher
+    )
+    {
+        IOobjectList results(list.size());
+
+        forAllConstIters(list, iter)
+        {
+            const word& key = iter.key();
+            const IOobject* io = iter.object();
+
+            if (clsName == io->headerClassName() && matcher(key))
+            {
+                if (IOobject::debug)
+                {
+                    InfoInFunction << "Found " << key << endl;
+                }
+
+                results.set(key, new IOobject(*io));
             }
         }
 
@@ -77,10 +107,13 @@ namespace Foam
         // Summary (key,val) = (class-name, object-names)
         forAllConstIters(list, iter)
         {
-            if (matcher(iter.key()))
+            const word& key = iter.key();
+            const IOobject* io = iter.object();
+
+            if (matcher(key))
             {
                 // Create entry (if needed) and insert
-                summary(iter.object()->headerClassName()).insert(iter.key());
+                summary(io->headerClassName()).insert(key);
             }
         }
 
@@ -103,13 +136,17 @@ namespace Foam
         label count = 0;
         forAllConstIters(list, iter)
         {
-            if (iter()->headerClassName() == clsName && matcher(iter.key()))
+            const word& key = iter.key();
+            const IOobject* io = iter.object();
+
+            if (clsName == io->headerClassName() && matcher(key))
             {
-                objNames[count++] = iter.key();
+                objNames[count] = key;
+                ++count;
             }
         }
 
-        objNames.setSize(count);
+        objNames.resize(count);
 
         if (doSort)
         {
@@ -118,7 +155,39 @@ namespace Foam
 
         return objNames;
     }
-}
+
+
+    // With syncPar = true, check that object names are the same on
+    // all processors. Trigger FatalError if not.
+    //
+    // The object names are sorted as a side-effect, since this is
+    // required for consistent ordering across all processors.
+    static bool checkNames(wordList& masterNames, const bool syncPar)
+    {
+        Foam::sort(masterNames);
+
+        if (syncPar && Pstream::parRun())
+        {
+            const wordList localNames(masterNames);
+            Pstream::scatter(masterNames);
+
+            if (localNames != masterNames)
+            {
+                FatalErrorInFunction
+                    << "Objects not synchronised across processors." << nl
+                    << "Master has " << flatOutput(masterNames) << nl
+                    << "Processor " << Pstream::myProcNo()
+                    << " has " << flatOutput(localNames)
+                    << exit(FatalError);
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -272,28 +341,15 @@ Foam::IOobjectList Foam::IOobjectList::lookup(const wordRes& matcher) const
 }
 
 
+Foam::IOobjectList Foam::IOobjectList::lookup(const wordHashSet& matcher) const
+{
+    return lookupImpl(*this, matcher);
+}
+
+
 Foam::IOobjectList Foam::IOobjectList::lookupClass(const word& clsName) const
 {
-    IOobjectList results(size());
-
-    forAllConstIters(*this, iter)
-    {
-        if (iter()->headerClassName() == clsName)
-        {
-            if (IOobject::debug)
-            {
-                InfoInFunction << "Found " << iter.key() << endl;
-            }
-
-            results.set
-            (
-                iter.key(),
-                new IOobject(*(iter.object()))
-            );
-        }
-    }
-
-    return results;
+    return lookupClassImpl(*this, clsName, predicates::always());
 }
 
 
@@ -317,6 +373,13 @@ Foam::IOobjectList::classes(const wordRes& matcher) const
 }
 
 
+Foam::HashTable<Foam::wordHashSet>
+Foam::IOobjectList::classes(const wordHashSet& matcher) const
+{
+    return classesImpl(*this, matcher);
+}
+
+
 Foam::wordList Foam::IOobjectList::names() const
 {
     return HashPtrTable<IOobject>::toc();
@@ -329,32 +392,21 @@ Foam::wordList Foam::IOobjectList::sortedNames() const
 }
 
 
+Foam::wordList Foam::IOobjectList::names(const bool syncPar) const
+{
+    wordList objNames(HashPtrTable<IOobject>::toc());
+
+    checkNames(objNames, syncPar);
+    return objNames;
+}
+
+
 Foam::wordList Foam::IOobjectList::names
 (
     const word& clsName
 ) const
 {
     return namesImpl(*this, clsName, predicates::always(), false);
-}
-
-
-Foam::wordList Foam::IOobjectList::names
-(
-    const word& clsName,
-    const wordRe& matcher
-) const
-{
-    return namesImpl(*this, clsName, matcher, false);
-}
-
-
-Foam::wordList Foam::IOobjectList::names
-(
-    const word& clsName,
-    const wordRes& matcher
-) const
-{
-    return namesImpl(*this, clsName, matcher, false);
 }
 
 
@@ -367,6 +419,29 @@ Foam::wordList Foam::IOobjectList::sortedNames
 }
 
 
+Foam::wordList Foam::IOobjectList::names
+(
+    const word& clsName,
+    const bool syncPar
+) const
+{
+    wordList objNames(namesImpl(*this, clsName, predicates::always(), false));
+
+    checkNames(objNames, syncPar);
+    return objNames;
+}
+
+
+Foam::wordList Foam::IOobjectList::names
+(
+    const word& clsName,
+    const wordRe& matcher
+) const
+{
+    return namesImpl(*this, clsName, matcher, false);
+}
+
+
 Foam::wordList Foam::IOobjectList::sortedNames
 (
     const word& clsName,
@@ -377,6 +452,30 @@ Foam::wordList Foam::IOobjectList::sortedNames
 }
 
 
+Foam::wordList Foam::IOobjectList::names
+(
+    const word& clsName,
+    const wordRe& matcher,
+    const bool syncPar
+) const
+{
+    wordList objNames(namesImpl(*this, clsName, matcher, false));
+
+    checkNames(objNames, syncPar);
+    return objNames;
+}
+
+
+Foam::wordList Foam::IOobjectList::names
+(
+    const word& clsName,
+    const wordRes& matcher
+) const
+{
+    return namesImpl(*this, clsName, matcher, false);
+}
+
+
 Foam::wordList Foam::IOobjectList::sortedNames
 (
     const word& clsName,
@@ -384,6 +483,54 @@ Foam::wordList Foam::IOobjectList::sortedNames
 ) const
 {
     return namesImpl(*this, clsName, matcher, true);
+}
+
+
+Foam::wordList Foam::IOobjectList::names
+(
+    const word& clsName,
+    const wordRes& matcher,
+    const bool syncPar
+) const
+{
+    wordList objNames(namesImpl(*this, clsName, matcher, false));
+
+    checkNames(objNames, syncPar);
+    return objNames;
+}
+
+
+Foam::wordList Foam::IOobjectList::names
+(
+    const word& clsName,
+    const wordHashSet& matcher
+) const
+{
+    return namesImpl(*this, clsName, matcher, false);
+}
+
+
+Foam::wordList Foam::IOobjectList::sortedNames
+(
+    const word& clsName,
+    const wordHashSet& matcher
+) const
+{
+    return namesImpl(*this, clsName, matcher, true);
+}
+
+
+Foam::wordList Foam::IOobjectList::names
+(
+    const word& clsName,
+    const wordHashSet& matcher,
+    const bool syncPar
+) const
+{
+    wordList objNames(namesImpl(*this, clsName, matcher, false));
+
+    checkNames(objNames, syncPar);
+    return objNames;
 }
 
 

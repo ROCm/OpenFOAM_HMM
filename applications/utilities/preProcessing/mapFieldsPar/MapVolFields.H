@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,52 +131,56 @@ void MapVolFields
     const fvMesh& meshSource = static_cast<const fvMesh&>(interp.srcRegion());
     const fvMesh& meshTarget = static_cast<const fvMesh&>(interp.tgtRegion());
 
-    IOobjectList fields = objects.lookupClass(fieldType::typeName);
+    // Available fields, sorted order
+    const wordList fieldNames =
+    (
+        selectedFields.empty()
+      ? objects.sortedNames(fieldType::typeName)
+      : objects.sortedNames(fieldType::typeName, selectedFields)
+    );
 
-    forAllIter(IOobjectList, fields, fieldIter)
+    for (const word& fieldName : fieldNames)
     {
-        const word& fieldName = fieldIter()->name();
+        const fieldType fieldSource(*(objects[fieldName]), meshSource);
 
-        if (selectedFields.empty() || selectedFields.found(fieldName))
+        IOobject targetIO
+        (
+            fieldName,
+            meshTarget.time().timeName(),
+            meshTarget,
+            IOobject::MUST_READ
+        );
+
+        if (targetIO.typeHeaderOk<fieldType>(true))
         {
-            const fieldType fieldSource(*fieldIter(), meshSource);
+            Info<< "    interpolating onto existing field "
+                << fieldName << endl;
 
-            IOobject targetIO
+            fieldType fieldTarget(targetIO, meshTarget);
+
+            interp.mapSrcToTgt(fieldSource, cop, fieldTarget);
+
+            evaluateConstraintTypes(fieldTarget);
+
+            fieldTarget.write();
+        }
+        else
+        {
+            Info<< "    creating new field "
+                << fieldName << endl;
+
+            targetIO.readOpt() = IOobject::NO_READ;
+
+            tmp<fieldType> tfieldTarget
             (
-                fieldName,
-                meshTarget.time().timeName(),
-                meshTarget,
-                IOobject::MUST_READ
+                interp.mapSrcToTgt(fieldSource, cop)
             );
 
-            if (targetIO.typeHeaderOk<fieldType>(true))
-            {
-                Info<< "    interpolating onto existing field "
-                    << fieldName << endl;
-                fieldType fieldTarget(targetIO, meshTarget);
+            fieldType fieldTarget(targetIO, tfieldTarget);
 
-                interp.mapSrcToTgt(fieldSource, cop, fieldTarget);
+            evaluateConstraintTypes(fieldTarget);
 
-                evaluateConstraintTypes(fieldTarget);
-
-                fieldTarget.write();
-            }
-            else
-            {
-                Info<< "    creating new field "
-                    << fieldName << endl;
-
-                targetIO.readOpt() = IOobject::NO_READ;
-
-                tmp<fieldType>
-                    tfieldTarget(interp.mapSrcToTgt(fieldSource, cop));
-
-                fieldType fieldTarget(targetIO, tfieldTarget);
-
-                evaluateConstraintTypes(fieldTarget);
-
-                fieldTarget.write();
-            }
+            fieldTarget.write();
         }
     }
 }

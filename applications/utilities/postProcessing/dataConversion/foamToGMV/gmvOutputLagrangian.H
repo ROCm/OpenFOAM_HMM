@@ -17,10 +17,8 @@ forAllConstIter(Cloud<passiveParticle>, particles, iter)
 }
 gmvFile << nl;
 
-forAll(lagrangianScalarNames, i)
+for (const word& name : lagrangianScalarNames)
 {
-    const word& name = lagrangianScalarNames[i];
-
     IOField<scalar> fld
     (
         IOobject
@@ -48,10 +46,8 @@ forAll(lagrangianScalarNames, i)
 
 }
 
-forAll(lagrangianVectorNames, i)
+for (const word& name : lagrangianVectorNames)
 {
-    const word& name = lagrangianVectorNames[i];
-
     IOField<vector> fld
     (
         IOobject

@@ -118,6 +118,9 @@ public:
         //- The list of all IOobjects with matching names
         IOobjectList lookup(const wordRes& matcher) const;
 
+        //- The list of all IOobjects with matching names
+        IOobjectList lookup(const wordHashSet& matcher) const;
+
         //- The list of all IOobjects with the given class name
         IOobjectList lookupClass(const word& clsName) const;
 
@@ -201,6 +204,10 @@ public:
         //  restricted to objects with names that satisfy the input matcher
         HashTable<wordHashSet> classes(const wordRes& matcher) const;
 
+        //- A summary hash of classes used and their associated object names
+        //  restricted to objects with names that satisfy the input matcher
+        HashTable<wordHashSet> classes(const wordHashSet& matcher) const;
+
 
     // Summary of names
 
@@ -211,12 +218,60 @@ public:
         wordList names(const word& clsName) const;
 
         //- The names of IOobjects with the given class name that also
-        //  have a name satisfying the input matcher
+        //- have a name satisfying the input matcher
         wordList names(const word& clsName, const wordRe& matcher) const;
 
         //- The names of IOobjects with the given class name that also
-        //  have a name satisfying the input matcher
+        //- have a name satisfying the input matcher
         wordList names(const word& clsName, const wordRes& matcher) const;
+
+        //- The names of IOobjects with the given class name that also
+        //- have a name satisfying the input matcher
+        wordList names(const word& clsName, const wordHashSet& matcher) const;
+
+
+        //- A sorted list of names of the IOobjects.
+        //  With syncPar = true, triggers FatalError if the names are
+        //  not consistent on all processors.
+        wordList names(const bool syncPar) const;
+
+        //- A sorted list of names of the IOobjects
+        //  With syncPar = true, triggers FatalError if the names are
+        //  not consistent on all processors.
+        wordList names(const word& clsName, const bool syncPar) const;
+
+        //- The sorted names of IOobjects with the given class name that also
+        //- have a name satisfying the input matcher
+        //  With syncPar = true, triggers FatalError if the names are
+        //  not consistent on all processors.
+        wordList names
+        (
+            const word& clsName,
+            const wordRe& matcher,
+            const bool syncPar
+        ) const;
+
+        //- The sorted names of IOobjects with the given class name that also
+        //- have a name satisfying the input matcher
+        //  With syncPar = true, triggers FatalError if the names are
+        //  not consistent on all processors.
+        wordList names
+        (
+            const word& clsName,
+            const wordRes& matcher,
+            const bool syncPar
+        ) const;
+
+        //- The sorted names of IOobjects with the given class name that also
+        //- have a name satisfying the input matcher
+        //  With syncPar = true, triggers FatalError if the names are
+        //  not consistent on all processors.
+        wordList names
+        (
+            const word& cls,
+            const wordHashSet& matcher,
+            const bool syncPar
+        ) const;
 
 
     // Summary of names (sorted)
@@ -228,12 +283,20 @@ public:
         wordList sortedNames(const word& clsName) const;
 
         //- The sorted names of IOobjects with the given class name that also
-        //  have a name satisfying the input matcher
+        //- have a name satisfying the input matcher
         wordList sortedNames(const word& clsName, const wordRe& matcher) const;
 
         //- The sorted names of IOobjects with the given class name that also
-        //  have a name satisfying the input matcher
+        //- have a name satisfying the input matcher
         wordList sortedNames(const word& clsName, const wordRes& matcher) const;
+
+        //- The sorted names of IOobjects with the given class name that also
+        //- have a name satisfying the input matcher
+        wordList sortedNames
+        (
+            const word& clsName,
+            const wordHashSet& matcher
+        ) const;
 
 
     // Member Operators

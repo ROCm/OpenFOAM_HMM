@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,11 +51,9 @@ class regIOobject;
 class IOobjectList;
 class objectRegistry;
 
-//- Get sorted names of fields of type. If syncPar and running in parallel
-//  check for identical names
-wordList fieldNames(const IOobjectList& objects, const bool syncPar);
-
-//- Read Geometric fields
+//- Read Geometric fields of templated type.
+//  \return sorted names of fields read.
+//  \note All processors guaranteed to read fields in same order.
 template<class Type, template<class> class PatchField, class GeoMesh>
 wordList ReadFields
 (
@@ -66,9 +64,10 @@ wordList ReadFields
     const bool readOldTime = false
 );
 
-//- Read all fields of the specified type.
-//  Returns names of fields read.
-//  Guarantees all processors read fields in same order.
+
+//- Read fields of the templated type.
+//  \return sorted names of fields read.
+//  \note All processors guaranteed to read fields in same order.
 template<class GeoField, class Mesh>
 wordList ReadFields
 (
@@ -78,7 +77,9 @@ wordList ReadFields
     const bool syncPar = true
 );
 
-//- Read non-mesh fields, e.g. uniformDimensionedField like 'g'
+//- Read non-mesh fields (uniformDimensionedField like 'g').
+//  \return sorted names of fields read.
+//  \note All processors guaranteed to read fields in same order.
 template<class GeoField>
 wordList ReadFields
 (
@@ -87,8 +88,8 @@ wordList ReadFields
     const bool syncPar = true
 );
 
-//- Read all GeometricFields of the specified type.
-//  The fieldsCache is an objectRegistry of all stored fields
+//- Read all GeometricFields of the templated type.
+//  \param fieldsCache is an objectRegistry of all stored fields
 template<class GeoField>
 static void ReadFields
 (
@@ -98,8 +99,8 @@ static void ReadFields
     objectRegistry& fieldsCache
 );
 
-//- Read all GeometricFields of the specified type.
-//  The fieldsCache is an objectRegistry of all stored fields
+//- Read all GeometricFields of the templated type.
+//  \param fieldsCache is the objectRegistry name where fields are stored
 template<class GeoField>
 static void ReadFields
 (
@@ -109,9 +110,9 @@ static void ReadFields
     const word& registryName = "fieldsCache"
 );
 
-//- Read the selected GeometricFields of the specified type.
+//- Read the selected GeometricFields of the templated type.
 //  The fields are transferred to the objectRegistry and a list of them is
-//  returned as a stack for later clean-up
+//  returned as a stack for later cleanup
 template<class GeoFieldType>
 void readFields
 (
@@ -122,9 +123,9 @@ void readFields
 );
 
 
-//- Read the selected UniformDimensionedFields of the specified type.
+//- Read the selected UniformDimensionedFields of the templated type.
 //  The fields are transferred to the objectRegistry and a list of them is
-//  returned as a stack for later clean-up
+//  returned as a stack for later cleanup
 template<class GeoFieldType>
 void readUniformFields
 (

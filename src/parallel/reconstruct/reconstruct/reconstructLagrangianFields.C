@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,47 +39,44 @@ Foam::tmp<Foam::IOField<Type>> Foam::reconstructLagrangianField
 )
 {
     // Construct empty field on mesh
-    tmp<IOField<Type>> tfield
+    auto tfield = tmp<IOField<Type>>::New
     (
-        new IOField<Type>
+        IOobject
         (
-            IOobject
-            (
-                fieldName,
-                mesh.time().timeName(),
-                cloud::prefix/cloudName,
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            Field<Type>(0)
-        )
+            fieldName,
+            mesh.time().timeName(),
+            cloud::prefix/cloudName,
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        Field<Type>(0)
     );
-    Field<Type>& field = tfield.ref();
+    auto& field = tfield.ref();
 
-    forAll(meshes, i)
+    for (const fvMesh& localMesh : meshes)
     {
         // Check object on local mesh
         IOobject localIOobject
         (
             fieldName,
-            meshes[i].time().timeName(),
+            localMesh.time().timeName(),
             cloud::prefix/cloudName,
-            meshes[i],
+            localMesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         );
 
         if (localIOobject.typeHeaderOk<IOField<Type>>(true))
         {
-            IOField<Type> fieldi(localIOobject);
+            IOField<Type> localField(localIOobject);
 
-            label offset = field.size();
-            field.setSize(offset + fieldi.size());
+            const label offset = field.size();
+            field.setSize(offset + localField.size());
 
-            forAll(fieldi, j)
+            forAll(localField, j)
             {
-                field[offset + j] = fieldi[j];
+                field[offset + j] = localField[j];
             }
         }
     }
@@ -99,33 +96,30 @@ Foam::reconstructLagrangianFieldField
 )
 {
     // Construct empty field on mesh
-    tmp<CompactIOField<Field<Type>, Type >> tfield
+    auto tfield = tmp<CompactIOField<Field<Type>, Type>>::New
     (
-        new CompactIOField<Field<Type>, Type>
+        IOobject
         (
-            IOobject
-            (
-                fieldName,
-                mesh.time().timeName(),
-                cloud::prefix/cloudName,
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            Field<Field<Type>>(0)
-        )
+            fieldName,
+            mesh.time().timeName(),
+            cloud::prefix/cloudName,
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        Field<Field<Type>>(0)
     );
-    Field<Field<Type>>& field = tfield.ref();
+    auto& field = tfield.ref();
 
-    forAll(meshes, i)
+    for (const fvMesh& localMesh : meshes)
     {
         // Check object on local mesh
         IOobject localIOobject
         (
             fieldName,
-            meshes[i].time().timeName(),
+            localMesh.time().timeName(),
             cloud::prefix/cloudName,
-            meshes[i],
+            localMesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         );
@@ -139,21 +133,20 @@ Foam::reconstructLagrangianFieldField
          || localIOobject.typeHeaderOk<IOField<Field<Type>>>(false)
         )
         {
-            CompactIOField<Field<Type>, Type> fieldi(localIOobject);
+            CompactIOField<Field<Type>, Type> localField(localIOobject);
 
-            label offset = field.size();
-            field.setSize(offset + fieldi.size());
+            const label offset = field.size();
+            field.setSize(offset + localField.size());
 
-            forAll(fieldi, j)
+            forAll(localField, j)
             {
-                field[offset + j] = fieldi[j];
+                field[offset + j] = localField[j];
             }
         }
     }
 
     return tfield;
 }
-
 
 
 template<class Type>
@@ -166,36 +159,34 @@ void Foam::reconstructLagrangianFields
     const wordHashSet& selectedFields
 )
 {
-    const word fieldClassName(IOField<Type>::typeName);
+    const word& clsName = IOField<Type>::typeName;
 
-    IOobjectList fields = objects.lookupClass(fieldClassName);
+    const wordList fieldNames =
+    (
+        selectedFields.empty()
+      ? objects.sortedNames(clsName)
+      : objects.sortedNames(clsName, selectedFields)
+    );
 
-    if (fields.size())
+    if (fieldNames.size())
     {
-        Info<< "    Reconstructing lagrangian "
-            << fieldClassName << "s\n" << endl;
-
-        forAllConstIter(IOobjectList, fields, fieldIter)
-        {
-            if
-            (
-                selectedFields.empty()
-             || selectedFields.found(fieldIter()->name())
-            )
-            {
-                Info<< "        " << fieldIter()->name() << endl;
-                reconstructLagrangianField<Type>
-                (
-                    cloudName,
-                    mesh,
-                    meshes,
-                    fieldIter()->name()
-                )().write();
-            }
-        }
-
-        Info<< endl;
+        Info<< "    Reconstructing lagrangian " << clsName << "s\n" << nl;
     }
+
+    for (const word& fieldName : fieldNames)
+    {
+        Info<< "        " << fieldName << endl;
+
+        reconstructLagrangianField<Type>
+        (
+            cloudName,
+            mesh,
+            meshes,
+            fieldName
+        )().write();
+    }
+
+    if (fieldNames.size()) Info<< endl;
 }
 
 
@@ -210,69 +201,65 @@ void Foam::reconstructLagrangianFieldFields
 )
 {
     {
-        const word fieldClassName(CompactIOField<Field<Type>, Type>::typeName);
+        const word& clsName = CompactIOField<Field<Type>,Type>::typeName;
 
-        IOobjectList fields = objects.lookupClass(fieldClassName);
+        const wordList fieldNames =
+        (
+            selectedFields.empty()
+          ? objects.sortedNames(clsName)
+          : objects.sortedNames(clsName, selectedFields)
+        );
 
-        if (fields.size())
+        if (fieldNames.size())
         {
-            Info<< "    Reconstructing lagrangian "
-                << fieldClassName << "s\n" << endl;
-
-            forAllConstIter(IOobjectList, fields, fieldIter)
-            {
-                if
-                (
-                    selectedFields.empty()
-                 || selectedFields.found(fieldIter()->name())
-                )
-                {
-                    Info<< "        " << fieldIter()->name() << endl;
-                    reconstructLagrangianFieldField<Type>
-                    (
-                        cloudName,
-                        mesh,
-                        meshes,
-                        fieldIter()->name()
-                    )().write();
-                }
-            }
-
-            Info<< endl;
+            Info<< "    Reconstructing lagrangian " << clsName << "s\n" << nl;
         }
+
+        for (const word& fieldName : fieldNames)
+        {
+            Info<< "        " << fieldName << endl;
+
+            reconstructLagrangianFieldField<Type>
+            (
+                cloudName,
+                mesh,
+                meshes,
+                fieldName
+            )().write();
+        }
+
+        if (fieldNames.size()) Info<< endl;
     }
 
     {
-        const word fieldClassName(IOField<Field<Type>>::typeName);
+        const word& clsName = IOField<Field<Type>>::typeName;
 
-        IOobjectList fields = objects.lookupClass(fieldClassName);
+        const wordList fieldNames =
+        (
+            selectedFields.empty()
+          ? objects.sortedNames(clsName)
+          : objects.sortedNames(clsName, selectedFields)
+        );
 
-        if (fields.size())
+        if (fieldNames.size())
         {
-            Info<< "    Reconstructing lagrangian "
-                << fieldClassName << "s\n" << endl;
-
-            forAllConstIter(IOobjectList, fields, fieldIter)
-            {
-                if
-                (
-                    selectedFields.empty()
-                 || selectedFields.found(fieldIter()->name())
-                )
-                {
-                    Info<< "        " << fieldIter()->name() << endl;
-                    reconstructLagrangianFieldField<Type>
-                    (
-                        cloudName,
-                        mesh,
-                        meshes,
-                        fieldIter()->name()
-                    )().write();
-                }
-            }
-
-            Info<< endl;
+            Info<< "    Reconstructing lagrangian " << clsName << "s\n" << nl;
         }
+
+        for (const word& fieldName : fieldNames)
+        {
+            Info<< "        " << fieldName << endl;
+
+            reconstructLagrangianFieldField<Type>
+            (
+                cloudName,
+                mesh,
+                meshes,
+                fieldName
+            )().write();
+        }
+
+        if (fieldNames.size()) Info<< endl;
     }
 }
 

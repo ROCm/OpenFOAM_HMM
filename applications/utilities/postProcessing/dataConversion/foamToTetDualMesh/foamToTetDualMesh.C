@@ -62,7 +62,7 @@ void ReadAndMapFields
     tetFields.setSize(fieldObjects.size());
 
     label i = 0;
-    forAllConstIter(IOobjectList, fieldObjects, iter)
+    forAllConstIters(fieldObjects, iter)
     {
         Info<< "Converting " << ReadGeoField::typeName << ' ' << iter.key()
             << endl;
@@ -138,8 +138,6 @@ void ReadAndMapFields
 }
 
 
-
-
 int main(int argc, char *argv[])
 {
     #include "addOverwriteOption.H"
@@ -151,7 +149,6 @@ int main(int argc, char *argv[])
     instantList Times = runTime.times();
     #include "checkTimeOptions.H"
     runTime.setTime(Times[startTime], startTime);
-
 
     // Read the mesh
     #include "createNamedMesh.H"

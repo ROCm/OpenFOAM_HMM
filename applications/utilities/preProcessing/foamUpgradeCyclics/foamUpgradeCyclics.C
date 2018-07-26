@@ -298,10 +298,10 @@ void rewriteField
 
     label nChanged = 0;
 
-    forAllConstIter(HashTable<word>, thisNames, iter)
+    forAllConstIters(thisNames, iter)
     {
         const word& patchName = iter.key();
-        const word& newName = iter();
+        const word& newName = iter.object();
 
         Info<< "Looking for entry for patch " << patchName << endl;
 
@@ -376,13 +376,13 @@ void rewriteFields
     const HashTable<word>& nbrNames
 )
 {
-    forAll(fieldNames, i)
+    for (const word& fieldName : fieldNames)
     {
         rewriteField
         (
             isTestRun,
             runTime,
-            fieldNames[i],
+            fieldName,
             thisNames,
             nbrNames
         );

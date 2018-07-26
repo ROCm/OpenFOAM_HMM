@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,23 +117,20 @@ Foam::pointFieldReconstructor::reconstructField(const IOobject& fieldIoObject)
 
     // Construct and write the field
     // setting the internalField and patchFields
-    return tmp<GeometricField<Type, pointPatchField, pointMesh>>
+    return tmp<GeometricField<Type, pointPatchField, pointMesh>>::New
     (
-        new GeometricField<Type, pointPatchField, pointMesh>
+        IOobject
         (
-            IOobject
-            (
-                fieldIoObject.name(),
-                mesh_().time().timeName(),
-                mesh_(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            procFields[0].dimensions(),
-            internalField,
-            patchFields
-        )
+            fieldIoObject.name(),
+            mesh_().time().timeName(),
+            mesh_(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        procFields[0].dimensions(),
+        internalField,
+        patchFields
     );
 }
 
@@ -146,33 +143,29 @@ void Foam::pointFieldReconstructor::reconstructFields
     const wordHashSet& selectedFields
 )
 {
-    word fieldClassName
+    const word& clsName =
+        GeometricField<Type, pointPatchField, pointMesh>::typeName;
+
+    const wordList fieldNames =
     (
-        GeometricField<Type, pointPatchField, pointMesh>::typeName
+        selectedFields.empty()
+      ? objects.sortedNames(clsName)
+      : objects.sortedNames(clsName, selectedFields)
     );
 
-    IOobjectList fields = objects.lookupClass(fieldClassName);
-
-    if (fields.size())
+    if (fieldNames.size())
     {
-        Info<< "    Reconstructing " << fieldClassName << "s\n" << endl;
-
-        forAllConstIter(IOobjectList, fields, fieldIter)
-        {
-            if
-            (
-                !selectedFields.size()
-             || selectedFields.found(fieldIter()->name())
-            )
-            {
-                Info<< "        " << fieldIter()->name() << endl;
-
-                reconstructField<Type>(*fieldIter())().write();
-            }
-        }
-
-        Info<< endl;
+        Info<< "    Reconstructing " << clsName << "s\n" << nl;
     }
+
+    for (const word& fieldName : fieldNames)
+    {
+        Info<< "        " << fieldName << endl;
+
+        reconstructField<Type>(*(objects[fieldName]))().write();
+    }
+
+    if (fieldNames.size()) Info<< endl;
 }
 
 

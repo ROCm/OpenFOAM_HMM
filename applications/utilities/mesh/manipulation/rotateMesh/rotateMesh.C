@@ -54,7 +54,7 @@ void RotateFields
     // Objects of field type
     IOobjectList fields(objects.lookupClass(GeometricField::typeName));
 
-    forAllIter(IOobjectList, fields, fieldIter)
+    forAllConstIters(fields, fieldIter)
     {
         Info<< "    Rotating " << fieldIter()->name() << endl;
 

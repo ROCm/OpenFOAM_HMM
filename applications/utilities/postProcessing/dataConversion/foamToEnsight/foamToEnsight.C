@@ -316,7 +316,7 @@ int main(int argc, char *argv[])
         // and doesn't cost much) and simultaneously remove all
         // "*_0" restart fields
 
-        for (auto fieldType : volFieldTypes)
+        for (const word& fieldType : volFieldTypes)
         {
             usableObjects
             (
@@ -360,7 +360,7 @@ int main(int argc, char *argv[])
         // ~~~~~~~~~~~~~~~~~~~~~~
         Info<< "Write volume field (";
 
-        for (auto fieldType : volFieldTypes)
+        for (const word& fieldType : volFieldTypes)
         {
             // For convenience, just force each field-type into existence.
             // This simplifies code logic and doesn't cost much at all.

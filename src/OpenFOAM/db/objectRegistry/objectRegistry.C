@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -128,6 +128,13 @@ Foam::objectRegistry::classes(const wordRe& matcher) const
 
 Foam::HashTable<Foam::wordHashSet>
 Foam::objectRegistry::classes(const wordRes& matcher) const
+{
+    return classesImpl(*this, matcher);
+}
+
+
+Foam::HashTable<Foam::wordHashSet>
+Foam::objectRegistry::classes(const wordHashSet& matcher) const
 {
     return classesImpl(*this, matcher);
 }

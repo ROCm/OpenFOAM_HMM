@@ -159,7 +159,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
 
     if (!haveMesh)
     {
-        bool oldParRun = Pstream::parRun();
+        const bool oldParRun = Pstream::parRun();
         Pstream::parRun() = false;
 
 
@@ -383,17 +383,17 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
 
     if (!haveMesh)
     {
-        forAll(pointSetNames, i)
+        for (const word& setName : pointSetNames)
         {
-            pointSet(mesh, pointSetNames[i], 0).write();
+            pointSet(mesh, setName, 0).write();
         }
-        forAll(faceSetNames, i)
+        for (const word& setName : faceSetNames)
         {
-            faceSet(mesh, faceSetNames[i], 0).write();
+            faceSet(mesh, setName, 0).write();
         }
-        forAll(cellSetNames, i)
+        for (const word& setName : cellSetNames)
         {
-            cellSet(mesh, cellSetNames[i], 0).write();
+            cellSet(mesh, setName, 0).write();
         }
     }
 

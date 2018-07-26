@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,25 +40,20 @@ Foam::wordList Foam::parLagrangianRedistributor::filterObjects
     const wordHashSet& selectedFields
 )
 {
-    const word fieldClassName(Container::typeName);
-
     // Parallel synchronise
-    wordList fieldNames(objects.names(fieldClassName));
+    wordList fieldNames =
+    (
+        selectedFields.empty()
+      ? objects.names(Container::typeName)
+      : objects.names(Container::typeName, selectedFields)
+    );
+
     Pstream::combineGather(fieldNames, ListOps::uniqueEqOp<word>());
     Pstream::combineScatter(fieldNames);
 
-    if (!selectedFields.empty())
-    {
-        DynamicList<word> selectedNames(fieldNames.size());
-        forAll(fieldNames, i)
-        {
-            if (selectedFields.found(fieldNames[i]))
-            {
-                selectedNames.append(fieldNames[i]);
-            }
-        }
-        fieldNames.transfer(selectedNames);
-    }
+    // Ensure order is consistent
+    Foam::sort(fieldNames);
+
     return fieldNames;
 }
 
@@ -72,6 +67,8 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFields
     const wordHashSet& selectedFields
 ) const
 {
+    const word fieldClassName(IOField<Type>::typeName);
+
     const wordList objectNames
     (
         filterObjects<IOField<Type>>
@@ -83,55 +80,53 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFields
 
     if (objectNames.size())
     {
-        const word fieldClassName(IOField<Type>::typeName);
-
         Info<< "    Redistributing lagrangian "
             << fieldClassName << "s\n" << endl;
+    }
 
-        forAll(objectNames, i)
+    for (const word& objectName : objectNames)
+    {
+        Info<< "        " <<  objectName << endl;
+
+        // Read if present
+        IOField<Type> field
+        (
+            IOobject
+            (
+                objectName,
+                srcMesh_.time().timeName(),
+                cloud::prefix/cloudName,
+                srcMesh_,
+                IOobject::READ_IF_PRESENT,
+                IOobject::NO_WRITE,
+                false
+            ),
+            label(0)
+        );
+
+        map.distribute(field);
+
+
+        if (field.size())
         {
-            Info<< "        " <<  objectNames[i] << endl;
-
-            // Read if present
-            IOField<Type> field
+            IOField<Type>
             (
                 IOobject
                 (
-                    objectNames[i],
-                    srcMesh_.time().timeName(),
+                    objectName,
+                    tgtMesh_.time().timeName(),
                     cloud::prefix/cloudName,
-                    srcMesh_,
-                    IOobject::READ_IF_PRESENT,
+                    tgtMesh_,
+                    IOobject::NO_READ,
                     IOobject::NO_WRITE,
                     false
                 ),
-                label(0)
-            );
-
-            map.distribute(field);
-
-
-            if (field.size())
-            {
-                IOField<Type>
-                (
-                    IOobject
-                    (
-                        objectNames[i],
-                        tgtMesh_.time().timeName(),
-                        cloud::prefix/cloudName,
-                        tgtMesh_,
-                        IOobject::NO_READ,
-                        IOobject::NO_WRITE,
-                        false
-                    ),
-                    std::move(field)
-                ).write();
-            }
+                std::move(field)
+            ).write();
         }
-
-        Info<< endl;
     }
+
+    if (objectNames.size()) Info<< endl;
 }
 
 
@@ -144,6 +139,8 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
     const wordHashSet& selectedFields
 ) const
 {
+    const word fieldClassName(CompactIOField<Field<Type>, Type>::typeName);
+
     wordList objectNames
     (
         filterObjects<CompactIOField<Field<Type>, Type>>
@@ -153,9 +150,9 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
         )
     );
 
-    // Append IOField names
+    // Append IOField Field names
     {
-        const wordList ioFieldNames
+        wordList ioFieldNames
         (
             filterObjects<IOField<Field<Type>>>
             (
@@ -169,52 +166,50 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
 
     if (objectNames.size())
     {
-        const word fieldClassName(CompactIOField<Field<Type>, Type>::typeName);
-
         Info<< "    Redistributing lagrangian "
             << fieldClassName << "s\n" << endl;
+    }
 
-        forAll(objectNames, i)
+    for (const word& objectName : objectNames)
+    {
+        Info<< "        " <<  objectName << endl;
+
+        // Read if present
+        CompactIOField<Field<Type>, Type> field
+        (
+            IOobject
+            (
+                objectName,
+                srcMesh_.time().timeName(),
+                cloud::prefix/cloudName,
+                srcMesh_,
+                IOobject::READ_IF_PRESENT,
+                IOobject::NO_WRITE,
+                false
+            ),
+            label(0)
+        );
+
+        // Distribute
+        map.distribute(field);
+
+        // Write
+        if (field.size())
         {
-            Info<< "        " <<  objectNames[i] << endl;
-
-            // Read if present
-            CompactIOField<Field<Type>, Type> field
+            CompactIOField<Field<Type>, Type>
             (
                 IOobject
                 (
-                    objectNames[i],
-                    srcMesh_.time().timeName(),
+                    objectName,
+                    tgtMesh_.time().timeName(),
                     cloud::prefix/cloudName,
-                    srcMesh_,
-                    IOobject::READ_IF_PRESENT,
+                    tgtMesh_,
+                    IOobject::NO_READ,
                     IOobject::NO_WRITE,
                     false
                 ),
-                label(0)
-            );
-
-            // Distribute
-            map.distribute(field);
-
-            // Write
-            if (field.size())
-            {
-                CompactIOField<Field<Type>, Type>
-                (
-                    IOobject
-                    (
-                        objectNames[i],
-                        tgtMesh_.time().timeName(),
-                        cloud::prefix/cloudName,
-                        tgtMesh_,
-                        IOobject::NO_READ,
-                        IOobject::NO_WRITE,
-                        false
-                    ),
-                    std::move(field)
-                ).write();
-            }
+                std::move(field)
+            ).write();
         }
     }
 }
@@ -228,6 +223,8 @@ void Foam::parLagrangianRedistributor::readLagrangianFields
     const wordHashSet& selectedFields
 )
 {
+    const word fieldClassName(Container::typeName);
+
     const wordList objectNames
     (
         filterObjects<Container>
@@ -239,31 +236,29 @@ void Foam::parLagrangianRedistributor::readLagrangianFields
 
     if (objectNames.size())
     {
-        const word fieldClassName(Container::typeName);
-
         Info<< "    Reading lagrangian "
             << fieldClassName << "s\n" << endl;
+    }
 
-        forAll(objectNames, i)
-        {
-            Info<< "        " <<  objectNames[i] << endl;
+    for (const word& objectName : objectNames)
+    {
+        Info<< "        " <<  objectName << endl;
 
-            // Read if present
-            Container* fieldPtr = new Container
+        // Read if present
+        Container* fieldPtr = new Container
+        (
+            IOobject
             (
-                IOobject
-                (
-                    objectNames[i],
-                    cloud.time().timeName(),
-                    cloud,
-                    IOobject::READ_IF_PRESENT,
-                    IOobject::NO_WRITE
-                ),
-                label(0)
-            );
+                objectName,
+                cloud.time().timeName(),
+                cloud,
+                IOobject::READ_IF_PRESENT,
+                IOobject::NO_WRITE
+            ),
+            label(0)
+        );
 
-            fieldPtr->store();
-        }
+        fieldPtr->store();
     }
 }
 
@@ -275,6 +270,8 @@ void Foam::parLagrangianRedistributor::redistributeStoredLagrangianFields
     passivePositionParticleCloud& cloud
 ) const
 {
+    const word fieldClassName(Container::typeName);
+
     HashTable<Container*> fields
     (
         cloud.lookupClass<Container>()
@@ -282,36 +279,34 @@ void Foam::parLagrangianRedistributor::redistributeStoredLagrangianFields
 
     if (fields.size())
     {
-        const word fieldClassName(Container::typeName);
-
         Info<< "    Redistributing lagrangian "
             << fieldClassName << "s\n" << endl;
+    }
 
-        forAllIter(typename HashTable<Container*>, fields, iter)
+    forAllIters(fields, iter)
+    {
+        Container& field = *(*iter);
+
+        Info<< "        " <<  field.name() << endl;
+
+        map.distribute(field);
+
+        if (field.size())
         {
-            Container& field = *iter();
-
-            Info<< "        " <<  field.name() << endl;
-
-            map.distribute(field);
-
-            if (field.size())
-            {
-                Container
+            Container
+            (
+                IOobject
                 (
-                    IOobject
-                    (
-                        field.name(),
-                        tgtMesh_.time().timeName(),
-                        cloud::prefix/cloud.name(),
-                        tgtMesh_,
-                        IOobject::NO_READ,
-                        IOobject::NO_WRITE,
-                        false
-                    ),
-                    std::move(field)
-                ).write();
-            }
+                    field.name(),
+                    tgtMesh_.time().timeName(),
+                    cloud::prefix/cloud.name(),
+                    tgtMesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                std::move(field)
+            ).write();
         }
     }
 }

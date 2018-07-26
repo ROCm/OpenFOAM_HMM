@@ -351,7 +351,7 @@ int main(int argc, char *argv[])
         // Get list of objects from the database
         IOobjectList objects(runTime, runTime.timeName(), regionPrefix);
 
-        forAllConstIter(IOobjectList, objects, iter)
+        forAllConstIters(objects, iter)
         {
             const word& headerClassName = iter()->headerClassName();
 

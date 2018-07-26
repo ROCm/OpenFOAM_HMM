@@ -51,7 +51,7 @@ void MapVolFields
 
     IOobjectList fields = objects.lookupClass(fieldType::typeName);
 
-    forAllIter(IOobjectList, fields, fieldIter)
+    forAllConstIters(fields, fieldIter)
     {
         IOobject fieldTargetIOobject
         (

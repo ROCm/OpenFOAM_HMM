@@ -13,7 +13,7 @@ if (timeDirs.size())
 
     IOobjectList objs(mesh, lastTimeName);
 
-    forAllConstIter(IOobjectList, objs, fieldIter)
+    forAllConstIters(objs, fieldIter)
     {
         const IOobject& obj = *fieldIter();
         const word& fieldName = obj.name();

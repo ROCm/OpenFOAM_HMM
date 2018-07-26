@@ -173,21 +173,21 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
         IOobjectList objects(*this, facesInstance(), "polyMesh/sets");
         {
             IOobjectList cSets(objects.lookupClass(cellSet::typeName));
-            forAllConstIter(IOobjectList, cSets, iter)
+            forAllConstIters(cSets, iter)
             {
                 cellSets.append(new cellSet(*iter()));
             }
         }
         {
             IOobjectList fSets(objects.lookupClass(faceSet::typeName));
-            forAllConstIter(IOobjectList, fSets, iter)
+            forAllConstIters(fSets, iter)
             {
                 faceSets.append(new faceSet(*iter()));
             }
         }
         {
             IOobjectList pSets(objects.lookupClass(pointSet::typeName));
-            forAllConstIter(IOobjectList, pSets, iter)
+            forAllConstIters(pSets, iter)
             {
                 pointSets.append(new pointSet(*iter()));
             }

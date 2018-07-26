@@ -780,18 +780,18 @@ int main(int argc, char *argv[])
                     );
 
                     IOobjectList cSets(objects.lookupClass(cellSet::typeName));
-                    forAllConstIter(IOobjectList, cSets, iter)
+                    forAllConstIters(cSets, iter)
                     {
                         cSetNames.insert(iter.key(), cSetNames.size());
                     }
 
                     IOobjectList fSets(objects.lookupClass(faceSet::typeName));
-                    forAllConstIter(IOobjectList, fSets, iter)
+                    forAllConstIters(fSets, iter)
                     {
                         fSetNames.insert(iter.key(), fSetNames.size());
                     }
                     IOobjectList pSets(objects.lookupClass(pointSet::typeName));
-                    forAllConstIter(IOobjectList, pSets, iter)
+                    forAllConstIters(pSets, iter)
                     {
                         pSetNames.insert(iter.key(), pSetNames.size());
                     }
@@ -842,7 +842,7 @@ int main(int argc, char *argv[])
                             objects.lookupClass(cellSet::typeName)
                         );
 
-                        forAllConstIter(IOobjectList, cSets, iter)
+                        forAllConstIters(cSets, iter)
                         {
                             // Load cellSet
                             const cellSet procSet(*iter());
@@ -878,7 +878,7 @@ int main(int argc, char *argv[])
                             objects.lookupClass(faceSet::typeName)
                         );
 
-                        forAllConstIter(IOobjectList, fSets, iter)
+                        forAllConstIters(fSets, iter)
                         {
                             // Load faceSet
                             const faceSet procSet(*iter());
@@ -912,7 +912,7 @@ int main(int argc, char *argv[])
                         (
                             objects.lookupClass(pointSet::typeName)
                         );
-                        forAllConstIter(IOobjectList, pSets, iter)
+                        forAllConstIters(pSets, iter)
                         {
                             // Load pointSet
                             const pointSet propSet(*iter());

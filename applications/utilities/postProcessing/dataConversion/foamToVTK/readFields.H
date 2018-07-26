@@ -35,16 +35,16 @@ SourceFiles
 #define readFields_H
 
 #include "fvMeshSubsetProxy.H"
+#include "HashSet.H"
 #include "PtrList.H"
 #include "IOobjectList.H"
-#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Read the fields, optionally subset, and place on the pointer list
+//- Read the fields, optionally subset, and place on the pointer list
 template<class GeoField>
 label readFields
 (
@@ -54,6 +54,18 @@ label readFields
     const wordHashSet& selectedFields,
     PtrList<const GeoField>& fields
 );
+
+
+//- Read the fields, and place on the pointer list
+template<class GeoField>
+label readFields
+(
+    const typename GeoField::Mesh& mesh,
+    const IOobjectList& objects,
+    const wordHashSet& selectedFields,
+    PtrList<const GeoField>& fields
+);
+
 
 } // End namespace Foam
 

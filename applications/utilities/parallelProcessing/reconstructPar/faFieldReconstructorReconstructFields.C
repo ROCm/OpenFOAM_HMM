@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -273,23 +273,20 @@ Foam::faFieldReconstructor::reconstructFaAreaField
 
     // Now construct and write the field
     // setting the internalField and patchFields
-    return tmp<GeometricField<Type, faPatchField, areaMesh>>
+    return tmp<GeometricField<Type, faPatchField, areaMesh>>::New
     (
-        new GeometricField<Type, faPatchField, areaMesh>
+        IOobject
         (
-            IOobject
-            (
-                fieldIoObject.name(),
-                mesh_.time().timeName(),
-                mesh_(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            procFields[0].dimensions(),
-            internalField,
-            patchFields
-        )
+            fieldIoObject.name(),
+            mesh_.time().timeName(),
+            mesh_(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        procFields[0].dimensions(),
+        internalField,
+        patchFields
     );
 }
 
@@ -553,23 +550,20 @@ Foam::faFieldReconstructor::reconstructFaEdgeField
 
     // Now construct and write the field
     // setting the internalField and patchFields
-    return tmp<GeometricField<Type, faePatchField, edgeMesh>>
+    return tmp<GeometricField<Type, faePatchField, edgeMesh>>::New
     (
-        new GeometricField<Type, faePatchField, edgeMesh>
+        IOobject
         (
-            IOobject
-            (
-                fieldIoObject.name(),
-                mesh_.time().timeName(),
-                mesh_(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            procFields[0].dimensions(),
-            internalField,
-            patchFields
-        )
+            fieldIoObject.name(),
+            mesh_.time().timeName(),
+            mesh_(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        procFields[0].dimensions(),
+        internalField,
+        patchFields
     );
 }
 
@@ -581,30 +575,25 @@ void Foam::faFieldReconstructor::reconstructFaAreaFields
     const IOobjectList& objects
 )
 {
-    const word& fieldClassName =
+    const word& clsName =
         GeometricField<Type, faPatchField, areaMesh>::typeName;
 
-    IOobjectList fields = objects.lookupClass(fieldClassName);
+    const wordList fieldNames = objects.sortedNames(clsName);
 
-    if (fields.size())
+    if (fieldNames.size())
     {
-        Info<< "    Reconstructing " << fieldClassName << "s\n" << endl;
-
-        for
-        (
-            IOobjectList::const_iterator fieldIter = fields.begin();
-            fieldIter != fields.end();
-            ++fieldIter
-        )
-        {
-            Info << "        " << fieldIter()->name() << endl;
-
-            reconstructFaAreaField<Type>(*fieldIter())().write();
-        }
-
-        Info<< endl;
+        Info<< "    Reconstructing " << clsName << "s\n" << endl;
     }
+
+    for (const word& fieldName : fieldNames)
+    {
+        Info << "        " << fieldName << endl;
+        reconstructFaAreaField<Type>(*(objects[fieldName]))().write();
+    }
+
+    if (fieldNames.size()) Info<< endl;
 }
+
 
 // Reconstruct and write all edge fields
 template<class Type>
@@ -613,29 +602,24 @@ void Foam::faFieldReconstructor::reconstructFaEdgeFields
     const IOobjectList& objects
 )
 {
-    const word& fieldClassName =
+    const word& clsName =
         GeometricField<Type, faePatchField, edgeMesh>::typeName;
 
-    IOobjectList fields = objects.lookupClass(fieldClassName);
+    const wordList fieldNames = objects.sortedNames(clsName);
 
-    if (fields.size())
+    if (fieldNames.size())
     {
-        Info<< "    Reconstructing " << fieldClassName << "s\n" << endl;
-
-        for
-        (
-            IOobjectList::const_iterator fieldIter = fields.begin();
-            fieldIter != fields.end();
-            ++fieldIter
-        )
-        {
-            Info<< "        " << fieldIter()->name() << endl;
-
-            reconstructFaEdgeField<Type>(*fieldIter())().write();
-        }
-
-        Info<< endl;
+        Info<< "    Reconstructing " << clsName << "s\n" << endl;
     }
+
+    for (const word& fieldName : fieldNames)
+    {
+        Info << "        " << fieldName << endl;
+
+        reconstructFaEdgeField<Type>(*(objects[fieldName]))().write();
+    }
+
+    if (fieldNames.size()) Info<< endl;
 }
 
 

@@ -29,8 +29,6 @@ License
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-// Read all GeometricFields of type. Returns names of fields read. Guarantees
-// all processors to read fields in same order.
 template<class Type, template<class> class PatchField, class GeoMesh>
 Foam::wordList Foam::ReadFields
 (
@@ -43,25 +41,27 @@ Foam::wordList Foam::ReadFields
 {
     typedef GeometricField<Type, PatchField, GeoMesh> GeoField;
 
-    // Search list of objects for wanted type
-    IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
+    // Names of GeoField objects, sorted order.
+    const wordList fieldNames(objects.names(GeoField::typeName, syncPar));
 
-    const wordList masterNames(fieldNames(fieldObjects, syncPar));
+    // Construct the fields - reading in consistent (master) order.
+    fields.resize(fieldNames.size());
 
-    fields.setSize(masterNames.size());
+    label nFields = 0;
 
-    // Make sure to read in masterNames order.
-
-    forAll(masterNames, i)
+    for (const word& fieldName : fieldNames)
     {
-        Info<< "Reading " << GeoField::typeName << ' ' << masterNames[i]
-            << endl;
+        if (!nFields)
+        {
+            Info<< "Reading " << GeoField::typeName << ':';
+        }
+        Info<< ' ' << fieldName;
 
-        const IOobject& io = *fieldObjects[masterNames[i]];
+        const IOobject& io = *objects[fieldName];
 
         fields.set
         (
-            i,
+            nFields++,
             new GeoField
             (
                 IOobject
@@ -79,12 +79,13 @@ Foam::wordList Foam::ReadFields
             )
         );
     }
-    return masterNames;
+
+    if (nFields) Info<< endl;
+
+    return fieldNames;
 }
 
 
-// Read all fields of type. Returns names of fields read. Guarantees all
-// processors to read fields in same order.
 template<class GeoField, class Mesh>
 Foam::wordList Foam::ReadFields
 (
@@ -94,25 +95,27 @@ Foam::wordList Foam::ReadFields
     const bool syncPar
 )
 {
-    // Search list of objects for wanted type
-    IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
+    // Names of GeoField objects, sorted order.
+    const wordList fieldNames(objects.names(GeoField::typeName, syncPar));
 
-    const wordList masterNames(fieldNames(fieldObjects, syncPar));
+    // Construct the fields - reading in consistent (master) order.
+    fields.resize(fieldNames.size());
 
-    fields.setSize(masterNames.size());
+    label nFields = 0;
 
-    // Make sure to read in masterNames order.
-
-    forAll(masterNames, i)
+    for (const word& fieldName : fieldNames)
     {
-        Info<< "Reading " << GeoField::typeName << ' ' << masterNames[i]
-            << endl;
+        if (!nFields)
+        {
+            Info<< "Reading " << GeoField::typeName << ':';
+        }
+        Info<< ' ' << fieldName;
 
-        const IOobject& io = *fieldObjects[masterNames[i]];
+        const IOobject& io = *objects[fieldName];
 
         fields.set
         (
-            i,
+            nFields++,
             new GeoField
             (
                 IOobject
@@ -129,12 +132,13 @@ Foam::wordList Foam::ReadFields
             )
         );
     }
-    return masterNames;
+
+    if (nFields) Info<< endl;
+
+    return fieldNames;
 }
 
 
-// Read all (non-mesh) fields of type. Returns names of fields read. Guarantees
-// all processors to read fields in same order.
 template<class GeoField>
 Foam::wordList Foam::ReadFields
 (
@@ -143,25 +147,27 @@ Foam::wordList Foam::ReadFields
     const bool syncPar
 )
 {
-    // Search list of objects for wanted type
-    IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
+    // Names of GeoField objects, sorted order.
+    const wordList fieldNames(objects.names(GeoField::typeName, syncPar));
 
-    const wordList masterNames(fieldNames(fieldObjects, syncPar));
+    // Construct the fields - reading in consistent (master) order.
+    fields.resize(fieldNames.size());
 
-    fields.setSize(masterNames.size());
+    label nFields = 0;
 
-    // Make sure to read in masterNames order.
-
-    forAll(masterNames, i)
+    for (const word& fieldName : fieldNames)
     {
-        Info<< "Reading " << GeoField::typeName << ' ' << masterNames[i]
-            << endl;
+        if (!nFields)
+        {
+            Info<< "Reading " << GeoField::typeName << ':';
+        }
+        Info<< ' ' << fieldName;
 
-        const IOobject& io = *fieldObjects[masterNames[i]];
+        const IOobject& io = *objects[fieldName];
 
         fields.set
         (
-            i,
+            nFields++,
             new GeoField
             (
                 IOobject
@@ -177,7 +183,10 @@ Foam::wordList Foam::ReadFields
             )
         );
     }
-    return masterNames;
+
+    if (nFields) Info<< endl;
+
+    return fieldNames;
 }
 
 
@@ -190,51 +199,38 @@ void Foam::ReadFields
     objectRegistry& fieldsCache
 )
 {
-    // Collect all times that are no longer used
+    // Unload times that are no longer used
     {
-        wordHashSet usedTimes(timeNames);
-
-        DynamicList<word> unusedTimes(fieldsCache.size());
-
-        forAllIter(objectRegistry, fieldsCache, timeIter)
-        {
-            const word& tm = timeIter.key();
-            if (!usedTimes.found(tm))
-            {
-                unusedTimes.append(tm);
-            }
-        }
+        wordHashSet unusedTimes(fieldsCache.toc());
+        unusedTimes.erase(timeNames);
 
         //Info<< "Unloading times " << unusedTimes << endl;
 
-        forAll(unusedTimes, i)
+        for (const word& timeName : unusedTimes)
         {
-            objectRegistry& timeCache = const_cast<objectRegistry&>
-            (
-                fieldsCache.lookupObject<objectRegistry>(unusedTimes[i])
-            );
+            objectRegistry& timeCache =
+                fieldsCache.lookupObjectRef<objectRegistry>(timeName);
+
             fieldsCache.checkOut(timeCache);
         }
     }
 
 
     // Load any new fields
-    forAll(timeNames, i)
+    for (const word& timeName : timeNames)
     {
-        const word& tm = timeNames[i];
-
         // Create if not found
-        if (!fieldsCache.found(tm))
+        if (!fieldsCache.found(timeName))
         {
-            //Info<< "Creating registry for time " << tm << endl;
+            //Info<< "Creating registry for time " << timeName << endl;
 
             // Create objectRegistry if not found
             objectRegistry* timeCachePtr = new objectRegistry
             (
                 IOobject
                 (
-                    tm,
-                    tm,
+                    timeName,
+                    timeName,
                     fieldsCache,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE
@@ -245,27 +241,24 @@ void Foam::ReadFields
 
         // Obtain cache for current time
         const objectRegistry& timeCache =
-            fieldsCache.lookupObject<objectRegistry>
-            (
-                tm
-            );
+            fieldsCache.lookupObject<objectRegistry>(timeName);
 
         // Store field if not found
         if (!timeCache.found(fieldName))
         {
             //Info<< "Loading field " << fieldName
-            //    << " for time " << tm << endl;
+            //    << " for time " << timeName << endl;
 
             GeoField loadedFld
             (
                 IOobject
                 (
                     fieldName,
-                    tm,
+                    timeName,
                     mesh.thisDb(),
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE,
-                    false
+                    false  // do not register
                 ),
                 mesh
             );
@@ -276,7 +269,7 @@ void Foam::ReadFields
                 IOobject
                 (
                     fieldName,
-                    tm,
+                    timeName,
                     timeCache,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE
@@ -320,48 +313,48 @@ void Foam::readFields
     LIFOStack<regIOobject*>& storedObjects
 )
 {
-    IOobjectList fields(objects.lookupClass(GeoFieldType::typeName));
-    if (!fields.size()) return;
+    // Names of GeoField objects, sorted order. Not synchronised.
+    const wordList fieldNames
+    (
+        objects.sortedNames
+        (
+            GeoFieldType::typeName,
+            selectedFields   // Only permit these
+        )
+    );
 
-    bool firstField = true;
+    label nFields = 0;
 
-    forAllConstIter(IOobjectList, fields, fieldIter)
+    for (const word& fieldName : fieldNames)
     {
-        const IOobject& io = *fieldIter();
-        const word& fieldName = io.name();
+        const IOobject& io = *objects[fieldName];
 
-        if (selectedFields.found(fieldName))
+        if (!nFields)
         {
-            if (firstField)
-            {
-                Info<< "    " << GeoFieldType::typeName << "s:";
-                firstField = false;
-            }
-
-            Info<< " " << fieldName;
-
-            GeoFieldType* fieldPtr = new GeoFieldType
-            (
-                IOobject
-                (
-                    fieldName,
-                    io.instance(),
-                    io.local(),
-                    io.db(),
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                ),
-                mesh
-            );
-            fieldPtr->store();
-            storedObjects.push(fieldPtr);
+            Info<< "    " << GeoFieldType::typeName << ':';
         }
+        Info<< ' ' << fieldName;
+
+        GeoFieldType* fieldPtr = new GeoFieldType
+        (
+            IOobject
+            (
+                fieldName,
+                io.instance(),
+                io.local(),
+                io.db(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh
+        );
+        fieldPtr->store();
+        storedObjects.push(fieldPtr);
+
+        ++nFields;
     }
 
-    if (!firstField)
-    {
-        Info<< endl;
-    }
+    if (nFields) Info<< endl;
 }
 
 
@@ -374,85 +367,48 @@ void Foam::readUniformFields
     const bool syncPar
 )
 {
-    // Search list of objects for wanted type
-    IOobjectList fields(objects.lookupClass(UniformFieldType::typeName));
-    if (!fields.size()) return;
+    // Names of UniformField objects, sorted order.
+    const wordList fieldNames
+    (
+        objects.names
+        (
+            UniformFieldType::typeName,
+            selectedFields,  // Only permit these
+            syncPar
+        )
+    );
 
-    wordList masterNames(fields.names());
+    label nFields = 0;
 
-    if (syncPar && Pstream::parRun())
+    for (const word& fieldName : fieldNames)
     {
-        // Check that I have the same fields as the master
-        const wordList localNames(masterNames);
-        Pstream::scatter(masterNames);
+        const IOobject& io = *objects[fieldName];
 
-        wordHashSet localNamesSet(localNames);
-
-        forAll(masterNames, i)
+        if (!nFields)
         {
-            const word& masterFld = masterNames[i];
-
-            wordHashSet::iterator iter = localNamesSet.find(masterFld);
-
-            if (iter == localNamesSet.end())
-            {
-                FatalErrorInFunction
-                    << "Fields not synchronised across processors." << endl
-                    << "Master has fields " << masterNames
-                    << "  processor " << Pstream::myProcNo()
-                    << " has fields " << localNames << exit(FatalError);
-            }
-            else
-            {
-                localNamesSet.erase(iter);
-            }
+            Info<< "    " << UniformFieldType::typeName << ':';
         }
+        Info<< ' ' << fieldName;
 
-        if (localNamesSet.size())
-        {
-            FatalErrorInFunction
-                << "Fields not synchronised across processors." << endl
-                << "Master has fields " << masterNames
-                << "  processor " << Pstream::myProcNo()
-                << " has fields " << localNames << exit(FatalError);
-        }
-    }
-
-    bool firstField = true;
-
-    forAll(masterNames, i)
-    {
-        const IOobject& io = *fields[masterNames[i]];
-        const word& fieldName = io.name();
-
-        if (selectedFields.found(fieldName))
-        {
-            if (firstField)
-            {
-                Info<< "    " << UniformFieldType::typeName << "s:";
-                firstField = false;
-            }
-
-            Info<< " " << fieldName;
-
-            UniformFieldType* fieldPtr = new UniformFieldType
+        UniformFieldType* fieldPtr = new UniformFieldType
+        (
+            IOobject
             (
-                IOobject
-                (
-                    fieldName,
-                    io.instance(),
-                    io.local(),
-                    io.db(),
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
-            );
-            fieldPtr->store();
-            storedObjects.push(fieldPtr);
-        }
+                fieldName,
+                io.instance(),
+                io.local(),
+                io.db(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
+        fieldPtr->store();
+        storedObjects.push(fieldPtr);
+
+        ++nFields;
     }
 
-    Info<< endl;
+    if (nFields) Info<< endl;
 }
 
 

@@ -45,12 +45,12 @@ void Foam::reconstructLagrangianPositions
         IDLList<passiveParticle>()
     );
 
-    forAll(meshes, i)
+    forAll(meshes, meshi)
     {
-        const labelList& cellMap = cellProcAddressing[i];
-        const labelList& faceMap = faceProcAddressing[i];
+        const labelList& cellMap = cellProcAddressing[meshi];
+        const labelList& faceMap = faceProcAddressing[meshi];
 
-        Cloud<passiveParticle> lpi(meshes[i], cloudName, false);
+        Cloud<passiveParticle> lpi(meshes[meshi], cloudName, false);
 
         forAllConstIter(Cloud<passiveParticle>, lpi, iter)
         {

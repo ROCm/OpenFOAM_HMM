@@ -58,7 +58,7 @@ void MapLagrangianFields
     {
         IOobjectList fields = objects.lookupClass(IOField<Type>::typeName);
 
-        forAllIter(IOobjectList, fields, fieldIter)
+        forAllConstIters(fields, fieldIter)
         {
             const word& fieldName = fieldIter()->name();
 
@@ -97,7 +97,7 @@ void MapLagrangianFields
         IOobjectList fieldFields =
             objects.lookupClass(IOField<Field<Type>>::typeName);
 
-        forAllIter(IOobjectList, fieldFields, fieldIter)
+        forAllConstIters(fieldFields, fieldIter)
         {
             const word& fieldName = fieldIter()->name();
 
@@ -149,7 +149,7 @@ void MapLagrangianFields
         IOobjectList fieldFields =
             objects.lookupClass(CompactIOField<Field<Type>, Type>::typeName);
 
-        forAllIter(IOobjectList, fieldFields, fieldIter)
+        forAllConstIters(fieldFields, fieldIter)
         {
             const word& fieldName = fieldIter()->name();
 

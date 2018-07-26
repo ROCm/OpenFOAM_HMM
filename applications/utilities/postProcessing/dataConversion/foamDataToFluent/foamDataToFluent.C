@@ -109,51 +109,49 @@ int main(int argc, char *argv[])
         IOobjectList objects(mesh, runTime.timeName());
 
 
-        // Converting volScalarField
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        // Search list of objects for volScalarFields
-        IOobjectList scalarFields(objects.lookupClass("volScalarField"));
-
-        forAllIter(IOobjectList, scalarFields, iter)
+        // volScalarField
+        for
+        (
+            const word& fieldName
+          : objects.sortedNames(volScalarField::typeName)
+        )
         {
-            // Read field
-            volScalarField field(*iter(), mesh);
-
-            // lookup field from dictionary and convert field
+            // Lookup field from dictionary and convert field
             label unitNumber;
             if
             (
-                foamDataToFluentDict.readIfPresent(field.name(), unitNumber)
+                foamDataToFluentDict.readIfPresent(fieldName, unitNumber)
              && unitNumber > 0
             )
             {
-                Info<< "    Converting field " << field.name() << endl;
+                // Read field
+                volScalarField field(*(objects[fieldName]), mesh);
+
+                Info<< "    Converting field " << fieldName << nl;
                 writeFluentField(field, unitNumber, fluentDataFile);
             }
         }
 
 
-        // Converting volVectorField
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        // Search list of objects for volVectorFields
-        IOobjectList vectorFields(objects.lookupClass("volVectorField"));
-
-        forAllIter(IOobjectList, vectorFields, iter)
+        // volVectorField
+        for
+        (
+            const word& fieldName
+          : objects.sortedNames(volVectorField::typeName)
+        )
         {
-            // Read field
-            volVectorField field(*iter(), mesh);
-
-            // lookup field from dictionary and convert field
+            // Lookup field from dictionary and convert field
             label unitNumber;
             if
             (
-                foamDataToFluentDict.readIfPresent(field.name(), unitNumber)
+                foamDataToFluentDict.readIfPresent(fieldName, unitNumber)
              && unitNumber > 0
             )
             {
-                Info<< "    Converting field " << field.name() << endl;
+                // Read field
+                volVectorField field(*(objects[fieldName]), mesh);
+
+                Info<< "    Converting field " << fieldName << nl;
                 writeFluentField(field, unitNumber, fluentDataFile);
             }
         }

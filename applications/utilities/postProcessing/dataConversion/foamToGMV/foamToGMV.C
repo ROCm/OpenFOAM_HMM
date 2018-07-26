@@ -49,13 +49,13 @@ Description
 int main(int argc, char *argv[])
 {
     const label nTypes = 4;
-    const word fieldTypes[] =
-    {
+    const wordList fieldTypes
+    ({
         "volScalarField",
         "volVectorField",
         "surfaceScalarField",
         cloud::prefix
-    };
+    });
 
     #include "setRootCase.H"
 

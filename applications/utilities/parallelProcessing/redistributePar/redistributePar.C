@@ -636,11 +636,11 @@ void readFields
     if (haveMesh[Pstream::myProcNo()] && objectNames != masterNames)
     {
         FatalErrorInFunction
-            << "differing fields of type " << GeoField::typeName
-            << " on processors." << nl
-            << "Master has:" << masterNames << endl
-            << Pstream::myProcNo() << " has:" << objectNames
-            << abort(FatalError);
+            << "Objects not synchronised across processors." << nl
+            << "Master has " << flatOutput(masterNames) << nl
+            << "Processor " << Pstream::myProcNo()
+            << " has " << flatOutput(objectNames)
+            << exit(FatalError);
     }
 
     fields.setSize(masterNames.size());

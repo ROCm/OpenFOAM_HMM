@@ -193,7 +193,7 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
     if (cellSets.size())
     {
         os  << "cellSets:" << endl;
-        forAllConstIter(IOobjectList, cellSets, iter)
+        forAllConstIters(cellSets, iter)
         {
             cellSet set(*iter());
             os  << '\t' << set.name() << "\tsize:" << set.size() << endl;
@@ -203,7 +203,7 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
     if (faceSets.size())
     {
         os  << "faceSets:" << endl;
-        forAllConstIter(IOobjectList, faceSets, iter)
+        forAllConstIters(faceSets, iter)
         {
             faceSet set(*iter());
             os  << '\t' << set.name() << "\tsize:" << set.size() << endl;
@@ -213,7 +213,7 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
     if (pointSets.size())
     {
         os  << "pointSets:" << endl;
-        forAllConstIter(IOobjectList, pointSets, iter)
+        forAllConstIters(pointSets, iter)
         {
             pointSet set(*iter());
             os  << '\t' << set.name() << "\tsize:" << set.size() << endl;
@@ -224,9 +224,8 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
     if (cellZones.size())
     {
         os  << "cellZones:" << endl;
-        forAll(cellZones, i)
+        for (const cellZone& zone : cellZones)
         {
-            const cellZone& zone = cellZones[i];
             os  << '\t' << zone.name() << "\tsize:" << zone.size() << endl;
         }
     }
@@ -234,9 +233,8 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
     if (faceZones.size())
     {
         os  << "faceZones:" << endl;
-        forAll(faceZones, i)
+        for (const faceZone& zone : faceZones)
         {
-            const faceZone& zone = faceZones[i];
             os  << '\t' << zone.name() << "\tsize:" << zone.size() << endl;
         }
     }
@@ -244,9 +242,8 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
     if (pointZones.size())
     {
         os  << "pointZones:" << endl;
-        forAll(pointZones, i)
+        for (const pointZone& zone : pointZones)
         {
-            const pointZone& zone = pointZones[i];
             os  << '\t' << zone.name() << "\tsize:" << zone.size() << endl;
         }
     }

@@ -286,7 +286,7 @@ template<class TopoSet>
 void subsetTopoSets
 (
     const fvMesh& mesh,
-    const IOobjectList& objectsList,
+    const IOobjectList& objects,
     const labelList& map,
     const fvMesh& subMesh,
     PtrList<TopoSet>& subSets
@@ -294,7 +294,7 @@ void subsetTopoSets
 {
     // Read original sets
     PtrList<TopoSet> sets;
-    ReadFields<TopoSet>(objectsList, sets);
+    ReadFields<TopoSet>(objects, sets);
 
     subSets.setSize(sets.size());
     forAll(sets, i)
