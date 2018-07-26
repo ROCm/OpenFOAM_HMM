@@ -34,7 +34,7 @@ Usage
     \b foamUpgradeCyclics [OPTION]
 
     Options:
-      - \par -test
+      - \par -dry-run
         Suppress writing the updated files with split cyclics
 
       - \par -enableFunctionEntries
@@ -70,7 +70,7 @@ namespace Foam
 // Read boundary file without reading mesh
 void rewriteBoundary
 (
-    const bool isTestRun,
+    const bool dryrun,
     const IOobject& io,
     const fileName& regionPrefix,
     HashTable<word>& thisNames,
@@ -237,9 +237,9 @@ void rewriteBoundary
 
     if (returnReduce(nOldCyclics, sumOp<label>()) > 0)
     {
-        if (isTestRun)
+        if (dryrun)
         {
-            //Info<< "-test option: no changes made" << nl << endl;
+            //Info<< "-dry-run option: no changes made" << nl << endl;
         }
         else
         {
@@ -263,7 +263,7 @@ void rewriteBoundary
 
 void rewriteField
 (
-    const bool isTestRun,
+    const bool dryrun,
     const Time& runTime,
     const word& fieldName,
     const HashTable<word>& thisNames,
@@ -342,7 +342,7 @@ void rewriteField
 
     if (returnReduce(nChanged, sumOp<label>()) > 0)
     {
-        if (isTestRun)
+        if (dryrun)
         {
             //Info<< "-test option: no changes made" << endl;
         }
@@ -369,7 +369,7 @@ void rewriteField
 
 void rewriteFields
 (
-    const bool isTestRun,
+    const bool dryrun,
     const Time& runTime,
     const wordList& fieldNames,
     const HashTable<word>& thisNames,
@@ -380,7 +380,7 @@ void rewriteFields
     {
         rewriteField
         (
-            isTestRun,
+            dryrun,
             runTime,
             fieldName,
             thisNames,
@@ -395,7 +395,12 @@ int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
 
-    argList::addBoolOption("test", "test only; do not change any files");
+    argList::addOptionCompat("dry-run", {"test", 1806});
+    argList::addBoolOption
+    (
+        "dry-run",
+        "test only do not change any files"
+    );
     argList::addBoolOption
     (
         "enableFunctionEntries",
@@ -414,10 +419,10 @@ int main(int argc, char *argv[])
 
     instantList timeDirs = timeSelector::select0(runTime, args);
 
-    const bool isTestRun = args.found("test");
-    if (isTestRun)
+    const bool dryrun = args.found("dry-run");
+    if (dryrun)
     {
-        Info<< "-test option: no changes made" << nl << endl;
+        Info<< "-dry-run option: no changes made" << nl << endl;
     }
     const bool enableEntries = args.found("enableFunctionEntries");
 
@@ -452,7 +457,7 @@ int main(int argc, char *argv[])
     {
         rewriteBoundary
         (
-            isTestRun,
+            dryrun,
             io,
             regionPrefix,
             thisNames,
@@ -486,7 +491,7 @@ int main(int argc, char *argv[])
         {
             rewriteBoundary
             (
-                isTestRun,
+                dryrun,
                 io,
                 regionPrefix,
                 thisNames,
@@ -510,7 +515,7 @@ int main(int argc, char *argv[])
 
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(volScalarField::typeName),
             thisNames,
@@ -518,7 +523,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(volVectorField::typeName),
             thisNames,
@@ -526,7 +531,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(volSphericalTensorField::typeName),
             thisNames,
@@ -534,7 +539,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(volSymmTensorField::typeName),
             thisNames,
@@ -542,7 +547,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(volTensorField::typeName),
             thisNames,
@@ -555,7 +560,7 @@ int main(int argc, char *argv[])
 
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(pointScalarField::typeName),
             thisNames,
@@ -563,7 +568,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(pointVectorField::typeName),
             thisNames,
@@ -571,7 +576,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(pointSphericalTensorField::typeName),
             thisNames,
@@ -579,7 +584,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(pointSymmTensorField::typeName),
             thisNames,
@@ -587,7 +592,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(pointTensorField::typeName),
             thisNames,
@@ -600,7 +605,7 @@ int main(int argc, char *argv[])
 
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(surfaceScalarField::typeName),
             thisNames,
@@ -608,7 +613,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(surfaceVectorField::typeName),
             thisNames,
@@ -616,7 +621,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(surfaceSphericalTensorField::typeName),
             thisNames,
@@ -624,7 +629,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(surfaceSymmTensorField::typeName),
             thisNames,
@@ -632,7 +637,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(surfaceTensorField::typeName),
             thisNames,
