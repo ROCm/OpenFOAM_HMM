@@ -878,24 +878,24 @@ int main(int argc, char *argv[])
         }
     }
 
-    // Set output level
-    {
-        wordList flags;
-        if (meshDict.readIfPresent("outputFlags", flags))
-        {
-            meshRefinement::outputLevel
-            (
-                meshRefinement::outputType
-                (
-                    meshRefinement::readFlags
-                    (
-                        meshRefinement::outputTypeNames,
-                        flags
-                    )
-                )
-            );
-        }
-    }
+    //// Set output level
+    //{
+    //    wordList flags;
+    //    if (meshDict.readIfPresent("outputFlags", flags))
+    //    {
+    //        meshRefinement::outputLevel
+    //        (
+    //            meshRefinement::outputType
+    //            (
+    //                meshRefinement::readFlags
+    //                (
+    //                    meshRefinement::outputTypeNames,
+    //                    flags
+    //                )
+    //            )
+    //        );
+    //    }
+    //}
 
     // for the impatient who want to see some output files:
     profiling::writeNow();

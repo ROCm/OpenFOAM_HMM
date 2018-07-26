@@ -80,14 +80,14 @@ Foam::meshRefinement::debugTypeNames
 };
 
 
-const Foam::Enum
-<
-    Foam::meshRefinement::outputType
->
-Foam::meshRefinement::outputTypeNames
-{
-    { outputType::OUTPUTLAYERINFO, "layerInfo" }
-};
+//const Foam::Enum
+//<
+//    Foam::meshRefinement::outputType
+//>
+//Foam::meshRefinement::outputTypeNames
+//{
+//    { outputType::OUTPUTLAYERINFO, "layerInfo" }
+//};
 
 
 const Foam::Enum
@@ -106,7 +106,7 @@ Foam::meshRefinement::writeTypeNames
 
 Foam::meshRefinement::writeType Foam::meshRefinement::writeLevel_;
 
-Foam::meshRefinement::outputType Foam::meshRefinement::outputLevel_;
+//Foam::meshRefinement::outputType Foam::meshRefinement::outputLevel_;
 
 // Inside/outside test for polyMesh:.findCell()
 //   2.4.x : default = polyMesh::FACE_DIAG_TRIS
@@ -3012,16 +3012,16 @@ void Foam::meshRefinement::writeLevel(const writeType flags)
 }
 
 
-Foam::meshRefinement::outputType Foam::meshRefinement::outputLevel()
-{
-    return outputLevel_;
-}
-
-
-void Foam::meshRefinement::outputLevel(const outputType flags)
-{
-    outputLevel_ = flags;
-}
+//Foam::meshRefinement::outputType Foam::meshRefinement::outputLevel()
+//{
+//    return outputLevel_;
+//}
+//
+//
+//void Foam::meshRefinement::outputLevel(const outputType flags)
+//{
+//    outputLevel_ = flags;
+//}
 
 
 // ************************************************************************* //

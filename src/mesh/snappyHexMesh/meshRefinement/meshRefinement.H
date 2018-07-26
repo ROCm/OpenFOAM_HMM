@@ -98,13 +98,13 @@ public:
 
         static const Enum<debugType> debugTypeNames;
 
-        //- Enumeration for what to output. Used as a bit-pattern.
-        enum outputType
-        {
-            OUTPUTLAYERINFO = (1 << 0)
-        };
-
-        static const Enum<outputType> outputTypeNames;
+        ////- Enumeration for what to output. Used as a bit-pattern.
+        //enum outputType
+        //{
+        //    OUTPUTLAYERINFO = (1 << 0)
+        //};
+        //
+        //static const Enum<outputType> outputTypeNames;
 
         //- Enumeration for what to write. Used as a bit-pattern.
         enum writeType
@@ -134,8 +134,8 @@ private:
         //- Control of writing level
         static writeType writeLevel_;
 
-        //- Control of output/log level
-        static outputType outputLevel_;
+        ////- Control of output/log level
+        //static outputType outputLevel_;
 
 
     // Private data
@@ -1513,9 +1513,9 @@ public:
             static writeType writeLevel();
             static void writeLevel(const writeType);
 
-            //- Get/set output level
-            static outputType outputLevel();
-            static void outputLevel(const outputType);
+            ////- Get/set output level
+            //static outputType outputLevel();
+            //static void outputLevel(const outputType);
 
 
             //- Helper: convert wordList into bit pattern using provided Enum

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,10 +84,9 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
                 << exit(FatalIOError);
         }
     }
-
-    List<Tuple2<point, word>> pointsToZone;
-    if (dict.readIfPresent("locationsInMesh", pointsToZone))
+    else
     {
+        List<Tuple2<point, word>> pointsToZone(dict.lookup("locationsInMesh"));
         label nZones = locationsInMesh_.size();
         locationsInMesh_.setSize(nZones+pointsToZone.size());
         zonesInMesh_.setSize(locationsInMesh_.size());
