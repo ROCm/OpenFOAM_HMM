@@ -115,7 +115,8 @@ activePressureForceBaffleVelocityFvPatchVectorField
         initCyclicSf_ = p.boundaryMesh()[cyclicPatchLabel_].Sf();
         nbrCyclicSf_ =  refCast<const cyclicFvPatch>
         (
-            p.boundaryMesh()[cyclicPatchLabel_]
+            p.boundaryMesh()[cyclicPatchLabel_],
+            dict
         ).neighbFvPatch().Sf();
     }
 

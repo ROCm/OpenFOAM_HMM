@@ -61,7 +61,7 @@ Foam::processorCyclicFvsPatchField<Type>::processorCyclicFvsPatchField
 )
 :
     coupledFvsPatchField<Type>(p, iF, dict),
-    procPatch_(refCast<const processorCyclicFvPatch>(p))
+    procPatch_(refCast<const processorCyclicFvPatch>(p, dict))
 {
     if (!isType<processorCyclicFvPatch>(p))
     {

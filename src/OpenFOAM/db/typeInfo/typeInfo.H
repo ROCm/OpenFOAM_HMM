@@ -100,6 +100,27 @@ inline To& dynamicCast(From& r)
 }
 
 
+//- Reference type cast template function,
+//  wraps dynamic_cast to handle bad_cast exception and generate a FatalError.
+template<class To, class From>
+inline To& dynamicCast(From& r, const dictionary& d)
+{
+    try
+    {
+        return dynamic_cast<To&>(r);
+    }
+    catch (std::bad_cast&)
+    {
+        FatalIOErrorInFunction(d)
+            << "Attempt to cast type " << typeid(r).name()
+            << " to type " << typeid(To).name()
+            << abort(FatalIOError);
+
+        return dynamic_cast<To&>(r);
+    }
+}
+
+
 //- Reference type cast template function.
 //  As per dynamicCast, but handles type names via the virtual type() method.
 template<class To, class From>
@@ -115,6 +136,27 @@ inline To& refCast(From& r)
             << "Attempt to cast type " << r.type()
             << " to type " << To::typeName
             << abort(FatalError);
+
+        return dynamic_cast<To&>(r);
+    }
+}
+
+
+//- Reference type cast template function.
+//  As per dynamicCast, but handles type names via the virtual type() method.
+template<class To, class From>
+inline To& refCast(From& r, const dictionary& d)
+{
+    try
+    {
+        return dynamic_cast<To&>(r);
+    }
+    catch (std::bad_cast&)
+    {
+        FatalIOErrorInFunction(d)
+            << "Attempt to cast type " << r.type()
+            << " to type " << To::typeName
+            << abort(FatalIOError);
 
         return dynamic_cast<To&>(r);
     }

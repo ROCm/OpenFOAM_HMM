@@ -52,7 +52,7 @@ Foam::processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
 )
 :
     coupledPointPatchField<Type>(p, iF, dict),
-    procPatch_(refCast<const processorCyclicPointPatch>(p)),
+    procPatch_(refCast<const processorCyclicPointPatch>(p, dict)),
     receiveBuf_(0)
 {}
 

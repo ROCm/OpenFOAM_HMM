@@ -96,7 +96,8 @@ activeBaffleVelocityFvPatchVectorField
     (
         refCast<const cyclicFvPatch>
         (
-            p.boundaryMesh()[cyclicPatchLabel_]
+            p.boundaryMesh()[cyclicPatchLabel_],
+            dict
         ).neighbFvPatch().Sf()
     ),
     openFraction_(readScalar(dict.lookup("openFraction"))),

@@ -73,7 +73,7 @@ Foam::symmetryPlaneFvPatchField<Type>::symmetryPlaneFvPatchField
 )
 :
     basicSymmetryFvPatchField<Type>(p, iF, dict),
-    symmetryPlanePatch_(refCast<const symmetryPlaneFvPatch>(p))
+    symmetryPlanePatch_(refCast<const symmetryPlaneFvPatch>(p, dict))
 {
     if (!isType<symmetryPlaneFvPatch>(p))
     {

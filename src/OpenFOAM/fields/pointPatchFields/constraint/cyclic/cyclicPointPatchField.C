@@ -51,7 +51,7 @@ Foam::cyclicPointPatchField<Type>::cyclicPointPatchField
 )
 :
     coupledPointPatchField<Type>(p, iF, dict),
-    cyclicPatch_(refCast<const cyclicPointPatch>(p))
+    cyclicPatch_(refCast<const cyclicPointPatch>(p, dict))
 {
     if (!isType<cyclicPointPatch>(p))
     {

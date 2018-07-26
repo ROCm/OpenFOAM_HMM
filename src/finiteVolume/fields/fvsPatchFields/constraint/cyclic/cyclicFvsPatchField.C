@@ -48,7 +48,7 @@ Foam::cyclicFvsPatchField<Type>::cyclicFvsPatchField
 )
 :
     coupledFvsPatchField<Type>(p, iF, dict),
-    cyclicPatch_(refCast<const cyclicFvPatch>(p))
+    cyclicPatch_(refCast<const cyclicFvPatch>(p, dict))
 {
     if (!isA<cyclicFvPatch>(p))
     {

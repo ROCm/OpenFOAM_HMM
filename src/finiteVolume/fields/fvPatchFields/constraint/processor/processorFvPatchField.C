@@ -76,7 +76,7 @@ Foam::processorFvPatchField<Type>::processorFvPatchField
 )
 :
     coupledFvPatchField<Type>(p, iF, dict, dict.found("value")),
-    procPatch_(refCast<const processorFvPatch>(p)),
+    procPatch_(refCast<const processorFvPatch>(p, dict)),
     sendBuf_(0),
     receiveBuf_(0),
     outstandingSendRequest_(-1),

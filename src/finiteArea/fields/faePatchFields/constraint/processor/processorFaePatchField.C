@@ -87,7 +87,7 @@ Foam::processorFaePatchField<Type>::processorFaePatchField
 )
 :
     coupledFaePatchField<Type>(p, iF, dict),
-    procPatch_(refCast<const processorFaPatch>(p))
+    procPatch_(refCast<const processorFaPatch>(p, dict))
 {
     if (!isType<processorFaPatch>(p))
     {

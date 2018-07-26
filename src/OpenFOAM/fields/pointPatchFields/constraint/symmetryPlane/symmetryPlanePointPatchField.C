@@ -48,7 +48,7 @@ Foam::symmetryPlanePointPatchField<Type>::symmetryPlanePointPatchField
 )
 :
     basicSymmetryPointPatchField<Type>(p, iF, dict),
-    symmetryPlanePatch_(refCast<const symmetryPlanePointPatch>(p))
+    symmetryPlanePatch_(refCast<const symmetryPlanePointPatch>(p, dict))
 {
     if (!isType<symmetryPlanePointPatch>(p))
     {

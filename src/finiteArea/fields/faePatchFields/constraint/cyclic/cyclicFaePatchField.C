@@ -74,7 +74,7 @@ Foam::cyclicFaePatchField<Type>::cyclicFaePatchField
 )
 :
     coupledFaePatchField<Type>(p, iF, dict),
-    cyclicPatch_(refCast<const cyclicFaPatch>(p))
+    cyclicPatch_(refCast<const cyclicFaPatch>(p, dict))
 {
     if (!isType<cyclicFaPatch>(p))
     {

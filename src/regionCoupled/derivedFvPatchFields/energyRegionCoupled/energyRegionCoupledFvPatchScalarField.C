@@ -236,7 +236,7 @@ energyRegionCoupledFvPatchScalarField
 )
 :
     coupledFvPatchField<scalar>(p, iF, dict),
-    regionCoupledPatch_(refCast<const regionCoupledBaseFvPatch>(p)),
+    regionCoupledPatch_(refCast<const regionCoupledBaseFvPatch>(p, dict)),
     method_(UNDEFINED),
     nbrThermoPtr_(nullptr),
     thermoPtr_(nullptr)

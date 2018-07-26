@@ -180,7 +180,7 @@ void thermalBaffleFvPatchScalarField::createPatchMesh()
     }
 
     const mappedPatchBase& mpp =
-        refCast<const mappedPatchBase>(patch().patch());
+        refCast<const mappedPatchBase>(patch().patch(), dict_);
 
     const word coupleGroup(mpp.coupleGroup());
 

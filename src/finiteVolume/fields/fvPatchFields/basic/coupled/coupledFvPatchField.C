@@ -75,7 +75,7 @@ Foam::coupledFvPatchField<Type>::coupledFvPatchField
     const bool valueRequired
 )
 :
-    LduInterfaceField<Type>(refCast<const lduInterface>(p)),
+    LduInterfaceField<Type>(refCast<const lduInterface>(p, dict)),
     fvPatchField<Type>(p, iF, dict, valueRequired)
 {}
 

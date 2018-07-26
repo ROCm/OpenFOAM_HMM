@@ -72,7 +72,7 @@ Foam::cyclicACMIFvsPatchField<Type>::cyclicACMIFvsPatchField
 )
 :
     coupledFvsPatchField<Type>(p, iF, dict),
-    cyclicACMIPatch_(refCast<const cyclicACMIFvPatch>(p))
+    cyclicACMIPatch_(refCast<const cyclicACMIFvPatch>(p, dict))
 {
     if (!isA<cyclicACMIFvPatch>(p))
     {

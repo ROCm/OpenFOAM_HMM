@@ -51,7 +51,7 @@ Foam::cyclicACMIFvPatchField<Type>::cyclicACMIFvPatchField
 :
     cyclicACMILduInterfaceField(),
     coupledFvPatchField<Type>(p, iF, dict, dict.found("value")),
-    cyclicACMIPatch_(refCast<const cyclicACMIFvPatch>(p))
+    cyclicACMIPatch_(refCast<const cyclicACMIFvPatch>(p, dict))
 {
     if (!isA<cyclicACMIFvPatch>(p))
     {

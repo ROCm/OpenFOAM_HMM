@@ -53,7 +53,7 @@ Foam::cyclicACMIPointPatchField<Type>::cyclicACMIPointPatchField
 )
 :
     coupledPointPatchField<Type>(p, iF, dict),
-    cyclicACMIPatch_(refCast<const cyclicACMIPointPatch>(p)),
+    cyclicACMIPatch_(refCast<const cyclicACMIPointPatch>(p, dict)),
     ppiPtr_(nullptr),
     nbrPpiPtr_(nullptr)
 {
