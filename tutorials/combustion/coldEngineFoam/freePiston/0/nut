@@ -23,15 +23,11 @@ internalField   uniform 0;
 
 boundaryField
 {
-    back
-    {
-        type            wedge;
-    }
+    back  { type    wedge; }
     front { $back; }
     liner { $:wall.nut; }
     cylinderHead { $liner; }
     piston { $liner; }
-}
 }
 
 
