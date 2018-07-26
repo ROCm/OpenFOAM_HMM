@@ -67,11 +67,12 @@ void Foam::geomDecomp::checkDecompositionDirections
     {
         if (n_[dir] > 1 && meshDirs[dir] == -1)
         {
-            FatalErrorInFunction << "Trying to decompose a 1/2D mesh"
+            WarningInFunction
+                << "Trying to decompose a 1/2D mesh"
                 << " into " << n_[dir]
                 << " parts in direction "
                 << Vector<label>::componentNames[dir]
-                << exit(FatalError);
+                << endl;
         }
     }
 }

@@ -574,7 +574,8 @@ Foam::labelList Foam::localPointRegion::findDuplicateFaces
                 {
                     FatalErrorInFunction
                         << "Face:" << bFacei + mesh.nInternalFaces()
-                        << " has local points:" << f
+                        << " has local points:" << f << " at:"
+                        << UIndirectList<point>(allPatch.localPoints(), f)
                         << " which are in same order as face:"
                         << otherFacei + mesh.nInternalFaces()
                         << " with local points:" << otherF
@@ -597,7 +598,8 @@ Foam::labelList Foam::localPointRegion::findDuplicateFaces
                             << "This means that three or more faces share"
                             << " the same points and this is illegal." << nl
                             << "Face:" << meshFace0
-                            << " with local points:" << f
+                            << " with local points:" << f << " at:"
+                            << UIndirectList<point>(allPatch.localPoints(), f)
                             << " which are in same order as face:"
                             << meshFace1
                             << " with local points:" << otherF
