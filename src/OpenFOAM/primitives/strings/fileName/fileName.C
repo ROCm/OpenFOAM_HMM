@@ -533,6 +533,30 @@ void Foam::fileName::operator=(const char* str)
 }
 
 
+Foam::fileName& Foam::fileName::operator/=(const string& other)
+{
+    fileName& s = *this;
+
+    if (s.size())
+    {
+        if (other.size())
+        {
+            // Two non-empty strings: can concatenate
+
+            s.append("/");
+            s.append(other);
+        }
+    }
+    else if (other.size())
+    {
+        // Or, if the first string is empty
+        s = other;
+    }
+
+    return *this;
+}
+
+
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 Foam::fileName Foam::operator/(const string& a, const string& b)

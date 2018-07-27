@@ -130,7 +130,7 @@ public:
         fileName(Istream& is);
 
 
-    // Member functions
+    // Member Functions
 
         //- Is this character valid for a fileName?
         inline static bool valid(char c);
@@ -188,7 +188,7 @@ public:
         fileName clean() const;
 
 
-      // Interrogation
+    // Interrogation
 
         //- Return the file type: FILE, DIRECTORY, LINK or UNDEFINED.
         //  LINK is only returned if followLink=false
@@ -210,7 +210,7 @@ public:
         inline bool isBackup() const;
 
 
-      // Decomposition
+    // Decomposition
 
         //- Return basename (part beyond last /), including its extension
         //  The result normally corresponds to a Foam::word
@@ -316,7 +316,7 @@ public:
 
     // Member operators
 
-      // Assignment
+    // Assignment
 
         //- Copy, no character validation required
         void operator=(const fileName& str);
@@ -332,6 +332,13 @@ public:
 
         //- Copy, stripping invalid characters
         void operator=(const char* str);
+
+
+    // Other operators
+
+        //- Append a path element with '/' separator.
+        //  No '/' separator is added if this or the argument are empty.
+        fileName& operator/=(const string& other);
 
 
     // IOstream operators

@@ -824,7 +824,7 @@ bool Foam::cp(const fileName& src, const fileName& dest, const bool followLink)
         // If dest is a directory, create the destination file name.
         if (destFile.type() == fileName::DIRECTORY)
         {
-            destFile = destFile/src.name();
+            destFile /= src.name();
         }
 
         // Make sure the destination directory exists.
@@ -864,7 +864,7 @@ bool Foam::cp(const fileName& src, const fileName& dest, const bool followLink)
         // If dest is a directory, create the destination file name.
         if (destFile.type() == fileName::DIRECTORY)
         {
-            destFile = destFile/src.name();
+            destFile /= src.name();
         }
 
         // Make sure the destination directory exists.
@@ -880,7 +880,7 @@ bool Foam::cp(const fileName& src, const fileName& dest, const bool followLink)
         // If dest is a directory, create the destination file name.
         if (destFile.type() == fileName::DIRECTORY)
         {
-            destFile = destFile/src.components().last();
+            destFile /= src.components().last();
         }
 
         // Make sure the destination directory exists.
