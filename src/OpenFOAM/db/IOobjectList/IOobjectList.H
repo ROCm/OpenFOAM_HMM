@@ -94,16 +94,34 @@ public:
 
     // Basic methods
 
-        //- Add an IOobject to the list
+        //- Add IOobject to the list
         bool add(autoPtr<IOobject>& objectPtr);
 
-        //- Add an IOobject to the list
+        //- Add IOobject to the list
         bool add(autoPtr<IOobject>&& objectPtr);
 
-        //- Remove an IOobject from the list, by iterator
+        //- Copy append objects from other to this list, but do not overwrite
+        //- existing keys.
+        //
+        //  \return number of items added
+        label append(const IOobjectList& other);
+
+        //- Move append objects from other to this list, but do not overwrite
+        //- existing keys.
+        //  After calling this, the other parameter will contains any items
+        //  that could not be moved.
+        //
+        //  \return number of items added
+        label append(IOobjectList&& other);
+
+        //- Remove IOobject from the list, by name or by iterator.
+        //
+        //  \return autoPtr<IOobject>
         using HashPtrTable<IOobject>::remove;
 
-        //- Remove an IOobject from the list
+        //- Remove IOobject from the list.
+        //
+        //  \return True if object was removed
         bool remove(const IOobject& io);
 
 

@@ -298,6 +298,56 @@ bool Foam::IOobjectList::add(autoPtr<IOobject>&& objectPtr)
 }
 
 
+Foam::label Foam::IOobjectList::append(const IOobjectList& other)
+{
+    label count = 0;
+
+    forAllConstIters(other, iter)
+    {
+        if (!found(iter.key()))
+        {
+            if (IOobject::debug)
+            {
+                InfoInFunction << "Copy append " << iter.key() << nl;
+            }
+
+            set(iter.key(), new IOobject(*(iter.object())));
+            ++count;
+        }
+    }
+
+    return count;
+}
+
+
+Foam::label Foam::IOobjectList::append(IOobjectList&& other)
+{
+    // Remove by name to avoid uncertainties about invalid iterators
+
+    label count = 0;
+
+    wordList keys(other.toc());
+
+    for (const word& key : keys)
+    {
+        if (!found(key))
+        {
+            if (IOobject::debug)
+            {
+                InfoInFunction << "Move append " << key << nl;
+            }
+
+            if (add(other.remove(key)))
+            {
+                ++count;
+            }
+        }
+    }
+
+    return count;
+}
+
+
 bool Foam::IOobjectList::remove(const IOobject& io)
 {
     return erase(io.name());
@@ -317,15 +367,12 @@ Foam::IOobject* Foam::IOobjectList::lookup(const word& name) const
 
         return const_cast<IOobject*>(*iter);
     }
-    else
-    {
-        if (IOobject::debug)
-        {
-            InfoInFunction << "Could not find " << name << endl;
-        }
 
-        return nullptr;
+    if (IOobject::debug)
+    {
+        InfoInFunction << "Could not find " << name << endl;
     }
+    return nullptr;
 }
 
 
