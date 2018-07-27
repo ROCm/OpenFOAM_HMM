@@ -72,6 +72,9 @@ ThirdParty)
     Gcc81)
         gcc_version=gcc-8.1.0
         ;;
+    Gcc82)
+        gcc_version=gcc-8.2.0
+        ;;
     Clang | Clang37)
         clang_version=llvm-3.7.1
         ;;
