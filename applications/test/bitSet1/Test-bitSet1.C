@@ -25,7 +25,7 @@ Application
     Test-bitSet1
 
 Description
-    Test bitSet functionality
+    Basic bitSet characteristics
 
 \*---------------------------------------------------------------------------*/
 
@@ -63,8 +63,6 @@ inline Ostream& report
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// Main program:
 
 int main(int argc, char *argv[])
 {

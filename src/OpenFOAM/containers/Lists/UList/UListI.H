@@ -225,16 +225,6 @@ inline void Foam::UList<T>::shallowCopy(const UList<T>& list)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-template<class T>
-inline T& Foam::UList<T>::operator[](const label i)
-{
-    #ifdef FULLDEBUG
-    checkIndex(i);
-    #endif
-    return v_[i];
-}
-
-
 namespace Foam
 {
     // Template specialization for bool
@@ -249,6 +239,16 @@ namespace Foam
 
         return Foam::pTraits<bool>::zero;
     }
+}
+
+
+template<class T>
+inline T& Foam::UList<T>::operator[](const label i)
+{
+    #ifdef FULLDEBUG
+    checkIndex(i);
+    #endif
+    return v_[i];
 }
 
 

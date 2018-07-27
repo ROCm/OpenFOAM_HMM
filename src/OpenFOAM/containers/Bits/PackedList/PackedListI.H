@@ -579,8 +579,7 @@ inline unsigned int Foam::PackedList<Width>::get(const label i) const
         }
         #endif
 
-        // Lazy evaluation - return 0 for out-of-range
-        return 0u;
+        return 0u;        // Out-of-bounds (lazy): return 0 (false)
     }
 
     return reference(const_cast<PackedList<Width>*>(this), i).get();
@@ -603,19 +602,16 @@ inline bool Foam::PackedList<Width>::set
             << endl;
         #endif
 
-        // Lazy evaluation - ignore out-of-bounds
-        return false;
+        return false;       // Out-of-bounds: ignore
     }
     else if (i >= size())
     {
-        if (!val)
+        if (!val)           // Unset out-of-bounds: ignore
         {
-            // Same as unset out-of-bounds = noop
             return false;
         }
 
-        // Lazy evaluation - increase size on assigment
-        resize(i + 1);
+        resize(i + 1);      // Lazy evaluation: adjust size for assign
     }
 
     return reference(this, i).set(val);
@@ -627,8 +623,7 @@ inline bool Foam::PackedList<Width>::unset(const label i)
 {
     if (i < 0 || i >= size())
     {
-        // Unset out-of-bounds = noop
-        return false;
+        return false;       // Unset out-of-bounds: ignore
     }
 
     return reference(this, i).set(0u);

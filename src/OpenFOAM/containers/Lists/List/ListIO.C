@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,10 +41,10 @@ Foam::List<T>::List(Istream& is)
 
 
 template<class T>
-Foam::Istream& Foam::operator>>(Istream& is, List<T>& lst)
+Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
 {
     // Anull list
-    lst.setSize(0);
+    list.resize(0);
 
     is.fatalCheck(FUNCTION_NAME);
 
@@ -55,7 +55,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& lst)
     // Compound: simply transfer contents
     if (firstToken.isCompound())
     {
-        lst.transfer
+        list.transfer
         (
             dynamicCast<token::Compound<List<T>>>
             (
@@ -72,8 +72,8 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& lst)
     {
         const label len = firstToken.labelToken();
 
-        // Set list length to that read
-        lst.setSize(len);
+        // Resize to length read
+        list.resize(len);
 
         // Read list contents depending on data format
 
@@ -88,11 +88,12 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& lst)
                 {
                     for (label i=0; i<len; ++i)
                     {
-                        is >> lst[i];
+                        is >> list[i];
 
                         is.fatalCheck
                         (
-                            "operator>>(Istream&, List<T>&) : reading entry"
+                            "operator>>(Istream&, List<T>&) : "
+                            "reading entry"
                         );
                     }
                 }
@@ -111,7 +112,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& lst)
 
                     for (label i=0; i<len; ++i)
                     {
-                        lst[i] = element;  // Copy the value
+                        list[i] = element;  // Copy the value
                     }
                 }
             }
@@ -123,11 +124,12 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& lst)
         {
             // Non-empty, binary, contiguous
 
-            is.read(reinterpret_cast<char*>(lst.data()), len*sizeof(T));
+            is.read(reinterpret_cast<char*>(list.data()), len*sizeof(T));
 
             is.fatalCheck
             (
-                "operator>>(Istream&, List<T>&) : reading the binary block"
+                "operator>>(Istream&, List<T>&) : "
+                "reading the binary block"
             );
         }
 
@@ -151,7 +153,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& lst)
         SLList<T> sll(is);      // Read as singly-linked list
 
         // Reallocate and move assign list elements
-        lst = std::move(sll);
+        list = std::move(sll);
 
         return is;
     }
