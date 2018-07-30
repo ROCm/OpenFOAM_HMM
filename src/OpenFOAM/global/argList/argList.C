@@ -52,6 +52,7 @@ License
 bool Foam::argList::argsMandatory_ = true;
 bool Foam::argList::checkProcessorDirectories_ = true;
 Foam::SLList<Foam::string>    Foam::argList::validArgs;
+Foam::HashSet<Foam::string>   Foam::argList::advancedOptions;
 Foam::HashTable<Foam::string> Foam::argList::validOptions;
 Foam::HashTable<Foam::string> Foam::argList::validParOptions;
 Foam::HashTable<Foam::string> Foam::argList::optionUsage;
@@ -234,10 +235,11 @@ void Foam::argList::addArgument(const string& argName)
 void Foam::argList::addBoolOption
 (
     const word& optName,
-    const string& usage
+    const string& usage,
+    const bool advanced
 )
 {
-    addOption(optName, "", usage);
+    addOption(optName, "", usage, advanced);
 }
 
 
@@ -245,13 +247,18 @@ void Foam::argList::addOption
 (
     const word& optName,
     const string& param,
-    const string& usage
+    const string& usage,
+    const bool advanced
 )
 {
     validOptions.set(optName, param);
     if (!usage.empty())
     {
         optionUsage.set(optName, usage);
+    }
+    if (advanced)
+    {
+        advancedOptions.set(optName);
     }
 }
 
@@ -314,6 +321,7 @@ void Foam::argList::removeOption(const word& optName)
 {
     validOptions.erase(optName);
     optionUsage.erase(optName);
+    advancedOptions.erase(optName);
 }
 
 
@@ -361,7 +369,8 @@ void Foam::argList::noLibs()
     addBoolOption
     (
         "no-libs",
-        "disable use of the controlDict libs entry"
+        "disable use of the controlDict libs entry",
+        true  // advanced
     );
 }
 
@@ -427,7 +436,7 @@ void Foam::argList::printOptionUsage
             else if (isspace(str[curr+1]))
             {
                 // The next one is a space - so we are okay
-                curr++;  // otherwise the length is wrong
+                ++curr;  // otherwise the length is wrong
                 next = str.find_first_not_of(" \t\n", curr);
             }
             else
@@ -1575,16 +1584,8 @@ void Foam::argList::printUsage(bool full) const
 
     for (const word& optName : validOptions.sortedToc())
     {
-        // Ad hoc suppression of some options for regular (non-full) help
-        if
-        (
-            !full
-         &&
-            (
-                // '-listXXX' and '-list-XXX' but not '-list'
-                (optName.size() > 4 && optName.startsWith("list"))
-            )
-        )
+        // Suppress advanced options for regular -help.
+        if (advancedOptions.found(optName) && !full)
         {
             continue;
         }

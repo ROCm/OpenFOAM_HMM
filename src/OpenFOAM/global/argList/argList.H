@@ -97,6 +97,7 @@ SourceFiles
 #include "stringList.H"
 #include "SubList.H"
 #include "SLList.H"
+#include "HashSet.H"
 #include "HashTable.H"
 #include "word.H"
 #include "fileName.H"
@@ -192,6 +193,9 @@ public:
 
         //- A list of valid (mandatory) arguments
         static SLList<string> validArgs;
+
+        //- The "advanced" options are shown with -help-full (not with --help)
+        static HashSet<string> advancedOptions;
 
         //- A list of valid options
         static HashTable<string> validOptions;
@@ -386,7 +390,8 @@ public:
         static void addBoolOption
         (
             const word& optName,
-            const string& usage = ""
+            const string& usage = "",
+            const bool advanced = false
         );
 
         //- Add an option to validOptions with usage information
@@ -395,7 +400,8 @@ public:
         (
             const word& optName,
             const string& param = "",
-            const string& usage = ""
+            const string& usage = "",
+            const bool advanced = false
         );
 
         //- Specify an alias for the option name.

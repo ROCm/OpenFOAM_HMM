@@ -1,4 +1,4 @@
-bool listOptions = false ;
+bool listOptions = false;
 
 if
 (

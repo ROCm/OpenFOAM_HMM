@@ -1,29 +1,34 @@
 argList::addBoolOption
 (
     "listSwitches",
-    "List switches declared in libraries but not set in etc/controlDict"
+    "List switches declared in libraries but not set in etc/controlDict",
+    true // advanced
 );
 argList::addBoolOption
 (
     "listRegisteredSwitches",
-    "List switches registered for run-time modification"
+    "List switches registered for run-time modification",
+    true // advanced
 );
 argList::addBoolOption
 (
     "listUnsetSwitches",
-    "List switches declared in libraries but not set in etc/controlDict"
+    "List switches declared in libraries but not set in etc/controlDict",
+    true // advanced
 );
 
 #ifdef fvPatchField_H
 argList::addBoolOption
 (
     "listScalarBCs",
-    "List scalar field boundary conditions (fvPatchField<scalar>)"
+    "List scalar field boundary conditions (fvPatchField<scalar>)",
+    true // advanced
 );
 argList::addBoolOption
 (
     "listVectorBCs",
-    "List vector field boundary conditions (fvPatchField<vector>)"
+    "List vector field boundary conditions (fvPatchField<vector>)",
+    true // advanced
 );
 #endif
 
@@ -31,7 +36,8 @@ argList::addBoolOption
 argList::addBoolOption
 (
     "listFunctionObjects",
-    "List functionObjects"
+    "List functionObjects",
+    true // advanced
 );
 #endif
 
@@ -39,7 +45,8 @@ argList::addBoolOption
 argList::addBoolOption
 (
     "listFvOptions",
-    "List fvOptions"
+    "List fvOptions",
+    true // advanced
 );
 #endif
 
@@ -47,6 +54,7 @@ argList::addBoolOption
 argList::addBoolOption
 (
     "listTurbulenceModels",
-    "List turbulenceModels"
+    "List turbulenceModels",
+    true // advanced
 );
 #endif
