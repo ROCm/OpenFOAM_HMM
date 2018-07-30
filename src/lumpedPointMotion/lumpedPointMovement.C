@@ -266,7 +266,7 @@ void Foam::lumpedPointMovement::readDict(const dictionary& dict)
     // assume the worst
     deleteDemandDrivenData(thresholdPtr_);
 
-    dict.read("axis", axis_);
+    dict.readEntry("axis", axis_);
 
     division_ = 0;
     if (dict.readIfPresent("division", division_))
@@ -283,7 +283,7 @@ void Foam::lumpedPointMovement::readDict(const dictionary& dict)
 
     dict.readIfPresent("relax", relax_);
 
-    dict.read("locations", locations_);
+    dict.readEntry("locations", locations_);
 
     if (dict.readIfPresent("interpolationScheme", interpolationScheme_))
     {
@@ -304,8 +304,8 @@ void Foam::lumpedPointMovement::readDict(const dictionary& dict)
 
     // TODO: calcFrequency_  = dict.lookupOrDefault("calcFrequency", 1);
 
-    commDict.read("inputName", inputName_);
-    commDict.read("outputName", outputName_);
+    commDict.readEntry("inputName", inputName_);
+    commDict.readEntry("outputName", outputName_);
     commDict.readIfPresent("logName", logName_);
 
     inputFormat_ = lumpedPointState::formatNames.lookup

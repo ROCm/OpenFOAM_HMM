@@ -223,10 +223,10 @@ bool Foam::waveModels::streamFunction::readDict(const dictionary& overrideDict)
 {
     if (regularWaveModel::readDict(overrideDict))
     {
-        overrideDict.read("uMean", uMean_);
-        overrideDict.read("waveLength", waveLength_);
-        overrideDict.read("Bjs", Bjs_);
-        overrideDict.read("Ejs", Ejs_);
+        overrideDict.readEntry("uMean", uMean_);
+        overrideDict.readEntry("waveLength", waveLength_);
+        overrideDict.readEntry("Bjs", Bjs_);
+        overrideDict.readEntry("Ejs", Ejs_);
 
         return true;
     }

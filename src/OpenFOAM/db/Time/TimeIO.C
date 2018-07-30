@@ -344,7 +344,7 @@ void Foam::Time::readDict()
 
     if (!deltaTchanged_)
     {
-        deltaT_ = readScalar(controlDict_.lookup("deltaT"));
+        controlDict_.readEntry("deltaT", deltaT_);
     }
 
     if (controlDict_.found("writeControl"))
@@ -369,7 +369,7 @@ void Foam::Time::readDict()
     }
     else
     {
-        controlDict_.lookup("writeFrequency") >> writeInterval_;
+        controlDict_.readEntry("writeFrequency", writeInterval_);
     }
 
 
@@ -409,7 +409,7 @@ void Foam::Time::readDict()
 
     if (controlDict_.found("timeFormat"))
     {
-        const word formatName(controlDict_.lookup("timeFormat"));
+        const word formatName(controlDict_.get<word>("timeFormat"));
 
         if (formatName == "general")
         {
@@ -441,7 +441,7 @@ void Foam::Time::readDict()
 
         if (stopAt_ == saEndTime)
         {
-            controlDict_.lookup("endTime") >> endTime_;
+            controlDict_.readEntry("endTime", endTime_);
         }
         else
         {
@@ -468,14 +468,14 @@ void Foam::Time::readDict()
 
     if (controlDict_.found("writeFormat"))
     {
-        writeStreamOption_.format(word(controlDict_.lookup("writeFormat")));
+        writeStreamOption_.format(controlDict_.get<word>("writeFormat"));
     }
 
     if (controlDict_.found("writePrecision"))
     {
         IOstream::defaultPrecision
         (
-            readUint(controlDict_.lookup("writePrecision"))
+            controlDict_.get<unsigned int>("writePrecision")
         );
 
         Sout.precision(IOstream::defaultPrecision());
@@ -495,7 +495,7 @@ void Foam::Time::readDict()
     {
         writeStreamOption_.compression
         (
-            word(controlDict_.lookup("writeCompression"))
+            controlDict_.get<word>("writeCompression")
         );
 
         if

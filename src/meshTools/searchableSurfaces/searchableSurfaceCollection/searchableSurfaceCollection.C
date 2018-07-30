@@ -195,7 +195,7 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
 
             const dictionary& subDict = dict.subDict(instance_[surfI]);
 
-            subDict.read("scale", scale_[surfI]);
+            subDict.readEntry("scale", scale_[surfI]);
             transform_.set
             (
                 surfI,

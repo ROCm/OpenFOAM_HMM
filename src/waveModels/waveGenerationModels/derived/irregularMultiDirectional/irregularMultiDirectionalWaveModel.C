@@ -262,10 +262,10 @@ bool Foam::waveModels::irregularMultiDirectional::readDict
 {
     if (irregularWaveModel::readDict(overrideDict))
     {
-        dictionary::read("wavePeriods", irregWavePeriods_);
-        dictionary::read("waveHeights", irregWaveHeights_);
-        dictionary::read("wavePhases", irregWavePhases_);
-        dictionary::read("waveDirs", irregWaveDirs_);
+        readEntry("wavePeriods", irregWavePeriods_);
+        readEntry("waveHeights", irregWaveHeights_);
+        readEntry("wavePhases", irregWavePhases_);
+        readEntry("waveDirs", irregWaveDirs_);
 
         irregWaveLengths_ = irregWaveHeights_;
 

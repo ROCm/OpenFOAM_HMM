@@ -316,7 +316,7 @@ void Foam::dimensioned<Type>::replace
 template<class Type>
 void Foam::dimensioned<Type>::read(const dictionary& dict)
 {
-    dict.read(name_, value_);
+    dict.readEntry(name_, value_);
 }
 
 

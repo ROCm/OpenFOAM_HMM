@@ -85,7 +85,7 @@ void Foam::fv::rotorDiskSource::checkData()
             {
                 case ifFixed:
                 {
-                    coeffs_.read("inletVelocity", inletVelocity_);
+                    coeffs_.readEntry("inletVelocity", inletVelocity_);
                     break;
                 }
                 case ifSurfaceNormal:
@@ -331,7 +331,7 @@ void Foam::fv::rotorDiskSource::createCoordinateSystem()
                 }
             }
 
-            coeffs_.read("refDirection", refDir);
+            coeffs_.readEntry("refDirection", refDir);
 
             cylindrical_.reset
             (
@@ -352,9 +352,9 @@ void Foam::fv::rotorDiskSource::createCoordinateSystem()
         }
         case gmSpecified:
         {
-            coeffs_.read("origin", origin);
-            coeffs_.read("axis", axis);
-            coeffs_.read("refDirection", refDir);
+            coeffs_.readEntry("origin", origin);
+            coeffs_.readEntry("axis", axis);
+            coeffs_.readEntry("refDirection", refDir);
 
             cylindrical_.reset
             (
@@ -521,7 +521,7 @@ void Foam::fv::rotorDiskSource::addSup
     );
 
     // Read the reference density for incompressible flow
-    coeffs_.read("rhoRef", rhoRef_);
+    coeffs_.readEntry("rhoRef", rhoRef_);
 
     const vectorField Uin(inflowVelocity(eqn.psi()));
     trim_->correct(Uin, force);
@@ -574,17 +574,17 @@ bool Foam::fv::rotorDiskSource::read(const dictionary& dict)
 {
     if (cellSetOption::read(dict))
     {
-        coeffs_.read("fields", fieldNames_);
+        coeffs_.readEntry("fields", fieldNames_);
         applied_.setSize(fieldNames_.size(), false);
 
         // Read coordinate system/geometry invariant properties
         omega_ = rpmToRads(coeffs_.get<scalar>("rpm"));
 
-        coeffs_.read("nBlades", nBlades_);
+        coeffs_.readEntry("nBlades", nBlades_);
 
         inletFlow_ = inletFlowTypeNames_.lookup("inletFlowType", coeffs_);
 
-        coeffs_.read("tipEffect", tipEffect_);
+        coeffs_.readEntry("tipEffect", tipEffect_);
 
         const dictionary& flapCoeffs(coeffs_.subDict("flapCoeffs"));
         flap_.beta0 = degToRad(flapCoeffs.get<scalar>("beta0"));

@@ -159,7 +159,7 @@ void Foam::ensightSurfaceWriter::updateMesh
             IFstream is(baseDir/"fieldsDict");
             if (is.good() && dict.read(is))
             {
-                dict.read(is);
+                // ... any futher actions
             }
         }
 

@@ -309,11 +309,11 @@ bool Foam::functionObjectList::readFunctionObject
     }
     else if (funcDict.found("field"))
     {
-        requiredFields.insert(wordRe(funcDict.lookup("field")));
+        requiredFields.insert(funcDict.get<wordRe>("field"));
     }
     else if (funcDict.found("fields"))
     {
-        requiredFields.insert(wordReList(funcDict.lookup("fields")));
+        requiredFields.insert(funcDict.get<wordRes>("fields"));
     }
 
     // Insert named arguments

@@ -139,7 +139,7 @@ void Foam::timeControl::read(const dictionary& dict)
         case ocCpuTime:
         case ocAdjustableRunTime:
         {
-            const scalar userTime = readScalar(dict.lookup(intervalName));
+            const scalar userTime = dict.get<scalar>(intervalName);
             interval_ = time_.userTimeToTime(userTime);
             break;
         }

@@ -1041,7 +1041,7 @@ void Foam::ccm::reader::readMonitoring
             word zoneName;
             if (iter.found())
             {
-                iter().read("Label", zoneName);
+                iter().readEntry("Label", zoneName);
             }
             else
             {
@@ -2425,8 +2425,8 @@ void Foam::ccm::reader::addPatches
 
         if (citer.found())
         {
-            citer().read("Label", patchName);
-            citer().read("BoundaryType", patchType);
+            citer().readEntry("Label", patchName);
+            citer().readEntry("BoundaryType", patchType);
         }
         else
         {

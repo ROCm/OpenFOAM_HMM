@@ -431,15 +431,16 @@ bool surfaceNoise::read(const dictionary& dict)
         if (!dict.readIfPresent("files", inputFileNames_))
         {
             inputFileNames_.resize(1);
-            dict.read("file", inputFileNames_.first());
+            dict.readEntry("file", inputFileNames_.first());
         }
 
         dict.readIfPresent("fftWriteInterval", fftWriteInterval_);
         dict.readIfPresent("p", pName_);
 
-        dict.read("reader", readerType_);
+        readerType_ = dict.get<word>("reader");
 
         const word writerType(dict.get<word>("writer"));
+
         dictionary optDict
         (
             dict.subOrEmptyDict("writeOptions").subOrEmptyDict(writerType)

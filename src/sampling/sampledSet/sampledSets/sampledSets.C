@@ -226,11 +226,11 @@ bool Foam::sampledSets::read(const dictionary& dict)
 
     if (dict_.found("sets"))
     {
-        dict_.read("fields", fieldSelection_);
+        dict_.readEntry("fields", fieldSelection_);
         clearFieldGroups();
 
-        dict.read("interpolationScheme", interpolationScheme_);
-        dict.read("setFormat", writeFormat_);
+        dict.readEntry("interpolationScheme", interpolationScheme_);
+        dict.readEntry("setFormat", writeFormat_);
 
         PtrList<sampledSet> newList
         (

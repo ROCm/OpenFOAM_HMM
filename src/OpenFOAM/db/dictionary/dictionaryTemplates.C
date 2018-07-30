@@ -58,7 +58,7 @@ T Foam::dictionary::get
 ) const
 {
     T val;
-    read<T>(keyword, val, recursive, patternMatch);
+    readEntry<T>(keyword, val, recursive, patternMatch);
     return val;
 }
 
@@ -196,7 +196,7 @@ T Foam::dictionary::lookupOrAddDefault
 
 
 template<class T>
-bool Foam::dictionary::read
+bool Foam::dictionary::readEntry
 (
     const word& keyword,
     T& val,
@@ -238,7 +238,7 @@ bool Foam::dictionary::readIfPresent
 ) const
 {
     // Read is non-mandatory
-    return read<T>(keyword, val, recursive, patternMatch, false);
+    return readEntry<T>(keyword, val, recursive, patternMatch, false);
 }
 
 

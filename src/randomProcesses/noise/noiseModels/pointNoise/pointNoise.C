@@ -260,7 +260,7 @@ bool pointNoise::read(const dictionary& dict)
             inputFileNames_.resize(1);
 
             // Note: lookup uses same keyword as used by the CSV constructor
-            dict.read("file", inputFileNames_.first());
+            dict.readEntry("file", inputFileNames_.first());
         }
 
         return true;

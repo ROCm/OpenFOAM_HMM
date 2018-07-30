@@ -226,7 +226,7 @@ void Foam::ccm::writer::writeCellTable
             // Tags containing 'Id' are integers
             if (pos > 0)
             {
-                dict.read(keyword, intVal);
+                dict.readEntry(keyword, intVal);
 
                 CCMIOWriteOpti
                 (

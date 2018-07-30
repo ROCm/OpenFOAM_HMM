@@ -1187,7 +1187,7 @@ void Foam::argList::parse
                 if (decompDict.lookupOrDefault("distributed", false))
                 {
                     distributed_ = true;
-                    decompDict.read("roots", roots);
+                    decompDict.readEntry("roots", roots);
                 }
             }
 
@@ -1758,7 +1758,7 @@ void Foam::argList::displayDoc(bool source) const
     string docBrowser = getEnv("FOAM_DOC_BROWSER");
     if (docBrowser.empty())
     {
-        docDict.read("docBrowser", docBrowser);
+        docDict.readEntry("docBrowser", docBrowser);
     }
 
     // Can use FOAM_DOC_BROWSER='application file://%f' if required

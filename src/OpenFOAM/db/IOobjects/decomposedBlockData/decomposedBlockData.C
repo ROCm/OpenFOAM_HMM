@@ -1166,8 +1166,14 @@ Foam::label Foam::decomposedBlockData::numBlocks(const fileName& fName)
     )
     {
         dictionary headerDict(is);
-        is.version(headerDict.lookup("version"));
-        is.format(headerDict.lookup("format"));
+        is.version
+        (
+            IOstreamOption::versionNumber
+            (
+                headerDict.get<float>("version")
+            )
+        );
+        is.format(headerDict.get<word>("format"));
 
         // Obtain number of blocks directly
         if (headerDict.readIfPresent("blocks", nBlocks))

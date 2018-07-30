@@ -51,7 +51,7 @@ Foam::autoPtr<Foam::waveModel> Foam::waveModel::New
     if (waveDict.found(patch.name()))
     {
         patchDict = waveDict.subDict(patch.name());
-        patchDict.read("waveModel", modelType);
+        modelType = patchDict.get<word>("waveModel");
     }
     else
     {

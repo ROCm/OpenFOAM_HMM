@@ -477,7 +477,7 @@ Foam::dictionary& Foam::dictionary::subDict(const word& keyword)
 Foam::dictionary Foam::dictionary::subOrEmptyDict
 (
     const word& keyword,
-    const bool mustRead
+    const bool mandatory
 ) const
 {
     // Find non-recursive with patterns
@@ -489,7 +489,7 @@ Foam::dictionary Foam::dictionary::subOrEmptyDict
         return finder.dict();
     }
 
-    if (mustRead)
+    if (mandatory)
     {
         FatalIOErrorInFunction(*this)
             << "'" << keyword

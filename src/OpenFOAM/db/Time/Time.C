@@ -149,7 +149,7 @@ void Foam::Time::setControls()
 
     if (startFrom == "startTime")
     {
-        controlDict_.lookup("startTime") >> startTime_;
+        controlDict_.readEntry("startTime", startTime_);
     }
     else
     {
@@ -938,7 +938,7 @@ bool Foam::Time::stopAt(const stopAtControls stopCtrl) const
     // Adjust endTime
     if (stopCtrl == stopAtControls::saEndTime)
     {
-        controlDict_.lookup("endTime") >> endTime_;
+        controlDict_.readEntry("endTime", endTime_);
     }
 
     return changed;

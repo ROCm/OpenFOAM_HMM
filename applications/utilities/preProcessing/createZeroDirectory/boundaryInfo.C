@@ -112,7 +112,7 @@ Foam::boundaryInfo::boundaryInfo(const Time& runTime, const word& regionName)
         const dictionary& dict = boundaryDict_[patchI].dict();
 
         names_[patchI] = dict.dictName();
-        dict.read("type", types_[patchI]);
+        dict.readEntry("type", types_[patchI]);
         if (polyPatch::constraintType(types_[patchI]))
         {
             constraint_[patchI] = true;

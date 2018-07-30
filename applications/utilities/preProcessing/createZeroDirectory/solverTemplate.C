@@ -120,12 +120,12 @@ Foam::dictionary Foam::solverTemplate::readFluidFieldTemplates
             else if (modelType == "RAS")
             {
                 turbPropDict.subDict(modelType)
-                    .read("RASModel", turbulenceModel);
+                    .readEntry("RASModel", turbulenceModel);
             }
             else if (modelType == "LES")
             {
                 turbPropDict.subDict(modelType)
-                    .read("LESModel", turbulenceModel);
+                    .readEntry("LESModel", turbulenceModel);
             }
             else
             {

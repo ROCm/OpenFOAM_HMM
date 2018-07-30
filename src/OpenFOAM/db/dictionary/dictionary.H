@@ -405,7 +405,7 @@ public:
         explicit dictionary(const fileName& name);
 
         //- Construct given the entry name, parent dictionary and Istream,
-        //  reading entries until EOF
+        //- reading entries until EOF
         dictionary
         (
             const fileName& name,
@@ -414,11 +414,11 @@ public:
         );
 
         //- Construct top-level dictionary from Istream,
-        //  reading entries until EOF
+        //- reading entries until EOF
         dictionary(Istream& is);
 
         //- Construct top-level dictionary from Istream,
-        //  reading entries until EOF, optionally keeping the header
+        //- reading entries until EOF, optionally keeping the header
         dictionary(Istream& is, bool keepHeader);
 
         //- Copy construct given the parent dictionary
@@ -604,7 +604,7 @@ public:
         //
         //  \return true if the entry was found.
         template<class T>
-        bool read
+        bool readEntry
         (
             const word& keyword,
             T& val,
@@ -682,7 +682,7 @@ public:
         dictionary subOrEmptyDict
         (
             const word& keyword,
-            const bool mustRead = false
+            const bool mandatory = false
         ) const;
 
         //- Find and return a sub-dictionary, otherwise return this dictionary.

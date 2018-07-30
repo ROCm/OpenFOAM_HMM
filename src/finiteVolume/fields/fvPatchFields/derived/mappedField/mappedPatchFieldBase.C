@@ -91,7 +91,7 @@ Foam::mappedPatchFieldBase<Type>::mappedPatchFieldBase
 {
     if (mapper_.mode() == mappedPatchBase::NEARESTCELL)
     {
-        dict.read("interpolationScheme", interpolationScheme_);
+        dict.readEntry("interpolationScheme", interpolationScheme_);
     }
 }
 

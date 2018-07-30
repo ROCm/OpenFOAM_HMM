@@ -92,9 +92,9 @@ Foam::error::error(const dictionary& errDict)
 :
     std::exception(),
     messageStream(errDict),
-    functionName_(errDict.lookup("functionName")),
-    sourceFileName_(errDict.lookup("sourceFileName")),
-    sourceFileLineNumber_(readLabel(errDict.lookup("sourceFileLineNumber"))),
+    functionName_(errDict.get<string>("functionName")),
+    sourceFileName_(errDict.get<string>("sourceFileName")),
+    sourceFileLineNumber_(errDict.get<label>("sourceFileLineNumber")),
     throwExceptions_(false),
     messageStreamPtr_(new OStringStream())
 {

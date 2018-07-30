@@ -90,11 +90,11 @@ Foam::boxToFace::boxToFace
     if (dict.found("box"))
     {
         bbs_.resize(1);
-        dict.read("box", bbs_.first());
+        dict.readEntry("box", bbs_.first());
     }
     else
     {
-        dict.read("boxes", bbs_);
+        dict.readEntry("boxes", bbs_);
     }
 }
 

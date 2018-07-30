@@ -237,10 +237,10 @@ bool Foam::fv::multiphaseMangrovesSource::read(const dictionary& dict)
                     << exit(FatalError);
             }
 
-            modelDict.read("a", aZone_[i]);
-            modelDict.read("N", NZone_[i]);
-            modelDict.read("Cm", CmZone_[i]);
-            modelDict.read("Cd", CdZone_[i]);
+            modelDict.readEntry("a", aZone_[i]);
+            modelDict.readEntry("N", NZone_[i]);
+            modelDict.readEntry("Cm", CmZone_[i]);
+            modelDict.readEntry("Cd", CdZone_[i]);
         }
 
         return true;

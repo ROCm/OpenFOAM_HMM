@@ -231,7 +231,7 @@ bool Foam::fv::multiphaseMangrovesTurbulenceModel::read(const dictionary& dict)
             if (coeffs_.found("epsilon"))
             {
                 fieldNames_.resize(1);
-                coeffs_.read("epsilon", fieldNames_.first());
+                coeffs_.readEntry("epsilon", fieldNames_.first());
             }
             else
             {
@@ -269,11 +269,11 @@ bool Foam::fv::multiphaseMangrovesTurbulenceModel::read(const dictionary& dict)
                     << exit(FatalError);
             }
 
-            modelDict.read("a", aZone_[i]);
-            modelDict.read("N", NZone_[i]);
-            modelDict.read("Ckp", CkpZone_[i]);
-            modelDict.read("Cep", CepZone_[i]);
-            modelDict.read("Cd", CdZone_[i]);
+            modelDict.readEntry("a", aZone_[i]);
+            modelDict.readEntry("N", NZone_[i]);
+            modelDict.readEntry("Ckp", CkpZone_[i]);
+            modelDict.readEntry("Cep", CepZone_[i]);
+            modelDict.readEntry("Cd", CdZone_[i]);
         }
 
         return true;
