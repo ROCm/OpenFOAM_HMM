@@ -234,6 +234,8 @@ public:
         operator const T&() const = delete;
         #endif
 
+        //- True if the managed pointer is non-null
+        explicit inline operator bool() const noexcept;
 
         //- Transfer object ownership from parameter
         inline void operator=(autoPtr<T>&& ap) noexcept;
