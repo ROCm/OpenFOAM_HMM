@@ -1,6 +1,6 @@
 SUFFIXES += .c
 
-cc          = clang -m64 -Ddarwin
+cc          = clang -m64 -Ddarwin -ftrapping-math
 
 cWARN       = -Wall
 

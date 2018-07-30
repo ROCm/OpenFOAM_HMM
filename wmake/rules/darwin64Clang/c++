@@ -1,6 +1,6 @@
 include $(GENERAL_RULES)/Clang/c++
 
-CC          = clang++ -std=c++11 -m64 -Ddarwin
+CC          = clang++ -std=c++11 -m64 -Ddarwin -ftrapping-math
 
 include $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
 
