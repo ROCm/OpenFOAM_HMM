@@ -538,7 +538,7 @@ int main(int argc, char *argv[])
 
             if (!noLagrangian)
             {
-                HashTable<IOobjectList> cloudObjects;
+                HashTable<IOobjectList> allCloudObjects;
 
                 forAll(databases, proci)
                 {
@@ -566,39 +566,38 @@ int main(int argc, char *argv[])
                     {
                         // Check if we already have cloud objects for this
                         // cloudname
-                        if (!cloudObjects.found(cloudDir))
+                        if (!allCloudObjects.found(cloudDir))
                         {
                             // Do local scan for valid cloud objects
-                            IOobjectList sprayObjs
+                            IOobjectList localObjs
                             (
                                 procMeshes.meshes()[proci],
                                 databases[proci].timeName(),
                                 cloud::prefix/cloudDir
                             );
 
-                            IOobject* positionsPtr =
-                                sprayObjs.lookup(word("positions"));
-                            IOobject* coordsPtr =
-                                sprayObjs.lookup(word("coordinates"));
-
-                            if (coordsPtr || positionsPtr)
+                            if
+                            (
+                                localObjs.found("coordinates")
+                             || localObjs.found("positions")
+                            )
                             {
-                                cloudObjects.insert(cloudDir, sprayObjs);
+                                allCloudObjects.insert(cloudDir, localObjs);
                             }
                         }
                     }
                 }
 
 
-                if (cloudObjects.size())
+                if (allCloudObjects.size())
                 {
                     // Pass2: reconstruct the cloud
-                    forAllConstIter(HashTable<IOobjectList>, cloudObjects, iter)
+                    forAllConstIters(allCloudObjects, iter)
                     {
                         const word cloudName = word::validate(iter.key());
 
                         // Objects (on arbitrary processor)
-                        const IOobjectList& sprayObjs = iter.object();
+                        const IOobjectList& cloudObjs = iter.object();
 
                         Info<< "Reconstructing lagrangian fields for cloud "
                             << cloudName << nl << endl;
@@ -616,7 +615,7 @@ int main(int argc, char *argv[])
                             cloudName,
                             mesh,
                             procMeshes.meshes(),
-                            sprayObjs,
+                            cloudObjs,
                             selectedLagrangianFields
                         );
                         reconstructLagrangianFieldFields<label>
@@ -624,7 +623,7 @@ int main(int argc, char *argv[])
                             cloudName,
                             mesh,
                             procMeshes.meshes(),
-                            sprayObjs,
+                            cloudObjs,
                             selectedLagrangianFields
                         );
                         reconstructLagrangianFields<scalar>
@@ -632,7 +631,7 @@ int main(int argc, char *argv[])
                             cloudName,
                             mesh,
                             procMeshes.meshes(),
-                            sprayObjs,
+                            cloudObjs,
                             selectedLagrangianFields
                         );
                         reconstructLagrangianFieldFields<scalar>
@@ -640,7 +639,7 @@ int main(int argc, char *argv[])
                             cloudName,
                             mesh,
                             procMeshes.meshes(),
-                            sprayObjs,
+                            cloudObjs,
                             selectedLagrangianFields
                         );
                         reconstructLagrangianFields<vector>
@@ -648,7 +647,7 @@ int main(int argc, char *argv[])
                             cloudName,
                             mesh,
                             procMeshes.meshes(),
-                            sprayObjs,
+                            cloudObjs,
                             selectedLagrangianFields
                         );
                         reconstructLagrangianFieldFields<vector>
@@ -656,7 +655,7 @@ int main(int argc, char *argv[])
                             cloudName,
                             mesh,
                             procMeshes.meshes(),
-                            sprayObjs,
+                            cloudObjs,
                             selectedLagrangianFields
                         );
                         reconstructLagrangianFields<sphericalTensor>
@@ -664,7 +663,7 @@ int main(int argc, char *argv[])
                             cloudName,
                             mesh,
                             procMeshes.meshes(),
-                            sprayObjs,
+                            cloudObjs,
                             selectedLagrangianFields
                         );
                         reconstructLagrangianFieldFields<sphericalTensor>
@@ -672,7 +671,7 @@ int main(int argc, char *argv[])
                             cloudName,
                             mesh,
                             procMeshes.meshes(),
-                            sprayObjs,
+                            cloudObjs,
                             selectedLagrangianFields
                         );
                         reconstructLagrangianFields<symmTensor>
@@ -680,7 +679,7 @@ int main(int argc, char *argv[])
                             cloudName,
                             mesh,
                             procMeshes.meshes(),
-                            sprayObjs,
+                            cloudObjs,
                             selectedLagrangianFields
                         );
                         reconstructLagrangianFieldFields<symmTensor>
@@ -688,7 +687,7 @@ int main(int argc, char *argv[])
                             cloudName,
                             mesh,
                             procMeshes.meshes(),
-                            sprayObjs,
+                            cloudObjs,
                             selectedLagrangianFields
                         );
                         reconstructLagrangianFields<tensor>
@@ -696,7 +695,7 @@ int main(int argc, char *argv[])
                             cloudName,
                             mesh,
                             procMeshes.meshes(),
-                            sprayObjs,
+                            cloudObjs,
                             selectedLagrangianFields
                         );
                         reconstructLagrangianFieldFields<tensor>
@@ -704,7 +703,7 @@ int main(int argc, char *argv[])
                             cloudName,
                             mesh,
                             procMeshes.meshes(),
-                            sprayObjs,
+                            cloudObjs,
                             selectedLagrangianFields
                         );
                     }

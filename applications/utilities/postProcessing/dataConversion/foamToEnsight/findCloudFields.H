@@ -37,7 +37,19 @@ if (timeDirs.size() && !noLagrangian)
 
             // Clouds require "coordinates".
             // The "positions" are for v1706 and lower.
-            if (cloudObjs.found("coordinates") || cloudObjs.found("positions"))
+            // - detect and remove since these are treated specially
+
+            bool isCloud = false;
+            if (cloudObjs.erase("coordinates"))
+            {
+                isCloud = true;
+            }
+            if (cloudObjs.erase("positions"))
+            {
+                isCloud = true;
+            }
+
+            if (isCloud)
             {
                 // Save the cloud fields on a per cloud basis
                 auto& fieldsPerCloud = cloudFields(cloudName);
@@ -51,13 +63,6 @@ if (timeDirs.size() && !noLagrangian)
                 }
             }
         }
-    }
-
-    // Prune out geometry again since it gets treated specially
-    forAllIters(cloudFields, cloudIter)
-    {
-        cloudIter().erase("coordinates");
-        cloudIter().erase("positions");
     }
 
     if (Pstream::parRun())

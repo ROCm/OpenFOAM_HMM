@@ -807,7 +807,7 @@ int main(int argc, char *argv[])
 
                 for (const fileName& cloudDir : cloudDirs)
                 {
-                    IOobjectList sprayObjs
+                    IOobjectList cloudObjects
                     (
                         mesh,
                         runTime.timeName(),
@@ -817,12 +817,12 @@ int main(int argc, char *argv[])
                         false
                     );
 
-                    // Note: looking up "positions" for backwards compatibility
-                    IOobject* positionsPtr =
-                        sprayObjs.lookup(word("positions"));
-                    IOobject* coordsPtr = sprayObjs.lookup(word("coordinates"));
-
-                    if (positionsPtr || coordsPtr)
+                    // Note: look up "positions" for backwards compatibility
+                    if
+                    (
+                        cloudObjects.found("coordinates")
+                     || cloudObjects.found("positions")
+                    )
                     {
                         // Read lagrangian particles
                         // ~~~~~~~~~~~~~~~~~~~~~~~~~

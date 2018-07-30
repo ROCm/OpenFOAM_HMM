@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -461,13 +461,15 @@ int main(int argc, char *argv[])
 
 
                 // Do local scan for valid cloud objects
-                IOobjectList sprayObjs(runTime, runTime.timeName(), dir);
+                wordList cloudFields
+                (
+                    IOobjectList(runTime, runTime.timeName(), dir).sortedNames()
+                );
 
                 // Combine with all other cloud objects
-                wordList sprayFields(sprayObjs.sortedToc());
-                combineReduce(sprayFields, uniqueEqOp<word>());
+                combineReduce(cloudFields, uniqueEqOp<word>());
 
-                for (const word& name : sprayFields)
+                for (const word& name : cloudFields)
                 {
                     // Note: try the various field types. Make sure to
                     //       exit once successful conversion to avoid re-read
