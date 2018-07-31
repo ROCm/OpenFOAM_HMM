@@ -45,10 +45,8 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
 int main(int argc, char *argv[])
 {
-    const label nTypes = 4;
     const wordList fieldTypes
     ({
         "volScalarField",
@@ -58,10 +56,8 @@ int main(int argc, char *argv[])
     });
 
     #include "setRootCase.H"
-
     #include "createTime.H"
     #include "createNamedMesh.H"
-
     #include "readConversionProperties.H"
 
     // get the available time-steps
