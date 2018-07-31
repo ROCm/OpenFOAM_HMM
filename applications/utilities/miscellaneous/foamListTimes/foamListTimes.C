@@ -68,17 +68,17 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "processor",
-        "list times from processor0/ directory"
+        "List times from processor0/ directory"
     );
     argList::addBoolOption
     (
         "rm",
-        "remove selected time directories"
+        "Remove selected time directories"
     );
     argList::addBoolOption
     (
         "verbose",
-        "report progress of -rm option"
+        "Report progress of -rm option"
     );
     profiling::disable(); // Disable profiling (and its output)
 

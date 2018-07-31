@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "vtk",
-        "create visualization files of the forces"
+        "Create visualization files of the forces"
     );
 
     timeSelector::addOptions(true, false);

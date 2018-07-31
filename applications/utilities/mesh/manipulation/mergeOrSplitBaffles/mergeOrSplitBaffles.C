@@ -287,12 +287,12 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "detectOnly",
-        "find baffles only, but do not merge or split them"
+        "Find baffles only, but do not merge or split them"
     );
     argList::addBoolOption
     (
         "split",
-        "topologically split duplicate surfaces"
+        "Topologically split duplicate surfaces"
     );
 
     #include "setRootCase.H"

@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "apply a simplified boundary-layer model to the velocity and\n"
+        "Apply a simplified boundary-layer model to the velocity and\n"
         "turbulence fields based on the 1/7th power-law."
     );
 
@@ -283,13 +283,13 @@ int main(int argc, char *argv[])
     (
         "ybl",
         "scalar",
-        "specify the boundary-layer thickness"
+        "Specify the boundary-layer thickness"
     );
     argList::addOption
     (
         "Cbl",
         "scalar",
-        "boundary-layer thickness as Cbl * mean distance to wall"
+        "Boundary-layer thickness as Cbl * mean distance to wall"
     );
     argList::addBoolOption
     (

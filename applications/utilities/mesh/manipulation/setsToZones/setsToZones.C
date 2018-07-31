@@ -63,13 +63,13 @@ int main(int argc, char *argv[])
     timeSelector::addOptions(true, false);
     argList::addNote
     (
-        "add point/face/cell Zones from similar named point/face/cell Sets"
+        "Add point/face/cell Zones from similarly named point/face/cell Sets"
     );
 
     argList::addBoolOption
     (
         "noFlipMap",
-        "ignore orientation of faceSet"
+        "Ignore orientation of faceSet"
     );
 
     #include "addRegionOption.H"

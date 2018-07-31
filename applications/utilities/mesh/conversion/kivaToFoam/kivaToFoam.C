@@ -63,19 +63,19 @@ int main(int argc, char *argv[])
     (
         "file",
         "name",
-        "specify alternative input file name - default is otape17"
+        "Specify alternative input file name - default is otape17"
     );
     argList::addOption
     (
         "version",
         "version",
-        "specify kiva version [kiva3|kiva3v] - default is '3v'"
+        "Specify kiva version [kiva3|kiva3v] - default is '3v'"
     );
     argList::addOption
     (
         "zHeadMin",
         "scalar",
-        "minimum z-height for transferring liner faces to cylinder-head"
+        "Minimum z-height for transferring liner faces to cylinder-head"
     );
 
     #include "setRootCase.H"

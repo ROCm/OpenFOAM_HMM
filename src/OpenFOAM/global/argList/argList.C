@@ -68,41 +68,43 @@ Foam::argList::initValidTables::initValidTables()
     argList::addOption
     (
         "case", "dir",
-        "specify alternate case directory, default is the cwd"
+        "Specify case directory to use (instead of the cwd)"
     );
-    argList::addBoolOption("parallel", "run in parallel");
+    argList::addBoolOption("parallel", "Run in parallel");
     validParOptions.set("parallel", "");
     argList::addOption
     (
         "roots", "(dir1 .. dirN)",
-        "slave root directories for distributed running"
+        "Slave root directories for distributed running",
+        true  // advanced option
     );
     validParOptions.set("roots", "(dir1 .. dirN)");
 
     argList::addOption
     (
         "decomposeParDict", "file",
-        "read decomposePar dictionary from specified location"
+        "Use specified file for decomposePar dictionary"
     );
     argList::addOption
     (
         "hostRoots", "(((host1 dir1) .. (hostN dirN))",
         "slave root directories (per host) for distributed running. "
-        "The host specification can use a regex."
+        "The host specification can use a regex.",
+        true  // advanced option
     );
     validParOptions.set("hostRoots", "((host1 dir1) .. (hostN dirN))");
 
     argList::addBoolOption
     (
         "noFunctionObjects",
-        "do not execute function objects"
+        "Do not execute function objects"
     );
 
     argList::addOption
     (
-        "fileHandler",
-        "handler",
-        "override the file handler type"
+        "fileHandler", "handler",
+        "Override the file handler type",
+        true  // advanced option
     );
 
     // Some standard option aliases (with or without version warnings)
@@ -369,7 +371,7 @@ void Foam::argList::noLibs()
     addBoolOption
     (
         "no-libs",
-        "disable use of the controlDict libs entry",
+        "Disable use of the controlDict libs entry",
         true  // advanced
     );
 }
@@ -894,27 +896,15 @@ void Foam::argList::parse
 )
 {
     // Help/documentation options:
-    //   -help        print the usage
-    //   -help-full   print the full usage
-    //   -doc         display application documentation in browser
-    //   -doc-source  display source code in browser
-    //   -list-compat print compatibility information
+    //   -doc         Display documentation in browser
+    //   -doc-source  Display source code in browser
+    //   -help        Display short help and exit
+    //   -help-compat Display compatibility options
+    //   -help-full   Display full help and exit
     {
         bool quickExit = false;
 
-        // Only display one or the other
-        if (options_.found("help-full"))
-        {
-            printUsage(true);
-            quickExit = true;
-        }
-        else if (options_.found("help"))
-        {
-            printUsage(false);
-            quickExit = true;
-        }
-
-        // Only display one or the other
+        // Display either application or source documentation, not both
         if (options_.found("doc"))
         {
             displayDoc(false);
@@ -930,7 +920,20 @@ void Foam::argList::parse
             quickExit = true;
         }
 
-        if (options_.found("list-compat"))
+        // Display either short or full help, not both
+        if (options_.found("help-full"))
+        {
+            printUsage(true);
+            quickExit = true;
+        }
+        else if (options_.found("help"))
+        {
+            printUsage(false);
+            quickExit = true;
+        }
+
+        // Allow independent display of compatibility information
+        if (options_.found("help-compat"))
         {
             printCompat();
             quickExit = true;
@@ -1613,16 +1616,28 @@ void Foam::argList::printUsage(bool full) const
     }
 
     // Place documentation/help options at the end
+
     Info<< "  -doc";
-    printOptionUsage(6, "display application documentation in browser");
+    printOptionUsage(6, "Display documentation in browser");
 
     Info<< "  -doc-source";
-    printOptionUsage(13, "display source code in browser" );
+    printOptionUsage(13, "Display source code in browser" );
 
     Info<< "  -help";
-    printOptionUsage(7, "print usage information and exit");
+    printOptionUsage(7, "Display short help and exit");
+
+    if
+    (
+        argList::validOptionsCompat.size()
+      + argList::ignoreOptionsCompat.size()
+    )
+    {
+        Info<< "  -help-compat";
+        printOptionUsage(14, "Display compatibility options and exit");
+    }
+
     Info<< "  -help-full";
-    printOptionUsage(12, "print full usage information and exit");
+    printOptionUsage(12, "Display full help and exit");
 
     printNotes();
 

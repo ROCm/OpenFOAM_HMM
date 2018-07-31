@@ -1541,7 +1541,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "invertedSpace",
-        "do the surfaces have inverted space orientation, "
+        "Do the surfaces have inverted space orientation, "
         "i.e. a point at infinity is considered inside. "
         "This is only sensible for union and intersection."
     );

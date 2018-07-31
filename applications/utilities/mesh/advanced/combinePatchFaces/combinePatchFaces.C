@@ -350,12 +350,12 @@ int main(int argc, char *argv[])
     (
         "concaveAngle",
         "degrees",
-        "specify concave angle [0..180] (default: 30 degrees)"
+        "Specify concave angle [0..180] (default: 30 degrees)"
     );
     argList::addBoolOption
     (
         "meshQuality",
-        "read user-defined mesh quality criterions from system/meshQualityDict"
+        "Read user-defined mesh quality criterions from system/meshQualityDict"
     );
 
     #include "setRootCase.H"

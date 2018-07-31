@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "decompose a mesh and fields of a case for parallel execution"
+        "Decompose a mesh and fields of a case for parallel execution"
     );
 
     argList::noParallel();
@@ -234,13 +234,13 @@ int main(int argc, char *argv[])
     (
         "decomposeParDict",
         "file",
-        "read decomposePar dictionary from specified location"
+        "Use specified file for decomposePar dictionary"
     );
     #include "addRegionOption.H"
     argList::addBoolOption
     (
         "allRegions",
-        "operate on all regions in regionProperties"
+        "Operate on all regions in regionProperties"
     );
     argList::addBoolOption
     (
@@ -262,32 +262,32 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "copyZero",
-        "Copy a 0 directory to processor* rather than decompose the fields"
+        "Copy 0/ directory to processor*/ rather than decompose the fields"
     );
     argList::addBoolOption
     (
         "copyUniform",
-        "copy any uniform/ directories too"
+        "Copy any uniform/ directories too"
     );
     argList::addBoolOption
     (
         "fields",
-        "use existing geometry decomposition and convert fields only"
+        "Use existing geometry decomposition and convert fields only"
     );
     argList::addBoolOption
     (
         "noSets",
-        "skip decomposing cellSets, faceSets, pointSets"
+        "Skip decomposing cellSets, faceSets, pointSets"
     );
     argList::addBoolOption
     (
         "force",
-        "remove existing processor*/ subdirs before decomposing the geometry"
+        "Remove existing processor*/ subdirs before decomposing the geometry"
     );
     argList::addBoolOption
     (
         "ifRequired",
-        "only decompose geometry if the number of domains has changed"
+        "Only decompose geometry if the number of domains has changed"
     );
 
     // Include explicit constant options, have zero from time range

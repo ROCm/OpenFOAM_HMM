@@ -1417,67 +1417,67 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "splits mesh into multiple regions (detected by walking across faces)"
+        "Split mesh into multiple regions (detected by walking across faces)"
     );
     #include "addRegionOption.H"
     #include "addOverwriteOption.H"
     argList::addBoolOption
     (
         "cellZones",
-        "additionally split cellZones off into separate regions"
+        "Additionally split cellZones off into separate regions"
     );
     argList::addBoolOption
     (
         "cellZonesOnly",
-        "use cellZones only to split mesh into regions; do not use walking"
+        "Use cellZones only to split mesh into regions; do not use walking"
     );
     argList::addOption
     (
         "cellZonesFileOnly",
         "file",
-        "like -cellZonesOnly, but use specified file"
+        "Like -cellZonesOnly, but use specified file"
     );
     argList::addOption
     (
         "blockedFaces",
         "faceSet",
-        "specify additional region boundaries that walking does not cross"
+        "Specify additional region boundaries that walking does not cross"
     );
     argList::addBoolOption
     (
         "makeCellZones",
-        "place cells into cellZones instead of splitting mesh"
+        "Place cells into cellZones instead of splitting mesh"
     );
     argList::addBoolOption
     (
         "largestOnly",
-        "only write largest region"
+        "Only write largest region"
     );
     argList::addOption
     (
         "insidePoint",
         "point",
-        "only write region containing point"
+        "Only write region containing point"
     );
     argList::addBoolOption
     (
         "detectOnly",
-        "do not write mesh"
+        "Do not write mesh"
     );
     argList::addBoolOption
     (
         "sloppyCellZones",
-        "try to match heuristically regions to existing cell zones"
+        "Try to match heuristically regions to existing cell zones"
     );
     argList::addBoolOption
     (
         "useFaceZones",
-        "use faceZones to patch inter-region faces instead of single patch"
+        "Use faceZones to patch inter-region faces instead of single patch"
     );
     argList::addBoolOption
     (
         "prefixRegion",
-        "prefix region name to all patches, not just coupling patches"
+        "Prefix region name to all patches, not just coupling patches"
     );
 
     #include "setRootCase.H"

@@ -62,29 +62,29 @@ int main(int argc, char *argv[])
     (
         "max",
         "N",
-        "maximum number of outputs"
+        "Maximum number of outputs"
     );
     argList::addOption
     (
         "span",
         "N",
-        "increment each input by factor N (default: 1)"
+        "Increment each input by factor N (default: 1)"
     );
     argList::addOption
     (
         "scale",
         "factor",
-        "relaxation/scaling factor for movement (default: 1)"
+        "Relaxation/scaling factor for movement (default: 1)"
     );
     argList::addBoolOption
     (
         "removeLock",
-        "remove lock-file on termination of slave"
+        "Remove lock-file on termination of slave"
     );
     argList::addBoolOption
     (
         "slave",
-        "invoke as a slave responder for testing"
+        "Invoke as a slave responder for testing"
     );
     argList::addArgument("responseFile");
 

@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "minSet",
-        "remove cells from input cellSet to keep to 2:1 ratio"
+        "Remove cells from input cellSet to keep to 2:1 ratio"
         " (default is to extend set)"
     );
 

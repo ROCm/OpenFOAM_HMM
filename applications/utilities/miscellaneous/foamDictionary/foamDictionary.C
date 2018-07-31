@@ -261,13 +261,13 @@ void removeDict(dictionary& dict, const dictionary& dictToRemove)
 
 int main(int argc, char *argv[])
 {
-    argList::addNote("manipulates dictionaries");
+    argList::addNote("Manipulates dictionaries");
 
     argList::noBanner();
     argList::noJobInfo();
     argList::addArgument("dictionary");
     argList::addBoolOption("keywords", "List keywords");
-    argList::addOption("entry", "name", "report/select the named entry");
+    argList::addOption("entry", "name", "Report/select the named entry");
     argList::addBoolOption
     (
         "value",
@@ -288,7 +288,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "remove",
-        "Remove the entry."
+        "Remove the entry"
     );
     argList::addOption
     (

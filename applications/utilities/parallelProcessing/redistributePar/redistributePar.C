@@ -2255,25 +2255,24 @@ int main(int argc, char *argv[])
     timeSelector::addOptions(true, true);
     #include "addRegionOption.H"
     #include "addOverwriteOption.H"
-    argList::addBoolOption("decompose", "decompose case");
-    argList::addBoolOption("reconstruct", "reconstruct case");
+    argList::addBoolOption("decompose", "Decompose case");
+    argList::addBoolOption("reconstruct", "Reconstruct case");
     argList::addOption
     (
         "mergeTol",
         "scalar",
-        "specify the merge distance relative to the bounding box size "
-        "(default 1e-6)"
+        "The merge distance relative to the bounding box size (default 1e-6)"
     );
     argList::addBoolOption
     (
         "cellDist",
-        "write cell distribution as a labelList - for use with 'manual' "
+        "Write cell distribution as a labelList - for use with 'manual' "
         "decomposition method or as a volScalarField for post-processing."
     );
     argList::addBoolOption
     (
         "newTimes",
-        "only reconstruct new times (i.e. that do not exist already)"
+        "Only reconstruct new times (i.e. that do not exist already)"
     );
 
 

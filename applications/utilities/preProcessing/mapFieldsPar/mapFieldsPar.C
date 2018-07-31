@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "map volume fields from one mesh to another"
+        "Map volume fields from one mesh to another"
     );
 
     argList::addArgument("sourceCase");
@@ -149,60 +149,60 @@ int main(int argc, char *argv[])
     (
         "sourceTime",
         "scalar|'latestTime'",
-        "specify the source time"
+        "Specify the source time"
     );
     argList::addOption
     (
         "sourceRegion",
         "word",
-        "specify the source region"
+        "Specify the source region"
     );
     argList::addOption
     (
         "targetRegion",
         "word",
-        "specify the target region"
+        "Specify the target region"
     );
     argList::addBoolOption
     (
         "consistent",
-        "source and target geometry and boundary conditions identical"
+        "Source and target geometry and boundary conditions identical"
     );
     argList::addOption
     (
         "mapMethod",
         "word",
-        "specify the mapping method "
+        "Specify the mapping method "
         "(direct|mapNearest|cellVolumeWeight|correctedCellVolumeWeight)"
     );
     argList::addOption
     (
         "patchMapMethod",
         "word",
-        "specify the patch mapping method (direct|mapNearest|faceAreaWeight)"
+        "Specify the patch mapping method (direct|mapNearest|faceAreaWeight)"
     );
     argList::addOption
     (
         "procMapMethod",
         "word",
-        "specify the processor distribution map method (AABB|LOD)"
+        "Specify the processor distribution map method (AABB|LOD)"
     );
     argList::addBoolOption
     (
         "subtract",
-        "subtract mapped source from target"
+        "Subtract mapped source from target"
     );
     argList::addOption
     (
         "fields",
         "list",
-        "specify a list of fields to be mapped. Eg, '(U T p)' - "
+        "Specify a list of fields to be mapped. Eg, '(U T p)' - "
         "regular expressions not currently supported"
     );
     argList::addBoolOption
     (
         "noLagrangian",
-        "skip mapping lagrangian positions and fields"
+        "Skip mapping lagrangian positions and fields"
     );
 
     argList args(argc, argv);

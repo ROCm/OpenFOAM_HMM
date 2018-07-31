@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     (
         "useSet",
         "name",
-        "restrict cells to refine based on specified cellSet name"
+        "Restrict cells to refine based on specified cellSet name"
     );
 
 

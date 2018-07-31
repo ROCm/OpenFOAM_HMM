@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
     argList::addOption
     (
         "featureFile",
-        "fix points from a file containing feature points and edges"
+        "Fix points from a file containing feature points and edges"
     );
     argList args(argc, argv);
 

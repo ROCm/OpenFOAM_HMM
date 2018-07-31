@@ -367,17 +367,17 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "splitAllFaces",
-        "have multiple faces inbetween cells"
+        "Have multiple faces inbetween cells"
     );
     argList::addBoolOption
     (
         "concaveMultiCells",
-        "split cells on concave boundary edges into multiple cells"
+        "Split cells on concave boundary edges into multiple cells"
     );
     argList::addBoolOption
     (
         "doNotPreserveFaceZones",
-        "disable the default behaviour of preserving faceZones by having"
+        "Disable the default behaviour of preserving faceZones by having"
         " multiple faces inbetween cells"
     );
 

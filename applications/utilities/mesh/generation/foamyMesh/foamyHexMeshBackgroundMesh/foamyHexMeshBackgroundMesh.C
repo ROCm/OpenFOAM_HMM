@@ -387,14 +387,13 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "writeMesh",
-        "write the resulting mesh and distance fields"
+        "Write the resulting mesh and distance fields"
     );
     argList::addOption
     (
         "mergeTol",
         "scalar",
-        "specify the merge distance relative to the bounding box size "
-        "(default 1e-6)"
+        "The merge distance relative to the bounding box size (default 1e-6)"
     );
 
     #include "setRootCase.H"

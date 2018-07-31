@@ -208,11 +208,11 @@ void createFieldFiles
 // Main program:
 int main(int argc, char *argv[])
 {
-    Foam::argList::addOption
+    argList::addOption
     (
         "templateDir",
         "file",
-        "read case set-up templates from specified location"
+        "Read case set-up templates from specified location"
     );
 
     #include "setRootCase.H"

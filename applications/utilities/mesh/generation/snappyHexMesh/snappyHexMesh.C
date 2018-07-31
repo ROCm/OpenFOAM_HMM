@@ -679,28 +679,28 @@ int main(int argc, char *argv[])
 {
     #include "addRegionOption.H"
     #include "addOverwriteOption.H"
-    Foam::argList::addBoolOption
+    argList::addBoolOption
     (
         "checkGeometry",
-        "check all surface geometry for quality"
+        "Check all surface geometry for quality"
     );
-    Foam::argList::addOption
+    argList::addOption
     (
         "surfaceSimplify",
         "boundBox",
-        "simplify the surface using snappyHexMesh starting from a boundBox"
+        "Simplify the surface using snappyHexMesh starting from a boundBox"
     );
-    Foam::argList::addOption
+    argList::addOption
     (
         "patches",
         "(patch0 .. patchN)",
-        "only triangulate selected patches (wildcards supported)"
+        "Only triangulate selected patches (wildcards supported)"
     );
-    Foam::argList::addOption
+    argList::addOption
     (
         "outFile",
         "file",
-        "name of the file to save the simplified surface to"
+        "Name of the file to save the simplified surface to"
     );
     #include "addProfilingOption.H"
     #include "addDictOption.H"

@@ -194,20 +194,20 @@ int main(int argc, char *argv[])
     (
         "fields",
         "wordRes",
-        "the fields (or field) to be interpolated."
+        "The fields (or field) to be interpolated."
         " Eg, '(U T p \"Y.*\")' or a single field 'U'"
     );
     argList::addOption
     (
         "divisions",
         "integer",
-        "specify number of temporal sub-divisions to create (default = 1)."
+        "Specify number of temporal sub-divisions to create (default = 1)."
     );
     argList::addOption
     (
         "interpolationType",
         "word",
-        "specify type of interpolation (linear or spline)"
+        "The type of interpolation (linear or spline)"
     );
 
     #include "setRootCase.H"

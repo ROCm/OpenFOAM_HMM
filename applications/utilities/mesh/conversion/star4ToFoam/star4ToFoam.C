@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "convert STARCD/PROSTAR (v4) mesh to OpenFOAM"
+        "Convert STARCD/PROSTAR (v4) mesh to OpenFOAM"
     );
 
     argList::noParallel();
@@ -74,18 +74,18 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "ascii",
-        "write in ASCII instead of binary format"
+        "Write in ASCII instead of binary format"
     );
     argList::addOption
     (
         "scale",
         "factor",
-        "geometry scaling factor - default is 0.001 ([mm] to [m])"
+        "Geometry scaling factor - default is 0.001 ([mm] to [m])"
     );
     argList::addBoolOption
     (
         "solids",
-        "retain solid cells and treat them like fluid cells"
+        "Retain solid cells and treat like fluid cells"
     );
 
 

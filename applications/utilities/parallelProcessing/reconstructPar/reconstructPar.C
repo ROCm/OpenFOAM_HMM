@@ -90,42 +90,42 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "allRegions",
-        "operate on all regions in regionProperties"
+        "Operate on all regions in regionProperties"
     );
     argList::addOption
     (
         "fields",
         "list",
-        "specify a list of fields to be reconstructed. Eg, '(U T p)' - "
+        "Specify a list of fields to be reconstructed. Eg, '(U T p)' - "
         "regular expressions not currently supported"
     );
     argList::addBoolOption
     (
         "noFields",
-        "skip reconstructing fields"
+        "Skip reconstructing fields"
     );
     argList::addOption
     (
         "lagrangianFields",
         "list",
-        "specify a list of lagrangian fields to be reconstructed. Eg, '(U d)' -"
+        "Specify a list of lagrangian fields to be reconstructed. Eg, '(U d)' -"
         "regular expressions not currently supported, "
         "positions always included."
     );
     argList::addBoolOption
     (
         "noLagrangian",
-        "skip reconstructing lagrangian positions and fields"
+        "Skip reconstructing lagrangian positions and fields"
     );
     argList::addBoolOption
     (
         "noSets",
-        "skip reconstructing cellSets, faceSets, pointSets"
+        "Skip reconstructing cellSets, faceSets, pointSets"
     );
     argList::addBoolOption
     (
         "newTimes",
-        "only reconstruct new times (i.e. that do not exist already)"
+        "Only reconstruct new times (i.e. that do not exist already)"
     );
 
     #include "setRootCase.H"

@@ -50,19 +50,19 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "noH",
-        "do not write the magnetic field intensity field"
+        "Do not write the magnetic field intensity field"
     );
 
     argList::addBoolOption
     (
         "noB",
-        "do not write the magnetic flux density field"
+        "Do not write the magnetic flux density field"
     );
 
     argList::addBoolOption
     (
         "HdotGradH",
-        "write the paramagnetic particle force field"
+        "Write the paramagnetic particle force field"
     );
 
     #include "addCheckCaseOptions.H"

@@ -672,7 +672,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "split multiply connected surface edges by duplicating points"
+        "Split multiply connected surface edges by duplicating points"
     );
     argList::noParallel();
     argList::addArgument("surfaceFile");
@@ -680,7 +680,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "debug",
-        "add debugging output"
+        "Add debugging output"
     );
 
     argList args(argc, argv);

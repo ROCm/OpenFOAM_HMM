@@ -64,23 +64,23 @@ int main(int argc, char *argv[])
     (
         "scale",
         "factor",
-        "geometry scaling factor - default is 1"
+        "Geometry scaling factor - default is 1"
     );
     argList::addBoolOption
     (
         "noBlank",
-        "skip blank items"
+        "Skip blank items"
     );
     argList::addBoolOption
     (
         "singleBlock",
-        "input is a single block"
+        "Input is a single block"
     );
     argList::addOption
     (
         "2D",
         "thickness",
-        "use when converting a 2-D mesh (applied before scale)"
+        "Use when converting a 2-D mesh (applied before scale)"
     );
 
     argList args(argc, argv);

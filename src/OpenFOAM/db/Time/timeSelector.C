@@ -116,7 +116,7 @@ void Foam::timeSelector::addOptions
         argList::addBoolOption
         (
             "constant",
-            "include the 'constant/' dir in the times list"
+            "Include the 'constant/' dir in the times list"
         );
     }
     if (withZero)
@@ -124,13 +124,13 @@ void Foam::timeSelector::addOptions
         argList::addBoolOption
         (
             "withZero",
-            "include the '0/' dir in the times list"
+            "Include the '0/' dir in the times list"
         );
     }
     argList::addBoolOption
     (
         "noZero",
-        string("exclude the '0/' dir from the times list")
+        string("Exclude the '0/' dir from the times list")
       + (
             withZero
           ? ", has precedence over the -withZero option"
@@ -140,18 +140,18 @@ void Foam::timeSelector::addOptions
     argList::addBoolOption
     (
         "latestTime",
-        "select the latest time"
+        "Select the latest time"
     );
     argList::addBoolOption
     (
         "newTimes",
-        "select the new times"
+        "Select the new times"
     );
     argList::addOption
     (
         "time",
         "ranges",
-        "comma-separated time ranges - eg, ':10,20,40:70,1000:'"
+        "Comma-separated time ranges - eg, ':10,20,40:70,1000:'"
     );
 }
 

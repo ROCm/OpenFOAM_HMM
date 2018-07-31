@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     (
         "scale",
         "factor",
-        "input geometry scaling factor"
+        "Input geometry scaling factor"
     );
 
     argList args(argc, argv);

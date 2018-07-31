@@ -183,7 +183,7 @@ void Foam::helpType::init()
     (
         "browse",
         "word",
-        "display documentation in browser"
+        "Display documentation in browser"
     );
 }
 

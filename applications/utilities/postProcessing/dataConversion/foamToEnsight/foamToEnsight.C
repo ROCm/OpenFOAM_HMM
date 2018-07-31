@@ -107,59 +107,59 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "ascii",
-        "write in ASCII format instead of 'C Binary'"
+        "Write in ASCII format instead of 'C Binary'"
     );
     argList::addBoolOption
     (
         "nodeValues",
-        "write values in nodes"
+        "Write values in nodes"
     );
     argList::addBoolOption
     (
         "noLagrangian",
-        "suppress writing lagrangian positions and fields"
+        "Suppress writing lagrangian positions and fields"
     );
     argList::addBoolOption
     (
         "noPatches",
-        "suppress writing any patches"
+        "Suppress writing any patches"
     );
     argList::addOption
     (
         "patches",
         "wordRes",
-        "specify particular patches to write - eg '(outlet \"inlet.*\")'. "
+        "Specify particular patches to write - eg '(outlet \"inlet.*\")'. "
         "An empty list suppresses writing the internalMesh."
     );
     argList::addOption
     (
         "faceZones",
         "wordRes",
-        "specify faceZones to write - eg '( slice \"mfp-.*\" )'."
+        "Specify faceZones to write - eg '( slice \"mfp-.*\" )'."
     );
     argList::addOption
     (
         "fields",
         "wordRes",
-        "specify fields to export (all by default) - eg '( \"U.*\" )'."
+        "Specify fields to export (all by default) - eg '( \"U.*\" )'."
     );
     argList::addOption
     (
         "cellZone",
         "word",
-        "specify cellZone to write"
+        "Specify cellZone to write"
     );
     argList::addOption
     (
         "name",
         "subdir",
-        "sub-directory name for ensight output (default: 'EnSight')"
+        "Sub-directory name for ensight output (default: 'EnSight')"
     );
     argList::addOption
     (
         "width",
         "n",
-        "width of ensight data subdir"
+        "Width of ensight data subdir"
     );
 
     // The volume field types that we handle

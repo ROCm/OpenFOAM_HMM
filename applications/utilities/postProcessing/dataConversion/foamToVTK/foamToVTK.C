@@ -333,108 +333,108 @@ int main(int argc, char *argv[])
     (
         "fields",
         "wordList",
-        "only convert the specified fields - eg '(p T U)'"
+        "Only convert the specified fields - eg '(p T U)'"
     );
     argList::addOption
     (
         "cellSet",
         "name",
-        "convert a mesh subset corresponding to the specified cellSet"
+        "Convert a mesh subset corresponding to the specified cellSet"
     );
     argList::addOption
     (
         "cellZone",
         "name",
-        "convert a mesh subset corresponding to the specified cellZone"
+        "Convert a mesh subset corresponding to the specified cellZone"
     );
     argList::addOption
     (
         "faceSet",
         "name",
-        "restrict conversion to the specified faceSet"
+        "Restrict conversion to the specified faceSet"
     );
     argList::addOption
     (
         "pointSet",
         "name",
-        "restrict conversion to the specified pointSet"
+        "Restrict conversion to the specified pointSet"
     );
     argList::addBoolOption
     (
         "ascii",
-        "write in ASCII format instead of binary"
+        "Write in ASCII format instead of binary"
     );
     argList::addBoolOption
     (
         "xml",
-        "write VTK xml instead of legacy format"
+        "Write VTK xml instead of legacy format"
     );
     argList::addBoolOption
     (
         "poly",
-        "write polyhedral cells without tet/pyramid decomposition"
+        "Write polyhedral cells without tet/pyramid decomposition"
     );
     argList::addBoolOption
     (
         "surfaceFields",
-        "write surfaceScalarFields (e.g., phi)"
+        "Write surfaceScalarFields (e.g., phi)"
     );
     argList::addBoolOption
     (
         "finiteAreaFields",
-        "write finite area fields"
+        "Write finite area fields"
     );
     argList::addBoolOption
     (
         "nearCellValue",
-        "use cell value on patches instead of patch value itself"
+        "Use cell value on patches instead of patch value itself"
     );
     argList::addBoolOption
     (
         "noInternal",
-        "do not generate file for mesh, only for patches"
+        "Do not generate file for mesh, only for patches"
     );
     argList::addBoolOption
     (
         "noLagrangian",
-        "suppress writing lagrangian positions and fields"
+        "Suppress writing lagrangian positions and fields"
     );
     argList::addBoolOption
     (
         "noPointValues",
-        "no pointFields"
+        "No pointFields"
     );
     argList::addBoolOption
     (
         "allPatches",
-        "combine all patches into a single file"
+        "Combine all patches into a single file"
     );
     argList::addOption
     (
         "excludePatches",
         "wordRes",
-        "a list of patches to exclude - eg '( inlet \".*Wall\" )' "
+        "A list of patches to exclude - eg '( inlet \".*Wall\" )' "
     );
     argList::addBoolOption
     (
         "noFaceZones",
-        "no faceZones"
+        "No faceZones"
     );
     argList::addBoolOption
     (
         "noLinks",
-        "don't link processor VTK files - parallel only"
+        "Do not link processor VTK files - parallel only"
     );
     argList::addBoolOption
     (
         "useTimeName",
-        "use time name instead of the time index when naming files"
+        "Use time name instead of the time index when naming files"
     );
     argList::addOption
     (
         "name",
         "subdir",
-        "sub-directory name for VTK output (default: 'VTK')"
+        "Sub-directory name for VTK output (default: 'VTK')"
     );
 
     #include "setRootCase.H"

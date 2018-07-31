@@ -524,7 +524,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "split cells with flat faces"
+        "Split cells with flat faces"
     );
     #include "addOverwriteOption.H"
     argList::noParallel();
@@ -534,17 +534,18 @@ int main(int argc, char *argv[])
     (
         "set",
         "name",
-        "split cells from specified cellSet only"
+        "Split cells from specified cellSet only"
     );
     argList::addBoolOption
     (
         "geometry",
-        "use geometric cut for hexes as well"
+        "Use geometric cut for hexes as well"
     );
     argList::addOption
     (
         "tol",
-        "scalar", "edge snap tolerance (default 0.2)"
+        "scalar",
+        "Edge snap tolerance (default 0.2)"
     );
 
     #include "setRootCase.H"

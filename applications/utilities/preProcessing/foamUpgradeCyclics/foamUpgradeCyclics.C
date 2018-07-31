@@ -399,12 +399,12 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "dry-run",
-        "test only do not change any files"
+        "Test only do not change any files"
     );
     argList::addBoolOption
     (
         "enableFunctionEntries",
-        "enable expansion of dictionary directives - #include, #codeStream etc"
+        "Enable expansion of dictionary directives - #include, #codeStream etc"
     );
     #include "addRegionOption.H"
 

@@ -871,23 +871,23 @@ int main(int argc, char *argv[])
     (
         "scale",
         "factor",
-        "geometry scaling factor - default is 1"
+        "Geometry scaling factor - default is 1"
     );
     argList::addOption
     (
         "2D",
         "thickness",
-        "use when converting a 2-D mesh (applied before scale)"
+        "Use when converting a 2-D mesh (applied before scale)"
     );
     argList::addBoolOption
     (
         "writeSets",
-        "write cell zones and patches as sets"
+        "Write cell zones and patches as sets"
     );
     argList::addBoolOption
     (
         "writeZones",
-        "write cell zones as zones"
+        "Write cell zones as zones"
     );
 
     argList args(argc, argv);

@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "newFormat",
-        "read Chemkin thermo file in new format"
+        "Read Chemkin thermo file in new format"
     );
 
     argList args(argc, argv);

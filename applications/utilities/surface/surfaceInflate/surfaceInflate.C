@@ -571,30 +571,30 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::addNote
     (
-        "Creates inflated version of surface using point normals."
-        " Takes surface, distance to inflate and additional safety factor"
+        "Creates inflated version of surface using point normals. "
+        "Takes surface, distance to inflate and additional safety factor"
     );
     argList::addBoolOption
     (
         "checkSelfIntersection",
-        "also check for self-intersection"
+        "Also check for self-intersection"
     );
     argList::addOption
     (
         "nSmooth",
         "integer",
-        "number of smoothing iterations (default 20)"
+        "Number of smoothing iterations (default 20)"
     );
     argList::addOption
     (
         "featureAngle",
         "scalar",
-        "feature angle"
+        "Feature angle"
     );
     argList::addBoolOption
     (
         "debug",
-        "switch on additional debug information"
+        "Switch on additional debug information"
     );
 
     argList::addArgument("inputFile");

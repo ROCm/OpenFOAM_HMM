@@ -103,57 +103,57 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "ascii",
-        "write in ASCII format instead of binary"
+        "Write in ASCII format instead of binary"
     );
     argList::addBoolOption
     (
         "export",
-        "re-export mesh in CCM format for post-processing"
+        "Re-export mesh in CCM format for post-processing"
     );
     argList::addBoolOption
     (
         "list",
-        "list some information about the geometry"
+        "List some information about the geometry"
     );
     argList::addOption
     (
         "remap",
         "name",
-        "use specified remapping dictionary instead of <constant/remapping>"
+        "Use specified remapping dictionary instead of <constant/remapping>"
     );
     argList::addOption
     (
         "name",
         "name",
-        "provide alternative base name when re-exporting (implies -export). "
+        "Provide alternative base name when re-exporting (implies -export). "
         "Default is <meshExport>."
     );
     argList::addBoolOption
     (
         "noBaffles",
-        "remove any baffles by merging the faces"
+        "Remove any baffles by merging the faces"
     );
     argList::addBoolOption
     (
         "merge",
-        "merge in-place interfaces"
+        "Merge in-place interfaces"
     );
     argList::addBoolOption
     (
         "numbered",
-        "use numbered names (eg, patch_0, zone_0) only"
+        "Use numbered names (eg, patch_0, zone_0) only"
     );
     argList::addOption
     (
         "scale",
         "scale",
-        "geometry scaling factor - default is 1 (ie, no scaling)"
+        "Geometry scaling factor - default is 1 (ie, no scaling)"
     );
     argList::addBoolOption
     (
         "solids",
-        "treat any solid cells present just like fluid cells. "
-        "the default is to remove them."
+        "Treat any solid cells present just like fluid cells. "
+        "The default is to remove them."
     );
 
     argList args(argc, argv);

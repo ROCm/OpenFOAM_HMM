@@ -340,7 +340,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "select a mesh subset based on a cellSet"
+        "Select a mesh subset based on a cellSet"
     );
 
     #include "addOverwriteOption.H"
@@ -350,21 +350,21 @@ int main(int argc, char *argv[])
     (
         "patch",
         "name",
-        "add exposed internal faces to specified patch instead of to "
+        "Add exposed internal faces to specified patch instead of to "
         "'oldInternalFaces'"
     );
     argList::addOption
     (
         "patches",
         "names",
-        "add exposed internal faces to nearest of specified patches"
+        "Add exposed internal faces to nearest of specified patches"
         " instead of to 'oldInternalFaces'"
     );
     argList::addOption
     (
         "resultTime",
         "time",
-        "specify a time for the resulting mesh"
+        "Specify a time for the resulting mesh"
     );
     #include "setRootCase.H"
     #include "createTime.H"

@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "readLevel",
-        "read level from refinementLevel file"
+        "Read level from refinementLevel file"
     );
 
     #include "setRootCase.H"

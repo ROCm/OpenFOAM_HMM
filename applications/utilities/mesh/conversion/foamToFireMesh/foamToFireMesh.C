@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "read OpenFOAM mesh and write an AVL/FIRE fpma format"
+        "Read OpenFOAM mesh and write an AVL/FIRE fpma format"
     );
     argList::noParallel();
     timeSelector::addOptions();
@@ -66,13 +66,13 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "ascii",
-        "write in ASCII format instead of binary"
+        "Write in ASCII format instead of binary"
     );
     argList::addOption
     (
         "scale",
         "factor",
-        "geometry scaling factor - default is 1 (none)"
+        "Geometry scaling factor - default is 1 (none)"
     );
 
     #include "setRootCase.H"

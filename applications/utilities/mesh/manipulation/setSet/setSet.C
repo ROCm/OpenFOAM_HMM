@@ -736,18 +736,18 @@ int main(int argc, char *argv[])
 
     timeSelector::addOptions(true, false);
     #include "addRegionOption.H"
-    argList::addBoolOption("noVTK", "do not write VTK files");
-    argList::addBoolOption("loop", "execute batch commands for all timesteps");
+    argList::addBoolOption("noVTK", "Do not write VTK files");
+    argList::addBoolOption("loop", "Execute batch commands for all timesteps");
     argList::addOption
     (
         "batch",
         "file",
-        "process in batch mode, using input from specified file"
+        "Process in batch mode, using input from specified file"
     );
     argList::addBoolOption
     (
         "noSync",
-        "do not synchronise selection across coupled patches"
+        "Do not synchronise selection across coupled patches"
     );
 
     #include "setRootCase.H"

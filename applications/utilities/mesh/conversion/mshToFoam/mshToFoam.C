@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "hex",
-        "treat input as containing hex instead of tet cells"
+        "Treat input as containing hex instead of tet cells"
     );
 
     #include "setRootCase.H"

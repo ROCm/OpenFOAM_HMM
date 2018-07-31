@@ -86,39 +86,39 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "noTopology",
-        "skip checking the mesh topology"
+        "Skip checking the mesh topology"
     );
     argList::addBoolOption
     (
         "allGeometry",
-        "include bounding box checks"
+        "Include bounding box checks"
     );
     argList::addBoolOption
     (
         "allTopology",
-        "include extra topology checks"
+        "Include extra topology checks"
     );
     argList::addBoolOption
     (
         "writeAllFields",
-        "write volFields with mesh quality parameters"
+        "Write volFields with mesh quality parameters"
     );
     argList::addOption
     (
         "writeFields",
         "wordList",
-        "write volFields with selected mesh quality parameters"
+        "Write volFields with selected mesh quality parameters"
     );
     argList::addBoolOption
     (
         "meshQuality",
-        "read user-defined mesh quality criterions from system/meshQualityDict"
+        "Read user-defined mesh quality criterions from system/meshQualityDict"
     );
     argList::addOption
     (
         "writeSets",
         "surfaceFormat",
-        "reconstruct and write all faceSets and cellSets in selected format"
+        "Reconstruct and write all faceSets and cellSets in selected format"
     );
 
     #include "setRootCase.H"

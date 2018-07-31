@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "export from surfMesh to various third-party surface formats"
+        "Export from surfMesh to various third-party surface formats"
     );
 
     argList::noParallel();
@@ -85,39 +85,41 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "clean",
-        "perform some surface checking/cleanup on the input surface"
+        "Perform some surface checking/cleanup on the input surface"
     );
     argList::addOption
     (
         "name",
         "name",
-        "specify an alternative surface name when reading - "
+        "Specify an alternative surface name when reading - "
         "default is 'default'"
     );
     argList::addOption
     (
         "scaleIn",
         "factor",
-        "geometry scaling factor on input - default is 1"
+        "Geometry scaling factor on input - default is 1"
     );
     argList::addOption
     (
         "scaleOut",
         "factor",
-        "geometry scaling factor on output - default is 1"
+        "Geometry scaling factor on output - default is 1"
     );
     #include "addDictOption.H"
     argList::addOption
     (
         "from",
         "coordinateSystem",
-        "specify the source coordinate system, applied after '-scaleIn'"
+        "Specify the source coordinate system, applied after '-scaleIn'",
+        true // advanced
     );
     argList::addOption
     (
         "to",
         "coordinateSystem",
-        "specify the target coordinate system, applied before '-scaleOut'"
+        "Specify the target coordinate system, applied before '-scaleOut'",
+        true // advanced
     );
 
     argList args(argc, argv);

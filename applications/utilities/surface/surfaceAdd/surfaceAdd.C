@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "add two surfaces via a geometric merge on points."
+        "Add two surfaces via a geometric merge on points."
     );
 
     argList::noParallel();
@@ -63,18 +63,18 @@ int main(int argc, char *argv[])
     (
         "points",
         "file",
-        "provide additional points"
+        "Provide additional points"
     );
     argList::addBoolOption
     (
         "mergeRegions",
-        "combine regions from both surfaces"
+        "Combine regions from both surfaces"
     );
     argList::addOption
     (
         "scale",
         "factor",
-        "geometry scaling factor on input surfaces"
+        "Geometry scaling factor on input surfaces"
     );
 
     argList args(argc, argv);

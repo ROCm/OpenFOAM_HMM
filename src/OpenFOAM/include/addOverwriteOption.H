@@ -1,5 +1,5 @@
 Foam::argList::addBoolOption
 (
     "overwrite",
-    "overwrite existing mesh/results files"
+    "Overwrite existing mesh/results files"
 );

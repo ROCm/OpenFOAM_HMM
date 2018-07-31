@@ -239,12 +239,12 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "noConstant",
-        "exclude the 'constant/' dir in the times list"
+        "Exclude the 'constant/' dir in the times list"
     );
     argList::addBoolOption
     (
         "enableFunctionEntries",
-        "enable expansion of dictionary directives - #include, #codeStream etc"
+        "Enable expansion of dictionary directives - #include, #codeStream etc"
     );
 
     #include "addRegionOption.H"

@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "set face normals consistent with a user-provided 'outside' point"
+        "Set face normals consistent with a user-provided 'outside' point"
     );
 
     argList::noParallel();
@@ -56,18 +56,18 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "inside",
-        "treat provided point as being inside"
+        "Treat provided point as being inside"
     );
     argList::addBoolOption
     (
         "usePierceTest",
-        "determine orientation by counting number of intersections"
+        "Determine orientation by counting number of intersections"
     );
     argList::addOption
     (
         "scale",
         "factor",
-        "input geometry scaling factor"
+        "Input geometry scaling factor"
     );
 
     argList args(argc, argv);

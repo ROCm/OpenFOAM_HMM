@@ -513,16 +513,16 @@ int main(int argc, char *argv[])
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
     #include "addDictOption.H"
-    Foam::argList::addBoolOption
+    argList::addBoolOption
     (
         "writeObj",
-        "write obj files showing the cyclic matching process"
+        "Write obj files showing the cyclic matching process"
     );
     #include "setRootCase.H"
     #include "createTime.H"
     runTime.functionObjects().off();
 
-    Foam::word meshRegionName = polyMesh::defaultRegion;
+    word meshRegionName = polyMesh::defaultRegion;
     args.readIfPresent("region", meshRegionName);
 
     const bool overwrite = args.found("overwrite");

@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
     (
         "dict",
         "file",
-        "read surfaceFeatureExtractDict from specified location"
+        "Read surfaceFeatureExtractDict from specified location"
     );
 
     #include "setRootCase.H"

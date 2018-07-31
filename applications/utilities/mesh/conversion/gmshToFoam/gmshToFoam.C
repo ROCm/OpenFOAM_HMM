@@ -773,7 +773,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "keepOrientation",
-        "retain raw orientation for prisms/hexs"
+        "Retain raw orientation for prisms/hexs"
     );
 
     #include "addRegionOption.H"

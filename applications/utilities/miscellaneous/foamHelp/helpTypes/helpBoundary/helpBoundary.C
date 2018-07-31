@@ -66,17 +66,17 @@ void Foam::helpTypes::helpBoundary::init()
     (
         "field",
         "word",
-        "list available conditions for field"
+        "List available conditions for field"
     );
     argList::addBoolOption
     (
         "constraint",
-        "list constraint patches"
+        "List constraint patches"
     );
     argList::addBoolOption
     (
         "fixedValue",
-        "list fixed value patches (use with -field option)"
+        "List fixed value patches (use with -field option)"
     );
 }
 

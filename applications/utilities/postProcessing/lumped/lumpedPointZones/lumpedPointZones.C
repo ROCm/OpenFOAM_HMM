@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "verbose",
-        "increased verbosity"
+        "Additional verbosity"
     );
 
     #include "addRegionOption.H"

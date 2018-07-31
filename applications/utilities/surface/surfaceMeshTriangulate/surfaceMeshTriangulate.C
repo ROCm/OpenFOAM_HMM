@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "extract surface from a polyMesh"
+        "Extract surface from a polyMesh"
     );
     timeSelector::addOptions();
 
@@ -71,19 +71,19 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "excludeProcPatches",
-        "exclude processor patches"
+        "Exclude processor patches"
     );
     argList::addOption
     (
         "patches",
         "(patch0 .. patchN)",
-        "only triangulate selected patches (wildcards supported)"
+        "Only triangulate selected patches (wildcards supported)"
     );
     argList::addOption
     (
         "faceZones",
         "(fz0 .. fzN)",
-        "triangulate selected faceZones (wildcards supported)"
+        "Triangulate selected faceZones (wildcards supported)"
     );
 
     #include "setRootCase.H"

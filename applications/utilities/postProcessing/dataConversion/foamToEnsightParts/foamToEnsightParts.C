@@ -100,37 +100,37 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "ascii",
-        "write in ASCII format instead of 'C Binary'"
+        "Write in ASCII format instead of 'C Binary'"
     );
     argList::addOption
     (
         "index",
         "start",
-        "ignore the time index contained in the uniform/time file "
+        "Ignore the time index contained in the uniform/time file "
         "and use simple indexing when creating the files"
     );
     argList::addBoolOption
     (
         "noLagrangian",
-        "suppress writing lagrangian positions and fields"
+        "Suppress writing lagrangian positions and fields"
     );
     argList::addBoolOption
     (
         "noMesh",
-        "suppress writing the geometry. "
+        "Suppress writing the geometry. "
         "Can be useful for converting partial results for a static geometry"
     );
     argList::addOption
     (
         "name",
         "subdir",
-        "sub-directory name for ensight output (default: 'Ensight')"
+        "Sub-directory name for ensight output (default: 'Ensight')"
     );
     argList::addOption
     (
         "width",
         "n",
-        "width of Ensight data subdir"
+        "Width of Ensight data subdir"
     );
 
     // The volume field types that we handle

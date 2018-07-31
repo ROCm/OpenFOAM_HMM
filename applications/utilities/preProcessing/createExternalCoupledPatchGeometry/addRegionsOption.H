@@ -6,5 +6,5 @@
     (
         "regions",
         "(name1 .. nameN)",
-        "specify alternative mesh regions"
+        "Specify alternative mesh regions"
     );

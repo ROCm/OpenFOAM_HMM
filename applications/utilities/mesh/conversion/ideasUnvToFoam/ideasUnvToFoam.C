@@ -671,7 +671,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "dump",
-        "dump boundary faces as boundaryFaces.obj (for debugging)"
+        "Dump boundary faces as boundaryFaces.obj (for debugging)"
     );
 
     #include "setRootCase.H"

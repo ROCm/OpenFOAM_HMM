@@ -68,18 +68,18 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "ascii",
-        "write in ASCII format instead of binary"
+        "Write in ASCII format instead of binary"
     );
     argList::addBoolOption
     (
         "check",
-        "perform edge checking as well"
+        "Perform edge checking as well"
     );
     argList::addOption
     (
         "scale",
         "scale",
-        "geometry scaling factor - default is 1 (no scaling)"
+        "Geometry scaling factor - default is 1 (no scaling)"
     );
 
 

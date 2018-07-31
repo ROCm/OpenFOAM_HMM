@@ -45,16 +45,16 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    Foam::argList::addBoolOption
+    argList::addBoolOption
     (
         "checkGeometry",
-        "check all surface geometry for quality"
+        "Check all surface geometry for quality"
     );
 
-    Foam::argList::addBoolOption
+    argList::addBoolOption
     (
         "conformationOnly",
-        "conform to the initial points without any point motion"
+        "Conform to the initial points without any point motion"
     );
 
     #include "setRootCase.H"

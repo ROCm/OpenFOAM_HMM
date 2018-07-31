@@ -399,13 +399,13 @@ int main(int argc, char *argv[])
     (
         "subDict",
         "name",
-        "specify the subDict name of the replacements dictionary"
+        "Specify the subDict name of the replacements dictionary"
     );
     argList::addOption
     (
         "instance",
         "name",
-        "override instance setting (default is the time name)"
+        "Override instance setting (default is the time name)"
     );
 
     // Add explicit time option
@@ -414,17 +414,17 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "literalRE",
-        "treat regular expressions literally (i.e., as a keyword)"
+        "Treat regular expressions literally (i.e., as a keyword)"
     );
     argList::addBoolOption
     (
         "enableFunctionEntries",
-        "enable expansion of dictionary directives - #include, #codeStream etc"
+        "Enable expansion of dictionary directives - #include, #codeStream etc"
     );
     argList::addBoolOption
     (
         "disablePatchGroups",
-        "disable matching keys to patch groups"
+        "Disable matching keys to patch groups"
     );
 
     #include "addRegionOption.H"

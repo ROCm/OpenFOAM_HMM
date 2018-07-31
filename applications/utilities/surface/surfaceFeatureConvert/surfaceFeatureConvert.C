@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     (
         "scale",
         "factor",
-        "geometry scaling factor - default is 1"
+        "Geometry scaling factor - default is 1"
     );
 
     argList args(argc, argv);

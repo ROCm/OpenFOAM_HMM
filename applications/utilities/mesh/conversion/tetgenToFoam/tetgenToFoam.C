@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "noFaceFile",
-        "skip reading .face file for boundary information"
+        "Skip reading .face file for boundary information"
     );
 
     #include "setRootCase.H"

@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "noSync",
-        "do not synchronise selection across coupled patches"
+        "Do not synchronise selection across coupled patches"
     );
 
     #include "setRootCase.H"

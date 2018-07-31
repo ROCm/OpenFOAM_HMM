@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "checkAMI",
-        "check AMI weights"
+        "Check AMI weights"
     );
 
     #include "setRootCase.H"

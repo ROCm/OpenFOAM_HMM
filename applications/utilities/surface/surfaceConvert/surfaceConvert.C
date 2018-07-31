@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "convert between surface formats, using triSurface library components"
+        "Convert between surface formats, using triSurface library components"
     );
 
     argList::noParallel();
@@ -98,12 +98,11 @@ int main(int argc, char *argv[])
 
     if (args.found("writePrecision"))
     {
-        const label writePrecision = args.opt<label>("writePrecision");
+        const label prec = args.opt<label>("writePrecision");
+        Info<< "Output write precision set to " << prec << endl;
 
-        IOstream::defaultPrecision(writePrecision);
-        Sout.precision(writePrecision);
-
-        Info<< "Output write precision set to " << writePrecision << endl;
+        IOstream::defaultPrecision(prec);
+        Sout.precision(prec);
     }
 
     const fileName importName = args[1];

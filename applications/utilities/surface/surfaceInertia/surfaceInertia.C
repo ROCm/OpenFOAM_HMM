@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "shellProperties",
-        "inertia of a thin shell"
+        "Inertia of a thin shell"
     );
 
     argList::addOption

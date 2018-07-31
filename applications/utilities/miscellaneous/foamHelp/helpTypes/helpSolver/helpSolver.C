@@ -66,7 +66,7 @@ void Foam::helpTypes::helpSolver::init()
     argList::addBoolOption
     (
         "read",
-        "read solver type from the system/controlDict"
+        "Read solver type from the system/controlDict"
     );
 }
 

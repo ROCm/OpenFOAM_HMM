@@ -779,25 +779,25 @@ int main(int argc, char *argv[])
     (
         "scale",
         "factor",
-        "geometry scaling factor - default is 1"
+        "Geometry scaling factor - default is 1"
     );
     argList::addOption
     (
         "ignoreCellGroups",
         "names",
-        "specify cell groups to ignore"
+        "Specify cell groups to ignore"
     );
     argList::addOption
     (
         "ignoreFaceGroups",
         "names",
-        "specify face groups to ignore"
+        "Specify face groups to ignore"
     );
 
     argList::addBoolOption
     (
         "cubit",
-        "special parsing of (incorrect) cubit files"
+        "Special parsing of (incorrect) cubit files"
     );
 
     argList args(argc, argv);

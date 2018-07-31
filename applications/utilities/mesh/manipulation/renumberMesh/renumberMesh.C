@@ -621,7 +621,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "frontWidth",
-        "calculate the rms of the frontwidth"
+        "Calculate the rms of the frontwidth"
     );
 
 

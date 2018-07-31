@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "keepNonMapped",
-        "preserve surface outside of mesh bounds"
+        "Preserve surface outside of mesh bounds"
     );
 
     #include "setRootCase.H"

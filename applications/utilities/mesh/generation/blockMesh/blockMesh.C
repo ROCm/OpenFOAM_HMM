@@ -82,23 +82,23 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "blockTopology",
-        "write block edges and centres as .obj files"
+        "Write block edges and centres as .obj files"
     );
     argList::addBoolOption
     (
         "noClean",
-        "keep the existing files in the polyMesh"
+        "Keep the existing files in the polyMesh"
     );
     argList::addOption
     (
         "dict",
         "file",
-        "specify alternative dictionary for the blockMesh description"
+        "Specify alternative dictionary for the blockMesh description"
     );
     argList::addBoolOption
     (
         "sets",
-        "write cellZones as cellSets too (for processing purposes)"
+        "Write cellZones as cellSets too (for processing purposes)"
     );
     argList::addNote
     (

@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "merge two meshes"
+        "Merge two meshes"
     );
 
     #include "addOverwriteOption.H"
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     (
         "masterRegion",
         "name",
-        "specify alternative mesh region for the master mesh"
+        "Specify alternative mesh region for the master mesh"
     );
 
     argList::addArgument("addCase");
@@ -82,13 +82,13 @@ int main(int argc, char *argv[])
     (
         "addRegion",
         "name",
-        "specify alternative mesh region for the additional mesh"
+        "Specify alternative mesh region for the additional mesh"
     );
     argList::addOption
     (
         "resultTime",
         "time",
-        "specify a time for the resulting mesh"
+        "Specify a time for the resulting mesh"
     );
 
     argList args(argc, argv);

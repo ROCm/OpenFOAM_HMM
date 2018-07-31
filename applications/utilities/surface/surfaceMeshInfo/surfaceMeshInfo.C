@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "information about surface meshes"
+        "Information about surface meshes"
     );
 
     argList::noBanner();
@@ -87,17 +87,17 @@ int main(int argc, char *argv[])
     (
         "scale",
         "factor",
-        "input geometry scaling factor"
+        "Input geometry scaling factor"
     );
     argList::addBoolOption
     (
         "areas",
-        "display area of each face"
+        "Display area of each face"
     );
     argList::addBoolOption
     (
         "xml",
-        "write output in XML format"
+        "Write output in XML format"
     );
     profiling::disable(); // Disable profiling (and its output)
 

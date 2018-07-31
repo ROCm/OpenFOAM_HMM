@@ -85,37 +85,39 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "clean",
-        "perform some surface checking/cleanup on the input surface"
+        "Perform some surface checking/cleanup on the input surface"
     );
     argList::addOption
     (
         "scaleIn",
         "factor",
-        "geometry scaling factor on input"
+        "Geometry scaling factor on input"
     );
     argList::addOption
     (
         "scaleOut",
         "factor",
-        "geometry scaling factor on output"
+        "Geometry scaling factor on output"
     );
     #include "addDictOption.H"
     argList::addOption
     (
         "from",
         "system",
-        "specify the source coordinate system, applied after '-scaleIn'"
+        "Specify the source coordinate system, applied after '-scaleIn'",
+        true // advanced
     );
     argList::addOption
     (
         "to",
         "system",
-        "specify the target coordinate system, applied before '-scaleOut'"
+        "Specify the target coordinate system, applied before '-scaleOut'",
+        true // advanced
     );
     argList::addBoolOption
     (
         "tri",
-        "triangulate surface"
+        "Triangulate surface"
     );
 
 

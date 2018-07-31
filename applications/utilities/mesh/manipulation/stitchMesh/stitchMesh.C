@@ -118,28 +118,28 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "integral",
-        "couple integral master/slave patches (2 argument mode: default)"
+        "Couple integral master/slave patches (2 argument mode: default)"
     );
     argList::addBoolOption
     (
         "partial",
-        "couple partially overlapping master/slave patches (2 argument mode)"
+        "Couple partially overlapping master/slave patches (2 argument mode)"
     );
     argList::addBoolOption
     (
         "perfect",
-        "couple perfectly aligned master/slave patches (2 argument mode)"
+        "Couple perfectly aligned master/slave patches (2 argument mode)"
     );
     argList::addBoolOption
     (
         "intermediate",
-        "write intermediate stages, not just the final result"
+        "Write intermediate stages, not just the final result"
     );
     argList::addOption
     (
         "toleranceDict",
         "file",
-        "dictionary file with tolerances"
+        "Dictionary file with tolerances"
     );
 
     // The arguments are non-mandatory when using dictionary mode

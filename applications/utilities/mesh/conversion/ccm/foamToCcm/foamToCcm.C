@@ -91,29 +91,29 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "mesh",
-        "convert mesh only"
+        "Convert mesh only"
     );
     argList::addOption
     (
         "name",
         "name",
-        "provide alternative base name. Default is <meshExport>."
+        "Provide alternative base name. Default is <meshExport>."
     );
     argList::addBoolOption
     (
         "overwrite",
-        "no backup of existing output files"
+        "No backup of existing output files"
     );
     argList::addOption
     (
         "remap",
         "name",
-        "use specified remapping dictionary instead of <constant/remapping>"
+        "Use specified remapping dictionary instead of <constant/remapping>"
     );
     argList::addBoolOption
     (
         "results",
-        "convert results only"
+        "Convert results only"
     );
 
     #include "setRootCase.H"

@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "hook surfaces to other surfaces by moving and retriangulating their"
+        "Hook surfaces to other surfaces by moving and retriangulating their"
         "boundary edges to match other surface boundary edges"
     );
     argList::noParallel();

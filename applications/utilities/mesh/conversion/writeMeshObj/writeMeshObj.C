@@ -376,49 +376,49 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "for mesh debugging: write mesh as separate OBJ files"
+        "For mesh debugging: write mesh as separate OBJ files"
     );
 
     timeSelector::addOptions();
     argList::addBoolOption
     (
         "patchFaces",
-        "write patch faces edges"
+        "Write patch faces edges"
     );
     argList::addBoolOption
     (
         "patchEdges",
-        "write patch boundary edges"
+        "Write patch boundary edges"
     );
     argList::addOption
     (
         "cell",
-        "int",
-        "write points for the specified cell"
+        "cellId",
+        "Write points for the specified cell"
     );
     argList::addOption
     (
         "face",
-        "int",
-        "write specified face"
+        "faceId",
+        "Write specified face"
     );
     argList::addOption
     (
         "point",
-        "int",
-        "write specified point"
+        "pointId",
+        "Write specified point"
     );
     argList::addOption
     (
         "cellSet",
         "name",
-        "write points for specified cellSet"
+        "Write points for specified cellSet"
     );
     argList::addOption
     (
         "faceSet",
         "name",
-        "write points for specified faceSet"
+        "Write points for specified faceSet"
     );
     #include "addRegionOption.H"
 

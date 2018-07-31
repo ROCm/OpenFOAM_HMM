@@ -157,14 +157,14 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "refine cells in multiple directions"
+        "Refine cells in multiple directions"
     );
 
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
     #include "addDictOption.H"
 
-    Foam::argList::addBoolOption
+    argList::addBoolOption
     (
         "all",
         "Refine all cells"

@@ -322,36 +322,36 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "checkSelfIntersection",
-        "also check for self-intersection"
+        "Also check for self-intersection"
     );
     argList::addBoolOption
     (
         "splitNonManifold",
-        "split surface along non-manifold edges"
-        " (default split is fully disconnected)"
+        "Split surface along non-manifold edges "
+        "(default split is fully disconnected)"
     );
     argList::addBoolOption
     (
         "verbose",
-        "verbose operation"
+        "Additional verbosity"
     );
     argList::addBoolOption
     (
         "blockMesh",
-        "write vertices/blocks for blockMeshDict"
+        "Write vertices/blocks for blockMeshDict"
     );
     argList::addOption
     (
         "outputThreshold",
         "number",
-        "upper limit on the number of files written."
-        " Default is 10, using 0 suppresses file writing."
+        "Upper limit on the number of files written. "
+        "Default is 10, using 0 suppresses file writing."
     );
     argList::addOption
     (
         "writeSets",
         "surfaceFormat",
-        "reconstruct and write problem triangles/edges in selected format"
+        "Reconstruct and write problem triangles/edges in selected format"
     );
 
 
