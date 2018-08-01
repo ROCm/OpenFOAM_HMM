@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,18 +44,18 @@ void Foam::syncTools::swapBoundaryCellPositions
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    label nBnd = mesh.nFaces()-mesh.nInternalFaces();
+    neighbourCellData.resize(mesh.nFaces()-mesh.nInternalFaces());
 
-    neighbourCellData.setSize(nBnd);
-
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        const polyPatch& pp = patches[patchi];
+        label bFacei = pp.start()-mesh.nInternalFaces();
+
         const labelUList& faceCells = pp.faceCells();
-        forAll(faceCells, i)
+
+        for (const label celli : faceCells)
         {
-            label bFacei = pp.start()+i-mesh.nInternalFaces();
-            neighbourCellData[bFacei] = cellData[faceCells[i]];
+            neighbourCellData[bFacei] = cellData[celli];
+            ++bFacei;
         }
     }
     syncTools::swapBoundaryFacePositions(mesh, neighbourCellData);
@@ -64,7 +64,7 @@ void Foam::syncTools::swapBoundaryCellPositions
 
 Foam::bitSet Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 {
-    bitSet isMasterPoint(mesh.nPoints());
+    bitSet isMaster(mesh.nPoints());
     bitSet donePoint(mesh.nPoints());
 
     const globalMeshData& globalData = mesh.globalData();
@@ -75,7 +75,7 @@ Foam::bitSet Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 
     forAll(meshPoints, coupledPointi)
     {
-        label meshPointi = meshPoints[coupledPointi];
+        const label meshPointi = meshPoints[coupledPointi];
         if
         (
             (
@@ -85,7 +85,7 @@ Foam::bitSet Foam::syncTools::getMasterPoints(const polyMesh& mesh)
           > 0
         )
         {
-            isMasterPoint.set(meshPointi);
+            isMaster.set(meshPointi);
         }
         donePoint.set(meshPointi);
     }
@@ -98,17 +98,17 @@ Foam::bitSet Foam::syncTools::getMasterPoints(const polyMesh& mesh)
     {
         if (!donePoint.test(pointi))
         {
-            isMasterPoint.set(pointi);
+            isMaster.set(pointi);
         }
     }
 
-    return isMasterPoint;
+    return isMaster;
 }
 
 
 Foam::bitSet Foam::syncTools::getMasterEdges(const polyMesh& mesh)
 {
-    bitSet isMasterEdge(mesh.nEdges());
+    bitSet isMaster(mesh.nEdges());
     bitSet doneEdge(mesh.nEdges());
 
     const globalMeshData& globalData = mesh.globalData();
@@ -119,7 +119,7 @@ Foam::bitSet Foam::syncTools::getMasterEdges(const polyMesh& mesh)
 
     forAll(meshEdges, coupledEdgeI)
     {
-        label meshEdgeI = meshEdges[coupledEdgeI];
+        const label meshEdgeI = meshEdges[coupledEdgeI];
         if
         (
             (
@@ -129,7 +129,7 @@ Foam::bitSet Foam::syncTools::getMasterEdges(const polyMesh& mesh)
           > 0
         )
         {
-            isMasterEdge.set(meshEdgeI);
+            isMaster.set(meshEdgeI);
         }
         doneEdge.set(meshEdgeI);
     }
@@ -142,38 +142,38 @@ Foam::bitSet Foam::syncTools::getMasterEdges(const polyMesh& mesh)
     {
         if (!doneEdge.test(edgeI))
         {
-            isMasterEdge.set(edgeI);
+            isMaster.set(edgeI);
         }
     }
 
-    return isMasterEdge;
+    return isMaster;
 }
 
 
 Foam::bitSet Foam::syncTools::getMasterFaces(const polyMesh& mesh)
 {
-    bitSet isMasterFace(mesh.nFaces(), true);
+    bitSet isMaster(mesh.nFaces(), true);
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        if (patches[patchi].coupled())
+        if (pp.coupled())
         {
-            const coupledPolyPatch& pp =
-                refCast<const coupledPolyPatch>(patches[patchi]);
+            const coupledPolyPatch& cpp =
+                refCast<const coupledPolyPatch>(pp);
 
-            if (!pp.owner())
+            if (!cpp.owner())
             {
                 forAll(pp, i)
                 {
-                    isMasterFace.unset(pp.start()+i);
+                    isMaster.unset(cpp.start()+i);
                 }
             }
         }
     }
 
-    return isMasterFace;
+    return isMaster;
 }
 
 
@@ -182,21 +182,19 @@ Foam::bitSet Foam::syncTools::getInternalOrMasterFaces
     const polyMesh& mesh
 )
 {
-    bitSet isMasterFace(mesh.nFaces(), true);
+    bitSet isMaster(mesh.nFaces(), true);
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        const polyPatch& pp = patches[patchi];
-
         if (pp.coupled())
         {
             if (!refCast<const coupledPolyPatch>(pp).owner())
             {
                 forAll(pp, i)
                 {
-                    isMasterFace.unset(pp.start()+i);
+                    isMaster.unset(pp.start()+i);
                 }
             }
         }
@@ -204,12 +202,12 @@ Foam::bitSet Foam::syncTools::getInternalOrMasterFaces
         {
             forAll(pp, i)
             {
-                isMasterFace.unset(pp.start()+i);
+                isMaster.unset(pp.start()+i);
             }
         }
     }
 
-    return isMasterFace;
+    return isMaster;
 }
 
 
@@ -218,24 +216,22 @@ Foam::bitSet Foam::syncTools::getInternalOrCoupledFaces
     const polyMesh& mesh
 )
 {
-    bitSet isMasterFace(mesh.nFaces(), true);
+    bitSet isMaster(mesh.nFaces(), true);
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        const polyPatch& pp = patches[patchi];
-
         if (!pp.coupled())
         {
             forAll(pp, i)
             {
-                isMasterFace.unset(pp.start()+i);
+                isMaster.unset(pp.start()+i);
             }
         }
     }
 
-    return isMasterFace;
+    return isMaster;
 }
 
 

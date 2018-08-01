@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,11 +44,11 @@ void Foam::syncTools::combine
     const T& val
 )
 {
-    typename Map<T>::iterator iter = pointValues.find(index);
+    auto iter = pointValues.find(index);
 
-    if (iter != pointValues.end())
+    if (iter.found())
     {
-        cop(iter(), val);
+        cop(*iter, val);
     }
     else
     {
@@ -66,11 +66,11 @@ void Foam::syncTools::combine
     const T& val
 )
 {
-    typename EdgeMap<T>::iterator iter = edgeValues.find(index);
+    auto iter = edgeValues.find(index);
 
-    if (iter != edgeValues.end())
+    if (iter.found())
     {
-        cop(iter(), val);
+        cop(*iter, val);
     }
     else
     {
@@ -100,6 +100,7 @@ void Foam::syncTools::syncPointMap
     {
         // meshPoint per local index
         const labelList& sharedPtLabels = pd.sharedPointLabels();
+
         // global shared index per local index
         const labelList& sharedPtAddr = pd.sharedPointAddr();
 
@@ -108,19 +109,16 @@ void Foam::syncTools::syncPointMap
         // Fill my entries in the shared points
         forAll(sharedPtLabels, i)
         {
-            label meshPointi = sharedPtLabels[i];
+            const auto fnd = pointValues.cfind(sharedPtLabels[i]);
 
-            typename Map<T>::const_iterator fnd =
-                pointValues.find(meshPointi);
-
-            if (fnd != pointValues.end())
+            if (fnd.found())
             {
                 combine
                 (
                     sharedPointValues,
                     cop,
                     sharedPtAddr[i],    // index
-                    fnd()               // value
+                    *fnd                // value
                 );
             }
         }
@@ -133,16 +131,12 @@ void Foam::syncTools::syncPointMap
 
         // Send
 
-        forAll(patches, patchi)
+        for (const polyPatch& pp : patches)
         {
-            if
-            (
-                isA<processorPolyPatch>(patches[patchi])
-             && patches[patchi].nPoints() > 0
-            )
+            if (isA<processorPolyPatch>(pp) && pp.nPoints() > 0)
             {
                 const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(patches[patchi]);
+                    refCast<const processorPolyPatch>(pp);
 
                 // Get data per patchPoint in neighbouring point numbers.
 
@@ -155,12 +149,11 @@ void Foam::syncTools::syncPointMap
 
                 forAll(meshPts, i)
                 {
-                    typename Map<T>::const_iterator iter =
-                        pointValues.find(meshPts[i]);
+                    const auto iter = pointValues.cfind(meshPts[i]);
 
-                    if (iter != pointValues.end())
+                    if (iter.found())
                     {
-                        patchInfo.insert(nbrPts[i], iter());
+                        patchInfo.insert(nbrPts[i], *iter);
                     }
                 }
 
@@ -173,16 +166,12 @@ void Foam::syncTools::syncPointMap
 
         // Receive and combine.
 
-        forAll(patches, patchi)
+        for (const polyPatch& pp : patches)
         {
-            if
-            (
-                isA<processorPolyPatch>(patches[patchi])
-             && patches[patchi].nPoints() > 0
-            )
+            if (isA<processorPolyPatch>(pp) && pp.nPoints() > 0)
             {
                 const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(patches[patchi]);
+                    refCast<const processorPolyPatch>(pp);
 
                 UIPstream fromNb(procPatch.neighbProcNo(), pBufs);
                 Map<T> nbrPatchInfo(fromNb);
@@ -193,14 +182,14 @@ void Foam::syncTools::syncPointMap
                 const labelList& meshPts = procPatch.meshPoints();
 
                 // Only update those values which come from neighbour
-                forAllConstIter(typename Map<T>, nbrPatchInfo, nbrIter)
+                forAllConstIters(nbrPatchInfo, nbrIter)
                 {
                     combine
                     (
                         pointValues,
                         cop,
                         meshPts[nbrIter.key()],
-                        nbrIter()
+                        nbrIter.object()
                     );
                 }
             }
@@ -208,12 +197,12 @@ void Foam::syncTools::syncPointMap
     }
 
     // Do the cyclics.
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        if (isA<cyclicPolyPatch>(patches[patchi]))
+        if (isA<cyclicPolyPatch>(pp))
         {
             const cyclicPolyPatch& cycPatch =
-                refCast<const cyclicPolyPatch>(patches[patchi]);
+                refCast<const cyclicPolyPatch>(pp);
 
             if (cycPatch.owner())
             {
@@ -232,20 +221,18 @@ void Foam::syncTools::syncPointMap
                 {
                     const edge& e = coupledPoints[i];
 
-                    typename Map<T>::const_iterator point0Fnd =
-                        pointValues.find(meshPtsA[e[0]]);
+                    const auto point0Fnd = pointValues.cfind(meshPtsA[e[0]]);
 
-                    if (point0Fnd != pointValues.end())
+                    if (point0Fnd.found())
                     {
-                        half0Values.insert(i, point0Fnd());
+                        half0Values.insert(i, *point0Fnd);
                     }
 
-                    typename Map<T>::const_iterator point1Fnd =
-                        pointValues.find(meshPtsB[e[1]]);
+                    const auto point1Fnd = pointValues.cfind(meshPtsB[e[1]]);
 
-                    if (point1Fnd != pointValues.end())
+                    if (point1Fnd.found())
                     {
-                        half1Values.insert(i, point1Fnd());
+                        half1Values.insert(i, *point1Fnd);
                     }
                 }
 
@@ -257,31 +244,29 @@ void Foam::syncTools::syncPointMap
                 {
                     const edge& e = coupledPoints[i];
 
-                    typename Map<T>::const_iterator half0Fnd =
-                        half0Values.find(i);
+                    const auto half0Fnd = half0Values.cfind(i);
 
-                    if (half0Fnd != half0Values.end())
+                    if (half0Fnd.found())
                     {
                         combine
                         (
                             pointValues,
                             cop,
                             meshPtsB[e[1]],
-                            half0Fnd()
+                            *half0Fnd
                         );
                     }
 
-                    typename Map<T>::const_iterator half1Fnd =
-                        half1Values.find(i);
+                    const auto half1Fnd = half1Values.cfind(i);
 
-                    if (half1Fnd != half1Values.end())
+                    if (half1Fnd.found())
                     {
                         combine
                         (
                             pointValues,
                             cop,
                             meshPtsA[e[0]],
-                            half1Fnd()
+                            *half1Fnd
                         );
                     }
                 }
@@ -315,14 +300,14 @@ void Foam::syncTools::syncPointMap
                     Map<T> nbrValues(fromSlave);
 
                     // Merge neighbouring values with my values
-                    forAllConstIter(typename Map<T>, nbrValues, iter)
+                    forAllConstIters(nbrValues, iter)
                     {
                         combine
                         (
                             sharedPointValues,
                             cop,
-                            iter.key(), // edge
-                            iter()      // value
+                            iter.key(),     // edge
+                            iter.object()   // value
                         );
                     }
                 }
@@ -373,15 +358,14 @@ void Foam::syncTools::syncPointMap
             sharedToMeshPoint.insert(sharedPtAddr[i], sharedPtLabels[i]);
         }
 
-        forAllConstIter(Map<label>, sharedToMeshPoint, iter)
+        forAllConstIters(sharedToMeshPoint, iter)
         {
             // Do I have a value for my shared point
-            typename Map<T>::const_iterator sharedFnd =
-                sharedPointValues.find(iter.key());
+            const auto sharedFnd = sharedPointValues.cfind(iter.key());
 
-            if (sharedFnd != sharedPointValues.end())
+            if (sharedFnd.found())
             {
-                pointValues.set(iter(), sharedFnd());
+                pointValues.set(*iter, *sharedFnd);
             }
         }
     }
@@ -413,16 +397,12 @@ void Foam::syncTools::syncEdgeMap
 
         // Send
 
-        forAll(patches, patchi)
+        for (const polyPatch& pp : patches)
         {
-            if
-            (
-                isA<processorPolyPatch>(patches[patchi])
-             && patches[patchi].nEdges() > 0
-            )
+            if (isA<processorPolyPatch>(pp) && pp.nEdges() > 0)
             {
                 const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(patches[patchi]);
+                    refCast<const processorPolyPatch>(pp);
 
 
                 // Get data per patch edge in neighbouring edge.
@@ -433,18 +413,16 @@ void Foam::syncTools::syncEdgeMap
 
                 EdgeMap<T> patchInfo(edges.size() / 20);
 
-                forAll(edges, i)
+                for (const edge& e : edges)
                 {
-                    const edge& e = edges[i];
                     const edge meshEdge(meshPts[e[0]], meshPts[e[1]]);
 
-                    typename EdgeMap<T>::const_iterator iter =
-                        edgeValues.find(meshEdge);
+                    const auto iter = edgeValues.cfind(meshEdge);
 
-                    if (iter != edgeValues.end())
+                    if (iter.found())
                     {
                         const edge nbrEdge(nbrPts[e[0]], nbrPts[e[1]]);
-                        patchInfo.insert(nbrEdge, iter());
+                        patchInfo.insert(nbrEdge, *iter);
                     }
                 }
 
@@ -457,16 +435,12 @@ void Foam::syncTools::syncEdgeMap
 
         // Receive and combine.
 
-        forAll(patches, patchi)
+        for (const polyPatch& pp : patches)
         {
-            if
-            (
-                isA<processorPolyPatch>(patches[patchi])
-             && patches[patchi].nEdges() > 0
-            )
+            if (isA<processorPolyPatch>(pp) && pp.nEdges() > 0)
             {
                 const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(patches[patchi]);
+                    refCast<const processorPolyPatch>(pp);
 
                 EdgeMap<T> nbrPatchInfo;
                 {
@@ -481,7 +455,7 @@ void Foam::syncTools::syncEdgeMap
                 // Only update those values which come from neighbour
                 const labelList& meshPts = procPatch.meshPoints();
 
-                forAllConstIter(typename EdgeMap<T>, nbrPatchInfo, nbrIter)
+                forAllConstIters(nbrPatchInfo, nbrIter)
                 {
                     const edge& e = nbrIter.key();
                     const edge meshEdge(meshPts[e[0]], meshPts[e[1]]);
@@ -490,8 +464,8 @@ void Foam::syncTools::syncEdgeMap
                     (
                         edgeValues,
                         cop,
-                        meshEdge,   // edge
-                        nbrIter()   // value
+                        meshEdge,           // edge
+                        nbrIter.object()    // value
                     );
                 }
             }
@@ -502,12 +476,12 @@ void Foam::syncTools::syncEdgeMap
     // Swap cyclic info
     // ~~~~~~~~~~~~~~~~
 
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        if (isA<cyclicPolyPatch>(patches[patchi]))
+        if (isA<cyclicPolyPatch>(pp))
         {
             const cyclicPolyPatch& cycPatch =
-                refCast<const cyclicPolyPatch>(patches[patchi]);
+                refCast<const cyclicPolyPatch>(pp);
 
             if (cycPatch.owner())
             {
@@ -532,24 +506,22 @@ void Foam::syncTools::syncEdgeMap
                         const edge& e0 = edgesA[twoEdges[0]];
                         const edge meshEdge0(meshPtsA[e0[0]], meshPtsA[e0[1]]);
 
-                        typename EdgeMap<T>::const_iterator iter =
-                            edgeValues.find(meshEdge0);
+                        const auto iter = edgeValues.cfind(meshEdge0);
 
-                        if (iter != edgeValues.end())
+                        if (iter.found())
                         {
-                            half0Values.insert(i, iter());
+                            half0Values.insert(i, *iter);
                         }
                     }
                     {
                         const edge& e1 = edgesB[twoEdges[1]];
                         const edge meshEdge1(meshPtsB[e1[0]], meshPtsB[e1[1]]);
 
-                        typename EdgeMap<T>::const_iterator iter =
-                            edgeValues.find(meshEdge1);
+                        const auto iter = edgeValues.cfind(meshEdge1);
 
-                        if (iter != edgeValues.end())
+                        if (iter.found())
                         {
-                            half1Values.insert(i, iter());
+                            half1Values.insert(i, *iter);
                         }
                     }
                 }
@@ -565,10 +537,9 @@ void Foam::syncTools::syncEdgeMap
                 {
                     const edge& twoEdges = coupledEdges[i];
 
-                    typename Map<T>::const_iterator half1Fnd =
-                        half1Values.find(i);
+                    const auto half1Fnd = half1Values.cfind(i);
 
-                    if (half1Fnd != half1Values.end())
+                    if (half1Fnd.found())
                     {
                         const edge& e0 = edgesA[twoEdges[0]];
                         const edge meshEdge0(meshPtsA[e0[0]], meshPtsA[e0[1]]);
@@ -578,13 +549,13 @@ void Foam::syncTools::syncEdgeMap
                             edgeValues,
                             cop,
                             meshEdge0,  // edge
-                            half1Fnd()  // value
+                            *half1Fnd   // value
                         );
                     }
 
-                    typename Map<T>::const_iterator half0Fnd =
-                        half0Values.find(i);
-                    if (half0Fnd != half0Values.end())
+                    const auto half0Fnd = half0Values.cfind(i);
+
+                    if (half0Fnd.found())
                     {
                         const edge& e1 = edgesB[twoEdges[1]];
                         const edge meshEdge1(meshPtsB[e1[0]], meshPtsB[e1[1]]);
@@ -594,7 +565,7 @@ void Foam::syncTools::syncEdgeMap
                             edgeValues,
                             cop,
                             meshEdge1,  // edge
-                            half0Fnd()  // value
+                            *half0Fnd   // value
                         );
                     }
                 }
@@ -628,35 +599,34 @@ void Foam::syncTools::syncEdgeMap
     // on the outside of the mesh. (though might not be on coupled patch
     // if is single edge and not on coupled face)
     // Store value (if any) on sharedEdgeValues
-    for (label facei = mesh.nInternalFaces(); facei < mesh.nFaces(); facei++)
+    for (label facei = mesh.nInternalFaces(); facei < mesh.nFaces(); ++facei)
     {
         const face& f = mesh.faces()[facei];
 
         forAll(f, fp)
         {
-            label v0 = f[fp];
-            label v1 = f[f.fcIndex(fp)];
+            const label v0 = f[fp];
+            const label v1 = f[f.fcIndex(fp)];
 
-            Map<label>::const_iterator v0Fnd = meshToShared.find(v0);
+            const auto v0Fnd = meshToShared.cfind(v0);
 
-            if (v0Fnd != meshToShared.end())
+            if (v0Fnd.found())
             {
-                Map<label>::const_iterator v1Fnd = meshToShared.find(v1);
+                const auto v1Fnd = meshToShared.cfind(v1);
 
-                if (v1Fnd != meshToShared.end())
+                if (v1Fnd.found())
                 {
                     const edge meshEdge(v0, v1);
 
                     // edge in shared point labels
-                    const edge sharedEdge(v0Fnd(), v1Fnd());
+                    const edge sharedEdge(*v0Fnd, *v1Fnd);
 
                     // Store mesh edge as a potential shared edge.
                     potentialSharedEdge.insert(sharedEdge, meshEdge);
 
-                    typename EdgeMap<T>::const_iterator edgeFnd =
-                        edgeValues.find(meshEdge);
+                    const auto edgeFnd = edgeValues.cfind(meshEdge);
 
-                    if (edgeFnd != edgeValues.end())
+                    if (edgeFnd.found())
                     {
                         // edge exists in edgeValues. See if already in map
                         // (since on same processor, e.g. cyclic)
@@ -665,7 +635,7 @@ void Foam::syncTools::syncEdgeMap
                             sharedEdgeValues,
                             cop,
                             sharedEdge, // edge
-                            edgeFnd()   // value
+                            *edgeFnd    // value
                         );
                     }
                 }
@@ -695,14 +665,14 @@ void Foam::syncTools::syncEdgeMap
                 EdgeMap<T> nbrValues(fromSlave);
 
                 // Merge neighbouring values with my values
-                forAllConstIter(typename EdgeMap<T>, nbrValues, iter)
+                forAllConstIters(nbrValues, iter)
                 {
                     combine
                     (
                         sharedEdgeValues,
                         cop,
-                        iter.key(), // edge
-                        iter()      // value
+                        iter.key(),     // edge
+                        iter.object()   // value
                     );
                 }
             }
@@ -748,23 +718,22 @@ void Foam::syncTools::syncEdgeMap
     // (keyed on mesh points).
 
     // Loop over all my shared edges.
-    forAllConstIter(typename EdgeMap<edge>, potentialSharedEdge, iter)
+    forAllConstIters(potentialSharedEdge, iter)
     {
         const edge& sharedEdge = iter.key();
-        const edge& meshEdge = iter();
+        const edge& meshEdge = iter.object();
 
         // Do I have a value for the shared edge?
-        typename EdgeMap<T>::const_iterator sharedFnd =
-            sharedEdgeValues.find(sharedEdge);
+        const auto sharedFnd = sharedEdgeValues.cfind(sharedEdge);
 
-        if (sharedFnd != sharedEdgeValues.end())
+        if (sharedFnd.found())
         {
             combine
             (
                 edgeValues,
                 cop,
                 meshEdge,       // edge
-                sharedFnd()     // value
+                *sharedFnd      // value
             );
         }
     }
@@ -819,11 +788,11 @@ void Foam::syncTools::syncPointList
 
     forAll(meshPoints, i)
     {
-        label pointi = meshPoints[i];
-        Map<label>::const_iterator iter = mpm.find(pointi);
-        if (iter != mpm.end())
+        const auto iter = mpm.cfind(meshPoints[i]);
+
+        if (iter.found())
         {
-            cppFld[iter()] = pointValues[i];
+            cppFld[*iter] = pointValues[i];
         }
     }
 
@@ -840,11 +809,11 @@ void Foam::syncTools::syncPointList
 
     forAll(meshPoints, i)
     {
-        label pointi = meshPoints[i];
-        Map<label>::const_iterator iter = mpm.find(pointi);
-        if (iter != mpm.end())
+        const auto iter = mpm.cfind(meshPoints[i]);
+
+        if (iter.found())
         {
-            pointValues[i] = cppFld[iter()];
+            pointValues[i] = cppFld[*iter];
         }
     }
 }
@@ -920,11 +889,11 @@ void Foam::syncTools::syncEdgeList
 
     forAll(meshEdges, i)
     {
-        label edgeI = meshEdges[i];
-        Map<label>::const_iterator iter = mpm.find(edgeI);
-        if (iter != mpm.end())
+        const auto iter = mpm.cfind(meshEdges[i]);
+
+        if (iter.found())
         {
-            cppFld[iter()] = edgeValues[i];
+            cppFld[*iter] = edgeValues[i];
         }
     }
 
@@ -941,11 +910,11 @@ void Foam::syncTools::syncEdgeList
 
     forAll(meshEdges, i)
     {
-        label edgeI = meshEdges[i];
-        Map<label>::const_iterator iter = mpm.find(edgeI);
-        if (iter != mpm.end())
+        const auto iter = mpm.cfind(meshEdges[i]);
+
+        if (iter.found())
         {
-            edgeValues[i] = cppFld[iter()];
+            edgeValues[i] = cppFld[*iter];
         }
     }
 }
@@ -978,16 +947,12 @@ void Foam::syncTools::syncBoundaryFaceList
 
         // Send
 
-        forAll(patches, patchi)
+        for (const polyPatch& pp : patches)
         {
-            if
-            (
-                isA<processorPolyPatch>(patches[patchi])
-             && patches[patchi].size() > 0
-            )
+            if (isA<processorPolyPatch>(pp) && pp.size() > 0)
             {
                 const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(patches[patchi]);
+                    refCast<const processorPolyPatch>(pp);
 
                 label patchStart = procPatch.start()-mesh.nInternalFaces();
 
@@ -1002,16 +967,12 @@ void Foam::syncTools::syncBoundaryFaceList
 
         // Receive and combine.
 
-        forAll(patches, patchi)
+        for (const polyPatch& pp : patches)
         {
-            if
-            (
-                isA<processorPolyPatch>(patches[patchi])
-             && patches[patchi].size() > 0
-            )
+            if (isA<processorPolyPatch>(pp) && pp.size() > 0)
             {
                 const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(patches[patchi]);
+                    refCast<const processorPolyPatch>(pp);
 
                 Field<T> nbrPatchInfo(procPatch.size());
 
@@ -1031,21 +992,21 @@ void Foam::syncTools::syncBoundaryFaceList
     }
 
     // Do the cyclics.
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        if (isA<cyclicPolyPatch>(patches[patchi]))
+        if (isA<cyclicPolyPatch>(pp))
         {
             const cyclicPolyPatch& cycPatch =
-                refCast<const cyclicPolyPatch>(patches[patchi]);
+                refCast<const cyclicPolyPatch>(pp);
 
             if (cycPatch.owner())
             {
                 // Owner does all.
                 const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
-                label ownStart = cycPatch.start()-mesh.nInternalFaces();
-                label nbrStart = nbrPatch.start()-mesh.nInternalFaces();
+                const label ownStart = cycPatch.start()-mesh.nInternalFaces();
+                const label nbrStart = nbrPatch.start()-mesh.nInternalFaces();
 
-                label sz = cycPatch.size();
+                const label sz = cycPatch.size();
 
                 // Transform (copy of) data on both sides
                 Field<T> ownVals(SubField<T>(faceValues, sz, ownStart));
@@ -1098,16 +1059,12 @@ void Foam::syncTools::syncFaceList
 
         // Send
 
-        forAll(patches, patchi)
+        for (const polyPatch& pp : patches)
         {
-            if
-            (
-                isA<processorPolyPatch>(patches[patchi])
-             && patches[patchi].size() > 0
-            )
+            if (isA<processorPolyPatch>(pp) && pp.size() > 0)
             {
                 const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(patches[patchi]);
+                    refCast<const processorPolyPatch>(pp);
 
                 List<unsigned int> patchInfo(procPatch.size());
                 forAll(procPatch, i)
@@ -1125,16 +1082,12 @@ void Foam::syncTools::syncFaceList
 
         // Receive and combine.
 
-        forAll(patches, patchi)
+        for (const polyPatch& pp : patches)
         {
-            if
-            (
-                isA<processorPolyPatch>(patches[patchi])
-             && patches[patchi].size() > 0
-            )
+            if (isA<processorPolyPatch>(pp) && pp.size() > 0)
             {
                 const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(patches[patchi]);
+                    refCast<const processorPolyPatch>(pp);
 
                 List<unsigned int> patchInfo(procPatch.size());
                 {
@@ -1145,9 +1098,11 @@ void Foam::syncTools::syncFaceList
                 // Combine (bitwise)
                 forAll(procPatch, i)
                 {
+                    const label meshFacei = procPatch.start()+i;
+
                     unsigned int patchVal = patchInfo[i];
-                    label meshFacei = procPatch.start()+i;
                     unsigned int faceVal = faceValues[meshFacei];
+
                     cop(faceVal, patchVal);
                     faceValues[meshFacei] = faceVal;
                 }
@@ -1156,23 +1111,24 @@ void Foam::syncTools::syncFaceList
     }
 
     // Do the cyclics.
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        if (isA<cyclicPolyPatch>(patches[patchi]))
+        if (isA<cyclicPolyPatch>(pp))
         {
             const cyclicPolyPatch& cycPatch =
-                refCast<const cyclicPolyPatch>(patches[patchi]);
+                refCast<const cyclicPolyPatch>(pp);
 
             if (cycPatch.owner())
             {
                 // Owner does all.
                 const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
 
-                for (label i = 0; i < cycPatch.size(); i++)
+                for (label i = 0; i < cycPatch.size(); ++i)
                 {
-                    label meshFace0 = cycPatch.start()+i;
+                    const label meshFace0 = cycPatch.start()+i;
+                    const label meshFace1 = nbrPatch.start()+i;
+
                     unsigned int val0 = faceValues[meshFace0];
-                    label meshFace1 = nbrPatch.start()+i;
                     unsigned int val1 = faceValues[meshFace1];
 
                     unsigned int t = val0;
@@ -1206,18 +1162,18 @@ void Foam::syncTools::swapBoundaryCellList
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    label nBnd = mesh.nFaces()-mesh.nInternalFaces();
+    neighbourCellData.resize(mesh.nFaces()-mesh.nInternalFaces());
 
-    neighbourCellData.setSize(nBnd);
-
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        const polyPatch& pp = patches[patchi];
+        label bFacei = pp.start()-mesh.nInternalFaces();
+
         const labelUList& faceCells = pp.faceCells();
-        forAll(faceCells, i)
+
+        for (const label celli : faceCells)
         {
-            label bFacei = pp.start()+i-mesh.nInternalFaces();
-            neighbourCellData[bFacei] = cellData[faceCells[i]];
+            neighbourCellData[bFacei] = cellData[celli];
+            ++bFacei;
         }
     }
     syncTools::swapBoundaryFaceList(mesh, neighbourCellData);
