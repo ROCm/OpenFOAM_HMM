@@ -69,8 +69,12 @@ template<class T> class BiIndirectList;
 
 template<class T> Istream& operator>>(Istream& is, List<T>& list);
 
-// Commonly required list types
+// Common list types
 typedef List<char> charList;
+typedef List<label> labelList;
+
+//- A zero-sized list of labels
+extern const labelList emptyLabelList;
 
 
 /*---------------------------------------------------------------------------*\

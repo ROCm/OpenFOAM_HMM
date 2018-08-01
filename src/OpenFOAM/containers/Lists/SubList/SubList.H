@@ -47,6 +47,13 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+template<class T> class SubList;
+
+// Common list types
+typedef SubList<label> labelSubList;
+
+
 /*---------------------------------------------------------------------------*\
                            Class SubList Declaration
 \*---------------------------------------------------------------------------*/

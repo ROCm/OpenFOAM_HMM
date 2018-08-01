@@ -64,9 +64,10 @@ Description
 
 namespace Foam
 {
-    // NB: labelUList is defined in UList itself
-    typedef List<label> labelList;
-    typedef SubList<label> labelSubList;
+    // labelUList   = defined in UList.H
+    // labelList    = defined in List.H
+    // labelSubList = defined in SubList.H
+
     typedef List<labelList> labelListList;
     typedef List<labelListList> labelListListList;
 }

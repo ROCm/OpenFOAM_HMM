@@ -2398,7 +2398,7 @@ const Foam::labelList& Foam::dynamicIndexedOctree<Type>::findIndices
         return *(contents_[getContent(contentIndex)]);
     }
 
-    return emptyList<label>();
+    return Foam::emptyLabelList;
 }
 
 

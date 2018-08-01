@@ -26,7 +26,7 @@ License
 #include "ListOps.H"
 #include <numeric>
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Global Data Members * * * * * * * * * * * * * //
 
 const Foam::labelList Foam::emptyLabelList;
 

@@ -54,10 +54,10 @@ SourceFiles
 namespace Foam
 {
 
-extern const labelList emptyLabelList;
-
-//- Return reference to zero-sized list. Compare to List::null() which returns
-//  null pointer cast as list reference.
+//- Return reference to zero-sized list.
+//  Compare to List::null() which returns null pointer cast as list reference.
+//
+//  \deprecated This cast is disallowed with many modern compilers (JUL-2018)
 template<class Type>
 static const List<Type>& emptyList()
 {
