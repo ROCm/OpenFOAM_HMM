@@ -766,7 +766,7 @@ template<class T, class CombineOp, class TransformOp>
 void Foam::syncTools::syncPointList
 (
     const polyMesh& mesh,
-    const labelList& meshPoints,
+    const labelUList& meshPoints,
     List<T>& pointValues,
     const CombineOp& cop,
     const T& nullValue,
@@ -1061,38 +1061,35 @@ void Foam::syncTools::syncFaceList
 
         for (const polyPatch& pp : patches)
         {
-            if (isA<processorPolyPatch>(pp) && pp.size() > 0)
+            if (isA<processorPolyPatch>(pp) && pp.size())
             {
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(pp);
 
-                List<unsigned int> patchInfo(procPatch.size());
-                forAll(procPatch, i)
-                {
-                    patchInfo[i] = faceValues[procPatch.start()+i];
-                }
-
+                // Send slice of values on the patch
                 UOPstream toNbr(procPatch.neighbProcNo(), pBufs);
-                toNbr << patchInfo;
+                toNbr
+                    << PackedList<Width>(faceValues, procPatch.range());
             }
         }
 
-
         pBufs.finishedSends();
+
 
         // Receive and combine.
 
         for (const polyPatch& pp : patches)
         {
-            if (isA<processorPolyPatch>(pp) && pp.size() > 0)
+            if (isA<processorPolyPatch>(pp) && pp.size())
             {
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(pp);
 
-                List<unsigned int> patchInfo(procPatch.size());
+                // Recv slice of values on the patch
+                PackedList<Width> recvInfo(procPatch.size());
                 {
                     UIPstream fromNbr(procPatch.neighbProcNo(), pBufs);
-                    fromNbr >> patchInfo;
+                    fromNbr >> recvInfo;
                 }
 
                 // Combine (bitwise)
@@ -1100,15 +1097,16 @@ void Foam::syncTools::syncFaceList
                 {
                     const label meshFacei = procPatch.start()+i;
 
-                    unsigned int patchVal = patchInfo[i];
+                    unsigned int recvVal = recvInfo[i];
                     unsigned int faceVal = faceValues[meshFacei];
 
-                    cop(faceVal, patchVal);
-                    faceValues[meshFacei] = faceVal;
+                    cop(faceVal, recvVal);
+                    faceValues.set(meshFacei, faceVal);
                 }
             }
         }
     }
+
 
     // Do the cyclics.
     for (const polyPatch& pp : patches)

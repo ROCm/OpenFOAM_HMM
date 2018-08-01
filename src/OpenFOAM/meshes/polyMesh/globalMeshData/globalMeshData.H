@@ -499,7 +499,7 @@ public:
             template<class Type, class CombineOp, class TransformOp>
             static void syncData
             (
-                List<Type>& pointData,
+                List<Type>& elems,
                 const labelListList& slaves,
                 const labelListList& transformedSlaves,
                 const mapDistribute& slavesMap,
@@ -512,7 +512,7 @@ public:
             template<class Type, class CombineOp>
             static void syncData
             (
-                List<Type>& pointData,
+                List<Type>& elems,
                 const labelListList& slaves,
                 const labelListList& transformedSlaves,
                 const mapDistribute& slavesMap,
