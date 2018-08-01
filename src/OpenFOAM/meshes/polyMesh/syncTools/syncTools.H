@@ -54,6 +54,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class polyBoundaryMesh;
 
 /*---------------------------------------------------------------------------*\
