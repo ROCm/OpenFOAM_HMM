@@ -73,6 +73,9 @@ int main(int argc, char *argv[])
     bitSet set2(100, { -1, 10, 25, 45});
     Info<<"bitSet(label, labels): "; report(set2, true);
 
+    bitSet set2b(set2, labelRange(15, 30));
+    Info<<"bitSet slice(15,30) :"; report(set2b, true);
+
     {
         FixedList<label, 4> locs({ -1, 3, 4, 12});
 

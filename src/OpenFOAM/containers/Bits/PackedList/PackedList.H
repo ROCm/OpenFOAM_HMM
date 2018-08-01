@@ -104,6 +104,8 @@ namespace Foam
 
 // Forward declarations
 template<unsigned Width> class PackedList;
+class labelRange;
+
 class Istream;
 class Ostream;
 
@@ -239,10 +241,19 @@ public:
         inline PackedList(Istream& is);
 
         //- Copy construct
-        inline PackedList(const PackedList<Width>& rhs);
+        inline PackedList(const PackedList<Width>& list);
 
         //- Move construct
-        inline PackedList(PackedList<Width>&& rhs);
+        inline PackedList(PackedList<Width>&& list);
+
+        //- Copy construct a subset
+        PackedList(const PackedList<Width>& list, const labelUList& addr);
+
+        //- Copy construct a subset
+        PackedList(const PackedList<Width>& list, const labelUIndList& addr);
+
+        //- Copy construct a subset range
+        PackedList(const PackedList<Width>& list, const labelRange& range);
 
         //- Construct from a list of values
         inline explicit PackedList(const labelUList& values);

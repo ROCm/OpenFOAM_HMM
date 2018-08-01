@@ -203,20 +203,20 @@ inline Foam::PackedList<Width>::PackedList(Istream& is)
 
 
 template<unsigned Width>
-inline Foam::PackedList<Width>::PackedList(const PackedList<Width>& rhs)
+inline Foam::PackedList<Width>::PackedList(const PackedList<Width>& list)
 :
-    blocks_(rhs.blocks_),
-    size_(rhs.size_)
+    blocks_(list.blocks_),
+    size_(list.size_)
 {}
 
 
 template<unsigned Width>
-inline Foam::PackedList<Width>::PackedList(PackedList<Width>&& rhs)
+inline Foam::PackedList<Width>::PackedList(PackedList<Width>&& list)
 :
-    blocks_(std::move(rhs.blocks_)),
-    size_(rhs.size_)
+    blocks_(std::move(list.blocks_)),
+    size_(list.size_)
 {
-    rhs.size_ = 0;
+    list.size_ = 0;
 }
 
 
@@ -228,8 +228,8 @@ inline Foam::PackedList<Width>::PackedList(const labelUList& values)
 {
     const label len = values.size();
 
-    // Could add more intelligent filling (blockwise), but likely done
-    // fairly infrequently
+    // Could add more intelligent filling (blockwise),
+    // but likely done fairly infrequently
 
     for (label i = 0; i < len; ++i)
     {
@@ -247,8 +247,8 @@ inline Foam::PackedList<Width>::PackedList(const labelUIndList& values)
 {
     const label len = values.size();
 
-    // Could add more intelligent filling (blockwise), but likely done
-    // fairly infrequently
+    // Could add more intelligent filling (blockwise),
+    // but likely done fairly infrequently
 
     for (label i = 0; i < len; ++i)
     {

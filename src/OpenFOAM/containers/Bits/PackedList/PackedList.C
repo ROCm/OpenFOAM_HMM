@@ -24,6 +24,65 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PackedList.H"
+#include "labelRange.H"
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<unsigned Width>
+Foam::PackedList<Width>::PackedList
+(
+    const PackedList<Width>& list,
+    const labelUList& addr
+)
+:
+    PackedList<Width>(addr.size())
+{
+    const label len = addr.size();
+
+    for (label i = 0; i < len; ++i)
+    {
+        set(i, list.get(addr[i]));
+    }
+}
+
+
+template<unsigned Width>
+Foam::PackedList<Width>::PackedList
+(
+    const PackedList<Width>& list,
+    const labelUIndList& addr
+)
+:
+    PackedList<Width>(addr.size())
+{
+    const label len = addr.size();
+
+    for (label i = 0; i < len; ++i)
+    {
+        set(i, list.get(addr[i]));
+    }
+}
+
+
+template<unsigned Width>
+Foam::PackedList<Width>::PackedList
+(
+    const PackedList<Width>& list,
+    const labelRange& range
+)
+:
+    PackedList<Width>(range.size())
+{
+    label pos = range.start();
+    const label len = range.size();
+
+    for (label i = 0; i < len; ++i)
+    {
+        set(i, list.get(pos));
+        ++pos;
+    }
+}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

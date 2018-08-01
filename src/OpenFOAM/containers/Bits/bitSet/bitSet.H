@@ -46,7 +46,6 @@ See also
 
 #include "className.H"
 #include "PackedList.H"
-#include "UIndirectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -152,6 +151,15 @@ public:
 
         //- Move construct
         inline bitSet(bitSet&& bitset);
+
+        //- Copy construct a subset
+        bitSet(const bitSet& bitset, const labelUList& addr);
+
+        //- Copy construct a subset
+        bitSet(const bitSet& bitset, const labelUIndList& addr);
+
+        //- Copy construct a subset range
+        bitSet(const bitSet& bitset, const labelRange& range);
 
         //- Construct from a list of bools
         inline explicit bitSet(const UList<bool>& bools);
