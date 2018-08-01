@@ -587,26 +587,27 @@ public:
                 const unsigned int nullValue
             );
 
+
         // Other
 
             //- Get per point whether it is uncoupled or a master of a
             //  coupled set of points
-            static bitSet getMasterPoints(const polyMesh&);
+            static bitSet getMasterPoints(const polyMesh& mesh);
 
             //- Get per edge whether it is uncoupled or a master of a
             //  coupled set of edges
-            static bitSet getMasterEdges(const polyMesh&);
+            static bitSet getMasterEdges(const polyMesh& mesh);
 
             //- Get per face whether it is uncoupled or a master of a
             //  coupled set of faces
-            static bitSet getMasterFaces(const polyMesh&);
+            static bitSet getMasterFaces(const polyMesh& mesh);
 
             //- Get per face whether it is internal or a master of a
             //  coupled set of faces
-            static bitSet getInternalOrMasterFaces(const polyMesh&);
+            static bitSet getInternalOrMasterFaces(const polyMesh& mesh);
 
             //- Get per face whether it is internal or coupled
-            static bitSet getInternalOrCoupledFaces(const polyMesh&);
+            static bitSet getInternalOrCoupledFaces(const polyMesh& mesh);
 
 };
 

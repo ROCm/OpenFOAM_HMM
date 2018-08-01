@@ -65,7 +65,7 @@ void Foam::syncTools::swapBoundaryCellPositions
 Foam::bitSet Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 {
     bitSet isMaster(mesh.nPoints());
-    bitSet donePoint(mesh.nPoints());
+    bitSet unvisited(mesh.nPoints(), true);
 
     const globalMeshData& globalData = mesh.globalData();
     const labelList& meshPoints = globalData.coupledPatch().meshPoints();
@@ -73,34 +73,19 @@ Foam::bitSet Foam::syncTools::getMasterPoints(const polyMesh& mesh)
     const labelListList& transformedSlaves =
             globalData.globalPointTransformedSlaves();
 
-    forAll(meshPoints, coupledPointi)
+    forAll(meshPoints, i)
     {
-        const label meshPointi = meshPoints[coupledPointi];
-        if
-        (
-            (
-                slaves[coupledPointi].size()
-              + transformedSlaves[coupledPointi].size()
-            )
-          > 0
-        )
+        const label meshPointi = meshPoints[i];
+
+        if (!slaves[i].empty() || !transformedSlaves[i].empty())
         {
             isMaster.set(meshPointi);
         }
-        donePoint.set(meshPointi);
+        unvisited.unset(meshPointi);
     }
 
-
-    // Do all other points
-    // ~~~~~~~~~~~~~~~~~~~
-
-    forAll(donePoint, pointi)
-    {
-        if (!donePoint.test(pointi))
-        {
-            isMaster.set(pointi);
-        }
-    }
+    // Add in all unvisited points
+    isMaster |= unvisited;
 
     return isMaster;
 }
@@ -109,7 +94,7 @@ Foam::bitSet Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 Foam::bitSet Foam::syncTools::getMasterEdges(const polyMesh& mesh)
 {
     bitSet isMaster(mesh.nEdges());
-    bitSet doneEdge(mesh.nEdges());
+    bitSet unvisited(mesh.nEdges(), true);
 
     const globalMeshData& globalData = mesh.globalData();
     const labelList& meshEdges = globalData.coupledPatchMeshEdges();
@@ -117,34 +102,19 @@ Foam::bitSet Foam::syncTools::getMasterEdges(const polyMesh& mesh)
     const labelListList& transformedSlaves =
         globalData.globalEdgeTransformedSlaves();
 
-    forAll(meshEdges, coupledEdgeI)
+    forAll(meshEdges, i)
     {
-        const label meshEdgeI = meshEdges[coupledEdgeI];
-        if
-        (
-            (
-                slaves[coupledEdgeI].size()
-              + transformedSlaves[coupledEdgeI].size()
-            )
-          > 0
-        )
+        const label meshEdgei = meshEdges[i];
+
+        if (!slaves[i].empty() || !transformedSlaves[i].empty())
         {
-            isMaster.set(meshEdgeI);
+            isMaster.set(meshEdgei);
         }
-        doneEdge.set(meshEdgeI);
+        unvisited.unset(meshEdgei);
     }
 
-
-    // Do all other edges
-    // ~~~~~~~~~~~~~~~~~~
-
-    forAll(doneEdge, edgeI)
-    {
-        if (!doneEdge.test(edgeI))
-        {
-            isMaster.set(edgeI);
-        }
-    }
+    // Add in all unvisited edges
+    isMaster |= unvisited;
 
     return isMaster;
 }
@@ -160,15 +130,9 @@ Foam::bitSet Foam::syncTools::getMasterFaces(const polyMesh& mesh)
     {
         if (pp.coupled())
         {
-            const coupledPolyPatch& cpp =
-                refCast<const coupledPolyPatch>(pp);
-
-            if (!cpp.owner())
+            if (!refCast<const coupledPolyPatch>(pp).owner())
             {
-                forAll(pp, i)
-                {
-                    isMaster.unset(cpp.start()+i);
-                }
+                isMaster.unset(pp.range());
             }
         }
     }
@@ -192,18 +156,12 @@ Foam::bitSet Foam::syncTools::getInternalOrMasterFaces
         {
             if (!refCast<const coupledPolyPatch>(pp).owner())
             {
-                forAll(pp, i)
-                {
-                    isMaster.unset(pp.start()+i);
-                }
+                isMaster.unset(pp.range());
             }
         }
         else
         {
-            forAll(pp, i)
-            {
-                isMaster.unset(pp.start()+i);
-            }
+            isMaster.unset(pp.range());
         }
     }
 
@@ -224,10 +182,7 @@ Foam::bitSet Foam::syncTools::getInternalOrCoupledFaces
     {
         if (!pp.coupled())
         {
-            forAll(pp, i)
-            {
-                isMaster.unset(pp.start()+i);
-            }
+            isMaster.unset(pp.range());
         }
     }
 
