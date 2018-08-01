@@ -72,12 +72,6 @@ Foam::patchIdentifier::patchIdentifier
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::patchIdentifier::~patchIdentifier()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::patchIdentifier::inGroup(const word& name) const

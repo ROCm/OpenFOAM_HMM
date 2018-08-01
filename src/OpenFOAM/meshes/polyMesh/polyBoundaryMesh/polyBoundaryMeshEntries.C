@@ -29,7 +29,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(polyBoundaryMeshEntries, 0);
+    defineTypeNameAndDebug(polyBoundaryMeshEntries, 0);
 }
 
 

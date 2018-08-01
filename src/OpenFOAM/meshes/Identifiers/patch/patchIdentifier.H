@@ -43,10 +43,8 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class dictionary;
-
-// Forward declaration of friend functions and operators
-
 class patchIdentifier;
 Ostream& operator<<(Ostream& os, const patchIdentifier& p);
 
@@ -92,7 +90,7 @@ public:
             const label index
         );
 
-        //- Copy construct from geometric patch, resetting the index
+        //- Copy construct, resetting the index
         patchIdentifier
         (
             const patchIdentifier& p,
@@ -101,7 +99,7 @@ public:
 
 
     //- Destructor
-    virtual ~patchIdentifier();
+    virtual ~patchIdentifier() = default;
 
 
     // Member Functions
