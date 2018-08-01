@@ -66,7 +66,7 @@ public:
 
     // Constructors
 
-        //- Construct from UList and sub-list size
+        //- Construct from UList and sub-list size, start at 0
         inline SubList
         (
             const UList<T>& list,
@@ -91,7 +91,7 @@ public:
         );
 
         //- Construct from UList and a (start,size) range, but bypassing
-        //  run-time range checking.
+        //- run-time range checking.
         inline SubList
         (
             const labelRange& range,
@@ -99,7 +99,7 @@ public:
         );
 
 
-    // Member operators
+    // Member Operators
 
         //- Allow cast to a const List<T>&
         inline operator const Foam::List<T>&() const;

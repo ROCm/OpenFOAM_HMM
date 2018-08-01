@@ -31,7 +31,6 @@ Description
     globalIndex globalFaces(mesh.nFaces());
     label globalFacei = globalFaces.toGlobal(facei);
 
-
 SourceFiles
     globalIndexI.H
     globalIndex.C
@@ -49,9 +48,10 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 class globalIndex;
+class labelRange;
 
 Istream& operator>>(Istream& is, globalIndex& gi);
 Ostream& operator<<(Ostream& os, const globalIndex& gi);
@@ -76,12 +76,12 @@ public:
         //- Construct null
         globalIndex() = default;
 
-        //- Construct from local max size. Does communication with default
-        //  communicator and message tag.
+        //- Construct from local max size.
+        //  Does communication with default communicator and message tag.
         globalIndex(const label localSize);
 
-        //- Construct from local max size. Does communication with given
-        //  communicator and message tag
+        //- Construct from local max size.
+        //  Does communication with given communicator and message tag
         globalIndex
         (
             const label localSize,
@@ -113,6 +113,9 @@ public:
             //- My local size
             inline label localSize() const;
 
+            //- Return start/size range of local processor data
+            inline labelRange range() const;
+
             //- From local to global
             inline label toGlobal(const label i) const;
 
@@ -131,6 +134,9 @@ public:
 
             //- Size of proci data
             inline label localSize(const label proci) const;
+
+            //- Return start/size range of proci data
+            inline labelRange range(const label proci) const;
 
             //- From local to global on proci
             inline label toGlobal(const label proci, const label i) const;

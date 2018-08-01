@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +48,7 @@ SourceFiles
 namespace Foam
 {
 
-//- Pre-declare SubField and related Field type
+// Forward declarations
 template<class Type> class Field;
 template<class Type> class SubField;
 
@@ -71,20 +71,20 @@ public:
 
     // Constructors
 
-        //- Construct from a SubList
-        inline SubField(const SubList<Type>&);
+        //- Copy construct from a SubList
+        inline SubField(const SubList<Type>& list);
 
-        //- Construct from a UList\<Type\>, using the entire size
-        inline explicit SubField(const UList<Type>&);
+        //- Construct from a UList, the entire size
+        inline explicit SubField(const UList<Type>& list);
 
-        //- Construct from a UList\<Type\> with a given size
+        //- Construct from a UList with a given sub-list size, start at 0
         inline SubField
         (
             const UList<Type>& list,
             const label subSize
         );
 
-        //- Construct from a UList\<Type\> with a given size and start index
+        //- Construct from a UList with a given size and start index
         inline SubField
         (
             const UList<Type>& list,
@@ -92,11 +92,28 @@ public:
             const label startIndex
         );
 
-        //- Construct as copy
-        inline SubField(const SubField<Type>&);
+        //- Construct from UList and a (start,size) range.
+        //  The range is subsetted with the list size itself to ensure that the
+        //  result always addresses a valid section of the list.
+        inline SubField
+        (
+            const UList<Type>& list,
+            const labelRange& range
+        );
+
+        //- Construct from UList and a (start,size) range, but bypassing
+        //- run-time range checking.
+        inline SubField
+        (
+            const labelRange& range,
+            const UList<Type>& list
+        );
+
+        //- Copy construct
+        inline SubField(const SubField<Type>& sfield);
 
 
-    // Member functions
+    // Member Functions
 
         //- Return a null SubField
         static inline const SubField<Type>& null();
@@ -110,13 +127,13 @@ public:
 
     // Member operators
 
-        //- Assignment via UList operator. Takes linear time.
+        //- Copy assign via UList operator. Takes linear time.
         inline void operator=(const SubField<Type>&);
 
-        //- Assignment via UList operator. Takes linear time.
+        //- Copy assign via UList operator. Takes linear time.
         inline void operator=(const Field<Type>&);
 
-        //- Assignment via UList operator. Takes linear time.
+        //- Copy assign via UList operator. Takes linear time.
         template<class Form, direction Ncmpts>
         inline void operator=(const VectorSpace<Form, Type, Ncmpts>&);
 

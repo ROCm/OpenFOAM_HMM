@@ -71,6 +71,28 @@ inline Foam::SubField<Type>::SubField
 template<class Type>
 inline Foam::SubField<Type>::SubField
 (
+    const UList<Type>& list,
+    const labelRange& range
+)
+:
+    SubList<Type>(list, range)
+{}
+
+
+template<class Type>
+inline Foam::SubField<Type>::SubField
+(
+    const labelRange& range,
+    const UList<Type>& list
+)
+:
+    SubList<Type>(range, list)
+{}
+
+
+template<class Type>
+inline Foam::SubField<Type>::SubField
+(
     const SubField<Type>& sfield
 )
 :

@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ListOps.H"
+#include "labelRange.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -65,6 +66,18 @@ inline Foam::label Foam::globalIndex::localSize() const
 }
 
 
+inline Foam::labelRange Foam::globalIndex::range(const label proci) const
+{
+    return labelRange(offsets_[proci], offsets_[proci+1] - offsets_[proci]);
+}
+
+
+inline Foam::labelRange Foam::globalIndex::range() const
+{
+    return range(Pstream::myProcNo());
+}
+
+
 inline Foam::label Foam::globalIndex::size() const
 {
     return offsets_.last();
@@ -87,7 +100,6 @@ inline Foam::label Foam::globalIndex::toGlobal(const label i) const
 }
 
 
-//- Is on local processor
 inline bool Foam::globalIndex::isLocal(const label proci, const label i) const
 {
     return i >= offsets_[proci] && i < offsets_[proci+1];
@@ -100,19 +112,19 @@ inline bool Foam::globalIndex::isLocal(const label i) const
 }
 
 
-inline Foam::label Foam::globalIndex::toLocal(const label proci, const label i)
-const
+inline Foam::label
+Foam::globalIndex::toLocal(const label proci, const label i) const
 {
-    label localI = i - offsets_[proci];
+    const label locali = i - offsets_[proci];
 
-    if (localI < 0 || i >= offsets_[proci+1])
+    if (locali < 0 || i >= offsets_[proci+1])
     {
         FatalErrorInFunction
             << "Global " << i << " does not belong on processor "
-            << proci << endl << "Offsets:" << offsets_
+            << proci << nl << "Offsets:" << offsets_
             << abort(FatalError);
     }
-    return localI;
+    return locali;
 }
 
 
