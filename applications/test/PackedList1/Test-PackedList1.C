@@ -118,6 +118,18 @@ int main(int argc, char *argv[])
     list1.set(14, 2);
     report(list1);
 
+    Info<< "values()    : " << flatOutput(list1.unpack<char>()) << nl
+        << "values(5,8) : " << flatOutput(list1.unpack<char>(labelRange(5,8)))
+        << nl;
+
+    {
+        labelList locations({-5, -2, 2, 1, 8});
+
+        Info<< "values at " << flatOutput(locations) << " = "
+            << flatOutput(list1.unpack<char>(locations))
+            << nl;
+    }
+
     Info<< "\ntest operator== between references\n";
     if (list1[1] == list1[8])
     {

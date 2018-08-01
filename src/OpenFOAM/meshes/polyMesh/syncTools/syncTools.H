@@ -552,36 +552,36 @@ public:
 
         // PackedList versions
 
-            template<unsigned nBits, class CombineOp>
+            template<unsigned Width, class CombineOp>
             static void syncFaceList
             (
                 const polyMesh& mesh,
-                PackedList<nBits>& faceValues,
+                PackedList<Width>& faceValues,
                 const CombineOp& cop,
                 const bool parRun = Pstream::parRun()
             );
 
-            template<unsigned nBits>
+            template<unsigned Width>
             static void swapFaceList
             (
                 const polyMesh& mesh,
-                PackedList<nBits>& faceValues
+                PackedList<Width>& faceValues
             );
 
-            template<unsigned nBits, class CombineOp>
+            template<unsigned Width, class CombineOp>
             static void syncPointList
             (
                 const polyMesh& mesh,
-                PackedList<nBits>& pointValues,
+                PackedList<Width>& pointValues,
                 const CombineOp& cop,
                 const unsigned int nullValue
             );
 
-            template<unsigned nBits, class CombineOp>
+            template<unsigned Width, class CombineOp>
             static void syncEdgeList
             (
                 const polyMesh& mesh,
-                PackedList<nBits>& edgeValues,
+                PackedList<Width>& edgeValues,
                 const CombineOp& cop,
                 const unsigned int nullValue
             );

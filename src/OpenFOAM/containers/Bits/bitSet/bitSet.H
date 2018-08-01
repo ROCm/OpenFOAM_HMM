@@ -248,6 +248,7 @@ public:
         inline labelList sortedToc() const;
 
         //- Return the bitset values as a boolList.
+        //  When the output is a bool, this is more efficient than unpack()
         List<bool> values() const;
 
 
@@ -522,17 +523,18 @@ public:
             return *this;
         }
 
+
     // Housekeeping
 
         //- Identical to toc()
-        //  \deprecated compatibility method for PackedBoolList (APR-2018)
+        //  \deprecated compatibility name for PackedBoolList (APR-2018)
         inline labelList used() const { return toc(); }
 
 };
 
 
 // Global Operators
-//
+
 Ostream& operator<<(Ostream& os, const InfoProxy<bitSet>& info);
 Ostream& operator<<(Ostream& os, const bitSet& bitset);
 

@@ -1413,11 +1413,11 @@ void Foam::syncTools::syncBoundaryFaceList
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<unsigned nBits, class CombineOp>
+template<unsigned Width, class CombineOp>
 void Foam::syncTools::syncFaceList
 (
     const polyMesh& mesh,
-    PackedList<nBits>& faceValues,
+    PackedList<Width>& faceValues,
     const CombineOp& cop,
     const bool parRun
 )
@@ -1564,22 +1564,22 @@ void Foam::syncTools::swapBoundaryCellList
 }
 
 
-template<unsigned nBits>
+template<unsigned Width>
 void Foam::syncTools::swapFaceList
 (
     const polyMesh& mesh,
-    PackedList<nBits>& faceValues
+    PackedList<Width>& faceValues
 )
 {
     syncFaceList(mesh, faceValues, eqOp<unsigned int>());
 }
 
 
-template<unsigned nBits, class CombineOp>
+template<unsigned Width, class CombineOp>
 void Foam::syncTools::syncPointList
 (
     const polyMesh& mesh,
-    PackedList<nBits>& pointValues,
+    PackedList<Width>& pointValues,
     const CombineOp& cop,
     const unsigned int nullValue
 )
@@ -1618,11 +1618,11 @@ void Foam::syncTools::syncPointList
 }
 
 
-template<unsigned nBits, class CombineOp>
+template<unsigned Width, class CombineOp>
 void Foam::syncTools::syncEdgeList
 (
     const polyMesh& mesh,
-    PackedList<nBits>& edgeValues,
+    PackedList<Width>& edgeValues,
     const CombineOp& cop,
     const unsigned int nullValue
 )

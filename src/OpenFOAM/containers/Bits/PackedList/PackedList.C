@@ -83,14 +83,34 @@ bool Foam::PackedList<Width>::uniform() const
 template<unsigned Width>
 Foam::labelList Foam::PackedList<Width>::values() const
 {
+    return this->unpack<label>();
+}
+
+
+template<unsigned Width>
+template<class IntType>
+Foam::List<IntType>
+Foam::PackedList<Width>::unpack() const
+{
+    static_assert
+    (
+        std::is_integral<IntType>::value,
+        "Integral required for output."
+    );
+    static_assert
+    (
+        std::numeric_limits<IntType>::digits >= Width,
+        "Width of IntType is too small to hold result"
+    );
+
     if (size() < 2 || uniform())
     {
-        const label val = (size() ? get(0) : 0);
+        const IntType val = (size() ? get(0) : 0);
 
-        return labelList(size(), val);
+        return List<IntType>(size(), val);
     }
 
-    labelList output(size());
+    List<IntType> output(size());
     label outi = 0;
 
     // Process n-1 complete blocks
@@ -102,7 +122,7 @@ Foam::labelList Foam::PackedList<Width>::values() const
 
         for (unsigned nget = elem_per_block; nget; --nget, ++outi)
         {
-            output[outi] = label(blockval & max_value);
+            output[outi] = IntType(blockval & max_value);
             blockval >>= Width;
         }
     }
@@ -111,6 +131,71 @@ Foam::labelList Foam::PackedList<Width>::values() const
     for (/*nil*/; outi < size(); ++outi)
     {
         output[outi] = get(outi);
+    }
+
+    return output;
+}
+
+
+template<unsigned Width>
+template<class IntType>
+Foam::List<IntType>
+Foam::PackedList<Width>::unpack(const labelRange& range) const
+{
+    static_assert
+    (
+        std::is_integral<IntType>::value,
+        "Integral required for unpack output."
+    );
+    static_assert
+    (
+        std::numeric_limits<IntType>::digits >= Width,
+        "Width of IntType is too small to hold unpack output."
+    );
+
+
+    // Could be more efficient but messier with block-wise access.
+    // - automatically handles any invalid positions
+
+    auto pos = range.start();
+
+    List<IntType> output(range.size());
+
+    for (IntType& out : output)
+    {
+        out = IntType(get(pos));
+        ++pos;
+    }
+
+    return output;
+}
+
+
+template<unsigned Width>
+template<class IntType>
+Foam::List<IntType>
+Foam::PackedList<Width>::unpack(const labelUList& locations) const
+{
+    static_assert
+    (
+        std::is_integral<IntType>::value,
+        "Integral required for unpack output."
+    );
+    static_assert
+    (
+        std::numeric_limits<IntType>::digits >= Width,
+        "Width of IntType is too small to hold unpack output."
+    );
+
+
+    label pos = 0;
+
+    List<IntType> output(locations.size());
+
+    for (IntType& out : output)
+    {
+        out = IntType(get(locations[pos]));
+        ++pos;
     }
 
     return output;

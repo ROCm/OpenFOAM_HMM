@@ -294,6 +294,22 @@ public:
         //- Return the values as a list of labels
         labelList values() const;
 
+        //- Return the values as a list of integral type.
+        //  The default integral type is unsigned int.
+        template<class IntType = unsigned int>
+        List<IntType> unpack() const;
+
+        //- Return the range of values as a list of integral type.
+        //  The default integral type is unsigned int.
+        template<class IntType = unsigned int>
+        List<IntType> unpack(const labelRange& range) const;
+
+        //- Extract the values for the specified locations as
+        //- a list of integral type.
+        //  The default integral type is unsigned int.
+        template<class IntType = unsigned int>
+        List<IntType> unpack(const labelUList& locations) const;
+
 
     // Edit
 
