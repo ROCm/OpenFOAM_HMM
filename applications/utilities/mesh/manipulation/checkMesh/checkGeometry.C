@@ -15,7 +15,7 @@
 #include "vtkSurfaceWriter.H"
 #include "writer.H"
 
-#include "cyclicAMIPolyPatch.H"
+#include "cyclicACMIPolyPatch.H"
 #include "Time.H"
 
 // Find wedge with opposite orientation. Note: does not actually check that
@@ -1033,6 +1033,40 @@ Foam::label Foam::checkGeometry
                                 false
                             );
                         }
+
+                        if (isA<cyclicACMIPolyPatch>(pbm[patchi]))
+                        {
+                            const cyclicACMIPolyPatch& pp =
+                                refCast<const cyclicACMIPolyPatch>(pbm[patchi]);
+                            scalarField mergedMask;
+                            globalFaces().gather
+                            (
+                                UPstream::worldComm,
+                                ListOps::create<label>
+                                (
+                                    UPstream::procID(UPstream::worldComm),
+                                    labelOp<int>()  // int -> label
+                                ),
+                                pp.mask(),
+                                mergedMask
+                            );
+                            if (Pstream::master())
+                            {
+                                wr.write
+                                (
+                                    functionObject::outputPrefix,
+                                    "src_" + tmName,
+                                    meshedSurfRef
+                                    (
+                                        mergedPoints,
+                                        mergedFaces
+                                    ),
+                                    "mask",
+                                    mergedMask,
+                                    false
+                                );
+                            }
+                        }
                     }
                     {
                         // Collect geometry
@@ -1086,6 +1120,40 @@ Foam::label Foam::checkGeometry
                                 mergedWeights,
                                 false
                             );
+                        }
+
+                        if (isA<cyclicACMIPolyPatch>(pbm[patchi]))
+                        {
+                            const cyclicACMIPolyPatch& pp =
+                                refCast<const cyclicACMIPolyPatch>(pbm[patchi]);
+                            scalarField mergedMask;
+                            globalFaces().gather
+                            (
+                                UPstream::worldComm,
+                                ListOps::create<label>
+                                (
+                                    UPstream::procID(UPstream::worldComm),
+                                    labelOp<int>()  // int -> label
+                                ),
+                                pp.neighbPatch().mask(),
+                                mergedMask
+                            );
+                            if (Pstream::master())
+                            {
+                                wr.write
+                                (
+                                    functionObject::outputPrefix,
+                                    "tgt_" + tmName,
+                                    meshedSurfRef
+                                    (
+                                        mergedPoints,
+                                        mergedFaces
+                                    ),
+                                    "mask",
+                                    mergedMask,
+                                    false
+                                );
+                            }
                         }
                     }
                 }
