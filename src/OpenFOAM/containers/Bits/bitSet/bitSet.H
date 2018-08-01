@@ -166,6 +166,11 @@ public:
 
         //- Construct with given size with all bits set to 0,
         //- subsequently add specified locations as 1.
+        template<unsigned N>
+        bitSet(const label n, const FixedList<label, N>& locations);
+
+        //- Construct with given size with all bits set to 0,
+        //- subsequently add specified locations as 1.
         inline bitSet(const label n, std::initializer_list<label> locations);
 
         //- Construct with automatic sizing (filled with 0),
@@ -175,6 +180,11 @@ public:
         //- Construct with automatic sizing (filled with 0),
         //- and populate with specified locations as 1.
         inline explicit bitSet(const labelUIndList& locations);
+
+        //- Construct with automatic sizing (filled with 0),
+        //- and populate with specified locations as 1.
+        template<unsigned N>
+        explicit bitSet(const FixedList<label, N>& locations);
 
         //- Clone
         inline autoPtr<bitSet> clone() const;
@@ -366,6 +376,13 @@ public:
         //  \return number of locations changed
         inline label set(const labelUIndList& locations);
 
+        //- Set the listed locations to true.
+        //  Does auto-vivify for non-existent entries.
+        //
+        //  \return number of locations changed
+        template<unsigned N>
+        label set(const FixedList<label, N>& locations);
+
         //- Unset the locations listed by the iterator range,
         //- never auto-vivify entries.
         //
@@ -382,6 +399,12 @@ public:
         //
         //  \return number of locations changed
         inline label unset(const labelUIndList& locations);
+
+        //- Unset the listed locations, never auto-vivifies.
+        //
+        //  \return number of locations changed
+        template<unsigned N>
+        label unset(const FixedList<label, N>& locations);
 
 
     // Access helpers
