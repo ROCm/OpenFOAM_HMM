@@ -195,6 +195,7 @@ public:
         (
             const globalIndex& gi,
             const polyMesh& mesh,
+            const boolList& isValidDonor,
             const labelList& selectedCells,
             labelListList& cellCells,
             pointListList& cellCellCentres

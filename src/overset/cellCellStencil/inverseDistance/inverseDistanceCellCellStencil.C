@@ -1434,6 +1434,16 @@ void Foam::cellCellStencils::inverseDistance::createStencil
     // Special value for unused points
     const vector greatPoint(GREAT, GREAT, GREAT);
 
+    boolList isValidDonor(mesh_.nCells(), true);
+    forAll(cellTypes_, celli)
+    {
+        if (cellTypes_[celli] == HOLE)
+        {
+            isValidDonor[celli] = false;
+        }
+    }
+
+
     // Has acceptor been handled already?
     bitSet doneAcceptor(interpolationCells_.size());
 
@@ -1513,6 +1523,7 @@ void Foam::cellCellStencils::inverseDistance::createStencil
         (
             globalCells,
             mesh_,
+            isValidDonor,
             donorCells,
             donorCellCells,
             donorCellCentres

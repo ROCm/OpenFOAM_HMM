@@ -170,6 +170,7 @@ void Foam::cellCellStencil::globalCellCells
 (
     const globalIndex& gi,
     const polyMesh& mesh,
+    const boolList& isValidDonor,
     const labelList& selectedCells,
     labelListList& cellCells,
     pointListList& cellCellCentres
@@ -206,6 +207,14 @@ void Foam::cellCellStencil::globalCellCells
         nbrCellCentres
     );
 
+    boolList nbrIsValidDonor;
+    syncTools::swapBoundaryCellList
+    (
+        mesh,
+        isValidDonor,
+        nbrIsValidDonor
+    );
+
 
     // 2. Collect cell and all its neighbours
 
@@ -224,8 +233,11 @@ void Foam::cellCellStencil::globalCellCells
         label compacti = 0;
 
         // First entry is cell itself
-        stencil[compacti] = globalCellIDs[celli];
-        stencilPoints[compacti++] = cellCentres[celli];
+        if (isValidDonor[celli])
+        {
+            stencil[compacti] = globalCellIDs[celli];
+            stencilPoints[compacti++] = cellCentres[celli];
+        }
 
         // Other entries are cell neighbours
         forAll(cFaces, i)
@@ -235,10 +247,12 @@ void Foam::cellCellStencil::globalCellCells
             label own = faceOwner[facei];
             label nbrCelli;
             point nbrCc;
+            bool isValid = false;
             if (bFacei >= 0)
             {
                 nbrCelli = nbrGlobalCellIDs[bFacei];
                 nbrCc = nbrCellCentres[bFacei];
+                isValid = nbrIsValidDonor[bFacei];
             }
             else
             {
@@ -246,20 +260,25 @@ void Foam::cellCellStencil::globalCellCells
                 {
                     nbrCelli = gi.toGlobal(own);
                     nbrCc = cellCentres[own];
+                    isValid = isValidDonor[own];
                 }
                 else
                 {
                     label nei = faceNeighbour[facei];
                     nbrCelli = gi.toGlobal(nei);
                     nbrCc = cellCentres[nei];
+                    isValid = isValidDonor[nei];
                 }
             }
 
-            SubList<label> current(stencil, compacti);
-            if (!current.found(nbrCelli))
+            if (isValid)
             {
-                stencil[compacti] = nbrCelli;
-                stencilPoints[compacti++] = nbrCc;
+                SubList<label> current(stencil, compacti);
+                if (!current.found(nbrCelli))
+                {
+                    stencil[compacti] = nbrCelli;
+                    stencilPoints[compacti++] = nbrCc;
+                }
             }
         }
         stencil.setSize(compacti);
