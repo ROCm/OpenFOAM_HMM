@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -166,40 +166,30 @@ Foam::PatchTools::subsetMap
     labelList& faceMap
 )
 {
-    label facei  = 0;
-    label pointi = 0;
-
     const List<Face>& localFaces = p.localFaces();
 
-    faceMap.setSize(localFaces.size());
-    pointMap.setSize(p.nPoints());
+    faceMap.resize(localFaces.size());
+    pointMap.clear();
 
-    bitSet pointHad(pointMap.size(), false);
+    bitSet pointUsed(p.nPoints());
 
-    forAll(p, oldFacei)
+    label facei  = 0;
+
+    forAll(localFaces, oldFacei)
     {
         if (includeFaces[oldFacei])
         {
-            // Store new faces compact
+            // Compact storage for new faces
             faceMap[facei++] = oldFacei;
 
-            // Renumber labels for face
-            const Face& f = localFaces[oldFacei];
-
-            forAll(f, fp)
-            {
-                const label ptLabel = f[fp];
-                if (pointHad.set(ptLabel))
-                {
-                    pointMap[pointi++] = ptLabel;
-                }
-            }
+            // Local points used by face
+            pointUsed.set(localFaces[oldFacei]);
         }
     }
 
-    // Trim
-    faceMap.setSize(facei);
-    pointMap.setSize(pointi);
+    // The newToOld mappings
+    faceMap.resize(facei);
+    pointMap = pointUsed.sortedToc();
 }
 
 
@@ -221,19 +211,16 @@ void Foam::PatchTools::calcBounds
     // ourselves
     const PointField& points = p.points();
 
-    bitSet pointIsUsed(points.size());
+    bitSet pointUsed(points.size());
 
     nPoints = 0;
     bb = boundBox::invertedBox;
 
-    forAll(p, facei)
+    for (const Face& f : p)
     {
-        const Face& f = p[facei];
-
-        forAll(f, fp)
+        for (const label pointi : f)
         {
-            label pointi = f[fp];
-            if (pointIsUsed.set(pointi))
+            if (pointUsed.set(pointi))
             {
                 bb.add(points[pointi]);
                 ++nPoints;
