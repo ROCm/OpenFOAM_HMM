@@ -336,8 +336,8 @@ List<OutputIntListType> invertManyToMany
 //  Optionally with an alternative start index, so that (map[i] == i+start)
 labelList identity(const label len, label start=0);
 
-//- Find first occurence of given element and return index,
-//  return -1 if not found. Linear search.
+//- Linear search to find the first occurence of the given element.
+//  \return The index found or return -1 if not found.
 //  \deprecated prefer UList find/found methods (deprecated Oct 2017)
 template<class ListType>
 label findIndex
@@ -351,7 +351,7 @@ label findIndex
 }
 
 
-//- Find all occurences of given element. Linear search.
+//- Linear search to find all occurences of given element.
 template<class ListType>
 labelList findIndices
 (
@@ -360,20 +360,44 @@ labelList findIndices
     label start=0
 );
 
-//- Find index of max element (and larger than given element).
-//  return -1 if not found. Linear search.
+//- Linear search for the index of the max element.
+//
+//  \tparam ListType  The input list type
+//
+//  \param input The list to search
+//  \param start The start index in the list (default: 0)
+//
+//  \return The max index or -1 on error.
 template<class ListType>
-label findMax(const ListType& input, const label start=0);
+label findMax(const ListType& input, label start=0);
 
 
-//- Find index of min element (and less than given element).
-//  return -1 if not found. Linear search.
+//- Linear search for the index of the min element.
+//
+//  \tparam ListType  The input list type
+//
+//  \param input The list to search
+//  \param start The start index in the list (default: 0)
+//
+//  \return The min index or -1 on error.
 template<class ListType>
-label findMin(const ListType& input, const label start=0);
+label findMin(const ListType& input, label start=0);
 
 
-//- Find first occurrence of given element in sorted list and return index,
-//  return -1 if not found. Binary search.
+//- Binary search to find the index of the last element in a sorted list
+//- that is less than value.
+//
+//  Uses the global <code> < </code> operator and thus
+//  <code> (list[i] < val) </code> for the test.
+//
+//  \tparam ListType  The input list type
+//  \tparam T  The value type (should normally be ListType::value_type)
+//
+//  \param input The sorted list to search
+//  \param val   The value for searching/comparing
+//  \param start The start index in the list (default: 0)
+//
+//  \return The index found or -1 if not found.
 template<class ListType>
 label findSortedIndex
 (
@@ -383,25 +407,53 @@ label findSortedIndex
 );
 
 
-//- Find last element < given value in sorted list and return index,
-//  return -1 if not found. Binary search.
-template<class ListType, class BinaryPredicate>
+//- Binary search to find the index of the last element in a sorted list
+//- that is less than value.
+//
+//  Uses <code> lessOp<T>() </code> and thus
+//  <code> lessOp<T>(list[i], val) </code> for the test.
+//
+//  \tparam ListType  The input list type
+//  \tparam T  The value type (is often the same as ListType::value_type)
+//  \tparam ComparePredicate  The type of the comparison functor that
+//      returns true for sorting below.
+//
+//  \param input The sorted list to search
+//  \param val   The value for searching/comparing
+//  \param start The start index in the list
+//  \param comp  The comparison functor for testing.
+//      Uses <code> comp(list[i], val) </code> for the test.
+//
+//  \return The index found or -1 if not found.
+template<class ListType, class T, class ComparePredicate>
 label findLower
 (
     const ListType& input,
-    typename ListType::const_reference val,
+    const T& val,
     const label start,
-    const BinaryPredicate& pred
+    const ComparePredicate& comp
 );
 
 
-//- Find last element < given value in sorted list and return index,
-//  return -1 if not found. Binary search.
-template<class ListType>
+//- Binary search to find the index of the last element in a sorted list
+//- that is less than value.
+//
+//  Uses <code> lessOp<T>() </code> and thus
+//  <code> lessOp<T>(list[i], val) </code> for the test.
+//
+//  \tparam ListType  The input list type
+//  \tparam T  The value type (should normally be ListType::value_type)
+//
+//  \param input The sorted list to search
+//  \param val   The value for searching/comparing
+//  \param start The start index in the list (default: 0)
+//
+//  \return The index found or -1 if not found.
+template<class ListType, class T>
 label findLower
 (
     const ListType& input,
-    typename ListType::const_reference val,
+    const T& val,
     const label start=0
 );
 
@@ -416,7 +468,8 @@ template<class ListType>
 void inplaceReverseList(ListType& input);
 
 
-//- Rotate a list by n places. If n is positive rotate clockwise/right/down.
+//- Rotate a list by n places.
+//  If n is positive rotate clockwise/right/down.
 //  If n is negative rotate anti-clockwise/left/up.
 template<class ListType>
 ListType rotateList(const ListType& list, const label n);

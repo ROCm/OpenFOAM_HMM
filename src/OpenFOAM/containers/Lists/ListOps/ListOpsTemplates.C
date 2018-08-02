@@ -672,48 +672,54 @@ Foam::labelList Foam::findIndices
 
 
 template<class ListType>
-Foam::label Foam::findMax(const ListType& input, const label start)
+Foam::label Foam::findMax
+(
+    const ListType& input,
+    label start
+)
 {
     const label len = input.size();
 
-    if (start >= len)
+    if (start < 0 || start >= len)
     {
         return -1;
     }
 
-    label idx = start;
     for (label i = start+1; i < len; ++i)
     {
-        if (input[idx] < input[i])
+        if (input[start] < input[i])
         {
-            idx = i;
+            start = i;
         }
     }
 
-    return idx;
+    return start;
 }
 
 
 template<class ListType>
-Foam::label Foam::findMin(const ListType& input, const label start)
+Foam::label Foam::findMin
+(
+    const ListType& input,
+    label start
+)
 {
     const label len = input.size();
 
-    if (start >= len)
+    if (start < 0 || start >= len)
     {
         return -1;
     }
 
-    label idx = start;
     for (label i = start+1; i < len; ++i)
     {
-        if (input[i] < input[idx])
+        if (input[i] < input[start])
         {
-            idx = i;
+            start = i;
         }
     }
 
-    return idx;
+    return start;
 }
 
 
@@ -728,7 +734,7 @@ Foam::label Foam::findSortedIndex
     label low = start;
     label high = input.size() - 1;
 
-    if (start >= input.size())
+    if (start < 0 || start >= input.size())
     {
         return -1;
     }
@@ -755,19 +761,19 @@ Foam::label Foam::findSortedIndex
 }
 
 
-template<class ListType, class BinaryPredicate>
+template<class ListType, class T, class ComparePredicate>
 Foam::label Foam::findLower
 (
     const ListType& input,
-    typename ListType::const_reference val,
+    const T& val,
     const label start,
-    const BinaryPredicate& pred
+    const ComparePredicate& comp
 )
 {
     label low = start;
     label high = input.size() - 1;
 
-    if (start >= input.size())
+    if (start < 0 || start >= input.size())
     {
         return -1;
     }
@@ -776,7 +782,7 @@ Foam::label Foam::findLower
     {
         const label mid = (low + high)/2;
 
-        if (pred(input[mid], val))
+        if (comp(input[mid], val))
         {
             low = mid;
         }
@@ -786,11 +792,11 @@ Foam::label Foam::findLower
         }
     }
 
-    if (pred(input[high], val))
+    if (comp(input[high], val))
     {
         return high;
     }
-    else if (pred(input[low], val))
+    else if (comp(input[low], val))
     {
         return low;
     }
@@ -801,11 +807,11 @@ Foam::label Foam::findLower
 }
 
 
-template<class ListType>
+template<class ListType, class T>
 Foam::label Foam::findLower
 (
     const ListType& input,
-    typename ListType::const_reference val,
+    const T& val,
     const label start
 )
 {
@@ -814,7 +820,7 @@ Foam::label Foam::findLower
         input,
         val,
         start,
-        lessOp<typename ListType::value_type>()
+        lessOp<T>()
     );
 }
 
