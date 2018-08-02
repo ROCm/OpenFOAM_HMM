@@ -41,7 +41,7 @@ Foam::lumpedPointIOMovement::lookupInRegistry(const objectRegistry& obr)
 {
     return obr.lookupObjectPtr<lumpedPointIOMovement>
     (
-        lumpedPointMovement::dictionaryName
+        lumpedPointMovement::canonicalName
     );
 }
 
@@ -57,7 +57,7 @@ Foam::lumpedPointIOMovement::New
     (
         IOobject
         (
-            lumpedPointMovement::dictionaryName,
+            lumpedPointMovement::canonicalName,
             obr.time().caseSystem(),
             obr,
             IOobject::MUST_READ,

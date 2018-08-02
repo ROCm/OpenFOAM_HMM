@@ -238,11 +238,8 @@ public:
 
     // Static data members
 
-        //- The standard dictionary name
-        static const word dictionaryName;
-
-        //- Helper: return IOobject with optionally absolute path provided
-        static IOobject selectIO(const IOobject&, const fileName&);
+        //- The canonical name ("lumpedPointMovement") for the dictionary
+        static const word canonicalName;
 
 
     // Constructors
@@ -460,6 +457,22 @@ public:
             const labelUList& patchLst,
             const pointField& points0
         ) const;
+
+
+    // Housekeeping
+
+        //- Compatibility method
+        //  \deprecated use IOobject::selectIO directly (AUG-2018)
+        static IOobject selectIO
+        (
+            const IOobject& io,
+            const fileName& altFile,
+            const word& ioName = ""
+        )
+        {
+            return IOobject::selectIO(io, altFile, ioName);
+        }
+
 };
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::IOobject
 
 Description
-    IOobject defines the attributes of an object for which implicit
+    Defines the attributes of an object for which implicit
     objectRegistry management is supported, and provides the infrastructure
     for performing stream I/O.
 
@@ -83,6 +83,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class Time;
 class objectRegistry;
 
@@ -184,7 +185,7 @@ public:
     TypeName("IOobject");
 
 
-    // Static data members
+    // Static Data Members
 
         //- Type of file modification checking
         static fileCheckTypes fileModificationChecking;
@@ -218,6 +219,27 @@ public:
         //- Create dot-delimited name.group
         template<class StringType>
         static inline word groupName(StringType name, const word& group);
+
+        //- Return the IOobject, but also consider an alternative file name.
+        //
+        //  \param io The expected IOobject to use
+        //  \param altFile Alternative fileName (ignored if empty).
+        //  \param ioName  The alternative name for the IOobject when
+        //      the altFile resolves to a directory.
+        //
+        //  \note If the alternative fileName is a non-empty string,
+        //      it defines the location but uses all other properties of the
+        //      expected IOobject.
+        //      The location may be an absolute or a relative path.
+        //      If it corresponds to a directory, the name of the
+        //      expected IOobject will be used in its resolution.
+        //      This expected name can provided via the ioName parameter.
+        static IOobject selectIO
+        (
+            const IOobject& io,
+            const fileName& altFile,
+            const word& ioName = ""
+        );
 
 
     // Constructors
@@ -290,7 +312,7 @@ public:
 
 
     //- Destructor
-    virtual ~IOobject();
+    virtual ~IOobject() = default;
 
 
     // Member Functions
@@ -355,10 +377,10 @@ public:
     // Path components
 
         //- Return group (extension part of name)
-        word group() const;
+        inline word group() const;
 
         //- Return member (name without the extension)
-        word member() const;
+        inline word member() const;
 
         const fileName& rootPath() const;
 
@@ -370,17 +392,17 @@ public:
 
         inline const fileName& local() const;
 
-        //- Return complete path
+        //- The complete path
         fileName path() const;
 
-        //- Return complete path with alternative instance and local
+        //- The complete path with alternative instance and local
         fileName path
         (
             const word& instance,
             const fileName& local = fileName::null
         ) const;
 
-        //- Return complete path + object name
+        //- The complete path + object name
         inline fileName objectPath() const;
 
         //- Helper for filePath that searches locally.

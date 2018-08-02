@@ -192,6 +192,51 @@ bool Foam::IOobject::fileNameComponents
 }
 
 
+Foam::IOobject Foam::IOobject::selectIO
+(
+    const IOobject& io,
+    const fileName& altFile,
+    const word& ioName
+)
+{
+    if (altFile.empty())
+    {
+        return io;
+    }
+
+    // Construct from file path instead
+
+    fileName altPath = altFile;
+
+    if (isDir(altPath))
+    {
+        // Resolve directories as well
+
+        if (ioName.empty())
+        {
+            altPath /= io.name();
+        }
+        else
+        {
+            altPath /= ioName;
+        }
+    }
+    altPath.expand();
+
+
+    return
+        IOobject
+        (
+            altPath,
+            io.db(),
+            io.readOpt(),
+            io.writeOpt(),
+            io.registerObject(),
+            io.globalObject()
+        );
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::IOobject::IOobject
@@ -339,12 +384,6 @@ Foam::IOobject::IOobject
 {}
 
 
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
-
-Foam::IOobject::~IOobject()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::objectRegistry& Foam::IOobject::db() const
@@ -371,28 +410,14 @@ const Foam::fileName& Foam::IOobject::caseName() const
 }
 
 
-Foam::word Foam::IOobject::group() const
-{
-    return name_.ext();
-}
-
-
-Foam::word Foam::IOobject::member() const
-{
-    return name_.lessExt();
-}
-
-
 Foam::fileName Foam::IOobject::path() const
 {
     if (isOutsideOfCase(instance()))
     {
         return instance();
     }
-    else
-    {
-        return rootPath()/caseName()/instance()/db_.dbDir()/local();
-    }
+
+    return rootPath()/caseName()/instance()/db_.dbDir()/local();
 }
 
 

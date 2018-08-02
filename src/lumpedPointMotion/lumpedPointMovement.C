@@ -61,7 +61,7 @@ Foam::lumpedPointMovement::scalingNames
 
 
 const Foam::word
-Foam::lumpedPointMovement::dictionaryName("lumpedPointMovement");
+Foam::lumpedPointMovement::canonicalName("lumpedPointMovement");
 
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
@@ -115,31 +115,6 @@ static void writeList(Ostream& os, const string& header, const UList<T>& list)
 //! \endcond
 
 } // End namespace Foam
-
-
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-Foam::IOobject Foam::lumpedPointMovement::selectIO
-(
-    const IOobject& io,
-    const fileName& f
-)
-{
-    return
-    (
-        f.size()
-      ? IOobject        // construct from filePath instead
-        (
-            f,
-            io.db(),
-            io.readOpt(),
-            io.writeOpt(),
-            io.registerObject(),
-            io.globalObject()
-        )
-      : io
-    );
-}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

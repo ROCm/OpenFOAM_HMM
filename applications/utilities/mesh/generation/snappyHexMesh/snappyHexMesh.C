@@ -788,32 +788,29 @@ int main(int argc, char *argv[])
     dictionary decomposeDict;
     if (Pstream::parRun())
     {
-        fileName decompDictFile;
-        args.readIfPresent("decomposeParDict", decompDictFile);
-
-        // A demand-driven decompositionMethod can have issues finding
-        // an alternative decomposeParDict location.
+        // Ensure demand-driven decompositionMethod finds alternative
+        // decomposeParDict location properly.
 
         IOdictionary* dictPtr = new IOdictionary
         (
-            decompositionModel::selectIO
+            IOobject::selectIO
             (
                 IOobject
                 (
-                    "decomposeParDict",
+                    decompositionModel::canonicalName,
                     runTime.system(),
                     runTime,
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE
                 ),
-                decompDictFile
+                args.lookupOrDefault<fileName>("decomposeParDict", "")
             )
         );
 
         // Store it on the object registry, but to be found it must also
         // have the expected "decomposeParDict" name.
 
-        dictPtr->rename("decomposeParDict");
+        dictPtr->rename(decompositionModel::canonicalName);
         runTime.store(dictPtr);
 
         decomposeDict = *dictPtr;
@@ -1425,7 +1422,7 @@ int main(int argc, char *argv[])
             decomposeDict
         )
     );
-    decompositionMethod& decomposer = decomposerPtr();
+    decompositionMethod& decomposer = *decomposerPtr;
 
     if (Pstream::parRun() && !decomposer.parallelAware())
     {

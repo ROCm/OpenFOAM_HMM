@@ -21,10 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Writes the header description of the File to the stream
-    associated with the File.
-
 \*---------------------------------------------------------------------------*/
 
 #include "IOobject.H"

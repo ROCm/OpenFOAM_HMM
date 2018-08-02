@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,29 +51,22 @@ int readNumProcs
     const Time& runTime
 )
 {
-    const word dictName = "decomposeParDict";
-    fileName dictFile;
-    if (args.readIfPresent(optionName, dictFile) && isDir(dictFile))
-    {
-        dictFile = dictFile / dictName;
-    }
-
     return decompositionMethod::nDomains
     (
         IOdictionary
         (
-            decompositionModel::selectIO
+            IOobject::selectIO
             (
                 IOobject
                 (
-                    dictName,
+                    decompositionModel::canonicalName,
                     runTime.system(),
                     runTime,
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE,
-                    false
+                    false // do not register
                 ),
-                dictFile
+                args.lookupOrDefault<fileName>(optionName, "")
             )
         )
     );

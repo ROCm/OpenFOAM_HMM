@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -141,53 +141,28 @@ int main(int argc, char *argv[])
 
     if (args.found("from") || args.found("to"))
     {
-        autoPtr<IOobject> ioPtr;
-
-        if (args.found("dict"))
-        {
-            const fileName dictPath = args["dict"];
-
-            ioPtr.reset
+        IOobject ioCsys = IOobject::selectIO
+        (
+            IOobject
             (
-                new IOobject
-                (
-                    (
-                        isDir(dictPath)
-                      ? dictPath/coordinateSystems::typeName
-                      : dictPath
-                    ),
-                    runTime,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE,
-                    false
-                )
-            );
-        }
-        else
-        {
-            ioPtr.reset
-            (
-                new IOobject
-                (
-                    coordinateSystems::typeName,
-                    runTime.constant(),
-                    runTime,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE,
-                    false
-                )
-            );
-        }
+                coordinateSystems::typeName,
+                runTime.constant(),
+                runTime,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            args.lookupOrDefault<fileName>("dict", "")
+        );
 
-
-        if (!ioPtr->typeHeaderOk<coordinateSystems>(false))
+        if (!ioCsys.typeHeaderOk<coordinateSystems>(false))
         {
             FatalErrorInFunction
-                << ioPtr->objectPath() << nl
+                << ioCsys.objectPath() << nl
                 << exit(FatalError);
         }
 
-        coordinateSystems csLst(ioPtr());
+        coordinateSystems csLst(ioCsys);
 
         if (args.found("from"))
         {

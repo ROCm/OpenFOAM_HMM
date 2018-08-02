@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -182,7 +182,6 @@ int main(int argc, char *argv[])
     // Read/construct control dictionary
     //
 
-    const bool readDict = args.found("dict");
     const bool refineAllCells = args.found("all");
     const bool overwrite = args.found("overwrite");
 
@@ -191,54 +190,56 @@ int main(int argc, char *argv[])
 
     // Dictionary to control refinement
     dictionary refineDict;
-    const word dictName("refineMeshDict");
 
-    if (readDict)
+    // The -all option has precedence over -dict, or anything else
+    if (!refineAllCells)
     {
-        fileName dictPath = args["dict"];
-        if (isDir(dictPath))
-        {
-            dictPath = dictPath/dictName;
-        }
+        const word dictName("refineMeshDict");
 
-        IOobject dictIO
+        // Obtain dictPath here for messages
+        fileName dictPath = args.lookupOrDefault<fileName>("dict", "");
+
+        IOobject dictIO = IOobject::selectIO
         (
-            dictPath,
-            mesh,
-            IOobject::MUST_READ
+            IOobject
+            (
+                dictName,
+                runTime.system(),
+                mesh,
+                IOobject::MUST_READ
+            ),
+            dictPath
         );
 
-        if (!dictIO.typeHeaderOk<IOdictionary>(true))
+        // The reported dictPath will not be full resolved for the output
+        // (it will just be the -dict value) but this is purely cosmetic.
+
+        if (dictIO.typeHeaderOk<IOdictionary>(true))
+        {
+            refineDict = IOdictionary(dictIO);
+
+            Info<< "Refining according to ";
+
+            if (dictPath.empty())
+            {
+                Info<< dictName;
+            }
+            else
+            {
+                Info<< dictPath;
+            }
+            Info<< nl << endl;
+        }
+        else if (dictPath.empty())
+        {
+            Info<< "Refinement dictionary " << dictName << " not found" << nl;
+        }
+        else
         {
             FatalErrorInFunction
                 << "Cannot open specified refinement dictionary "
                 << dictPath
                 << exit(FatalError);
-        }
-
-        Info<< "Refining according to " << dictPath << nl << endl;
-
-        refineDict = IOdictionary(dictIO);
-    }
-    else if (!refineAllCells)
-    {
-        IOobject dictIO
-        (
-            dictName,
-            runTime.system(),
-            mesh,
-            IOobject::MUST_READ
-        );
-
-        if (dictIO.typeHeaderOk<IOdictionary>(true))
-        {
-            Info<< "Refining according to " << dictName << nl << endl;
-
-            refineDict = IOdictionary(dictIO);
-        }
-        else
-        {
-            Info<< "Refinement dictionary " << dictName << " not found" << endl;
         }
     }
 
@@ -346,9 +347,8 @@ int main(int argc, char *argv[])
     // Create cellSet with added cells for easy inspection
     cellSet newCells(mesh, "refinedCells", refCells.size());
 
-    forAll(oldToNew, oldCelli)
+    for (const labelList& added : oldToNew)
     {
-        const labelList& added = oldToNew[oldCelli];
         newCells.insert(added);
     }
 
@@ -359,7 +359,6 @@ int main(int argc, char *argv[])
         << endl << endl;
 
     newCells.write();
-
 
 
     //
@@ -392,9 +391,9 @@ int main(int argc, char *argv[])
 
         if (added.size())
         {
-            forAll(added, i)
+            for (const label celli : added)
             {
-                newToOld[added[i]] = oldCelli;
+                newToOld[celli] = oldCelli;
             }
         }
         else

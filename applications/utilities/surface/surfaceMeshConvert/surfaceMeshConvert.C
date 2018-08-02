@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -152,59 +152,29 @@ int main(int argc, char *argv[])
 
     if (args.found("from") || args.found("to"))
     {
-        autoPtr<IOobject> csDictIoPtr;
-
-        const word dictName("coordinateSystems::typeName");
-
-        // Note: cannot use setSystemRunTimeDictionaryIO.H since dictionary
-        //       is in constant
-
-        fileName dictPath;
-        if (args.readIfPresent("dict", dictPath) && isDir(dictPath))
-        {
-            dictPath = dictPath / dictName;
-        }
-
-        if (dictPath.size())
-        {
-            csDictIoPtr.reset
+        IOobject ioCsys = IOobject::selectIO
+        (
+            IOobject
             (
-                new IOobject
-                (
-                    dictPath,
-                    runTime,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE,
-                    false
-                )
-            );
-        }
-        else
-        {
-            csDictIoPtr.reset
-            (
-                new IOobject
-                (
-                    dictName,
-                    runTime.constant(),
-                    runTime,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE,
-                    false
-                )
-            );
-        }
+                coordinateSystems::typeName,
+                runTime.constant(),
+                runTime,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            args.lookupOrDefault<fileName>("dict", "")
+        );
 
-
-        if (!csDictIoPtr->typeHeaderOk<coordinateSystems>(false))
+        if (!ioCsys.typeHeaderOk<coordinateSystems>(false))
         {
             FatalErrorInFunction
                 << "Cannot open coordinateSystems file\n    "
-                << csDictIoPtr->objectPath() << nl
+                << ioCsys.objectPath() << nl
                 << exit(FatalError);
         }
 
-        coordinateSystems csLst(csDictIoPtr());
+        coordinateSystems csLst(ioCsys);
 
         if (args.found("from"))
         {

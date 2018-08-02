@@ -34,6 +34,8 @@ namespace Foam
     defineTypeNameAndDebug(decompositionModel, 0);
 }
 
+const Foam::word Foam::decompositionModel::canonicalName("decomposeParDict");
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -51,11 +53,11 @@ Foam::decompositionModel::decompositionModel
     >(mesh),
     IOdictionary
     (
-        selectIO
+        IOobject::selectIO
         (
             IOobject
             (
-                "decomposeParDict",
+                canonicalName,
                 mesh.time().system(),
                 mesh.local(),
                 mesh.thisDb(),
@@ -85,11 +87,11 @@ Foam::decompositionModel::decompositionModel
     >(mesh),
     IOdictionary
     (
-        selectIO
+        IOobject::selectIO
         (
             IOobject
             (
-                "decomposeParDict",
+                canonicalName,
                 mesh.time().system(),
                 mesh.local(),
                 mesh.thisDb(),
@@ -137,31 +139,6 @@ const Foam::decompositionModel& Foam::decompositionModel::New
             Foam::UpdateableMeshObject,
             decompositionModel
         >::New(mesh, dict, decompDictFile);
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::IOobject Foam::decompositionModel::selectIO
-(
-    const IOobject& io,
-    const fileName& f
-)
-{
-    return
-    (
-        f.size()
-      ? IOobject        // construct from filePath instead
-        (
-            f,
-            io.db(),
-            io.readOpt(),
-            io.writeOpt(),
-            io.registerObject(),
-            io.globalObject()
-        )
-     :  io
-    );
 }
 
 

@@ -806,21 +806,17 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
     {
         // Use singleton decomposeParDict. Cannot use decompositionModel
         // here since we've only got Time and not a mesh.
-        if
-        (
-            searchableSurface::time().foundObject<IOdictionary>
+
+        const auto* dictPtr =
+            searchableSurface::time().lookupObjectPtr<IOdictionary>
             (
+                // == decompositionModel::canonicalName
                 "decomposeParDict"
-            )
-        )
-        {
-            decomposer_ = decompositionMethod::New
-            (
-                searchableSurface::time().lookupObject<IOdictionary>
-                (
-                    "decomposeParDict"
-                )
             );
+
+        if (dictPtr)
+        {
+            decomposer_ = decompositionMethod::New(*dictPtr);
         }
         else
         {
@@ -832,6 +828,7 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
                     (
                         IOobject
                         (
+                            // == decompositionModel::canonicalName
                             "decomposeParDict",
                             searchableSurface::time().system(),
                             searchableSurface::time(),

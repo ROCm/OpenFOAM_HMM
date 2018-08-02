@@ -392,11 +392,11 @@ int main(int argc, char *argv[])
         (
             IOdictionary
             (
-                decompositionModel::selectIO
+                IOobject::selectIO
                 (
                     IOobject
                     (
-                        "decomposeParDict",
+                        decompositionModel::canonicalName,
                         runTime.time().system(),
                         regionDir,  // region (if non-default)
                         runTime,

@@ -26,7 +26,7 @@ License
 #include "IOobject.H"
 #include "dictionary.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::IOobject::readHeader(Istream& is)
 {

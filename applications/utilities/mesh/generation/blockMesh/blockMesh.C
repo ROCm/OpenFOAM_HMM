@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
     {
         if (isDir(dictPath))
         {
-            dictPath = dictPath / dictName;
+            dictPath /= dictName;
         }
     }
     // Check if dictionary is present in the constant directory
@@ -255,10 +255,9 @@ int main(int argc, char *argv[])
 
             const pointField& cellCentres = topo.cellCentres();
 
-            forAll(cellCentres, celli)
+            for (const point& cc : cellCentres)
             {
                 //point cc = b.blockShape().centre(b.points());
-                const point& cc = cellCentres[celli];
 
                 str << "v " << cc.x() << ' ' << cc.y() << ' ' << cc.z() << nl;
             }
@@ -388,9 +387,9 @@ int main(int argc, char *argv[])
     {
         const polyPatchList& patches = mesh.boundaryMesh();
         bool hasCyclic = false;
-        forAll(patches, patchi)
+        for (const polyPatch& pp : patches)
         {
-            if (isA<cyclicPolyPatch>(patches[patchi]))
+            if (isA<cyclicPolyPatch>(pp))
             {
                 hasCyclic = true;
                 break;
