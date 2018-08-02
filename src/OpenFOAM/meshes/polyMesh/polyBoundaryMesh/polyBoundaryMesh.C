@@ -747,36 +747,41 @@ Foam::label Foam::polyBoundaryMesh::whichPatch(const label faceIndex) const
     else if (faceIndex >= mesh().nFaces())
     {
         FatalErrorInFunction
-            << "given label " << faceIndex
-            << " greater than the number of geometric faces " << mesh().nFaces()
+            << "Face " << faceIndex
+            << " out of bounds. Number of geometric faces " << mesh().nFaces()
             << abort(FatalError);
     }
 
 
-    forAll(*this, patchi)
-    {
-        const polyPatch& bp = operator[](patchi);
+    // Patches are ordered, use binary search
 
-        if
+    const polyPatchList& patches = *this;
+
+    const label patchi =
+        findLower
         (
-            faceIndex >= bp.start()
-         && faceIndex < bp.start() + bp.size()
-        )
-        {
-            return patchi;
-        }
+            patches,
+            faceIndex,
+            0,
+            // Must include the start in the comparison
+            [](const polyPatch& p, label val) { return (p.start() <= val); }
+        );
+
+    if (patchi < 0 || !patches[patchi].range().found(faceIndex))
+    {
+        // If not in any of above, it is trouble!
+        FatalErrorInFunction
+            << "Face " << faceIndex << " not found in any of the patches "
+            << flatOutput(names()) << nl
+            << "The patches appear to be inconsistent with the mesh :"
+            << " internalFaces:" << mesh().nInternalFaces()
+            << " total number of faces:" << mesh().nFaces()
+            << abort(FatalError);
+
+        return -1;
     }
 
-    // If not in any of above, it is trouble!
-    FatalErrorInFunction
-        << "Cannot find face " << faceIndex << " in any of the patches "
-        << names() << nl
-        << "It seems your patches are not consistent with the mesh :"
-        << " internalFaces:" << mesh().nInternalFaces()
-        << "  total number of faces:" << mesh().nFaces()
-        << abort(FatalError);
-
-    return -1;
+    return patchi;
 }
 
 
