@@ -25,11 +25,7 @@ License
 
 #include "ensightGeoFile.H"
 #include "foamVersion.H"
-
-// Macros to stringify macro contents.
-#define STRINGIFY(content)      #content
-#define STRING_QUOTE(input)     STRINGIFY(input)
-
+#include "macros.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

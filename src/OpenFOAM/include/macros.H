@@ -53,6 +53,13 @@ Description
 //- Map 'name' to 'Name' via the predefined macro CAPITALIZE_name
 #define CAPITALIZE(name) CAPITALIZE_##name
 
+//- Helper macro for STRING_QUOTE
+#define STRINGIFY(content) #content
+
+//- Macro to stringify macro contents
+#define STRING_QUOTE(input) STRINGIFY(input)
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
