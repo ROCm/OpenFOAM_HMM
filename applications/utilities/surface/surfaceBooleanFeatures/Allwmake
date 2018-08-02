@@ -1,5 +1,6 @@
 #!/bin/sh
 cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments # (for error catching)
 . $WM_PROJECT_DIR/wmake/scripts/have_cgal
 
 #------------------------------------------------------------------------------
@@ -14,6 +15,6 @@ else
     export COMP_FLAGS="-DNO_CGAL"
 fi
 
-wmake
+wmake $targetType
 
 #------------------------------------------------------------------------------
