@@ -785,6 +785,10 @@ meshQualityControls
 //    layerFields     // write volScalarField for layer coverage
 //);
 
+
+//// Format for writing lines. E.g. leak path. Default is vtk format.
+//setFormat ensight;
+
 // Merge tolerance. Is fraction of overall bounding box of initial mesh.
 // Note: the write tolerance needs to be higher than this.
 mergeTolerance 1e-6;

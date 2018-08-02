@@ -62,6 +62,7 @@ Description
 #include "fvMeshTools.H"
 #include "profiling.H"
 #include "processorMeshes.H"
+#include "vtkSetWriter.H"
 
 using namespace Foam;
 
@@ -788,6 +789,20 @@ int main(int argc, char *argv[])
 
     const bool keepPatches(meshDict.lookupOrDefault("keepPatches", false));
 
+    // format to be used for writing lines
+    const word setFormat
+    (
+        meshDict.lookupOrDefault
+        (
+            "setFormat",
+            vtkSetWriter<scalar>::typeName
+        )
+    );
+    const autoPtr<writer<scalar>> setFormatter
+    (
+        writer<scalar>::New(setFormat)
+    );
+
 
     // Read decomposePar dictionary
     dictionary decomposeDict;
@@ -1038,7 +1053,7 @@ int main(int argc, char *argv[])
         (
             100.0,      // max size ratio
             1e-9,       // intersection tolerance
-            autoPtr<writer<scalar>>(new vtkSetWriter<scalar>()),
+            setFormatter,
             0.01,       // min triangle quality
             true
         );
@@ -1476,7 +1491,8 @@ int main(int argc, char *argv[])
             decomposer,
             distributor,
             globalToMasterPatch,
-            globalToSlavePatch
+            globalToSlavePatch,
+            setFormatter
         );
 
 

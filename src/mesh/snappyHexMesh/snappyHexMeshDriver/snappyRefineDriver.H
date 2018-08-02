@@ -38,6 +38,7 @@ SourceFiles
 #include "labelList.H"
 #include "scalarField.H"
 #include "Tuple2.H"
+#include "writer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,6 +76,9 @@ class snappyRefineDriver
 
         //- From surface region to patch
         const labelList globalToSlavePatch_;
+
+        //- How to write lines. Used e.g. when writing leak-paths
+        const writer<scalar>& setFormatter_;
 
 
     // Private Member Functions
@@ -220,7 +224,8 @@ public:
             decompositionMethod& decomposer,
             fvMeshDistribute& distributor,
             const labelUList& globalToMasterPatch,
-            const labelUList& globalToSlavePatch
+            const labelUList& globalToSlavePatch,
+            const writer<scalar>& setFormatter
         );
 
 

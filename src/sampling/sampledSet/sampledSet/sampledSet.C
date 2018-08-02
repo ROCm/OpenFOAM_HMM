@@ -419,7 +419,8 @@ void Foam::sampledSet::setSamples
 
 Foam::autoPtr<Foam::coordSet> Foam::sampledSet::gather
 (
-    labelList& indexSet
+    labelList& indexSet,
+    labelList& allSegments
 ) const
 {
     // Combine sampleSet from processors. Sort by curveDist. Return
@@ -448,13 +449,11 @@ Foam::autoPtr<Foam::coordSet> Foam::sampledSet::gather
             gatheredPts, accessOp<List<point>>()
         )
     );
-    labelList allSegments
-    (
+    allSegments =
         ListListOps::combine<labelList>
         (
             gatheredSegments, accessOp<labelList>()
-        )
-    );
+        );
     scalarList allCurveDist
     (
         ListListOps::combine<scalarList>
@@ -474,6 +473,8 @@ Foam::autoPtr<Foam::coordSet> Foam::sampledSet::gather
     // Sort curveDist and use to fill masterSamplePts
     Foam::sortedOrder(allCurveDist, indexSet);      // uses stable sort
     scalarList sortedDist(allCurveDist, indexSet);  // with indices for mapping
+
+    allSegments = UIndirectList<label>(allSegments, indexSet)();
 
     return autoPtr<coordSet>::New
     (

@@ -52,5 +52,6 @@ $(setWriters)/raw/rawSetWriterRunTime.C
 $(setWriters)/vtk/vtkSetWriterRunTime.C
 $(setWriters)/xmgrace/xmgraceSetWriterRunTime.C
 $(setWriters)/csv/csvSetWriterRunTime.C
+$(setWriters)/nastran/nastranSetWriterRunTime.C
 
 LIB = $(FOAM_LIBBIN)/libfileFormats

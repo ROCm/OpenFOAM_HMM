@@ -69,10 +69,11 @@ void Foam::sampledSets::combineSampledSets
 
     forAll(sampledSets, setI)
     {
+        labelList segments;
         masterSampledSets.set
         (
             setI,
-            sampledSets[setI].gather(indexSets[setI])
+            sampledSets[setI].gather(indexSets[setI], segments)
         );
     }
 }

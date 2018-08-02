@@ -3561,7 +3561,8 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
     const pointField& locationsInMesh,
     const wordList& zonesInMesh,
-    const pointField& locationsOutsideMesh
+    const pointField& locationsOutsideMesh,
+    const writer<scalar>& leakPathFormatter
 )
 {
     // Introduce baffles
@@ -3695,7 +3696,8 @@ void Foam::meshRefinement::baffleAndSplitMesh
         globalToMasterPatch,
         globalToSlavePatch,
         locationsInMesh,
-        locationsOutsideMesh
+        locationsOutsideMesh,
+        leakPathFormatter
     );
 
     if (debug)
@@ -3737,7 +3739,8 @@ void Foam::meshRefinement::mergeFreeStandingBaffles
     const labelList& globalToMasterPatch,
     const labelList& globalToSlavePatch,
     const pointField& locationsInMesh,
-    const pointField& locationsOutsideMesh
+    const pointField& locationsOutsideMesh,
+    const writer<scalar>& leakPathFormatter
 )
 {
     // Merge baffles
@@ -3803,7 +3806,8 @@ void Foam::meshRefinement::mergeFreeStandingBaffles
             globalToMasterPatch,
             globalToSlavePatch,
             locationsInMesh,
-            locationsOutsideMesh
+            locationsOutsideMesh,
+            leakPathFormatter
         );
 
 
@@ -3827,7 +3831,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
 
     const pointField& locationsInMesh,
     const wordList& zonesInMesh,
-    const pointField& locationsOutsideMesh
+    const pointField& locationsOutsideMesh,
+    const writer<scalar>& leakPathFormatter
 )
 {
     // Determine patches to put intersections into
@@ -3869,7 +3874,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
 
 
     regionSplit cellRegion(mesh_, blockedFace);
-    blockedFace.clear();
 
     // Set unreachable cells to -1
     findRegions
@@ -3878,8 +3882,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
         mergeDistance_ * vector::one,   // perturbVec
         locationsInMesh,
         locationsOutsideMesh,
+        leakPathFormatter,
         cellRegion.nRegions(),
-        cellRegion
+        cellRegion,
+        blockedFace
     );
 
     return splitMesh
