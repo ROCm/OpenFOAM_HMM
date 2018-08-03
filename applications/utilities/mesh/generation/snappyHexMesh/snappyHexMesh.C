@@ -677,6 +677,11 @@ void writeMesh
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Automatic split hex mesher. Refines and snaps to surface"
+    );
+
     #include "addRegionOption.H"
     #include "addOverwriteOption.H"
     argList::addBoolOption

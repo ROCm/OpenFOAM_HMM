@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,15 +80,13 @@ Foam::blockMesh::blockMesh(const IOdictionary& dict, const word& regionName)
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::blockMesh::~blockMesh()
+bool Foam::blockMesh::valid() const
 {
-    delete topologyPtr_;
+    return topologyPtr_.valid();
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::blockMesh::verbose(const bool on)
 {
@@ -191,17 +189,19 @@ Foam::wordList Foam::blockMesh::patchNames() const
 
 Foam::label Foam::blockMesh::numZonedBlocks() const
 {
-    label num = 0;
+    const blockList& blocks = *this;
 
-    forAll(*this, blocki)
+    label count = 0;
+
+    for (const block& blk : blocks)
     {
-        if (operator[](blocki).zoneName().size())
+        if (blk.zoneName().size())
         {
-            num++;
+            ++count;
         }
     }
 
-    return num;
+    return count;
 }
 
 
@@ -209,19 +209,15 @@ void Foam::blockMesh::writeTopology(Ostream& os) const
 {
     const pointField& pts = topology().points();
 
-    forAll(pts, pI)
+    for (const point& pt : pts)
     {
-        const point& pt = pts[pI];
-
         os << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
     }
 
     const edgeList& edges = topology().edges();
 
-    forAll(edges, eI)
+    for (const edge& e : edges)
     {
-        const edge& e = edges[eI];
-
         os << "l " << e.start() + 1 << ' ' << e.end() + 1 << endl;
     }
 }

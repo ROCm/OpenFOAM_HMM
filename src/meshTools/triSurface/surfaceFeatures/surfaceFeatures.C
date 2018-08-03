@@ -1296,10 +1296,7 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
         // Dump to obj file
         //
 
-        Pout<< endl
-            << "Dumping nearest surface feature points to nearestSamples.obj"
-            << endl
-            << "View this Lightwave-OBJ file with e.g. javaview" << endl
+        Pout<< "Dumping nearest surface feature points to nearestSamples.obj"
             << endl;
 
         OFstream objStream("nearestSamples.obj");
@@ -1423,8 +1420,8 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
     {
         // Dump to obj file
 
-        Pout<< "Dumping nearest surface edges to nearestEdges.obj\n"
-            << "View this Lightwave-OBJ file with e.g. javaview\n" << endl;
+        Pout<< "Dumping nearest surface edges to nearestEdges.obj"
+            << endl;
 
         OFstream objStream("nearestEdges.obj");
 
@@ -1577,8 +1574,8 @@ Foam::Map<Foam::pointIndexHit> Foam::surfaceFeatures::nearestEdges
     {
         // Dump to obj file
 
-        Pout<< "Dumping nearest surface feature edges to nearestEdges.obj\n"
-            << "View this Lightwave-OBJ file with e.g. javaview\n" << endl;
+        Pout<< "Dumping nearest surface feature edges to nearestEdges.obj"
+            << endl;
 
         OFstream objStream("nearestEdges.obj");
 

@@ -82,8 +82,7 @@ void dumpPoints(const triSurface& surf, const labelList& borderPoint)
 {
     fileName fName("borderPoints.obj");
 
-    Info<< "Dumping borderPoints as Lightwave .obj file to " << fName
-        << "\nThis can be visualized with e.g. javaview (www.javaview.de)\n\n";
+    Info<< "Dumping borderPoints as obj file: " << fName << endl;
 
     OFstream os(fName);
 
@@ -103,8 +102,7 @@ void dumpEdges(const triSurface& surf, const boolList& borderEdge)
 {
     fileName fName("borderEdges.obj");
 
-    Info<< "Dumping borderEdges as Lightwave .obj file to " << fName
-        << "\nThis can be visualized with e.g. javaview (www.javaview.de)\n\n";
+    Info<< "Dumping borderEdges as obj file: " << fName << endl;
 
     OFstream os(fName);
 
@@ -129,7 +127,7 @@ void dumpFaces
     const Map<label>& connectedFaces
 )
 {
-    Info<< "Dumping connectedFaces as .obj file to " << fName << nl;
+    Info<< "Dumping connectedFaces as obj file: " << fName << endl;
 
     OFstream os(fName);
 

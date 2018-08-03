@@ -336,7 +336,7 @@ void Foam::blockMesh::createCellShapes
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::polyMesh* Foam::blockMesh::createTopology
+Foam::autoPtr<Foam::polyMesh> Foam::blockMesh::createTopology
 (
     const IOdictionary& meshDescription,
     const word& regionName
@@ -428,8 +428,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology
     }
 
 
-
-    polyMesh* blockMeshPtr = nullptr;
+    autoPtr<polyMesh> blockMeshPtr;
 
     // Create the patches
 
@@ -511,7 +510,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology
             }
         }
 
-        blockMeshPtr = new polyMesh
+        blockMeshPtr = autoPtr<polyMesh>::New
         (
             IOobject
             (
@@ -550,7 +549,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology
         cellShapeList tmpBlockCells(blocks.size());
         createCellShapes(tmpBlockCells);
 
-        blockMeshPtr = new polyMesh
+        blockMeshPtr = autoPtr<polyMesh>::New
         (
             IOobject
             (

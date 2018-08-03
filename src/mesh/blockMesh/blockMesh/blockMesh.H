@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,8 +93,9 @@ class blockMesh
         blockFaceList faces_;
 
         //- The blocks themselves (the topology) as a polyMesh
-        polyMesh* topologyPtr_;
+        autoPtr<polyMesh> topologyPtr_;
 
+        //- The sum of all cells in each block
         label nPoints_;
 
         //- The sum of all cells in each block
@@ -143,9 +144,13 @@ class blockMesh
 
         void createCellShapes(cellShapeList& tmpBlockCells);
 
-        polyMesh* createTopology(const IOdictionary&, const word& regionName);
+        autoPtr<polyMesh> createTopology
+        (
+            const IOdictionary& dict,
+            const word& regionName
+        );
 
-        void check(const polyMesh&, const dictionary&) const;
+        void check(const polyMesh& bm, const dictionary& dict) const;
 
         //- Determine the merge info and the final number of cells/points
         void calcMergeInfo();
@@ -159,8 +164,12 @@ class blockMesh
         void createCells() const;
         void createPatches() const;
 
-        //- As copy (not implemented)
+
+        //- No copy construct
         blockMesh(const blockMesh&) = delete;
+
+        //- No copy assignment
+        void operator=(const blockMesh&) = delete;
 
 
 public:
@@ -173,11 +182,11 @@ public:
     // Constructors
 
         //- Construct from IOdictionary
-        blockMesh(const IOdictionary&, const word& regionName);
+        blockMesh(const IOdictionary& dict, const word& regionName);
 
 
     //- Destructor
-    ~blockMesh();
+    ~blockMesh() = default;
 
 
     // Member Functions
@@ -195,6 +204,9 @@ public:
             {
                 return geometry_;
             }
+
+            //- True if the blockMesh topology exists
+            bool valid() const;
 
             //- Reference to point field defining the blockMesh
             //  these points have not been scaled by scaleFactor

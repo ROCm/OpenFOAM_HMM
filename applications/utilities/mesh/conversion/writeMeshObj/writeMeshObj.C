@@ -28,8 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    For mesh debugging: writes mesh as three separate OBJ files which can
-    be viewed with e.g. javaview.
+    For mesh debugging: writes mesh as three separate OBJ files.
 
     meshPoints_XXX.obj : all points and edges as lines.
     meshFaceCentres_XXX.obj : all face centres.
@@ -60,6 +59,7 @@ void writeOBJ(const point& pt, Ostream& os)
 {
     os  << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
 }
+
 
 // All edges of mesh
 void writePoints(const polyMesh& mesh, const fileName& timeName)
