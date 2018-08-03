@@ -144,11 +144,11 @@ bool Foam::functionObjects::turbulenceFields::read(const dictionary& dict)
 
     if (dict.found("field"))
     {
-        fieldSet_.insert(word(dict.lookup("field")));
+        fieldSet_.insert(dict.get<word>("field"));
     }
     else
     {
-        fieldSet_.insert(wordList(dict.lookup("fields")));
+        fieldSet_.insert(dict.get<wordList>("fields"));
     }
 
     Info<< type() << " " << name() << ": ";

@@ -59,10 +59,8 @@ Foam::functionObjects::CourantNo::byRho
     {
         return Co/obr_.lookupObject<volScalarField>(rhoName_);
     }
-    else
-    {
-        return Co;
-    }
+
+    return Co;
 }
 
 
@@ -85,35 +83,27 @@ bool Foam::functionObjects::CourantNo::calc()
 
         if (foundObject<volScalarField>(resultName_, false))
         {
-            volScalarField& Co
-            (
-                const_cast<volScalarField&>
-                (
-                    lookupObject<volScalarField>(resultName_)
-                )
-            );
+            volScalarField& Co =
+                lookupObjectRef<volScalarField>(resultName_);
 
             Co.ref() = Coi();
             Co.correctBoundaryConditions();
         }
         else
         {
-            tmp<volScalarField> tCo
+            auto tCo = tmp<volScalarField>::New
             (
-                new volScalarField
+                IOobject
                 (
-                    IOobject
-                    (
-                        resultName_,
-                        mesh_.time().timeName(),
-                        mesh_,
-                        IOobject::NO_READ,
-                        IOobject::NO_WRITE
-                    ),
+                    resultName_,
+                    mesh_.time().timeName(),
                     mesh_,
-                    dimensionedScalar(dimless, Zero),
-                    zeroGradientFvPatchScalarField::typeName
-                )
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh_,
+                dimensionedScalar(dimless, Zero),
+                zeroGradientFvPatchScalarField::typeName
             );
             tCo.ref().ref() = Coi();
             tCo.ref().correctBoundaryConditions();
@@ -122,10 +112,8 @@ bool Foam::functionObjects::CourantNo::calc()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

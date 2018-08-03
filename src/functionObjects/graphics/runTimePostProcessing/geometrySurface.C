@@ -140,8 +140,10 @@ Foam::functionObjects::runTimePostPro::geometrySurface::geometrySurface
 )
 :
     surface(parent, dict, colours),
-    fileNames_(dict.lookup("files"))
-{}
+    fileNames_()
+{
+    dict.readEntry("files", fileNames_);
+}
 
 
 Foam::functionObjects::runTimePostPro::geometrySurface::geometrySurface

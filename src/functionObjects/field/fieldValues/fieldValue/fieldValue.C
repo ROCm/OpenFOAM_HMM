@@ -95,8 +95,8 @@ bool Foam::functionObjects::fieldValue::read(const dictionary& dict)
     fvMeshFunctionObject::read(dict);
     writeFile::read(dict);
 
-    dict.lookup("fields") >> fields_;
-    dict.lookup("writeFields") >> writeFields_;
+    dict.readEntry("fields", fields_);
+    dict.readEntry("writeFields", writeFields_);
     scaleFactor_ = dict.lookupOrDefault<scalar>("scaleFactor", 1.0);
 
     return true;

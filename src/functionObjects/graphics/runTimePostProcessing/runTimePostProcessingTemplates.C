@@ -44,7 +44,7 @@ void Foam::functionObjects::runTimePostProcessing::readObjects
         }
 
         const dictionary& objectDict(iter().dict());
-        word objectType = objectDict.lookup("type");
+        const word objectType = objectDict.get<word>("type");
 
         objects.append
         (

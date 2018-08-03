@@ -97,9 +97,9 @@ bool Foam::functionObjects::runTimePostProcessing::read(const dictionary& dict)
     scene_.read(dict);
 
     const dictionary& outputDict = dict.subDict("output");
-    outputDict.lookup("name") >> output_.name_;
-    outputDict.lookup("width") >> output_.width_;
-    outputDict.lookup("height") >> output_.height_;
+    outputDict.readEntry("name", output_.name_);
+    outputDict.readEntry("width", output_.width_);
+    outputDict.readEntry("height", output_.height_);
 
 
     readObjects(dict.subOrEmptyDict("points"), points_);
@@ -117,11 +117,14 @@ bool Foam::functionObjects::runTimePostProcessing::read(const dictionary& dict)
                 << exit(FatalIOError);
         }
 
-        text_.append(new runTimePostPro::text
+        text_.append
         (
-            *this,
-            iter().dict(),
-            scene_.colours())
+            new runTimePostPro::text
+            (
+                *this,
+                iter().dict(),
+                scene_.colours()
+            )
         );
     }
 

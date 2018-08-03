@@ -81,22 +81,19 @@ Foam::functionObjects::blendingFactor::blendingFactor
     writeFileHeader(file());
     setResultName(typeName, "");
 
-    tmp<volScalarField> indicatorPtr
+    auto indicatorPtr = tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                resultName_,
-                time_.timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            resultName_,
+            time_.timeName(),
             mesh_,
-            dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar(dimless, Zero),
+        zeroGradientFvPatchScalarField::typeName
     );
 
     store(resultName_, indicatorPtr);

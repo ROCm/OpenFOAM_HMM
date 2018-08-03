@@ -91,10 +91,10 @@ bool Foam::functionObjects::processorField::read(const dictionary& dict)
 
 bool Foam::functionObjects::processorField::execute()
 {
-    const volScalarField& procField =
-        mesh_.lookupObject<volScalarField>("processorID");
+    volScalarField& procField =
+        mesh_.lookupObjectRef<volScalarField>("processorID");
 
-    const_cast<volScalarField&>(procField) ==
+    procField ==
         dimensionedScalar("proci", dimless, Pstream::myProcNo());
 
     return true;

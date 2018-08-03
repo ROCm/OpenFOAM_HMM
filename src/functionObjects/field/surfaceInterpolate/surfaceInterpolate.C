@@ -76,7 +76,7 @@ bool Foam::functionObjects::surfaceInterpolate::read
 {
     fvMeshFunctionObject::read(dict);
 
-    dict.lookup("fields") >> fieldSet_;
+    dict.readEntry("fields", fieldSet_);
 
     return true;
 }

@@ -36,7 +36,7 @@ Foam::autoPtr<Foam::heatTransferCoeffModel> Foam::heatTransferCoeffModel::New
     const word& TName
 )
 {
-    const word modelType(dict.lookup("htcModel"));
+    const word modelType(dict.get<word>("htcModel"));
 
     Info<< "Selecting heat transfer coefficient model " << modelType << endl;
 

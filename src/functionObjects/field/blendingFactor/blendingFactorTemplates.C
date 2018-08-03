@@ -72,10 +72,8 @@ void Foam::functionObjects::blendingFactor::calcBlendingFactor
     // - factor applied to 1st scheme, and (1-factor) to 2nd scheme
     // - not using the store(...) mechanism due to need to correct BCs
     volScalarField& indicator =
-        const_cast<volScalarField&>
-        (
-            lookupObject<volScalarField>(resultName_)
-        );
+        lookupObjectRef<volScalarField>(resultName_);
+
     indicator = 1 - fvc::cellReduce(factorf, minEqOp<scalar>(), GREAT);
     indicator.correctBoundaryConditions();
 }

@@ -57,20 +57,17 @@ Foam::volScalarField& Foam::functionObjects::energyTransport::transportedField()
 {
     if (!foundObject<volScalarField>(fieldName_))
     {
-        tmp<volScalarField> tfldPtr
+        auto tfldPtr = tmp<volScalarField>::New
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    fieldName_,
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::MUST_READ,
-                    IOobject::AUTO_WRITE
-                ),
-                mesh_
-            )
+                fieldName_,
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh_
         );
         store(fieldName_, tfldPtr);
     }
@@ -113,21 +110,18 @@ Foam::functionObjects::energyTransport::kappaEff() const
 Foam::tmp<Foam::volScalarField>
 Foam::functionObjects::energyTransport::rho() const
 {
-    tmp<volScalarField> trho
+    auto trho = tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "trho",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "trho",
+            mesh_.time().timeName(),
             mesh_,
-            rho_
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        rho_
     );
 
     if (phases_.size())
@@ -152,24 +146,19 @@ Foam::functionObjects::energyTransport::Cp() const
         return tCp;
     }
 
-    tmp<volScalarField> tCp
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "tCp",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "tCp",
+            mesh_.time().timeName(),
             mesh_,
-            Cp_
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        Cp_
     );
-
-    return tCp;
 }
 
 
@@ -187,24 +176,19 @@ Foam::functionObjects::energyTransport::kappa() const
         return tkappa;
     }
 
-    tmp<volScalarField> tkappa
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "tkappa",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "tkappa",
+            mesh_.time().timeName(),
             mesh_,
-            kappa_
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        kappa_
     );
-
-    return tkappa;
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -430,21 +414,18 @@ bool Foam::functionObjects::energyTransport::execute()
 
         const surfaceScalarField CpPhi(rhoCp*phi);
 
-        tmp<volScalarField> trhoCp
+        auto trhoCp = tmp<volScalarField>::New
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    "trhoCp",
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
+                "trhoCp",
+                mesh_.time().timeName(),
                 mesh_,
-                rhoCp
-            )
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            rhoCp
         );
 
         for (label i = 0; i <= nCorr_; i++)

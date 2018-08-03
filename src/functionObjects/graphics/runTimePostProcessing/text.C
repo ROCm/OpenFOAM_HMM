@@ -44,13 +44,15 @@ Foam::functionObjects::runTimePostPro::text::text
 )
 :
     geometryBase(parent, dict, colours),
-    string_(dict.lookup("string")),
-    position_(dict.lookup("position")),
-    size_(readScalar(dict.lookup("size"))),
+    string_(dict.get<string>("string")),
+    position_(),
+    size_(dict.get<scalar>("size")),
     colour_(nullptr),
-    bold_(readBool(dict.lookup("bold"))),
+    bold_(dict.get<bool>("bold")),
     timeStamp_(dict.lookupOrDefault("timeStamp", false))
 {
+    dict.readEntry("position", position_);
+
     if (dict.found("colour"))
     {
         colour_.reset(Function1<vector>::New("colour", dict).ptr());

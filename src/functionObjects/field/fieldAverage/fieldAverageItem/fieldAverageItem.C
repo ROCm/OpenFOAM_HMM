@@ -192,13 +192,13 @@ void Foam::functionObjects::fieldAverageItem::clear
 
 bool Foam::functionObjects::fieldAverageItem::readState(const dictionary& dict)
 {
-    dict.lookup("totalIter") >> totalIter_;
-    dict.lookup("totalTime") >> totalTime_;
+    dict.readEntry("totalIter", totalIter_);
+    dict.readEntry("totalTime", totalTime_);
 
     if (window_ > 0)
     {
-        dict.lookup("windowTimes") >> windowTimes_;
-        dict.lookup("windowFieldNames") >> windowFieldNames_;
+        dict.readEntry("windowTimes", windowTimes_);
+        dict.readEntry("windowFieldNames", windowFieldNames_);
     }
 
     return true;

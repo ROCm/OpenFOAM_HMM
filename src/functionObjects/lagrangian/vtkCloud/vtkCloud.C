@@ -364,7 +364,7 @@ bool Foam::functionObjects::vtkCloud::read(const dictionary& dict)
     writeOpts_.ascii
     (
         dict.found("format")
-     && (IOstream::formatEnum(dict.lookup("format")) == IOstream::ASCII)
+     && (IOstream::formatEnum(dict.get<word>("format")) == IOstream::ASCII)
     );
 
     writeOpts_.append(false);  // No append supported

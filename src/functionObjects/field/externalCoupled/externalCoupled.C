@@ -606,8 +606,8 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
             const dictionary& groupDict = regionIter().dict();
 
             const label nGroups = groupNames_.size();
-            const wordList readFields(groupDict.lookup("readFields"));
-            const wordList writeFields(groupDict.lookup("writeFields"));
+            const wordList readFields(groupDict.get<wordList>("readFields"));
+            const wordList writeFields(groupDict.get<wordList>("writeFields"));
 
             auto fnd = regionToGroups_.find(regionGroupNames_.last());
             if (fnd.found())

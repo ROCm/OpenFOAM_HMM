@@ -76,8 +76,8 @@ equationInitialResidualCondition
 )
 :
     runTimeCondition(name, obr, dict, state),
-    fieldNames_(dict.lookup("fields")),
-    value_(readScalar(dict.lookup("value"))),
+    fieldNames_(dict.get<wordList>("fields")),
+    value_(dict.get<scalar>("value")),
     timeStart_(dict.lookupOrDefault("timeStart", -GREAT)),
     mode_(operatingModeNames.lookup("mode", dict))
 {

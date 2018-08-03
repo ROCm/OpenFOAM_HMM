@@ -87,7 +87,7 @@ void Foam::functionObjects::runTimePostPro::scene::readCamera
     cameraUp_ = Function1<vector>::New("up", dict);
 
     dict.readIfPresent("clipBox", clipBox_);
-    dict.lookup("parallelProjection") >> parallelProjection_;
+    dict.readEntry("parallelProjection", parallelProjection_);
     if (!parallelProjection_)
     {
         if (dict.found("viewAngle"))

@@ -137,7 +137,7 @@ bool Foam::functionObjects::setFlow::read(const dictionary& dict)
     if (fvMeshFunctionObject::read(dict))
     {
         Info<< name() << ":" << endl;
-        mode_ = modeTypeNames.read(dict.lookup("mode"));
+        mode_ = modeTypeNames.lookup("mode", dict);
 
         Info<< "    operating mode: " << modeTypeNames[mode_] << endl;
 
@@ -176,22 +176,21 @@ bool Foam::functionObjects::setFlow::read(const dictionary& dict)
             case modeType::ROTATION:
             {
                 omegaPtr_ = Function1<scalar>::New("omega", dict);
-                dict.lookup("origin") >> origin_;
-                vector refDir(dict.lookup("refDir"));
-                refDir /= mag(refDir) + ROOTVSMALL;
-                vector axis(dict.lookup("axis"));
-                axis /= mag(axis) + ROOTVSMALL;
+
+                dict.readEntry("origin", origin_);
+                const vector refDir(dict.get<vector>("refDir").normalise());
+                const vector axis(dict.get<vector>("axis").normalise());
+
                 R_ = tensor(refDir, axis, refDir^axis);
                 break;
             }
             case modeType::VORTEX2D:
             case modeType::VORTEX3D:
             {
-                dict.lookup("origin") >> origin_;
-                vector refDir(dict.lookup("refDir"));
-                refDir /= mag(refDir) + ROOTVSMALL;
-                vector axis(dict.lookup("axis"));
-                axis /= mag(axis) + ROOTVSMALL;
+                dict.readEntry("origin", origin_);
+                const vector refDir(dict.get<vector>("refDir").normalise());
+                const vector axis(dict.get<vector>("axis").normalise());
+
                 R_ = tensor(refDir, axis, refDir^axis);
                 break;
             }

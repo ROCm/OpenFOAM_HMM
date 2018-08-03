@@ -39,26 +39,25 @@ bool Foam::functionObjects::randomise::calcRandomised()
 
         resultName_ = fieldName_ & "Random";
 
-        tmp<VolFieldType> rfieldt(new VolFieldType(field));
-        VolFieldType& rfield = rfieldt.ref();
+        auto trfield = tmp<VolFieldType>::New(field);
+        auto& rfield = trfield.ref();
 
         Random rand(1234567);
 
-        forAll(field, celli)
+        for (Type& cellval : rfield)
         {
             Type rndPert;
             rand.randomise01(rndPert);
             rndPert = 2.0*rndPert - pTraits<Type>::one;
             rndPert /= mag(rndPert);
-            rfield[celli] += magPerturbation_*rndPert;
+
+            cellval += magPerturbation_*rndPert;
         }
 
-        return store(resultName_, rfieldt);
+        return store(resultName_, trfield);
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

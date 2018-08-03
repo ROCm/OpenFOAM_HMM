@@ -865,7 +865,7 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
 
     if (fields_.empty())
     {
-        dict.lookup("fields") >> fields_;
+        dict.readEntry("fields", fields_);
 
         if (!fields_.found(UName_))
         {
@@ -878,8 +878,8 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
 
     Info<< "    Employing velocity field " << UName_ << endl;
 
-    dict.lookup("trackForward") >> trackForward_;
-    dict.lookup("lifeTime") >> lifeTime_;
+    dict.readEntry("trackForward", trackForward_);
+    dict.readEntry("lifeTime", lifeTime_);
     if (lifeTime_ < 1)
     {
         FatalErrorInFunction
@@ -916,8 +916,8 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
     sampledSetPtr_.clear();
     sampledSetAxis_.clear();
 
-    scalarFormatterPtr_ = writer<scalar>::New(dict.lookup("setFormat"));
-    vectorFormatterPtr_ = writer<vector>::New(dict.lookup("setFormat"));
+    scalarFormatterPtr_ = writer<scalar>::New(dict.get<word>("setFormat"));
+    vectorFormatterPtr_ = writer<vector>::New(dict.get<word>("setFormat"));
 
     return true;
 }

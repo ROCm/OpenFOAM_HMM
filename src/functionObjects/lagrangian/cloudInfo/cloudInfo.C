@@ -90,7 +90,7 @@ bool Foam::functionObjects::cloudInfo::read(const dictionary& dict)
 {
     if (regionFunctionObject::read(dict) && logFiles::read(dict))
     {
-        logFiles::resetNames(dict.lookup("clouds"));
+        logFiles::resetNames(dict.get<wordList>("clouds"));
 
         Info<< type() << " " << name() << ": ";
         if (writeToFile() && names().size())

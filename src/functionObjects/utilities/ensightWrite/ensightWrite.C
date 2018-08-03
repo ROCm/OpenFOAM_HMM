@@ -109,19 +109,16 @@ bool Foam::functionObjects::ensightWrite::read(const dictionary& dict)
     //
     writeOpts_.noPatches(dict.lookupOrDefault("noPatches", false));
 
-    if (dict.found("patches"))
+    wordRes list;
+    if (dict.readIfPresent("patches", list))
     {
-        wordRes list(dict.lookup("patches"));
         list.uniq();
-
         writeOpts_.patchSelection(list);
     }
 
-    if (dict.found("faceZones"))
+    if (dict.readIfPresent("faceZones", list))
     {
-        wordRes list(dict.lookup("faceZones"));
         list.uniq();
-
         writeOpts_.faceZoneSelection(list);
     }
 
@@ -147,7 +144,7 @@ bool Foam::functionObjects::ensightWrite::read(const dictionary& dict)
     //
     // output fields
     //
-    dict.lookup("fields") >> selectFields_;
+    dict.readEntry("fields", selectFields_);
     selectFields_.uniq();
 
     return true;

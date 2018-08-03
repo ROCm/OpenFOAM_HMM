@@ -105,13 +105,13 @@ bool Foam::functionObjects::histogram::read(const dictionary& dict)
     fvMeshFunctionObject::read(dict);
     writeFile::read(dict);
 
-    dict.lookup("field") >> fieldName_;
+    dict.readEntry("field", fieldName_);
 
     max_ = dict.lookupOrDefault<scalar>("max", -GREAT);
     min_ = dict.lookupOrDefault<scalar>("min", GREAT);
-    dict.lookup("nBins") >> nBins_;
+    dict.readEntry("nBins", nBins_);
 
-    word format(dict.lookup("setFormat"));
+    const word format(dict.get<word>("setFormat"));
     formatterPtr_ = writer<scalar>::New(format);
 
     return true;

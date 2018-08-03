@@ -260,10 +260,9 @@ bool Foam::functionObjects::nearWallFields::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
 
-    dict.lookup("fields") >> fieldSet_;
-    patchSet_ =
-        mesh_.boundaryMesh().patchSet(wordReList(dict.lookup("patches")));
-    distance_ = readScalar(dict.lookup("distance"));
+    dict.readEntry("fields", fieldSet_);
+    patchSet_ = mesh_.boundaryMesh().patchSet(dict.get<wordRes>("patches"));
+    distance_ = dict.get<scalar>("distance");
 
 
     // Clear out any previously loaded fields

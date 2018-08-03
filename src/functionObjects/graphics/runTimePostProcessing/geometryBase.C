@@ -86,7 +86,7 @@ Foam::functionObjects::runTimePostPro::geometryBase::geometryBase
 :
     parent_(parent),
     name_(dict.dictName()),
-    visible_(readBool(dict.lookup("visible"))),
+    visible_(dict.get<bool>("visible")),
     renderMode_(rmGouraud),
     opacity_(nullptr),
     colours_(colours)

@@ -56,28 +56,24 @@ int Foam::functionObjects::ddt2::apply(const word& inputName, int& state)
           : magSqr(input.dimensions()/dimTime)
         );
 
-        tmp<volScalarField> tddt2
+        auto tddt2 = tmp<volScalarField>::New
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    outputName,
-                    time_.timeName(),
-                    mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
+                outputName,
+                time_.timeName(),
                 mesh_,
-                dimensionedScalar(dims, Zero)
-            )
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            dimensionedScalar(dims, Zero)
         );
 
         store(outputName, tddt2);
     }
 
-    volScalarField& output =
-        const_cast<volScalarField&>(lookupObject<volScalarField>(outputName));
+    volScalarField& output = lookupObjectRef<volScalarField>(outputName);
 
     if (mag_)
     {

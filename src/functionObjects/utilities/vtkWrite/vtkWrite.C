@@ -87,7 +87,7 @@ bool Foam::functionObjects::vtkWrite::read(const dictionary& dict)
     writeOpts_.ascii
     (
         dict.found("format")
-     && (IOstream::formatEnum(dict.lookup("format")) == IOstream::ASCII)
+     && (IOstream::formatEnum(dict.get<word>("format")) == IOstream::ASCII)
     );
 
     // FUTURE?
@@ -115,7 +115,7 @@ bool Foam::functionObjects::vtkWrite::read(const dictionary& dict)
     //
     // output fields
     //
-    dict.lookup("fields") >> selectFields_;
+    dict.readEntry("fields", selectFields_);
     selectFields_.uniq();
 
     return true;

@@ -46,16 +46,12 @@ Foam::heatTransferCoeffModel::q() const
     const volScalarField& T = mesh_.lookupObject<volScalarField>(TName_);
     const volScalarField::Boundary& Tbf = T.boundaryField();
 
-    tmp<FieldField<Field, scalar>> tq
-    (
-        new FieldField<Field, scalar>(Tbf.size())
-    );
-
-    FieldField<Field, scalar>& q = tq.ref();
+    auto tq = tmp<FieldField<Field, scalar>>::New(Tbf.size());
+    auto& q = tq.ref();
 
     forAll(q, patchi)
     {
-        q.set(patchi, new Field<scalar>(Tbf[patchi].size(), 0));
+        q.set(patchi, new Field<scalar>(Tbf[patchi].size(), Zero));
     }
 
     typedef compressible::turbulenceModel cmpTurbModel;
@@ -71,7 +67,7 @@ Foam::heatTransferCoeffModel::q() const
         const volScalarField alphaEff(turb.alphaEff());
         const volScalarField::Boundary& alphaEffbf = alphaEff.boundaryField();
 
-        for (label patchi : patchSet_)
+        for (const label patchi : patchSet_)
         {
             q[patchi] = alphaEffbf[patchi]*hebf[patchi].snGrad();
         }
@@ -105,7 +101,7 @@ Foam::heatTransferCoeffModel::q() const
         const volScalarField& qr = mesh_.lookupObject<volScalarField>(qrName_);
         const volScalarField::Boundary& qrbf = qr.boundaryField();
 
-        for (label patchi : patchSet_)
+        for (const label patchi : patchSet_)
         {
             q[patchi] += qrbf[patchi];
         }
@@ -135,8 +131,7 @@ Foam::heatTransferCoeffModel::heatTransferCoeffModel
 
 bool Foam::heatTransferCoeffModel::read(const dictionary& dict)
 {
-    patchSet_ =
-        mesh_.boundaryMesh().patchSet(wordReList(dict.lookup("patches")));
+    patchSet_ = mesh_.boundaryMesh().patchSet(dict.get<wordRes>("patches"));
 
     dict.readIfPresent("qr", qrName_);
 

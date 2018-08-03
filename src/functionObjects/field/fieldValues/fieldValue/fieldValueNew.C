@@ -36,7 +36,7 @@ Foam::functionObjects::fieldValue::New
     const bool output
 )
 {
-    const word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     if (output)
     {

@@ -155,7 +155,7 @@ Foam::functionObjects::runTimePostPro::pathline::pathline
         }
         case rtTube:
         {
-            dict.lookup("tubeRadius") >> tubeRadius_;
+            dict.readEntry("tubeRadius", tubeRadius_);
             break;
         }
         case rtVector:

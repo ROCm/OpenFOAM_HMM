@@ -178,7 +178,6 @@ processSameTypeValues
             if (canWeight(weightField))
             {
                 tmp<scalarField> weight(weightingFactor(weightField));
-
                 result = gSum(weight*values);
             }
             else
@@ -466,8 +465,8 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::filterField
     const GeometricField<Type, fvPatchField, volMesh>& field
 ) const
 {
-    tmp<Field<Type>> tvalues(new Field<Type>(faceId_.size()));
-    Field<Type>& values = tvalues.ref();
+    auto tvalues = tmp<Field<Type>>::New(faceId_.size());
+    auto& values = tvalues.ref();
 
     forAll(values, i)
     {
@@ -501,8 +500,8 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::filterField
     const GeometricField<Type, fvsPatchField, surfaceMesh>& field
 ) const
 {
-    tmp<Field<Type>> tvalues(new Field<Type>(faceId_.size()));
-    Field<Type>& values = tvalues.ref();
+    auto tvalues = tmp<Field<Type>>::New(faceId_.size());
+    auto& values = tvalues.ref();
 
     forAll(values, i)
     {

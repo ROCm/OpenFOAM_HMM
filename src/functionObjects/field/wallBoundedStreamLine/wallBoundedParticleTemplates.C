@@ -166,8 +166,7 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
         }
 
         const triFace tri(currentTetIndices().faceTriIs(mesh(), false));
-        vector n = tri.normal(mesh().points());
-        n /= mag(n);
+        const vector n = tri.unitNormal(mesh().points());
 
         point projectedEndPosition = endPosition;
 

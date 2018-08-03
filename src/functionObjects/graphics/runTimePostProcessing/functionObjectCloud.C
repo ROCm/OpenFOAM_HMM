@@ -65,9 +65,9 @@ Foam::functionObjects::runTimePostPro::functionObjectCloud::functionObjectCloud
 :
     pointData(parent, dict, colours),
     functionObjectBase(parent, dict, colours),
-    cloudName_(dict.lookup("cloud")),
+    cloudName_(dict.get<word>("cloud")),
     inputFileName_(),
-    colourFieldName_(dict.lookup("colourField")),
+    colourFieldName_(dict.get<word>("colourField")),
     actor_()
 {
     actor_ = vtkSmartPointer<vtkActor>::New();

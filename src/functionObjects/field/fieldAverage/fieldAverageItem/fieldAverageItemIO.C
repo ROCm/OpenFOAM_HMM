@@ -66,8 +66,8 @@ Foam::Istream& Foam::functionObjects::operator>>
 
     faItem.active_ = false;
     faItem.fieldName_ = entry.keyword();
-    faItem.mean_ = readBool(entry.lookup("mean"));
-    faItem.prime2Mean_ = readBool(entry.lookup("prime2Mean"));
+    faItem.mean_ = entry.get<bool>("mean");
+    faItem.prime2Mean_ = entry.get<bool>("prime2Mean");
     faItem.base_ = faItem.baseTypeNames_.lookup("base", entry);
     faItem.window_ = entry.lookupOrDefault<scalar>("window", -1.0);
 
@@ -94,7 +94,7 @@ Foam::Istream& Foam::functionObjects::operator>>
 
             if (faItem.windowType_ == fieldAverageItem::windowType::EXACT)
             {
-                faItem.allowRestart_ = readBool(entry.lookup("allowRestart"));
+                faItem.allowRestart_ = entry.get<bool>("allowRestart");
 
                 if (!faItem.allowRestart_)
                 {

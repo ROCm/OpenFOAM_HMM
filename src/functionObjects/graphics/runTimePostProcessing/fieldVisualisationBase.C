@@ -484,7 +484,7 @@ Foam::functionObjects::fieldVisualisationBase::fieldVisualisationBase
 )
 :
     colours_(colours),
-    fieldName_(dict.lookup("field")),
+    fieldName_(dict.get<word>("field")),
     colourBy_(cbColour),
     colourMap_(cmRainbow),
     range_()
@@ -500,7 +500,7 @@ Foam::functionObjects::fieldVisualisationBase::fieldVisualisationBase
         }
         case cbField:
         {
-            dict.lookup("range") >> range_;
+            dict.readEntry("range", range_);
 
             if (dict.found("colourMap"))
             {
@@ -508,15 +508,15 @@ Foam::functionObjects::fieldVisualisationBase::fieldVisualisationBase
             }
 
             const dictionary& sbarDict = dict.subDict("scalarBar");
-            sbarDict.lookup("visible") >> scalarBar_.visible_;
+            sbarDict.readEntry("visible", scalarBar_.visible_);
             if (scalarBar_.visible_)
             {
-                sbarDict.lookup("vertical") >> scalarBar_.vertical_;
-                sbarDict.lookup("position") >> scalarBar_.position_;
-                sbarDict.lookup("title") >> scalarBar_.title_;
-                sbarDict.lookup("fontSize") >> scalarBar_.fontSize_;
-                sbarDict.lookup("labelFormat") >> scalarBar_.labelFormat_;
-                sbarDict.lookup("numberOfLabels") >> scalarBar_.numberOfLabels_;
+                sbarDict.readEntry("vertical", scalarBar_.vertical_);
+                sbarDict.readEntry("position", scalarBar_.position_);
+                sbarDict.readEntry("title", scalarBar_.title_);
+                sbarDict.readEntry("fontSize", scalarBar_.fontSize_);
+                sbarDict.readEntry("labelFormat", scalarBar_.labelFormat_);
+                sbarDict.readEntry("numberOfLabels", scalarBar_.numberOfLabels_);
             }
             break;
         }

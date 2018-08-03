@@ -134,7 +134,7 @@ bool Foam::functionObjects::ddt2::read(const dictionary& dict)
         return false;
     }
 
-    dict.lookup("fields") >> selectFields_;
+    dict.readEntry("fields", selectFields_);
     selectFields_.uniq();
 
     Info<< type() << " fields: " << selectFields_ << nl;

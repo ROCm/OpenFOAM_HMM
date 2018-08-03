@@ -80,10 +80,10 @@ bool Foam::functionObjects::particleDistribution::read(const dictionary& dict)
 {
     if (fvMeshFunctionObject::read(dict) && writeFile::read(dict))
     {
-        dict.lookup("cloud") >> cloudName_;
-        dict.lookup("nameVsBinWidth") >> nameVsBinWidth_;
+        dict.readEntry("cloud", cloudName_);
+        dict.readEntry("nameVsBinWidth", nameVsBinWidth_);
         dict.readIfPresent("tagField", tagFieldName_);
-        word format(dict.lookup("setFormat"));
+        const word format(dict.get<word>("setFormat"));
         writerPtr_ = writer<scalar>::New(format);
 
         Info<< type() << " " << name() << " output:" << nl

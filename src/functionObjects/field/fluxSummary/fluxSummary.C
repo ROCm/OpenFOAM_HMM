@@ -448,8 +448,7 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
 
         if (((own != -1) && (nbr == -1)) || ((own == -1) && (nbr != -1)))
         {
-            vector n = mesh_.faces()[facei].normal(mesh_.points());
-            n /= mag(n) + ROOTVSMALL;
+            vector n = mesh_.faces()[facei].unitNormal(mesh_.points());
 
             if ((n & refDir) > tolerance_)
             {
@@ -481,8 +480,7 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
 
             if ((own != -1) && (nbr == -1))
             {
-                vector n = mesh_.faces()[facei].normal(mesh_.points());
-                n /= mag(n) + ROOTVSMALL;
+                vector n = mesh_.faces()[facei].unitNormal(mesh_.points());
 
                 if ((n & refDir) > tolerance_)
                 {
@@ -835,7 +833,7 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
     {
         case mdFaceZone:
         {
-            List<word> zones(dict.lookup("faceZones"));
+            wordList zones(dict.get<wordList>("faceZones"));
 
             forAll(zones, i)
             {
@@ -853,8 +851,8 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
         }
         case mdFaceZoneAndDirection:
         {
-            List<Tuple2<word, vector>>
-                zoneAndDirection(dict.lookup("faceZoneAndDirection"));
+            List<Tuple2<word, vector>> zoneAndDirection;
+            dict.readEntry("faceZoneAndDirection", zoneAndDirection);
 
             forAll(zoneAndDirection, i)
             {
@@ -873,8 +871,8 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
         }
         case mdCellZoneAndDirection:
         {
-            List<Tuple2<word, vector>>
-                zoneAndDirection(dict.lookup("cellZoneAndDirection"));
+            List<Tuple2<word, vector>> zoneAndDirection;
+            dict.readEntry("cellZoneAndDirection", zoneAndDirection);
 
             forAll(zoneAndDirection, i)
             {
@@ -893,7 +891,7 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
         }
         case mdSurface:
         {
-            List<word> surfs(dict.lookup("surfaces"));
+            wordList surfs(dict.get<wordList>("surfaces"));
 
             forAll(surfs, i)
             {
@@ -909,8 +907,8 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
         }
         case mdSurfaceAndDirection:
         {
-            List<Tuple2<word, vector>>
-                surfAndDirection(dict.lookup("surfaceAndDirection"));
+            List<Tuple2<word, vector>> surfAndDirection;
+            dict.readEntry("surfaceAndDirection", surfAndDirection);
 
             forAll(surfAndDirection, i)
             {

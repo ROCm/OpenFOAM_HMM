@@ -87,7 +87,7 @@ Foam::functionObjects::valueAverage::valueAverage
             if (dict.found(fieldName))
             {
                 const dictionary& valueDict = dict.subDict(fieldName);
-                totalTime_[fieldi] = readScalar(valueDict.lookup("totalTime"));
+                totalTime_[fieldi] = valueDict.get<scalar>("totalTime");
             }
         }
     }
@@ -112,8 +112,8 @@ bool Foam::functionObjects::valueAverage::read(const dictionary& dict)
     // Make certain that the values are consistent with the defaults:
     resetOnRestart_ = false;
 
-    dict.lookup("functionObject") >> functionObjectName_;
-    dict.lookup("fields") >> fieldNames_;
+    dict.readEntry("functionObject", functionObjectName_);
+    dict.readEntry("fields", fieldNames_);
     if (dict.readIfPresent("window", window_))
     {
         window_ = obr().time().userTimeToTime(window_);

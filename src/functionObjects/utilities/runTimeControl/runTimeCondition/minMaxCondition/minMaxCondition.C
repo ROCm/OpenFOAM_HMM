@@ -83,10 +83,10 @@ Foam::functionObjects::runTimeControls::minMaxCondition::minMaxCondition
 )
 :
     runTimeCondition(name, obr, dict, state),
-    functionObjectName_(dict.lookup("functionObject")),
+    functionObjectName_(dict.get<word>("functionObject")),
     mode_(modeTypeNames_.lookup("mode", dict)),
-    fieldNames_(dict.lookup("fields")),
-    value_(readScalar(dict.lookup("value")))
+    fieldNames_(dict.get<wordList>("fields")),
+    value_(dict.get<scalar>("value"))
 {}
 
 

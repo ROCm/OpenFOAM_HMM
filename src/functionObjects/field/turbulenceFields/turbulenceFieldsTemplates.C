@@ -40,8 +40,7 @@ void Foam::functionObjects::turbulenceFields::processField
 
     if (obr_.foundObject<FieldType>(scopedName))
     {
-        FieldType& fld =
-            const_cast<FieldType&>(obr_.lookupObject<FieldType>(scopedName));
+        FieldType& fld = obr_.lookupObjectRef<FieldType>(scopedName);
         fld == tvalue();
     }
     else if (obr_.found(scopedName))

@@ -83,29 +83,25 @@ int Foam::functionObjects::zeroGradient::apply
 
     if (!foundObject<VolFieldType>(outputName))
     {
-        tmp<VolFieldType> tzg
+        auto tzeroGrad = tmp<VolFieldType>::New
         (
-            new VolFieldType
+            IOobject
             (
-                IOobject
-                (
-                    outputName,
-                    time_.timeName(),
-                    mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
+                outputName,
+                time_.timeName(),
                 mesh_,
-                dimensioned<Type>(input.dimensions(), Zero),
-                zeroGradientFvPatchField<Type>::typeName
-            )
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            dimensioned<Type>(input.dimensions(), Zero),
+            zeroGradientFvPatchField<Type>::typeName
         );
 
-        store(outputName, tzg);
+        store(outputName, tzeroGrad);
     }
 
-    VolFieldType& output =
-        const_cast<VolFieldType&>(lookupObject<VolFieldType>(outputName));
+    VolFieldType& output = lookupObjectRef<VolFieldType>(outputName);
 
     output = input;
     output.correctBoundaryConditions();

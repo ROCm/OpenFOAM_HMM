@@ -90,15 +90,15 @@ bool Foam::functionObjects::writeObjects::read(const dictionary& dict)
     if (dict.found("field"))
     {
         objectNames_.setSize(1);
-        dict.lookup("field") >> objectNames_[0];
+        dict.readEntry("field", objectNames_[0]);
     }
     else if (dict.found("fields"))
     {
-        dict.lookup("fields") >> objectNames_;
+        dict.readEntry("fields", objectNames_);
     }
     else
     {
-        dict.lookup("objects") >> objectNames_;
+        dict.readEntry("objects", objectNames_);
     }
 
     writeOption_ = writeOptionNames_.lookupOrDefault

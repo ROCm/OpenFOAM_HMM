@@ -101,7 +101,7 @@ Foam::functionObjects::runTimePostPro::pointData::pointData
     (
         representationTypeNames.lookup("representation", dict)
     ),
-    maxGlyphLength_(readScalar(dict.lookup("maxGlyphLength"))),
+    maxGlyphLength_(dict.get<scalar>("maxGlyphLength")),
     pointColour_(nullptr)
 {
     if (dict.found("pointColour"))

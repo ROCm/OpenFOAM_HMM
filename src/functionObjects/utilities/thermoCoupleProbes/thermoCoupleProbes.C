@@ -56,7 +56,7 @@ Foam::functionObjects::thermoCoupleProbes::thermoCoupleProbes
     probes(name, runTime, dict, loadFromFiles, false),
     ODESystem(),
     UName_(dict.lookupOrDefault<word>("U", "U")),
-    radiationFieldName_(dict.lookup("radiationField")),
+    radiationFieldName_(dict.get<word>("radiationField")),
     thermo_(mesh_.lookupObject<fluidThermo>(basicThermo::dictName)),
     odeSolver_(nullptr),
     Ttc_()
@@ -71,7 +71,7 @@ Foam::functionObjects::thermoCoupleProbes::thermoCoupleProbes
     dictionary probeDict;
     if (getDict(typeName, probeDict))
     {
-        probeDict.lookup("Tc") >> Ttc_;
+        probeDict.readEntry("Tc", Ttc_);
     }
     else
     {
@@ -198,10 +198,10 @@ bool Foam::functionObjects::thermoCoupleProbes::read(const dictionary& dict)
 {
     if (probes::read(dict))
     {
-        rho_ = readScalar(dict.lookup("rho"));
-        Cp_ = readScalar(dict.lookup("Cp"));
-        d_ = readScalar(dict.lookup("d"));
-        epsilon_ = readScalar(dict.lookup("epsilon"));
+        dict.readEntry("rho", rho_);
+        dict.readEntry("Cp", Cp_);
+        dict.readEntry("d", d_);
+        dict.readEntry("epsilon", epsilon_);
         return true;
     }
 

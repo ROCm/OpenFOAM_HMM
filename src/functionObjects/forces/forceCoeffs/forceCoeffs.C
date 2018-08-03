@@ -243,24 +243,24 @@ bool Foam::functionObjects::forceCoeffs::read(const dictionary& dict)
     forces::read(dict);
 
     // Directions for lift and drag forces, and pitch moment
-    dict.lookup("liftDir") >> liftDir_;
-    dict.lookup("dragDir") >> dragDir_;
-    dict.lookup("pitchAxis") >> pitchAxis_;
+    dict.readEntry("liftDir", liftDir_);
+    dict.readEntry("dragDir", dragDir_);
+    dict.readEntry("pitchAxis", pitchAxis_);
 
     // Free stream velocity magnitude
-    dict.lookup("magUInf") >> magUInf_;
+    dict.readEntry("magUInf", magUInf_);
 
     // If case is compressible we must read rhoInf (store in rhoRef_) to
     // calculate the reference dynamic pressure
     // - note: for incompressible, rhoRef_ is already initialised
     if (rhoName_ != "rhoInf")
     {
-        dict.lookup("rhoInf") >> rhoRef_;
+        dict.readEntry("rhoInf", rhoRef_);
     }
 
     // Reference length and area scales
-    dict.lookup("lRef") >> lRef_;
-    dict.lookup("Aref") >> Aref_;
+    dict.readEntry("lRef", lRef_);
+    dict.readEntry("Aref", Aref_);
 
     if (writeFields_)
     {
@@ -402,16 +402,10 @@ bool Foam::functionObjects::forceCoeffs::execute()
             lookupObject<volVectorField>(fieldName("moment"));
 
         volVectorField& forceCoeff =
-            const_cast<volVectorField&>
-            (
-                lookupObject<volVectorField>(fieldName("forceCoeff"))
-            );
+            lookupObjectRef<volVectorField>(fieldName("forceCoeff"));
 
         volVectorField& momentCoeff =
-            const_cast<volVectorField&>
-            (
-                lookupObject<volVectorField>(fieldName("momentCoeff"))
-            );
+            lookupObjectRef<volVectorField>(fieldName("momentCoeff"));
 
         dimensionedScalar f0("f0", dimForce, Aref_*pDyn);
         dimensionedScalar m0("m0", dimForce*dimLength, Aref_*lRef_*pDyn);

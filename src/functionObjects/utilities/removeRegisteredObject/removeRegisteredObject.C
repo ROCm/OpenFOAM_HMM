@@ -74,7 +74,7 @@ bool Foam::functionObjects::removeRegisteredObject::read(const dictionary& dict)
 {
     regionFunctionObject::read(dict);
 
-    dict.lookup("objects") >> objectNames_;
+    dict.readEntry("objects", objectNames_);
 
     return true;
 }

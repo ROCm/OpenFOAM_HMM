@@ -184,11 +184,11 @@ Foam::functionObjects::runTimePostPro::surface::surface
 
     if (representation_ == rtGlyph)
     {
-        dict.lookup("maxGlyphLength") >> maxGlyphLength_;
+        dict.readEntry("maxGlyphLength", maxGlyphLength_);
     }
     else
     {
-        dict.lookup("featureEdges") >> featureEdges_;
+        dict.readEntry("featureEdges", featureEdges_);
     }
 }
 

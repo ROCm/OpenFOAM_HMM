@@ -58,20 +58,17 @@ Foam::volScalarField& Foam::functionObjects::scalarTransport::transportedField()
 {
     if (!foundObject<volScalarField>(fieldName_))
     {
-        tmp<volScalarField> tfldPtr
+        auto tfldPtr = tmp<volScalarField>::New
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    fieldName_,
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::MUST_READ,
-                    IOobject::AUTO_WRITE
-                ),
-                mesh_
-            )
+                fieldName_,
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh_
         );
         store(fieldName_, tfldPtr);
 
@@ -81,10 +78,7 @@ Foam::volScalarField& Foam::functionObjects::scalarTransport::transportedField()
         }
     }
 
-    return const_cast<volScalarField&>
-    (
-        lookupObject<volScalarField>(fieldName_)
-    );
+    return lookupObjectRef<volScalarField>(fieldName_);
 }
 
 

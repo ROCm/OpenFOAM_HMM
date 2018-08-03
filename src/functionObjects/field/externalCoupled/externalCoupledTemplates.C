@@ -278,8 +278,8 @@ Foam::functionObjects::externalCoupled::gatherAndCombine
     Pstream::gatherList(gatheredValues);
 
 
-    tmp<Field<Type>> tresult(new Field<Type>(0));
-    Field<Type>& result = tresult.ref();
+    auto tresult = tmp<Field<Type>>::New();
+    auto& result = tresult.ref();
 
     if (Pstream::master())
     {

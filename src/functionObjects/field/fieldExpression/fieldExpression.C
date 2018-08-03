@@ -97,12 +97,12 @@ bool Foam::functionObjects::fieldExpression::read(const dictionary& dict)
 
     if (fieldName_.empty() || dict.found("field"))
     {
-        dict.lookup("field") >> fieldName_;
+        dict.readEntry("field", fieldName_);
     }
 
     if (dict.found("result"))
     {
-        dict.lookup("result") >> resultName_;
+        dict.readEntry("result", resultName_);
     }
 
     return true;

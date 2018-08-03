@@ -71,27 +71,21 @@ Foam::tmp<Foam::pointScalarField> Foam::functionObjects::streamFunction::calc
 
     const pointMesh& pMesh = pointMesh::New(mesh_);
 
-    tmp<pointScalarField> tstreamFunction
+    auto tstreamFunction = tmp<pointScalarField>::New
     (
-        new pointScalarField
+        IOobject
         (
-            IOobject
-            (
-                "streamFunction",
-                time_.timeName(),
-                mesh_
-            ),
-            pMesh,
-            dimensionedScalar(phi.dimensions(), Zero)
-        )
+            "streamFunction",
+            time_.timeName(),
+            mesh_
+        ),
+        pMesh,
+        dimensionedScalar(phi.dimensions(), Zero)
     );
     pointScalarField& streamFunction = tstreamFunction.ref();
 
-    labelList visitedPoint(mesh_.nPoints());
-    forAll(visitedPoint, pointi)
-    {
-        visitedPoint[pointi] = 0;
-    }
+    labelList visitedPoint(mesh_.nPoints(), Zero);
+
     label nVisited = 0;
     label nVisitedOld = 0;
 
@@ -263,7 +257,7 @@ Foam::tmp<Foam::pointScalarField> Foam::functionObjects::streamFunction::calc
                                     points[curBPoints[pointi]]
                                   - currentBStreamPoint;
                                 edgeHat.replace(slabDir, 0);
-                                edgeHat /= mag(edgeHat);
+                                edgeHat.normalise();
 
                                 vector nHat = unitAreas[facei];
 
@@ -356,7 +350,7 @@ Foam::tmp<Foam::pointScalarField> Foam::functionObjects::streamFunction::calc
                                 points[curPoints[pointi]] - currentStreamPoint;
 
                             edgeHat.replace(slabDir, 0);
-                            edgeHat /= mag(edgeHat);
+                            edgeHat.normalise();
 
                             vector nHat = unitAreas[facei];
 

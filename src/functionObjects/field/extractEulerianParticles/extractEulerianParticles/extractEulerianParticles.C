@@ -584,8 +584,8 @@ bool Foam::functionObjects::extractEulerianParticles::read
 
     if (fvMeshFunctionObject::read(dict) && writeFile::read(dict))
     {
-        dict.lookup("faceZone") >> faceZoneName_;
-        dict.lookup("alpha") >> alphaName_;
+        dict.readEntry("faceZone", faceZoneName_);
+        dict.readEntry("alpha", alphaName_);
 
         dict.readIfPresent("alphaThreshold", alphaThreshold_);
         dict.readIfPresent("U", UName_);

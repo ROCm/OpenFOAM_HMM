@@ -59,7 +59,7 @@ minTimeStepCondition
 )
 :
     runTimeCondition(name, obr, dict, state),
-    minValue_(readScalar(dict.lookup("minValue")))
+    minValue_(dict.get<scalar>("minValue"))
 {}
 
 

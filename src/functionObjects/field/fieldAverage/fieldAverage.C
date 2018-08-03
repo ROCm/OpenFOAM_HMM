@@ -305,13 +305,13 @@ bool Foam::functionObjects::fieldAverage::read(const dictionary& dict)
     dict.readIfPresent("restartOnRestart", restartOnRestart_);
     dict.readIfPresent("restartOnOutput",  restartOnOutput_);
     dict.readIfPresent("periodicRestart",  periodicRestart_);
-    dict.lookup("fields") >> faItems_;
+    dict.readEntry("fields", faItems_);
 
     const scalar currentTime = obr().time().value();
 
     if (periodicRestart_)
     {
-        scalar userRestartPeriod = readScalar(dict.lookup("restartPeriod"));
+        scalar userRestartPeriod = dict.get<scalar>("restartPeriod");
         restartPeriod_ = obr().time().userTimeToTime(userRestartPeriod);
 
         if (restartPeriod_ > 0)

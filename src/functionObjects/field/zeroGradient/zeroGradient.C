@@ -112,7 +112,7 @@ bool Foam::functionObjects::zeroGradient::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
 
-    dict.lookup("fields") >> selectFields_;
+    dict.readEntry("fields", selectFields_);
     selectFields_.uniq();
 
     Info<< type() << " fields: " << selectFields_ << nl;

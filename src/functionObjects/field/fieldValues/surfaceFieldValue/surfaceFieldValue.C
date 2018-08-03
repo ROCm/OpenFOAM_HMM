@@ -484,7 +484,7 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::initialise
     const dictionary& dict
 )
 {
-    dict.lookup("name") >> regionName_;
+    dict.readEntry("name", regionName_);
 
     switch (regionType_)
     {
@@ -616,7 +616,7 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::initialise
     surfaceWriterPtr_.clear();
     if (writeFields_)
     {
-        const word surfaceFormat(dict.lookup("surfaceFormat"));
+        const word surfaceFormat(dict.get<word>("surfaceFormat"));
 
         if (surfaceFormat != "none")
         {
@@ -687,12 +687,12 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::processValues
     {
         case opSumDirection:
         {
-            const vector n(dict_.lookup("direction"));
+            const vector n(dict_.get<vector>("direction"));
             return gSum(pos0(values*(Sf & n))*mag(values));
         }
         case opSumDirectionBalance:
         {
-            const vector n(dict_.lookup("direction"));
+            const vector n(dict_.get<vector>("direction"));
             const scalarField nv(values*(Sf & n));
 
             return gSum(pos0(nv)*mag(values) - neg(nv)*mag(values));
@@ -758,16 +758,14 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::processValues
     {
         case opSumDirection:
         {
-            vector n(dict_.lookup("direction"));
-            n /= mag(n) + ROOTVSMALL;
+            const vector n(dict_.get<vector>("direction").normalise());
 
             const scalarField nv(n & values);
             return gSum(pos0(nv)*n*(nv));
         }
         case opSumDirectionBalance:
         {
-            vector n(dict_.lookup("direction"));
-            n /= mag(n) + ROOTVSMALL;
+            const vector n(dict_.get<vector>("direction").normalise());
 
             const scalarField nv(n & values);
             return gSum(pos0(nv)*n*(nv));
