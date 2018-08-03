@@ -855,7 +855,7 @@ Foam::surfaceLocation Foam::triSurfaceTools::cutEdge
     scalar norm = 0;
     forAll(d, fp)
     {
-        d[fp] = (points[f[fp]]-cutPlane.refPoint()) & cutPlane.normal();
+        d[fp] = cutPlane.signedDistance(points[f[fp]]);
         norm += mag(d[fp]);
     }
 

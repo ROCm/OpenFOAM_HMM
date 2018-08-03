@@ -145,7 +145,7 @@ void Foam::searchablePlane::boundingSpheres
 ) const
 {
     centres.setSize(1);
-    centres[0] = refPoint();
+    centres[0] = origin();
 
     radiusSqr.setSize(1);
     radiusSqr[0] = Foam::sqr(GREAT);

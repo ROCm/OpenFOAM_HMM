@@ -203,9 +203,9 @@ inline void Foam::boundBox::add
 {
     if (!points.empty())
     {
-        forAll(indices, i)
+        for (const label pointi : indices)
         {
-            add(points[indices[i]]);
+            add(points[pointi]);
         }
     }
 }

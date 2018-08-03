@@ -45,7 +45,7 @@ SourceFiles
 #ifndef searchableDisk_H
 #define searchableDisk_H
 
-#include "treeBoundBox.H"
+#include "plane.H"
 #include "searchableSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -59,17 +59,12 @@ namespace Foam
 
 class searchableDisk
 :
-    public searchableSurface
+    public searchableSurface,
+    public plane
 {
 private:
 
     // Private Member Data
-
-        //- Origin
-        const point origin_;
-
-        //- Normal
-        vector normal_;
 
         //- Radius
         const scalar radius_;
@@ -116,8 +111,8 @@ public:
         searchableDisk
         (
             const IOobject& io,
-            const point& origin,
-            const point& normal,
+            const point& originPoint,
+            const vector& normalVector,
             const scalar radius
         );
 
@@ -127,6 +122,7 @@ public:
             const IOobject& io,
             const dictionary& dict
         );
+
 
     //- Destructor
     virtual ~searchableDisk() = default;
@@ -153,7 +149,7 @@ public:
         //  Usually the element centres (should be of length size()).
         virtual tmp<pointField> coordinates() const
         {
-            return tmp<pointField>::New(1, origin_);
+            return tmp<pointField>::New(one(), origin());
         }
 
         //- Get bounding spheres (centre and radius squared), one per element.
@@ -220,7 +216,7 @@ public:
             virtual void getNormal
             (
                 const List<pointIndexHit>&,
-                vectorField& normal
+                vectorField& normals
             ) const;
 
             //- Determine type (inside/outside/mixed) for point.

@@ -1080,7 +1080,7 @@ void Foam::isoSurface::trimToPlanes
 
     forAll(planes, faceI)
     {
-        const plane& pl = planes[faceI];
+        const plane& pln = planes[faceI];
 
         if (useA)
         {
@@ -1088,7 +1088,7 @@ void Foam::isoSurface::trimToPlanes
             forAll(insideOpA.tris_, i)
             {
                 const triPoints& tri = insideOpA.tris_[i];
-                triPointRef(tri).sliceWithPlane(pl, insideOpB, dop);
+                triPointRef(tri).sliceWithPlane(pln, insideOpB, dop);
             }
         }
         else
@@ -1097,7 +1097,7 @@ void Foam::isoSurface::trimToPlanes
             forAll(insideOpB.tris_, i)
             {
                 const triPoints& tri = insideOpB.tris_[i];
-                triPointRef(tri).sliceWithPlane(pl, insideOpA, dop);
+                triPointRef(tri).sliceWithPlane(pln, insideOpA, dop);
             }
         }
         useA = !useA;
@@ -1141,13 +1141,11 @@ void Foam::isoSurface::trimToBox
     }
 
     // Generate inwards pointing planes
-    PtrList<plane> planes(6);
-    const pointField pts(bb.treeBoundBox::points());
-    forAll(treeBoundBox::faces, faceI)
+    PtrList<plane> planes(treeBoundBox::faceNormals.size());
+    forAll(treeBoundBox::faceNormals, faceI)
     {
-        const face& f = treeBoundBox::faces[faceI];
         const vector& n = treeBoundBox::faceNormals[faceI];
-        planes.set(faceI, new plane(pts[f[0]], -n));
+        planes.set(faceI, new plane(bb.faceCentre(faceI), -n));
     }
 
     label nTris = triPoints.size()/3;

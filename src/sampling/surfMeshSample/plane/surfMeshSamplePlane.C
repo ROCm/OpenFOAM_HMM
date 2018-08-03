@@ -91,7 +91,7 @@ Foam::surfMeshSamplePlane::surfMeshSamplePlane
     {
         coordinateSystem cs(mesh, dict.subDict("coordinateSystem"));
 
-        const point  base = cs.globalPosition(planeDesc().refPoint());
+        const point  base = cs.globalPosition(planeDesc().origin());
         const vector norm = cs.globalVector(planeDesc().normal());
 
         // Assign the plane description
@@ -263,8 +263,8 @@ bool Foam::surfMeshSamplePlane::sample
 void Foam::surfMeshSamplePlane::print(Ostream& os) const
 {
     os  << "surfMeshSamplePlane: " << name() << " :"
-        << "  base:" << cuttingPlane::refPoint()
-        << "  normal:" << cuttingPlane::normal()
+        << "  base:" << plane::origin()
+        << "  normal:" << plane::normal()
         << "  triangulate:" << triangulate_
         << "  faces:"  << SurfaceSource::surfFaces().size()
         << "  points:" << SurfaceSource::points().size();

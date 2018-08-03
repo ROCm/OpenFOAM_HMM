@@ -134,7 +134,7 @@ public:
         //  Usually the element centres (should be of length size()).
         virtual tmp<pointField> coordinates() const
         {
-            return tmp<pointField>::New(1, refPoint());
+            return tmp<pointField>::New(1, origin());
         }
 
         //- Get bounding spheres (centre and radius squared), one per element.

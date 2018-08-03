@@ -51,7 +51,7 @@ typename Foam::cut::opAddResult<AboveOp, BelowOp>::type Foam::triCut
     // opposite the first vertex. This may change the sign of the tri.
     FixedList<label, 3> indices({0, 1, 2});
     label i;
-    for (i = 0; i < 3; ++ i)
+    for (i = 0; i < 3; ++i)
     {
         if (level[(i + 1)%3]*level[(i + 2)%3] >= 0)
         {
@@ -80,7 +80,7 @@ typename Foam::cut::opAddResult<AboveOp, BelowOp>::type Foam::triCut
 
     // Slice off one corner to form a tri and a quad
     Pair<scalar> f;
-    for (label i = 0; i < 2; ++ i)
+    for (label i = 0; i < 2; ++i)
     {
         f[i] = l[0]/(l[0] - l[i+1]);
     }
@@ -99,7 +99,7 @@ template<class AboveOp, class BelowOp>
 typename Foam::cut::opAddResult<AboveOp, BelowOp>::type Foam::triCut
 (
     const FixedList<point, 3>& tri,
-    const plane& p,
+    const plane& pln,
     const AboveOp& aboveOp,
     const BelowOp& belowOp
 )
@@ -108,8 +108,7 @@ typename Foam::cut::opAddResult<AboveOp, BelowOp>::type Foam::triCut
     FixedList<scalar, 3> level;
     for (label i = 0; i < 3; ++i)
     {
-        // uses unit-normal
-        level[i] = (tri[i] - p.refPoint()) & p.normal();
+        level[i] = pln.signedDistance(tri[i]);
     }
 
     // Run the level set function
@@ -129,7 +128,7 @@ typename Foam::cut::opAddResult<AboveOp, BelowOp>::type Foam::tetCut
     // Get the min and max over all four vertices and quick return if there is
     // no change of sign
     scalar levelMin = VGREAT, levelMax = - VGREAT;
-    for (label i = 0; i < 4; ++ i)
+    for (label i = 0; i < 4; ++i)
     {
         levelMin = min(levelMin, level[i]);
         levelMax = max(levelMax, level[i]);
@@ -176,7 +175,7 @@ typename Foam::cut::opAddResult<AboveOp, BelowOp>::type Foam::tetCut
     if (n > 2)
     {
         n = 4 - n;
-        for (label i = 0; i < 2; ++ i)
+        for (label i = 0; i < 2; ++i)
         {
             Swap(indices[i], indices[3-i]);
         }
@@ -199,7 +198,7 @@ typename Foam::cut::opAddResult<AboveOp, BelowOp>::type Foam::tetCut
     {
         // Slice off one corner to form a tet and a prism
         FixedList<scalar, 3> f;
-        for (label i = 0; i < 3; ++ i)
+        for (label i = 0; i < 3; ++i)
         {
             f[i] = l[0]/(l[0] - l[i+1]);
         }
@@ -216,9 +215,9 @@ typename Foam::cut::opAddResult<AboveOp, BelowOp>::type Foam::tetCut
     {
         // Slice off two corners to form two prisms
         FixedList<scalar, 4> f;
-        for (label i = 0; i < 2; ++ i)
+        for (label i = 0; i < 2; ++i)
         {
-            for (label j = 0; j < 2; ++ j)
+            for (label j = 0; j < 2; ++j)
             {
                 f[2*i+j] = l[i]/(l[i] - l[j+2]);
             }
@@ -245,7 +244,7 @@ template<class AboveOp, class BelowOp>
 typename Foam::cut::opAddResult<AboveOp, BelowOp>::type Foam::tetCut
 (
     const FixedList<point, 4>& tet,
-    const plane& p,
+    const plane& pln,
     const AboveOp& aboveOp,
     const BelowOp& belowOp
 )
@@ -254,8 +253,7 @@ typename Foam::cut::opAddResult<AboveOp, BelowOp>::type Foam::tetCut
     FixedList<scalar, 4> level;
     for (label i = 0; i < 4; ++i)
     {
-        // uses unit-normal
-        level[i] = (tet[i] - p.refPoint()) & p.normal();
+        level[i] = pln.signedDistance(tet[i]);
     }
 
     // Run the level set function

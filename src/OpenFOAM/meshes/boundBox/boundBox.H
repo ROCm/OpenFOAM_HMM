@@ -78,6 +78,9 @@ public:
         //- Faces to point addressing, as per a 'hex' cell
         static const faceList faces;
 
+        //- The unit normal per face
+        static const FixedList<vector, 6> faceNormals;
+
 
     // Constructors
 
@@ -176,6 +179,12 @@ public:
 
             //- Corner points in an order corresponding to a 'hex' cell
             tmp<pointField> points() const;
+
+            //- Face midpoints
+            tmp<pointField> faceCentres() const;
+
+            //- Face centre of given face index
+            point faceCentre(const direction facei) const;
 
 
         // Manipulate

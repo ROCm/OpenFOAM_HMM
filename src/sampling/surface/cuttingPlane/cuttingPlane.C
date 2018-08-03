@@ -86,7 +86,7 @@ void Foam::cuttingPlane::calcCutCells
     }
 
     // Set correct list size
-    meshCells_.setSize(cutcelli);
+    meshCells_.resize(cutcelli);
 }
 
 
@@ -102,7 +102,7 @@ void Foam::cuttingPlane::intersectEdges
     const pointField& points = mesh.points();
 
     // Per edge -1 or the label of the intersection point
-    edgePoint.setSize(edges.size());
+    edgePoint.resize(edges.size());
 
     DynamicList<point> dynCuttingPoints(4*meshCells_.size());
 

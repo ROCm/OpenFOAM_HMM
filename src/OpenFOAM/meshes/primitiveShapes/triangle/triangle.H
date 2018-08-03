@@ -50,12 +50,12 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+
 class Istream;
 class Ostream;
 class triPoints;
 class plane;
-
-// Forward declaration of friend functions and operators
 
 template<class Point, class PointRef> class triangle;
 
@@ -158,7 +158,7 @@ private:
         template<class AboveOp, class BelowOp>
         inline static void triSliceWithPlane
         (
-            const plane& pl,
+            const plane& pln,
             const triPoints& tri,
             AboveOp& aboveOp,
             BelowOp& belowOp
@@ -327,7 +327,7 @@ public:
             template<class AboveOp, class BelowOp>
             inline void sliceWithPlane
             (
-                const plane& pl,
+                const plane& pln,
                 AboveOp& aboveOp,
                 BelowOp& belowOp
             ) const;

@@ -29,12 +29,12 @@ License
 
 const Foam::faceList Foam::treeBoundBox::faces
 ({
-    face{0, 4, 6, 2}, // left
-    face{1, 3, 7, 5}, // right
-    face{0, 1, 5, 4}, // bottom
-    face{2, 6, 7, 3}, // top
-    face{0, 2, 3, 1}, // back
-    face{4, 5, 7, 6}  // front
+    face({0, 4, 6, 2}),  // 0: x-min, left
+    face({1, 3, 7, 5}),  // 1: x-max, right
+    face({0, 1, 5, 4}),  // 2: y-min, bottom
+    face({2, 6, 7, 3}),  // 3: y-max, top
+    face({0, 2, 3, 1}),  // 4: z-min, back
+    face({4, 5, 7, 6})   // 5: z-max, front
 });
 
 const Foam::edgeList Foam::treeBoundBox::edges
@@ -51,16 +51,6 @@ const Foam::edgeList Foam::treeBoundBox::edges
     {1, 5},
     {3, 7}, // 10
     {2, 6}
-});
-
-const Foam::FixedList<Foam::vector, 6> Foam::treeBoundBox::faceNormals
-({
-    vector(-1,  0,  0), // left
-    vector( 1,  0,  0), // right
-    vector( 0, -1,  0), // bottom
-    vector( 0,  1,  0), // top
-    vector( 0,  0, -1), // back
-    vector( 0,  0,  1)  // front
 });
 
 
@@ -104,15 +94,15 @@ Foam::treeBoundBox::treeBoundBox
 
 Foam::tmp<Foam::pointField> Foam::treeBoundBox::points() const
 {
-    tmp<pointField> tpoints(new pointField(8));
-    pointField& pts = tpoints.ref();
+    auto tpts = tmp<pointField>::New(8);
+    auto& pts = tpts.ref();
 
     forAll(pts, octant)
     {
         pts[octant] = corner(octant);
     }
 
-    return tpoints;
+    return tpts;
 }
 
 

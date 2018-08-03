@@ -74,9 +74,9 @@ void Foam::boundBox::add
     // points may be empty, but a FixedList is never empty
     if (!points.empty())
     {
-        for (unsigned i=0; i < Size; ++i)
+        for (const label pointi : indices)
         {
-            add(points[indices[i]]);
+            add(points[pointi]);
         }
     }
 }
@@ -95,9 +95,9 @@ bool Foam::boundBox::contains
         return false;
     }
 
-    forAll(indices, i)
+    for (const label pointi : indices)
     {
-        if (!contains(points[indices[i]]))
+        if (!contains(points[pointi]))
         {
             return false;
         }
@@ -120,9 +120,9 @@ bool Foam::boundBox::containsAny
         return false;
     }
 
-    forAll(indices, i)
+    for (const label pointi : indices)
     {
-        if (contains(points[indices[i]]))
+        if (contains(points[pointi]))
         {
             return true;
         }

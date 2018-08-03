@@ -378,15 +378,15 @@ inline Scalar sqrtSumSqr(const Scalar a, const Scalar b)
 
 
 //- Stabilisation around zero for division
-inline Scalar stabilise(const Scalar s, const Scalar small)
+inline Scalar stabilise(const Scalar s, const Scalar tol)
 {
     if (s >= 0)
     {
-        return s + small;
+        return s + tol;
     }
     else
     {
-        return s - small;
+        return s - tol;
     }
 }
 

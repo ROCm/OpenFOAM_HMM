@@ -33,7 +33,7 @@ template<class Point, class PointRef>
 template<class AboveOp, class BelowOp>
 inline void Foam::triangle<Point, PointRef>::triSliceWithPlane
 (
-    const plane& pl,
+    const plane& pln,
     const triPoints& tri,
     AboveOp& aboveOp,
     BelowOp& belowOp
@@ -48,7 +48,7 @@ inline void Foam::triangle<Point, PointRef>::triSliceWithPlane
     label negI = -1;
     forAll(tri, i)
     {
-        d[i] = ((tri[i] - pl.refPoint()) & pl.normal());
+        d[i] = pln.signedDistance(tri[i]);
 
         if (d[i] > 0)
         {

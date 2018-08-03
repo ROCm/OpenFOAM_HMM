@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,8 +80,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward Declarations
 class plane;
 Ostream& operator<<(Ostream& os, const plane& pln);
 
@@ -97,28 +96,30 @@ public:
     //- Side of the plane
     enum side
     {
-        NORMAL = 1,  //!< The front (or normal) side of the plane
-        FLIP  = -1   //!< The back (or flip) side of the plane
+        FRONT = 1,  //!< The front (positive normal) side of the plane
+        BACK  = -1, //!< The back (negative normal) side of the plane
+        NORMAL = 1, //!< Same as FRONT
+        FLIP  = -1  //!< Same as BACK
     };
 
 
-    //- A direction and a reference point
+    //- A reference point and direction
     class ray
     {
-        point refPoint_;
+        point  pt_;
         vector dir_;
 
     public:
 
-        ray(const point& refPoint, const vector& dir)
+        ray(const point& pt, const vector& dir)
         :
-            refPoint_(refPoint),
+            pt_(pt),
             dir_(dir)
         {}
 
         const point& refPoint() const
         {
-            return refPoint_;
+            return pt_;
         }
 
         const vector& dir() const
@@ -130,27 +131,43 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
-        //- Normal
+        //- The unit normal of the plane
         vector normal_;
 
-        //- Reference point
-        point point_;
+        //- The origin or reference point for the plane
+        point origin_;
 
 
     // Private Member Functions
 
-        //- Calculates basePoint and normal vector given plane coefficients
-        void calcPntAndVec(const scalarList& C);
+        //- Normalise normal_ and emit error if its mag is less than VSMALL
+        //  Optionally pass as test only, without normalisation.
+        void makeUnitNormal
+        (
+            const char * const caller,
+            const bool notTest = true
+        );
 
-        //- Calculates basePoint and normal vector given three points
+        //- Calculates point and normal given plane coefficients.
+        void calcFromCoeffs
+        (
+            const scalar a,
+            const scalar b,
+            const scalar c,
+            const scalar d,
+            const char * const caller
+        );
+
+        //- Calculates point and normal vector given three points
         //- Normal vector determined using right hand rule
-        void calcPntAndVec
+        void calcFromEmbeddedPoints
         (
             const point& point1,
             const point& point2,
-            const point& point3
+            const point& point3,
+            const char * const caller
         );
 
 
@@ -159,7 +176,7 @@ public:
     // Constructors
 
         //- Construct null. Does not set normal and point.
-        plane();
+        inline plane();
 
         //- Construct from normal vector through the origin.
         //  The vector is normalised to a unit vector on input.
@@ -167,11 +184,11 @@ public:
 
         //- Construct from normal vector and point in plane.
         //  By default, the vector is normalised to a unit vector on input.
-        explicit plane
+        plane
         (
-            const point& basePoint,
+            const point& originPoint,
             const vector& normalVector,
-            const bool normalise = true
+            const bool doNormalise = true
         );
 
         //- Construct from three points in plane
@@ -182,37 +199,50 @@ public:
             const point& point3
         );
 
-        //- Construct from coefficients for the
-        //  plane equation: ax + by + cz + d = 0
-        explicit plane(const scalarList& C);
+        //- Construct from coefficients for the plane equation:
+        //- ax + by + cz + d = 0
+        explicit plane(const scalarList& coeffs);
+
+        //- Construct from coefficients for the plane equation:
+        //- ax + by + cz + d = 0
+        explicit plane(const FixedList<scalar,4>& coeffs);
 
         //- Construct from dictionary
         explicit plane(const dictionary& dict);
 
-        //- Construct from Istream. Assumes the base + normal notation.
+        //- Construct from Istream. Assumes (normal) (origin) input.
         explicit plane(Istream& is);
 
 
     // Member Functions
 
-        //- Return the plane unit normal
-        const vector& normal() const;
+        //- The plane unit normal
+        inline const vector& normal() const;
 
-        //- Return plane base point
-        const point& refPoint() const;
+        //- The plane base point (same as refPoint)
+        inline const point& origin() const;
 
-        //- Return coefficients for the
-        //  plane equation: ax + by + cz + d = 0
+        //- The plane base point (same as origin)
+        inline const point& refPoint() const;
+
+        //- Flip the plane by reversing the normal
+        inline void flip();
+
+        //- Return coefficients for the plane equation:
+        //- ax + by + cz + d = 0
         FixedList<scalar, 4> planeCoeffs() const;
 
         //- Return nearest point in the plane for the given point
-        point nearestPoint(const point& p) const;
+        inline point nearestPoint(const point& p) const;
+
+        //- Return distance (magnitude) from the given point to the plane
+        inline scalar distance(const point& p) const;
 
         //- Return distance from the given point to the plane
-        scalar distance(const point& p) const;
+        inline scalar signedDistance(const point& p) const;
 
         //- Return cut coefficient for plane and line defined by
-        //  origin and direction
+        //- origin and direction
         scalar normalIntersect(const point& pnt0, const vector& dir) const;
 
         //- Return cut coefficient for plane and ray
@@ -246,7 +276,15 @@ public:
 
         //- Return the side of the plane that the point is on.
         //  If the point is on the plane, then returns NORMAL.
-        side sideOfPlane(const point& p) const;
+        inline side sideOfPlane(const point& p) const;
+
+        //- The sign for the side of the plane that the point is on.
+        //  Uses the supplied tolerance for rounding around zero.
+        //  \return
+        //  -  0: on plane
+        //  - +1: front-side
+        //  - -1: back-side
+        inline int sign(const point& p, const scalar tol = SMALL) const;
 
         //- Mirror the supplied point in the plane. Return the mirrored point.
         point mirror(const point& p) const;
@@ -265,13 +303,15 @@ public:
 
 // Global Operators
 
-bool operator==(const plane& a, const plane& b);
-bool operator!=(const plane& a, const plane& b);
+inline bool operator==(const plane& a, const plane& b);
+inline bool operator!=(const plane& a, const plane& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+#include "planeI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

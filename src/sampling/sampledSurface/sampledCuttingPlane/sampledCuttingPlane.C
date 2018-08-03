@@ -126,8 +126,7 @@ void Foam::sampledCuttingPlane::createGeometry()
 
         forAll(cc, i)
         {
-            // Signed distance
-            fld[i] = (cc[i] - plane_.refPoint()) & plane_.normal();
+            fld[i] = plane_.signedDistance(cc[i]);
         }
     }
 
@@ -163,7 +162,7 @@ void Foam::sampledCuttingPlane::createGeometry()
                 fld.setSize(pp.size());
                 forAll(fld, i)
                 {
-                    fld[i] = (cc[i] - plane_.refPoint()) & plane_.normal();
+                    fld[i] = plane_.signedDistance(cc[i]);
                 }
             }
             else
@@ -173,7 +172,7 @@ void Foam::sampledCuttingPlane::createGeometry()
 
                 forAll(fld, i)
                 {
-                    fld[i] = (cc[i] - plane_.refPoint()) & plane_.normal();
+                    fld[i] = plane_.signedDistance(cc[i]);
                 }
             }
         }
@@ -191,7 +190,7 @@ void Foam::sampledCuttingPlane::createGeometry()
 
         forAll(pointDistance_, i)
         {
-            pointDistance_[i] = (pts[i] - plane_.refPoint()) & plane_.normal();
+            pointDistance_[i] = plane_.signedDistance(pts[i]);
         }
     }
 

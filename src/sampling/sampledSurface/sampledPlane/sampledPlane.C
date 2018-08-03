@@ -90,7 +90,7 @@ Foam::sampledPlane::sampledPlane
     {
         coordinateSystem cs(mesh, dict.subDict("coordinateSystem"));
 
-        const point  base = cs.globalPosition(planeDesc().refPoint());
+        const point  base = cs.globalPosition(planeDesc().origin());
         const vector norm = cs.globalVector(planeDesc().normal());
 
         // Assign the plane description
@@ -334,8 +334,8 @@ Foam::tmp<Foam::tensorField> Foam::sampledPlane::interpolate
 void Foam::sampledPlane::print(Ostream& os) const
 {
     os  << "sampledPlane: " << name() << " :"
-        << "  base:" << refPoint()
-        << "  normal:" << normal()
+        << "  base:" << plane::origin()
+        << "  normal:" << plane::normal()
         << "  triangulate:" << triangulate_
         << "  faces:" << faces().size()
         << "  points:" << points().size();

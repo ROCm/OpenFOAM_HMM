@@ -21,11 +21,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description:
-    Functions which cut triangles and tetrahedra. Generic operations are
-    applied to each half of a cut.
+Description
+    Functions for cutting triangles and tetrahedra.
+    Generic operations are applied to each half of a cut.
 
-SourceFiles:
+SourceFiles
     cutI.H
     cutTemplates.C
 
@@ -478,9 +478,9 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Cut a triangle along the zero plane defined by the given levels. Templated
-//  on aboveOp and belowOp; the operations applied to the regions on either side
-//  of the cut.
+//- Cut a triangle along the zero plane defined by the given levels.
+//  Templated on aboveOp and belowOp; the operations applied to the regions
+//  on either side of the cut.
 template<class AboveOp, class BelowOp>
 typename cut::opAddResult<AboveOp, BelowOp>::type triCut
 (
@@ -495,7 +495,7 @@ template<class AboveOp, class BelowOp>
 typename cut::opAddResult<AboveOp, BelowOp>::type triCut
 (
     const FixedList<point, 3>& tri,
-    const plane& s,
+    const plane& pln,
     const AboveOp& aboveOp,
     const BelowOp& belowOp
 );
@@ -515,7 +515,7 @@ template<class AboveOp, class BelowOp>
 typename cut::opAddResult<AboveOp, BelowOp>::type tetCut
 (
     const FixedList<point, 4>& tet,
-    const plane& s,
+    const plane& pln,
     const AboveOp& aboveOp,
     const BelowOp& belowOp
 );

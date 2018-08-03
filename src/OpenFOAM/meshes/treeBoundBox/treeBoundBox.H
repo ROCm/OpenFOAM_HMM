@@ -71,11 +71,8 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class Random;
-
-
-// Forward declaration of friend functions and operators
-
 class treeBoundBox;
 Istream& operator>>(Istream& is, treeBoundBox& bb);
 Ostream& operator<<(Ostream& os, const treeBoundBox& bb);
@@ -98,20 +95,21 @@ public:
         //  Every octant/corner point is the combination of three faces.
         enum octantBit
         {
-            RIGHTHALF = 0x1 << 0,
-            TOPHALF   = 0x1 << 1,
-            FRONTHALF = 0x1 << 2
+            RIGHTHALF = 0x1,
+            TOPHALF   = 0x2,
+            FRONTHALF = 0x4
         };
 
-        //- Face codes
+        //- Face codes. Identical order and meaning as per hex cellmodel
+        //- and boundBox, but have a different point ordering.
         enum faceId
         {
-            LEFT   = 0,
-            RIGHT  = 1,
-            BOTTOM = 2,
-            TOP    = 3,
-            BACK   = 4,
-            FRONT  = 5
+            LEFT   = 0,  //!< 0: x-min, left
+            RIGHT  = 1,  //!< 1: x-max, right
+            BOTTOM = 2,  //!< 2: y-min, bottom
+            TOP    = 3,  //!< 3: y-max, top
+            BACK   = 4,  //!< 4: z-min, back
+            FRONT  = 5   //!< 5: z-max, front
         };
 
         //- Bits used for face coding
@@ -151,9 +149,6 @@ public:
 
         //- Edge to point addressing
         static const edgeList edges;
-
-        //- The unit normal per face
-        static const FixedList<vector, 6> faceNormals;
 
 
     // Constructors

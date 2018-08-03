@@ -493,7 +493,7 @@ int main(int argc, char *argv[])
 
                 Info<< "Only include feature edges that intersect the plane"
                     << " with normal " << cutPlane.normal()
-                    << " and base point " << cutPlane.refPoint() << endl;
+                    << " and origin " << cutPlane.origin() << endl;
 
                 features().subsetPlane(edgeStat, cutPlane);
             }
