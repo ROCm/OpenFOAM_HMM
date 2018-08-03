@@ -40,9 +40,9 @@ Foam::fv::PhaseLimitStabilization<Type>::PhaseLimitStabilization
 )
 :
     option(name, modelType, dict, mesh),
-    fieldName_(coeffs_.lookup("field")),
-    rateName_(coeffs_.lookup("rate")),
-    residualAlpha_(readScalar(coeffs_.lookup("residualAlpha")))
+    fieldName_(coeffs_.get<word>("field")),
+    rateName_(coeffs_.get<word>("rate")),
+    residualAlpha_(coeffs_.get<scalar>("residualAlpha"))
 {
     fieldNames_.setSize(1, fieldName_);
     applied_.setSize(1, false);
@@ -74,14 +74,12 @@ bool Foam::fv::PhaseLimitStabilization<Type>::read(const dictionary& dict)
 {
     if (option::read(dict))
     {
-        coeffs_.lookup("residualAlpha") >> residualAlpha_;
+        coeffs_.readEntry("residualAlpha", residualAlpha_);
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

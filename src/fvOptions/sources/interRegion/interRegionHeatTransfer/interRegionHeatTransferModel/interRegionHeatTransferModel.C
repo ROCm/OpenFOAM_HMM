@@ -119,9 +119,10 @@ Foam::fv::interRegionHeatTransferModel::interRegionHeatTransferModel
         dict,
         mesh
     ),
-    nbrModelName_(coeffs_.lookup("nbrModel")),
+    nbrModelName_(coeffs_.get<word>("nbrModel")),
     nbrModel_(nullptr),
     firstIter_(true),
+    semiImplicit_(false),
     timeIndex_(-1),
     htc_
     (
@@ -137,24 +138,17 @@ Foam::fv::interRegionHeatTransferModel::interRegionHeatTransferModel
         dimensionedScalar(dimEnergy/dimTime/dimTemperature/dimVolume, Zero),
         zeroGradientFvPatchScalarField::typeName
     ),
-    semiImplicit_(false),
     TName_(coeffs_.lookupOrDefault<word>("T", "T")),
     TNbrName_(coeffs_.lookupOrDefault<word>("TNbr", "T"))
 {
     if (active())
     {
-        coeffs_.lookup("fields") >> fieldNames_;
+        coeffs_.readEntry("fields", fieldNames_);
         applied_.setSize(fieldNames_.size(), false);
 
-        coeffs_.lookup("semiImplicit") >> semiImplicit_;
+        coeffs_.readEntry("semiImplicit", semiImplicit_);
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fv::interRegionHeatTransferModel::~interRegionHeatTransferModel()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -173,23 +167,20 @@ void Foam::fv::interRegionHeatTransferModel::addSup
 
     const volScalarField& T = mesh_.lookupObject<volScalarField>(TName_);
 
-    tmp<volScalarField> tTmapped
+    auto tTmapped = tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                type() + ":Tmapped",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            T
-        )
+            type() + ":Tmapped",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        T
     );
 
-    volScalarField& Tmapped = tTmapped.ref();
+    auto& Tmapped = tTmapped.ref();
 
     const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
 
@@ -264,6 +255,17 @@ void Foam::fv::interRegionHeatTransferModel::addSup
 )
 {
     addSup(eqn, fieldi);
+}
+
+
+bool Foam::fv::interRegionHeatTransferModel::read(const dictionary& dict)
+{
+    if (interRegionOption::read(dict))
+    {
+        return true;
+    }
+
+    return false;
 }
 
 

@@ -57,9 +57,9 @@ void Foam::fv::actuationDiskSource::addActuationDiskAxialInertialResistance
 
     scalar T = 2.0*upRho*diskArea_*mag(upU)*a*(1 - a);
 
-    forAll(cells, i)
+    for (const label celli : cells)
     {
-        Usource[cells[i]] += ((Vcells[cells[i]]/V())*T*E) & upU;
+        Usource[celli] += ((Vcells[celli]/V())*T*E) & upU;
     }
 }
 

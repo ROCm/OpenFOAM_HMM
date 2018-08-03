@@ -165,28 +165,25 @@ void Foam::fv::rotorDiskSource::writeField
     const bool writeNow
 ) const
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+    typedef GeometricField<Type, fvPatchField, volMesh> FieldType;
 
     if (mesh_.time().writeTime() || writeNow)
     {
-        tmp<fieldType> tfield
+        auto tfield = tmp<FieldType>::New
         (
-            new fieldType
+            IOobject
             (
-                IOobject
-                (
-                    name,
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
+                name,
+                mesh_.time().timeName(),
                 mesh_,
-                dimensioned<Type>(dimless, Zero)
-            )
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            dimensioned<Type>(dimless, Zero)
         );
 
-        Field<Type>& field = tfield.ref().primitiveFieldRef();
+        auto& field = tfield.ref().primitiveFieldRef();
 
         if (cells_.size() != values.size())
         {

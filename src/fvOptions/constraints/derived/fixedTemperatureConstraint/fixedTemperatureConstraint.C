@@ -160,10 +160,8 @@ bool Foam::fv::fixedTemperatureConstraint::read(const dictionary& dict)
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

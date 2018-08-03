@@ -199,7 +199,7 @@ protected:
         //- Rotor local cylindrical coordinate system (r, theta, z)
         cylindricalCS coordSys_;
 
-         //- Rotor transformation co-ordinate system
+        //- Rotor transformation coordinate system
         autoPtr<cylindrical> cylindrical_;
 
         //- Maximum radius

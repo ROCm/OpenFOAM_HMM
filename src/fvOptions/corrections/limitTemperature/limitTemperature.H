@@ -71,7 +71,6 @@ class limitTemperature
 :
     public cellSetOption
 {
-
 protected:
 
     // Protected data
@@ -116,8 +115,7 @@ public:
 
 
     //- Destructor
-    virtual ~limitTemperature()
-    {}
+    virtual ~limitTemperature() = default;
 
 
     // Member Functions

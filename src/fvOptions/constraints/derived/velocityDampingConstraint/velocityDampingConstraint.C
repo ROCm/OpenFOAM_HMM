@@ -70,7 +70,7 @@ void Foam::fv::velocityDampingConstraint::addDamping(fvMatrix<vector>& eqn)
 
             diag[cellI] += scale*(magU-UMax_);
 
-            nDamped++;
+            ++nDamped;
         }
     }
 
@@ -104,7 +104,7 @@ Foam::fv::velocityDampingConstraint::velocityDampingConstraint
 void Foam::fv::velocityDampingConstraint::constrain
 (
     fvMatrix<vector>& eqn,
-    const label fieldI
+    const label fieldi
 )
 {
     addDamping(eqn);
@@ -122,7 +122,7 @@ bool Foam::fv::velocityDampingConstraint::read(const dictionary& dict)
 {
     if (cellSetOption::read(dict))
     {
-        UMax_ = readScalar(coeffs_.lookup("UMax"));
+        UMax_ = coeffs_.get<scalar>("UMax");
 
         if (!coeffs_.readIfPresent("UNames", fieldNames_))
         {

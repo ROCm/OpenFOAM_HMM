@@ -78,13 +78,8 @@ namespace Foam
 namespace fv
 {
 
-// Forward declaration of classes
-
-template<class Type>
-class SemiImplicitSource;
-
-
-// Forward declaration of friend functions
+// Forward declarations
+template<class Type> class SemiImplicitSource;
 
 template<class Type>
 Ostream& operator<<
@@ -216,7 +211,6 @@ public:
 
 #ifdef NoRepository
     #include "SemiImplicitSource.C"
-    #include "SemiImplicitSourceIO.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

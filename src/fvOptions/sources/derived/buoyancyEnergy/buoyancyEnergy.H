@@ -56,7 +56,7 @@ namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
-               Class buoyancyEnergy Declaration
+                       Class buoyancyEnergy Declaration
 \*---------------------------------------------------------------------------*/
 
 class buoyancyEnergy
@@ -98,21 +98,17 @@ public:
 
     // Member Functions
 
-        // Evaluate
-
-            //- Add explicit contribution to compressible momentum equation
-            virtual void addSup
-            (
-                const volScalarField& rho,
-                fvMatrix<scalar>& eqn,
-                const label fieldi
-            );
+        //- Add explicit contribution to compressible momentum equation
+        virtual void addSup
+        (
+            const volScalarField& rho,
+            fvMatrix<scalar>& eqn,
+            const label fieldi
+        );
 
 
-        // IO
-
-            //- Read source dictionary
-            virtual bool read(const dictionary& dict);
+        //- Read source dictionary
+        virtual bool read(const dictionary& dict);
 };
 
 

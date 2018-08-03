@@ -50,11 +50,6 @@ Foam::trimModel::trimModel
     read(dict);
 }
 
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-Foam::trimModel::~trimModel()
-{}
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

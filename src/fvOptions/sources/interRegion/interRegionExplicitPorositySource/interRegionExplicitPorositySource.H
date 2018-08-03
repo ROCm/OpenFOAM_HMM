@@ -73,6 +73,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class porosityModel;
 
 namespace fv
@@ -87,7 +88,6 @@ class interRegionExplicitPorositySource
 :
     public interRegionOption
 {
-
 protected:
 
     // Protected data

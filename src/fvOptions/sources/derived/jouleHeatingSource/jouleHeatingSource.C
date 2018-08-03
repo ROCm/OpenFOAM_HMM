@@ -48,7 +48,6 @@ namespace fv
 }
 }
 
-
 const Foam::word Foam::fv::jouleHeatingSource::sigmaName(typeName + ":sigma");
 
 
@@ -73,26 +72,24 @@ Foam::fv::jouleHeatingSource::transformSigma
     const volVectorField& sigmaLocal
 ) const
 {
-    tmp<volSymmTensorField> tsigma
+    auto tsigma = tmp<volSymmTensorField>::New
     (
-        new volSymmTensorField
+        IOobject
         (
-            IOobject
-            (
-                sigmaName,
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            sigmaName,
+            mesh_.time().timeName(),
             mesh_,
-            dimensionedSymmTensor(sigmaLocal.dimensions(), Zero),
-            zeroGradientFvPatchField<symmTensor>::typeName
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh_,
+        dimensionedSymmTensor(sigmaLocal.dimensions(), Zero),
+        zeroGradientFvPatchField<symmTensor>::typeName
     );
 
-    volSymmTensorField& sigma = tsigma.ref();
+    auto& sigma = tsigma.ref();
+
     sigma.primitiveFieldRef() = coordSys().R().transformVector(sigmaLocal);
 
     sigma.correctBoundaryConditions();
@@ -211,5 +208,34 @@ void Foam::fv::jouleHeatingSource::addSup
     }
 }
 
+
+bool Foam::fv::jouleHeatingSource::read(const dictionary& dict)
+{
+    if (option::read(dict))
+    {
+        coeffs_.readIfPresent("T", TName_);
+
+        anisotropicElectricalConductivity_ =
+            coeffs_.get<bool>("anisotropicElectricalConductivity");
+
+        if (anisotropicElectricalConductivity_)
+        {
+            Info<< "    Using vector electrical conductivity" << endl;
+
+            initialiseSigma(coeffs_, vectorSigmaVsTPtr_);
+            coordSysPtr_ = coordinateSystem::New(mesh_, coeffs_);
+        }
+        else
+        {
+            Info<< "    Using scalar electrical conductivity" << endl;
+
+            initialiseSigma(coeffs_, scalarSigmaVsTPtr_);
+        }
+
+        return true;
+    }
+
+    return false;
+}
 
 // ************************************************************************* //

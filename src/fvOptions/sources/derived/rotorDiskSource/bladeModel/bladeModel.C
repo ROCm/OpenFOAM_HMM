@@ -103,10 +103,10 @@ Foam::bladeModel::bladeModel(const dictionary& dict)
     }
     else
     {
-        dict.lookup("data") >> data;
+        dict.readEntry("data", data);
     }
 
-    if (data.size() > 0)
+    if (data.size())
     {
         profileName_.setSize(data.size());
         profileID_.setSize(data.size());
@@ -129,11 +129,6 @@ Foam::bladeModel::bladeModel(const dictionary& dict)
             << "No blade data specified" << exit(FatalError);
     }
 }
-
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-Foam::bladeModel::~bladeModel()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

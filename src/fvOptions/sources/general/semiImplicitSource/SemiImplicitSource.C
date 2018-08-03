@@ -92,8 +92,8 @@ void Foam::fv::SemiImplicitSource<Type>::setFieldData(const dictionary& dict)
     forAllConstIter(dictionary, dict, iter)
     {
         fieldNames_[i] = iter().keyword();
-        dict.lookup(iter().keyword()) >> injectionRate_[i];
-        i++;
+        dict.readEntry(iter().keyword(), injectionRate_[i]);
+        ++i;
     }
 
     // Set volume normalisation
@@ -194,6 +194,22 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
     }
 
     return this->addSup(eqn, fieldi);
+}
+
+
+
+template<class Type>
+bool Foam::fv::SemiImplicitSource<Type>::read(const dictionary& dict)
+{
+    if (cellSetOption::read(dict))
+    {
+        volumeMode_ = wordToVolumeModeType(coeffs_.get<word>("volumeMode"));
+        setFieldData(coeffs_.subDict("injectionRateSuSp"));
+
+        return true;
+    }
+
+    return false;
 }
 
 

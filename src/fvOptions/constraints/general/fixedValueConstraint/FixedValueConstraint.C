@@ -61,18 +61,16 @@ bool Foam::fv::FixedValueConstraint<Type>::read(const dictionary& dict)
         forAllConstIter(dictionary, fieldValuesDict, iter)
         {
             fieldNames_[i] = iter().keyword();
-            fieldValuesDict.lookup(iter().keyword()) >> fieldValues_[i];
-            i++;
+            fieldValuesDict.readEntry(iter().keyword(), fieldValues_[i]);
+            ++i;
         }
 
         applied_.setSize(fieldNames_.size(), false);
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

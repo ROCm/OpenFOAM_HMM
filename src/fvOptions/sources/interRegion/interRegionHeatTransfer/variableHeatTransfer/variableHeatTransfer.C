@@ -65,11 +65,11 @@ Foam::fv::variableHeatTransfer::variableHeatTransfer
 {
     if (master_)
     {
-        a_ = readScalar(coeffs_.lookup("a"));
-        b_ = readScalar(coeffs_.lookup("b"));
-        c_ = readScalar(coeffs_.lookup("c"));
-        ds_ = readScalar(coeffs_.lookup("ds"));
-        Pr_ = readScalar(coeffs_.lookup("Pr"));
+        a_ = coeffs_.get<scalar>("a");
+        b_ = coeffs_.get<scalar>("b");
+        c_ = coeffs_.get<scalar>("c");
+        ds_ = coeffs_.get<scalar>("ds");
+        Pr_ = coeffs_.get<scalar>("Pr");
         AoV_.reset
         (
             new volScalarField
@@ -134,10 +134,8 @@ bool Foam::fv::variableHeatTransfer::read(const dictionary& dict)
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

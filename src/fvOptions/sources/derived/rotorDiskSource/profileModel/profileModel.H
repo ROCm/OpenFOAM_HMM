@@ -50,7 +50,6 @@ namespace Foam
 
 class profileModel
 {
-
 protected:
 
     // Protected data
@@ -102,7 +101,7 @@ public:
 
 
     //- Destructor
-    virtual ~profileModel();
+    virtual ~profileModel() = default;
 
 
     // Member functions

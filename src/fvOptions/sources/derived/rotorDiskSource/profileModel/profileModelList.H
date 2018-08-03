@@ -44,14 +44,13 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class profileModelList Declaration
+                      Class profileModelList Declaration
 \*---------------------------------------------------------------------------*/
 
 class profileModelList
 :
     public PtrList<profileModel>
 {
-
 protected:
 
     // Protected data
@@ -66,7 +65,7 @@ public:
     profileModelList(const dictionary& dict, const bool readFields = true);
 
     //- Destructor
-    ~profileModelList();
+    ~profileModelList() = default;
 
 
     // Member Functions

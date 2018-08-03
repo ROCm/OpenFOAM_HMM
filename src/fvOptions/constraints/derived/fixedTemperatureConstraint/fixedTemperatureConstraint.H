@@ -78,7 +78,6 @@ class fixedTemperatureConstraint
 :
     public cellSetOption
 {
-
 public:
 
     //- Temperature mode
@@ -137,8 +136,7 @@ public:
 
 
     //- Destructor
-    virtual ~fixedTemperatureConstraint()
-    {}
+    virtual ~fixedTemperatureConstraint() = default;
 
 
     // Member Functions

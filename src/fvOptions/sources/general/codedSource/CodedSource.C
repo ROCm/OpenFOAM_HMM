@@ -38,7 +38,7 @@ void Foam::fv::CodedSource<Type>::prepare
     const dynamicCodeContext& context
 ) const
 {
-    word sourceType(pTraits<Type>::typeName);
+    const word sourceType(pTraits<Type>::typeName);
 
     // Set additional rewrite rules
     dynCode.setFilterVariable("typeName", name_);

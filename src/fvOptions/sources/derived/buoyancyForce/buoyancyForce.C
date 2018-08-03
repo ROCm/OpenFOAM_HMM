@@ -68,7 +68,7 @@ Foam::fv::buoyancyForce::buoyancyForce
         )
     )
 {
-    coeffs_.lookup("fields") >> fieldNames_;
+    coeffs_.readEntry("fields", fieldNames_);
 
     if (fieldNames_.size() != 1)
     {
@@ -100,6 +100,14 @@ void Foam::fv::buoyancyForce::addSup
 )
 {
     eqn += rho*g_;
+}
+
+
+bool Foam::fv::buoyancyForce::read(const dictionary& dict)
+{
+    NotImplemented;
+
+    return false;
 }
 
 

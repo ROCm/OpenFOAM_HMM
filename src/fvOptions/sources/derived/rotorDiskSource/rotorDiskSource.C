@@ -318,13 +318,13 @@ void Foam::fv::rotorDiskSource::createCoordinateSystem()
                 }
             }
             reduce(axis, maxMagSqrOp<vector>());
-            axis /= mag(axis);
+            axis.normalise();
 
             // Correct the axis direction using a point above the rotor
             {
                 vector pointAbove(coeffs_.get<vector>("pointAbove"));
                 vector dir = pointAbove - origin;
-                dir /= mag(dir);
+                dir.normalise();
                 if ((dir & axis) < 0)
                 {
                     axis *= -1.0;

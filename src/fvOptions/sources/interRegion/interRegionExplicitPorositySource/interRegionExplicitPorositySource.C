@@ -296,10 +296,8 @@ bool Foam::fv::interRegionExplicitPorositySource::read(const dictionary& dict)
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

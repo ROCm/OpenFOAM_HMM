@@ -79,7 +79,7 @@ Foam::fv::solidificationMeltingSource::Cp() const
         {
             if (CpName_ == "CpRef")
             {
-                scalar CpRef = readScalar(coeffs_.lookup("CpRef"));
+                scalar CpRef = coeffs_.get<scalar>("CpRef");
 
                 return tmp<volScalarField>::New
                 (
@@ -129,7 +129,7 @@ Foam::vector Foam::fv::solidificationMeltingSource::g() const
         return value.value();
     }
 
-    return coeffs_.lookup("g");
+    return coeffs_.get<vector>("g");
 }
 
 
@@ -179,18 +179,18 @@ Foam::fv::solidificationMeltingSource::solidificationMeltingSource
 )
 :
     cellSetOption(sourceName, modelType, dict, mesh),
-    Tmelt_(readScalar(coeffs_.lookup("Tmelt"))),
-    L_(readScalar(coeffs_.lookup("L"))),
+    Tmelt_(coeffs_.get<scalar>("Tmelt")),
+    L_(coeffs_.get<scalar>("L")),
     relax_(coeffs_.lookupOrDefault("relax", 0.9)),
     mode_(thermoModeTypeNames_.lookup("thermoMode", coeffs_)),
-    rhoRef_(readScalar(coeffs_.lookup("rhoRef"))),
+    rhoRef_(coeffs_.get<scalar>("rhoRef")),
     TName_(coeffs_.lookupOrDefault<word>("T", "T")),
     CpName_(coeffs_.lookupOrDefault<word>("Cp", "Cp")),
     UName_(coeffs_.lookupOrDefault<word>("U", "U")),
     phiName_(coeffs_.lookupOrDefault<word>("phi", "phi")),
     Cu_(coeffs_.lookupOrDefault<scalar>("Cu", 100000)),
     q_(coeffs_.lookupOrDefault("q", 0.001)),
-    beta_(readScalar(coeffs_.lookup("beta"))),
+    beta_(coeffs_.get<scalar>("beta")),
     alpha1_
     (
         IOobject
@@ -307,6 +307,33 @@ void Foam::fv::solidificationMeltingSource::addSup
 {
     // Momentum source uses a Boussinesq approximation - redirect
     addSup(eqn, fieldi);
+}
+
+
+bool Foam::fv::solidificationMeltingSource::read(const dictionary& dict)
+{
+    if (cellSetOption::read(dict))
+    {
+        coeffs_.readEntry("Tmelt", Tmelt_);
+        coeffs_.readEntry("L", L_);
+
+        coeffs_.readIfPresent("relax", relax_);
+
+        mode_ = thermoModeTypeNames_.lookup("thermoMode", coeffs_);
+
+        coeffs_.readEntry("rhoRef", rhoRef_);
+        coeffs_.readIfPresent("T", TName_);
+        coeffs_.readIfPresent("U", UName_);
+
+        coeffs_.readIfPresent("Cu", Cu_);
+        coeffs_.readIfPresent("q", q_);
+
+        coeffs_.readIfPresent("beta", beta_);
+
+        return true;
+    }
+
+    return false;
 }
 
 

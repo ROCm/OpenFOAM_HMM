@@ -39,21 +39,18 @@ void Foam::fv::jouleHeatingSource::initialiseSigma
         // Sigma to be defined using a Function1 type
         sigmaVsTPtr = Function1<Type>::New("sigma", dict);
 
-        tmp<VolFieldType> tsigma
+        auto tsigma = tmp<VolFieldType>::New
         (
-            new VolFieldType
+            IOobject
             (
-                IOobject
-                (
-                    typeName + ":sigma",
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::NO_READ,
-                    IOobject::AUTO_WRITE
-                ),
+                typeName + ":sigma",
+                mesh_.time().timeName(),
                 mesh_,
-                dimensioned<Type>(sqr(dimCurrent)/dimPower/dimLength, Zero)
-            )
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh_,
+            dimensioned<Type>(sqr(dimCurrent)/dimPower/dimLength, Zero)
         );
 
         mesh_.objectRegistry::store(tsigma.ptr());
@@ -64,20 +61,17 @@ void Foam::fv::jouleHeatingSource::initialiseSigma
     else
     {
         // Sigma to be defined by user input
-        tmp<VolFieldType> tsigma
+        auto tsigma = tmp<VolFieldType>::New
         (
-            new VolFieldType
+            IOobject
             (
-                IOobject
-                (
-                    typeName + ":sigma",
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::MUST_READ,
-                    IOobject::AUTO_WRITE
-                ),
-                mesh_
-            )
+                typeName + ":sigma",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh_
         );
 
         mesh_.objectRegistry::store(tsigma.ptr());
@@ -97,10 +91,7 @@ Foam::fv::jouleHeatingSource::updateSigma
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
     VolFieldType& sigma =
-        const_cast<VolFieldType&>
-        (
-            mesh_.lookupObject<VolFieldType>(typeName + ":sigma")
-        );
+        mesh_.lookupObjectRef<VolFieldType>(typeName + ":sigma");
 
     if (!sigmaVsTPtr.valid())
     {

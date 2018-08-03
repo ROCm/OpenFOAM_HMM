@@ -33,7 +33,7 @@ bool Foam::fv::CodedSource<Type>::read(const dictionary& dict)
 {
     if (cellSetOption::read(dict))
     {
-        coeffs_.lookup("fields") >> fieldNames_;
+        coeffs_.readEntry("fields", fieldNames_);
         applied_.setSize(fieldNames_.size(), false);
 
         dict.readCompat<word>("name", {{"redirectType", 1706}}, name_);
@@ -92,10 +92,8 @@ bool Foam::fv::CodedSource<Type>::read(const dictionary& dict)
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

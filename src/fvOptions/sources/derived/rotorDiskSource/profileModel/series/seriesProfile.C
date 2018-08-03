@@ -93,8 +93,8 @@ Foam::seriesProfile::seriesProfile
     }
     else
     {
-        dict.lookup("CdCoeffs") >> CdCoeffs_;
-        dict.lookup("ClCoeffs") >> ClCoeffs_;
+        dict.readEntry("CdCoeffs", CdCoeffs_);
+        dict.readEntry("ClCoeffs", ClCoeffs_);
     }
 
 

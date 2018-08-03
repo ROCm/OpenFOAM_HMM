@@ -51,12 +51,6 @@ Foam::tabulated6DoFAcceleration::tabulated6DoFAcceleration
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::tabulated6DoFAcceleration::~tabulated6DoFAcceleration()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::tabulated6DoFAcceleration::accelerationVectors
@@ -106,7 +100,7 @@ bool Foam::tabulated6DoFAcceleration::read
 
     fileName newTimeDataFileName
     (
-        fileName(accelerationCoeffs_.lookup("timeDataFileName")).expand()
+        accelerationCoeffs_.get<fileName>("timeDataFileName").expand()
     );
 
     if (newTimeDataFileName != timeDataFileName_)

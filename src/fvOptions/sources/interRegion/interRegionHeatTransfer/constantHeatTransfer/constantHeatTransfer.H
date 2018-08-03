@@ -54,8 +54,6 @@ class constantHeatTransfer
 :
     public interRegionHeatTransferModel
 {
-private:
-
     // Private data
 
         //- Constant heat transfer coefficient [W/m2/K]
@@ -68,7 +66,7 @@ private:
 public:
 
     //- Runtime type information
-      TypeName("constantHeatTransfer");
+    TypeName("constantHeatTransfer");
 
 
     // Constructors
@@ -92,11 +90,8 @@ public:
         //- Calculate the heat transfer coefficient
         virtual void calculateHtc();
 
-
-        // IO
-
-            //- Read dictionary
-            virtual bool read(const dictionary& dict);
+        //- Read dictionary
+        virtual bool read(const dictionary& dict);
 };
 
 

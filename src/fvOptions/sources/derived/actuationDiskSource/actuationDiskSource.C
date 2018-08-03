@@ -88,14 +88,14 @@ Foam::fv::actuationDiskSource::actuationDiskSource
 )
 :
     cellSetOption(name, modelType, dict, mesh),
-    diskDir_(coeffs_.lookup("diskDir")),
-    Cp_(readScalar(coeffs_.lookup("Cp"))),
-    Ct_(readScalar(coeffs_.lookup("Ct"))),
-    diskArea_(readScalar(coeffs_.lookup("diskArea"))),
-    upstreamPoint_(coeffs_.lookup("upstreamPoint")),
+    diskDir_(coeffs_.get<vector>("diskDir")),
+    Cp_(coeffs_.get<scalar>("Cp")),
+    Ct_(coeffs_.get<scalar>("Ct")),
+    diskArea_(coeffs_.get<scalar>("diskArea")),
+    upstreamPoint_(coeffs_.get<point>("upstreamPoint")),
     upstreamCellId_(-1)
 {
-    coeffs_.lookup("fields") >> fieldNames_;
+    coeffs_.readEntry("fields", fieldNames_);
     applied_.setSize(fieldNames_.size(), false);
 
     Info<< "    - creating actuation disk zone: "
@@ -171,10 +171,8 @@ bool Foam::fv::actuationDiskSource::read(const dictionary& dict)
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

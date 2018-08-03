@@ -72,14 +72,14 @@ protected:
         //- First iteration
         bool firstIter_;
 
+        //- Flag to activate semi-implicit coupling
+        bool semiImplicit_;
+
         //- Time index - used for updating htc
         label timeIndex_;
 
         //- Heat transfer coefficient [W/m2/k] times area/volume [1/m]
         volScalarField htc_;
-
-        //- Flag to activate semi-implicit coupling
-        bool semiImplicit_;
 
         //- Name of temperature field; default = "T"
         word TName_;
@@ -151,7 +151,7 @@ public:
 
 
     //- Destructor
-    virtual ~interRegionHeatTransferModel();
+    virtual ~interRegionHeatTransferModel() = default;
 
 
     // Member Functions

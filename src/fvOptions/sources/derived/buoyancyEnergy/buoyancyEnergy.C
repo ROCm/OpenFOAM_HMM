@@ -58,7 +58,7 @@ Foam::fv::buoyancyEnergy::buoyancyEnergy
     option(sourceName, modelType, dict, mesh),
     UName_(coeffs_.lookupOrDefault<word>("U", "U"))
 {
-    coeffs_.lookup("fields") >> fieldNames_;
+    coeffs_.readEntry("fields", fieldNames_);
 
     if (fieldNames_.size() != 1)
     {
@@ -85,6 +85,14 @@ void Foam::fv::buoyancyEnergy::addSup
     const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
 
     eqn += rho*(U&g);
+}
+
+
+bool Foam::fv::buoyancyEnergy::read(const dictionary& dict)
+{
+    NotImplemented;
+
+    return false;
 }
 
 

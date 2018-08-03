@@ -56,7 +56,7 @@ Foam::fv::limitVelocity::limitVelocity
 :
     cellSetOption(name, modelType, dict, mesh),
     UName_(coeffs_.lookupOrDefault<word>("U", "U")),
-    max_(readScalar(coeffs_.lookup("max")))
+    max_(coeffs_.get<scalar>("max"))
 {
     fieldNames_.setSize(1, UName_);
     applied_.setSize(1, false);
@@ -69,14 +69,12 @@ bool Foam::fv::limitVelocity::read(const dictionary& dict)
 {
     if (cellSetOption::read(dict))
     {
-        coeffs_.lookup("max") >> max_;
+        coeffs_.readEntry("max", max_);
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -86,10 +84,8 @@ void Foam::fv::limitVelocity::correct(volVectorField& U)
 
     vectorField& Uif = U.primitiveFieldRef();
 
-    forAll(cells_, i)
+    for (const label celli : cells_)
     {
-        const label celli = cells_[i];
-
         const scalar magSqrUi = magSqr(Uif[celli]);
 
         if (magSqrUi > maxSqrU)

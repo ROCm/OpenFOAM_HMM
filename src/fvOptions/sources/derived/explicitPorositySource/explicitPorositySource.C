@@ -129,10 +129,8 @@ bool Foam::fv::explicitPorositySource::read(const dictionary& dict)
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

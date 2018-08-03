@@ -100,10 +100,8 @@ bool Foam::fv::tabulatedAccelerationSource::read(const dictionary& dict)
     {
         return motion_.read(coeffs_);
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

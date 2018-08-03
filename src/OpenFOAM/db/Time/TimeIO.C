@@ -461,7 +461,7 @@ void Foam::Time::readDict()
         (
             IOstreamOption::versionNumber
             (
-                controlDict_.lookup("writeVersion")
+                controlDict_.get<float>("writeVersion")
             )
         );
     }

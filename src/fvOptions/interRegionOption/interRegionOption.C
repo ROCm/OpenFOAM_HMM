@@ -110,7 +110,7 @@ Foam::fv::interRegionOption::interRegionOption
         mesh
     ),
     master_(coeffs_.lookupOrDefault("master", true)),
-    nbrRegionName_(coeffs_.lookup("nbrRegion")),
+    nbrRegionName_(coeffs_.get<word>("nbrRegion")),
     meshInterpPtr_()
 {
     if (active())
@@ -124,6 +124,19 @@ Foam::fv::interRegionOption::interRegionOption
 
 Foam::fv::interRegionOption::~interRegionOption()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::fv::interRegionOption::read(const dictionary& dict)
+{
+    if (option::read(dict))
+    {
+        return true;
+    }
+
+    return false;
+}
 
 
 // ************************************************************************* //

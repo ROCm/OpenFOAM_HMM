@@ -187,11 +187,11 @@ bool Foam::fv::acousticDampingSource::read(const dictionary& dict)
 
         applied_.setSize(fieldNames_.size(), false);
 
-        coeffs_.lookup("frequency") >> frequency_.value();
-        coeffs_.lookup("URef") >> URefName_;
-        coeffs_.lookup("centre") >> x0_;
-        coeffs_.lookup("radius1") >> r1_;
-        coeffs_.lookup("radius2") >> r2_;
+        coeffs_.readEntry("frequency", frequency_.value());
+        coeffs_.readEntry("URef", URefName_);
+        coeffs_.readEntry("centre", x0_);
+        coeffs_.readEntry("radius1", r1_);
+        coeffs_.readEntry("radius2", r2_);
 
         if (coeffs_.readIfPresent("w", w_))
         {

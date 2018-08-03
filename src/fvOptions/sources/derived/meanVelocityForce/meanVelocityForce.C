@@ -86,14 +86,14 @@ Foam::fv::meanVelocityForce::meanVelocityForce
 )
 :
     cellSetOption(sourceName, modelType, dict, mesh),
-    Ubar_(coeffs_.lookup("Ubar")),
+    Ubar_(coeffs_.get<vector>("Ubar")),
     gradP0_(0.0),
     dGradP_(0.0),
     flowDir_(Ubar_/mag(Ubar_)),
     relaxation_(coeffs_.lookupOrDefault<scalar>("relaxation", 1.0)),
     rAPtr_(nullptr)
 {
-    coeffs_.lookup("fields") >> fieldNames_;
+    coeffs_.readEntry("fields", fieldNames_);
 
     if (fieldNames_.size() != 1)
     {
@@ -113,7 +113,7 @@ Foam::fv::meanVelocityForce::meanVelocityForce
     {
         Info<< "    Reading pressure gradient from file" << endl;
         dictionary propsDict(dictionary::null, propsFile);
-        propsDict.lookup("gradient") >> gradP0_;
+        propsDict.readEntry("gradient", gradP0_);
     }
 
     Info<< "    Initial pressure gradient = " << gradP0_ << nl << endl;
@@ -257,6 +257,14 @@ void Foam::fv::meanVelocityForce::constrain
 
     gradP0_ += dGradP_;
     dGradP_ = 0.0;
+}
+
+
+bool Foam::fv::meanVelocityForce::read(const dictionary& dict)
+{
+    NotImplemented;
+
+    return false;
 }
 
 

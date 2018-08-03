@@ -138,8 +138,7 @@ public:
 
 
     //- Destructor
-    virtual ~radialActuationDiskSource()
-    {}
+    virtual ~radialActuationDiskSource() = default;
 
 
     // Member Functions
@@ -159,8 +158,6 @@ public:
             const label fieldi
         );
 
-
-    // IO
 
         //- Read dictionary
         virtual bool read(const dictionary& dict);

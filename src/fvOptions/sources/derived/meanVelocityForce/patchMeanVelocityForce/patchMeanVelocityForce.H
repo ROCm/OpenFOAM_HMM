@@ -110,6 +110,11 @@ public:
             const dictionary& dict,
             const fvMesh& mesh
         );
+
+
+    //- Destructor
+    ~patchMeanVelocityForce() = default;
+
 };
 
 

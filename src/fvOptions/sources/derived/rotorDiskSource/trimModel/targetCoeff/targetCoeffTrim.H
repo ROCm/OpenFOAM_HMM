@@ -89,7 +89,6 @@ class targetCoeffTrim
 :
     public trimModel
 {
-
 protected:
 
     // Protected data
@@ -153,10 +152,10 @@ public:
     targetCoeffTrim(const fv::rotorDiskSource& rotor, const dictionary& dict);
 
     //- Destructor
-    virtual ~targetCoeffTrim();
+    virtual ~targetCoeffTrim() = default;
 
 
-    // Member functions
+    // Member Functions
 
         //- Read
         void read(const dictionary& dict);
