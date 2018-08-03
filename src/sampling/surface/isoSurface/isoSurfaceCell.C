@@ -137,7 +137,7 @@ Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
 
         const label fp0 = mesh_.tetBasePtIs()[facei];
         label fp = f.fcIndex(fp0);
-        for (label i = 2; i < f.size(); i++)
+        for (label i = 2; i < f.size(); ++i)
         {
             const label nextFp = f.fcIndex(fp);
 
@@ -199,6 +199,11 @@ void Foam::isoSurfaceCell::calcCutTypes
 {
     cellCutType_.setSize(mesh_.nCells());
     nCutCells_ = 0;
+
+    // Some processor domains may require tetBasePtIs and others do not.
+    // Do now to ensure things stay synchronized.
+    (void)mesh_.tetBasePtIs();
+
     forAll(mesh_.cells(), celli)
     {
         cellCutType_[celli] = calcCutType(isTet, cVals, pVals, celli);
@@ -339,7 +344,7 @@ Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
             // Check that all normals make a decent angle
             scalar minCos = GREAT;
             const vector& n0 = surf.faceNormals()[0];
-            for (label i = 1; i < surf.size(); i++)
+            for (label i = 1; i < surf.size(); ++i)
             {
                 scalar cosAngle = (n0 & surf.faceNormals()[i]);
                 if (cosAngle < minCos)
@@ -451,7 +456,7 @@ void Foam::isoSurfaceCell::calcSnappedCc
 
                     const label fp0 = mesh_.tetBasePtIs()[facei];
                     label fp = f.fcIndex(fp0);
-                    for (label i = 2; i < f.size(); i++)
+                    for (label i = 2; i < f.size(); ++i)
                     {
                         label nextFp = f.fcIndex(fp);
                         triFace tri(f[fp0], f[fp], f[nextFp]);
@@ -547,7 +552,7 @@ void Foam::isoSurfaceCell::genPointTris
 
     const label fp0 = mesh_.tetBasePtIs()[facei];
     label fp = f.fcIndex(fp0);
-    for (label i = 2; i < f.size(); i++)
+    for (label i = 2; i < f.size(); ++i)
     {
         label nextFp = f.fcIndex(fp);
         triFace tri(f[fp0], f[fp], f[nextFp]);
@@ -849,7 +854,7 @@ void Foam::isoSurfaceCell::calcSnappedPoint
                 // Check that all normals make a decent angle
                 scalar minCos = GREAT;
                 const vector& n0 = surf.faceNormals()[0];
-                for (label i = 1; i < surf.size(); i++)
+                for (label i = 1; i < surf.size(); ++i)
                 {
                     const vector& n = surf.faceNormals()[i];
                     scalar cosAngle = (n0 & n);
@@ -952,7 +957,7 @@ Foam::triSurface Foam::isoSurfaceCell::stitchTriPoints
         label rawPointi = 0;
         DynamicList<label> newToOldTri(nTris);
 
-        for (label oldTriI = 0; oldTriI < nTris; oldTriI++)
+        for (label oldTriI = 0; oldTriI < nTris; ++oldTriI)
         {
             labelledTri tri
             (
