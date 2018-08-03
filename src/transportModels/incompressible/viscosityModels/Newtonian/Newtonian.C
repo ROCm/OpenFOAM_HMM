@@ -76,7 +76,7 @@ bool Foam::viscosityModels::Newtonian::read
 {
     viscosityModel::read(viscosityProperties);
 
-    viscosityProperties_.lookup("nu") >> nu0_;
+    viscosityProperties_.readEntry("nu", nu0_);
     nu_ = nu0_;
 
     return true;

@@ -112,10 +112,10 @@ bool Foam::viscosityModels::powerLaw::read
 
     powerLawCoeffs_ = viscosityProperties.optionalSubDict(typeName + "Coeffs");
 
-    powerLawCoeffs_.lookup("k") >> k_;
-    powerLawCoeffs_.lookup("n") >> n_;
-    powerLawCoeffs_.lookup("nuMin") >> nuMin_;
-    powerLawCoeffs_.lookup("nuMax") >> nuMax_;
+    powerLawCoeffs_.readEntry("k", k_);
+    powerLawCoeffs_.readEntry("n", n_);
+    powerLawCoeffs_.readEntry("nuMin", nuMin_);
+    powerLawCoeffs_.readEntry("nuMax", nuMax_);
 
     return true;
 }

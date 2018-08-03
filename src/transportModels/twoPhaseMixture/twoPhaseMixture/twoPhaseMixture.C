@@ -34,8 +34,8 @@ Foam::twoPhaseMixture::twoPhaseMixture
     const dictionary& dict
 )
 :
-    phase1Name_(wordList(dict.lookup("phases"))[0]),
-    phase2Name_(wordList(dict.lookup("phases"))[1]),
+    phase1Name_(dict.get<wordList>("phases")[0]),
+    phase2Name_(dict.get<wordList>("phases")[1]),
 
     alpha1_
     (

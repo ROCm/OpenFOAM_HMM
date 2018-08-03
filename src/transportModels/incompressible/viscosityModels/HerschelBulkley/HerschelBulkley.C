@@ -113,10 +113,10 @@ bool Foam::viscosityModels::HerschelBulkley::read
     HerschelBulkleyCoeffs_ =
         viscosityProperties.optionalSubDict(typeName + "Coeffs");
 
-    HerschelBulkleyCoeffs_.lookup("k") >> k_;
-    HerschelBulkleyCoeffs_.lookup("n") >> n_;
-    HerschelBulkleyCoeffs_.lookup("tau0") >> tau0_;
-    HerschelBulkleyCoeffs_.lookup("nu0") >> nu0_;
+    HerschelBulkleyCoeffs_.readEntry("k", k_);
+    HerschelBulkleyCoeffs_.readEntry("n", n_);
+    HerschelBulkleyCoeffs_.readEntry("tau0", tau0_);
+    HerschelBulkleyCoeffs_.readEntry("nu0", nu0_);
 
     return true;
 }

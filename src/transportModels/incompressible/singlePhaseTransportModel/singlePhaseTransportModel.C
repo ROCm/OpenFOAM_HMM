@@ -92,10 +92,8 @@ bool Foam::singlePhaseTransportModel::read()
     {
         return viscosityModelPtr_->read(*this);
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

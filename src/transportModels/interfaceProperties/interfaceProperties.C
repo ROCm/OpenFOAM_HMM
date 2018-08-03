@@ -157,10 +157,7 @@ Foam::interfaceProperties::interfaceProperties
     transportPropertiesDict_(dict),
     cAlpha_
     (
-        readScalar
-        (
-            alpha1.mesh().solverDict(alpha1.name()).lookup("cAlpha")
-        )
+        alpha1.mesh().solverDict(alpha1.name()).get<scalar>("cAlpha")
     ),
 
     sigmaPtr_(surfaceTensionModel::New(dict, alpha1.mesh())),
@@ -233,7 +230,7 @@ void Foam::interfaceProperties::correct()
 
 bool Foam::interfaceProperties::read()
 {
-    alpha1_.mesh().solverDict(alpha1_.name()).lookup("cAlpha") >> cAlpha_;
+    alpha1_.mesh().solverDict(alpha1_.name()).readEntry("cAlpha", cAlpha_);
     sigmaPtr_->readDict(transportPropertiesDict_);
 
     return true;

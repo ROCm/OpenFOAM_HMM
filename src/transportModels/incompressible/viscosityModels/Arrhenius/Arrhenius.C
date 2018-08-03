@@ -83,8 +83,8 @@ bool Foam::viscosityModels::Arrhenius<ViscousModel>::read
     ArrheniusCoeffs_ =
         viscosityProperties.optionalSubDict(typeName + "Coeffs");
 
-    ArrheniusCoeffs_.lookup("alpha") >> alpha_;
-    ArrheniusCoeffs_.lookup("Talpha") >> Talpha_;
+    ArrheniusCoeffs_.readEntry("alpha", alpha_);
+    ArrheniusCoeffs_.readEntry("Talpha", Talpha_);
 
     return true;
 }

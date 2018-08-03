@@ -72,10 +72,10 @@ timeVaryingAlphaContactAngleFvPatchScalarField
 )
 :
     alphaContactAngleFvPatchScalarField(p, iF, dict),
-    t0_(readScalar(dict.lookup("t0"))),
-    thetaT0_(readScalar(dict.lookup("thetaT0"))),
-    te_(readScalar(dict.lookup("te"))),
-    thetaTe_(readScalar(dict.lookup("thetaTe")))
+    t0_(dict.get<scalar>("t0")),
+    thetaT0_(dict.get<scalar>("thetaT0")),
+    te_(dict.get<scalar>("te")),
+    thetaTe_(dict.get<scalar>("thetaTe"))
 {
     evaluate();
 }
