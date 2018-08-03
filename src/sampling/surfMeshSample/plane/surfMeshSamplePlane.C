@@ -175,7 +175,7 @@ bool Foam::surfMeshSamplePlane::update()
 
     labelList selectedCells
     (
-        mesh().cellZones().findMatching(zoneKey_).sortedToc()
+        mesh().cellZones().selection(zoneKey_).sortedToc()
     );
 
     bool fullMesh = returnReduce(selectedCells.empty(), andOp<bool>());

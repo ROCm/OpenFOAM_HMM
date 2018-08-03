@@ -109,7 +109,7 @@ Foam::porosityModel::porosityModel
         dict_.lookup("cellZone") >> zoneName_;
     }
 
-    cellZoneIDs_ = mesh_.cellZones().findIndices(zoneName_);
+    cellZoneIDs_ = mesh_.cellZones().indices(zoneName_);
 
     Info<< "    creating porous zone: " << zoneName_ << endl;
 
@@ -262,8 +262,8 @@ bool Foam::porosityModel::read(const dictionary& dict)
 
     coeffs_ = dict.optionalSubDict(type() + "Coeffs");
 
-    dict.lookup("cellZone") >> zoneName_;
-    cellZoneIDs_ = mesh_.cellZones().findIndices(zoneName_);
+    dict.readEntry("cellZone", zoneName_);
+    cellZoneIDs_ = mesh_.cellZones().indices(zoneName_);
 
     return true;
 }

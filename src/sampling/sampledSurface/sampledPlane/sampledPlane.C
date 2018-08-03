@@ -177,7 +177,10 @@ bool Foam::sampledPlane::update()
     }
 
 
-    labelList selectedCells(mesh().cellZones().findMatching(zoneKey_).toc());
+    labelList selectedCells
+    (
+        mesh().cellZones().selection(zoneKey_).sortedToc()
+    );
 
     bool fullMesh = returnReduce(selectedCells.empty(), andOp<bool>());
 

@@ -51,8 +51,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward declarations
 class pointZone;
 Ostream& operator<<(Ostream& os, const pointZone& zn);
 
@@ -65,23 +64,23 @@ class pointZone
 :
     public zone
 {
-    // Private Member Functions
-
-        //- No copy construct
-        pointZone(const pointZone&) = delete;
-
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Reference to zone list
         const pointZoneMesh& zoneMesh_;
 
 
+    // Protected Member Functions
+
+        //- No copy construct
+        pointZone(const pointZone&) = delete;
+
+
 public:
 
-    // Static data members
+    // Static Data Members
 
         //- The name associated with the zone-labels dictionary entry
         static const char * const labelsName;

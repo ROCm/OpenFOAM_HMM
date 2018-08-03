@@ -228,7 +228,8 @@ bool Foam::fv::multiphaseMangrovesSource::read(const dictionary& dict)
             const dictionary& modelDict = regionsDict.subDict(regionName);
 
             const word zoneName(modelDict.get<word>("cellZone"));
-            zoneIDs_[i] = mesh_.cellZones().findIndices(zoneName);
+
+            zoneIDs_[i] = mesh_.cellZones().indices(zoneName);
             if (zoneIDs_[i].empty())
             {
                 FatalErrorInFunction

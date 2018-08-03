@@ -175,12 +175,14 @@ public:
         labelRange range(const label patchi) const;
 
 
-        //- Return patch indices for all matches. Optionally matches patchGroups
-        labelList findIndices
+        //- Return patch indices for all matches.
+        //  Optionally matches patchGroups
+        labelList indices
         (
             const keyType& key,
-            const bool usePatchGroups = true
+            const bool useGroups = true
         ) const;
+
 
         //- Return patch index for the first match, return -1 if not found
         label findIndex(const keyType& key) const;
@@ -215,7 +217,7 @@ public:
         (
             const UList<wordRe>& patchNames,
             const bool warnNotFound = true,
-            const bool usePatchGroups = true
+            const bool useGroups = true
         ) const;
 
         //- Match the patches to groups.
@@ -276,6 +278,19 @@ public:
     // Ostream operator
 
         friend Ostream& operator<<(Ostream& os, const polyBoundaryMesh& pbm);
+
+
+    // Housekeeping
+
+        //- Identical to the indices() method (AUG-2018)
+        labelList findIndices
+        (
+            const keyType& key,
+            const bool useGroups = true
+        ) const
+        {
+            return this->indices(key, useGroups);
+        }
 };
 
 

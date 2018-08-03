@@ -88,10 +88,9 @@ int main(int argc, char *argv[])
 
     forAllConstIter(dictionary, agglomDict, iter)
     {
-        labelList patchids = boundary.findIndices(iter().keyword());
-        forAll(patchids, i)
+        labelList patchids = boundary.indices(iter().keyword());
+        for (const label patchi : patchids)
         {
-            label patchi =  patchids[i];
             const polyPatch& pp = boundary[patchi];
 
             if (!pp.coupled())

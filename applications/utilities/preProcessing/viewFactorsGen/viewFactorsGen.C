@@ -338,12 +338,11 @@ int main(int argc, char *argv[])
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
     const polyBoundaryMesh& coarsePatches = coarseMesh.boundaryMesh();
 
-    labelList viewFactorsPatches(patches.findIndices(viewFactorWall));
-    forAll(viewFactorsPatches, i)
+    labelList viewFactorsPatches(patches.indices(viewFactorWall));
+    for (const label patchi : viewFactorsPatches)
     {
-        label patchI = viewFactorsPatches[i];
-        nCoarseFaces += coarsePatches[patchI].size();
-        nFineFaces += patches[patchI].size();
+        nCoarseFaces += coarsePatches[patchi].size();
+        nFineFaces += patches[patchi].size();
     }
 
     // total number of coarse faces
@@ -370,10 +369,8 @@ int main(int argc, char *argv[])
     DynamicList<label> localAgg(nCoarseFaces);
     labelHashSet includePatches;
 
-    forAll(viewFactorsPatches, i)
+    for (const label patchID : viewFactorsPatches)
     {
-        const label patchID = viewFactorsPatches[i];
-
         const polyPatch& pp = patches[patchID];
         const labelList& agglom = finalAgglom[patchID];
 

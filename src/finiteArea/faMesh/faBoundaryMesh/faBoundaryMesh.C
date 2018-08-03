@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -23,8 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "faBoundaryMesh.H"
@@ -37,6 +35,81 @@ namespace Foam
 {
     defineTypeNameAndDebug(faBoundaryMesh, 0);
 }
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    // Templated implementation for types(), names(), etc - file-scope
+    template<class ListType, class GetOp>
+    static ListType getMethodImpl
+    (
+        const faPatchList& list,
+        const GetOp& getop
+    )
+    {
+        const label len = list.size();
+
+        ListType output(len);
+
+        for (label i = 0; i < len; ++i)
+        {
+            output[i] = getop(list[i]);
+        }
+
+        return output;
+    }
+
+
+    // Templated implementation for indices() - file-scope
+    template<class UnaryMatchPredicate>
+    static labelList indicesImpl
+    (
+        const faPatchList& list,
+        const UnaryMatchPredicate& matcher
+    )
+    {
+        const label len = list.size();
+
+        labelList output(len);
+
+        label count = 0;
+        for (label i = 0; i < len; ++i)
+        {
+            if (matcher(list[i].name()))
+            {
+                output[count++] = i;
+            }
+        }
+
+        output.resize(count);
+
+        return output;
+    }
+
+
+    // Templated implementation for findIndex() - file-scope
+    template<class UnaryMatchPredicate>
+    label findIndexImpl
+    (
+        const faPatchList& list,
+        const UnaryMatchPredicate& matcher
+    )
+    {
+        const label len = list.size();
+
+        for (label i = 0; i < len; ++i)
+        {
+            if (matcher(list[i].name()))
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -61,22 +134,21 @@ Foam::faBoundaryMesh::faBoundaryMesh
         PtrList<entry> patchEntries(is);
         patches.setSize(patchEntries.size());
 
-        forAll(patches, patchI)
+        forAll(patches, patchi)
         {
             patches.set
             (
-                patchI,
+                patchi,
                 faPatch::New
                 (
-                    patchEntries[patchI].keyword(),
-                    patchEntries[patchI].dict(),
-                    patchI,
+                    patchEntries[patchi].keyword(),
+                    patchEntries[patchi].dict(),
+                    patchi,
                     *this
                 )
             );
         }
 
-        // Check state of IOstream
         is.check(FUNCTION_NAME);
 
         close();
@@ -139,86 +211,78 @@ Foam::lduInterfacePtrsList Foam::faBoundaryMesh::interfaces() const
 }
 
 
-Foam::wordList Foam::faBoundaryMesh::types() const
+Foam::wordList Foam::faBoundaryMesh::names() const
 {
-    const faPatchList& patches = *this;
-
-    wordList t(patches.size());
-
-    forAll(patches, patchI)
-    {
-        t[patchI] = patches[patchI].type();
-    }
-
-    return t;
+    return getMethodImpl<wordList>(*this, getNameOp<faPatch>());
 }
 
 
-Foam::wordList Foam::faBoundaryMesh::names() const
+Foam::wordList Foam::faBoundaryMesh::types() const
 {
-    const faPatchList& patches = *this;
+    return getMethodImpl<wordList>(*this, getTypeOp<faPatch>());
+}
 
-    wordList t(patches.size());
 
-    forAll(patches, patchI)
+Foam::labelList Foam::faBoundaryMesh::indices
+(
+    const keyType& key,
+    const bool useGroups  // ignored
+) const
+{
+    if (key.empty())
     {
-        t[patchI] = patches[patchI].name();
+        return labelList();
     }
 
-    return t;
+    if (key.isPattern())
+    {
+        const regExp matcher(key);
+
+        return indicesImpl(*this, matcher);
+    }
+    else
+    {
+        // Literal string.
+        // Special version of above for reduced memory footprint
+
+        const word& matcher = key;
+
+        const label patchId = findIndexImpl(*this, matcher);
+
+        if (patchId >= 0)
+        {
+            return labelList(one(), patchId);
+        }
+    }
+
+    return labelList();
+}
+
+
+Foam::label Foam::faBoundaryMesh::findIndex(const keyType& key) const
+{
+    if (key.empty())
+    {
+        return -1;
+    }
+    else if (key.isPattern())
+    {
+        // Find as regex
+        regExp matcher(key);
+        return findIndexImpl(*this, matcher);
+    }
+    else
+    {
+        // Find as literal string
+        const word& matcher = key;
+        return findIndexImpl(*this, matcher);
+    }
 }
 
 
 Foam::label Foam::faBoundaryMesh::findPatchID(const word& patchName) const
 {
-    const faPatchList& patches = *this;
-
-    forAll(patches, patchI)
-    {
-        if (patches[patchI].name() == patchName)
-        {
-            return patchI;
-        }
-    }
-
-    // Patch not found
-    return -1;
-}
-
-
-Foam::labelList Foam::faBoundaryMesh::findIndices
-(
-    const keyType& key,
-    const bool usePatchGroups
-) const
-{
-    DynamicList<label> indices;
-
-    if (key.empty())
-    {
-        // no-op
-    }
-    else if (key.isPattern())
-    {
-        indices = findStrings(key, this->names());
-    }
-    else
-    {
-        // Literal string. Special version of above to avoid
-        // unnecessary memory allocations
-
-        indices.setCapacity(1);
-        forAll(*this, i)
-        {
-            if (key == operator[](i).name())
-            {
-                indices.append(i);
-                break;
-            }
-        }
-    }
-
-    return indices;
+    return findIndexImpl(*this, patchName);
 }
 
 
@@ -228,22 +292,22 @@ Foam::label Foam::faBoundaryMesh::whichPatch(const label edgeIndex) const
     // with patch start labels.
     // If the face is internal, return -1;
     // if it is off the end of the list, abort
-    if (edgeIndex >= mesh().nEdges())
-    {
-        FatalErrorInFunction
-            << "given label greater than the number of edges"
-            << abort(FatalError);
-    }
-
     if (edgeIndex < mesh().nInternalEdges())
     {
         return -1;
     }
-
-    forAll(*this, patchI)
+    else if (edgeIndex >= mesh().nEdges())
     {
-        label start = mesh_.patchStarts()[patchI];
-        label size = operator[](patchI).faPatch::size();
+        FatalErrorInFunction
+            << "Edge " << edgeIndex
+            << " out of bounds. Number of geometric edges " << mesh().nEdges()
+            << abort(FatalError);
+    }
+
+    forAll(*this, patchi)
+    {
+        label start = mesh_.patchStarts()[patchi];
+        label size = operator[](patchi).faPatch::size();
 
         if
         (
@@ -251,7 +315,7 @@ Foam::label Foam::faBoundaryMesh::whichPatch(const label edgeIndex) const
          && edgeIndex < start + size
         )
         {
-            return patchI;
+            return patchi;
         }
     }
 
@@ -269,25 +333,31 @@ bool Foam::faBoundaryMesh::checkDefinition(const bool report) const
     label nextPatchStart = mesh().nInternalEdges();
     const faBoundaryMesh& bm = *this;
 
-    bool boundaryError = false;
+    bool hasError = false;
 
-    forAll(bm, patchI)
+    forAll(bm, patchi)
     {
-        if (bm[patchI].start() != nextPatchStart)
+        if (bm[patchi].start() != nextPatchStart && !hasError)
         {
-            boundaryError = true;
+            hasError = true;
 
             InfoInFunction
-                << "Problem with boundary patch " << patchI
-                << ".\nThe patch should start on face no " << nextPatchStart
-                << " and the boundary file specifies " << bm[patchI].start()
-                << "." << nl << endl;
+                << " ****Problem with boundary patch " << patchi
+                << " named " << bm[patchi].name()
+                << " of type " <<  bm[patchi].type()
+                << ". The patch should start on face no " << nextPatchStart
+                << " and the patch specifies " << bm[patchi].start()
+                << "." << endl
+                << "Possibly consecutive patches have this same problem."
+                << " Suppressing future warnings." << endl;
         }
 
-        nextPatchStart += bm[patchI].faPatch::size();
+        // Warn about duplicate boundary patches?
+
+        nextPatchStart += bm[patchi].faPatch::size();
     }
 
-    if (boundaryError)
+    if (hasError)
     {
         SeriousErrorInFunction
             << "This mesh is not valid: boundary definition is in error."
@@ -301,7 +371,7 @@ bool Foam::faBoundaryMesh::checkDefinition(const bool report) const
         }
     }
 
-    return boundaryError;
+    return hasError;
 }
 
 
@@ -309,14 +379,14 @@ void Foam::faBoundaryMesh::movePoints(const pointField& p)
 {
     faPatchList& patches = *this;
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        patches[patchI].initMovePoints(p);
+        patches[patchi].initMovePoints(p);
     }
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        patches[patchI].movePoints(p);
+        patches[patchi].movePoints(p);
     }
 }
 
@@ -343,19 +413,16 @@ bool Foam::faBoundaryMesh::writeData(Ostream& os) const
 
     os  << patches.size() << nl << token::BEGIN_LIST << incrIndent << nl;
 
-    forAll(patches, patchi)
+    for (const faPatch& p : patches)
     {
-        os  << indent << patches[patchi].name() << nl
-            << indent << token::BEGIN_BLOCK << nl
-            << incrIndent << patches[patchi] << decrIndent
-            << indent << token::END_BLOCK << endl;
+        os.beginBlock(p.name());
+        os << p;
+        os.endBlock();
     }
 
     os  << decrIndent << token::END_LIST;
 
-    // Check state of IOstream
     os.check(FUNCTION_NAME);
-
     return os.good();
 }
 

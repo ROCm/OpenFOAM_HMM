@@ -40,6 +40,81 @@ namespace Foam
     defineTypeNameAndDebug(polyBoundaryMesh, 0);
 }
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    // Templated implementation for types(), names(), etc - file-scope
+    template<class ListType, class GetOp>
+    static ListType getMethodImpl
+    (
+        const polyPatchList& list,
+        const GetOp& getop
+    )
+    {
+        const label len = list.size();
+
+        ListType output(len);
+
+        for (label i = 0; i < len; ++i)
+        {
+            output[i] = getop(list[i]);
+        }
+
+        return output;
+    }
+
+
+    // Templated implementation for indices() - file-scope
+    template<class UnaryMatchPredicate>
+    static labelList indicesImpl
+    (
+        const polyPatchList& list,
+        const UnaryMatchPredicate& matcher
+    )
+    {
+        const label len = list.size();
+
+        labelList output(len);
+
+        label count = 0;
+        for (label i = 0; i < len; ++i)
+        {
+            if (matcher(list[i].name()))
+            {
+                output[count++] = i;
+            }
+        }
+
+        output.resize(count);
+
+        return output;
+    }
+
+
+    // Templated implementation for findIndex() - file-scope
+    template<class UnaryMatchPredicate>
+    label findIndexImpl
+    (
+        const polyPatchList& list,
+        const UnaryMatchPredicate& matcher
+    )
+    {
+        const label len = list.size();
+
+        for (label i = 0; i < len; ++i)
+        {
+            if (matcher(list[i].name()))
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+} // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -169,9 +244,11 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
 
 void Foam::polyBoundaryMesh::clearGeom()
 {
-    forAll(*this, patchi)
+    polyPatchList& patches = *this;
+
+    for (polyPatch& p : patches)
     {
-        operator[](patchi).clearGeom();
+        p.clearGeom();
     }
 }
 
@@ -182,9 +259,11 @@ void Foam::polyBoundaryMesh::clearAddressing()
     patchIDPtr_.clear();
     groupPatchIDsPtr_.clear();
 
-    forAll(*this, patchi)
+    polyPatchList& patches = *this;
+
+    for (polyPatch& p : patches)
     {
-        operator[](patchi).clearAddressing();
+        p.clearAddressing();
     }
 }
 
@@ -402,11 +481,11 @@ Foam::polyBoundaryMesh::groupPatchIDs() const
         groupPatchIDsPtr_.reset(new HashTable<labelList>(16));
         auto& groupPatchIDs = *groupPatchIDsPtr_;
 
-        const polyBoundaryMesh& bm = *this;
+        const polyBoundaryMesh& patches = *this;
 
-        forAll(bm, patchi)
+        forAll(patches, patchi)
         {
-            const wordList& groups = bm[patchi].inGroups();
+            const wordList& groups = patches[patchi].inGroups();
 
             for (const word& groupName : groups)
             {
@@ -424,12 +503,12 @@ Foam::polyBoundaryMesh::groupPatchIDs() const
         }
 
         // Remove patch names from patchGroups
-        forAll(bm, patchi)
+        forAll(patches, patchi)
         {
-            if (groupPatchIDs.erase(bm[patchi].name()))
+            if (groupPatchIDs.erase(patches[patchi].name()))
             {
                 WarningInFunction
-                    << "Removing patchGroup '" << bm[patchi].name()
+                    << "Removed patchGroup '" << patches[patchi].name()
                     << "' which clashes with patch " << patchi
                     << " of the same name."
                     << endl;
@@ -513,46 +592,24 @@ Foam::label Foam::polyBoundaryMesh::nNonProcessor() const
 
 Foam::wordList Foam::polyBoundaryMesh::names() const
 {
-    const polyPatchList& patches = *this;
-
-    wordList list(patches.size());
-
-    forAll(patches, patchi)
-    {
-        list[patchi] = patches[patchi].name();
-    }
-
-    return list;
+    return getMethodImpl<wordList>(*this, getNameOp<polyPatch>());
 }
 
 
 Foam::wordList Foam::polyBoundaryMesh::types() const
 {
-    const polyPatchList& patches = *this;
-
-    wordList list(patches.size());
-
-    forAll(patches, patchi)
-    {
-        list[patchi] = patches[patchi].type();
-    }
-
-    return list;
+    return getMethodImpl<wordList>(*this, getTypeOp<polyPatch>());
 }
 
 
 Foam::wordList Foam::polyBoundaryMesh::physicalTypes() const
 {
-    const polyPatchList& patches = *this;
-
-    wordList list(patches.size());
-
-    forAll(patches, patchi)
-    {
-        list[patchi] = patches[patchi].physicalType();
-    }
-
-    return list;
+    return
+        getMethodImpl<wordList>
+        (
+            *this,
+            [](const polyPatch& p) { return p.physicalType(); }
+        );
 }
 
 
@@ -578,84 +635,79 @@ Foam::labelRange Foam::polyBoundaryMesh::range(const label patchi) const
 }
 
 
-Foam::labelList Foam::polyBoundaryMesh::findIndices
+Foam::labelList Foam::polyBoundaryMesh::indices
 (
     const keyType& key,
-    const bool usePatchGroups
+    const bool useGroups
 ) const
 {
-    DynamicList<label> indices;
-
     if (key.empty())
     {
-        // no-op
+        return labelList();
     }
-    else if (key.isPattern())
+
+    DynamicList<label> patchIndices;
+
+    if (key.isPattern())
     {
-        const regExp keyRe(key);
+        const regExp matcher(key);
 
-        indices = findStrings(keyRe, this->names());
+        patchIndices = indicesImpl(*this, matcher);
 
-        if (usePatchGroups && groupPatchIDs().size())
+        // Only examine patch groups if requested and when they exist.
+        if (useGroups && !groupPatchIDs().empty())
         {
-            labelHashSet indexSet(indices);
+            const wordList groupNames
+            (
+                groupPatchIDs().tocKeys(matcher)
+            );
 
-            const wordList allGroupNames = groupPatchIDs().toc();
-            labelList groupIDs = findStrings(keyRe, allGroupNames);
-
-            for (const label groupi : groupIDs)
+            if (groupNames.size())
             {
-                const word& grpName = allGroupNames[groupi];
+                labelHashSet groupIndices;
 
-                const labelList& patchIDs = groupPatchIDs()[grpName];
-
-                for (const label patchi : patchIDs)
+                for (const word& grpName : groupNames)
                 {
-                    if (indexSet.insert(patchi))
-                    {
-                        indices.append(patchi);
-                    }
+                    // Hash the patch ids for the group
+                    groupIndices.insert( groupPatchIDs()[grpName] );
                 }
+
+                groupIndices.erase(patchIndices);  // Skip existing
+                patchIndices.append(groupIndices.sortedToc());
             }
         }
     }
     else
     {
-        // Literal string. Special version of above to avoid
-        // unnecessary memory allocations
+        // Literal string.
+        // Special version of above for reduced memory footprint
 
-        indices.setCapacity(1);
-        forAll(*this, i)
+        const word& matcher = key;
+
+        const label patchId = findIndexImpl(*this, matcher);
+
+        if (patchId >= 0)
         {
-            if (key == operator[](i).name())
-            {
-                indices.append(i);
-                break;
-            }
+            patchIndices.append(patchId);
         }
 
-        if (usePatchGroups && groupPatchIDs().size())
+        // Only examine patch groups if requested and when they exist.
+        if (useGroups && !groupPatchIDs().empty())
         {
             const auto iter = groupPatchIDs().cfind(key);
 
             if (iter.found())
             {
-                labelHashSet indexSet(indices);
+                // Hash the patch ids for the group
+                labelHashSet groupIndices(iter.object());
 
-                const labelList& patchIDs = *iter;
-
-                for (const label patchi : patchIDs)
-                {
-                    if (indexSet.insert(patchi))
-                    {
-                        indices.append(patchi);
-                    }
-                }
+                groupIndices.erase(patchIndices);  // Skip existing
+                patchIndices.append(groupIndices.sortedToc());
             }
         }
     }
 
-    return indices;
+    return patchIndices;
 }
 
 
@@ -663,31 +715,20 @@ Foam::label Foam::polyBoundaryMesh::findIndex(const keyType& key) const
 {
     if (key.empty())
     {
-        // no-op
+        return -1;
     }
     else if (key.isPattern())
     {
-        labelList indices = this->findIndices(key);
-
-        // Return the first element
-        if (!indices.empty())
-        {
-            return indices.first();
-        }
+        // Find as regex
+        regExp matcher(key);
+        return findIndexImpl(*this, matcher);
     }
     else
     {
-        forAll(*this, i)
-        {
-            if (key == operator[](i).name())
-            {
-                return i;
-            }
-        }
+        // Find as literal string
+        const word& matcher = key;
+        return findIndexImpl(*this, matcher);
     }
-
-    // Not found, return -1
-    return -1;
 }
 
 
@@ -697,14 +738,11 @@ Foam::label Foam::polyBoundaryMesh::findPatchID
     bool allowNotFound
 ) const
 {
-    const polyPatchList& patches = *this;
+    const label patchId = findIndexImpl(*this, patchName);
 
-    forAll(patches, patchi)
+    if (patchId >= 0)
     {
-        if (patches[patchi].name() == patchName)
-        {
-            return patchi;
-        }
+        return patchId;
     }
 
     if (!allowNotFound)
@@ -789,7 +827,7 @@ Foam::labelHashSet Foam::polyBoundaryMesh::patchSet
 (
     const UList<wordRe>& patchNames,
     const bool warnNotFound,
-    const bool usePatchGroups
+    const bool useGroups
 ) const
 {
     const wordList allPatchNames(this->names());
@@ -799,28 +837,26 @@ Foam::labelHashSet Foam::polyBoundaryMesh::patchSet
     {
         // Treat the given patch names as wild-cards and search the set
         // of all patch names for matches
-        labelList patchIDs = findStrings(patchName, allPatchNames);
-        ids.insert(patchIDs);
+        labelList patchIndices = findStrings(patchName, allPatchNames);
+        ids.insert(patchIndices);
 
-        if (patchIDs.empty())
+        if (patchIndices.empty())
         {
-            if (usePatchGroups)
+            if (useGroups)
             {
-                const wordList allGroupNames = groupPatchIDs().toc();
+                // Treat as group name or regex for group name
 
-                // Regard as group name
-                labelList groupIDs = findStrings(patchName, allGroupNames);
+                const wordList groupNames
+                (
+                    groupPatchIDs().tocKeys(patchName)
+                );
 
-                for (const label groupi : groupIDs)
+                for (const word& grpName : groupNames)
                 {
-                    const word& groupName = allGroupNames[groupi];
-                    ids.insert
-                    (
-                        groupPatchIDs()[groupName]
-                    );
+                    ids.insert( groupPatchIDs()[grpName] );
                 }
 
-                if (groupIDs.empty() && warnNotFound)
+                if (groupNames.empty() && warnNotFound)
                 {
                     WarningInFunction
                         << "Cannot find any patch or group names matching "

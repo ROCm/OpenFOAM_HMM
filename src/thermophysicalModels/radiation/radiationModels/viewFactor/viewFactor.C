@@ -53,11 +53,11 @@ void Foam::radiation::viewFactor::initialise()
 {
     const polyBoundaryMesh& coarsePatches = coarseMesh_.boundaryMesh();
 
-    selectedPatches_ = mesh_.boundaryMesh().findIndices(viewFactorWalls);
-    forAll(selectedPatches_, i)
+    selectedPatches_ = mesh_.boundaryMesh().indices(viewFactorWalls);
+
+    for (const label patchi : selectedPatches_)
     {
-        const label patchI = selectedPatches_[i];
-        nLocalCoarseFaces_ += coarsePatches[patchI].size();
+        nLocalCoarseFaces_ += coarsePatches[patchi].size();
     }
 
     if (debug)

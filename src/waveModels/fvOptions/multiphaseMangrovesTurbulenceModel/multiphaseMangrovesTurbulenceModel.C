@@ -260,7 +260,7 @@ bool Foam::fv::multiphaseMangrovesTurbulenceModel::read(const dictionary& dict)
 
             const word zoneName(modelDict.get<word>("cellZone"));
 
-            zoneIDs_[i] = mesh_.cellZones().findIndices(zoneName);
+            zoneIDs_[i] = mesh_.cellZones().indices(zoneName);
             if (zoneIDs_[i].empty())
             {
                 FatalErrorInFunction

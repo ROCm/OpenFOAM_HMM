@@ -117,19 +117,25 @@ public:
     // Member Functions
 
         //- Find and return indices for all matches
-        labelList findIndices(const keyType& key) const;
+        labelList indices(const keyType& key) const;
+
+        //- Find and return indices for all matches
+        labelList indices(const wordRes& matcher) const;
 
         //- Find and return index for the first match, return -1 if not found
         label findIndex(const keyType& key) const;
 
-        //- Search for given key
+        //- Find and return index for the first match, return -1 if not found
+        label findIndex(const wordRes& matcher) const;
+
+        //- Search if given key exists
         bool found(const keyType& key) const;
 
         //- A list of the coordinate-system names
         wordList names() const;
 
         //- A list of the coordinate-system names satisfying the input matcher
-        wordList names(const keyType& matcher) const;
+        wordList names(const keyType& key) const;
 
         //- A list of the coordinate-system names satisfying the input matcher
         wordList names(const wordRe& matcher) const;
@@ -145,6 +151,15 @@ public:
 
         //- Write data
         bool writeData(Ostream&) const;
+
+
+    // Housekeeping
+
+        //- Identical to the indices() method (AUG-2018)
+        labelList findIndices(const keyType& key) const
+        {
+            return this->indices(key);
+        }
 };
 
 

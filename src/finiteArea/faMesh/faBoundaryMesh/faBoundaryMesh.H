@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -54,6 +54,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Forward declarations
 class faMesh;
 class faBoundaryMesh;
 Ostream& operator<<(Ostream&, const faBoundaryMesh&);
@@ -67,7 +68,7 @@ class faBoundaryMesh
     public faPatchList,
     public regIOobject
 {
-    // private data
+    // Private Data
 
         //- Reference to mesh
         const faMesh& mesh_;
@@ -103,10 +104,11 @@ public:
         );
 
 
-    // Destructor - default
+    //- Destructor
+    ~faBoundaryMesh() = default;
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 
@@ -121,22 +123,25 @@ public:
             //  with only those pointing to interfaces being set
             lduInterfacePtrsList interfaces() const;
 
-            //- Return a list of patch types
-            wordList types() const;
-
             //- Return a list of patch names
             wordList names() const;
 
-            //- Find patch index given a name
-            label findPatchID(const word& patchName) const;
+            //- Return a list of patch types
+            wordList types() const;
 
-            //- Find patch indices given a name
-            //  Compatibility change  HJ, 12/Aug/2017
-            labelList findIndices
+            //- Return patch indices for all matches.
+            //  Matching patchGroups currently not supported
+            labelList indices
             (
-                const keyType&,
+                const keyType& key,
                 const bool useGroups = false
             ) const;
+
+            //- Return patch index for the first match, return -1 if not found
+            label findIndex(const keyType& key) const;
+
+            //- Find patch index given a name, return -1 if not found
+            label findPatchID(const word& patchName) const;
 
             //- Return patch index for a given edge label
             label whichPatch(const label edgeIndex) const;
@@ -160,6 +165,20 @@ public:
     // Ostream operator
 
         friend Ostream& operator<<(Ostream&, const faBoundaryMesh&);
+
+
+    // Housekeeping
+
+        //- Identical to the indices() method (AUG-2018)
+        labelList findIndices
+        (
+            const keyType& key,
+            const bool useGroups = false
+        ) const
+        {
+            return indices(key, useGroups);
+        }
+
 };
 
 

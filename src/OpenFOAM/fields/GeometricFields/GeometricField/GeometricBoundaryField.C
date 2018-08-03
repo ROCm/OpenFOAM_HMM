@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +55,7 @@ readField
     {
         if (iter().isDict() && !iter().keyword().isPattern())
         {
-            label patchi = bmesh_.findPatchID(iter().keyword());
+            const label patchi = bmesh_.findPatchID(iter().keyword());
 
             if (patchi != -1)
             {
@@ -98,16 +98,11 @@ readField
 
             if (e.isDict() && !e.keyword().isPattern())
             {
-                const labelList patchIDs = bmesh_.findIndices
-                (
-                    e.keyword(),
-                    true                    // use patchGroups
-                );
+                const labelList patchIds =
+                    bmesh_.indices(e.keyword(), true); // use patchGroups
 
-                forAll(patchIDs, i)
+                for (const label patchi : patchIds)
                 {
-                    label patchi = patchIDs[i];
-
                     if (!this->set(patchi))
                     {
                         this->set

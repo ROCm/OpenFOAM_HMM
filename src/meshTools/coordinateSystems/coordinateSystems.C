@@ -45,7 +45,7 @@ namespace Foam
     template<class UnaryMatchPredicate>
     static wordList namesImpl
     (
-        const IOPtrList<coordinateSystem>& list,
+        const PtrList<coordinateSystem>& list,
         const UnaryMatchPredicate& matcher,
         const bool doSort
     )
@@ -73,6 +73,55 @@ namespace Foam
         }
 
         return output;
+    }
+
+
+    // Templated implementation for indices() - file-scope
+    template<class UnaryMatchPredicate>
+    static labelList indicesImpl
+    (
+        const PtrList<coordinateSystem>& list,
+        const UnaryMatchPredicate& matcher
+    )
+    {
+        const label len = list.size();
+
+        labelList output(len);
+
+        label count = 0;
+        for (label i = 0; i < len; ++i)
+        {
+            if (matcher(list[i].name()))
+            {
+                output[count++] = i;
+            }
+        }
+
+        output.resize(count);
+
+        return output;
+    }
+
+
+    // Templated implementation for findIndex() - file-scope
+    template<class UnaryMatchPredicate>
+    label findIndexImpl
+    (
+        const PtrList<coordinateSystem>& list,
+        const UnaryMatchPredicate& matcher
+    )
+    {
+        const label len = list.size();
+
+        for (label i = 0; i < len; ++i)
+        {
+            if (matcher(list[i].name()))
+            {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
 } // End namespace Foam
@@ -143,32 +192,30 @@ const Foam::coordinateSystems& Foam::coordinateSystems::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::labelList Foam::coordinateSystems::findIndices(const keyType& key) const
+Foam::labelList Foam::coordinateSystems::indices(const keyType& key) const
 {
-    labelList indices;
     if (key.empty())
     {
-        // no-op
+        return labelList();
     }
     else if (key.isPattern())
     {
-        indices = findStrings(key, this->names());
+        // Match as regex
+        regExp matcher(key);
+        return indicesImpl(*this, matcher);
     }
     else
     {
-        indices.setSize(this->size());
-        label count = 0;
-        forAll(*this, i)
-        {
-            if (key == operator[](i).name())
-            {
-                indices[count++] = i;
-            }
-        }
-        indices.setSize(count);
+        // Compare as literal string
+        const word& matcher = key;
+        return indicesImpl(*this, matcher);
     }
+}
 
-    return indices;
+
+Foam::labelList Foam::coordinateSystems::indices(const wordRes& matcher) const
+{
+    return indicesImpl(*this, matcher);
 }
 
 
@@ -176,29 +223,27 @@ Foam::label Foam::coordinateSystems::findIndex(const keyType& key) const
 {
     if (key.empty())
     {
-        // no-op
+        return -1;
     }
-    else if (key.isPattern())
+
+    if (key.isPattern())
     {
-        labelList indices = findIndices(key);
-        if (!indices.empty())
-        {
-            return indices.first();  // first match
-        }
+        // Find as regex
+        regExp matcher(key);
+        return findIndexImpl(*this, matcher);
     }
     else
     {
-        forAll(*this, i)
-        {
-            if (key == operator[](i).name())
-            {
-                return i;
-            }
-        }
+        // Find as literal string
+        const word& matcher = key;
+        return findIndexImpl(*this, matcher);
     }
+}
 
-    // Not found
-    return -1;
+
+Foam::label Foam::coordinateSystems::findIndex(const wordRes& matcher) const
+{
+    return findIndexImpl(*this, matcher);
 }
 
 
@@ -210,25 +255,37 @@ bool Foam::coordinateSystems::found(const keyType& key) const
 
 Foam::wordList Foam::coordinateSystems::names() const
 {
-    wordList output(size());
+    const PtrList<coordinateSystem>& systems = *this;
 
-    forAll(*this, i)
+    wordList list(systems.size());
+
+    forAll(systems, i)
     {
-        output[i] = operator[](i).name();
+        list[i] = systems[i].name();
     }
 
-    return output;
+    return list;
 }
 
 
-Foam::wordList Foam::coordinateSystems::names(const keyType& matcher) const
+Foam::wordList Foam::coordinateSystems::names(const keyType& key) const
 {
-    return
-    (
-        matcher.isPattern()
-      ? namesImpl(*this, regExp(matcher), false)
-      : namesImpl(*this, matcher, false)
-    );
+    if (key.empty())
+    {
+        return wordList();
+    }
+    else if (key.isPattern())
+    {
+        // Find as regex
+        regExp matcher(key);
+        return namesImpl(*this, matcher, false);
+    }
+    else
+    {
+        // Find as literal string
+        const word& matcher = key;
+        return namesImpl(*this, matcher, false);
+    }
 }
 
 

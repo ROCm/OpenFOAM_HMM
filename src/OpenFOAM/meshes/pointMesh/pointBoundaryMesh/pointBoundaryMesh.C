@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,19 +58,20 @@ Foam::pointBoundaryMesh::pointBoundaryMesh
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::pointBoundaryMesh::findPatchID(const word& patchName) const
+
+Foam::labelList Foam::pointBoundaryMesh::indices
+(
+    const keyType& key,
+    const bool useGroups
+) const
 {
-    return mesh()().boundaryMesh().findPatchID(patchName);
+    return mesh()().boundaryMesh().indices(key, useGroups);
 }
 
 
-Foam::labelList Foam::pointBoundaryMesh::findIndices
-(
-    const keyType& key,
-    const bool usePatchGroups
-) const
+Foam::label Foam::pointBoundaryMesh::findPatchID(const word& patchName) const
 {
-    return mesh()().boundaryMesh().findIndices(key, usePatchGroups);
+    return mesh()().boundaryMesh().findPatchID(patchName);
 }
 
 
