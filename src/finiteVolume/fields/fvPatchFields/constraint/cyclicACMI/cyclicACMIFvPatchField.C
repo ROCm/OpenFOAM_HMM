@@ -68,6 +68,30 @@ Foam::cyclicACMIFvPatchField<Type>::cyclicACMIFvPatchField
 
     if (!dict.found("value") && this->coupled())
     {
+        // Extra check: make sure that the non-overlap patch is before
+        // this so it has actually been read - evaluate will crash otherwise
+
+        const GeometricField<Type, fvPatchField, volMesh>& fld =
+            static_cast<const GeometricField<Type, fvPatchField, volMesh>&>
+            (
+                this->primitiveField()
+            );
+        if (!fld.boundaryField().set(cyclicACMIPatch_.nonOverlapPatchID()))
+        {
+            FatalIOErrorInFunction
+            (
+                dict
+            )
+                << "    patch " << p.name()
+                << " of field " << this->internalField().name()
+                << " refers to non-overlap patch "
+                << cyclicACMIPatch_.cyclicACMIPatch().nonOverlapPatchName()
+                << " which is not constructed yet." << nl
+                << "    Either supply an initial value or change the ordering"
+                << " in the file"
+                << exit(FatalIOError);
+        }
+
         this->evaluate(Pstream::commsTypes::blocking);
     }
 }
