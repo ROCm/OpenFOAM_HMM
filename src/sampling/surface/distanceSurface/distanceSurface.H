@@ -97,9 +97,6 @@ class distanceSurface
         //- Optional bounding box to trim triangles against
         const boundBox bounds_;
 
-        //- If restricted to zones, name of this zone or a regular expression
-        keyType zoneKey_;
-
         //- Distance to cell centres
         autoPtr<volScalarField> cellDistancePtr_;
 

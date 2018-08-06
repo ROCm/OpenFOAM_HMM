@@ -201,7 +201,6 @@ Foam::sampledIsoSurfaceCell::sampledIsoSurfaceCell
     bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox)),
     regularise_(dict.lookupOrDefault("regularise", true)),
     average_(dict.lookupOrDefault("average", true)),
-    zoneKey_(keyType::null),
     prevTimeIndex_(-1),
     meshCells_()
 {}

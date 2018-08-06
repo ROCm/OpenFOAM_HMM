@@ -74,7 +74,6 @@ Foam::distanceSurface::distanceSurface
     cell_(dict.lookupOrDefault("cell", true)),
     regularise_(dict.lookupOrDefault("regularise", true)),
     bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox)),
-    zoneKey_(keyType::null),
     isoSurfCellPtr_(nullptr),
     isoSurfPtr_(nullptr)
 {}
@@ -120,7 +119,6 @@ Foam::distanceSurface::distanceSurface
     cell_(cell),
     regularise_(regularise),
     bounds_(bounds),
-    zoneKey_(keyType::null),
     isoSurfCellPtr_(nullptr),
     isoSurfPtr_(nullptr)
 {}

@@ -54,7 +54,8 @@ Usage
         regularise | point snapping                        | yes      |
         average  | cell values from averaged point values  | no       | false
         bounds   | limit with bounding box                 | no       |
-        zone     | limit to specified zone                 | no       |
+        zone     | limit to cell zone (name or regex)      | no       |
+        zones    | limit to cell zones (names, regexs)     | no       |
         exposedPatchName | name for zone subset            | partly   |
     \endtable
 
@@ -68,7 +69,6 @@ SourceFiles
 
 #include "isoSurface.H"
 #include "sampledSurface.H"
-#include "ZoneIDs.H"
 #include "fvMeshSubset.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -104,8 +104,8 @@ class sampledIsoSurface
         //- Whether to recalculate cell values as average of point values
         const bool average_;
 
-        //- Zone name/index (if restricted to zones)
-        mutable cellZoneID zoneID_;
+        //- The zone or zones for the iso-surface
+        wordRes zoneNames_;
 
         //- For zones: patch to put exposed faces into
         mutable word exposedPatchName_;

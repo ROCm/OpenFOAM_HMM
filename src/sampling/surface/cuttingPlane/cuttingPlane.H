@@ -25,10 +25,10 @@ Class
     Foam::cuttingPlane
 
 Description
-    Constructs plane through mesh.
+    Constructs cutting plane through a mesh.
 
-    No attempt at resolving degenerate cases. Since the cut faces are
-    usually quite ugly, they will always be triangulated.
+    No attempt at resolving degenerate cases.
+    Since the cut faces can be quite ugly, they will often be triangulated.
 
 Note
     When the cutting plane coincides with a mesh face, the cell edge on the
@@ -45,6 +45,7 @@ SourceFiles
 #include "plane.H"
 #include "pointField.H"
 #include "faceList.H"
+#include "bitSet.H"
 #include "MeshedSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -52,6 +53,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class primitiveMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -75,19 +77,28 @@ class cuttingPlane
 
     // Private Member Functions
 
-        //- Determine cut cells, possibly restricted to a list of cells
-        void calcCutCells
+        //- Classify sides of plane (0=BACK, 1=ONPLANE, 2=FRONT) for each point
+        static PackedList<2> classifySides
         (
-            const primitiveMesh&,
-            const scalarField& dotProducts,
-            const labelUList& cellIdLabels = labelUList::null()
+            const plane& pln,
+            const pointField& pts
+        );
+
+        //- Determine cut cells, possibly restricted to a list of cells
+        //  \return number of faces cut
+        label calcCellCuts
+        (
+            const primitiveMesh& mesh,
+            const PackedList<2>& planeSides,
+            bitSet& cellCuts
         );
 
         //- Determine intersection points (cutPoints).
         void intersectEdges
         (
-            const primitiveMesh&,
-            const scalarField& dotProducts,
+            const primitiveMesh& mesh,
+            const PackedList<2>& planeSides,
+            const bitSet& cellCuts,
             List<label>& edgePoint
         );
 
@@ -106,8 +117,9 @@ class cuttingPlane
         void walkCellCuts
         (
             const primitiveMesh& mesh,
-            const bool triangulate,
-            const labelUList& edgePoint
+            const bitSet& cellCuts,
+            const labelUList& edgePoint,
+            const bool triangulate
         );
 
 
@@ -115,18 +127,35 @@ protected:
 
     // Constructors
 
-        //- Construct plane description without cutting
+        //- Construct from a plane description without any cutting
         cuttingPlane(const plane& pln);
 
 
     // Protected Member Functions
 
-        //- Recut mesh with existing plane, restricted to a list of cells
-        void reCut
+        //- Cut mesh with existing plane, restricted to a list of cells
+        void performCut
         (
-            const primitiveMesh&,
+            const primitiveMesh& mesh,
             const bool triangulate,
-            const labelUList& cellIdLabels = labelUList::null()
+            const bitSet& cellSelectionMask = bitSet()
+        );
+
+        //- Cut mesh with existing plane, restricted to a list of cells
+        //  Reclaim memory for cellSelectionMask
+        void performCut
+        (
+            const primitiveMesh& mesh,
+            const bool triangulate,
+            bitSet&& cellSelectionMask
+        );
+
+        //- Cut mesh with existing plane, restricted to a list of cells
+        void performCut
+        (
+            const primitiveMesh& mesh,
+            const bool triangulate,
+            const labelUList& cellIdLabels
         );
 
         //- Remap action on triangulation or cleanup
@@ -134,6 +163,10 @@ protected:
 
 
 public:
+
+    //- Debug information
+    static int debug;
+
 
     // Constructors
 
@@ -144,7 +177,27 @@ public:
             const plane& pln,
             const primitiveMesh& mesh,
             const bool triangulate,
-            const labelUList& cellIdLabels = labelUList::null()
+            const bitSet& cellIdLabels = bitSet()
+        );
+
+        //- Construct from plane and mesh reference,
+        //- possibly restricted to a list of cells
+        cuttingPlane
+        (
+            const plane& pln,
+            const primitiveMesh& mesh,
+            const bool triangulate,
+            bitSet&& cellIdLabels
+        );
+
+        //- Construct from plane and mesh reference,
+        //- possibly restricted to a list of cells
+        cuttingPlane
+        (
+            const plane& pln,
+            const primitiveMesh& mesh,
+            const bool triangulate,
+            const labelUList& cellIdLabels
         );
 
 
@@ -153,7 +206,7 @@ public:
         //- Return the plane used
         const plane& planeDesc() const
         {
-            return static_cast<const plane&>(*this);
+            return *this;
         }
 
         //- The mesh cells cut by the plane

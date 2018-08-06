@@ -108,7 +108,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
                         fvm
                     )
                 );
-                volFieldPtr_ = storedVolFieldPtr_.operator->();
+                volFieldPtr_ = storedVolFieldPtr_.get();
             }
             else
             {
@@ -132,7 +132,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
     // (volPointInterpolation::interpolate with cache=false deletes any
     //  registered one or if mesh.changing())
 
-    if (!subMeshPtr_.valid())
+    if (subMeshPtr_.empty())
     {
         const word pointFldName =
             "volPointInterpolate_"
@@ -200,8 +200,8 @@ void Foam::sampledIsoSurface::getIsoFields() const
         }
 
 
-        // If averaging redo the volField. Can only be done now since needs the
-        // point field.
+        // If averaging redo the volField.
+        // Can only be done now since needs the point field.
         if (average_)
         {
             storedVolFieldPtr_.reset
@@ -261,7 +261,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
         }
 
 
-        // Pointfield on submesh
+        // The point field on subMesh
 
         const word pointFldName =
             "volPointInterpolate_"
@@ -360,30 +360,30 @@ bool Foam::sampledIsoSurface::updateGeometry() const
         return false;
     }
 
-    // Get any subMesh
-    if (zoneID_.index() != -1 && !subMeshPtr_.valid())
+    // Get sub-mesh if any
+    if
+    (
+        (-1 != mesh().cellZones().findIndex(zoneNames_))
+     && subMeshPtr_.empty()
+    )
     {
         const polyBoundaryMesh& patches = mesh().boundaryMesh();
 
         // Patch to put exposed internal faces into
         const label exposedPatchi = patches.findPatchID(exposedPatchName_);
 
-        if (debug)
-        {
-            Info<< "Allocating subset of size "
-                << mesh().cellZones()[zoneID_.index()].size()
-                << " with exposed faces into patch "
-                << patches[exposedPatchi].name() << endl;
-        }
+        DebugInfo
+            << "Allocating subset of size "
+            << mesh().cellZones().selection(zoneNames_).count()
+            << " with exposed faces into patch "
+            << patches[exposedPatchi].name() << endl;
 
-        // Remove old mesh if any
-        subMeshPtr_.clear();
         subMeshPtr_.reset
         (
             new fvMeshSubset
             (
                 fvm,
-                mesh().cellZones()[zoneID_.index()],
+                mesh().cellZones().selection(zoneNames_),
                 exposedPatchi
             )
         );
@@ -474,8 +474,8 @@ Foam::sampledIsoSurface::sampledIsoSurface
     mergeTol_(dict.lookupOrDefault("mergeTol", 1e-6)),
     regularise_(dict.lookupOrDefault("regularise", true)),
     average_(dict.lookupOrDefault("average", false)),
-    zoneID_(dict.lookupOrDefault("zone", word::null), mesh.cellZones()),
-    exposedPatchName_(word::null),
+    zoneNames_(),
+    exposedPatchName_(),
     surfPtr_(nullptr),
     prevTimeIndex_(-1),
     storedVolFieldPtr_(nullptr),
@@ -491,27 +491,30 @@ Foam::sampledIsoSurface::sampledIsoSurface
             << " span across cells." << exit(FatalIOError);
     }
 
-    if (zoneID_.index() != -1)
+
+    if (!dict.readIfPresent("zones", zoneNames_) && dict.found("zone"))
+    {
+        zoneNames_.resize(1);
+        dict.readEntry("zone", zoneNames_.first());
+    }
+
+    if (-1 != mesh.cellZones().findIndex(zoneNames_))
     {
         dict.readEntry("exposedPatchName", exposedPatchName_);
 
         if (mesh.boundaryMesh().findPatchID(exposedPatchName_) == -1)
         {
-            FatalIOErrorInFunction
-            (
-                dict
-            )   << "Cannot find patch " << exposedPatchName_
+            FatalIOErrorInFunction(dict)
+                << "Cannot find patch " << exposedPatchName_
                 << " in which to put exposed faces." << endl
                 << "Valid patches are " << mesh.boundaryMesh().names()
                 << exit(FatalIOError);
         }
 
-        if (debug && zoneID_.index() != -1)
-        {
-            Info<< "Restricting to cellZone " << zoneID_.name()
-                << " with exposed internal faces into patch "
-                << exposedPatchName_ << endl;
-        }
+        DebugInfo
+            << "Restricting to cellZone(s) " << flatOutput(zoneNames_)
+            << " with exposed internal faces into patch "
+            << exposedPatchName_ << endl;
     }
 }
 

@@ -55,9 +55,13 @@ Usage
         mergeTol | tolerance for merging points            | no       | 1e-6
         regularise | point snapping                        | no       | true
         bounds   | limit with bounding box                 | no       |
-        zone     | limit to specified zone                 | no       |
+        zone     | limit to cell zone (name or regex)      | no       |
+        zones    | limit to cell zones (names, regexs)     | no       |
         exposedPatchName | name for zone subset            | partly   |
     \endtable
+
+Note
+    The keyword \c zones has priority over \c zone.
 
 SeeAlso
     Foam::plane
@@ -74,7 +78,6 @@ SourceFiles
 #include "isoSurface.H"
 //#include "isoSurfaceCell.H"
 #include "plane.H"
-#include "ZoneIDs.H"
 #include "fvMeshSubset.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -107,8 +110,8 @@ class sampledCuttingPlane
         //- Whether to recalculate cell values as average of point values
         const bool average_;
 
-        //- Zone name/index (if restricted to zones)
-        mutable cellZoneID zoneID_;
+        //- The zone or zones in which cutting is to occur
+        wordRes zoneNames_;
 
         //- For zones: patch to put exposed faces into
         mutable word exposedPatchName_;
@@ -117,7 +120,7 @@ class sampledCuttingPlane
         mutable bool needsUpdate_;
 
 
-        //- Optional subsetted mesh
+        //- Mesh subset (optional: only used with zones)
         autoPtr<fvMeshSubset> subMeshPtr_;
 
         //- Distance to cell centres
@@ -132,6 +135,13 @@ class sampledCuttingPlane
 
 
     // Private Member Functions
+
+        //- Check and warn if bounding box does not intersect mesh or plane
+        void checkBoundsIntersection
+        (
+            const plane& pln,
+            const boundBox& meshBb
+        ) const;
 
         //- Create iso surface
         void createGeometry();

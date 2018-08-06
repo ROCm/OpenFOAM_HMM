@@ -63,8 +63,8 @@ class surfMeshSamplePlane
 
     // Private data
 
-        //- If restricted to zones, name of this zone or a regular expression
-        const keyType zoneKey_;
+        //- The zone or zones in which cutting is to occur
+        wordRes zoneNames_;
 
         //- Optional bounding box to trim triangles against
         const boundBox bounds_;
@@ -77,6 +77,20 @@ class surfMeshSamplePlane
 
 
     // Private Member Functions
+
+        //- Check and warn if bounding box does not intersect mesh or plane
+        void checkBoundsIntersection
+        (
+            const plane& pln,
+            const boundBox& meshBb
+        ) const;
+
+        //- Define cell selection from zones and bounding box.
+        //  Optionally check and warn if the plane does not intersect
+        //  with the bounds of the mesh (or submesh) or if the bounding box
+        //  does not overlap with the mesh (or submesh)
+        bitSet cellSelection(const bool warnIntersect=false) const;
+
 
         //- Sample field on surface
         template<class Type>
@@ -109,7 +123,7 @@ public:
             const word& name,
             const polyMesh& mesh,
             const plane& planeDesc,
-            const keyType& zoneKey = word::null,
+            const wordRes& zones = wordRes(),
             const bool triangulate = true
         );
 
