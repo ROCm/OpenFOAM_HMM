@@ -468,6 +468,16 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findIndex
 
 
 template<class ZoneType, class MeshType>
+Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findIndex
+(
+    const wordRes& matcher
+) const
+{
+    return (matcher.empty() ? -1 : findIndexImpl(*this, matcher));
+}
+
+
+template<class ZoneType, class MeshType>
 Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findZoneID
 (
     const word& zoneName

@@ -189,18 +189,22 @@ public:
         wordList sortedNames(const wordRes& matcher) const;
 
 
-        //- Return zone index for the first match, return -1 if not found
-        label findIndex(const keyType& key) const;
-
-        //- Find zone index given a name, return -1 if not found
-        label findZoneID(const word& zoneName) const;
-
-
         //- Return zone indices for all matches
         labelList indices(const keyType& key) const;
 
         //- Return zone indices for all matches
         labelList indices(const wordRes& matcher) const;
+
+
+        //- Return zone index for the first match, return -1 if not found
+        label findIndex(const keyType& key) const;
+
+        //- Return zone index for the first match, return -1 if not found
+        label findIndex(const wordRes& matcher) const;
+
+
+        //- Find zone index given a name, return -1 if not found
+        label findZoneID(const word& zoneName) const;
 
 
         //- Return all elements (cells, faces, points) contained in the
