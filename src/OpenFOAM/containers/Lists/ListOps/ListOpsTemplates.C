@@ -672,6 +672,32 @@ Foam::labelList Foam::findIndices
 
 
 template<class ListType>
+Foam::label Foam::findMin
+(
+    const ListType& input,
+    label start
+)
+{
+    const label len = input.size();
+
+    if (start < 0 || start >= len)
+    {
+        return -1;
+    }
+
+    for (label i = start+1; i < len; ++i)
+    {
+        if (input[i] < input[start])
+        {
+            start = i;
+        }
+    }
+
+    return start;
+}
+
+
+template<class ListType>
 Foam::label Foam::findMax
 (
     const ListType& input,
@@ -698,7 +724,7 @@ Foam::label Foam::findMax
 
 
 template<class ListType>
-Foam::label Foam::findMin
+Foam::labelPair Foam::findMinMax
 (
     const ListType& input,
     label start
@@ -708,18 +734,25 @@ Foam::label Foam::findMin
 
     if (start < 0 || start >= len)
     {
-        return -1;
+        return labelPair(-1,-1);
     }
+
+    label minIdx = start;
+    label maxIdx = start;
 
     for (label i = start+1; i < len; ++i)
     {
-        if (input[i] < input[start])
+        if (input[i] < input[minIdx])
         {
-            start = i;
+            minIdx = i;
+        }
+        if (input[maxIdx] < input[i])
+        {
+            maxIdx = i;
         }
     }
 
-    return start;
+    return labelPair(minIdx, maxIdx);
 }
 
 

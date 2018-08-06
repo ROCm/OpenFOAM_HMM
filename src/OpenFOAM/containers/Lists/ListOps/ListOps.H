@@ -43,6 +43,7 @@ SourceFiles
 #define ListOps_H
 
 #include "FlatOutput.H"
+#include "labelPair.H"
 #include "labelList.H"
 #include "HashSet.H"
 #include "Map.H"
@@ -360,7 +361,21 @@ labelList findIndices
     label start=0
 );
 
-//- Linear search for the index of the max element.
+
+//- Linear search for the index of the min element,
+//- similar to std::min_element but for lists and returns the index.
+//
+//  \tparam ListType  The input list type
+//
+//  \param input The list to search
+//  \param start The start index in the list (default: 0)
+//
+//  \return The min index or -1 on error.
+template<class ListType>
+label findMin(const ListType& input, label start=0);
+
+//- Linear search for the index of the max element,
+//- similar to std::max_element but for lists and returns the index.
 //
 //  \tparam ListType  The input list type
 //
@@ -372,16 +387,18 @@ template<class ListType>
 label findMax(const ListType& input, label start=0);
 
 
-//- Linear search for the index of the min element.
+//- Linear search for the index of the min/max element,
+//- similar to std::minmax_element but for lists and returns the index.
 //
 //  \tparam ListType  The input list type
 //
 //  \param input The list to search
 //  \param start The start index in the list (default: 0)
 //
-//  \return The min index or -1 on error.
+//  \return The min/max indices as a Pair (min is first max is second)
+//      or (-1,-1) on error.
 template<class ListType>
-label findMin(const ListType& input, label start=0);
+labelPair findMinMax(const ListType& input, label start=0);
 
 
 //- Binary search to find the index of the last element in a sorted list
