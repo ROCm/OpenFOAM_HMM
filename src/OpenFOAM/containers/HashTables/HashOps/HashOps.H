@@ -140,6 +140,29 @@ struct plusEqOp
     }
 };
 
+
+//- List of values from HashTable, optionally sorted.
+template<class T, class Key, class Hash>
+List<T> values(const HashTable<T, Key, Hash>& tbl, const bool doSort=false)
+{
+    List<T> output(tbl.size());
+
+    label i=0;
+
+    forAllConstIters(tbl, iter)
+    {
+        output[i] = iter.object();
+        ++i;
+    }
+
+    if (doSort)
+    {
+        Foam::sort(output);
+    }
+
+    return output;
+}
+
 } // End namespace HashTableOps
 
 
