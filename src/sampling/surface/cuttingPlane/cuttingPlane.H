@@ -93,33 +93,14 @@ class cuttingPlane
             bitSet& cellCuts
         );
 
-        //- Determine intersection points (cutPoints).
-        void intersectEdges
+        //- Walk the cell cuts to create faces
+        void walkCellCuts
         (
             const primitiveMesh& mesh,
             const PackedList<2>& planeSides,
             const bitSet& cellCuts,
-            List<label>& edgePoint
-        );
-
-        //- Walk circumference of cell, starting from startEdgeI crossing
-        //  only cut edges. Record cutPoint labels in faceVerts.
-        static bool walkCell
-        (
-            const primitiveMesh&,
-            const labelUList& edgePoint,
-            const label celli,
-            const label startEdgei,
-            DynamicList<label>& faceVerts
-        );
-
-        //- Determine cuts for all cut cells.
-        void walkCellCuts
-        (
-            const primitiveMesh& mesh,
-            const bitSet& cellCuts,
-            const labelUList& edgePoint,
-            const bool triangulate
+            const bool triangulate,
+            const label nFaceCuts = 0
         );
 
 

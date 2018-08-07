@@ -26,6 +26,23 @@ debug
         }
     }
 
+    _plane
+    {
+        type    plane;
+        source  cells;
+        triangulate false;
+
+        planeType   pointAndNormal;
+
+        pointAndNormalDict
+        {
+            normal (-1 0 0);
+            point  (-0.042 0 0);
+            // point  (-0.0425 0 0);  // between faces
+        }
+    }
+
+
     surfaces
     (
         angledPlane
@@ -45,6 +62,20 @@ debug
             isoValue    1e5;
             regularise  true;
             interpolate true;
+        }
+
+        // Top channel
+        plane1
+        {
+            ${_plane}
+            bounds (-1 0 -1) (0 1 1);
+        }
+
+        // Bottom channel
+        plane2
+        {
+            ${_plane}
+            bounds (-1 -1 -1) (0 0 1);
         }
     );
 }

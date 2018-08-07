@@ -28,6 +28,8 @@ License
 #include "volFields.H"
 #include "linePointRef.H"
 #include "meshTools.H"
+#include "EdgeMap.H"
+#include "HashOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -39,9 +41,19 @@ int Foam::cuttingPlane::debug(Foam::debug::debugSwitch("cuttingPlane", 0));
 namespace Foam
 {
     // Check edge/plane intersection based on crossings ... trivial check.
-    inline bool intersectsEdge(const PackedList<2>& sides, const edge& e)
+    // Orients the edge (first,last) points in the positive normal direction
+    inline bool intersectEdgeOrient(const PackedList<2>& sides, edge& e)
     {
-        return (sides[e.first()] != sides[e.last()]);
+        if (sides[e.first()] == sides[e.last()])
+        {
+            return false;
+        }
+        else if (sides[e.last()] < sides[e.first()])
+        {
+            e.flip();
+        }
+
+        return true;
     }
 
 
@@ -66,6 +78,31 @@ namespace Foam
         // Accumulated value 3,5,6,7 indicates an intersection
         return (accum == 3 || accum >= 5);
     }
+
+
+    //- Hash specialization for labelList. Hash incrementally.
+    template<>
+    inline unsigned Hash<labelList>::operator()
+    (
+        const labelList& list,
+        unsigned seed
+    ) const
+    {
+        return Hasher(list.cdata(), list.size()*sizeof(label), seed);
+    }
+
+    //- Hash specialization for labelList
+    template<>
+    inline unsigned Hash<labelList>::operator()
+    (
+        const labelList& list
+    ) const
+    {
+        return Hash<labelList>()(list, 0);
+    }
+
+    //- For hashing face point labels, which are pre-sorted.
+    typedef HashSet<labelList, Hash<labelList>> labelListHashSet;
 
 } // End namespace Foam
 
@@ -213,224 +250,326 @@ Foam::label Foam::cuttingPlane::calcCellCuts
 }
 
 
-void Foam::cuttingPlane::intersectEdges
+void Foam::cuttingPlane::walkCellCuts
 (
     const primitiveMesh& mesh,
     const PackedList<2>& sides,
     const bitSet& cellCuts,
-    List<label>& edgePoint
+    const bool triangulate,
+    label nFaceCuts
 )
 {
-    const edgeList& edges = mesh.edges();
+    // Dynamic lists to handle triangulation and/or missed cuts etc
+    const label nCellCuts = cellCuts.count();
+
+    DynamicList<point> dynCutPoints(4*nCellCuts);
+    DynamicList<face>  dynCutFaces(4*nCellCuts);
+    DynamicList<label> dynCutCells(nCellCuts);
+
+    // No nFaceCuts provided? Use a reasonable estimate
+    if (!nFaceCuts)
+    {
+        nFaceCuts = 4*nCellCuts;
+    }
+
+    // Information required from the mesh
+    const faceList& faces = mesh.faces();
+    const cellList& cells = mesh.cells();
     const pointField& points = mesh.points();
 
-    // Per edge -1 or the label of the intersection point
-    edgePoint.resize(edges.size());
 
-    DynamicList<point> dynCutPoints(4*cellCuts.count());
+    // Edge to pointId mapping
+    EdgeMap<label> handledEdges(4*nFaceCuts);
 
-    forAll(edges, edgei)
-    {
-        const edge& e = edges[edgei];
+    // Local scratch space for face vertices
+    DynamicList<label> localFaceLoop(16);
 
-        if (intersectsEdge(sides, points, e))
+    // Local scratch space for edge to pointId
+    EdgeMap<label> localEdges(128);
+
+    // Local scratch space for edge to faceId
+    EdgeMap<edge>  localFaces(128);
+
+    // Avoid duplicates for cuts exactly through a mesh point.
+    // No other way to distinguish them, since there is no single edge
+    // that "owns" the point.
+    Map<label> endPoints;
+
+    // Hash of faces (face points) exactly on-plane
+    labelListHashSet onPlaneFaces;
+
+
+    // Failure handling
+
+    // Cells where walking failed (concave, degenerate, ...)
+    labelHashSet failedCells;
+
+    // To unwind insertion of end-point cutting
+    labelHashSet localEndPoints;
+
+    // Our recovery point on failure
+    label unwindPoint = 0;
+
+    // Cleanup routine for failed cell cut:
+    const auto unwindWalk =
+        [&](const label failedCellId = -1) -> void
         {
-            // Edge is cut
-            edgePoint[edgei] = dynCutPoints.size();
+            // Discard points introduced
+            dynCutPoints.resize(unwindPoint);
 
-            const point& p0 = points[e[0]];
-            const point& p1 = points[e[1]];
+            // Discard end-point cuts
+            endPoints.erase(localEndPoints);
 
-            const scalar alpha = lineIntersect(linePointRef(p0, p1));
-
-            if (alpha < SMALL)
+            // Optionally record the failedCellId
+            if (failedCellId != -1)
             {
-                dynCutPoints.append(p0);
+                failedCells.insert(failedCellId);
             }
-            else if (alpha >= 1.0)
+        };
+
+
+    // Loop over cells that are cut
+    for (const label celli : cellCuts)
+    {
+        const cell& cFace = cells[celli];
+
+        // Reset local scratch
+        localEdges.clear();
+        localFaces.clear();
+        localFaceLoop.clear();
+        localEndPoints.clear();
+
+        unwindPoint = dynCutPoints.size();
+
+
+        // Classification for all the points cut - see intersectsFace() above
+        // for more detail
+        unsigned pointCutType = 0u;
+
+        for (const label facei : cFace)
+        {
+            const face& f = faces[facei];
+
+            forAll(f, fp)
             {
-                dynCutPoints.append(p1);
+                edge e(f.faceEdge(fp));
+
+                if (!intersectEdgeOrient(sides, e))
+                {
+                    continue;
+                }
+
+                // Record the edge/face combination for the edge cut.
+                // NB: the second operation is edge::insert() which places
+                // facei in the unoccupied 'slot'
+                localFaces(e).insert(facei);
+
+                // Already handled cut point in this inner-loop?
+                if (localEdges.found(e))
+                {
+                    // No new edge cut required
+                    continue;
+                }
+
+                // Already handled cut point in the outer-loop?
+                label cutPointId = handledEdges.lookup(e, -1);
+
+                if (cutPointId >= 0)
+                {
+                    // Copy existing edge cut-point index
+                    localEdges.insert(e, cutPointId);
+                    continue;
+                }
+
+                // Expected id for the cut point
+                cutPointId = dynCutPoints.size();
+
+
+                const point& p0 = points[e[0]];
+                const point& p1 = points[e[1]];
+
+                const scalar alpha =
+                    this->lineIntersect(linePointRef(p0, p1));
+
+                if (alpha < SMALL)
+                {
+                    // -> equal(alpha, 0) with more tolerance
+
+                    if (endPoints.insert(e[0], cutPointId))
+                    {
+                        localEndPoints.insert(e[0]);
+                        dynCutPoints.append(p0);
+                    }
+                    else
+                    {
+                        cutPointId = endPoints[e[0]];
+                    }
+
+                    pointCutType |= 0x1; // Cut at 0
+                }
+                else if (alpha >= (1.0 - SMALL))
+                {
+                    // -> equal(alpha, 1) with more tolerance
+
+                    if (endPoints.insert(e[1], cutPointId))
+                    {
+                        localEndPoints.insert(e[1]);
+                        dynCutPoints.append(p1);
+                    }
+                    else
+                    {
+                        cutPointId = endPoints[e[1]];
+                    }
+
+                    pointCutType |= 0x2; // Cut at 1
+                }
+                else
+                {
+                    dynCutPoints.append((1-alpha)*p0 + alpha*p1);
+
+                    pointCutType |= 0x4; // Cut between
+                }
+
+                // Introduce new edge cut point
+                localEdges.insert(e, cutPointId);
             }
-            else
+        }
+
+
+        // The keys of localEdges, localFaces are now identical.
+        // The size of either should represent the number of points for
+        // the resulting face loop.
+
+        const label nTargetLoop = localFaces.size();
+
+        if (nTargetLoop < 3)
+        {
+            unwindWalk(celli);
+            continue;
+        }
+
+
+        // Handling cuts between two cells (on-plane cuts)
+        // After the previous intersectEdgeOrient call, the edge is oriented
+        // to have 0-1 in the positive plane normal.
+        // If we only ever cut at the same edge end we know that we have
+        // an on-plane cut.
+
+        if (pointCutType == 1 || pointCutType == 2)
+        {
+            // Hash the face-points to avoid duplicate faces
+            if (!onPlaneFaces.insert(HashTableOps::values(localEdges, true)))
             {
-                dynCutPoints.append((1-alpha)*p0 + alpha*p1);
+                DebugInfo
+                    <<"skip duplicate on-place cut for cell " << celli
+                    << " type (" << pointCutType << ")" << endl;
+
+                // A duplicate is not failure
+                unwindWalk();
+                continue;
+            }
+        }
+
+
+        // Start somewhere
+        label nextFace = localFaces.begin().object()[0];
+
+        DebugInfo
+            << "search face " <<  nextFace << " IN " <<  localEdges << endl;
+
+        for
+        (
+            label loopi = 0;
+            localFaces.size() && loopi < 2*nTargetLoop;
+            ++loopi
+        )
+        {
+            bool ok = false;
+
+            forAllIters(localFaces, iter)
+            {
+                DebugInfo
+                    << "lookup " << nextFace << " in " << iter.object() << nl;
+
+                const label got = iter.object().which(nextFace);
+
+                if (got != -1)
+                {
+                    ok = true;
+
+                    // The other face
+                    nextFace = iter.object()[(got?0:1)];
+
+                    // The edge -> cut point
+                    localFaceLoop.append(localEdges[iter.key()]);
+
+                    DebugInfo
+                        <<" faces " << iter.object()
+                        << " point " << localFaceLoop.last()
+                        << " edge=" << iter.key() << " nextFace=" << nextFace
+                        << nl;
+
+                    // Done this connection
+                    localFaces.erase(iter);
+                    break;
+                }
+            }
+
+            if (!ok)
+            {
+                break;
+            }
+        }
+
+
+        // Could also check if localFaces is now empty.
+
+        if (nTargetLoop != localFaceLoop.size())
+        {
+            DebugInfo
+                <<"Warn expected " << nTargetLoop << " but got "
+                << localFaceLoop.size() << endl;
+
+            unwindWalk(celli);
+            continue;
+        }
+
+
+        // Success
+        handledEdges += localEdges;
+
+        face f(localFaceLoop);
+
+        // Orient face to point in the same direction as the plane normal
+        if ((f.areaNormal(dynCutPoints) & this->normal()) < 0)
+        {
+            f.flip();
+        }
+
+        // The cut faces can be quite ugly, so optionally triangulate
+        if (triangulate)
+        {
+            label nTri = f.triangles(dynCutPoints, dynCutFaces);
+            while (nTri--)
+            {
+                dynCutCells.append(celli);
             }
         }
         else
         {
-            edgePoint[edgei] = -1;
+            dynCutFaces.append(f);
+            dynCutCells.append(celli);
         }
     }
 
-    this->storedPoints().transfer(dynCutPoints);
-}
-
-
-bool Foam::cuttingPlane::walkCell
-(
-    const primitiveMesh& mesh,
-    const labelUList& edgePoint,
-    const label celli,
-    const label startEdgei,
-    DynamicList<label>& faceVerts
-)
-{
-    label facei = -1;
-    label edgei = startEdgei;
-
-    label nIter = 0;
-
-    faceVerts.clear();
-    do
+    if (failedCells.size())
     {
-        faceVerts.append(edgePoint[edgei]);
-
-        // Cross edge to other face
-        facei = meshTools::otherFace(mesh, celli, facei, edgei);
-
-        // Find next cut edge on face.
-        const labelList& fEdges = mesh.faceEdges()[facei];
-
-        label nextEdgei = -1;
-
-        //Note: here is where we should check for whether there are more
-        // than 2 intersections with the face (warped/non-convex face).
-        // If so should e.g. decompose the cells on both faces and redo
-        // the calculation.
-
-        for (const label edge2i : fEdges)
-        {
-            if (edge2i != edgei && edgePoint[edge2i] != -1)
-            {
-                nextEdgei = edge2i;
-                break;
-            }
-        }
-
-        if (nextEdgei == -1)
-        {
-            // Did not find another cut edge on facei. Do what?
-            WarningInFunction
-                << "Did not find closed walk along surface of cell " << celli
-                << " starting from edge " << startEdgei
-                << " in " << nIter << " iterations." << nl
-                << "Collected cutPoints so far:" << faceVerts
-                << endl;
-
-            return false;
-        }
-
-        edgei = nextEdgei;
-
-        ++nIter;
-
-        if (nIter > 1000)
-        {
-            WarningInFunction
-                << "Did not find closed walk along surface of cell " << celli
-                << " at " << mesh.cellCentres()[celli]
-                << " starting from edge " << startEdgei
-                << " in " << nIter << " iterations."
-                << endl;
-            return false;
-        }
-
-    } while (edgei != startEdgei);
-
-
-    if (faceVerts.size() >= 3)
-    {
-        return true;
+        WarningInFunction
+            << "Failed cuts for " << failedCells.size() << " cells:" << nl
+            << "    " << flatOutput(failedCells.sortedToc()) << nl
+            << endl;
     }
 
-    WarningInFunction
-        << "Did not find closed walk along surface of cell " << celli
-        << " starting from edge " << startEdgei << nl
-        << "Collected cutPoints so far:" << faceVerts
-        << endl;
-
-    return false;
-}
-
-
-void Foam::cuttingPlane::walkCellCuts
-(
-    const primitiveMesh& mesh,
-    const bitSet& cellCuts,
-    const labelUList& edgePoint,
-    const bool triangulate
-)
-{
-    const pointField& cutPoints = this->points();
-
-    // Dynamic lists to handle triangulation and/or missed cuts
-
-    DynamicList<face>  dynCutFaces(cellCuts.count());
-    DynamicList<label> dynCutCells(cellCuts.count());
-
-    // Scratch space for calculating the face vertices
-    DynamicList<label> faceVerts(16);
-
-    for (const label celli : cellCuts)
-    {
-        // Find the starting edge to walk from.
-        const labelList& cEdges = mesh.cellEdges()[celli];
-
-        label startEdgei = -1;
-
-        for (const label edgei : cEdges)
-        {
-            if (edgePoint[edgei] != -1)
-            {
-                startEdgei = edgei;
-                break;
-            }
-        }
-
-        // Check for the unexpected ...
-        if (startEdgei == -1)
-        {
-            FatalErrorInFunction
-                << "Cannot find cut edge for cut cell " << celli
-                << abort(FatalError);
-        }
-
-        // Walk from starting edge around the circumference of the cell.
-        bool okCut = walkCell
-        (
-            mesh,
-            edgePoint,
-            celli,
-            startEdgei,
-            faceVerts
-        );
-
-        if (okCut)
-        {
-            face f(faceVerts);
-
-            // Orient face to point in the same direction as the plane normal
-            if ((f.normal(cutPoints) & normal()) < 0)
-            {
-                f.flip();
-            }
-
-            // The cut faces can be quite ugly, so optionally triangulate
-            if (triangulate)
-            {
-                label nTri = f.triangles(cutPoints, dynCutFaces);
-                while (nTri--)
-                {
-                    dynCutCells.append(celli);
-                }
-            }
-            else
-            {
-                dynCutFaces.append(f);
-                dynCutCells.append(celli);
-            }
-        }
-    }
 
     // No cuts? Then no need for any of this information
     if (dynCutCells.empty())
@@ -441,6 +580,7 @@ void Foam::cuttingPlane::walkCellCuts
     }
     else
     {
+        this->storedPoints().transfer(dynCutPoints);
         this->storedFaces().transfer(dynCutFaces);
         meshCells_.transfer(dynCutCells);
     }
@@ -522,15 +662,10 @@ void Foam::cuttingPlane::performCut
 
     // Determine cells that are (likely) cut
     // - some ambiguity when plane is exactly between cells
-    calcCellCuts(mesh, sides, cellCuts);
+    const label nFaceCuts = calcCellCuts(mesh, sides, cellCuts);
 
-    // Determine cutPoints and return list of edge cuts.
-    // per edge -1 or the label of the intersection point
-    labelList edgePoint;
-    intersectEdges(mesh, sides, cellCuts, edgePoint);
-
-    // Do topological walk around cell to find closed loop.
-    walkCellCuts(mesh, cellCuts, edgePoint, triangulate);
+    // Find closed loop from cell cuts
+    walkCellCuts(mesh, sides, cellCuts, triangulate, nFaceCuts);
 }
 
 
@@ -567,10 +702,7 @@ void Foam::cuttingPlane::performCut
 }
 
 
-void Foam::cuttingPlane::remapFaces
-(
-    const labelUList& faceMap
-)
+void Foam::cuttingPlane::remapFaces(const labelUList& faceMap)
 {
     if (notNull(faceMap) && !faceMap.empty())
     {
