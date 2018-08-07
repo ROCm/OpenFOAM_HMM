@@ -36,8 +36,7 @@ Foam::boundBox::boundBox
     bool doReduce
 )
 :
-    min_(invertedBox.min()),
-    max_(invertedBox.max())
+    boundBox()
 {
     add(points, indices);
 
@@ -56,10 +55,9 @@ void Foam::boundBox::add
     const FixedList<point, Size>& points
 )
 {
-    // a FixedList is never empty
-    for (unsigned i=0; i < Size; ++i)
+    for (const point& p : points)
     {
-        add(points[i]);
+        add(p);
     }
 }
 
@@ -71,35 +69,96 @@ void Foam::boundBox::add
     const FixedList<label, Size>& indices
 )
 {
-    // points may be empty, but a FixedList is never empty
-    if (!points.empty())
+    const label len = points.size();
+
+    // Skip if points is empty
+    if (len)
     {
         for (const label pointi : indices)
         {
-            add(points[pointi]);
+            if (pointi >= 0 && pointi < len)
+            {
+                add(points[pointi]);
+            }
+        }
+    }
+}
+
+
+template<class IntContainer>
+void Foam::boundBox::add
+(
+    const UList<point>& points,
+    const IntContainer& indices
+)
+{
+    const label len = points.size();
+
+    // Skip if points is empty
+    if (len)
+    {
+        for (const label pointi : indices)
+        {
+            if (pointi >= 0 && pointi < len)
+            {
+                add(points[pointi]);
+            }
         }
     }
 }
 
 
 template<unsigned Size>
-bool Foam::boundBox::contains
+inline bool Foam::boundBox::contains
 (
     const UList<point>& points,
     const FixedList<label, Size>& indices
 ) const
 {
-    // points may be empty, but a FixedList is never empty
-    if (points.empty())
+    const label len = points.size();
+
+    if (!len)
     {
-        return false;
+        return true;
     }
 
     for (const label pointi : indices)
     {
-        if (!contains(points[pointi]))
+        if (pointi >= 0 && pointi < len)
         {
-            return false;
+            if (!contains(points[pointi]))
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+
+template<class IntContainer>
+inline bool Foam::boundBox::contains
+(
+    const UList<point>& points,
+    const IntContainer& indices
+) const
+{
+    const label len = points.size();
+
+    if (!len)
+    {
+        return true;
+    }
+
+    for (const label pointi : indices)
+    {
+        if (pointi >= 0 && pointi < len)
+        {
+            if (!contains(points[pointi]))
+            {
+                return false;
+            }
         }
     }
 
@@ -108,27 +167,68 @@ bool Foam::boundBox::contains
 
 
 template<unsigned Size>
-bool Foam::boundBox::containsAny
+inline bool Foam::boundBox::containsAny
 (
     const UList<point>& points,
     const FixedList<label, Size>& indices
 ) const
 {
-    // points may be empty, but a FixedList is never empty
-    if (points.empty())
+    const label len = points.size();
+
+    if (!len)
     {
-        return false;
+        return true;
     }
+
+    label failed = 0;
 
     for (const label pointi : indices)
     {
-        if (contains(points[pointi]))
+        if (pointi >= 0 && pointi < len)
         {
-            return true;
+            if (contains(points[pointi]))
+            {
+                return true;
+            }
+
+            ++failed;
         }
     }
 
-    return false;
+    return !failed;
+}
+
+
+template<class IntContainer>
+inline bool Foam::boundBox::containsAny
+(
+    const UList<point>& points,
+    const IntContainer& indices
+) const
+{
+    const label len = points.size();
+
+    if (!len)
+    {
+        return true;
+    }
+
+    label failed = 0;
+
+    for (const label pointi : indices)
+    {
+        if (pointi >= 0 && pointi < len)
+        {
+            if (contains(points[pointi]))
+            {
+                return true;
+            }
+
+            ++failed;
+        }
+    }
+
+    return !failed;
 }
 
 

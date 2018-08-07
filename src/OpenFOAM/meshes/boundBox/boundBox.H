@@ -126,7 +126,7 @@ public:
         inline boundBox(Istream& is);
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 
@@ -201,25 +201,28 @@ public:
             //- Extend to include the points from the temporary point field.
             inline void add(const tmp<pointField>& tpoints);
 
-            //- Extend to include the subset of the point field.
-            //  The indices could be from cell/face etc.
-            inline void add
-            (
-                const UList<point>& points,
-                const labelUList& indices
-            );
-
             //- Extend to include the points.
             template<unsigned Size>
             void add(const FixedList<point, Size>& points);
 
-            //- Extend to include the subset of the point field.
+            //- Extend to include a (subsetted) point field.
             //  The indices could be from edge/triFace etc.
             template<unsigned Size>
             void add
             (
                 const UList<point>& points,
                 const FixedList<label, Size>& indices
+            );
+
+            //- Extend to include a (subsetted) point field.
+            //
+            //  \tparam IntContainer  A container with an iterator that
+            //      dereferences to an label
+            template<class IntContainer>
+            void add
+            (
+                const UList<point>& points,
+                const IntContainer& indices
             );
 
             //- Inflate box by factor*mag(span) in all dimensions
@@ -259,42 +262,52 @@ public:
             //- Contains point? (inside only)
             inline bool containsInside(const point& pt) const;
 
-            //- Contains all of the points? (inside or on edge)
+            //- Contains all points? (inside or on edge)
             bool contains(const UList<point>& points) const;
 
-            //- Contains all of the subset of points? (inside or on edge)
-            bool contains
-            (
-                const UList<point>& points,
-                const labelUList& indices
-            ) const;
-
-            //- Contains all of the subset of points? (inside or on edge)
+            //- Contains all of the (subsetted) points? (inside or on edge)
             template<unsigned Size>
             bool contains
             (
                 const UList<point>& points,
                 const FixedList<label, Size>& indices
+            ) const;
+
+
+            //- Contains all of the (subsetted) points? (inside or on edge)
+            //
+            //  \tparam IntContainer  A container with an iterator that
+            //      dereferences to an label
+            template<class IntContainer>
+            bool contains
+            (
+                const UList<point>& points,
+                const IntContainer& indices
             ) const;
 
 
             //- Contains any of the points? (inside or on edge)
             bool containsAny(const UList<point>& points) const;
 
-            //- Contains any of the subset of points? (inside or on edge)
-            bool containsAny
-            (
-                const UList<point>& points,
-                const labelUList& indices
-            ) const;
-
-            //- Contains any of the subset of points? (inside or on edge)
+            //- Contains any of the (subsetted) points? (inside or on edge)
             template<unsigned Size>
             bool containsAny
             (
                 const UList<point>& points,
                 const FixedList<label, Size>& indices
             ) const;
+
+            //- Contains any of the (subsetted) points? (inside or on edge)
+            //
+            //  \tparam IntContainer  A container with an iterator that
+            //      dereferences to an label
+            template<class IntContainer>
+            bool containsAny
+            (
+                const UList<point>& points,
+                const IntContainer& indices
+            ) const;
+
 
             //- Return the nearest point on the boundBox to the supplied point.
             //  If point is inside the boundBox then the point is returned

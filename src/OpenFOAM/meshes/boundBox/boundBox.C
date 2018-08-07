@@ -68,8 +68,7 @@ const Foam::FixedList<Foam::vector, 6> Foam::boundBox::faceNormals
 
 Foam::boundBox::boundBox(const UList<point>& points, bool doReduce)
 :
-    min_(invertedBox.min()),
-    max_(invertedBox.max())
+    boundBox()
 {
     add(points);
 
@@ -82,8 +81,7 @@ Foam::boundBox::boundBox(const UList<point>& points, bool doReduce)
 
 Foam::boundBox::boundBox(const tmp<pointField>& tpoints, bool doReduce)
 :
-    min_(invertedBox.min()),
-    max_(invertedBox.max())
+    boundBox()
 {
     add(tpoints);
 
@@ -101,8 +99,7 @@ Foam::boundBox::boundBox
     bool doReduce
 )
 :
-    min_(invertedBox.min()),
-    max_(invertedBox.max())
+    boundBox()
 {
     add(points, indices);
 
@@ -246,29 +243,6 @@ bool Foam::boundBox::contains(const UList<point>& points) const
 }
 
 
-bool Foam::boundBox::contains
-(
-    const UList<point>& points,
-    const labelUList& indices
-) const
-{
-    if (points.empty() || indices.empty())
-    {
-        return true;
-    }
-
-    for (const label pointi : indices)
-    {
-        if (!contains(points[pointi]))
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-
 bool Foam::boundBox::containsAny(const UList<point>& points) const
 {
     if (points.empty())
@@ -279,29 +253,6 @@ bool Foam::boundBox::containsAny(const UList<point>& points) const
     for (const point& p : points)
     {
         if (contains(p))
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-
-bool Foam::boundBox::containsAny
-(
-    const UList<point>& points,
-    const labelUList& indices
-) const
-{
-    if (points.empty() || indices.empty())
-    {
-        return true;
-    }
-
-    for (const label pointi : indices)
-    {
-        if (contains(points[pointi]))
         {
             return true;
         }
