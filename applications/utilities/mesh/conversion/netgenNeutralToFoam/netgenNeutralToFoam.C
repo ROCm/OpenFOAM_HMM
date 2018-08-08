@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
     label maxPatch = 0;
 
     // Boundary faces as three vertices
-    HashTable<label, triFace, Hash<triFace>> vertsToBoundary(nFaces);
+    HashTable<label, triFace, triFace::Hash<>> vertsToBoundary(nFaces);
 
     forAll(boundaryFaces, facei)
     {
@@ -215,12 +215,11 @@ int main(int argc, char *argv[])
 
             // Is there any boundary face with same vertices?
             // (uses commutative hash)
-            HashTable<label, triFace, Hash<triFace>>::iterator iter =
-                vertsToBoundary.find(triFace(f[0], f[1], f[2]));
+            auto iter = vertsToBoundary.find(triFace(f[0], f[1], f[2]));
 
-            if (iter != vertsToBoundary.end())
+            if (iter.found())
             {
-                label facei = iter();
+                label facei = iter.object();
                 const triFace& tri = iter.key();
 
                 // Determine orientation of tri v.s. cell centre.

@@ -45,10 +45,12 @@ SourceFiles
 #include "bool.H"
 #include "label.H"
 #include "uLabel.H"
-#include "nullObject.H"
 #include "zero.H"
+#include "contiguous.H"
+#include "nullObject.H"
 #include "stdFoam.H"
 #include "Swap.H"
+#include "HashFwd.H"
 
 #include <initializer_list>
 #include <iterator>
@@ -529,10 +531,38 @@ public:
             }
             return false;
         }
+
+
+    // Other
+
+        //- Hashing function class for UList.
+        //  Can use this one (instead of the global Hash<>) for inheritance
+        //  in sub-classes
+        template<class HashT=Foam::Hash<T>>
+        struct Hash
+        {
+            inline unsigned operator()
+            (
+                const UList<T>& obj,
+                unsigned seed=0
+            ) const
+            {
+                if (contiguous<T>())
+                {
+                    return Hasher(obj.cdata(), obj.size()*sizeof(T), seed);
+                }
+
+                for (const T& val : obj)
+                {
+                    seed = HashT()(val, seed);
+                }
+                return seed;
+            }
+        };
 };
 
 
-// Global Functions
+// * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
 template<class T>
 void sort(UList<T>& a);
@@ -560,6 +590,27 @@ inline void reverse(UList<T>& list);
 // Exchange contents of lists - see UList::swap().
 template<class T>
 inline void Swap(UList<T>& a, UList<T>& b);
+
+
+//- Hashing for UList data, which uses Hasher for contiguous data and
+//- element-wise incrementally hashing otherwise.
+template<>
+template<class T>
+struct Hash<UList<T>>
+{
+    inline unsigned operator()(const UList<T>& obj, unsigned seed=0) const
+    {
+        if (contiguous<T>())
+        {
+            return Hasher(obj.cdata(), obj.size()*sizeof(T), seed);
+        }
+        for (const T& val : obj)
+        {
+            seed = Hash<T>()(val, seed);
+        }
+        return seed;
+    }
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

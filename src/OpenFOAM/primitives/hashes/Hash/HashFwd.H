@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,57 +21,23 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InNamespace
-    Foam
-
 Description
-    Misc. hashing functions, mostly from Bob Jenkins.
-
-    The Jenkins hashing function(s) is similar in speed to Paul Hsieh's
-    SuperFast hash, but is public domain, supports incremental hashing
-    and has been reported to have better characteristics.
-    It is also what postgresql seems to be using.
-
-See also
-    http://burtleburtle.net/bob/c/lookup3.c
-    and HasherInt.H for a specialized version
-
-SourceFiles
-    Hasher.C
+    Forward definition for Hash function class and the definition for
+    the Hasher function.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Hasher_H
-#define Hasher_H
+#ifndef HashFwd_H
+#define HashFwd_H
 
-#include <cstddef>
+#include "Hasher.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-//- Bob Jenkins's 96-bit mixer hashing function (lookup3)
-//  \param[in] data - a character stream
-//  \param[in] len  - the number of bytes
-//  \param[in] seed - the previous hash, or an arbitrary value
-unsigned Hasher(const void* data, size_t len, unsigned seed = 0);
-
-
-//- Hashing of bit-wise internal content of given data object.
-//  For primitives and simple collections of primitives this is reasonable,
-//  but ill-advised for more complex data structures.
-template<class T>
-inline unsigned HasherT(const T& obj, unsigned seed = 0)
-{
-    return Hasher(&obj, sizeof(obj), seed);
+    template<class T> struct Hash;
 }
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

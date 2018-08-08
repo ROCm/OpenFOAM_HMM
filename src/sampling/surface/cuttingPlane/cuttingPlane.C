@@ -26,9 +26,8 @@ License
 #include "cuttingPlane.H"
 #include "fvMesh.H"
 #include "volFields.H"
-#include "linePointRef.H"
 #include "meshTools.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 #include "HashOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -80,29 +79,8 @@ namespace Foam
     }
 
 
-    //- Hash specialization for labelList. Hash incrementally.
-    template<>
-    inline unsigned Hash<labelList>::operator()
-    (
-        const labelList& list,
-        unsigned seed
-    ) const
-    {
-        return Hasher(list.cdata(), list.size()*sizeof(label), seed);
-    }
-
-    //- Hash specialization for labelList
-    template<>
-    inline unsigned Hash<labelList>::operator()
-    (
-        const labelList& list
-    ) const
-    {
-        return Hash<labelList>()(list, 0);
-    }
-
     //- For hashing face point labels, which are pre-sorted.
-    typedef HashSet<labelList, Hash<labelList>> labelListHashSet;
+    typedef HashSet<labelList, labelList::Hash<>> labelListHashSet;
 
 } // End namespace Foam
 
@@ -354,6 +332,7 @@ void Foam::cuttingPlane::walkCellCuts
             {
                 edge e(f.faceEdge(fp));
 
+                // Action #1: detect edge intersection and orient edge
                 if (!intersectEdgeOrient(sides, e))
                 {
                     continue;
@@ -388,6 +367,7 @@ void Foam::cuttingPlane::walkCellCuts
                 const point& p0 = points[e[0]];
                 const point& p1 = points[e[1]];
 
+                // Action #2: edge cut alpha
                 const scalar alpha =
                     this->lineIntersect(linePointRef(p0, p1));
 
@@ -540,6 +520,7 @@ void Foam::cuttingPlane::walkCellCuts
 
         face f(localFaceLoop);
 
+        // Action #3: orient face
         // Orient face to point in the same direction as the plane normal
         if ((f.areaNormal(dynCutPoints) & this->normal()) < 0)
         {

@@ -54,20 +54,13 @@ class multiphaseSystem
 {
 protected:
 
-        typedef
-            HashTable
-            <
-                volScalarField::Internal,
-                word,
-                word::hash
-            >
-            SuSpTable;
+        typedef HashTable<volScalarField::Internal> SuSpTable;
 
         typedef HashTable<scalar, phasePairKey, phasePairKey::hash>
             scalarTable;
 
-        typedef HashTable<surfaceScalarField, word, word::hash>
-            compressionFluxTable;
+        typedef HashTable<surfaceScalarField> compressionFluxTable;
+
 
     // Protected data
 

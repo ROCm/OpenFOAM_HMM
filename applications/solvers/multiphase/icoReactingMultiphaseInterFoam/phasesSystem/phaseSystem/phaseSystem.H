@@ -75,8 +75,7 @@ public:
             phasePairTable;
 
 
-        typedef
-            HashTable<autoPtr<phaseModel>, word, word::hash> phaseModelTable;
+        typedef HashTable<autoPtr<phaseModel>> phaseModelTable;
 
 
 protected:

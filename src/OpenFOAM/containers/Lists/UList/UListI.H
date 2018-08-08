@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
+#include "contiguous.H"
 #include "pTraits.H"
 #include "Swap.H"
 

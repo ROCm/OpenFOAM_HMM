@@ -402,6 +402,19 @@ public:
 };
 
 
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+//- Hash specialization for face
+template<>
+struct Hash<face>
+{
+    inline unsigned operator()(const face& obj, unsigned seed=0) const
+    {
+        return Hasher(obj.cdata(), obj.size()*sizeof(label), seed);
+    }
+};
+
+
 //- Specialization to offset faces, used in ListListOps::combineOffset
 template<>
 struct offsetOp<face>
@@ -414,25 +427,24 @@ struct offsetOp<face>
     {
         face result(x.size());
 
-        forAll(x, xI)
+        forAll(x, i)
         {
-            result[xI] = x[xI] + offset;
+            result[i] = x[i] + offset;
         }
         return result;
     }
 };
 
 
-// Global operators
-inline bool operator==(const face& a, const face& b);
-inline bool operator!=(const face& a, const face& b);
-
-
-// Global functions
-
 //- Find the longest edge on a face. Face point labels index into pts.
 //  \deprecated use class method instead (APR-2017)
 label longestEdge(const face& f, const UList<point>& pts);
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
+inline bool operator==(const face& a, const face& b);
+inline bool operator!=(const face& a, const face& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

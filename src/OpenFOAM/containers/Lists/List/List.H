@@ -344,6 +344,30 @@ public:
 };
 
 
+// * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
+
+//- Hashing for List data, which uses Hasher for contiguous data and
+//- element-wise incrementally hashing otherwise.
+template<>
+template<class T>
+struct Hash<List<T>>
+{
+    inline unsigned operator()(const UList<T>& obj, unsigned seed=0) const
+    {
+        if (contiguous<T>())
+        {
+            return Hasher(obj.cdata(), obj.size()*sizeof(T), seed);
+        }
+
+        for (const T& val : obj)
+        {
+            seed = Hash<T>()(val, seed);
+        }
+        return seed;
+    }
+};
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

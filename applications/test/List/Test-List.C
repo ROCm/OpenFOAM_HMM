@@ -598,6 +598,20 @@ int main(int argc, char *argv[])
         << "-wordList:   " << flatOutput(wLst)  << nl
         << "-stringList: " << flatOutput(sLst)  << endl;
 
+    // Hash values
+    {
+        labelList list1(identity(5));
+        labelList list2(identity(5));
+
+        Info<<"hash of " << flatOutput(list1)
+            << " = " << Hash<labelList>()(list1) << " or "
+            << labelList::Hash<>()(list1) << nl;
+
+        Info<<"hash of " << flatOutput(list2) << " = "
+            << Hash<labelList>()(list2) << " or "
+            << labelList::Hash<>()(list2) << nl;
+    }
+
     return 0;
 }
 

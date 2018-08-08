@@ -25,8 +25,6 @@ License
 
 #include "UList.H"
 #include "SLList.H"
-#include "contiguous.H"
-
 #include <type_traits>
 #include <utility>
 
@@ -567,32 +565,6 @@ template<class T, unsigned Size>
 inline bool Foam::FixedList<T, Size>::empty() const
 {
     return false;
-}
-
-
-template<class T, unsigned Size>
-template<class HashT>
-inline unsigned Foam::FixedList<T, Size>::Hash<HashT>::operator()
-(
-    const FixedList<T, Size>& list,
-    unsigned seed
-) const
-{
-    if (contiguous<T>())
-    {
-        // Hash directly
-        return Hasher(list.v_, sizeof(list.v_), seed);
-    }
-
-    // Hash incrementally
-    unsigned val = seed;
-
-    for (unsigned i=0; i<Size; ++i)
-    {
-        val = HashT()(list[i], val);
-    }
-
-    return val;
 }
 
 

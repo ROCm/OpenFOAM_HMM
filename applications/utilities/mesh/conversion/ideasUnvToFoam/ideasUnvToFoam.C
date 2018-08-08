@@ -54,23 +54,7 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    template<>
-    inline unsigned Hash<face>::operator()(const face& t, unsigned seed) const
-    {
-        return Hasher(t.cdata(),t.size()*sizeof(label), seed);
-    }
-
-    template<>
-    inline unsigned Hash<face>::operator()(const face& t) const
-    {
-        return Hash<face>::operator()(t, 0);
-    }
-}
-
 const string SEPARATOR("    -1");
-
 
 bool isSeparator(const std::string& line)
 {
@@ -861,7 +845,7 @@ int main(int argc, char *argv[])
     Map<label> faceToCell[2];
 
     {
-        HashTable<label, face, Hash<face>> faceToFaceID(boundaryFaces.size());
+        HashTable<label, face, face::Hash<>> faceToFaceID(boundaryFaces.size());
         forAll(boundaryFaces, facei)
         {
             SortableList<label> sortedVerts(boundaryFaces[facei]);
@@ -874,12 +858,11 @@ int main(int argc, char *argv[])
             forAll(faces, i)
             {
                 SortableList<label> sortedVerts(faces[i]);
-                HashTable<label, face, Hash<face>>::const_iterator fnd =
-                    faceToFaceID.find(face(sortedVerts));
+                const auto fnd = faceToFaceID.find(face(sortedVerts));
 
-                if (fnd != faceToFaceID.end())
+                if (fnd.found())
                 {
-                    label facei = fnd();
+                    label facei = *fnd;
                     int stat = face::compare(faces[i], boundaryFaces[facei]);
 
                     if (stat == 1)
