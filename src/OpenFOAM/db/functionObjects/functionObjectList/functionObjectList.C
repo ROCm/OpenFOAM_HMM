@@ -435,8 +435,7 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
     {
         modifiedControlDict = true;
 
-        ITstream is("funcs", args["funcs"]);
-        wordList funcNames(is);
+        wordList funcNames = args.readList<word>("funcs");
 
         for (const word& funcName : funcNames)
         {
