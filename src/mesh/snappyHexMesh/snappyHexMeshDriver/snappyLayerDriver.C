@@ -511,7 +511,7 @@ void Foam::snappyLayerDriver::handleNonStringConnected
 
 
     // 1) Local
-    Map<label> nCommonPoints(100);
+    Map<label> nCommonPoints(128);
 
     forAll(pp, facei)
     {

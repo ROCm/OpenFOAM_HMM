@@ -30,7 +30,7 @@ License
 #include "demandDrivenData.H"
 #include "OFstream.H"
 #include "matchPoints.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 #include "Time.H"
 #include "transformField.H"
 #include "SubField.H"

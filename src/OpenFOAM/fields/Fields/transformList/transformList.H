@@ -38,7 +38,7 @@ SourceFiles
 #include "transform.H"
 #include "List.H"
 #include "Map.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 #include "tensorField.H"
 
 

@@ -31,7 +31,7 @@ License
 #include "lduSchedule.H"
 #include "globalMeshData.H"
 #include "stringListOps.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

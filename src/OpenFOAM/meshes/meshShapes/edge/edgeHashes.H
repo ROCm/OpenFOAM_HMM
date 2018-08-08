@@ -33,9 +33,9 @@ Description
 #ifndef edgeHashes_H
 #define edgeHashes_H
 
-#include "HashSet.H"
 #include "edge.H"
 #include "EdgeMap.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -43,7 +43,7 @@ SourceFiles
 #define syncTools_H
 
 #include "Pstream.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 #include "bitSet.H"
 #include "polyMesh.H"
 #include "coupledPolyPatch.H"

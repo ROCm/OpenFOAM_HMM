@@ -123,7 +123,7 @@ SourceFiles
 #include "dictionary.H"
 #include "Switch.H"
 #include "bitSet.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 #include "cv2DControls.H"
 #include "tolerances.H"
 #include "meshTools.H"

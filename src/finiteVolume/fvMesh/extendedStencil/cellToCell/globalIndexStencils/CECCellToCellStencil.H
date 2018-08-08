@@ -38,7 +38,7 @@ SourceFiles
 #include "boolList.H"
 #include "HashSet.H"
 #include "Map.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

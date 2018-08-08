@@ -29,7 +29,7 @@ License
 #include "polyTopoChange.H"
 #include "mapPolyMesh.H"
 #include "OFstream.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 #include "syncTools.H"
 #include "triPointRef.H"
 

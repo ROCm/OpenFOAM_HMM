@@ -40,7 +40,7 @@ SourceFiles
 #include "labelList.H"
 #include "typeInfo.H"
 #include "Map.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -80,8 +80,8 @@ labelList owner(0);
 labelList neighbour(0);
 
 // Group type and name
-Map<word> groupType(100);
-Map<word> groupName(100);
+Map<word> groupType(128);
+Map<word> groupName(128);
 
 // Point groups
 DynamicList<label> pointGroupZoneID;

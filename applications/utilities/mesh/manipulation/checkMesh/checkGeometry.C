@@ -4,7 +4,7 @@
 #include "cellSet.H"
 #include "faceSet.H"
 #include "pointSet.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 #include "wedgePolyPatch.H"
 #include "unitConversion.H"
 #include "polyMeshTetDecomposition.H"

@@ -346,7 +346,7 @@ void Foam::localPointRegion::calcPointRegions
         // Transport minimum from face across cell
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        Map<label> minPointValue(100);
+        Map<label> minPointValue(128);
         label nChanged = 0;
         forAllConstIter(Map<label>, candidateCell, iter)
         {

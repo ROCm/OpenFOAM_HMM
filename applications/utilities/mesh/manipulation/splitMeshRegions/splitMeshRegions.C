@@ -97,7 +97,7 @@ Description
 #include "cellSet.H"
 #include "polyTopoChange.H"
 #include "removeCells.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 #include "syncTools.H"
 #include "ReadFields.H"
 #include "mappedWallPolyPatch.H"

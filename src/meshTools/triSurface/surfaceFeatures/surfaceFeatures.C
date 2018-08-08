@@ -32,7 +32,7 @@ License
 #include "linePointRef.H"
 #include "Fstream.H"
 #include "unitConversion.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

@@ -26,7 +26,7 @@ License
 #include "triSurfaceMesh.H"
 #include "Random.H"
 #include "addToRunTimeSelectionTable.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 #include "triSurfaceFields.H"
 #include "Time.H"
 #include "PatchTools.H"
@@ -162,7 +162,7 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
     // Every edge should be used by two faces exactly.
     // To prevent doing work twice per edge only look at edges to higher
     // point
-    EdgeMap<label> facesPerEdge(100);
+    EdgeMap<label> facesPerEdge(128);
     forAll(pointFaces, pointi)
     {
         const labelList& pFaces = pointFaces[pointi];
