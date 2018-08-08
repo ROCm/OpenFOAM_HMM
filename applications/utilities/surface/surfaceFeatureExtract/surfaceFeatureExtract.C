@@ -207,10 +207,12 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Extract and write surface features to file"
+        "Extract and write surface feature lines to file.\n"
+        "Feature line extraction only valid on closed manifold surfaces."
     );
+
     argList::noParallel();
-    argList::noFunctionObjects();
+    argList::noFunctionObjects();  // Never use function objects
 
     argList::addOption
     (

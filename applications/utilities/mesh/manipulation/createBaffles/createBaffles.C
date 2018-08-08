@@ -440,13 +440,16 @@ int main(int argc, char *argv[])
         "Makes internal faces into boundary faces.\n"
         "Does not duplicate points."
     );
+
     #include "addDictOption.H"
     #include "addOverwriteOption.H"
     #include "addDictOption.H"
     #include "addRegionOption.H"
+
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createNamedMesh.H"
 
 

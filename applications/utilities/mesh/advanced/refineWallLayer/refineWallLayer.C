@@ -72,12 +72,12 @@ int main(int argc, char *argv[])
         "Restrict cells to refine based on specified cellSet name"
     );
 
+    argList::noFunctionObjects();  // Never use function objects
 
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
-
     #include "createPolyMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     // Find set of patches from the list of regular expressions provided

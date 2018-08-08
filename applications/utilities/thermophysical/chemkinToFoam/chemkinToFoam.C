@@ -52,8 +52,10 @@ int main(int argc, char *argv[])
         "Converts CHEMKINIII thermodynamics and reaction data files into\n"
         "OpenFOAM format."
     );
+
     argList::noParallel();
-    argList::noFunctionObjects();
+    argList::noFunctionObjects();  // Never use function objects
+
     argList::addArgument("CHEMKINFile");
     argList::addArgument("CHEMKINThermodynamicsFile");
     argList::addArgument("CHEMKINTransport");

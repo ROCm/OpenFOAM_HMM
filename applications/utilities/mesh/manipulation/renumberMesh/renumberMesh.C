@@ -618,16 +618,17 @@ int main(int argc, char *argv[])
     #include "addOverwriteOption.H"
     #include "addTimeOptions.H"
     #include "addDictOption.H"
+
     argList::addBoolOption
     (
         "frontWidth",
-        "Calculate the rms of the frontwidth"
+        "Calculate the rms of the front-width"
     );
 
+    argList::noFunctionObjects();  // Never use function objects
 
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
 
 
     // Force linker to include zoltan symbols. This section is only needed since
@@ -647,6 +648,7 @@ int main(int argc, char *argv[])
     runTime.setTime(Times[startTime], startTime);
 
     #include "createNamedMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     const bool readDict = args.found("dict");

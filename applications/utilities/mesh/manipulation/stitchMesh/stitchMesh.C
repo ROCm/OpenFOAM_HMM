@@ -111,6 +111,8 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
     #include "addDictOption.H"
@@ -194,7 +196,6 @@ int main(int argc, char *argv[])
     }
 
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createNamedMesh.H"
 
     const word oldInstance = mesh.pointsInstance();

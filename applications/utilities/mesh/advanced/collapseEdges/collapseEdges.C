@@ -85,10 +85,12 @@ int main(int argc, char *argv[])
 
     #include "addDictOption.H"
     #include "addOverwriteOption.H"
+
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
 
-    runTime.functionObjects().off();
     instantList timeDirs = timeSelector::selectIfPresent(runTime, args);
 
     #include "createNamedMesh.H"

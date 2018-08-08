@@ -1480,10 +1480,12 @@ int main(int argc, char *argv[])
         "Prefix region name to all patches, not just coupling patches"
     );
 
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createNamedMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     word blockedFacesName;

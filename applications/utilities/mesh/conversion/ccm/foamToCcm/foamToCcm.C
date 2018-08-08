@@ -116,11 +116,12 @@ int main(int argc, char *argv[])
         "Convert results only"
     );
 
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
 
-    // get times list
+    // The times list
     instantList timeDirs = Foam::timeSelector::select0(runTime, args);
 
     const bool optMesh      = args.found("mesh");

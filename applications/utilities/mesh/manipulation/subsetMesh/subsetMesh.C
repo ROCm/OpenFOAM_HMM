@@ -366,9 +366,11 @@ int main(int argc, char *argv[])
         "time",
         "Specify a time for the resulting mesh"
     );
+
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
 
     #include "createNamedMesh.H"
 

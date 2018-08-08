@@ -63,8 +63,9 @@ int main(int argc, char *argv[])
         "and pressure for a range of unburnt gas temperatures and equivalence\n"
         "ratios; includes the effects of dissociation on O2, H2O and CO2."
     );
+
     argList::noParallel();
-    argList::noFunctionObjects();
+    argList::noFunctionObjects();  // Never use function objects
     argList::addArgument("controlFile");
 
     argList args(argc, argv);

@@ -210,9 +210,10 @@ int main(int argc, char *argv[])
         "The type of interpolation (linear or spline)"
     );
 
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
 
     wordRes selectedFields;
     args.readListIfPresent<wordRe>("fields", selectedFields);

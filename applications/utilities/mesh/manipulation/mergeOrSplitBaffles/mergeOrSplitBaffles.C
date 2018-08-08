@@ -295,9 +295,10 @@ int main(int argc, char *argv[])
         "Topologically split duplicate surfaces"
     );
 
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createNamedMesh.H"
 
     const word oldInstance = mesh.pointsInstance();

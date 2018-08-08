@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
 
     profiling::disable(); // Disable profiling (and its output)
     argList::noJobInfo();
-    argList::noFunctionObjects();
+    argList::noFunctionObjects();  // Never use function objects
     argList::addOption
     (
         "method",

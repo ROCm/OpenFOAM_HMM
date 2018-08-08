@@ -518,12 +518,14 @@ int main(int argc, char *argv[])
         "writeObj",
         "Write obj files showing the cyclic matching process"
     );
+
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
 
-    word meshRegionName = polyMesh::defaultRegion;
-    args.readIfPresent("region", meshRegionName);
+    const word meshRegionName =
+        args.lookupOrDefault<word>("region", polyMesh::defaultRegion);
 
     const bool overwrite = args.found("overwrite");
 

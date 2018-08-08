@@ -156,9 +156,12 @@ int main(int argc, char *argv[])
         "The default is to remove them."
     );
 
+    argList::noFunctionObjects();  // Never use function objects
+
     argList args(argc, argv);
     Time runTime(args.rootPath(), args.caseName());
-    runTime.functionObjects().off();
+
+    runTime.functionObjects().off();  // Extra safety
 
     const bool optList = args.found("list");
 

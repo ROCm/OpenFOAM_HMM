@@ -114,6 +114,8 @@ void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "addOverwriteOption.H"
 
     argList::addArgument("faceSet");
@@ -122,8 +124,8 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createPolyMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     const word setName = args[1];

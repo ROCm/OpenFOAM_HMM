@@ -56,10 +56,12 @@ int main(int argc, char *argv[])
     #include "addOverwriteOption.H"
     argList::addArgument("faceSet");
 
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createNamedMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     const word setName = args[1];

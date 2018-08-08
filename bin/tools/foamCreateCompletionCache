@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -116,7 +116,8 @@ echo 1>&2
 # Header not disabled
 [ "$optHeader" = true ] && cat << HEADER
 #----------------------------------*-sh-*--------------------------------------
-# Cached options for bash completion of OpenFOAM applications.
+# Cached options for bash completion of OpenFOAM applications, primarily for
+# use with the tcsh completion mechanism.
 # These are the values expected by the '_of_complete_' function
 #
 # Recreate with "${0##*/}"
@@ -149,8 +150,9 @@ extractOptions()
     # Array of options with args
     local argOpts=($(awk '/^ {0,4}-[a-z]/ && /</ {print $1}' <<< "$helpText"))
 
-    # Array of options without args
-    local boolOpts=($(awk '/^ {0,4}-[a-z]/ && !/</ {print $1}' <<< "$helpText"))
+    # Array of options without args, but skip the following:
+    #     -help-compat -help-full
+    local boolOpts=($(awk '/^ {0,4}-[a-z]/ && !/</ && !/help-(compat|full)/ {print $1}' <<< "$helpText"))
 
     appName="${appName##*/}"
     echo "$appName" 1>&2

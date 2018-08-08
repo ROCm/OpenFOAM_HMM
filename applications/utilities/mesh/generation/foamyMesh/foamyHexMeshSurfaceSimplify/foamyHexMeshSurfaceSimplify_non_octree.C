@@ -56,9 +56,10 @@ int main(int argc, char *argv[])
     argList::addArgument("(nx ny nz)");
     argList::addArgument("outputName");
 
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
 
     const labelVector n(args.read<labelVector>(1));
     const fileName exportName = args[2];

@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 
     timeSelector::addOptions(true, true);
     argList::noParallel();
-    argList::noFunctionObjects();
+    argList::noFunctionObjects();  // Never use function objects
 
     // Note that this should work without problems when profiling is active,
     // since we don't trigger it anywhere

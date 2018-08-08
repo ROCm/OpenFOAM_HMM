@@ -396,9 +396,10 @@ int main(int argc, char *argv[])
         "The merge distance relative to the bounding box size (default 1e-6)"
     );
 
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
 
     const bool writeMesh = args.found("writeMesh");
 

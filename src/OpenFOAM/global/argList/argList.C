@@ -349,12 +349,16 @@ void Foam::argList::noFunctionObjects(bool addWithOption)
 {
     removeOption("noFunctionObjects");
 
+    // Ignore this bool option without warning
+    // - cannot tie to any particular version anyhow
+    ignoreOptionCompat({"noFunctionObjects", 0}, false);
+
     if (addWithOption)
     {
         addBoolOption
         (
             "withFunctionObjects",
-            "execute functionObjects"
+            "Execute functionObjects"
         );
     }
 }

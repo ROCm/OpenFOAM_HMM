@@ -60,9 +60,11 @@ int main(int argc, char *argv[])
         "Calculates the adiabatic flame temperature for a given mixture\n"
         "at a given temperature."
     );
+
     argList::noParallel();
-    argList::noFunctionObjects();
+    argList::noFunctionObjects();  // Never use function objects
     argList::addArgument("controlFile");
+
     argList args(argc, argv);
 
     const fileName controlFileName(args[1]);

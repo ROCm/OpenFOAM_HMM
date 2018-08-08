@@ -358,10 +358,12 @@ int main(int argc, char *argv[])
         "Read user-defined mesh quality criterions from system/meshQualityDict"
     );
 
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createPolyMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     const scalar featureAngle = args.read<scalar>(1);

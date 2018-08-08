@@ -57,10 +57,10 @@ int main(int argc, char *argv[])
         "Conform to the initial points without any point motion"
     );
 
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-
-    runTime.functionObjects().off();
 
     const bool checkGeometry = args.found("checkGeometry");
     const bool conformationOnly = args.found("conformationOnly");

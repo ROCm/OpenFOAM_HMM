@@ -623,9 +623,11 @@ label findPatch(const polyBoundaryMesh& patches, const word& patchName)
 int main(int argc, char *argv[])
 {
     #include "addOverwriteOption.H"
+
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createNamedMesh.H"
 
     // Read control dictionary

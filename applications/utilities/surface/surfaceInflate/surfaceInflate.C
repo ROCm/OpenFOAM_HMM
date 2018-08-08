@@ -601,9 +601,10 @@ int main(int argc, char *argv[])
     argList::addArgument("distance");
     argList::addArgument("safety factor [1..]");
 
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
 
     const word inputName(args[1]);
     const scalar distance(args.read<scalar>(2));

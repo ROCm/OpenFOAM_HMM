@@ -422,9 +422,10 @@ int main(int argc, char *argv[])
     );
     #include "addRegionOption.H"
 
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
 
     const bool patchFaces = args.found("patchFaces");
     const bool patchEdges = args.found("patchEdges");

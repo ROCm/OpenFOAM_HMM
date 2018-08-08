@@ -60,8 +60,10 @@ int main(int argc, char *argv[])
         "Calculates the adiabatic flame temperature for a given fuel\n"
         "over a range of unburnt temperatures and equivalence ratios."
     );
+
     argList::noParallel();
-    argList::noFunctionObjects();
+    argList::noFunctionObjects();  // Never use function objects
+
     argList::addArgument("controlFile");
 
     argList args(argc, argv);

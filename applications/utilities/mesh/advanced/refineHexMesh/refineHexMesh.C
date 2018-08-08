@@ -66,10 +66,12 @@ int main(int argc, char *argv[])
         " (default is to extend set)"
     );
 
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createNamedMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     word cellSetName(args[1]);

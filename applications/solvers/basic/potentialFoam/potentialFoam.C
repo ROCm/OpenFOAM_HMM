@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "withFunctionObjects",
-        "execute functionObjects"
+        "Execute functionObjects"
     );
 
     #include "addCheckCaseOptions.H"

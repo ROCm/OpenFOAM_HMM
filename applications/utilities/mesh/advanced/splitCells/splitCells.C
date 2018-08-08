@@ -548,10 +548,12 @@ int main(int argc, char *argv[])
         "Edge snap tolerance (default 0.2)"
     );
 
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createPolyMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     const scalar featureAngle = args.read<scalar>(1);

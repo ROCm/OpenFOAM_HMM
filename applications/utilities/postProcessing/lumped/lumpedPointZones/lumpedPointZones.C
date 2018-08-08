@@ -49,9 +49,10 @@ int main(int argc, char *argv[])
         "Create lumpedPointZones.vtp to verify the segmentation of "
         "pressure integration zones used by lumpedPoint BC."
     );
-    argList::noParallel();    // The VTP writer is not yet in parallel
 
+    argList::noParallel();    // The VTP writer is not yet in parallel
     argList::noFunctionObjects();  // Never use function objects
+
     argList::addBoolOption
     (
         "verbose",

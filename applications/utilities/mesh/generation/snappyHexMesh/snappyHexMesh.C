@@ -710,9 +710,10 @@ int main(int argc, char *argv[])
     #include "addProfilingOption.H"
     #include "addDictOption.H"
 
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
 
     const bool overwrite = args.found("overwrite");
     const bool checkGeometry = args.found("checkGeometry");

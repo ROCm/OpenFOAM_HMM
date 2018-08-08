@@ -455,8 +455,8 @@ public:
         //  Queries the Foam::infoDetailLevel flag.
         static bool bannerEnabled();
 
-        //- Remove the 'noFunctionObjects' option,
-        //- optionally adding a 'withFunctionObjects' option instead
+        //- Remove '-noFunctionObjects' option and ignore any occurances.
+        //  Optionally add a '-withFunctionObjects' option instead
         static void noFunctionObjects(bool addWithOption = false);
 
         //- Suppress JobInfo, overriding controlDict setting

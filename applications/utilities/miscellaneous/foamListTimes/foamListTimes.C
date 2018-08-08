@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     argList::noBanner();
     argList::noParallel();
     argList::noJobInfo();
-    argList::noFunctionObjects();
+    argList::noFunctionObjects();  // Never use function objects
     argList::addBoolOption
     (
         "processor",

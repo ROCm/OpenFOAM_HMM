@@ -339,10 +339,12 @@ int main(int argc, char *argv[])
     #include "addOverwriteOption.H"
     #include "addDictOption.H"
 
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createPolyMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     const bool overwrite = args.found("overwrite");

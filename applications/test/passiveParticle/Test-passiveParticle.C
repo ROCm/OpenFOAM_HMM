@@ -37,10 +37,12 @@ Description
 int main(int argc, char *argv[])
 {
     argList::addArgument("cloud");
+
+    argList::noFunctionObjects();
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
-    runTime.functionObjects().off();
 
     const word cloudName = args[1];
 

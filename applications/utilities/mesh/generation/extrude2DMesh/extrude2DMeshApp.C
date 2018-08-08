@@ -114,6 +114,8 @@ int main(int argc, char *argv[])
 
     #include "addOverwriteOption.H"
 
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
 
     Info<< "Create time\n" << endl;
@@ -125,6 +127,7 @@ int main(int argc, char *argv[])
         args.caseName()
     );
 
+    // For safety
     runTimeExtruded.functionObjects().off();
 
     const ExtrudeMode surfaceFormat = ExtrudeModeNames[args[1]];
@@ -301,7 +304,7 @@ int main(int argc, char *argv[])
 
     if (!overwrite)
     {
-        runTimeExtruded++;
+        ++runTimeExtruded;
     }
     else
     {

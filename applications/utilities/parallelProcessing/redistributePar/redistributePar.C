@@ -2250,6 +2250,8 @@ void redistributeLagrangian
 
 int main(int argc, char *argv[])
 {
+    argList::noFunctionObjects();  // Never use function objects
+
     // enable -constant ... if someone really wants it
     // enable -zeroTime to prevent accidentally trashing the initial fields
     timeSelector::addOptions(true, true);
@@ -2406,7 +2408,7 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~
 
     #include "createTime.H"
-    runTime.functionObjects().off();
+    runTime.functionObjects().off();  // Extra safety?
 
 
     // Save local processor0 casename

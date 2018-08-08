@@ -170,10 +170,12 @@ int main(int argc, char *argv[])
         "Refine all cells"
     );
 
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createNamedPolyMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     printEdgeStats(mesh);
