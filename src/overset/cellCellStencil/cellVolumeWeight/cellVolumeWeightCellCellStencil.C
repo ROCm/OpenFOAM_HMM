@@ -684,6 +684,35 @@ Foam::cellCellStencils::cellVolumeWeight::cellVolumeWeight
         zeroGradientFvPatchScalarField::typeName
     )
 {
+    // Read zoneID
+    this->zoneID();
+
+    // Read old-time cellTypes
+    IOobject io
+    (
+        "cellTypes",
+        mesh_.time().timeName(),
+        mesh_,
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE,
+        false
+    );
+    if (io.typeHeaderOk<volScalarField>(true))
+    {
+        if (debug)
+        {
+            Pout<< "Reading cellTypes from time " << mesh_.time().timeName()
+                << endl;
+        }
+
+        const volScalarField volCellTypes(io, mesh_);
+        forAll(volCellTypes, celli)
+        {
+            // Round to integer
+            cellTypes_[celli] = volCellTypes[celli];
+        }
+    }
+
     if (doUpdate)
     {
         update();
@@ -1029,6 +1058,40 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
         volTypes.write();
     }
 
+
+    // Check previous iteration cellTypes_ for any hole->calculated changes
+    {
+        label nCalculated = 0;
+
+        forAll(cellTypes_, celli)
+        {
+            if (allCellTypes[celli] == CALCULATED && cellTypes_[celli] == HOLE)
+            {
+                if (allStencil[celli].size() == 0)
+                {
+                    FatalErrorInFunction
+                        << "Cell:" << celli
+                        << " at:" << mesh_.cellCentres()[celli]
+                        << " zone:" << zoneID[celli]
+                        << " changed from hole to calculated"
+                        << " but there is no donor"
+                        << exit(FatalError);
+                }
+                else
+                {
+                    allCellTypes[celli] = INTERPOLATED;
+                    nCalculated++;
+                }
+            }
+        }
+
+        if (debug)
+        {
+            Pout<< "Detected " << nCalculated << " cells changing from hole"
+                << " to calculated. Changed these to interpolated"
+                << endl;
+        }
+    }
 
 
     cellTypes_.transfer(allCellTypes);

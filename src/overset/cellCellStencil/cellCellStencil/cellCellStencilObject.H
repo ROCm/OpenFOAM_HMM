@@ -75,7 +75,11 @@ public:
     // Constructors
 
         //- Construct with mesh
-        explicit cellCellStencilObject(const fvMesh& mesh)
+        explicit cellCellStencilObject
+        (
+            const fvMesh& mesh,
+            const bool update = true
+        )
         :
             MeshObject
             <
@@ -92,7 +96,8 @@ public:
                     mesh.schemesDict().subDict
                     (
                         "oversetInterpolation"
-                    )
+                    ),
+                    update
                 )
             )
         {}

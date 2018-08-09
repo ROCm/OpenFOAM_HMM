@@ -225,8 +225,8 @@ Foam::dynamicOversetFvMesh::dynamicOversetFvMesh(const IOobject& io)
     dynamicMotionSolverFvMesh(io),
     active_(false)
 {
-    // Force loading zoneID field before time gets incremented
-    (void)cellCellStencil::zoneID(*this);
+    // Load stencil (but do not update)
+    (void)Stencil::New(*this, false);
 }
 
 

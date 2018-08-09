@@ -188,6 +188,7 @@ protected:
             PstreamBuffers& pBufs,
             const PtrList<fvMeshSubset>& meshParts,
             const List<treeBoundBoxList>& meshBb,
+            const labelList& allCellTypes,
 
             const label srcI,
             const label tgtI,

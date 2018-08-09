@@ -135,7 +135,8 @@ public:
         static autoPtr<cellCellStencil> New
         (
             const fvMesh&,
-            const dictionary& dict
+            const dictionary& dict,
+            const bool update = true
         );
 
 

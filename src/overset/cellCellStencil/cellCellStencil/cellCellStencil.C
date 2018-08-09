@@ -60,7 +60,8 @@ Foam::cellCellStencil::cellCellStencil(const fvMesh& mesh)
 Foam::autoPtr<Foam::cellCellStencil> Foam::cellCellStencil::New
 (
     const fvMesh& mesh,
-    const dictionary& dict
+    const dictionary& dict,
+    const bool update
 )
 {
     if (debug)
@@ -82,7 +83,7 @@ Foam::autoPtr<Foam::cellCellStencil> Foam::cellCellStencil::New
             << abort(FatalError);
     }
 
-    return autoPtr<cellCellStencil>(cstrIter()(mesh, dict, true));
+    return autoPtr<cellCellStencil>(cstrIter()(mesh, dict, update));
 }
 
 
@@ -170,7 +171,7 @@ void Foam::cellCellStencil::globalCellCells
 (
     const globalIndex& gi,
     const polyMesh& mesh,
-    const boolList& isValidDonor,
+    const boolList& isValidCell,
     const labelList& selectedCells,
     labelListList& cellCells,
     pointListList& cellCellCentres
@@ -207,12 +208,12 @@ void Foam::cellCellStencil::globalCellCells
         nbrCellCentres
     );
 
-    boolList nbrIsValidDonor;
+    boolList nbrIsValidCell;
     syncTools::swapBoundaryCellList
     (
         mesh,
-        isValidDonor,
-        nbrIsValidDonor
+        isValidCell,
+        nbrIsValidCell
     );
 
 
@@ -233,7 +234,7 @@ void Foam::cellCellStencil::globalCellCells
         label compacti = 0;
 
         // First entry is cell itself
-        if (isValidDonor[celli])
+        if (isValidCell[celli])
         {
             stencil[compacti] = globalCellIDs[celli];
             stencilPoints[compacti++] = cellCentres[celli];
@@ -252,7 +253,7 @@ void Foam::cellCellStencil::globalCellCells
             {
                 nbrCelli = nbrGlobalCellIDs[bFacei];
                 nbrCc = nbrCellCentres[bFacei];
-                isValid = nbrIsValidDonor[bFacei];
+                isValid = nbrIsValidCell[bFacei];
             }
             else
             {
@@ -260,14 +261,14 @@ void Foam::cellCellStencil::globalCellCells
                 {
                     nbrCelli = gi.toGlobal(own);
                     nbrCc = cellCentres[own];
-                    isValid = isValidDonor[own];
+                    isValid = isValidCell[own];
                 }
                 else
                 {
                     label nei = faceNeighbour[facei];
                     nbrCelli = gi.toGlobal(nei);
                     nbrCc = cellCentres[nei];
-                    isValid = isValidDonor[nei];
+                    isValid = isValidCell[nei];
                 }
             }
 

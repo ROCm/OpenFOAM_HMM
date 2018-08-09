@@ -441,6 +441,8 @@ void Foam::cellCellStencils::inverseDistance::markDonors
     const PtrList<fvMeshSubset>& meshParts,
     const List<treeBoundBoxList>& meshBb,
 
+    const labelList& allCellTypes,
+
     const label srcI,
     const label tgtI,
     labelListList& allStencil,
@@ -463,14 +465,24 @@ void Foam::cellCellStencils::inverseDistance::markDonors
         forAll(tgtCellMap, tgtCelli)
         {
             label srcCelli = tgtToSrcAddr[tgtCelli];
-            if (srcCelli != -1)
+            if (srcCelli != -1 && allCellTypes[srcCellMap[srcCelli]] != HOLE)
             {
                 label celli = tgtCellMap[tgtCelli];
-                label globalDonor =
-                    globalCells.toGlobal(srcCellMap[srcCelli]);
-                allStencil[celli].setSize(1);
-                allStencil[celli][0] = globalDonor;
-                allDonor[celli] = srcI;
+
+                // TBD: check for multiple donors. Maybe better one? For
+                //      now check 'nearer' mesh
+                if
+                (
+                    allStencil[celli].empty()
+                 || (mag(srcI-tgtI) < mag(allDonor[celli]-tgtI))
+                )
+                {
+                    label globalDonor =
+                        globalCells.toGlobal(srcCellMap[srcCelli]);
+                    allStencil[celli].setSize(1);
+                    allStencil[celli][0] = globalDonor;
+                    allDonor[celli] = srcI;
+                }
             }
         }
     }
@@ -557,7 +569,7 @@ void Foam::cellCellStencils::inverseDistance::markDonors
         {
             const point& sample = samples[sampleI];
             label srcCelli = srcMesh.findCell(sample, polyMesh::CELL_TETS);
-            if (srcCelli != -1)
+            if (srcCelli != -1 && allCellTypes[srcCellMap[srcCelli]] != HOLE)
             {
                 donors[sampleI] = globalCells.toGlobal(srcCellMap[srcCelli]);
             }
@@ -591,8 +603,13 @@ void Foam::cellCellStencils::inverseDistance::markDonors
             {
                 label celli = tgtCellMap[cellIDs[donorI]];
 
-                // TBD: check for multiple donors. Maybe better one?
-                if (allStencil[celli].empty())
+                // TBD: check for multiple donors. Maybe better one? For
+                //      now check 'nearer' mesh
+                if
+                (
+                    allStencil[celli].empty()
+                 || (mag(srcI-tgtI) < mag(allDonor[celli]-tgtI))
+                )
                 {
                     allStencil[celli].setSize(1);
                     allStencil[celli][0] = globalDonor;
@@ -1622,6 +1639,35 @@ Foam::cellCellStencils::inverseDistance::inverseDistance
         zeroGradientFvPatchScalarField::typeName
     )
 {
+    // Read zoneID
+    this->zoneID();
+
+    // Read old-time cellTypes
+    IOobject io
+    (
+        "cellTypes",
+        mesh_.time().timeName(),
+        mesh_,
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE,
+        false
+    );
+    if (io.typeHeaderOk<volScalarField>(true))
+    {
+        if (debug)
+        {
+            Pout<< "Reading cellTypes from time " << mesh_.time().timeName()
+                << endl;
+        }
+
+        const volScalarField volCellTypes(io, mesh_);
+        forAll(volCellTypes, celli)
+        {
+            // Round to integer
+            cellTypes_[celli] = volCellTypes[celli];
+        }
+    }
+
     if (doUpdate)
     {
         update();
@@ -1827,6 +1873,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
 
     PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
+    // Mark holes (in allCellTypes)
     for (label srcI = 0; srcI < meshParts.size()-1; srcI++)
     {
         for (label tgtI = srcI+1; tgtI < meshParts.size(); tgtI++)
@@ -1859,13 +1906,21 @@ bool Foam::cellCellStencils::inverseDistance::update()
                 srcI,
                 allCellTypes
             );
+        }
+    }
 
+    // Find donors (which are not holes) in allStencil, allDonorID
+    for (label srcI = 0; srcI < meshParts.size()-1; srcI++)
+    {
+        for (label tgtI = srcI+1; tgtI < meshParts.size(); tgtI++)
+        {
             markDonors
             (
                 globalCells,
                 pBufs,
                 meshParts,
                 meshBb,
+                allCellTypes,
 
                 tgtI,
                 srcI,
@@ -1878,6 +1933,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
                 pBufs,
                 meshParts,
                 meshBb,
+                allCellTypes,
 
                 srcI,
                 tgtI,
@@ -1930,6 +1986,47 @@ bool Foam::cellCellStencils::inverseDistance::update()
     // Add buffer interpolation layer(s) around holes
     scalarField allWeight(mesh_.nCells(), 0.0);
     walkFront(layerRelax, allStencil, allCellTypes, allWeight);
+
+
+    // Check previous iteration cellTypes_ for any hole->calculated changes
+    {
+        label nCalculated = 0;
+
+        forAll(cellTypes_, celli)
+        {
+            if (allCellTypes[celli] == CALCULATED && cellTypes_[celli] == HOLE)
+            {
+                if (allStencil[celli].size() == 0)
+                {
+                    FatalErrorInFunction
+                    //WarningInFunction
+                        << "Cell:" << celli
+                        << " at:" << mesh_.cellCentres()[celli]
+                        << " zone:" << zoneID[celli]
+                        << " changed from hole to calculated"
+                        << " but there is no donor"
+                        //<< endl;
+                        << exit(FatalError);
+                }
+                else
+                {
+                    //Pout<< "cell:" << mesh_.cellCentres()[celli]
+                    //    << " changed from hole to calculated"
+                    //    << " using donors:" << allStencil[celli]
+                    //    << endl;
+                    allCellTypes[celli] = INTERPOLATED;
+                    nCalculated++;
+                }
+            }
+        }
+
+        if (debug)
+        {
+            Pout<< "Detected " << nCalculated << " cells changing from hole"
+                << " to calculated. Changed to interpolated"
+                << endl;
+        }
+    }
 
 
     // Convert cell-cell addressing to stencil in compact notation
