@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,7 @@ SourceFiles
 #include "label.H"
 #include "word.H"
 #include "UList.H"
-#include "LIFOStack.H"
+#include "DynamicList.H"
 #include "foamVtkCore.H"
 #include "foamVtkPTraits.H"
 
@@ -69,8 +69,8 @@ class formatter
         //- The output stream for the formatter
         std::ostream& os_;
 
-        //- Stack of current XML tags
-        LIFOStack<word> xmlTags_;
+        //- LIFO stack of current XML tags
+        DynamicList<word> xmlTags_;
 
         //- Tag open/closed/ended state
         mutable bool inTag_;
@@ -104,12 +104,12 @@ public:
 
 
     //- Destructor
-    virtual ~formatter();
+    virtual ~formatter() = default;
 
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- Access to the underlying output stream
         inline std::ostream& os();
@@ -142,7 +142,7 @@ public:
 
     // Member Functions
 
-      // Output
+    // Output
 
         //- Indent according to the currently nested XML tags
         void indent();
@@ -317,7 +317,6 @@ public:
             const uint64_t v,
             const char quote = '\''
         );
-
 };
 
 

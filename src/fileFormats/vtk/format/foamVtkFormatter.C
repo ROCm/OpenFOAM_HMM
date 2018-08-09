@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,12 +23,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "foamVtkFormatter.H"
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::vtk::formatter::~formatter()
-{}
-
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
@@ -95,7 +89,7 @@ Foam::vtk::formatter::openTag(const word& tagName)
     indent();
     os_ << '<' << tagName;
 
-    xmlTags_.push(tagName);
+    xmlTags_.append(tagName);
     inTag_ = true;
 
     return *this;
@@ -115,7 +109,7 @@ Foam::vtk::formatter::closeTag(const bool isEmpty)
     if (isEmpty)
     {
         // eg, <tag ... />
-        xmlTags_.pop();
+        xmlTags_.remove();
         os_ << " /";
     }
     os_ << '>' << nl;
@@ -129,7 +123,7 @@ Foam::vtk::formatter::closeTag(const bool isEmpty)
 Foam::vtk::formatter&
 Foam::vtk::formatter::endTag(const word& tagName)
 {
-    const word curr = xmlTags_.pop();
+    const word curr(xmlTags_.remove());
     indent();
 
     if (inTag_)
