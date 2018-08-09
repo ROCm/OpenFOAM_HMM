@@ -81,8 +81,8 @@ int main(int argc, char *argv[])
     const word oldInstance = mesh.pointsInstance();
 
     // Find set of patches from the list of regular expressions provided
-    const wordRes patches(args.readList<wordRe>(1));
-    const scalar weight  = args.read<scalar>(2);
+    const wordRes patches(args.getList<wordRe>(1));
+    const scalar weight  = args.get<scalar>(2);
     const bool overwrite = args.found("overwrite");
 
     const labelHashSet patchSet(mesh.boundaryMesh().patchSet(patches));

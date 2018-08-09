@@ -363,7 +363,7 @@ int main(int argc, char *argv[])
     List<scalar> scaling;
     if (args.readListIfPresent("scale", scaling))
     {
-        // readList handles single or multiple values
+        // readListIfPresent handles single or multiple values
 
         if (scaling.size() == 1)
         {

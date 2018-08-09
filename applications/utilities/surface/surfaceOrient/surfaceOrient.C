@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     argList args(argc, argv);
 
     const fileName surfFileName = args[1];
-    const point visiblePoint    = args.read<point>(2);
+    const point visiblePoint    = args.get<point>(2);
     const fileName outFileName  = args[3];
 
     const bool orientInside = args.found("inside");

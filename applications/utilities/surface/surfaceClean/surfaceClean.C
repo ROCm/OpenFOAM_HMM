@@ -71,8 +71,8 @@ int main(int argc, char *argv[])
     argList args(argc, argv);
 
     const fileName inFileName = args[1];
-    const scalar minLen = args.read<scalar>(2);
-    const scalar minQuality = args.read<scalar>(3);
+    const scalar minLen = args.get<scalar>(2);
+    const scalar minQuality = args.get<scalar>(3);
     const fileName outFileName = args[4];
 
     Info<< "Reading surface " << inFileName << nl

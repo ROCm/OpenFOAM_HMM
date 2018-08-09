@@ -1117,12 +1117,10 @@ void Foam::argList::parse
 
             // If running distributed (different roots for different procs)
             label dictNProcs = -1;
-            if (options_.found("roots"))
+            if (this->readListIfPresent("roots", roots))
             {
                 distributed_ = true;
                 source = "-roots";
-                roots = this->readList<fileName>("roots");
-
                 if (roots.size() != 1)
                 {
                     dictNProcs = roots.size()+1;

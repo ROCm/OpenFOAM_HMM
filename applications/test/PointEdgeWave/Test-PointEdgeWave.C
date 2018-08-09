@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 
     labelList patchIDs
     (
-        pbm.patchSet(args.readList<wordRe>(1)).sortedToc()
+        pbm.patchSet(args.getList<wordRe>(1)).sortedToc()
     );
 
     Info<< "Starting walk from patches "

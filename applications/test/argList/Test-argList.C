@@ -108,7 +108,9 @@ int main(int argc, char *argv[])
     if (args.found("label"))
     {
         Info<< "-label = " << args.opt<label>("label")
+            #ifdef Foam_argList_1712
             << " or " << args.optionRead<label>("label")  // old-compat
+            #endif
             << " or " << readLabel(args["label"])         // with function
             << nl;
     }
@@ -116,7 +118,9 @@ int main(int argc, char *argv[])
     if (args.found("scalar"))
     {
         Info<< "-scalar = " << args.opt<scalar>("scalar")
+            #ifdef Foam_argList_1712
             << " or " << args.optionRead<scalar>("scalar") // old-compat
+            #endif
             << " or " << readScalar(args["scalar"])        // with function
             << nl;
     }
@@ -124,7 +128,9 @@ int main(int argc, char *argv[])
     if (args.found("string"))
     {
         Info<< "-string = " << args.opt("string")
+            #ifdef Foam_argList_1712
             << " or " << args.optionRead<scalar>("string")  // old-compat
+            #endif
             << nl;
     }
 
@@ -133,8 +139,11 @@ int main(int argc, char *argv[])
     Info<< nl;
     for (label argi=1; argi < args.size(); ++argi)
     {
-        Info<< "arg[" << argi << "] = " << args.read<string>(argi)
+        Info<< "arg[" << argi << "] = " << args.get<string>(argi)
+            #ifdef Foam_argList_1712
+            << " or " << args.read<label>(argi)     // old-compat
             << " or " << args.argRead<label>(argi)  // old-compat
+            #endif
             << nl;
     }
 

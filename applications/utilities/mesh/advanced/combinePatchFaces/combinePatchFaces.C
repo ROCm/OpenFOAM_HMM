@@ -366,13 +366,15 @@ int main(int argc, char *argv[])
 
     const word oldInstance = mesh.pointsInstance();
 
-    const scalar featureAngle = args.read<scalar>(1);
+    const scalar featureAngle = args.get<scalar>(1);
     const scalar minCos = Foam::cos(degToRad(featureAngle));
 
     // Sin of angle between two consecutive edges on a face.
     // If sin(angle) larger than this the face will be considered concave.
-    scalar concaveAngle = args.lookupOrDefault("concaveAngle", 30.0);
-    scalar concaveSin = Foam::sin(degToRad(concaveAngle));
+    const scalar concaveAngle =
+        args.lookupOrDefault<scalar>("concaveAngle", 30);
+
+    const scalar concaveSin = Foam::sin(degToRad(concaveAngle));
 
     const bool overwrite = args.found("overwrite");
     const bool meshQuality = args.found("meshQuality");

@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    const labelVector n(args.read<labelVector>(1));
+    const labelVector n(args.get<labelVector>(1));
     const fileName exportName = args[2];
 
     Info<< "Reading surfaces as specified in the foamyHexMeshDict and"

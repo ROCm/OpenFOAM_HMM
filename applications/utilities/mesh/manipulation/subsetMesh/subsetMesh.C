@@ -391,7 +391,6 @@ int main(int argc, char *argv[])
         meshInstance = fieldsInstance;
     }
 
-
     Info<< "Reading cell set from " << selectionName << nl << endl;
 
 
@@ -400,12 +399,12 @@ int main(int argc, char *argv[])
 
     if (args.found("patches"))
     {
-        const wordRes patchNames(args.readList<wordRe>("patches"));
+        const wordRes patchNames(args.getList<wordRe>("patches"));
 
         exposedPatchIDs = mesh.boundaryMesh().patchSet(patchNames).sortedToc();
 
         Info<< "Adding exposed internal faces to nearest of patches "
-            << patchNames << nl << endl;
+            << flatOutput(patchNames) << nl << endl;
 
         if (exposedPatchIDs.empty())
         {
@@ -414,7 +413,6 @@ int main(int argc, char *argv[])
                 << mesh.boundaryMesh().names()
                 << exit(FatalError);
         }
-
     }
     else if (args.found("patch"))
     {

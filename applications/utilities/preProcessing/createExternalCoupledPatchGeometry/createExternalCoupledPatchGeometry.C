@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
         args.readIfPresent("regions", regionNames);
     }
 
-    const wordRe patchGroup(args.read<wordRe>(1));
+    const wordRe patchGroup(args.get<wordRe>(1));
 
     fileName commsDir(runTime.path()/"comms");
     args.readIfPresent("commsDir", commsDir);

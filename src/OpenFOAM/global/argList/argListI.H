@@ -133,22 +133,22 @@ inline Foam::ITstream Foam::argList::lookup(const word& optName) const
 
 namespace Foam
 {
-    template<> inline int32_t argList::read<int32_t>(const label index) const
+    template<> inline int32_t argList::get<int32_t>(const label index) const
     {
         return Foam::readInt32(args_[index]);
     }
 
-    template<> inline int64_t argList::read<int64_t>(const label index) const
+    template<> inline int64_t argList::get<int64_t>(const label index) const
     {
         return Foam::readInt64(args_[index]);
     }
 
-    template<> inline float argList::read<float>(const label index) const
+    template<> inline float argList::get<float>(const label index) const
     {
         return Foam::readFloat(args_[index]);
     }
 
-    template<> inline double argList::read<double>(const label index) const
+    template<> inline double argList::get<double>(const label index) const
     {
         return Foam::readDouble(args_[index]);
     }
@@ -176,19 +176,19 @@ namespace Foam
 
 
     template<>
-    inline string argList::read<Foam::string>(const label index) const
+    inline string argList::get<Foam::string>(const label index) const
     {
         return args_[index];
     }
 
     template<>
-    inline word argList::read<Foam::word>(const label index) const
+    inline word argList::get<Foam::word>(const label index) const
     {
         return args_[index];
     }
 
     template<>
-    inline fileName argList::read<Foam::fileName>(const label index) const
+    inline fileName argList::get<Foam::fileName>(const label index) const
     {
         return args_[index];
     }
@@ -217,7 +217,7 @@ namespace Foam
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline T Foam::argList::read(const label index) const
+inline T Foam::argList::get(const label index) const
 {
     ITstream is(Foam::name(index), args_[index]);
 
@@ -296,7 +296,7 @@ inline T Foam::argList::lookupOrDefault
 
 
 template<class T>
-inline Foam::List<T> Foam::argList::readList(const label index) const
+inline Foam::List<T> Foam::argList::getList(const label index) const
 {
     ITstream is(Foam::name(index), args_[index]);
 
@@ -310,7 +310,7 @@ inline Foam::List<T> Foam::argList::readList(const label index) const
 
 
 template<class T>
-inline Foam::List<T> Foam::argList::readList(const word& optName) const
+inline Foam::List<T> Foam::argList::getList(const word& optName) const
 {
     ITstream is(optName, options_[optName]);
 

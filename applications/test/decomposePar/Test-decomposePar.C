@@ -109,12 +109,8 @@ int main(int argc, char *argv[])
     const bool allRegions = args.found("allRegions");
     const bool verbose    = args.found("verbose");
 
-    const label numSubdomains =
-        args.lookupOrDefault<label>("domains", 0);
-
-    const word methodName =
-        args.lookupOrDefault<word>("method", word::null);
-
+    const label numSubdomains = args.lookupOrDefault<label>("domains", 0);
+    const word methodName = args.lookupOrDefault<word>("method", word::null);
 
     // Set time from database
     #include "createTime.H"

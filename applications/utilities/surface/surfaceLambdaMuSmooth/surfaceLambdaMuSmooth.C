@@ -146,9 +146,9 @@ int main(int argc, char *argv[])
     argList args(argc, argv);
 
     const fileName surfFileName = args[1];
-    const scalar lambda = args.read<scalar>(2);
-    const scalar mu = args.read<scalar>(3);
-    const label  iters = args.read<label>(4);
+    const scalar lambda = args.get<scalar>(2);
+    const scalar mu = args.get<scalar>(3);
+    const label  iters = args.get<label>(4);
     const fileName outFileName = args[5];
 
     if (lambda < 0 || lambda > 1)

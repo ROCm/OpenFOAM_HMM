@@ -83,11 +83,8 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    vector n1(args.read<vector>(1));
-    n1 /= mag(n1);
-
-    vector n2(args.read<vector>(2));
-    n2 /= mag(n2);
+    const vector n1(args.get<vector>(1).normalise());
+    const vector n2(args.get<vector>(2).normalise());
 
     const tensor rotT(rotationTensor(n1, n2));
 

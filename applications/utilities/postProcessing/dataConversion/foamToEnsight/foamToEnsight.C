@@ -237,11 +237,11 @@ int main(int argc, char *argv[])
 
     if (args.found("patches"))
     {
-        writeOpts.patchSelection(args.readList<wordRe>("patches"));
+        writeOpts.patchSelection(args.getList<wordRe>("patches"));
     }
     if (args.found("faceZones"))
     {
-        writeOpts.faceZoneSelection(args.readList<wordRe>("faceZones"));
+        writeOpts.faceZoneSelection(args.getList<wordRe>("faceZones"));
     }
 
     //

@@ -607,8 +607,8 @@ int main(int argc, char *argv[])
     #include "createTime.H"
 
     const word inputName(args[1]);
-    const scalar distance(args.read<scalar>(2));
-    const scalar extendFactor(args.read<scalar>(3));
+    const scalar distance(args.get<scalar>(2));
+    const scalar extendFactor(args.get<scalar>(3));
     const bool checkSelfIntersect = args.found("checkSelfIntersection");
     const label nSmooth = args.lookupOrDefault("nSmooth", 10);
     const scalar featureAngle = args.lookupOrDefault<scalar>

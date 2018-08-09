@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
          FatalError.exit();
     }
 
-    const scalar scaleFactor = args.lookupOrDefault("scale", 1.0);
+    const scalar scaleFactor = args.lookupOrDefault<scalar>("scale", 1);
 
     #include "createTime.H"
 

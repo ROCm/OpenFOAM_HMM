@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
         prefix,
         runTime,
         // Default rescale from [mm] to [m]
-        args.lookupOrDefault("scale", 0.001),
+        args.lookupOrDefault<scalar>("scale", 0.001),
         args.found("solids")
     );
 

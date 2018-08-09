@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    const scalar scaleFactor = args.read<scalar>(1);
+    const scalar scaleFactor = args.get<scalar>(1);
 
     #include "createTime.H"
     #include "createNamedMesh.H"

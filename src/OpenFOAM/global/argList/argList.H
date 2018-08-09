@@ -317,15 +317,15 @@ public:
         //- Return non-const access to the command options
         inline HashTable<string>& options();
 
-        //- Read a value from the argument at index.
-        //  Index 1 is the first non-option argument.
+        //- Get a value from the argument at index.
+        //  Index 1 is the first (non-option) argument.
         template<class T>
-        inline T read(const label index) const;
+        inline T get(const label index) const;
 
         //- Read a value from the argument at index.
-        //  Index 1 is the first non-option argument.
+        //  Index 1 is the first (non-option) argument.
         template<class T>
-        inline List<T> readList(const label index) const;
+        inline List<T> getList(const label index) const;
 
         //- Return true if the named option is found
         inline bool found(const word& optName) const;
@@ -372,7 +372,7 @@ public:
         //- Read a List of values from the named option,
         //- treating a single entry like a list of size 1.
         template<class T>
-        inline List<T> readList(const word& optName) const;
+        inline List<T> getList(const word& optName) const;
 
         //- If named option is present, read a List of values
         //- treating a single entry like a list of size 1.
@@ -516,7 +516,7 @@ public:
 
         //- The string corresponding to the argument index.
         //  Index 0 is the executable.
-        //  Index 1 is the first non-option argument.
+        //  Index 1 is the first (non-option) argument.
         inline const string& operator[](const label index) const;
 
         //- The string associated with the named option
@@ -528,12 +528,21 @@ public:
     #ifdef Foam_argList_1712
 
         //- Read a value from the argument at index.
-        //  Index 1 is the first non-option argument.
+        //  Index 1 is the first (non-option) argument.
+        //  \deprecated in favour of get() - AUG-2018
+        template<class T>
+        inline T read(const label index) const
+        {
+            return this->get<T>(index);
+        }
+
+        //- Read a value from the argument at index.
+        //  Index 1 is the first (non-option) argument.
         //  \deprecated in favour of read() - JAN-2018
         template<class T>
         inline T argRead(const label index) const
         {
-            return this->read<T>(index);
+            return this->get<T>(index);
         }
 
         //- Return true if the named option is found
@@ -600,11 +609,11 @@ public:
         }
 
         //- Read a List of values from the named option
-        //  \deprecated in favour of readList() - JAN-2018
+        //  \deprecated in favour of getList() - JAN-2018
         template<class T>
         inline List<T> optionReadList(const word& optName) const
         {
-            return this->readList<T>(optName);
+            return this->getList<T>(optName);
         }
 
     #endif  /* Foam_argList_1712 */

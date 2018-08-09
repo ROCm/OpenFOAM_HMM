@@ -401,7 +401,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    const scalar featureAngle = args.read<scalar>(1);
+    const scalar featureAngle = args.get<scalar>(1);
     const scalar minCos = Foam::cos(degToRad(featureAngle));
 
     Info<< "Feature:" << featureAngle << endl

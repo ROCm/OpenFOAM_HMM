@@ -556,7 +556,7 @@ int main(int argc, char *argv[])
 
     const word oldInstance = mesh.pointsInstance();
 
-    const scalar featureAngle = args.read<scalar>(1);
+    const scalar featureAngle = args.get<scalar>(1);
     const scalar minCos = Foam::cos(degToRad(featureAngle));
     const scalar minSin = Foam::sin(degToRad(featureAngle));
 
@@ -564,7 +564,7 @@ int main(int argc, char *argv[])
     const bool geometry  = args.found("geometry");
     const bool overwrite = args.found("overwrite");
 
-    const scalar edgeTol = args.lookupOrDefault("tol", 0.2);
+    const scalar edgeTol = args.lookupOrDefault<scalar>("tol", 0.2);
 
     Info<< "Trying to split cells with internal angles > feature angle\n" << nl
         << "featureAngle      : " << featureAngle << nl

@@ -173,10 +173,7 @@ int main(int argc, char *argv[])
 
         if (args.found("patches"))
         {
-            includePatches = bMesh.patchSet
-            (
-                args.readList<wordRe>("patches")
-            );
+            includePatches = bMesh.patchSet(args.getList<wordRe>("patches"));
         }
         else
         {
@@ -197,7 +194,7 @@ int main(int argc, char *argv[])
 
         if (args.found("faceZones"))
         {
-            wordReList zoneNames(args.readList<wordRe>("faceZones"));
+            wordReList zoneNames(args.getList<wordRe>("faceZones"));
             const wordList allZoneNames(fzm.names());
             for (const wordRe& zoneName : zoneNames)
             {

@@ -1591,8 +1591,7 @@ int main(int argc, char *argv[])
 
 
     // Scale factor for both surfaces:
-    const scalar scaleFactor
-        = args.lookupOrDefault<scalar>("scale", -1);
+    const scalar scaleFactor = args.lookupOrDefault<scalar>("scale", -1);
 
     const word surf1Name(args[2]);
     Info<< "Reading surface " << surf1Name << endl;

@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
     argList args(argc, argv);
 
     const fileName inFileName = args[1];
-    const scalar reduction = args.read<scalar>(2);
+    const scalar reduction = args.get<scalar>(2);
     const fileName outFileName = args[3];
 
     if (reduction <= 0 || reduction > 1)
