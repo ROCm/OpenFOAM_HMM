@@ -18,10 +18,6 @@ motionSolverLibs    ("libsixDoFRigidBodyMotion.so");
 
 dynamicFvMesh       dynamicOversetFvMesh;
 
-dynamicOversetFvMeshCoeffs
-{
-}
-
 solver          sixDoFRigidBodyMotion;
 
 sixDoFRigidBodyMotionCoeffs
