@@ -170,6 +170,13 @@ public:
         {
             stencilPtr_().stencilWeights(sample, donorCcs, weights);
         }
+
+        //- Return the names of any (stencil or mesh specific) fields that
+        //  should not be interpolated
+        virtual const wordHashSet& nonInterpolatedFields() const
+        {
+            return stencilPtr_().nonInterpolatedFields();
+        }
 };
 
 

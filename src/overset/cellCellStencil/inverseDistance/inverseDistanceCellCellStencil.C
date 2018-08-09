@@ -1639,6 +1639,10 @@ Foam::cellCellStencils::inverseDistance::inverseDistance
         zeroGradientFvPatchScalarField::typeName
     )
 {
+    // Protect local fields from interpolation
+    nonInterpolatedFields_.insert("cellInterpolationWeight");
+    nonInterpolatedFields_.insert("cellTypes");
+
     // Read zoneID
     this->zoneID();
 

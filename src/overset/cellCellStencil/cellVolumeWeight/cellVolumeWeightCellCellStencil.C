@@ -688,6 +688,7 @@ Foam::cellCellStencils::cellVolumeWeight::cellVolumeWeight
     this->zoneID();
 
     // Read old-time cellTypes
+    nonInterpolatedFields_.insert("cellTypes");
     IOobject io
     (
         "cellTypes",

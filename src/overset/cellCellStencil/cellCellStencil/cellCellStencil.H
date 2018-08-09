@@ -86,6 +86,9 @@ protected:
         //- Reference to the mesh
         const fvMesh& mesh_;
 
+        //- Set of fields that should not be interpolated
+        wordHashSet nonInterpolatedFields_;
+
 
     // Protected Member Functions
 
@@ -176,6 +179,10 @@ public:
             const pointList& donorCcs,
             scalarList& weights
         ) const = 0;
+
+        //- Return the names of any (stencil or mesh specific) fields that
+        //  should not be interpolated
+        virtual const wordHashSet& nonInterpolatedFields() const;
 
         //- Helper: is stencil fully local
         bool localStencil(const labelUList&) const;

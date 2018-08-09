@@ -115,14 +115,45 @@ void Foam::oversetFvPatchField<Type>::initEvaluate
         else if
         (
            !fvSchemes.found("oversetInterpolation")
-        || !fvSchemes.found("oversetInterpolationRequired")
+         || (
+               fvSchemes.found("oversetInterpolationRequired")
+            == fvSchemes.found("oversetInterpolationSuppressed")
+            )
         )
         {
             IOWarningInFunction(fvSchemes)
                 << "Missing required dictionary entries"
                 << " 'oversetInterpolation' and 'oversetInterpolationRequired'"
+                << " or 'oversetInterpolationSuppressed'"
                 << ". Skipping overset interpolation for field "
                 << fldName << endl;
+        }
+        else if (fvSchemes.found("oversetInterpolationSuppressed"))
+        {
+            const dictionary& intDict = fvSchemes.subDict
+            (
+                "oversetInterpolationSuppressed"
+            );
+            if (!intDict.found(fldName))
+            {
+                if (debug)
+                {
+                    Info<< "Interpolating non-suppressed field " << fldName
+                        << endl;
+                }
+                mesh.interpolate
+                (
+                    const_cast<Field<Type>&>
+                    (
+                        this->primitiveField()
+                    )
+                );
+            }
+            else if (debug)
+            {
+                Info<< "Skipping suppressed overset interpolation for field "
+                    << fldName << endl;
+            }
         }
         else
         {

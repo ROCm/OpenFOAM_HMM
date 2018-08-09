@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -274,8 +274,8 @@ bool Foam::dynamicOversetFvMesh::update()
         // let demand-driven lduAddr() trigger it but just to make sure.
         updateAddressing();
 
-        // Addressing and/or weights have changed. Make interpolated cells
-        // up to date with donors
+        // This should be done when there is actually a changed in
+        // the new addressing. This sshould no update old fields.
         interpolateFields();
 
         return true;
@@ -285,39 +285,46 @@ bool Foam::dynamicOversetFvMesh::update()
 }
 
 
-Foam::word Foam::dynamicOversetFvMesh::baseName(const word& name)
-{
-    if (name.endsWith("_0"))
-    {
-        return baseName(name.substr(0, name.size()-2));
-    }
-    else
-    {
-        return name;
-    }
-}
-
-
 bool Foam::dynamicOversetFvMesh::interpolateFields()
 {
-    // Add the stencil suppression list
-    wordHashSet suppressed(Stencil::New(*this).nonInterpolatedFields());
-
-    // Use whatever the solver has set up as suppression list
-    const dictionary* dictPtr
-    (
-        this->schemesDict().subDictPtr("oversetInterpolationSuppressed")
-    );
-    if (dictPtr)
     {
-        suppressed.insert(dictPtr->sortedToc());
+        auto flds(this->lookupClass<volScalarField>());
+        for (auto fldPtr : flds)
+        {
+            auto& fld = *fldPtr;
+            if
+            (
+                fld.name() != "cellMask"
+             && fld.name() != "cellMask_0"
+             && fld.name() != "interpolatedCells"
+             && fld.name() != "k_0"
+             && fld.name() != "epsilon_0"
+             && fld.name() != "alpha.water_0"
+             && fld.name() != "rho_0"
+            )
+            {
+                Pout << "Interpolating : " << fld.name() << endl;
+                interpolate(fld.primitiveFieldRef());
+            }
+        }
     }
 
-    interpolate<volScalarField>(suppressed);
-    interpolate<volVectorField>(suppressed);
-    interpolate<volSphericalTensorField>(suppressed);
-    interpolate<volSymmTensorField>(suppressed);
-    interpolate<volTensorField>(suppressed);
+    {
+        auto flds(this->lookupClass<volVectorField>());
+        for (auto fldPtr : flds)
+        {
+            auto& fld = *fldPtr;
+            if
+            (
+                fld.name() != "cellDisplacement"
+             && fld.name() != "U_0"
+            )
+            {
+                Pout << "Interpolating : " << fld.name() << endl;
+                interpolate(fld.primitiveFieldRef());
+            }
+        }
+    }
 
     return true;
 }

@@ -53,7 +53,8 @@ Foam::cellCellStencil::cellTypeNames_
 
 Foam::cellCellStencil::cellCellStencil(const fvMesh& mesh)
 :
-    mesh_(mesh)
+    mesh_(mesh),
+    nonInterpolatedFields_({"zoneID"})
 {}
 
 
@@ -151,6 +152,12 @@ Foam::labelList Foam::cellCellStencil::count
     }
     Pstream::listCombineGather(count, plusEqOp<label>());
     return count;
+}
+
+
+const Foam::wordHashSet& Foam::cellCellStencil::nonInterpolatedFields() const
+{
+    return nonInterpolatedFields_;
 }
 
 
