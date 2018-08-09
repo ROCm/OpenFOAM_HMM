@@ -22,18 +22,16 @@ ddtSchemes
 gradSchemes
 {
     default         Gauss linear;
-    grad(T)         Gauss linear;
 }
 
 divSchemes
 {
     default         none;
-    div(phi,U)      Gauss limitedLinearV 1;
-    div(phi,k)      Gauss limitedLinear 1;
-    div(phi,epsilon) Gauss limitedLinear 1;
-    div(phi,R)      Gauss limitedLinear 1;
-    div(R)          Gauss linear;
-    div(phi,nuTilda) Gauss limitedLinear 1;
+    div(phi,U)      Gauss upwind;
+
+    div(phi,epsilon) Gauss upwind;
+    div(phi,k)       Gauss upwind;
+
     div((nuEff*dev2(T(grad(U))))) Gauss linear;
 }
 
@@ -55,7 +53,7 @@ snGradSchemes
 
 oversetInterpolation
 {
-    method          inverseDistance;
+    method          cellVolumeWeight;
 }
 
 fluxRequired
@@ -63,6 +61,12 @@ fluxRequired
     default         no;
     pcorr           ;
     p               ;
+}
+
+oversetInterpolationSuppressed
+{
+    grad(p);
+    surfaceIntegrate(phiHbyA);
 }
 
 // ************************************************************************* //

@@ -5,10 +5,10 @@ cd ${0%/*} || exit 1                        # Run from this directory
 ./Allrun.pre
 
 # Serial
-#runApplication $(getApplication)
+runApplication $(getApplication)
 
 # Parallel
-runApplication decomposePar -cellDist
-runParallel  $(getApplication)
+#runApplication decomposePar -cellDist
+#runParallel  $(getApplication)
 
 #------------------------------------------------------------------------------

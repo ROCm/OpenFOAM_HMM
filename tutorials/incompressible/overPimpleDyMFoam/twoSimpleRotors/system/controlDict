@@ -16,6 +16,12 @@ FoamFile
 
 libs            ("liboverset.so");
 
+DebugSwitches
+{
+    overset                 0;
+    dynamicOversetFvMesh    0;
+}
+
 application     overPimpleDyMFoam;
 
 startFrom       startTime;
@@ -24,9 +30,9 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         0.6;
+endTime         0.08;
 
-deltaT          0.00025;
+deltaT          2e-5;
 
 writeControl    adjustableRunTime;
 
@@ -46,7 +52,7 @@ timePrecision   6;
 
 runTimeModifiable true;
 
-adjustTimeStep  yes;
+adjustTimeStep  no;
 
 maxCo           1;
 
@@ -54,6 +60,30 @@ maxCo           1;
 functions
 {
     // #include "catalyst"
+    probes
+    {
+        type            probes;
+        libs            ("libsampling.so");
+
+        // Name of the directory for probe data
+        name            probes;
+
+        // Write at same frequency as fields
+        writeControl    timeStep;
+        writeInterval   1;
+
+        // Fields to be probed
+        fields          (p U);
+
+        // Optional: interpolation scheme to use (default is cell)
+        interpolationScheme cell;
+
+        probeLocations
+        (
+            (0.015 0.005 0.005)      // at inlet
+        );
+
+    }
 }
 
 
