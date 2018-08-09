@@ -39,19 +39,30 @@ mesh.setFluxRequired(p.name());
 
 // Add solver-specific interpolations
 {
-    dictionary oversetDict;
-    oversetDict.add("U", true);
-    oversetDict.add("p", true);
-    oversetDict.add("HbyA", true);
-    oversetDict.add("grad(p)", true);
+    dictionary suppressDict;
+    {
+        const wordHashSet& nonInt = Stencil::New(mesh).nonInterpolatedFields();
+        for (auto fldName : nonInt)
+        {
+            suppressDict.add(fldName, true);
+        }
+        suppressDict.add("HbyA", true);
+        suppressDict.add("grad(p)", true);
+        suppressDict.add("surfaceIntegrate(phi)", true);
+        suppressDict.add("surfaceIntegrate(phiHbyA)", true);
+        suppressDict.add("cellMask", true);
+        suppressDict.add("cellDisplacement", true);
+        suppressDict.add("interpolatedCells", true);
+        suppressDict.add("cellInterpolationWeight", true);
+    }
 
     const_cast<dictionary&>
     (
         mesh.schemesDict()
     ).add
     (
-        "oversetInterpolationRequired",
-        oversetDict,
+        "oversetInterpolationSuppressed",
+        suppressDict,
         true
     );
 }
@@ -68,3 +79,17 @@ autoPtr<incompressible::turbulenceModel> turbulence
 (
     incompressible::turbulenceModel::New(U, phi, laminarTransport)
 );
+
+surfaceScalarField phiHbyA
+(
+    IOobject
+    (
+        "phiHbyA",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    ),
+    fvc::flux(U)
+);
+

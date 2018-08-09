@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,13 +94,24 @@ int main(int argc, char *argv[])
         {
             #include "setCellMask.H"
             #include "setInterpolatedCells.H"
+
+            surfaceScalarField faceMaskOld
+            (
+                localMin<scalar>(mesh).interpolate(cellMask.oldTime())
+            );
+
+            // Zero Uf on old faceMask (H-I)
+            Uf *= faceMaskOld;
+            // Update Uf and phi on new C-I faces
+            Uf += (1-faceMaskOld)*fvc::interpolate(U);
+
+            phi = mesh.Sf() & Uf;
         }
 
-        // Calculate absolute flux from the mapped surface velocity
-        phi = mesh.Sf() & Uf;
 
         if (mesh.changing() && correctPhi)
         {
+            // Calculate absolute flux from the mapped surface velocity
             #include "correctPhi.H"
         }
 
