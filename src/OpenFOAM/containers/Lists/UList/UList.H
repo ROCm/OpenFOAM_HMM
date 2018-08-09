@@ -594,7 +594,6 @@ inline void Swap(UList<T>& a, UList<T>& b);
 
 //- Hashing for UList data, which uses Hasher for contiguous data and
 //- element-wise incrementally hashing otherwise.
-template<>
 template<class T>
 struct Hash<UList<T>>
 {

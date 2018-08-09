@@ -348,7 +348,6 @@ public:
 
 //- Hashing for List data, which uses Hasher for contiguous data and
 //- element-wise incrementally hashing otherwise.
-template<>
 template<class T>
 struct Hash<List<T>>
 {

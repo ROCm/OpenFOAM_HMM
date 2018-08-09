@@ -467,7 +467,6 @@ inline void Swap(FixedList<T,Size>& lhs, FixedList<T,Size>& rhs);
 
 //- Hashing for FixedList data, which uses Hasher for contiguous data and
 //- element-wise incrementally hashing otherwise.
-template<>
 template<class T, unsigned N>
 struct Hash<FixedList<T, N>>
 {
