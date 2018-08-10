@@ -89,11 +89,8 @@ tmp<vectorField> calcVertexNormals(const triSurface& surf)
 {
     // Weighted average of normals of faces attached to the vertex
     // Weight = fA / (mag(e0)^2 * mag(e1)^2);
-    tmp<vectorField> tpointNormals
-    (
-        new pointField(surf.nPoints(), Zero)
-    );
-    vectorField& pointNormals = tpointNormals.ref();
+    auto tpointNormals = tmp<vectorField>::New(surf.nPoints(), Zero);
+    auto& pointNormals = tpointNormals.ref();
 
     const pointField& points = surf.points();
     const labelListList& pointFaces = surf.pointFaces();
@@ -108,20 +105,20 @@ tmp<vectorField> calcVertexNormals(const triSurface& surf)
             const label faceI = pFaces[fI];
             const triFace& f = surf[faceI];
 
-            vector fN = f.normal(points);
+            vector areaNorm = f.areaNormal(points);
 
             scalar weight = calcVertexNormalWeight
             (
                 f,
                 meshPoints[pI],
-                fN,
+                areaNorm,
                 points
             );
 
-            pointNormals[pI] += weight*fN;
+            pointNormals[pI] += weight * areaNorm;
         }
 
-        pointNormals[pI] /= mag(pointNormals[pI]) + VSMALL;
+        pointNormals[pI].normalise();
     }
 
     return tpointNormals;
@@ -168,9 +165,9 @@ tmp<vectorField> calcPointNormals
 
                 // Get average edge normal
                 vector n = Zero;
-                forAll(eFaces, i)
+                for (const label facei : eFaces)
                 {
-                    n += s.faceNormals()[eFaces[i]];
+                    n += s.faceNormals()[facei];
                 }
                 n /= eFaces.size();
 

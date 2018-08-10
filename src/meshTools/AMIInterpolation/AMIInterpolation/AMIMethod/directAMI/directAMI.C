@@ -87,7 +87,7 @@ void Foam::directAMI<SourcePatch, TargetPatch>::appendToDirectSeeds
             // second attempt: match by shooting a ray into the tgt face
             if (!found)
             {
-                const vector srcN = srcF.normal(srcPoints);
+                const vector srcN = srcF.areaNormal(srcPoints);
 
                 for (const label tgtI : tgtNbr)
                 {
@@ -117,7 +117,7 @@ void Foam::directAMI<SourcePatch, TargetPatch>::appendToDirectSeeds
                 {
                     Pout<< "source face not found: id=" << srcI
                         << " centre=" << srcCf[srcI]
-                        << " normal=" << srcF.normal(srcPoints)
+                        << " normal=" << srcF.areaNormal(srcPoints)
                         << " points=" << srcF.points(srcPoints)
                         << endl;
 
@@ -128,7 +128,7 @@ void Foam::directAMI<SourcePatch, TargetPatch>::appendToDirectSeeds
 
                         Pout<< "face id: " << tgtI
                             << " centre=" << tgtF.centre(tgtPoints)
-                            << " normal=" << tgtF.normal(tgtPoints)
+                            << " normal=" << tgtF.areaNormal(tgtPoints)
                             << " points=" << tgtF.points(tgtPoints)
                             << endl;
                     }

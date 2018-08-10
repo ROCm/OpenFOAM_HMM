@@ -1832,11 +1832,11 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                         }
 
                         vector correctNormal = calcSharedPatchNormal(vc1, vc2);
-                        correctNormal /= mag(correctNormal);
+                        correctNormal.normalise();
 
                         Info<< "    cN " << correctNormal << endl;
 
-                        vector fN = f.normal(pts);
+                        vector fN = f.areaNormal(pts);
 
                         if (mag(fN) < SMALL)
                         {
@@ -1844,7 +1844,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                             continue;
                         }
 
-                        fN /= mag(fN);
+                        fN.normalise();
                         Info<< "    fN " << fN << endl;
 
                         if ((fN & correctNormal) > 0)

@@ -425,9 +425,7 @@ void Foam::faMesh::calcFaceAreaNormals() const
     vectorField& nInternal = faceAreaNormals.ref();
     forAll(localFaces, faceI)
     {
-        nInternal[faceI] =
-            localFaces[faceI].normal(localPoints)/
-            localFaces[faceI].mag(localPoints);
+        nInternal[faceI] = localFaces[faceI].unitNormal(localPoints);
     }
 
     forAll(boundary(), patchI)

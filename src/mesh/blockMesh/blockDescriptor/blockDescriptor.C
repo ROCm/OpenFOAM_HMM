@@ -59,7 +59,8 @@ void Foam::blockDescriptor::check(const Istream& is)
     forAll(faces, i)
     {
         point faceCentre(faces[i].centre(vertices_));
-        vector faceNormal(faces[i].normal(vertices_));
+        vector faceNormal(faces[i].areaNormal(vertices_));
+
         if (mag(faceNormal) > SMALL)
         {
             if (((faceCentre - blockCentre) & faceNormal) > 0)

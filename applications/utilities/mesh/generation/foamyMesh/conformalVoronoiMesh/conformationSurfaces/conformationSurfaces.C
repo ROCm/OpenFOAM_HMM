@@ -89,11 +89,9 @@ void Foam::conformationSurfaces::hasBoundedVolume
             Info<< "        Index = " << surfaces_[s] << endl;
             Info<< "        Offset = " << regionOffset_[s] << endl;
 
-            forAll(triSurf, sI)
+            for (const labelledTri& f : triSurf)
             {
-                const label patchID =
-                    triSurf[sI].region()
-                  + regionOffset_[s];
+                const label patchID = f.region() + regionOffset_[s];
 
                 // Don't include baffle surfaces in the calculation
                 if
@@ -102,15 +100,15 @@ void Foam::conformationSurfaces::hasBoundedVolume
                  != extendedFeatureEdgeMesh::BOTH
                 )
                 {
-                    sum += triSurf[sI].normal(surfPts);
+                    sum += f.areaNormal(surfPts);
                 }
                 else
                 {
-                    nBaffles++;
+                    ++nBaffles;
                 }
             }
             Info<< "        has " << nBaffles << " baffles out of "
-                << triSurf.size() << " triangles" << endl;
+                << triSurf.size() << " triangles" << nl;
 
             totalTriangles += triSurf.size();
         }

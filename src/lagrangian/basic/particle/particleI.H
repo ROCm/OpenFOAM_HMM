@@ -276,7 +276,7 @@ inline Foam::barycentricTensor Foam::particle::currentTetTransform() const
 
 inline Foam::vector Foam::particle::normal() const
 {
-    return currentTetIndices().faceTri(mesh_).normal();
+    return currentTetIndices().faceTri(mesh_).unitNormal();
 }
 
 
@@ -324,8 +324,7 @@ void Foam::particle::patchData(vector& n, vector& U) const
         Pair<vector> centre, base, vertex1, vertex2;
         movingTetGeometry(1, centre, base, vertex1, vertex2);
 
-        n = triPointRef(base[0], vertex1[0], vertex2[0]).normal();
-        n /= mag(n);
+        n = triPointRef(base[0], vertex1[0], vertex2[0]).unitNormal();
 
         // Interpolate the motion of the three face vertices to the current
         // coordinates
@@ -343,8 +342,7 @@ void Foam::particle::patchData(vector& n, vector& U) const
         vector centre, base, vertex1, vertex2;
         stationaryTetGeometry(centre, base, vertex1, vertex2);
 
-        n = triPointRef(base, vertex1, vertex2).normal();
-        n /= mag(n);
+        n = triPointRef(base, vertex1, vertex2).unitNormal();
 
         U = Zero;
     }

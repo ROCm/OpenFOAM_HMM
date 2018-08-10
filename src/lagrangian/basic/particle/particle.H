@@ -522,8 +522,7 @@ public:
             //- Return the current tet transformation tensor
             inline barycentricTensor currentTetTransform() const;
 
-            //- Return the normal of the tri on tetFacei_ for the
-            //  current tet.
+            //- The (unit) normal of the tri on tetFacei_ for the current tet.
             inline vector normal() const;
 
             //- Is the particle on a face?

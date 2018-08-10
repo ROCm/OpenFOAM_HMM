@@ -188,19 +188,17 @@ label findInternalFace(const primitiveMesh& mesh, const labelList& meshF)
 bool correctOrientation(const pointField& points, const cellShape& shape)
 {
     // Get centre of shape.
-    point cc(shape.centre(points));
+    const point cc(shape.centre(points));
 
     // Get outwards pointing faces.
     faceList faces(shape.faces());
 
-    forAll(faces, i)
+    for (const face& f : faces)
     {
-        const face& f = faces[i];
-
-        vector n(f.normal(points));
+        const vector areaNorm(f.areaNormal(points));
 
         // Check if vector from any point on face to cc points outwards
-        if (((points[f[0]] - cc) & n) < 0)
+        if (((points[f[0]] - cc) & areaNorm) < 0)
         {
             // Incorrectly oriented
             return false;

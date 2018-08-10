@@ -187,9 +187,9 @@ void Foam::blockMesh::check(const polyMesh& bm, const dictionary& dict) const
                         if
                         (
                             (
-                                patchFace.normal(points)
-                              & faces[cellFaces[cellFacei]].normal(points)
-                            ) < 0.0
+                                patchFace.areaNormal(points)
+                              & faces[cellFaces[cellFacei]].areaNormal(points)
+                            ) < 0
                         )
                         {
                             Info<< tab << tab

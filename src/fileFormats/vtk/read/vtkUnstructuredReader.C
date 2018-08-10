@@ -979,10 +979,10 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
                 );
 
                 const point bottomCc(bottom.centre());
-                const vector bottomNormal(bottom.normal());
+                const vector bottomNormal(bottom.areaNormal());
                 const point topCc(top.centre());
 
-                if (((topCc-bottomCc)&bottomNormal) < 0)
+                if (((topCc - bottomCc) & bottomNormal) < 0)
                 {
                     // Flip top and bottom
                     Swap(shape[0], shape[3]);

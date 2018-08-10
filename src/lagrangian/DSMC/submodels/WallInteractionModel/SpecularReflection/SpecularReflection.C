@@ -57,8 +57,7 @@ void Foam::SpecularReflection<CloudType>::correct
 {
     vector& U = p.U();
 
-    vector nw = p.normal();
-    nw /= mag(nw);
+    const vector nw = p.normal();
 
     scalar U_dot_nw = U & nw;
 

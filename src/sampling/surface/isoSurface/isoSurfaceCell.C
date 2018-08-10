@@ -295,8 +295,8 @@ Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
 
         if (shared[0] != -1)
         {
-            const vector n0 = tri0.normal(localPoints);
-            const vector n1 = tri1.normal(localPoints);
+            const vector n0 = tri0.areaNormal(localPoints);
+            const vector n1 = tri1.areaNormal(localPoints);
 
             // Merge any zero-sized triangles,
             // or if they point in the same direction.

@@ -1023,13 +1023,11 @@ bool Foam::primitiveMeshGeometry::checkFaceTwist
 
     label nWarped = 0;
 
-    forAll(checkFaces, i)
+    for (const label facei : checkFaces)
     {
-        label facei = checkFaces[i];
-
         const face& f = fcs[facei];
 
-        scalar magArea = mag(faceAreas[facei]);
+        const scalar magArea = mag(faceAreas[facei]);
 
         if (f.size() > 3 && magArea > VSMALL)
         {
@@ -1039,21 +1037,21 @@ bool Foam::primitiveMeshGeometry::checkFaceTwist
 
             forAll(f, fpI)
             {
-                vector triArea
+                const vector triArea
                 (
                     triPointRef
                     (
                         p[f[fpI]],
                         p[f.nextLabel(fpI)],
                         fc
-                    ).normal()
+                    ).areaNormal()
                 );
 
-                scalar magTri = mag(triArea);
+                const scalar magTri = mag(triArea);
 
                 if (magTri > VSMALL && ((nf & triArea/magTri) < minTwist))
                 {
-                    nWarped++;
+                    ++nWarped;
 
                     if (setPtr)
                     {

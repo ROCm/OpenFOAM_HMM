@@ -1006,8 +1006,9 @@ void Foam::polyDualMesh::calcDual
         {
             // Check orientation.
             const face& f = dynDualFaces.last();
-            vector n = f.normal(dualPoints);
-            if (((mesh.points()[owner] - dualPoints[f[0]]) & n) > 0)
+            const vector areaNorm = f.areaNormal(dualPoints);
+
+            if (((mesh.points()[owner] - dualPoints[f[0]]) & areaNorm) > 0)
             {
                 WarningInFunction
                     << " on boundary edge:" << edgeI
@@ -1121,8 +1122,9 @@ void Foam::polyDualMesh::calcDual
             {
                 // Check orientation.
                 const face& f = dynDualFaces.last();
-                vector n = f.normal(dualPoints);
-                if (((mesh.points()[owner] - dualPoints[f[0]]) & n) > 0)
+                const vector areaNorm = f.areaNormal(dualPoints);
+
+                if (((mesh.points()[owner] - dualPoints[f[0]]) & areaNorm) > 0)
                 {
                     WarningInFunction
                         << " on internal edge:" << edgeI

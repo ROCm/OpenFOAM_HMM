@@ -1021,7 +1021,7 @@ Foam::faceList Foam::intersectedSurface::splitFace
     // See if normal needs flipping.
     faces.shrink();
 
-    vector n = faces[0].normal(eSurf.points());
+    const vector n = faces[0].areaNormal(eSurf.points());
 
     if ((n & surf.faceNormals()[facei]) < 0)
     {

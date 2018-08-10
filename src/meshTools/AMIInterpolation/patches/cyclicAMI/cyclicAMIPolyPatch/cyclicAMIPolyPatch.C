@@ -197,8 +197,8 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
                 reduce(n0, maxMagSqrOp<point>());
                 reduce(n1, maxMagSqrOp<point>());
 
-                n0 /= mag(n0) + VSMALL;
-                n1 /= mag(n1) + VSMALL;
+                n0.normalise();
+                n1.normalise();
 
                 // Extended tensor from two local coordinate systems calculated
                 // using normal and rotation axis
@@ -367,14 +367,14 @@ void Foam::cyclicAMIPolyPatch::calcTransforms()
     vectorField half0Areas(half0.size());
     forAll(half0, facei)
     {
-        half0Areas[facei] = half0[facei].normal(half0.points());
+        half0Areas[facei] = half0[facei].areaNormal(half0.points());
     }
 
     const cyclicAMIPolyPatch& half1 = neighbPatch();
     vectorField half1Areas(half1.size());
     forAll(half1, facei)
     {
-        half1Areas[facei] = half1[facei].normal(half1.points());
+        half1Areas[facei] = half1[facei].areaNormal(half1.points());
     }
 
     calcTransforms

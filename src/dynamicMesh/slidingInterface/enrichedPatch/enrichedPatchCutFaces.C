@@ -150,8 +150,7 @@ void Foam::enrichedPatch::calcCutFaces() const
         }
 
         // Grab face normal
-        vector normal = curLocalFace.normal(lp);
-        normal /= mag(normal);
+        const vector normal = curLocalFace.unitNormal(lp);
 
         while (edgeSeeds.size())
         {
