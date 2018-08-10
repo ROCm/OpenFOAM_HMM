@@ -89,8 +89,8 @@ Foam::searchableExtrudedCircle::searchableExtrudedCircle
     vector halfSpan(0.5*bounds().span());
     point ctr(bounds().midpoint());
 
-    bounds().min() = ctr - mag(halfSpan)*vector(1, 1, 1);
-    bounds().max() = ctr + mag(halfSpan)*vector(1, 1, 1);
+    bounds().min() = ctr - mag(halfSpan) * vector::one;
+    bounds().max() = ctr + mag(halfSpan) * vector::one;
 
     // Calculate bb of all points
     treeBoundBox bb(bounds());
@@ -182,8 +182,9 @@ void Foam::searchableExtrudedCircle::findNearest
 
         if (info[i].hit())
         {
-            vector d(samples[i]-info[i].hitPoint());
-            info[i].setPoint(info[i].hitPoint() + d/mag(d)*radius_);
+            const vector d = normalised(samples[i] - info[i].hitPoint());
+
+            info[i].setPoint(info[i].hitPoint() + d*radius_);
         }
     }
 }
@@ -360,7 +361,8 @@ void Foam::searchableExtrudedCircle::findParametricNearest
     {
         radialStart = start-curvePoints[0];
         radialStart -= (radialStart&axialVecs[0])*axialVecs[0];
-        radialStart /= mag(radialStart);
+        radialStart.normalise();
+
         qStart = quaternion(radialStart, 0.0);
 
         info[0] = pointIndexHit(true, start, 0);
@@ -370,11 +372,12 @@ void Foam::searchableExtrudedCircle::findParametricNearest
     {
         vector radialEnd(end-curvePoints.last());
         radialEnd -= (radialEnd&axialVecs.last())*axialVecs.last();
-        radialEnd /= mag(radialEnd);
+        radialEnd.normalise();
 
         vector projectedEnd = radialEnd;
         projectedEnd -= (projectedEnd&axialVecs[0])*axialVecs[0];
-        projectedEnd /= mag(projectedEnd);
+        projectedEnd.normalise();
+
         qProjectedEnd = quaternion(projectedEnd, 0.0);
 
         info.last() = pointIndexHit(true, end, 0);
@@ -385,8 +388,8 @@ void Foam::searchableExtrudedCircle::findParametricNearest
         quaternion q(slerp(qStart, qProjectedEnd, lambdas[i]));
         vector radialDir(q.transform(radialStart));
 
-        radialDir -= (radialDir&axialVecs[i])*axialVecs.last();
-        radialDir /= mag(radialDir);
+        radialDir -= (radialDir & axialVecs[i]) * axialVecs.last();
+        radialDir.normalise();
 
         info[i] = pointIndexHit(true, curvePoints[i]+radius_*radialDir, 0);
     }
@@ -434,8 +437,8 @@ void Foam::searchableExtrudedCircle::getNormal
             // Subtract axial direction
             const vector axialVec = edges[curvePt.index()].unitVec(points);
 
-            normal[i] -= (normal[i]&axialVec)*axialVec;
-            normal[i] /= mag(normal[i]);
+            normal[i] -= (normal[i] & axialVec) * axialVec;
+            normal[i].normalise();
         }
     }
 }

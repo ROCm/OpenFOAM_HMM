@@ -1281,10 +1281,11 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
 
         // Transform points
         const vector& origin = points[curPoint];
-        vector axis(result[curPoint]/mag(result[curPoint]));
+        const vector axis = normalised(result[curPoint]);
         vector dir(allPoints[0] - points[curPoint]);
         dir -= axis*(axis&dir);
-        dir /= mag(dir);
+        dir.normalise();
+
         coordinateSystem cs("cs", origin, axis, dir);
 
         forAll(allPoints, pI)
@@ -1563,10 +1564,11 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
 
                 // Transform points
                 const vector& origin = points[curPoint];
-                vector axis(result[curPoint]/mag(result[curPoint]));
+                const vector axis = normalised(result[curPoint]);
                 vector dir(allPoints[0] - points[curPoint]);
                 dir -= axis*(axis&dir);
-                dir /= mag(dir);
+                dir.normalise();
+
                 const coordinateSystem cs("cs", origin, axis, dir);
 
                 scalarField W(allPoints.size(), 1.0);
@@ -1734,10 +1736,11 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
 
                 // Transform points
                 const vector& origin = points[curPoint];
-                vector axis(result[curPoint]/mag(result[curPoint]));
+                const vector axis = normalised(result[curPoint]);
                 vector dir(allPoints[0] - points[curPoint]);
                 dir -= axis*(axis&dir);
-                dir /= mag(dir);
+                dir.normalise();
+
                 coordinateSystem cs("cs", origin, axis, dir);
 
                 scalarField W(allPoints.size(), 1.0);

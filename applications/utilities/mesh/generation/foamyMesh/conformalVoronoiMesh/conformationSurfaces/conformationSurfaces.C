@@ -738,8 +738,11 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInOutSide
 
                 surface.findNearest(sample, nearestDistSqr, info);
 
-                vector hitDir = info[0].rawPoint() - samplePts[i];
-                hitDir /= mag(hitDir) + SMALL;
+                const vector hitDir =
+                    normalised
+                    (
+                        info[0].rawPoint() - samplePts[i]
+                    );
 
                 pointIndexHit surfHit;
                 label hitSurface;

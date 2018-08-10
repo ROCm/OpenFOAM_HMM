@@ -104,8 +104,7 @@ Foam::ConeInjection<CloudType>::ConeInjection
     forAll(positionAxis_, i)
     {
         vector& axis = positionAxis_[i].second();
-
-        axis /= mag(axis);
+        axis.normalise();
 
         vector tangent = Zero;
         scalar magTangent = 0.0;
@@ -277,7 +276,7 @@ void Foam::ConeInjection<CloudType>::setProperties
     vector normal = alpha*(tanVec1_[i]*cos(beta) + tanVec2_[i]*sin(beta));
     vector dirVec = dcorr*positionAxis_[i].second();
     dirVec += normal;
-    dirVec /= mag(dirVec);
+    dirVec.normalise();
 
     parcel.U() = Umag_.value(t)*dirVec;
 

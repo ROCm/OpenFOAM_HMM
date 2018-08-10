@@ -308,10 +308,17 @@ void Foam::oldCyclicPolyPatch::getCentresAndAnchors
             label face0 = getConsistentRotationFace(half0Ctrs);
             label face1 = getConsistentRotationFace(half1Ctrs);
 
-            vector n0 = ((half0Ctrs[face0] - rotationCentre_) ^ rotationAxis_);
-            vector n1 = ((half1Ctrs[face1] - rotationCentre_) ^ -rotationAxis_);
-            n0 /= mag(n0) + VSMALL;
-            n1 /= mag(n1) + VSMALL;
+            const vector n0 =
+                normalised
+                (
+                    (half0Ctrs[face0] - rotationCentre_) ^ rotationAxis_
+                );
+
+            const vector n1 =
+                normalised
+                (
+                    (half1Ctrs[face1] - rotationCentre_) ^ -rotationAxis_
+                );
 
             if (debug)
             {

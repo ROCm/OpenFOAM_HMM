@@ -45,11 +45,9 @@ addToRunTimeSelectionTable(extrudeModel, linearDirection, dictionary);
 linearDirection::linearDirection(const dictionary& dict)
 :
     extrudeModel(typeName, dict),
-    direction_(coeffDict_.lookup("direction")),
-    thickness_(readScalar(coeffDict_.lookup("thickness")))
+    direction_(coeffDict_.get<vector>("direction").normalise()),
+    thickness_(coeffDict_.get<scalar>("thickness"))
 {
-    direction_ /= mag(direction_);
-
     if (thickness_ <= 0)
     {
         FatalErrorInFunction

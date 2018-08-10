@@ -336,9 +336,7 @@ void Foam::searchableSphere::getNormal
     {
         if (info[i].hit())
         {
-            normal[i] = info[i].hitPoint() - centre_;
-
-            normal[i] /= mag(normal[i])+VSMALL;
+            normal[i] = normalised(info[i].hitPoint() - centre_);
         }
         else
         {

@@ -165,8 +165,7 @@ void Foam::radiation::laserDTRM::initialise()
 
     const scalar t = mesh_.time().value();
     const vector lPosition = focalLaserPosition_->value(t);
-    vector lDir = laserDirection_->value(t);
-    lDir /= mag(lDir);
+    const vector lDir = normalised(laserDirection_->value(t));
 
     if (debug)
     {
@@ -175,7 +174,7 @@ void Foam::radiation::laserDTRM::initialise()
     }
 
     // Find a vector on the area plane. Normal to laser direction
-    vector rArea = vector::zero;
+    vector rArea = Zero;
     scalar magr = 0.0;
 
     {
@@ -188,7 +187,7 @@ void Foam::radiation::laserDTRM::initialise()
             magr = mag(rArea);
         }
     }
-    rArea /= mag(rArea);
+    rArea.normalise();
 
     scalar dr =  focalLaserRadius_/ndr_;
     scalar dTheta =  mathematical::twoPi/ndTheta_;

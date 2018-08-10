@@ -1137,7 +1137,7 @@ void Foam::conformalVoronoiMesh::move()
 
                         alignmentDirs[aA] = a + sign(dotProduct)*b;
 
-                        alignmentDirs[aA] /= mag(alignmentDirs[aA]);
+                        alignmentDirs[aA].normalise();
                     }
                 }
             }

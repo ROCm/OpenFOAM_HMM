@@ -428,7 +428,7 @@ void Foam::searchableSurfaceControl::initialVertices
 
                 if (mag(normals[0]) < SMALL)
                 {
-                    normals[0] = vector(1, 1, 1);
+                    normals[0] = vector::one;
                 }
 
                 pointAlignment.reset(new triad(normals[0]));

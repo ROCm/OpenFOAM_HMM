@@ -220,8 +220,7 @@ void Foam::conformalVoronoiMesh::createEdgePointGroupByCirculating
 //            << endl;
 
         // Calculate master point
-        vector masterPtVec(normalDir + nextNormalDir);
-        masterPtVec /= mag(masterPtVec) + SMALL;
+        const vector masterPtVec = normalised(normalDir + nextNormalDir);
 
         if
         (

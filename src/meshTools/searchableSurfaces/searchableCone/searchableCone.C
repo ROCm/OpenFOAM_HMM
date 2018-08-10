@@ -107,15 +107,8 @@ void Foam::searchableCone::findNearestAndNormal
     // Remove the parallel component and normalise
     v -= parallel*unitDir_;
 
-    scalar magV = mag(v);
-    if (magV < ROOTVSMALL)
-    {
-       v = Zero;
-    }
-    else
-    {
-       v /= magV;
-    }
+    const scalar magV = mag(v);
+    v.normalise();
 
     // Nearest and normal on disk at point1
     point disk1Point(point1_ + min(max(magV, innerRadius1_), radius1_)*v);
@@ -143,31 +136,30 @@ void Foam::searchableCone::findNearestAndNormal
         p1 /= mag(p1);
 
         // Find vector along the two end of cone
-        vector b(projPt2 - projPt1);
-        scalar magS = mag(b);
-        b /= magS;
+        const vector b = normalised(projPt2 - projPt1);
 
         // Find the vector along sample pt and pt at one end of cone
-        vector a(sample - projPt1);
+        vector a = (sample - projPt1);
 
         if (mag(a) <= ROOTVSMALL)
         {
             // Exception: sample on disk1. Redo with projPt2.
-            vector a(sample - projPt2);
+            a = (sample - projPt2);
+
             // Find normal unitvector
-            nearCone = (a & b)*b+projPt2;
+            nearCone = (a & b)*b + projPt2;
+
             vector b1 = (p1 & b)*b;
-            normalCone = p1 - b1;
-            normalCone /= mag(normalCone);
+            normalCone = normalised(p1 - b1);
         }
         else
         {
-            // Find neartest point on cone surface
-            nearCone = (a & b)*b+projPt1;
+            // Find nearest point on cone surface
+            nearCone = (a & b)*b + projPt1;
+
             // Find projection along surface of cone
             vector b1 = (p1 & b)*b;
-            normalCone = p1 - b1;
-            normalCone /= mag(normalCone);
+            normalCone = normalised(p1 - b1);
         }
 
         if (innerRadius1_ > 0 || innerRadius2_ > 0)
@@ -176,13 +168,10 @@ void Foam::searchableCone::findNearestAndNormal
             point iCprojPt1 = point1_+ innerRadius1_*v;
             point iCprojPt2 = point2_+ innerRadius2_*v;
 
-            vector iCp1 = (iCprojPt1 - point1_);
-            iCp1 /= mag(iCp1);
+            const vector iCp1 = normalised(iCprojPt1 - point1_);
 
             // Find vector along the two end of cone
-            vector iCb(iCprojPt2 - iCprojPt1);
-            magS = mag(iCb);
-            iCb /= magS;
+            const vector iCb = normalised(iCprojPt2 - iCprojPt1);
 
 
             // Find the vector along sample pt and pt at one end of conde
@@ -190,22 +179,22 @@ void Foam::searchableCone::findNearestAndNormal
 
             if (mag(iCa) <= ROOTVSMALL)
             {
-                vector iCa(sample - iCprojPt2);
+                iCa = (sample - iCprojPt2);
 
                 // Find normal unitvector
                 iCnearCone = (iCa & iCb)*iCb+iCprojPt2;
+
                 vector b1 = (iCp1 & iCb)*iCb;
-                iCnormalCone = iCp1 - b1;
-                iCnormalCone /= mag(iCnormalCone);
+                iCnormalCone = normalised(iCp1 - b1);
             }
             else
             {
                 // Find nearest point on cone surface
                 iCnearCone = (iCa & iCb)*iCb+iCprojPt1;
+
                 // Find projection along surface of cone
                 vector b1 = (iCp1 & iCb)*iCb;
-                iCnormalCone = iCp1 - b1;
-                iCnormalCone /= mag(iCnormalCone);
+                iCnormalCone = normalised(iCp1 - b1);
             }
         }
     }
@@ -234,8 +223,9 @@ void Foam::searchableCone::findNearestAndNormal
             scalar para = (v1 & unitDir_);
             // Remove the parallel component and normalise
             v1 -= para*unitDir_;
-            scalar magV1 = mag(v1);
+            const scalar magV1 = mag(v1);
             v1 = v1/magV1;
+
             if (para < 0.0 && magV1 >= radius1_)
             {
                 // Near point 1. Set point to intersection of disk and cone.
@@ -281,7 +271,8 @@ void Foam::searchableCone::findNearestAndNormal
             scalar para = (v1 & unitDir_);
             // Remove the parallel component and normalise
             v1 -= para*unitDir_;
-            scalar magV1 = mag(v1);
+
+            const scalar magV1 = mag(v1);
             v1 = v1/magV1;
 
             if (para < 0.0 && magV1 >= innerRadius1_)
@@ -382,7 +373,7 @@ void Foam::searchableCone::findLineAll
 
     {
         // Find dot product: mag(s)>VSMALL suggest that it is greater
-        scalar s = (V&unitDir_);
+        scalar s = (V & unitDir_);
         if (mag(s) > VSMALL)
         {
             tPoint1 = -s1/s;
@@ -471,8 +462,7 @@ void Foam::searchableCone::findLineAll
     else
     {
         vector va = cone.unitDir_;
-        vector v1(end-start);
-        v1 = v1/mag(v1);
+        vector v1 = normalised(end-start);
         scalar p  = (va&v1);
         vector a1 = (v1-p*va);
 

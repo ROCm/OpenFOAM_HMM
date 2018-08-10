@@ -286,7 +286,7 @@ calcPointNormals() const
             curNormal += faceUnitNormals[facei];
         }
 
-        curNormal /= mag(curNormal) + VSMALL;
+        curNormal.normalise();
     }
 
     if (debug)

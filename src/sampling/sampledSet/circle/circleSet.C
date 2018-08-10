@@ -94,8 +94,7 @@ void Foam::circleSet::calcSamples
     label nPoint = 1;
     while (theta < 360)
     {
-        axis1 = axis1*cosAlpha + (axis1^circleAxis_)*sinAlpha;
-        axis1 /= mag(axis1);
+        axis1 = normalised(axis1*cosAlpha + (axis1^circleAxis_)*sinAlpha);
         point pt = origin_ + radius*axis1;
 
         label celli = searchEngine().findCell(pt);

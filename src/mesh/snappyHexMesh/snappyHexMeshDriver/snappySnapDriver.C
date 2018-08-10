@@ -1101,9 +1101,7 @@ void Foam::snappySnapDriver::detectNearSurfaces
     //// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //
     //{
-    //    const scalar cos45 = Foam::cos(degToRad(45.0));
-    //    vector n(cos45, cos45, cos45);
-    //    n /= mag(n);
+    //    const vector n = normalised(vector::one);
     //
     //    pointField start(14*pp.nPoints());
     //    pointField end(start.size());

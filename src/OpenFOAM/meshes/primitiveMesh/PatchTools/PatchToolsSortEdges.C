@@ -76,8 +76,11 @@ Foam::PatchTools::sortedEdgeFaces
             {
                 if (f0[fpI] != e.start())
                 {
-                    vector faceEdgeDir = localPoints[f0[fpI]] - edgePt;
-                    faceEdgeDir /= mag(faceEdgeDir) + VSMALL;
+                    const vector faceEdgeDir =
+                        normalised
+                        (
+                            localPoints[f0[fpI]] - edgePt
+                        );
 
                     const scalar angle = e2 & faceEdgeDir;
 
@@ -91,11 +94,10 @@ Foam::PatchTools::sortedEdgeFaces
 
             // Get vector normal both to e2 and to edge from opposite vertex
             // to edge (will be x-axis of our coordinate system)
-            vector e0 = e2 ^ maxAngleEdgeDir;
-            e0 /= mag(e0) + VSMALL;
+            const vector e0 = normalised(e2 ^ maxAngleEdgeDir);
 
             // Get y-axis of coordinate system
-            vector e1 = e2 ^ e0;
+            const vector e1 = e2 ^ e0;
 
             SortableList<scalar> faceAngles(faceNbs.size());
 
@@ -115,8 +117,11 @@ Foam::PatchTools::sortedEdgeFaces
                 {
                     if (f[fpI] != e.start())
                     {
-                        vector faceEdgeDir = localPoints[f[fpI]] - edgePt;
-                        faceEdgeDir /= mag(faceEdgeDir) + VSMALL;
+                        const vector faceEdgeDir =
+                            normalised
+                            (
+                                localPoints[f[fpI]] - edgePt
+                            );
 
                         const scalar angle = e2 & faceEdgeDir;
 
@@ -128,8 +133,7 @@ Foam::PatchTools::sortedEdgeFaces
                     }
                 }
 
-                vector vec = e2 ^ maxAngleEdgeDir;
-                vec /= mag(vec) + VSMALL;
+                const vector vec = normalised(e2 ^ maxAngleEdgeDir);
 
                 faceAngles[nbI] = pseudoAngle
                 (

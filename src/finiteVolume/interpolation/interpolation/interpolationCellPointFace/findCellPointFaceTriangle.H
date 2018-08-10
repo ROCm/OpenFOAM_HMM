@@ -57,8 +57,7 @@ bool interpolationCellPointFace<Type>::findTriangle
         // calculate edge normal (pointing inwards)
         for (label i=0; i<3; i++)
         {
-            normal[i] = triangleFaceNormal ^ edge[i];
-            normal[i] /= mag(normal[i]) + VSMALL;
+            normal[i] = normalised(triangleFaceNormal ^ edge[i]);
         }
 
         // check if position is inside triangle

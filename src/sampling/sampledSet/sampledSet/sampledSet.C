@@ -172,9 +172,7 @@ Foam::scalar Foam::sampledSet::calcSign
 
     vec /= magVec;
 
-    vector n = mesh().faceAreas()[facei];
-
-    n /= mag(n) + VSMALL;
+    const vector n = normalised(mesh().faceAreas()[facei]);
 
     return n & vec;
 }

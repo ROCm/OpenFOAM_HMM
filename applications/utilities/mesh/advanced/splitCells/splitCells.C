@@ -135,8 +135,11 @@ bool largerAngle
     // Get cos between faceCentre and normal vector to determine in
     // which quadrant angle is. (Is correct for unwarped faces only!)
     // Correct for non-outwards pointing normal.
-    vector c1c0(mesh.faceCentres()[f1] - mesh.faceCentres()[f0]);
-    c1c0 /= mag(c1c0) + VSMALL;
+    const vector c1c0 =
+        normalised
+        (
+            mesh.faceCentres()[f1] - mesh.faceCentres()[f0]
+        );
 
     scalar fcCosAngle = n0 & c1c0;
 
@@ -327,8 +330,7 @@ bool splitCell
     // halfway on fully regular meshes (since we want cuts
     // to be snapped to vertices)
     planeN += 0.01*halfNorm;
-
-    planeN /= mag(planeN);
+    planeN.normalise();
 
     // Define plane through edge
     plane cutPlane(mesh.points()[e.start()], planeN);
@@ -409,11 +411,8 @@ void collectCuts
             label f0, f1;
             meshTools::getEdgeFaces(mesh, celli, edgeI, f0, f1);
 
-            vector n0 = faceAreas[f0];
-            n0 /= mag(n0);
-
-            vector n1 = faceAreas[f1];
-            n1 /= mag(n1);
+            const vector n0 = normalised(faceAreas[f0]);
+            const vector n1 = normalised(faceAreas[f1]);
 
             if
             (

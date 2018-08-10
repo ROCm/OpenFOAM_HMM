@@ -579,8 +579,7 @@ bool Foam::primitiveMeshGeometry::checkFaceSkewness
             // Boundary faces: consider them to have only skewness error.
             // (i.e. treat as if mirror cell on other side)
 
-            vector faceNormal = faceAreas[facei];
-            faceNormal /= mag(faceNormal) + VSMALL;
+            const vector faceNormal = normalised(faceAreas[facei]);
 
             vector dOwn = faceCentres[facei] - cellCentres[own[facei]];
 
@@ -767,8 +766,7 @@ bool Foam::primitiveMeshGeometry::checkFaceAngles
 
         const face& f = fcs[facei];
 
-        vector faceNormal = faceAreas[facei];
-        faceNormal /= mag(faceNormal) + VSMALL;
+        const vector faceNormal = normalised(faceAreas[facei]);
 
         // Get edge from f[0] to f[size-1];
         vector ePrev(p[f.first()] - p[f.last()]);

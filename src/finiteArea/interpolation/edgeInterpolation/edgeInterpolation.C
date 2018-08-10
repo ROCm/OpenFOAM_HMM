@@ -404,19 +404,16 @@ void Foam::edgeInterpolation::makeDeltaCoeffs() const
     forAll(owner, edgeI)
     {
         // Edge normal - area normal
-        vector edgeNormal = lengths[edgeI]^edges[edgeI].vec(points);
-        edgeNormal /= mag(edgeNormal);
-
+        vector edgeNormal =
+            normalised(lengths[edgeI] ^ edges[edgeI].vec(points));
 
         // Unit delta vector
         vector unitDelta =
             faceCentres[neighbour[edgeI]]
           - faceCentres[owner[edgeI]];
 
-        unitDelta -=
-            edgeNormal*(edgeNormal&unitDelta);
-
-        unitDelta /= mag(unitDelta);
+        unitDelta -= edgeNormal*(edgeNormal & unitDelta);
+        unitDelta.normalise();
 
 
         // Calc PN arc length
@@ -447,7 +444,7 @@ void Foam::edgeInterpolation::makeDeltaCoeffs() const
 
 
         // Edge normal - area tangent
-        edgeNormal = lengths[edgeI]/mag(lengths[edgeI]);
+        edgeNormal = normalised(lengths[edgeI]);
 
         // Delta coefficient as per definition
 //         dc[edgeI] = 1.0/(lPN*(unitDelta & edgeNormal));
@@ -496,7 +493,6 @@ void Foam::edgeInterpolation::makeCorrectionVectors() const
     const labelUList& neighbour = mesh().neighbour();
 
     const edgeVectorField& lengths = mesh().Le();
-    const edgeScalarField& magLengths = mesh().magLe();
 
     const edgeList& edges = mesh().edges();
     const pointField& points = mesh().points();
@@ -508,8 +504,8 @@ void Foam::edgeInterpolation::makeCorrectionVectors() const
     forAll(owner, edgeI)
     {
         // Edge normal - area normal
-        vector edgeNormal = lengths[edgeI] ^ edges[edgeI].vec(points);
-        edgeNormal /= mag(edgeNormal);
+        vector edgeNormal =
+            normalised(lengths[edgeI] ^ edges[edgeI].vec(points));
 
         // Unit delta vector
         vector unitDelta =
@@ -517,11 +513,10 @@ void Foam::edgeInterpolation::makeCorrectionVectors() const
           - faceCentres[owner[edgeI]];
 
         unitDelta -= edgeNormal*(edgeNormal & unitDelta);
-
-        unitDelta /= mag(unitDelta);
+        unitDelta.normalise();
 
         // Edge normal - area tangent
-        edgeNormal = lengths[edgeI]/magLengths[edgeI];
+        edgeNormal = normalised(lengths[edgeI]);
 
         // Delta coeffs
         deltaCoeffs[edgeI] = 1.0/(unitDelta & edgeNormal);

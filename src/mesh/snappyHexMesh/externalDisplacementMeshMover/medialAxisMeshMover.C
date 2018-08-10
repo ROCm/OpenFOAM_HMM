@@ -1441,12 +1441,14 @@ void Foam::medialAxisMeshMover::calculateDisplacement
 
             //- Option 2: Look at component in the direction
             //  of nearest (medial axis or static) point.
-            vector n =
-                patchDisp[patchPointI]
-              / (mag(patchDisp[patchPointI]) + VSMALL);
-            vector mVec = medialVec_[pointI]-mesh().points()[pointI];
-            mVec /= mag(mVec)+VSMALL;
-            thicknessRatio *= (n&mVec);
+            const vector n = normalised(patchDisp[patchPointI]);
+            const vector mVec =
+                normalised
+                (
+                    medialVec_[pointI] - mesh().points()[pointI]
+                );
+
+            thicknessRatio *= (n & mVec);
 
             if (thicknessRatio > maxThicknessToMedialRatio)
             {

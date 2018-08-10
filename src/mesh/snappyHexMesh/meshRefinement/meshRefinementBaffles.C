@@ -1649,7 +1649,7 @@ void Foam::meshRefinement::findCellZoneInsideWalk
         (
             mesh_,
             cellRegion,
-            mergeDistance_*vector(1,1,1),
+            mergeDistance_ * vector::one,
             insidePoint
         );
 
@@ -1916,7 +1916,7 @@ void Foam::meshRefinement::findCellZoneTopo
         (
             mesh_,
             cellRegion,
-            mergeDistance_*vector(1,1,1),
+            mergeDistance_ * vector::one,
             keepPoint
         );
 
@@ -3875,7 +3875,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
     findRegions
     (
         mesh_,
-        mergeDistance_*vector(1,1,1),   // perturbVec
+        mergeDistance_ * vector::one,   // perturbVec
         locationsInMesh,
         locationsOutsideMesh,
         cellRegion.nRegions(),

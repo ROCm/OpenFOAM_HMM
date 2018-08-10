@@ -243,8 +243,7 @@ Foam::Map<Foam::label> Foam::meshRefinement::findEdgeConnectedProblemCells
     {
         label facei = candidateFaces[i];
 
-        vector n = mesh_.faceAreas()[facei];
-        n /= mag(n);
+        const vector n = normalised(mesh_.faceAreas()[facei]);
 
         label region = surfaces_.globalRegion
         (

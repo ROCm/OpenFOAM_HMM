@@ -267,12 +267,11 @@ void Foam::isoCutCell::calcIsoFacePointsFromEdges()
 
     // Defining local coordinates with zhat along isoface normal and xhat from
     // isoface centre to first point in isoFaceEdges_
-    const vector zhat = isoFaceArea_/mag(isoFaceArea_);
+    const vector zhat = normalised(isoFaceArea_);
     vector xhat = isoFaceEdges_[0][0] - isoFaceCentre_;
     xhat = (xhat - (xhat & zhat)*zhat);
-    xhat /= mag(xhat);
-    vector yhat = zhat^xhat;
-    yhat /= mag(yhat);
+    xhat.normalise();
+    vector yhat = normalised(zhat ^ xhat);
 
     DebugPout << "Calculated local coordinates" << endl;
 

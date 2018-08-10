@@ -800,7 +800,7 @@ Foam::vector Foam::meshTools::edgeToCutDir
         edgeI = meshTools::walkFace(mesh, facei, edgeI, vertI, 2);
     }
 
-    avgVec /= mag(avgVec) + VSMALL;
+    avgVec.normalise();
 
     return avgVec;
 }

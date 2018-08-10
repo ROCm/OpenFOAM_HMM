@@ -123,7 +123,7 @@ void Foam::CV2D::insertFeaturePoints()
                 vector2DField fpn = toPoint2D(feMesh.edgeNormals(edgeI));
 
                 vector2D cornerNormal = sum(fpn);
-                cornerNormal /= mag(cornerNormal);
+                cornerNormal.normalise();
 
                 if (debug)
                 {

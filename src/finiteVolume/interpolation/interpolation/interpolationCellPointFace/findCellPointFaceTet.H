@@ -81,10 +81,11 @@ bool interpolationCellPointFace<Type>::findTet
             referencePoint = tetPoints[p1];
 
             faceNormal =
-                (tetPoints[p3] - tetPoints[p1])
-              ^ (tetPoints[p2] - tetPoints[p1]);
-
-            faceNormal /= mag(faceNormal);
+                normalised
+                (
+                    (tetPoints[p3] - tetPoints[p1])
+                  ^ (tetPoints[p2] - tetPoints[p1])
+                );
 
             // correct normal to point into the tet
             vector v0 = tetPoints[n] - referencePoint;

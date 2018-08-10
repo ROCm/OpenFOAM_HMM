@@ -59,14 +59,11 @@ Foam::SRF::SRFModel::SRFModel
     ),
     Urel_(Urel),
     mesh_(Urel_.mesh()),
-    origin_("origin", dimLength, lookup("origin")),
-    axis_(lookup("axis")),
+    origin_("origin", dimLength, get<vector>("origin")),
+    axis_(normalised(get<vector>("axis"))),
     SRFModelCoeffs_(optionalSubDict(type + "Coeffs")),
     omega_(dimensionedVector("omega", dimless/dimTime, Zero))
-{
-    // Normalise the axis
-    axis_ /= mag(axis_);
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -82,21 +79,19 @@ bool Foam::SRF::SRFModel::read()
     if (regIOobject::read())
     {
         // Re-read origin
-        lookup("origin") >> origin_;
+        readEntry("origin", origin_);
 
         // Re-read axis
-        lookup("axis") >> axis_;
-        axis_ /= mag(axis_);
+        readEntry("axis", axis_);
+        axis_.normalise();
 
         // Re-read sub-model coeffs
         SRFModelCoeffs_ = optionalSubDict(type() + "Coeffs");
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

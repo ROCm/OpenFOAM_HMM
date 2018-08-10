@@ -94,7 +94,7 @@ void Foam::polyMesh::calcDirections() const
     {
         reduce(emptyDirVec, sumOp<vector>());
 
-        emptyDirVec /= mag(emptyDirVec);
+        emptyDirVec.normalise();
 
         for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
         {
@@ -118,7 +118,7 @@ void Foam::polyMesh::calcDirections() const
     {
         reduce(wedgeDirVec, sumOp<vector>());
 
-        wedgeDirVec /= mag(wedgeDirVec);
+        wedgeDirVec.normalise();
 
         for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
         {

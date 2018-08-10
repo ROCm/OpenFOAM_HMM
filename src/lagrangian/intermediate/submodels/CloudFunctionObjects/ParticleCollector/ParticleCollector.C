@@ -167,7 +167,7 @@ void Foam::ParticleCollector<CloudType>::initConcentricCircles()
     {
         refDir = this->coeffDict().lookup("refDir");
         refDir -= normal_[0]*(normal_[0] & refDir);
-        refDir /= mag(refDir);
+        refDir.normalise();
     }
     else
     {
@@ -581,8 +581,7 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
         forAll(polygons, polyI)
         {
             polygons[polyI] = polygonAndNormal[polyI].first();
-            normal_[polyI] = polygonAndNormal[polyI].second();
-            normal_[polyI] /= mag(normal_[polyI]) + ROOTVSMALL;
+            normal_[polyI] = normalised(polygonAndNormal[polyI].second());
         }
 
         initPolygons(polygons);

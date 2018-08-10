@@ -206,7 +206,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     Random& rndGen = this->owner().rndGen();
 
     // Normalise direction vector
-    direction_ /= mag(direction_);
+    direction_.normalise();
 
     // Determine direction vectors tangential to direction
     vector tangent = Zero;
@@ -436,7 +436,7 @@ void Foam::ConeNozzleInjection<CloudType>::setProperties
     vector normal = alpha*normal_;
     vector dirVec = dcorr*direction_;
     dirVec += normal;
-    dirVec /= mag(dirVec);
+    dirVec.normalise();
 
     switch (flowType_)
     {

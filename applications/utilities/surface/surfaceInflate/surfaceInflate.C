@@ -189,7 +189,7 @@ tmp<vectorField> calcPointNormals
         {
             if (nNormals[pointI] > 0)
             {
-                pointNormals[pointI] /= mag(pointNormals[pointI]);
+                pointNormals[pointI].normalise();
             }
         }
     }

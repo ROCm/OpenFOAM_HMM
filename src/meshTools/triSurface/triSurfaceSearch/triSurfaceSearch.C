@@ -410,8 +410,7 @@ void Foam::triSurfaceSearch::findLineAll
 
             if (inter.hit())
             {
-                vector lineVec = end[pointi] - start[pointi];
-                lineVec /= mag(lineVec) + VSMALL;
+                const vector lineVec = normalised(end[pointi] - start[pointi]);
 
                 if
                 (
