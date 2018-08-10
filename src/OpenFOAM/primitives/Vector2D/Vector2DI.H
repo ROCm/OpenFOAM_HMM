@@ -105,6 +105,8 @@ inline Foam::Vector2D<Cmpt>& Foam::Vector2D<Cmpt>::normalise()
     {
         *this /= s;
     }
+
+    return *this;
 }
 
 
