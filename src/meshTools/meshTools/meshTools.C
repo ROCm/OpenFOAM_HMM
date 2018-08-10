@@ -192,11 +192,7 @@ Foam::vector Foam::meshTools::normEdgeVec
     const label edgeI
 )
 {
-    vector eVec = mesh.edges()[edgeI].vec(mesh.points());
-
-    eVec /= mag(eVec);
-
-    return eVec;
+    return mesh.edges()[edgeI].unitVec(mesh.points());
 }
 
 

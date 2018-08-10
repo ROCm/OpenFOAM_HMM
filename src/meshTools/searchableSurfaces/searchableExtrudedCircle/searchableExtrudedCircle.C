@@ -432,8 +432,8 @@ void Foam::searchableExtrudedCircle::getNormal
             normal[i] = info[i].hitPoint()-curvePt.hitPoint();
 
             // Subtract axial direction
-            vector axialVec = edges[curvePt.index()].vec(points);
-            axialVec /= mag(axialVec);
+            const vector axialVec = edges[curvePt.index()].unitVec(points);
+
             normal[i] -= (normal[i]&axialVec)*axialVec;
             normal[i] /= mag(normal[i]);
         }

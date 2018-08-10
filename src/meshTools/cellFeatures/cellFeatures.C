@@ -429,13 +429,11 @@ bool Foam::cellFeatures::isFeaturePoint(const label edge0, const label edge1)
 
     const edge& e0 = mesh_.edges()[edge0];
 
-    vector e0Vec = e0.vec(mesh_.points());
-    e0Vec /= mag(e0Vec);
+    const vector e0Vec = e0.unitVec(mesh_.points());
 
     const edge& e1 = mesh_.edges()[edge1];
 
-    vector e1Vec = e1.vec(mesh_.points());
-    e1Vec /= mag(e1Vec);
+    const vector e1Vec = e1.unitVec(mesh_.points());
 
     scalar cosAngle;
 

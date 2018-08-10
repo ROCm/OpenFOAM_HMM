@@ -319,8 +319,7 @@ bool splitCell
 {
     const edge& e = mesh.edges()[edgeI];
 
-    vector eVec = e.vec(mesh.points());
-    eVec /= mag(eVec);
+    const vector eVec = e.unitVec(mesh.points());
 
     vector planeN = eVec ^ halfNorm;
 

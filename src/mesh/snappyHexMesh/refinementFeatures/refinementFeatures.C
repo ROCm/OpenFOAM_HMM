@@ -575,8 +575,8 @@ void Foam::refinementFeatures::findNearestEdge
 
                     const treeDataEdge& td = tree.shapes();
                     const edge& e = td.edges()[nearInfo[sampleI].index()];
-                    nearNormal[sampleI] =  e.vec(td.points());
-                    nearNormal[sampleI] /= mag(nearNormal[sampleI])+VSMALL;
+
+                    nearNormal[sampleI] = e.unitVec(td.points());
                 }
             }
         }
@@ -638,8 +638,8 @@ void Foam::refinementFeatures::findNearestRegionEdge
                 );
 
                 const edge& e = td.edges()[nearInfo[sampleI].index()];
-                nearNormal[sampleI] =  e.vec(td.points());
-                nearNormal[sampleI] /= mag(nearNormal[sampleI])+VSMALL;
+
+                nearNormal[sampleI] = e.unitVec(td.points());
             }
         }
     }

@@ -63,8 +63,7 @@ Foam::PatchTools::sortedEdgeFaces
 
             const point& edgePt = localPoints[e.start()];
 
-            vector e2 = e.vec(localPoints);
-            e2 /= mag(e2) + VSMALL;
+            const vector e2 = e.unitVec(localPoints);
 
             // Get the vertex on 0th face that forms a vector with the first
             // edge point that has the largest angle with the edge

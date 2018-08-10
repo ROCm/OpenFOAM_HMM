@@ -127,8 +127,7 @@ void greenRefine
 //{
 //    const edge& e = surf.edges()[edgeIndex];
 
-//    vector eVec = e.vec(surf.localPoints());
-//    eVec /= mag(eVec) + SMALL;
+//    const vector eVec = e.unitVec(surf.localPoints());
 
 //    const labelList& pEdges = surf.pointEdges()[pointIndex];
 //
@@ -136,8 +135,7 @@ void greenRefine
 //    {
 //        const edge& nearE = surf.edges()[pEdges[eI]];
 
-//        vector nearEVec = nearE.vec(surf.localPoints());
-//        nearEVec /= mag(nearEVec) + SMALL;
+//        const vector nearEVec = nearE.unitVec(surf.localPoints());
 
 //        const scalar dot = eVec & nearEVec;
 //        const scalar minCos = degToRad(angle);

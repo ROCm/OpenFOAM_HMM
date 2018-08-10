@@ -529,8 +529,7 @@ void Foam::faMesh::calcEdgeAreaNormals() const
 
     forAll(edgeAreaNormals.internalField(), edgeI)
     {
-        vector e = edges()[edgeI].vec(points());
-        e /= mag(e);
+        const vector e = edges()[edgeI].unitVec(points());
 
 //         scalar wStart =
 //             1.0 - sqr(mag(e^pointNormals[edges()[edgeI].end()]));
@@ -580,8 +579,7 @@ void Foam::faMesh::calcEdgeAreaNormals() const
                 pointNormals[patchEdges[edgeI].start()]
               + pointNormals[patchEdges[edgeI].end()];
 
-            vector e = patchEdges[edgeI].vec(points());
-            e /= mag(e);
+            const vector e = patchEdges[edgeI].unitVec(points());
 
             edgeAreaNormals.boundaryFieldRef()[patchI][edgeI] -=
                 e*(e&edgeAreaNormals.boundaryField()[patchI][edgeI]);
