@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -98,24 +98,27 @@ public:
         inline line(Istream&);
 
 
-    // Member functions
+    // Member Functions
 
-      // Access
+    // Access
 
         //- Return first point
         inline PointRef first() const;
 
-        //- Return second point
+        //- Return second (last) point
         inline PointRef second() const;
+
+        //- Return last (second) point
+        inline PointRef last() const;
 
         //- Return first point
         inline PointRef start() const;
 
-        //- Return second point
+        //- Return second (last) point
         inline PointRef end() const;
 
 
-      // Properties
+    // Properties
 
         //- Return centre (centroid)
         inline Point centre() const;
