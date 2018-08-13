@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,32 +30,127 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+template<class Type, template<class> class PatchField>
+void Foam::vtk::internalWriter::write
+(
+    const GeometricField<Type, PatchField, pointMesh>& field
+)
+{
+    if (isState(outputState::POINT_DATA))
+    {
+        ++nPointData_;
+    }
+    else
+    {
+        FatalErrorInFunction
+            << "Bad writer state (" << stateNames[state_]
+            << ") - should be (" << stateNames[outputState::POINT_DATA]
+            << ") for field " << field.name() << nl << endl
+            << exit(FatalError);
+    }
+
+    const direction nCmpt(pTraits<Type>::nComponents);
+
+    const labelList& addPointCellLabels = vtuCells_.addPointCellLabels();
+
+    if (format_)
+    {
+        if (legacy())
+        {
+            legacy::floatField<nCmpt>(format(), field.name(), numberOfPoints_);
+        }
+        else
+        {
+            const uint64_t payLoad =
+                vtk::sizeofData<float, nCmpt>(numberOfPoints_);
+
+            format().beginDataArray<float, nCmpt>(field.name());
+            format().writeSize(payLoad);
+        }
+    }
+
+    if (parallel_)
+    {
+        List<Type> addedValues(addPointCellLabels.size());
+        label outi = 0;
+
+        for (const label cellId : addPointCellLabels)
+        {
+            addedValues[outi++] = interpolatePointToCell(field, cellId);
+        }
+
+        vtk::writeListsParallel(format_.ref(), field, addedValues);
+    }
+    else
+    {
+        vtk::writeList(format(), field);
+
+        for (const label cellId : addPointCellLabels)
+        {
+            const Type val = interpolatePointToCell(field, cellId);
+            vtk::write(format(), val);
+        }
+    }
+
+    if (format_)
+    {
+        format().flush();
+        format().endDataArray();
+    }
+}
+
+
 template<class Type>
 void Foam::vtk::internalWriter::write
 (
     const DimensionedField<Type, volMesh>& field
 )
 {
-    const labelList& cellMap = vtuCells_.cellMap();
-
-    const int nCmpt(pTraits<Type>::nComponents);
-    // const uint64_t payLoad(cellMap.size() * nCmpt * sizeof(float));
-
-    if (legacy_)
+    if (isState(outputState::CELL_DATA))
     {
-        legacy::floatField<nCmpt>(format(), field.name(), cellMap.size());
+        ++nCellData_;
     }
     else
     {
-        format().openDataArray<float, nCmpt>(field.name())
-            .closeTag();
+        FatalErrorInFunction
+            << "Bad writer state (" << stateNames[state_]
+            << ") - should be (" << stateNames[outputState::CELL_DATA]
+            << ") for field " << field.name() << nl << endl
+            << exit(FatalError);
     }
 
-    // writeField includes payload size, and flush
-    vtk::writeField(format(), field, cellMap);
+    const direction nCmpt(pTraits<Type>::nComponents);
 
-    if (!legacy_)
+    const labelList& cellMap = vtuCells_.cellMap();
+
+    if (format_)
     {
+        if (legacy())
+        {
+            legacy::floatField<nCmpt>(format(), field.name(), numberOfCells_);
+        }
+        else
+        {
+            const uint64_t payLoad =
+                vtk::sizeofData<float, nCmpt>(numberOfCells_);
+
+            format().beginDataArray<float, nCmpt>(field.name());
+            format().writeSize(payLoad);
+        }
+    }
+
+    if (parallel_)
+    {
+        vtk::writeListParallel(format_.ref(), field, cellMap);
+    }
+    else
+    {
+        vtk::writeList(format(), field, cellMap);
+    }
+
+    if (format_)
+    {
+        format().flush();
         format().endDataArray();
     }
 }
@@ -71,55 +166,28 @@ void Foam::vtk::internalWriter::write
 }
 
 
-template<class Type, template<class> class PatchField>
-void Foam::vtk::internalWriter::write
-(
-    const GeometricField<Type, PatchField, pointMesh>& field
-)
-{
-    const labelList& addPointCellLabels = vtuCells_.addPointCellLabels();
-
-    const int nCmpt(pTraits<Type>::nComponents);
-    const label nVals(vtuCells_.nFieldPoints());
-
-    // Only needed for non-legacy
-    const uint64_t payLoad(nVals * nCmpt * sizeof(float));
-
-    if (legacy_)
-    {
-        legacy::floatField<nCmpt>(format(), field.name(), nVals);
-    }
-    else
-    {
-        format().openDataArray<float, nCmpt>(field.name())
-            .closeTag();
-    }
-
-    format().writeSize(payLoad);
-    vtk::writeList(format(), field);
-
-    for (const label cellId : addPointCellLabels)
-    {
-        const Type val = interpolatePointToCell(field, cellId);
-        vtk::write(format(), val);
-    }
-
-    format().flush();
-
-    if (!legacy_)
-    {
-        format().endDataArray();
-    }
-}
-
-
 template<class Type>
 void Foam::vtk::internalWriter::write
 (
-    const volPointInterpolation& pInterp,
-    const DimensionedField<Type, volMesh>& vfield
+    const DimensionedField<Type, volMesh>& vfield,
+    const volPointInterpolation& pInterp
 )
 {
+    if (isState(outputState::POINT_DATA))
+    {
+        ++nPointData_;
+    }
+    else
+    {
+        FatalErrorInFunction
+            << "Bad writer state (" << stateNames[state_]
+            << ") - should be (" << stateNames[outputState::POINT_DATA]
+            << ") for field " << vfield.name() << nl << endl
+            << exit(FatalError);
+    }
+
+    const direction nCmpt(pTraits<Type>::nComponents);
+
     typedef DimensionedField<Type, pointMesh> PointFieldType;
 
     // Use tmp intermediate. Compiler sometimes weird otherwise.
@@ -128,29 +196,40 @@ void Foam::vtk::internalWriter::write
 
     const labelList& addPointCellLabels = vtuCells_.addPointCellLabels();
 
-    const int nCmpt(pTraits<Type>::nComponents);
-    const label nVals(vtuCells_.nFieldPoints());
-
-    // Only needed for non-legacy
-    const uint64_t payLoad(nVals * nCmpt * sizeof(float));
-
-    if (legacy_)
+    if (format_)
     {
-        legacy::floatField<nCmpt>(format(), vfield.name(), nVals);
+        if (legacy())
+        {
+            legacy::floatField<nCmpt>(format(), vfield.name(), numberOfPoints_);
+        }
+        else
+        {
+            const uint64_t payLoad =
+                vtk::sizeofData<float, nCmpt>(numberOfPoints_);
+
+            format().beginDataArray<float, nCmpt>(vfield.name());
+            format().writeSize(payLoad);
+        }
+    }
+
+    if (parallel_)
+    {
+        vtk::writeListsParallel
+        (
+            format_.ref(),
+            pfield,
+            vfield,
+            addPointCellLabels
+        );
     }
     else
     {
-        format().openDataArray<float, nCmpt>(vfield.name())
-            .closeTag();
+        vtk::writeLists(format(), pfield, vfield, addPointCellLabels);
     }
 
-    format().writeSize(payLoad);
-    vtk::writeList(format(), pfield);
-    vtk::writeList(format(), vfield, addPointCellLabels);
-    format().flush();
-
-    if (!legacy_)
+    if (format_)
     {
+        format().flush();
         format().endDataArray();
     }
 }
@@ -159,10 +238,25 @@ void Foam::vtk::internalWriter::write
 template<class Type>
 void Foam::vtk::internalWriter::write
 (
-    const volPointInterpolation& pInterp,
-    const GeometricField<Type, fvPatchField, volMesh>& vfield
+    const GeometricField<Type, fvPatchField, volMesh>& vfield,
+    const volPointInterpolation& pInterp
 )
 {
+    if (isState(outputState::POINT_DATA))
+    {
+        ++nPointData_;
+    }
+    else
+    {
+        FatalErrorInFunction
+            << "Bad writer state (" << stateNames[state_]
+            << ") - should be (" << stateNames[outputState::POINT_DATA]
+            << ") for field " << vfield.name() << nl << endl
+            << exit(FatalError);
+    }
+
+    const direction nCmpt(pTraits<Type>::nComponents);
+
     typedef GeometricField<Type, pointPatchField, pointMesh> PointFieldType;
 
     // Use tmp intermediate. Compiler sometimes weird otherwise.
@@ -171,84 +265,41 @@ void Foam::vtk::internalWriter::write
 
     const labelList& addPointCellLabels = vtuCells_.addPointCellLabels();
 
-    const int nCmpt(pTraits<Type>::nComponents);
-    const label nVals(vtuCells_.nFieldPoints());
-
-    // Only needed for non-legacy
-    const uint64_t payLoad(nVals * nCmpt * sizeof(float));
-
-    if (legacy_)
+    if (format_)
     {
-        legacy::floatField<nCmpt>(format(), vfield.name(), nVals);
+        if (legacy())
+        {
+            legacy::floatField<nCmpt>(format(), vfield.name(), numberOfPoints_);
+        }
+        else
+        {
+            const uint64_t payLoad =
+                vtk::sizeofData<float, nCmpt>(numberOfPoints_);
+
+            format().beginDataArray<float, nCmpt>(vfield.name());
+            format().writeSize(payLoad);
+        }
+    }
+
+    if (parallel_)
+    {
+        vtk::writeListsParallel
+        (
+            format_.ref(),
+            pfield,
+            vfield,
+            addPointCellLabels
+        );
     }
     else
     {
-        format().openDataArray<float, nCmpt>(vfield.name())
-            .closeTag();
+        vtk::writeLists(format(), pfield, vfield, addPointCellLabels);
     }
 
-    format().writeSize(payLoad);
-    vtk::writeList(format(), pfield);
-    vtk::writeList(format(), vfield, addPointCellLabels);
-    format().flush();
-
-    if (!legacy_)
+    if (format_)
     {
+        format().flush();
         format().endDataArray();
-    }
-}
-
-
-template<class Type>
-void Foam::vtk::internalWriter::write
-(
-    const UPtrList<const DimensionedField<Type, volMesh>>& flds
-)
-{
-    for (const auto& field : flds)
-    {
-        write(field);
-    }
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::vtk::internalWriter::write
-(
-    const UPtrList<const GeometricField<Type, PatchField, GeoMesh>>& flds
-)
-{
-    for (const auto& field : flds)
-    {
-        write(field);
-    }
-}
-
-
-template<class Type>
-void Foam::vtk::internalWriter::write
-(
-    const volPointInterpolation& pInterp,
-    const UPtrList<const DimensionedField<Type, volMesh>>& flds
-)
-{
-    for (const auto& field : flds)
-    {
-        write(pInterp, field);
-    }
-}
-
-
-template<class Type>
-void Foam::vtk::internalWriter::write
-(
-    const volPointInterpolation& pInterp,
-    const UPtrList<const GeometricField<Type, fvPatchField, volMesh>>& flds
-)
-{
-    for (const auto& field : flds)
-    {
-        write(pInterp, field);
     }
 }
 
