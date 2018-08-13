@@ -55,6 +55,8 @@ void Foam::shellSurfaces::setAndCheckLevels
     const List<Tuple2<scalar, label>>& distLevels
 )
 {
+    const searchableSurface& shell = allGeometry_[shells_[shellI]];
+
     if (modes_[shellI] != DISTANCE && distLevels.size() != 1)
     {
         FatalErrorInFunction
@@ -72,6 +74,16 @@ void Foam::shellSurfaces::setAndCheckLevels
     {
         distances_[shellI][j] = distLevels[j].first();
         levels_[shellI][j] = distLevels[j].second();
+
+        if (levels_[shellI][j] < -1)
+        {
+            FatalErrorInFunction
+                << "Shell " << shell.name()
+                << " has illegal refinement level "
+                << levels_[shellI][j]
+                << exit(FatalError);
+        }
+
 
         // Check in incremental order
         if (j > 0)
@@ -94,8 +106,6 @@ void Foam::shellSurfaces::setAndCheckLevels
             }
         }
     }
-
-    const searchableSurface& shell = allGeometry_[shells_[shellI]];
 
     if (modes_[shellI] == DISTANCE)
     {
