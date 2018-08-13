@@ -28,6 +28,28 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+inline Foam::globalIndex::globalIndex(const label localSize)
+:
+    globalIndex()
+{
+    reset(localSize);
+}
+
+
+inline Foam::globalIndex::globalIndex
+(
+    const label localSize,
+    const int tag,
+    const label comm,
+    const bool parallel
+)
+:
+    globalIndex()
+{
+    reset(localSize, tag, comm, parallel);
+}
+
+
 inline Foam::globalIndex::globalIndex(const labelUList& offsets)
 :
     offsets_(offsets)
@@ -42,6 +64,18 @@ inline Foam::globalIndex::globalIndex(labelList&& offsets)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+inline bool Foam::globalIndex::empty() const
+{
+    return offsets_.empty() || offsets_.last() == 0;
+}
+
+
+inline const Foam::labelList& Foam::globalIndex::offsets() const
+{
+    return offsets_;
+}
+
+
 inline Foam::labelList& Foam::globalIndex::offsets()
 {
     return offsets_;
@@ -51,6 +85,18 @@ inline Foam::labelList& Foam::globalIndex::offsets()
 inline Foam::label Foam::globalIndex::offset(const label proci) const
 {
     return offsets_[proci];
+}
+
+
+inline Foam::label Foam::globalIndex::localStart(const label proci) const
+{
+    return offsets_[proci];
+}
+
+
+inline Foam::label Foam::globalIndex::localStart() const
+{
+    return localStart(Pstream::myProcNo());
 }
 
 
