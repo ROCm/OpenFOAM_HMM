@@ -38,20 +38,39 @@ int Foam::functionObjects::ensightWrite::writeVolField
     // State: return 0 (not-processed), -1 (skip), +1 ok
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
+    const VolFieldType* fldPtr;
+
     // Already done, or not available
-    if (state || !foundObject<VolFieldType>(inputName))
+    if (state || !(fldPtr = lookupObjectPtr<VolFieldType>(inputName)))
     {
         return state;
     }
 
     autoPtr<ensightFile> os = ensCase().newData<Type>(inputName);
-    ensightOutput::writeField<Type>
-    (
-        lookupObject<VolFieldType>(inputName),
-        ensMesh(),
-        os,
-        caseOpts_.nodeValues()
-    );
+
+
+    if (meshSubset_.valid())
+    {
+        tmp<VolFieldType> tfield = meshSubset_->interpolate(*fldPtr);
+
+        ensightOutput::writeField<Type>
+        (
+            tfield(),
+            ensMesh(),
+            os,
+            caseOpts_.nodeValues()
+        );
+    }
+    else
+    {
+        ensightOutput::writeField<Type>
+        (
+            *fldPtr,
+            ensMesh(),
+            os,
+            caseOpts_.nodeValues()
+        );
+    }
 
     Log << " " << inputName;
 

@@ -67,6 +67,7 @@ Description
         faceZones    | Select faceZones to write    | no        |
         consecutive  | Consecutive output numbering | no        | false
         nodeValues   | Write values at nodes        | no        | false
+        bounds       | Limit with a bounding box    | no        |
     \endtable
 
     Note that if the \c patches entry is an empty list, this will select all
@@ -93,6 +94,7 @@ SourceFiles
 
 #include "interpolation.H"
 #include "volFields.H"
+#include "fvMeshSubset.H"
 #include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -129,6 +131,12 @@ class ensightWrite
         //- Consecutive output numbering
         bool consecutive_;
 
+        //- Restrict to bounding box
+        boundBox bounds_;
+
+        //- Mesh subset handler
+        autoPtr<fvMeshSubset> meshSubset_;
+
         //- Ensight case handler
         autoPtr<ensightCase> ensCase_;
 
@@ -150,6 +158,9 @@ class ensightWrite
             return *ensMesh_;
         }
 
+        //- Define cell selection from bounding box.
+        //  An empty set if no bounding box is specified.
+        bitSet cellSelection() const;
 
         //- Apply for the volume field type
         template<class Type>
