@@ -221,6 +221,19 @@ public:
             label& nearLabel
         ) const;
 
+        //- The sign for which side of the face plane the point is on.
+        //  Uses the supplied tolerance for rounding around zero.
+        //  \return
+        //  -  0: on plane
+        //  - +1: front-side
+        //  - -1: back-side
+        inline int sign
+        (
+            const point& p,
+            const UList<point>& points,
+            const scalar tol = SMALL
+        ) const;
+
         //- Return number of edges
         inline label nEdges() const;
 

@@ -299,6 +299,20 @@ public:
             label& nearLabel
         ) const;
 
+        //- The sign for the side of the face plane the point is on,
+        //- using three evenly distributed face points for the estimated normal.
+        //  Uses the supplied tolerance for rounding around zero.
+        //  \return
+        //  -  0: on plane
+        //  - +1: front-side
+        //  - -1: back-side
+        int sign
+        (
+            const point& p,
+            const UList<point>& points,
+            const scalar tol = SMALL
+        ) const;
+
         //- Return contact sphere diameter
         scalar contactSphereDiameter
         (
