@@ -174,6 +174,9 @@ public:
         //- Access to the functionObjects
         using PtrList<functionObject>::operator[];
 
+        //- Return the current trigger index (read from the stateDict)
+        label triggerIndex() const;
+
         //- Reset/read state dictionary for current time
         void resetState();
 

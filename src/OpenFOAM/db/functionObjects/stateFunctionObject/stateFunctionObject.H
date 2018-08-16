@@ -125,6 +125,12 @@ public:
             //- Return true if the property exists
             bool foundProperty(const word& entryName) const;
 
+            //- Get the current trigger index
+            label getTrigger() const;
+
+            //- Set the current trigger index
+            bool setTrigger(const label triggeri);
+
             //- Set dictionary, return true if set
             bool getDict
             (

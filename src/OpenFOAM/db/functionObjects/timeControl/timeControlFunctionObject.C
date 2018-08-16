@@ -51,6 +51,10 @@ void Foam::functionObjects::timeControl::readControls()
     {
         timeEnd_ = time_.userTimeToTime(timeEnd_);
     }
+
+    dict_.readIfPresent("triggerStart", triggerStart_);
+    dict_.readIfPresent("triggerEnd", triggerEnd_);
+
     deltaTCoeff_ = GREAT;
     if (dict_.readIfPresent("deltaTCoeff", deltaTCoeff_))
     {
@@ -70,9 +74,14 @@ void Foam::functionObjects::timeControl::readControls()
 
 bool Foam::functionObjects::timeControl::active() const
 {
+    label triggeri = time_.functionObjects().triggerIndex();
+
     return
-        time_.value() >= (timeStart_ - 0.5*time_.deltaTValue())
-     && time_.value() <= (timeEnd_ + 0.5*time_.deltaTValue());
+        (triggeri >= triggerStart_)
+     || (
+            time_.value() >= (timeStart_ - 0.5*time_.deltaTValue())
+         && time_.value() <= (timeEnd_ + 0.5*time_.deltaTValue())
+    );
 }
 
 
@@ -403,6 +412,8 @@ Foam::functionObjects::timeControl::timeControl
     dict_(dict),
     timeStart_(-VGREAT),
     timeEnd_(VGREAT),
+    triggerStart_(labelMin),
+    triggerEnd_(labelMax),
     nStepsToStartTimeChange_(labelMax),
     executeControl_(t, dict, "execute"),
     writeControl_(t, dict, "write"),
@@ -426,6 +437,8 @@ bool Foam::functionObjects::timeControl::entriesPresent(const dictionary& dict)
      || Foam::timeControl::entriesPresent(dict, "execute")
      || dict.found("timeStart")
      || dict.found("timeEnd")
+     || dict.found("triggerStart")
+     || dict.found("triggerEnd")
     )
     {
         return true;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016- OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,6 +45,7 @@ SourceFiles
 
 #include "fvMeshFunctionObject.H"
 #include "Map.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,6 +67,21 @@ class runTimeControl
 :
     public fvMeshFunctionObject
 {
+public:
+
+    // Public enumerations
+
+        enum class satisfiedAction
+        {
+            end,
+            setTrigger
+        };
+
+        static Enum<satisfiedAction> satisfiedActionNames;
+
+
+private:
+
     // Private data
 
         //- List of conditions to satisfy
@@ -79,6 +95,13 @@ class runTimeControl
 
         //- Current number of steps written
         label writeStepI_;
+
+        //- Action to take when conditions are satified
+        satisfiedAction satisfiedAction_;
+
+        //- Trigger index if satisfiedAction is setTrigger
+        label triggerIndex_;
+
 
 
     // Private Member Functions

@@ -92,6 +92,12 @@ class timeControl
             //- De-activation time - defaults to VGREAT
             scalar timeEnd_;
 
+            //- Activation trigger index - defaults to labelMin
+            label triggerStart_;
+
+            //- De-activation trigger index - defaults to labelMax
+            label triggerEnd_;
+
             //- Max time step change
             scalar deltaTCoeff_;
 

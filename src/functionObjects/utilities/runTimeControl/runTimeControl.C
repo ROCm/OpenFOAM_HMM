@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,7 +58,9 @@ Foam::functionObjects::runTimeControls::runTimeControl::runTimeControl
     conditions_(),
     groupMap_(),
     nWriteStep_(0),
-    writeStepI_(0)
+    writeStepI_(0),
+    satisfiedAction_(satisfiedAction::end),
+    triggerIndex_(labelMin)
 {
     read(dict);
 }
@@ -99,7 +101,7 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::read
 
         if (groupMap_.insert(groupi, uniqueGroupi))
         {
-            uniqueGroupi++;
+            ++uniqueGroupi;
         }
     }
 
@@ -116,9 +118,9 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::read
     {
         // Check that at least one condition is active
         bool active = false;
-        forAll(conditions_, conditioni)
+        for (const auto& condition : conditions_)
         {
-            if (conditions_[conditioni].active())
+            if (condition.active())
             {
                 active = true;
                 break;
@@ -131,6 +133,21 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::read
                 << "    All conditions are inactive" << nl
                 << endl;
         }
+    }
+
+    // Set the action to perform when all conditions are satisfied
+    // - set to end fro backwards compatibility with v1806
+    satisfiedAction_ =
+        satisfiedActionNames.lookupOrDefault
+        (
+            "satisfiedAction",
+            dict,
+            satisfiedAction::end
+        );
+
+    if (satisfiedAction_ == satisfiedAction::setTrigger)
+    {
+        triggerIndex_ = readLabel(dict.lookup("trigger"));
     }
 
     return true;
@@ -200,28 +217,39 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
 
     if (done)
     {
-        forAll(IDs, conditioni)
+        for (label conditioni : IDs)
         {
             Info<< "    " << conditions_[conditioni].type() << ": "
-                <<  conditions_[conditioni].name()
+                << conditions_[conditioni].name()
                 << " condition satisfied" << nl;
         }
 
-
-        // Set to write a data dump or finalise the calculation
-        Time& time = const_cast<Time&>(time_);
-
-        if (writeStepI_ < nWriteStep_ - 1)
+        switch (satisfiedAction_)
         {
-            writeStepI_++;
-            Info<< "    Writing fields - step " << writeStepI_ << nl;
-            time.writeNow();
-        }
-        else
-        {
-            Info<< "    Stopping calculation" << nl
-                << "    Writing fields - final step" << nl;
-            time.writeAndEnd();
+            case satisfiedAction::end:
+            {
+                // Set to write a data dump or finalise the calculation
+                Time& time = const_cast<Time&>(time_);
+
+                if (writeStepI_ < nWriteStep_ - 1)
+                {
+                    ++writeStepI_;
+                    Info<< "    Writing fields - step " << writeStepI_ << nl;
+                    time.writeNow();
+                }
+                else
+                {
+                    Info<< "    Stopping calculation" << nl
+                        << "    Writing fields - final step" << nl;
+                    time.writeAndEnd();
+                    break;
+                }
+            }
+            case satisfiedAction::setTrigger:
+            {
+                setTrigger(triggerIndex_);
+                break;
+            }
         }
     }
     else
@@ -237,9 +265,9 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
 
 bool Foam::functionObjects::runTimeControls::runTimeControl::write()
 {
-    forAll(conditions_, conditioni)
+    for (auto& condition : conditions_)
     {
-        conditions_[conditioni].write();
+        condition.write();
     }
 
     return true;

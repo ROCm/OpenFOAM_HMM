@@ -78,6 +78,34 @@ Foam::dictionary& Foam::functionObjects::stateFunctionObject::propertyDict()
 }
 
 
+bool Foam::functionObjects::stateFunctionObject::setTrigger
+(
+    const label triggeri
+)
+{
+    IOdictionary& stateDict = this->stateDict();
+
+    label oldTriggeri =
+        stateDict.lookupOrDefault<label>("triggerIndex", labelMin);
+
+    if (triggeri > oldTriggeri)
+    {
+        stateDict.set("triggerIndex", triggeri);
+        return true;
+    }
+
+    return false;
+}
+
+
+Foam::label Foam::functionObjects::stateFunctionObject::getTrigger() const
+{
+    const IOdictionary& stateDict = this->stateDict();
+
+    return stateDict.lookupOrDefault<label>("triggerIndex", labelMin);
+}
+
+
 bool Foam::functionObjects::stateFunctionObject::foundProperty
 (
     const word& entryName
