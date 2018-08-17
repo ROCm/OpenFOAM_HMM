@@ -129,7 +129,7 @@ public:
     );
 
     //- Destructor
-    virtual ~runTimeCondition();
+    virtual ~runTimeCondition() = default;
 
     //- Selector
     static autoPtr<runTimeCondition> New

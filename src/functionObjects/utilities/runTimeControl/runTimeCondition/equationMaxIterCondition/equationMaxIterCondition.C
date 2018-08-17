@@ -76,13 +76,6 @@ equationMaxIterCondition
 }
 
 
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-Foam::functionObjects::runTimeControls::equationMaxIterCondition::
-~equationMaxIterCondition()
-{}
-
-
 // * * * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * //
 
 bool Foam::functionObjects::runTimeControls::equationMaxIterCondition::apply()

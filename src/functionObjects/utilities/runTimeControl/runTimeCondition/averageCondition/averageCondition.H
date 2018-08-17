@@ -110,7 +110,7 @@ public:
     );
 
     //- Destructor
-    virtual ~averageCondition();
+    virtual ~averageCondition() = default;
 
 
     // Public Member Functions

@@ -78,7 +78,7 @@ public:
     );
 
     //- Destructor
-    virtual ~minTimeStepCondition();
+    virtual ~minTimeStepCondition() = default;
 
 
     // Public Member Functions

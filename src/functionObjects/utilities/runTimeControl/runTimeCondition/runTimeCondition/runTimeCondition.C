@@ -89,12 +89,6 @@ Foam::functionObjects::runTimeControls::runTimeCondition::runTimeCondition
 {}
 
 
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-Foam::functionObjects::runTimeControls::runTimeCondition::~runTimeCondition()
-{}
-
-
 // * * * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * //
 
 const Foam::word&

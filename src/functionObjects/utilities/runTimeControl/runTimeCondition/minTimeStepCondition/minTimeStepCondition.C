@@ -63,13 +63,6 @@ minTimeStepCondition
 {}
 
 
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-Foam::functionObjects::runTimeControls::minTimeStepCondition::
-~minTimeStepCondition()
-{}
-
-
 // * * * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * //
 
 bool Foam::functionObjects::runTimeControls::minTimeStepCondition::apply()

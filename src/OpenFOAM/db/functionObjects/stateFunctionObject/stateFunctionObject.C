@@ -205,8 +205,8 @@ Foam::functionObjects::stateFunctionObject::objectResultEntries() const
 }
 
 
-Foam::List<Foam::word> Foam::functionObjects::stateFunctionObject::
-objectResultEntries
+Foam::List<Foam::word>
+Foam::functionObjects::stateFunctionObject::objectResultEntries
 (
     const word& objectName
 ) const

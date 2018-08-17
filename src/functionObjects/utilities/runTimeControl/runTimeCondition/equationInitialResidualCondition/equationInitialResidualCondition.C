@@ -95,13 +95,6 @@ equationInitialResidualCondition
 }
 
 
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-Foam::functionObjects::runTimeControls::equationInitialResidualCondition::
-~equationInitialResidualCondition()
-{}
-
-
 // * * * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * //
 
 bool Foam::functionObjects::runTimeControls::equationInitialResidualCondition::

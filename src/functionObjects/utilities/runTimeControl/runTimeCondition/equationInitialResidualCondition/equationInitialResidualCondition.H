@@ -99,7 +99,7 @@ public:
     );
 
     //- Destructor
-    virtual ~equationInitialResidualCondition();
+    virtual ~equationInitialResidualCondition() = default;
 
 
     // Public Member Functions

@@ -60,16 +60,11 @@ Foam::functionObjects::runTimeControls::runTimeControl::runTimeControl
     nWriteStep_(0),
     writeStepI_(0),
     satisfiedAction_(satisfiedAction::end),
-    triggerIndex_(labelMin)
+    triggerIndex_(labelMin),
+    active_(getObjectProperty(name, "active", true))
 {
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::runTimeControls::runTimeControl::~runTimeControl()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -117,17 +112,17 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::read
     else
     {
         // Check that at least one condition is active
-        bool active = false;
+        bool check = false;
         for (const auto& condition : conditions_)
         {
             if (condition.active())
             {
-                active = true;
+                check = true;
                 break;
             }
         }
 
-        if (!active)
+        if (!check)
         {
             Info<< type() << " " << name() << " output:" << nl
                 << "    All conditions are inactive" << nl
@@ -156,6 +151,11 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::read
 
 bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
 {
+    if (!active_)
+    {
+        return true;
+    }
+
     Info<< type() << " " << name() << " output:" << nl;
 
     // IDs of satisfied conditions
@@ -242,12 +242,17 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
                     Info<< "    Stopping calculation" << nl
                         << "    Writing fields - final step" << nl;
                     time.writeAndEnd();
-                    break;
                 }
+                break;
             }
             case satisfiedAction::setTrigger:
             {
+                Info<< "    Setting trigger " << triggerIndex_ << nl;
                 setTrigger(triggerIndex_);
+
+                // Deactivate the model
+                active_ = false;
+                setProperty("active", active_);
                 break;
             }
         }

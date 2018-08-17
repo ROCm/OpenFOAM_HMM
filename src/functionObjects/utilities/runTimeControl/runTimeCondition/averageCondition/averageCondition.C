@@ -78,12 +78,6 @@ Foam::functionObjects::runTimeControls::averageCondition::averageCondition
 }
 
 
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-Foam::functionObjects::runTimeControls::averageCondition::~averageCondition()
-{}
-
-
 // * * * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * //
 
 bool Foam::functionObjects::runTimeControls::averageCondition::apply()
@@ -145,9 +139,8 @@ bool Foam::functionObjects::runTimeControls::averageCondition::apply()
             << "From function object: " << functionObjectName_ << nl
             << "Unprocessed fields:" << nl;
 
-        forAll(unprocessedFields, i)
+        for (const label fieldi : unprocessedFields)
         {
-            label fieldi = unprocessedFields[i];
             Info<< "        " << fieldNames_[fieldi] << nl;
         }
     }
