@@ -23,18 +23,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "Time.H"
+#include "FIFOStack.H"
+
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 template<class Type>
 void Foam::functionObjects::runTimeControls::averageCondition::calc
 (
-    const word& fieldName,
-    const scalar alpha,
-    const scalar beta,
+    const label fieldi,
     bool& satisfied,
     bool& processed
 )
 {
+    const word& fieldName = fieldNames_[fieldi];
+
     const word valueType =
         state_.objectResultType(functionObjectName_, fieldName);
 
@@ -43,13 +46,116 @@ void Foam::functionObjects::runTimeControls::averageCondition::calc
         return;
     }
 
-    Type currentValue =
-        state_.getObjectResult<Type>(functionObjectName_, fieldName);
+    const scalar dt = obr_.time().deltaTValue();
 
+    const Type currentValue =
+        state_.getObjectResult<Type>(functionObjectName_, fieldName);
     const word meanName(fieldName + "Mean");
 
+    // Current mean value
     Type meanValue = state_.getResult<Type>(meanName);
-    meanValue = alpha*meanValue + beta*currentValue;
+
+    switch (windowType_)
+    {
+        case windowType::NONE:
+        {
+            const scalar Dt = totalTime_[fieldi];
+            const scalar alpha = (Dt - dt)/Dt;
+            const scalar beta = dt/Dt;
+            meanValue = alpha*meanValue + beta*currentValue;
+
+            break;
+        }
+        case windowType::APPROXIMATE:
+        {
+            const scalar Dt = totalTime_[fieldi];
+            scalar alpha = (Dt - dt)/Dt;
+            scalar beta = dt/Dt;
+            if (Dt - dt >= window_)
+            {
+                alpha = (window_ - dt)/window_;
+                beta = dt/window_;
+            }
+            else
+            {
+                // Ensure that averaging is performed over window time
+                // before condition can be satisfied
+                satisfied = false;
+            }
+
+            meanValue = alpha*meanValue + beta*currentValue;
+            totalTime_[fieldi] += dt;
+            break;
+        }
+        case windowType::EXACT:
+        {
+            FIFOStack<scalar> windowTimes;
+            FIFOStack<Type> windowValues;
+            dictionary& dict = this->conditionDict().subDict(fieldName);
+            dict.readIfPresent("windowTimes", windowTimes);
+            dict.readIfPresent("windowValues", windowValues);
+
+            // Increment time for all existing values
+            for (scalar& dti : windowTimes)
+            {
+                dti += dt;
+            }
+
+            // Remove any values outside the window
+            bool removeValue = true;
+            while (removeValue && windowTimes.size())
+            {
+                removeValue = windowTimes.first() > window_;
+
+                if (removeValue)
+                {
+                    windowTimes.pop();
+                    windowValues.pop();
+                }
+            }
+
+            // Add the current value
+            windowTimes.push(dt);
+            windowValues.push(currentValue);
+
+            // Calculate the window average
+            typename FIFOStack<scalar>::const_iterator timeIter =
+                windowTimes.begin();
+            typename FIFOStack<Type>::const_iterator valueIter =
+                windowValues.begin();
+
+            meanValue = pTraits<Type>::zero;
+            Type valueOld(pTraits<Type>::zero);
+
+            for
+            (
+                label i = 0;
+                timeIter != windowTimes.end();
+                ++i, ++timeIter, ++valueIter
+            )
+            {
+                const Type& value = valueIter();
+                const scalar dt = timeIter();
+
+                meanValue += dt*value;
+
+                if (i)
+                {
+                    meanValue -= dt*valueOld;
+                }
+
+                valueOld = value;
+            }
+
+            meanValue /= windowTimes.first();
+
+            // Store the state information for the next step
+            dict.set("windowTimes", windowTimes);
+            dict.set("windowValues", windowValues);
+
+            break;
+        }
+    }
 
     scalar delta = mag(meanValue - currentValue);
 
@@ -59,6 +165,8 @@ void Foam::functionObjects::runTimeControls::averageCondition::calc
             << ", delta: " << delta << nl;
     }
 
+    // Note: Writing result to owner function object and not the local run-time
+    // condition
     state_.setResult(meanName, meanValue);
 
     if (delta > tolerance_)

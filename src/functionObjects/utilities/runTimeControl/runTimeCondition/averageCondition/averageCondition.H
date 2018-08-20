@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,7 @@ SourceFiles
 
 #include "runTimeCondition.H"
 #include "Switch.H"
-
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,6 +58,20 @@ class averageCondition
 :
     public runTimeCondition
 {
+public:
+
+    // Public enumerations
+
+        enum class windowType
+        {
+            NONE,
+            APPROXIMATE,
+            EXACT
+        };
+
+        static const Enum<windowType> windowTypeNames;
+
+
 protected:
 
     // Protected data
@@ -74,6 +88,9 @@ protected:
         //- Averaging window
         const scalar window_;
 
+        //- Averaging window type
+        windowType windowType_;
+
         //- Average time per field
         List<scalar> totalTime_;
 
@@ -87,9 +104,7 @@ protected:
         template<class Type>
         void calc
         (
-            const word& fieldName,
-            const scalar alpha,
-            const scalar beta,
+            const label fieldi,
             bool& satisfied,
             bool& processed
         );
