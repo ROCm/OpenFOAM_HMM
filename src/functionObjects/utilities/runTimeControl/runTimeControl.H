@@ -73,8 +73,8 @@ public:
 
         enum class satisfiedAction
         {
-            end,
-            setTrigger
+            END,
+            SET_TRIGGER
         };
 
         static Enum<satisfiedAction> satisfiedActionNames;

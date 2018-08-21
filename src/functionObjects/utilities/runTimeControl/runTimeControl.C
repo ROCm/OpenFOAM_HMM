@@ -44,6 +44,15 @@ namespace runTimeControls
 }
 }
 
+Foam::Enum
+<
+    Foam::functionObjects::runTimeControls::runTimeControl::satisfiedAction
+>
+Foam::functionObjects::runTimeControls::runTimeControl::satisfiedActionNames
+{
+    { satisfiedAction::END, "end"},
+    { satisfiedAction::SET_TRIGGER, "setTrigger"},
+};
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -59,7 +68,7 @@ Foam::functionObjects::runTimeControls::runTimeControl::runTimeControl
     groupMap_(),
     nWriteStep_(0),
     writeStepI_(0),
-    satisfiedAction_(satisfiedAction::end),
+    satisfiedAction_(satisfiedAction::END),
     triggerIndex_(labelMin),
     active_(getObjectProperty(name, "active", true))
 {
@@ -137,10 +146,10 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::read
         (
             "satisfiedAction",
             dict,
-            satisfiedAction::end
+            satisfiedAction::END
         );
 
-    if (satisfiedAction_ == satisfiedAction::setTrigger)
+    if (satisfiedAction_ == satisfiedAction::SET_TRIGGER)
     {
         triggerIndex_ = readLabel(dict.lookup("trigger"));
     }
@@ -226,7 +235,7 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
 
         switch (satisfiedAction_)
         {
-            case satisfiedAction::end:
+            case satisfiedAction::END:
             {
                 // Set to write a data dump or finalise the calculation
                 Time& time = const_cast<Time&>(time_);
@@ -240,12 +249,21 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
                 else
                 {
                     Info<< "    Stopping calculation" << nl
-                        << "    Writing fields - final step" << nl;
+                        << "    Writing fields";
+                    if (nWriteStep_ != 0)
+                    {
+                        Info<< " - final step" << nl;
+                    }
+                    else
+                    {
+                        Info<< nl;
+                    }
+
                     time.writeAndEnd();
                 }
                 break;
             }
-            case satisfiedAction::setTrigger:
+            case satisfiedAction::SET_TRIGGER:
             {
                 Info<< "    Setting trigger " << triggerIndex_ << nl;
                 setTrigger(triggerIndex_);
