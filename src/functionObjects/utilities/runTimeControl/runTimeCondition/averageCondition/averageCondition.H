@@ -97,6 +97,11 @@ protected:
         //- Reset the averaging process on restart flag
         Switch resetOnRestart_;
 
+        //- Number of start-up iterations before allowing satisfied checks
+        label nIterStartUp_;
+
+        //- Current iteration count
+        label iter_;
 
     // Protected Member Functions
 

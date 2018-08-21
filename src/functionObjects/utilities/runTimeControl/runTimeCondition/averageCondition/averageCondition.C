@@ -75,7 +75,9 @@ Foam::functionObjects::runTimeControls::averageCondition::averageCondition
           : windowType::NONE
     ),
     totalTime_(fieldNames_.size(), scalar(0)),
-    resetOnRestart_(dict.lookupOrDefault<bool>("resetOnRestart", false))
+    resetOnRestart_(dict.lookupOrDefault<bool>("resetOnRestart", false)),
+    nIterStartUp_(dict.lookupOrDefault<label>("nIterStartUp", 10)),
+    iter_(-1)
 {
     dictionary& conditionDict = this->conditionDict();
 
@@ -100,6 +102,8 @@ Foam::functionObjects::runTimeControls::averageCondition::averageCondition
             }
         }
     }
+
+    conditionDict.readIfPresent("iter", iter_);
 }
 
 
@@ -107,12 +111,14 @@ Foam::functionObjects::runTimeControls::averageCondition::averageCondition
 
 bool Foam::functionObjects::runTimeControls::averageCondition::apply()
 {
-    bool satisfied = true;
-
     if (!active_)
     {
-        return satisfied;
+        return true;
     }
+
+    bool satisfied = iter_ > nIterStartUp_ ? true : false;
+
+    ++iter_;
 
     const scalar dt = obr_.time().deltaTValue();
 
@@ -175,6 +181,8 @@ void Foam::functionObjects::runTimeControls::averageCondition::write()
             conditionDict.add(fieldName, valueDict);
         }
     }
+
+    conditionDict.set("iter", iter_);
 }
 
 
