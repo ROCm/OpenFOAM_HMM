@@ -94,6 +94,9 @@ bool Foam::functionObjects::runTimeControls::maxDurationCondition::apply()
     scalar delta = obr_.time().value() - startTime_;
     delta = obr_.time().timeToUserTime(delta);
 
+    Log << "    " << type() << ": " << name_ << nl
+        << "        Completed " << delta << " out of " << duration_ << nl;
+
     return delta >= duration_;
 }
 

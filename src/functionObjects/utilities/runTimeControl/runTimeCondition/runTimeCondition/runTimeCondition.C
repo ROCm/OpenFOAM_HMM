@@ -84,8 +84,8 @@ Foam::functionObjects::runTimeControls::runTimeCondition::runTimeCondition
     state_(state),
     active_(dict.lookupOrDefault("active", true)),
     conditionDict_(setConditionDict()),
-    log_(dict.lookupOrDefault("log", true)),
-    groupID_(dict.lookupOrDefault("groupID", -1))
+    groupID_(dict.lookupOrDefault("groupID", -1)),
+    log(dict.lookupOrDefault("log", true))
 {}
 
 

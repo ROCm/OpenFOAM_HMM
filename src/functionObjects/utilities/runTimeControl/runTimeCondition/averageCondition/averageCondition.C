@@ -116,7 +116,7 @@ bool Foam::functionObjects::runTimeControls::averageCondition::apply()
 
     const scalar dt = obr_.time().deltaTValue();
 
-    if (log_) Info<< "    " << type() << ": " << name_ << " averages:" << nl;
+    Log << "    " << type() << ": " << name_ << " averages:" << nl;
 
     DynamicList<label> unprocessedFields(fieldNames_.size());
 
@@ -149,7 +149,7 @@ bool Foam::functionObjects::runTimeControls::averageCondition::apply()
         }
     }
 
-    if (log_) Info<< endl;
+    Log << endl;
 
     return satisfied;
 }

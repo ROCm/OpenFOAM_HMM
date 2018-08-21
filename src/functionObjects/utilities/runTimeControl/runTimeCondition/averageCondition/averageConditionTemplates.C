@@ -159,11 +159,8 @@ void Foam::functionObjects::runTimeControls::averageCondition::calc
 
     scalar delta = mag(meanValue - currentValue);
 
-    if (log_)
-    {
-        Info<< "        " << meanName << ": " << meanValue
-            << ", delta: " << delta << nl;
-    }
+    Log << "        " << meanName << ": " << meanValue
+        << ", delta: " << delta << nl;
 
     // Note: Writing result to owner function object and not the local run-time
     // condition

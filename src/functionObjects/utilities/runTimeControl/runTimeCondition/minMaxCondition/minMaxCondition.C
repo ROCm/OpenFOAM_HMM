@@ -145,13 +145,10 @@ bool Foam::functionObjects::runTimeControls::minMaxCondition::apply()
             }
         }
 
-        if (log_)
-        {
-            Info<< "    " << type() << ": " << modeTypeNames_[mode_] << " "
-                << fieldName << ": value = " << v
-                << ", threshold value = " << value_
-                << ", satisfied = " << ok << endl;
-        }
+        Log << "    " << type() << ": " << modeTypeNames_[mode_] << " "
+            << fieldName << ": value = " << v
+            << ", threshold value = " << value_
+            << ", satisfied = " << ok << endl;
 
         satisfied = satisfied && ok;
     }

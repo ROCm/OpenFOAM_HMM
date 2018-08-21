@@ -78,9 +78,6 @@ protected:
         //- Reference to the condition dictionary
         dictionary& conditionDict_;
 
-        //- Switch to send output to Info
-        Switch log_;
-
         //- Group index - if applied, all conditions in a group must be
         //  satisfied before condition is met
         label groupID_;
@@ -139,6 +136,11 @@ public:
         const dictionary& dict,
         stateFunctionObject& state
     );
+
+    // Public Data
+
+        //- Switch to send output to Info
+        Switch log;
 
 
     // Public Member Functions

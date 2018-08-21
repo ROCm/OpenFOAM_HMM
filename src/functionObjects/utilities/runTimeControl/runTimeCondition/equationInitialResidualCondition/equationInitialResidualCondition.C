@@ -183,24 +183,18 @@ apply()
 
     if (satisfied && valid)
     {
-        if (log_)
-        {
-            Info<< type() << ": " << name_
-                << ": satisfied using threshold value: " << value_ << nl;
-        }
+        Log << type() << ": " << name_
+            << ": satisfied using threshold value: " << value_ << nl;
 
         forAll(result, resulti)
         {
             if (result[resulti] > 0)
             {
-                if (log_)
-                {
-                    Info<< "    field: " << fieldNames_[resulti]
-                        << ", residual: " << result[resulti] << nl;
-                }
+                Log << "    field: " << fieldNames_[resulti]
+                    << ", residual: " << result[resulti] << nl;
             }
         }
-        if (log_) Info<< endl;
+        Log << endl;
     }
 
     return satisfied;
