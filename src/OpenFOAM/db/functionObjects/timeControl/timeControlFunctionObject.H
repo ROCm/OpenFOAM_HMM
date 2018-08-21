@@ -75,6 +75,25 @@ class timeControl
 :
     public functionObject
 {
+public:
+
+
+    // Public enumerations
+
+        //- Control mode
+        enum class controlMode
+        {
+            TIME,
+            TRIGGER,
+            TIME_OR_TRIGGER,
+            TIME_AND_TRIGGER
+        };
+
+        static const Enum<controlMode> controlModeNames_;
+
+
+private:
+
     // Private data
 
         //- Reference to the time database
@@ -85,6 +104,9 @@ class timeControl
 
 
         // Optional user inputs
+
+            //- Control mode (combination of time/trigger behaviour)
+            controlMode controlMode_;
 
             //- Activation time - defaults to -VGREAT
             scalar timeStart_;

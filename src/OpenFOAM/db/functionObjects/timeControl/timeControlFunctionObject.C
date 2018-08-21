@@ -38,6 +38,15 @@ namespace functionObjects
 }
 }
 
+const Foam::Enum<Foam::functionObjects::timeControl::controlMode>
+Foam::functionObjects::timeControl::controlModeNames_
+{
+    { controlMode::TIME, "time" },
+    { controlMode::TRIGGER, "trigger" },
+    { controlMode::TIME_OR_TRIGGER, "timeOrTrigger" },
+    { controlMode::TIME_AND_TRIGGER, "timeAndTrigger" }
+};
+
 
 // * * * * * * * * * * * * * * * Private Members * * * * * * * * * * * * * * //
 
@@ -52,8 +61,11 @@ void Foam::functionObjects::timeControl::readControls()
         timeEnd_ = time_.userTimeToTime(timeEnd_);
     }
 
-    dict_.readIfPresent("triggerStart", triggerStart_);
-    dict_.readIfPresent("triggerEnd", triggerEnd_);
+    if (dict_.readIfPresent("triggerStart", triggerStart_))
+    {
+        dict_.readIfPresent("triggerEnd", triggerEnd_);
+        controlMode_ = controlModeNames_.read(dict_.lookup("controlMode"));
+    }
 
     deltaTCoeff_ = GREAT;
     if (dict_.readIfPresent("deltaTCoeff", deltaTCoeff_))
@@ -76,12 +88,39 @@ bool Foam::functionObjects::timeControl::active() const
 {
     label triggeri = time_.functionObjects().triggerIndex();
 
-    return
-        (triggeri >= triggerStart_)
-     || (
-            time_.value() >= (timeStart_ - 0.5*time_.deltaTValue())
-         && time_.value() <= (timeEnd_ + 0.5*time_.deltaTValue())
-    );
+    bool inTime =
+        time_.value() >= (timeStart_ - 0.5*time_.deltaTValue())
+     && time_.value() <= (timeEnd_ + 0.5*time_.deltaTValue());
+
+    bool inTrigger = triggeri >= triggerStart_ && triggeri <= triggerEnd_;
+
+    switch (controlMode_)
+    {
+        case controlMode::TIME:
+        {
+            return inTime;
+        }
+        case controlMode::TRIGGER:
+        {
+            return inTrigger;
+        }
+        case controlMode::TIME_OR_TRIGGER:
+        {
+            return inTime || inTrigger;
+        }
+        case controlMode::TIME_AND_TRIGGER:
+        {
+            return inTime && inTrigger;
+        }
+        default:
+        {
+            FatalErrorInFunction
+                << "Unhandled enumeration: " << controlModeNames_[controlMode_]
+                << abort(FatalError);
+        }
+    }
+
+    return false;
 }
 
 
@@ -410,9 +449,10 @@ Foam::functionObjects::timeControl::timeControl
     functionObject(name),
     time_(t),
     dict_(dict),
+    controlMode_(controlMode::TIME),
     timeStart_(-VGREAT),
     timeEnd_(VGREAT),
-    triggerStart_(labelMin),
+    triggerStart_(labelMax),
     triggerEnd_(labelMax),
     nStepsToStartTimeChange_(labelMax),
     executeControl_(t, dict, "execute"),
@@ -694,7 +734,7 @@ bool Foam::functionObjects::timeControl::adjustTimeStep()
 
                 // Set time, deltaT adjustments for writeInterval purposes
                 // are already taken care. Hence disable auto-update
-                const_cast<Time&>( time_).setDeltaT(newDeltaT, false);
+                const_cast<Time&>(time_).setDeltaT(newDeltaT, false);
 
                 if (seriesDTCoeff_ < 1.0)
                 {
@@ -759,12 +799,7 @@ bool Foam::functionObjects::timeControl::read(const dictionary& dict)
 
 bool Foam::functionObjects::timeControl::filesModified() const
 {
-    bool mod = false;
-    if (active())
-    {
-        mod = foPtr_->filesModified();
-    }
-    return mod;
+    return active() ? foPtr_->filesModified() : false;
 }
 
 
