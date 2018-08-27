@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -216,7 +216,13 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         IOobject
         (
             "boundary",
-            time().findInstance(meshDir(), "boundary"),
+            time().findInstance // allow 'newer' boundary file
+            (
+                meshDir(),
+                "boundary",
+                IOobject::MUST_READ,
+                faces_.instance()
+            ),
             meshSubDir,
             *this,
             IOobject::MUST_READ,
@@ -235,12 +241,13 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         IOobject
         (
             "pointZones",
-            time().findInstance
-            (
-                meshDir(),
-                "pointZones",
-                IOobject::READ_IF_PRESENT
-            ),
+            //time().findInstance
+            //(
+            //    meshDir(),
+            //    "pointZones",
+            //    IOobject::READ_IF_PRESENT
+            //),
+            faces_.instance(),
             meshSubDir,
             *this,
             IOobject::READ_IF_PRESENT,
@@ -253,12 +260,13 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         IOobject
         (
             "faceZones",
-            time().findInstance
-            (
-                meshDir(),
-                "faceZones",
-                IOobject::READ_IF_PRESENT
-            ),
+            //time().findInstance
+            //(
+            //    meshDir(),
+            //    "faceZones",
+            //    IOobject::READ_IF_PRESENT
+            //),
+            faces_.instance(),
             meshSubDir,
             *this,
             IOobject::READ_IF_PRESENT,
@@ -271,12 +279,13 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         IOobject
         (
             "cellZones",
-            time().findInstance
-            (
-                meshDir(),
-                "cellZones",
-                IOobject::READ_IF_PRESENT
-            ),
+            //time().findInstance
+            //(
+            //    meshDir(),
+            //    "cellZones",
+            //    IOobject::READ_IF_PRESENT
+            //),
+            faces_.instance(),
             meshSubDir,
             *this,
             IOobject::READ_IF_PRESENT,
