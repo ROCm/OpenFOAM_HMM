@@ -1642,6 +1642,7 @@ Foam::cellCellStencils::inverseDistance::inverseDistance
     // Protect local fields from interpolation
     nonInterpolatedFields_.insert("cellInterpolationWeight");
     nonInterpolatedFields_.insert("cellTypes");
+    nonInterpolatedFields_.insert("maxMagWeight");
 
     // Read zoneID
     this->zoneID();
@@ -2066,6 +2067,9 @@ bool Foam::cellCellStencils::inverseDistance::update()
 
     if (debug&2)
     {
+        // Dump mesh
+        mesh_.time().write();
+
         // Dump stencil
         mkDir(mesh_.time().timePath());
         OBJstream str(mesh_.time().timePath()/"injectionStencil.obj");
@@ -2100,29 +2104,79 @@ bool Foam::cellCellStencils::inverseDistance::update()
         cellInterpolationWeight_.instance() = mesh_.time().timeName();
         cellInterpolationWeight_.write();
 
-        // Dump cell types
-        volScalarField volTypes
-        (
-            IOobject
-            (
-                "cellTypes",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh_,
-            dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
-        );
-
-        forAll(volTypes.internalField(), cellI)
+        // Dump max weight
         {
-            volTypes[cellI] = cellTypes_[cellI];
+            volScalarField maxMagWeight
+            (
+                IOobject
+                (
+                    "maxMagWeight",
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                mesh_,
+                dimensionedScalar(dimless, Zero),
+                zeroGradientFvPatchScalarField::typeName
+            );
+            forAll(cellStencil_, celli)
+            {
+                const scalarList& wghts = cellInterpolationWeights_[celli];
+                forAll(wghts, i)
+                {
+                    if (mag(wghts[i]) > mag(maxMagWeight[celli]))
+                    {
+                        maxMagWeight[celli] = wghts[i];
+                    }
+                }
+                if (mag(maxMagWeight[celli]) > 1)
+                {
+                    const pointField& cc = mesh_.cellCentres();
+                    Pout<< "cell:" << celli
+                        << " at:" << cc[celli]
+                        << " zone:" << zoneID[celli]
+                        << " donors:" << cellStencil_[celli]
+                        << " weights:" << wghts
+                        << " coords:"
+                        << UIndirectList<point>(cc, cellStencil_[celli])
+                        << " donorZone:"
+                        << UIndirectList<label>(zoneID, cellStencil_[celli])
+                        << endl;
+                }
+            }
+            maxMagWeight.correctBoundaryConditions();
+            maxMagWeight.write();
         }
-        volTypes.correctBoundaryConditions();
-        volTypes.write();
+
+        // Dump cell types
+        {
+            volScalarField volTypes
+            (
+                IOobject
+                (
+                    "cellTypes",
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                mesh_,
+                dimensionedScalar(dimless, Zero),
+                zeroGradientFvPatchScalarField::typeName
+            );
+
+            forAll(volTypes.internalField(), cellI)
+            {
+                volTypes[cellI] = cellTypes_[cellI];
+            }
+            volTypes.correctBoundaryConditions();
+            volTypes.write();
+        }
+
+
 
         // Dump stencil
         mkDir(mesh_.time().timePath());

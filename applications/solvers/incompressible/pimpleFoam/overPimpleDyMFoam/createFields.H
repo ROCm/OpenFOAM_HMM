@@ -53,7 +53,6 @@ mesh.setFluxRequired(p.name());
         suppressDict.add("cellMask", true);
         suppressDict.add("cellDisplacement", true);
         suppressDict.add("interpolatedCells", true);
-        suppressDict.add("cellInterpolationWeight", true);
     }
 
     const_cast<dictionary&>
