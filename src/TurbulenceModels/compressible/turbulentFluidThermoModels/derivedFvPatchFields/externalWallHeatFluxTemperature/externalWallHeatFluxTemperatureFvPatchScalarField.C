@@ -215,6 +215,7 @@ externalWallHeatFluxTemperatureFvPatchScalarField
 
     if (qrName_ != "none")
     {
+        qrPrevious_.setSize(mapper.size());
         qrPrevious_.map(ptf.qrPrevious_, mapper);
     }
 }
