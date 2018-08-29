@@ -181,6 +181,14 @@ protected:
             labelList& allCellTypes
         ) const;
 
+        //- If multiple donors meshes: decide which is best
+        bool betterDonor
+        (
+            const label destMesh,
+            const label currentDonorMesh,
+            const label newDonorMesh
+        ) const;
+
         //- Determine donors for all tgt cells
         void markDonors
         (

@@ -434,6 +434,48 @@ void Foam::cellCellStencils::inverseDistance::markPatchesAsHoles
 }
 
 
+bool Foam::cellCellStencils::inverseDistance::betterDonor
+(
+    const label destMesh,
+    const label currentDonorMesh,
+    const label newDonorMesh
+) const
+{
+    // This determines for multiple overlapping meshes which one provides
+    // the best donors. Is very basic and only looks at indices of meshes:
+    // - 'nearest' mesh index wins, i.e. on mesh 0 it preferentially uses donors
+    //   from mesh 1 over mesh 2 (if applicable)
+    // - if same 'distance' the highest mesh wins. So on mesh 1 it
+    //   preferentially uses donors from mesh 2 over mesh 0. This particular
+    //   rule helps to avoid some interpolation loops where mesh 1 uses donors
+    //   from mesh 0 (usually the background) but mesh 0 then uses
+    //   donors from 1.
+
+    if (currentDonorMesh == -1)
+    {
+        return true;
+    }
+    else
+    {
+        const label currentDist = mag(currentDonorMesh-destMesh);
+        const label newDist = mag(newDonorMesh-destMesh);
+
+        if (newDist < currentDist)
+        {
+            return true;
+        }
+        else if (newDist == currentDist && newDonorMesh > currentDonorMesh)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+}
+
+
 void Foam::cellCellStencils::inverseDistance::markDonors
 (
     const globalIndex& globalCells,
@@ -471,11 +513,7 @@ void Foam::cellCellStencils::inverseDistance::markDonors
 
                 // TBD: check for multiple donors. Maybe better one? For
                 //      now check 'nearer' mesh
-                if
-                (
-                    allStencil[celli].empty()
-                 || (mag(srcI-tgtI) < mag(allDonor[celli]-tgtI))
-                )
+                if (betterDonor(tgtI, allDonor[celli], srcI))
                 {
                     label globalDonor =
                         globalCells.toGlobal(srcCellMap[srcCelli]);
@@ -605,11 +643,7 @@ void Foam::cellCellStencils::inverseDistance::markDonors
 
                 // TBD: check for multiple donors. Maybe better one? For
                 //      now check 'nearer' mesh
-                if
-                (
-                    allStencil[celli].empty()
-                 || (mag(srcI-tgtI) < mag(allDonor[celli]-tgtI))
-                )
+                if (betterDonor(tgtI, allDonor[celli], srcI))
                 {
                     allStencil[celli].setSize(1);
                     allStencil[celli][0] = globalDonor;
