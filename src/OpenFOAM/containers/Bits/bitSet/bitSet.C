@@ -159,9 +159,6 @@ Foam::bitSet& Foam::bitSet::orEq(const bitSet& other, const bool strict)
             << "Perform |= on dissimilar sized bitSets: "
             << size()  << " vs. " << other.size() << nl;
     }
-    {
-        return *this;
-    }
 
     label minpos = -1; // Min trim point
 
