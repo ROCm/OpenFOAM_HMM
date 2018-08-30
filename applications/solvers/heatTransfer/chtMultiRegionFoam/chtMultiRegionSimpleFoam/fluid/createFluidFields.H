@@ -12,7 +12,7 @@ PtrList<volScalarField> p_rghFluid(fluidRegions.size());
 PtrList<radiation::radiationModel> radiation(fluidRegions.size());
 
 List<scalar> initialMassFluid(fluidRegions.size());
-List<label> pRefCellFluid(fluidRegions.size(), 0);
+List<label> pRefCellFluid(fluidRegions.size(), -1);
 List<scalar> pRefValueFluid(fluidRegions.size(), 0.0);
 List<bool> frozenFlowFluid(fluidRegions.size(), false);
 
