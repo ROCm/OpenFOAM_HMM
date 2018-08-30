@@ -58,33 +58,42 @@ bool Foam::medialAxisMeshMover::isMaxEdge
 (
     const List<PointData<vector>>& pointWallDist,
     const label edgeI,
-    const scalar minCos
+    const scalar minCos,
+    const bool disableWallEdges
 ) const
 {
     const pointField& points = mesh().points();
-
-    // Do not mark edges with one side on moving wall.
-
     const edge& e = mesh().edges()[edgeI];
 
-    vector v0(points[e[0]] - pointWallDist[e[0]].origin());
-    scalar magV0(mag(v0));
-
-    if (magV0 < SMALL)
+    if (disableWallEdges)
     {
-        return false;
+        // 1. Do not mark edges with one side on moving wall.
+        vector v0(points[e[0]] - pointWallDist[e[0]].origin());
+        scalar magV0(mag(v0));
+        if (magV0 < SMALL)
+        {
+            return false;
+        }
+
+        vector v1(points[e[1]] - pointWallDist[e[1]].origin());
+        scalar magV1(mag(v1));
+        if (magV1 < SMALL)
+        {
+            return false;
+        }
     }
 
-    vector v1(points[e[1]] - pointWallDist[e[1]].origin());
-    scalar magV1(mag(v1));
+    //// 2. Do not mark edges with both sides on a moving wall.
+    //vector v0(points[e[0]] - pointWallDist[e[0]].origin());
+    //scalar magV0(mag(v0));
+    //vector v1(points[e[1]] - pointWallDist[e[1]].origin());
+    //scalar magV1(mag(v1));
+    //if (magV0 < SMALL && magV1 < SMALL)
+    //{
+    //    return false;
+    //}
 
-    if (magV1 < SMALL)
-    {
-        return false;
-    }
-
-
-    //- Detect based on vector to nearest point differing for both endpoints
+    //// 3. Detect based on vector to nearest point differing for both endpoints
     //v0 /= magV0;
     //v1 /= magV1;
     //
@@ -169,6 +178,13 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
         "nMedialAxisIter",
         mesh().globalData().nTotalPoints()
     );
+
+    const bool disableWallEdges = coeffDict.lookupOrDefault<bool>
+    (
+        "disableWallEdges",
+        false
+    );
+
 
 
     // Predetermine mesh edges
@@ -336,7 +352,16 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
                 }
 
             }
-            else if (isMaxEdge(pointWallDist, edgeI, minMedialAxisAngleCos))
+            else if
+            (
+                isMaxEdge
+                (
+                    pointWallDist,
+                    edgeI,
+                    minMedialAxisAngleCos,
+                    disableWallEdges
+                )
+            )
             {
                 // Both end points of edge have very different nearest wall
                 // point. Mark both points as medial axis points.
@@ -351,41 +376,56 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
 
                     // Calculate distance along edge
                     const point& p0 = points[e[0]];
+                    const point& origin0 = pointWallDist[e[0]].origin();
                     const point& p1 = points[e[1]];
-                    scalar dist0 = (p0-pointWallDist[e[0]].origin()) & eVec;
-                    scalar dist1 = (pointWallDist[e[1]].origin()-p1) & eVec;
+                    const point& origin1 = pointWallDist[e[1]].origin();
+                    scalar dist0 = (p0-origin0) & eVec;
+                    scalar dist1 = (origin1-p1) & eVec;
                     scalar s = 0.5*(dist1+eMag+dist0);
 
-                    point medialAxisPt;
+                    point medialAxisPt(vector::max);
                     if (s <= dist0)
                     {
-                        medialAxisPt = p0;
+                        // Make sure point is not on wall. Note that this
+                        // check used to be inside isMaxEdge.
+                        if (magSqr((p0-origin0)) > Foam::sqr(SMALL))
+                        {
+                            medialAxisPt = p0;
+                        }
                     }
                     else if (s >= dist0+eMag)
                     {
-                        medialAxisPt = p1;
+                        // Make sure point is not on wall. Note that this
+                        // check used to be inside isMaxEdge.
+                        if (magSqr((p1-origin1)) > Foam::sqr(SMALL))
+                        {
+                            medialAxisPt = p1;
+                        }
                     }
                     else
                     {
                         medialAxisPt = p0+(s-dist0)*eVec;
                     }
 
-                    forAll(e, ep)
+                    if (medialAxisPt != vector::max)
                     {
-                        label pointI = e[ep];
-
-                        if (!pointMedialDist[pointI].valid(dummyTrackData))
+                        forAll(e, ep)
                         {
-                            maxPoints.append(pointI);
-                            maxInfo.append
-                            (
-                                pointEdgePoint
+                            label pointI = e[ep];
+
+                            if (!pointMedialDist[pointI].valid(dummyTrackData))
+                            {
+                                maxPoints.append(pointI);
+                                maxInfo.append
                                 (
-                                    medialAxisPt,   //points[pointI],
-                                    magSqr(points[pointI]-medialAxisPt)//0.0
-                                )
-                            );
-                            pointMedialDist[pointI] = maxInfo.last();
+                                    pointEdgePoint
+                                    (
+                                        medialAxisPt,   //points[pointI],
+                                        magSqr(points[pointI]-medialAxisPt)//0.0
+                                    )
+                                );
+                                pointMedialDist[pointI] = maxInfo.last();
+                            }
                         }
                     }
                 }
