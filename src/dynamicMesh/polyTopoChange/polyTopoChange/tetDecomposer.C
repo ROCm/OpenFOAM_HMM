@@ -514,8 +514,8 @@ void Foam::tetDecomposer::setRefinement
                         -1,         //edge
                         -1,         //face
                         -1,         //patchi
-                        zoneI,
-                        zoneFlip
+                        -1,         //zone
+                        false
                     );
                 }
                 // 2b. Within neighbour cell - to cell centre
@@ -542,8 +542,8 @@ void Foam::tetDecomposer::setRefinement
                         -1,         //edge
                         -1,         //face
                         -1,         //patchi
-                        zoneI,
-                        zoneFlip
+                        -1,         //zone
+                        false
                     );
                 }
             }
@@ -628,8 +628,8 @@ void Foam::tetDecomposer::setRefinement
                             -1,         //edge
                             -1,         //face
                             -1,         //patchi
-                            zoneI,
-                            zoneFlip
+                            -1,         //zone
+                            false
                         );
                     }
 
@@ -658,8 +658,8 @@ void Foam::tetDecomposer::setRefinement
                             -1,         //edge
                             -1,         //face
                             -1,         //patchi
-                            zoneI,
-                            zoneFlip
+                            -1,         //zone
+                            false
                         );
                     }
                 }
@@ -702,14 +702,6 @@ void Foam::tetDecomposer::setRefinement
 
             if (decomposeCell[celli])
             {
-                label zoneI = mesh_.faceZones().whichZone(facei);
-                bool zoneFlip = false;
-                if (zoneI != -1)
-                {
-                    const faceZone& fz = mesh_.faceZones()[zoneI];
-                    zoneFlip = fz.flipMap()[fz.whichFace(facei)];
-                }
-
                 const face& f = mesh_.faces()[facei];
                 //const labelList& fEdges = mesh_.faceEdges()[facei];
                 forAll(f, fp)
@@ -843,8 +835,8 @@ void Foam::tetDecomposer::setRefinement
                             -1,         //fEdges[fp], //masterEdge
                             facei,      //masterFace
                             -1,         //patchi
-                            zoneI,
-                            zoneFlip
+                            -1,         //zone
+                            false
                         );
                     }
                 }
