@@ -204,6 +204,14 @@ void Foam::refinementFeatures::read
                 distances_[featI][j] = distLevels[j].first();
                 levels_[featI][j] = distLevels[j].second();
 
+                if (levels_[featI][j] < 0)
+                {
+                    FatalErrorInFunction
+                        << "Feature " << featFileName
+                        << " has illegal refinement level " << levels_[featI][j]
+                        << exit(FatalError);
+                }
+
                 // Check in incremental order
                 if (j > 0)
                 {
@@ -575,8 +583,8 @@ void Foam::refinementFeatures::findNearestEdge
 
                     const treeDataEdge& td = tree.shapes();
                     const edge& e = td.edges()[nearInfo[sampleI].index()];
-                    nearNormal[sampleI] =  e.vec(td.points());
-                    nearNormal[sampleI] /= mag(nearNormal[sampleI])+VSMALL;
+
+                    nearNormal[sampleI] = e.unitVec(td.points());
                 }
             }
         }
@@ -638,8 +646,8 @@ void Foam::refinementFeatures::findNearestRegionEdge
                 );
 
                 const edge& e = td.edges()[nearInfo[sampleI].index()];
-                nearNormal[sampleI] =  e.vec(td.points());
-                nearNormal[sampleI] /= mag(nearNormal[sampleI])+VSMALL;
+
+                nearNormal[sampleI] = e.unitVec(td.points());
             }
         }
     }

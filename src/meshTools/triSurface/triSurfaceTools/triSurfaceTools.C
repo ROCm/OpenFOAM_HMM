@@ -315,11 +315,8 @@ Foam::scalar Foam::triSurfaceTools::faceCosAngle
     const vector base0(pLeft - pStart);
     const vector base1(pRight - pStart);
 
-    vector n0(common ^ base0);
-    n0 /= Foam::mag(n0);
-
-    vector n1(base1 ^ common);
-    n1 /= Foam::mag(n1);
+    const vector n0 = normalised(common ^ base0);
+    const vector n1 = normalised(base1 ^ common);
 
     return n0 & n1;
 }
@@ -2068,11 +2065,11 @@ Foam::vector Foam::triSurfaceTools::surfaceNormal
 
         vector edgeNormal(Zero);
 
-        forAll(eFaces, i)
+        for (const label facei : eFaces)
         {
-            edgeNormal += surf.faceNormals()[eFaces[i]];
+            edgeNormal += surf.faceNormals()[facei];
         }
-        return edgeNormal/(mag(edgeNormal) + VSMALL);
+        return normalised(edgeNormal);
     }
     else
     {
@@ -2626,14 +2623,13 @@ void Foam::triSurfaceTools::calcInterpolationWeights
     edge[1] = tri.a()-tri.c();
     edge[2] = tri.b()-tri.a();
 
-    vector triangleFaceNormal = edge[1] ^ edge[2];
+    const vector triangleFaceNormal = edge[1] ^ edge[2];
 
     // calculate edge normal (pointing inwards)
     FixedList<vector, 3> normal;
     for (label i=0; i<3; i++)
     {
-        normal[i] = triangleFaceNormal ^ edge[i];
-        normal[i] /= mag(normal[i]) + VSMALL;
+        normal[i] = normalised(triangleFaceNormal ^ edge[i]);
     }
 
     weights[0] = ((p-tri.b()) & normal[0]) / max(VSMALL, normal[0] & edge[1]);

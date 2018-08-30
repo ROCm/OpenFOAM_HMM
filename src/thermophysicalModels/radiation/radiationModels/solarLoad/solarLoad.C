@@ -294,10 +294,9 @@ void Foam::radiation::solarLoad::updateSkyDiffusiveRadiation
 
 void Foam::radiation::solarLoad::initialise(const dictionary& coeffs)
 {
-    if (coeffs.found("gridUp"))
+    if (coeffs.readIfPresent("gridUp", verticalDir_))
     {
-         coeffs.lookup("gridUp") >> verticalDir_;
-         verticalDir_ /= mag(verticalDir_);
+         verticalDir_.normalise();
     }
     else if (mesh_.foundObject<uniformDimensionedVectorField>("g"))
     {

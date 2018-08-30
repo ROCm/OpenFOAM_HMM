@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
     const word addRegion =
         args.lookupOrDefault<word>
         (
-            "masterRegion",
+            "addRegion",
             polyMesh::defaultRegion
         );
 

@@ -74,6 +74,6 @@ if (mag(yT) < SMALL)
 }
 
 //swirlAxis doesn't have to be of unit length.
-xT /= mag(xT);
-yT /= mag(yT);
-zT /= mag(zT);
+xT.normalise();
+yT.normalise();
+zT.normalise();

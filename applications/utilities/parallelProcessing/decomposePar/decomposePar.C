@@ -108,7 +108,6 @@ Usage
 #include "pointFieldDecomposer.H"
 #include "lagrangianFieldDecomposer.H"
 #include "decompositionModel.H"
-#include "collatedFileOperation.H"
 
 #include "faCFD.H"
 #include "emptyFaPatch.H"
@@ -523,12 +522,6 @@ int main(int argc, char *argv[])
         // Decompose the mesh
         if (!decomposeFieldsOnly)
         {
-            // Disable buffering when writing mesh since we need to read
-            // it later on when decomposing the fields
-            float bufSz =
-                fileOperations::collatedFileOperation::maxThreadFileBufferSize;
-            fileOperations::collatedFileOperation::maxThreadFileBufferSize = 0;
-
             mesh.decomposeMesh();
 
             mesh.writeDecomposition(decomposeSets);
@@ -587,8 +580,7 @@ int main(int argc, char *argv[])
                     << " for use in manual decomposition." << endl;
             }
 
-            fileOperations::collatedFileOperation::maxThreadFileBufferSize =
-                bufSz;
+            fileHandler().flush();
         }
 
 
@@ -1486,8 +1478,14 @@ int main(int argc, char *argv[])
 
                             fieldDecomposer.decomposeFields(areaScalarFields);
                             fieldDecomposer.decomposeFields(areaVectorFields);
-                            fieldDecomposer.decomposeFields(areaSphericalTensorFields);
-                            fieldDecomposer.decomposeFields(areaSymmTensorFields);
+                            fieldDecomposer.decomposeFields
+                            (
+                                areaSphericalTensorFields
+                            );
+                            fieldDecomposer.decomposeFields
+                            (
+                                areaSymmTensorFields
+                            );
                             fieldDecomposer.decomposeFields(areaTensorFields);
 
                             fieldDecomposer.decomposeFields(edgeScalarFields);

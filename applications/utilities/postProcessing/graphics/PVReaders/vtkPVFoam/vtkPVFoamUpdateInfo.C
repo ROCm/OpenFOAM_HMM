@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2018 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -224,6 +224,9 @@ void Foam::vtkPVFoam::updateInfoLagrangian
 
     // List of lagrangian objects across all times
     HashSet<fileName> names;
+
+    // Get times list. Flush first to force refresh.
+    fileHandler().flush();
 
     for (const instant& t : dbPtr_().times())
     {
@@ -697,6 +700,7 @@ void Foam::vtkPVFoam::updateInfoLagrangianFields
     // to some of the clouds.
     HashTable<wordHashSet> fields;
 
+    fileHandler().flush();
     for (const instant& t : dbPtr_().times())
     {
         for (const auto& cloudName : cloudNames)

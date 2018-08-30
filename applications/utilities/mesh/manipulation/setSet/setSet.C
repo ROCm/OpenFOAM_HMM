@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2018 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,6 @@ Description
 #include "faceZoneSet.H"
 #include "pointZoneSet.H"
 #include "timeSelector.H"
-#include "collatedFileOperation.H"
 
 #include <stdio.h>
 
@@ -283,6 +282,9 @@ void removeZone
         {
             WarningInFunction << "Failed writing zone " << setName << endl;
         }
+        zones.write();
+        // Force flushing so we know it has finished writing
+        fileHandler().flush();
     }
 }
 
@@ -541,6 +543,8 @@ bool doCommand
                         << "Failed writing set "
                         << currentSet.objectPath() << endl;
                 }
+                // Make sure writing is finished
+                fileHandler().flush();
             }
         }
     }
@@ -732,8 +736,6 @@ int main(int argc, char *argv[])
     // Specific to topoSet/setSet: quite often we want to block upon writing
     // a set so we can immediately re-read it. So avoid use of threading
     // for set writing.
-    fileOperations::collatedFileOperation::maxThreadFileBufferSize = 0;
-
     timeSelector::addOptions(true, false);
     #include "addRegionOption.H"
     argList::addBoolOption("noVTK", "Do not write VTK files");

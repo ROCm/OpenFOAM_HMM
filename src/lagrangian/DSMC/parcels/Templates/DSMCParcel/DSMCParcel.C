@@ -116,8 +116,7 @@ void Foam::DSMCParcel<ParcelType>::hitWallPatch
 
     scalar m = constProps.mass();
 
-    vector nw = wpp.faceAreas()[wppLocalFace];
-    nw /= mag(nw);
+    const vector nw = normalised(wpp.faceAreas()[wppLocalFace]);
 
     scalar U_dot_nw = U_ & nw;
 

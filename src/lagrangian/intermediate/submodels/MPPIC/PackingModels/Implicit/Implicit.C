@@ -344,7 +344,7 @@ Foam::vector Foam::PackingModels::Implicit<CloudType>::velocityCorrection
     const vector U = uCorrect_()[celli];
 
     // face geometry
-    vector nHat = mesh.faces()[facei].normal(mesh.points());
+    vector nHat = mesh.faces()[facei].areaNormal(mesh.points());
     const scalar nMag = mag(nHat);
     nHat /= nMag;
 

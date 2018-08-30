@@ -86,7 +86,7 @@ void Foam::wedgePolyPatch::calcGeometry(PstreamBuffers&)
                 sign(n_.y())*(max(mag(n_.y()), 0.5) - 0.5),
                 sign(n_.z())*(max(mag(n_.z()), 0.5) - 0.5)
             );
-        centreNormal_ /= mag(centreNormal_);
+        centreNormal_.normalise();
 
         cosAngle_ = centreNormal_ & n_;
 

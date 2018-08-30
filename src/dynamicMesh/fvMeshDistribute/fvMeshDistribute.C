@@ -389,8 +389,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::fvMeshDistribute::generateTestField
     const fvMesh& mesh
 )
 {
-    vector testNormal(1, 1, 1);
-    testNormal /= mag(testNormal);
+    const vector testNormal = normalised(vector::one);
 
     tmp<surfaceScalarField> tfld
     (
@@ -440,8 +439,7 @@ void Foam::fvMeshDistribute::testField(const surfaceScalarField& fld)
 {
     const fvMesh& mesh = fld.mesh();
 
-    vector testNormal(1, 1, 1);
-    testNormal /= mag(testNormal);
+    const vector testNormal = normalised(vector::one);
 
     const surfaceVectorField n(mesh.Sf()/mesh.magSf());
 

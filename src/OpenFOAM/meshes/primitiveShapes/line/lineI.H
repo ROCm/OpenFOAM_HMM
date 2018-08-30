@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,6 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "zero.H"
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -71,6 +72,13 @@ inline PointRef Foam::line<Point, PointRef>::second() const
 
 
 template<class Point, class PointRef>
+inline PointRef Foam::line<Point, PointRef>::last() const
+{
+    return b_;
+}
+
+
+template<class Point, class PointRef>
 inline PointRef Foam::line<Point, PointRef>::start() const
 {
     return first();
@@ -107,10 +115,10 @@ inline Point Foam::line<Point, PointRef>::vec() const
 template<class Point, class PointRef>
 inline Point Foam::line<Point, PointRef>::unitVec() const
 {
-    Point v = b_ - a_;
-    v /= ::Foam::mag(v) + VSMALL;
+    const Point v = (b_ - a_);
+    const scalar s(::Foam::mag(v));
 
-    return v;
+    return s < ROOTVSMALL ? Zero : v/s;
 }
 
 

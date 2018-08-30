@@ -239,11 +239,9 @@ forAll(isNeiInterpolatedFace, faceI)
                 n1 = vector(-n.z(), 0, n.x());
             }
         }
+        n1.normalise();
 
-        n1 /= mag(n1);
-
-        vector n2 = n ^ n1;
-        n2 /= mag(n2);
+        const vector n2 = normalised(n ^ n1);
 
         tensor rot =
             tensor

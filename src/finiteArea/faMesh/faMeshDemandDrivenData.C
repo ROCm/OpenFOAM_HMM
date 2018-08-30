@@ -425,9 +425,7 @@ void Foam::faMesh::calcFaceAreaNormals() const
     vectorField& nInternal = faceAreaNormals.ref();
     forAll(localFaces, faceI)
     {
-        nInternal[faceI] =
-            localFaces[faceI].normal(localPoints)/
-            localFaces[faceI].mag(localPoints);
+        nInternal[faceI] = localFaces[faceI].unitNormal(localPoints);
     }
 
     forAll(boundary(), patchI)
@@ -529,8 +527,7 @@ void Foam::faMesh::calcEdgeAreaNormals() const
 
     forAll(edgeAreaNormals.internalField(), edgeI)
     {
-        vector e = edges()[edgeI].vec(points());
-        e /= mag(e);
+        const vector e = edges()[edgeI].unitVec(points());
 
 //         scalar wStart =
 //             1.0 - sqr(mag(e^pointNormals[edges()[edgeI].end()]));
@@ -580,8 +577,7 @@ void Foam::faMesh::calcEdgeAreaNormals() const
                 pointNormals[patchEdges[edgeI].start()]
               + pointNormals[patchEdges[edgeI].end()];
 
-            vector e = patchEdges[edgeI].vec(points());
-            e /= mag(e);
+            const vector e = patchEdges[edgeI].unitVec(points());
 
             edgeAreaNormals.boundaryFieldRef()[patchI][edgeI] -=
                 e*(e&edgeAreaNormals.boundaryField()[patchI][edgeI]);
@@ -1285,10 +1281,11 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
 
         // Transform points
         const vector& origin = points[curPoint];
-        vector axis(result[curPoint]/mag(result[curPoint]));
+        const vector axis = normalised(result[curPoint]);
         vector dir(allPoints[0] - points[curPoint]);
         dir -= axis*(axis&dir);
-        dir /= mag(dir);
+        dir.normalise();
+
         coordinateSystem cs("cs", origin, axis, dir);
 
         forAll(allPoints, pI)
@@ -1567,10 +1564,11 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
 
                 // Transform points
                 const vector& origin = points[curPoint];
-                vector axis(result[curPoint]/mag(result[curPoint]));
+                const vector axis = normalised(result[curPoint]);
                 vector dir(allPoints[0] - points[curPoint]);
                 dir -= axis*(axis&dir);
-                dir /= mag(dir);
+                dir.normalise();
+
                 const coordinateSystem cs("cs", origin, axis, dir);
 
                 scalarField W(allPoints.size(), 1.0);
@@ -1738,10 +1736,11 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
 
                 // Transform points
                 const vector& origin = points[curPoint];
-                vector axis(result[curPoint]/mag(result[curPoint]));
+                const vector axis = normalised(result[curPoint]);
                 vector dir(allPoints[0] - points[curPoint]);
                 dir -= axis*(axis&dir);
-                dir /= mag(dir);
+                dir.normalise();
+
                 coordinateSystem cs("cs", origin, axis, dir);
 
                 scalarField W(allPoints.size(), 1.0);

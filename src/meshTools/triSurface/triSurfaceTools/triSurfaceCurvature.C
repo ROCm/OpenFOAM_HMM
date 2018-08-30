@@ -68,8 +68,8 @@ Foam::triSurfaceTools::vertexNormals(const triSurface& surf)
 
     Info<< "Calculating vertex normals" << endl;
 
-    tmp<vectorField> tfld(new vectorField(surf.nPoints(), Zero));
-    vectorField& pointNormals = tfld.ref();
+    auto tpointNormals = tmp<vectorField>::New(surf.nPoints(), Zero);
+    auto& pointNormals = tpointNormals.ref();
 
     const pointField& points = surf.points();
     const labelListList& pointFaces = surf.pointFaces();
@@ -79,28 +79,27 @@ Foam::triSurfaceTools::vertexNormals(const triSurface& surf)
     {
         const labelList& pFaces = pointFaces[pI];
 
-        forAll(pFaces, fI)
+        for (const label facei : pFaces)
         {
-            const label facei = pFaces[fI];
             const triFace& f = surf[facei];
 
-            vector fN = f.normal(points);
+            const vector areaNorm = f.areaNormal(points);
 
             const scalar weight = vertexNormalWeight
             (
                 f,
                 meshPoints[pI],
-                fN,
+                areaNorm,
                 points
             );
 
-            pointNormals[pI] += weight*fN;
+            pointNormals[pI] += weight * areaNorm;
         }
 
-        pointNormals[pI] /= mag(pointNormals[pI]) + VSMALL;
+        pointNormals[pI].normalise();
     }
 
-    return tfld;
+    return tpointNormals;
 }
 
 
@@ -114,8 +113,8 @@ Foam::triSurfaceTools::vertexTriads
     const pointField& points = surf.points();
     const Map<label>& meshPointMap = surf.meshPointMap();
 
-    tmp<triadField> tfld(new triadField(points.size()));
-    triadField& pointTriads = tfld.ref();
+    auto tpointTriads = tmp<triadField>::New(points.size());
+    auto& pointTriads = tpointTriads.ref();
 
     forAll(points, pI)
     {
@@ -131,16 +130,13 @@ Foam::triSurfaceTools::vertexTriads
         plane p(pt, normal);
 
         // Pick arbitrary point in plane
-        vector dir1 = pt - p.somePointInPlane(1e-3);
-        dir1 /= mag(dir1);
-
-        vector dir2 = dir1 ^ normal;
-        dir2 /= mag(dir2);
+        vector dir1 = normalised(pt - p.somePointInPlane(1e-3));
+        vector dir2 = normalised(dir1 ^ normal);
 
         pointTriads[meshPointMap[pI]] = triad(dir1, dir2, normal);
     }
 
-    return tfld;
+    return tpointTriads;
 }
 
 
@@ -187,7 +183,7 @@ Foam::triSurfaceTools::curvatures
 
         // Set up a local coordinate system for the face
         const vector& e0 = edgeVectors[0];
-        const vector eN = f.normal(points);
+        const vector eN = f.areaNormal(points);
         const vector e1 = (e0 ^ eN);
 
         if (magSqr(eN) < ROOTVSMALL)
@@ -276,7 +272,7 @@ Foam::triSurfaceTools::curvatures
             (
                 f,
                 meshPoints[patchPointIndex],
-                f.normal(points),
+                f.areaNormal(points),
                 points
             );
 
@@ -304,8 +300,8 @@ Foam::triSurfaceTools::curvatures
         }
     }
 
-    tmp<scalarField> tfld(new scalarField(points.size(), Zero));
-    scalarField& curvatureAtPoints = tfld.ref();
+    auto tcurvatureAtPoints = tmp<scalarField>::New(points.size(), Zero);
+    scalarField& curvatureAtPoints = tcurvatureAtPoints.ref();
 
     forAll(curvatureAtPoints, pI)
     {
@@ -325,7 +321,7 @@ Foam::triSurfaceTools::curvatures
         curvatureAtPoints[meshPoints[pI]] = curvature;
     }
 
-    return tfld;
+    return tcurvatureAtPoints;
 }
 
 
@@ -356,8 +352,8 @@ Foam::triSurfaceTools::writeCurvature
 {
     Info<< "Extracting curvature of surface at the points." << endl;
 
-    tmp<scalarField> tfld = triSurfaceTools::curvatures(surf);
-    scalarField& curv = tfld.ref();
+    tmp<scalarField> tcurv = triSurfaceTools::curvatures(surf);
+    scalarField& curv = tcurv.ref();
 
     triSurfacePointScalarField outputField
     (
@@ -379,7 +375,7 @@ Foam::triSurfaceTools::writeCurvature
     outputField.write();
     outputField.swap(curv);
 
-    return tfld;
+    return tcurv;
 }
 
 

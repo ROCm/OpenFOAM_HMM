@@ -1860,9 +1860,9 @@ Foam::labelPair Foam::snappySnapDriver::findDiagonalAttraction
                         isConcave
                         (
                             compact0.centre(points0),
-                            compact0.normal(points0),
+                            compact0.areaNormal(points0),
                             compact1.centre(points1),
-                            compact1.normal(points1),
+                            compact1.areaNormal(points1),
                             concaveCos
                         )
                     )

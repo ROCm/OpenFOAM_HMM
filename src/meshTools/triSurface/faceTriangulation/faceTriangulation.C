@@ -54,8 +54,8 @@ Foam::tmp<Foam::vectorField> Foam::faceTriangulation::calcEdges
     const pointField& points
 )
 {
-    tmp<vectorField> tedges(new vectorField(f.size()));
-    vectorField& edges = tedges.ref();
+    auto tedges = tmp<vectorField>::New(f.size());
+    auto& edges = tedges.ref();
 
     forAll(f, i)
     {
@@ -63,9 +63,8 @@ Foam::tmp<Foam::vectorField> Foam::faceTriangulation::calcEdges
         point nextPt = points[f[f.fcIndex(i)]];
 
         vector vec(nextPt - thisPt);
-        vec /= mag(vec) + VSMALL;
 
-        edges[i] = vec;
+        edges[i] = vec.normalise();
     }
 
     return tedges;
@@ -159,9 +158,9 @@ bool Foam::faceTriangulation::triangleContainsPoint
     const point& pt
 )
 {
-    scalar area01Pt = triPointRef(p0, p1, pt).normal() & n;
-    scalar area12Pt = triPointRef(p1, p2, pt).normal() & n;
-    scalar area20Pt = triPointRef(p2, p0, pt).normal() & n;
+    const scalar area01Pt = triPointRef(p0, p1, pt).areaNormal() & n;
+    const scalar area12Pt = triPointRef(p1, p2, pt).areaNormal() & n;
+    const scalar area20Pt = triPointRef(p2, p0, pt).areaNormal() & n;
 
     if ((area01Pt > 0) && (area12Pt > 0) && (area20Pt > 0))
     {
@@ -172,10 +171,8 @@ bool Foam::faceTriangulation::triangleContainsPoint
         FatalErrorInFunction << abort(FatalError);
         return false;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -209,7 +206,7 @@ void Foam::faceTriangulation::findDiagonal
     );
     // rayDir should be normalized already but is not due to rounding errors
     // so normalize.
-    rayDir /= mag(rayDir) + VSMALL;
+    rayDir.normalise();
 
 
     //
@@ -309,8 +306,8 @@ void Foam::faceTriangulation::findDiagonal
         {
             // pt inside triangle (so perhaps visible)
             // Select based on minimal angle (so guaranteed visible).
-            vector edgePt0 = pt - startPt;
-            edgePt0 /= mag(edgePt0);
+            vector edgePt0 = (pt - startPt);
+            edgePt0.normalise();
 
             scalar cos = rayDir & edgePt0;
             if (cos > maxCos)
@@ -598,14 +595,12 @@ bool Foam::faceTriangulation::split
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Null constructor
 Foam::faceTriangulation::faceTriangulation()
 :
     triFaceList()
 {}
 
 
-// Construct from components
 Foam::faceTriangulation::faceTriangulation
 (
     const pointField& points,
@@ -615,8 +610,7 @@ Foam::faceTriangulation::faceTriangulation
 :
     triFaceList(f.size()-2)
 {
-    vector avgNormal = f.normal(points);
-    avgNormal /= mag(avgNormal) + VSMALL;
+    const vector avgNormal = f.unitNormal(points);
 
     label triI = 0;
 
@@ -629,7 +623,6 @@ Foam::faceTriangulation::faceTriangulation
 }
 
 
-// Construct from components
 Foam::faceTriangulation::faceTriangulation
 (
     const pointField& points,
@@ -651,7 +644,6 @@ Foam::faceTriangulation::faceTriangulation
 }
 
 
-// Construct from Istream
 Foam::faceTriangulation::faceTriangulation(Istream& is)
 :
     triFaceList(is)

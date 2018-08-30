@@ -225,9 +225,10 @@ int main(int argc, char *argv[])
                 // Determine orientation of tri v.s. cell centre.
                 point cc(cll.centre(points));
                 point fc(tri.centre(points));
-                vector fn(tri.normal(points));
 
-                if (((fc - cc) & fn) < 0)
+                const vector areaNorm(tri.areaNormal(points));
+
+                if (((fc - cc) & areaNorm) < 0)
                 {
                     // Boundary face points inwards. Flip.
                     boundaryFaces[facei].flip();

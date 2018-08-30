@@ -124,7 +124,7 @@ void Foam::setAndNormalToFaceZone::applyToSet
                 {
                     newAddressing.append(facei);
 
-                    vector n = faces[facei].normal(points);
+                    const vector n = faces[facei].areaNormal(points);
                     if ((n & normal_) > 0)
                     {
                         newFlipMap.append(false);

@@ -810,8 +810,7 @@ Foam::List<Foam::pointIndexHit> Foam::meshSearch::intersections
 {
     DynamicList<pointIndexHit> hits;
 
-    vector edgeVec = pEnd - pStart;
-    edgeVec /= mag(edgeVec);
+    const vector edgeVec = normalised(pEnd - pStart);
 
     point pt = pStart;
 

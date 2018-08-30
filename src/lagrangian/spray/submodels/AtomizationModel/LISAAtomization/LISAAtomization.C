@@ -43,7 +43,7 @@ Foam::LISAAtomization<CloudType>::LISAAtomization
     SMDCalcMethod_(this->coeffDict().lookup("SMDCalculationMethod"))
 {
     // Note: Would be good if this could be picked up from the injector
-    injectorDirection_ /= mag(injectorDirection_);
+    injectorDirection_.normalise();
 
     if (SMDCalcMethod_ == "method1")
     {

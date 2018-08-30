@@ -34,9 +34,8 @@ SourceFiles
 #ifndef cut_H
 #define cut_H
 
-#include "FixedList.H"
-#include "nil.H"
 #include "plane.H"
+#include "FixedList.H"
 #include "tetPointRef.H"
 #include "triPointRef.H"
 #include "zero.H"
@@ -55,8 +54,6 @@ namespace cut
 template<class Type>
 class uniformOp
 {
-private:
-
     //- Data
     Type data_;
 
@@ -92,7 +89,7 @@ public:
 
 class noOp
 :
-    public uniformOp<nil>
+    public uniformOp<zero::null>
 {
 public:
 
@@ -109,9 +106,9 @@ public:
         {}
 
         //- Construct from base
-        noOp(const uniformOp<nil>& op)
+        noOp(const uniformOp<zero::null>& op)
         :
-            uniformOp<nil>(op)
+            uniformOp<zero::null>(op)
         {}
 
 
@@ -138,7 +135,7 @@ public:
 
 class areaOp
 :
-    public uniformOp<nil>
+    public uniformOp<zero::null>
 {
 public:
 
@@ -155,9 +152,9 @@ public:
         {}
 
         //- Construct from base
-        areaOp(const uniformOp<nil>& op)
+        areaOp(const uniformOp<zero::null>& op)
         :
-            uniformOp<nil>(op)
+            uniformOp<zero::null>(op)
         {}
 
 
@@ -183,7 +180,7 @@ public:
 
 class volumeOp
 :
-    public uniformOp<nil>
+    public uniformOp<zero::null>
 {
 public:
 
@@ -200,9 +197,9 @@ public:
         {}
 
         //- Construct from base
-        volumeOp(const uniformOp<nil>& op)
+        volumeOp(const uniformOp<zero::null>& op)
         :
-            uniformOp<nil>(op)
+            uniformOp<zero::null>(op)
         {}
 
 
@@ -315,7 +312,7 @@ public:
 template<unsigned Size>
 class listOp
 :
-    public uniformOp<nil>
+    public uniformOp<zero::null>
 {
 public:
 
@@ -356,9 +353,9 @@ public:
         {}
 
         //- Construct from base
-        listOp(const uniformOp<nil>& op)
+        listOp(const uniformOp<zero::null>& op)
         :
-            uniformOp<nil>(op)
+            uniformOp<zero::null>(op)
         {}
 
 
@@ -379,8 +376,6 @@ public:
 
 
 typedef listOp<3> listTriOp;
-
-
 typedef listOp<4> listTetOp;
 
 
@@ -437,8 +432,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Trait to determine the result of the addition of two operations
-template<class AheadOp, class BehindOp>
-class opAddResult;
+template<class AheadOp, class BehindOp> class opAddResult;
 
 template<class Op>
 class opAddResult<Op, Op>

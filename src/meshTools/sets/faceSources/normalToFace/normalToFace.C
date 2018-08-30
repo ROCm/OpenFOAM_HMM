@@ -51,7 +51,7 @@ Foam::topoSetSource::addToUsageTable Foam::normalToFace::usage_
 
 void Foam::normalToFace::setNormal()
 {
-    normal_ /= mag(normal_) + VSMALL;
+    normal_.normalise();
 
     Info<< "    normalToFace : Normalized vector to " << normal_ << endl;
 
@@ -116,8 +116,7 @@ void Foam::normalToFace::applyToSet
 
         forAll(mesh_.faceAreas(), facei)
         {
-            vector n = mesh_.faceAreas()[facei];
-            n /= mag(n) + VSMALL;
+            const vector n = normalised(mesh_.faceAreas()[facei]);
 
             if (mag(1 - (n & normal_)) < tol_)
             {
@@ -136,8 +135,7 @@ void Foam::normalToFace::applyToSet
         {
             const label facei = iter.key();
 
-            vector n = mesh_.faceAreas()[facei];
-            n /= mag(n) + VSMALL;
+            const vector n = normalised(mesh_.faceAreas()[facei]);
 
             if (mag(1 - (n & normal_)) < tol_)
             {

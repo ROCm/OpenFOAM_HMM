@@ -129,8 +129,7 @@ void Foam::fieldSmoother::smoothNormals
             {
                 //full smoothing neighbours + point value
                 average[pointI] = 0.5*(normals[pointI]+average[pointI]);
-                normals[pointI] = average[pointI];
-                normals[pointI] /= mag(normals[pointI]) + VSMALL;
+                normals[pointI] = normalised(average[pointI]);
             }
         }
     }
@@ -196,8 +195,7 @@ void Foam::fieldSmoother::smoothPatchNormals
         {
             // full smoothing neighbours + point value
             average[pointI] = 0.5*(normals[pointI]+average[pointI]);
-            normals[pointI] = average[pointI];
-            normals[pointI] /= mag(normals[pointI]) + VSMALL;
+            normals[pointI] = normalised(average[pointI]);
         }
     }
 }

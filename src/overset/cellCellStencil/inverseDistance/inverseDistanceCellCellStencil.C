@@ -434,6 +434,48 @@ void Foam::cellCellStencils::inverseDistance::markPatchesAsHoles
 }
 
 
+bool Foam::cellCellStencils::inverseDistance::betterDonor
+(
+    const label destMesh,
+    const label currentDonorMesh,
+    const label newDonorMesh
+) const
+{
+    // This determines for multiple overlapping meshes which one provides
+    // the best donors. Is very basic and only looks at indices of meshes:
+    // - 'nearest' mesh index wins, i.e. on mesh 0 it preferentially uses donors
+    //   from mesh 1 over mesh 2 (if applicable)
+    // - if same 'distance' the highest mesh wins. So on mesh 1 it
+    //   preferentially uses donors from mesh 2 over mesh 0. This particular
+    //   rule helps to avoid some interpolation loops where mesh 1 uses donors
+    //   from mesh 0 (usually the background) but mesh 0 then uses
+    //   donors from 1.
+
+    if (currentDonorMesh == -1)
+    {
+        return true;
+    }
+    else
+    {
+        const label currentDist = mag(currentDonorMesh-destMesh);
+        const label newDist = mag(newDonorMesh-destMesh);
+
+        if (newDist < currentDist)
+        {
+            return true;
+        }
+        else if (newDist == currentDist && newDonorMesh > currentDonorMesh)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+}
+
+
 void Foam::cellCellStencils::inverseDistance::markDonors
 (
     const globalIndex& globalCells,
@@ -471,11 +513,7 @@ void Foam::cellCellStencils::inverseDistance::markDonors
 
                 // TBD: check for multiple donors. Maybe better one? For
                 //      now check 'nearer' mesh
-                if
-                (
-                    allStencil[celli].empty()
-                 || (mag(srcI-tgtI) < mag(allDonor[celli]-tgtI))
-                )
+                if (betterDonor(tgtI, allDonor[celli], srcI))
                 {
                     label globalDonor =
                         globalCells.toGlobal(srcCellMap[srcCelli]);
@@ -605,11 +643,7 @@ void Foam::cellCellStencils::inverseDistance::markDonors
 
                 // TBD: check for multiple donors. Maybe better one? For
                 //      now check 'nearer' mesh
-                if
-                (
-                    allStencil[celli].empty()
-                 || (mag(srcI-tgtI) < mag(allDonor[celli]-tgtI))
-                )
+                if (betterDonor(tgtI, allDonor[celli], srcI))
                 {
                     allStencil[celli].setSize(1);
                     allStencil[celli][0] = globalDonor;
@@ -1642,6 +1676,7 @@ Foam::cellCellStencils::inverseDistance::inverseDistance
     // Protect local fields from interpolation
     nonInterpolatedFields_.insert("cellInterpolationWeight");
     nonInterpolatedFields_.insert("cellTypes");
+    nonInterpolatedFields_.insert("maxMagWeight");
 
     // Read zoneID
     this->zoneID();
@@ -2066,6 +2101,9 @@ bool Foam::cellCellStencils::inverseDistance::update()
 
     if (debug&2)
     {
+        // Dump mesh
+        mesh_.time().write();
+
         // Dump stencil
         mkDir(mesh_.time().timePath());
         OBJstream str(mesh_.time().timePath()/"injectionStencil.obj");
@@ -2100,29 +2138,79 @@ bool Foam::cellCellStencils::inverseDistance::update()
         cellInterpolationWeight_.instance() = mesh_.time().timeName();
         cellInterpolationWeight_.write();
 
-        // Dump cell types
-        volScalarField volTypes
-        (
-            IOobject
-            (
-                "cellTypes",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh_,
-            dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
-        );
-
-        forAll(volTypes.internalField(), cellI)
+        // Dump max weight
         {
-            volTypes[cellI] = cellTypes_[cellI];
+            volScalarField maxMagWeight
+            (
+                IOobject
+                (
+                    "maxMagWeight",
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                mesh_,
+                dimensionedScalar(dimless, Zero),
+                zeroGradientFvPatchScalarField::typeName
+            );
+            forAll(cellStencil_, celli)
+            {
+                const scalarList& wghts = cellInterpolationWeights_[celli];
+                forAll(wghts, i)
+                {
+                    if (mag(wghts[i]) > mag(maxMagWeight[celli]))
+                    {
+                        maxMagWeight[celli] = wghts[i];
+                    }
+                }
+                if (mag(maxMagWeight[celli]) > 1)
+                {
+                    const pointField& cc = mesh_.cellCentres();
+                    Pout<< "cell:" << celli
+                        << " at:" << cc[celli]
+                        << " zone:" << zoneID[celli]
+                        << " donors:" << cellStencil_[celli]
+                        << " weights:" << wghts
+                        << " coords:"
+                        << UIndirectList<point>(cc, cellStencil_[celli])
+                        << " donorZone:"
+                        << UIndirectList<label>(zoneID, cellStencil_[celli])
+                        << endl;
+                }
+            }
+            maxMagWeight.correctBoundaryConditions();
+            maxMagWeight.write();
         }
-        volTypes.correctBoundaryConditions();
-        volTypes.write();
+
+        // Dump cell types
+        {
+            volScalarField volTypes
+            (
+                IOobject
+                (
+                    "cellTypes",
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                mesh_,
+                dimensionedScalar(dimless, Zero),
+                zeroGradientFvPatchScalarField::typeName
+            );
+
+            forAll(volTypes.internalField(), cellI)
+            {
+                volTypes[cellI] = cellTypes_[cellI];
+            }
+            volTypes.correctBoundaryConditions();
+            volTypes.write();
+        }
+
+
 
         // Dump stencil
         mkDir(mesh_.time().timePath());

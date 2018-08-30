@@ -665,6 +665,13 @@ addLayersControls
         // Default is 0.5*featureAngle. Set to -180 always attempt extrusion
         //layerTerminationAngle 25;
 
+        // Optional: disable shrinking of edges that have one (or two) points
+        // on an extruded patch.
+        // Default is false to enable single/two cell thick channels to still
+        // have layers. In <=1806 this was true by default. On larger gaps it
+        // should have no effect.
+        //disableWallEdges true;
+
         // Optional: at non-patched sides allow mesh to slip if extrusion
         // direction makes angle larger than slipFeatureAngle. Default is
         // 0.5*featureAngle.

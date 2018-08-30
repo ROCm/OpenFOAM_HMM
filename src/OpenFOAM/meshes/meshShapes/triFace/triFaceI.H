@@ -332,6 +332,17 @@ inline Foam::pointHit Foam::triFace::nearestPointClassify
 }
 
 
+inline int Foam::triFace::sign
+(
+    const point& p,
+    const UList<point>& points,
+    const scalar tol
+) const
+{
+    return this->tri(points).sign(p, tol);
+}
+
+
 inline Foam::label Foam::triFace::nEdges() const
 {
     return 3;

@@ -1498,8 +1498,7 @@ bool Foam::polyMeshGeometry::checkFaceAngles
 
         const face& f = fcs[facei];
 
-        vector faceNormal = faceAreas[facei];
-        faceNormal /= mag(faceNormal) + VSMALL;
+        const vector faceNormal = normalised(faceAreas[facei]);
 
         // Get edge from f[0] to f[size-1];
         vector ePrev(p[f.first()] - p[f.last()]);
@@ -1646,7 +1645,7 @@ bool Foam::polyMeshGeometry::checkFaceTwist
 //                        p[f[fpI]],
 //                        p[f.nextLabel(fpI)],
 //                        fc
-//                    ).normal()
+//                    ).areaNormal()
 //                );
 //
 //                scalar magTri = mag(triArea);
@@ -1692,20 +1691,30 @@ bool Foam::polyMeshGeometry::checkFaceTwist
 
             if (mesh.isInternalFace(facei))
             {
-                nf = cellCentres[nei[facei]] - cellCentres[own[facei]];
-                nf /= mag(nf) + VSMALL;
+                nf =
+                    normalised
+                    (
+                        cellCentres[nei[facei]]
+                      - cellCentres[own[facei]]
+                    );
             }
             else if (patches[patches.whichPatch(facei)].coupled())
             {
                 nf =
-                    neiCc[facei-mesh.nInternalFaces()]
-                  - cellCentres[own[facei]];
-                nf /= mag(nf) + VSMALL;
+                    normalised
+                    (
+                        neiCc[facei-mesh.nInternalFaces()]
+                      - cellCentres[own[facei]]
+                    );
             }
             else
             {
-                nf = faceCentres[facei] - cellCentres[own[facei]];
-                nf /= mag(nf) + VSMALL;
+                nf =
+                    normalised
+                    (
+                        faceCentres[facei]
+                      - cellCentres[own[facei]]
+                    );
             }
 
             if (nf != vector::zero)
@@ -1721,7 +1730,7 @@ bool Foam::polyMeshGeometry::checkFaceTwist
                             p[f[fpI]],
                             p[f.nextLabel(fpI)],
                             fc
-                        ).normal()
+                        ).areaNormal()
                     );
 
                     scalar magTri = mag(triArea);
@@ -1826,7 +1835,7 @@ bool Foam::polyMeshGeometry::checkTriangleTwist
                     p[f[fp]],
                     p[f.nextLabel(fp)],
                     fc
-                ).normal();
+                ).areaNormal();
 
                 scalar magTri = mag(prevN);
 
@@ -1853,7 +1862,7 @@ bool Foam::polyMeshGeometry::checkTriangleTwist
                             p[f[fp]],
                             p[f.nextLabel(fp)],
                             fc
-                        ).normal()
+                        ).areaNormal()
                     );
                     scalar magTri = mag(triN);
 

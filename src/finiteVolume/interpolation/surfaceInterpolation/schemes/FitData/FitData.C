@@ -76,8 +76,7 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::findFaceDirs
 {
     const fvMesh& mesh = this->mesh();
 
-    idir = mesh.faceAreas()[facei];
-    idir /= mag(idir);
+    idir = normalised(mesh.faceAreas()[facei]);
 
     #ifndef SPHERICAL_GEOMETRY
     if (mesh.nGeometricD() <= 2) // find the normal direction

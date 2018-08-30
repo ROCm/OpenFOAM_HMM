@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,11 +78,11 @@ public:
 
         //- Construct from local max size.
         //  Does communication with default communicator and message tag.
-        globalIndex(const label localSize);
+        inline explicit globalIndex(const label localSize);
 
         //- Construct from local max size.
         //  Does communication with given communicator and message tag
-        globalIndex
+        inline globalIndex
         (
             const label localSize,
             const int tag,
@@ -91,10 +91,10 @@ public:
         );
 
         //- Copy construct from list of labels
-        inline globalIndex(const labelUList& offsets);
+        inline explicit globalIndex(const labelUList& offsets);
 
         //- Move construct from list of labels
-        inline globalIndex(labelList&& offsets);
+        inline explicit globalIndex(labelList&& offsets);
 
         //- Construct from Istream
         globalIndex(Istream& is);
@@ -102,13 +102,37 @@ public:
 
     // Member Functions
 
-        // Edit
+        //- Check for null constructed or global sum == 0
+        inline bool empty() const;
 
-            //- Change after construction
-            inline labelList& offsets();
+        //- Const-access to the offsets
+        inline const labelList& offsets() const;
+
+
+    // Edit
+
+        //- Write-access to the offsets, for changing after construction
+        inline labelList& offsets();
+
+        //- Reset from local size.
+        //  Does communication with default communicator and message tag.
+        void reset(const label localSize);
+
+        //- Reset from local size.
+        //  Does communication with given communicator and message tag
+        void reset
+        (
+            const label localSize,
+            const int tag,
+            const label comm,
+            const bool parallel     // use parallel comms
+        );
 
 
         // Queries relating to my processor (using world communicator)
+
+            //- My local start
+            inline label localStart() const;
 
             //- My local size
             inline label localSize() const;
@@ -132,6 +156,12 @@ public:
             //- Global sum of localSizes
             inline label size() const;
 
+            //- Start of proci data
+            inline label offset(const label proci) const;
+
+            //- Start of proci data
+            inline label localStart(const label proci) const;
+
             //- Size of proci data
             inline label localSize(const label proci) const;
 
@@ -149,9 +179,6 @@ public:
 
             //- Which processor does global come from? Binary search.
             inline label whichProcID(const label i) const;
-
-            //- Start of proci data
-            inline label offset(const label proci) const;
 
 
         // Other

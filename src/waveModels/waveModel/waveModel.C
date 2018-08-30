@@ -57,8 +57,7 @@ void Foam::waveModel::initialiseGeometry()
     // - X: streamwise: patch normal
     // - Y: spanwise: Z^X
     // - Z: up: (negative) gravity direction
-    vector x(-gAverage(patch_.faceAreas()));
-    x /= mag(x) + ROOTVSMALL;
+    vector x = normalised(-gAverage(patch_.faceAreas()));
     vector z = -g_/mag(g_);
     vector y = z^x;
 

@@ -281,12 +281,12 @@ calcPointNormals() const
 
         const labelList& curFaces = pf[pointi];
 
-        forAll(curFaces, facei)
+        for (const label facei : curFaces)
         {
-            curNormal += faceUnitNormals[curFaces[facei]];
+            curNormal += faceUnitNormals[facei];
         }
 
-        curNormal /= mag(curNormal) + VSMALL;
+        curNormal.normalise();
     }
 
     if (debug)
@@ -425,7 +425,7 @@ calcFaceAreas() const
 
     forAll(n, facei)
     {
-        n[facei] = this->operator[](facei).normal(points_);
+        n[facei] = this->operator[](facei).areaNormal(points_);
     }
 
     if (debug)
@@ -472,8 +472,7 @@ calcFaceNormals() const
 
     forAll(n, facei)
     {
-        n[facei] = this->operator[](facei).normal(points_);
-        n[facei] /= mag(n[facei]) + VSMALL;
+        n[facei] = this->operator[](facei).unitNormal(points_);
     }
 
     if (debug)

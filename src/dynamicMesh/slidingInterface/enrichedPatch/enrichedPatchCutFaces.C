@@ -150,8 +150,7 @@ void Foam::enrichedPatch::calcCutFaces() const
         }
 
         // Grab face normal
-        vector normal = curLocalFace.normal(lp);
-        normal /= mag(normal);
+        const vector normal = curLocalFace.unitNormal(lp);
 
         while (edgeSeeds.size())
         {
@@ -221,10 +220,9 @@ void Foam::enrichedPatch::calcCutFaces() const
                 // Get the vector along the edge and the right vector
                 vector ahead = curPoint - lp[prevPointLabel];
                 ahead -= normal*(normal & ahead);
-                ahead /= mag(ahead);
+                ahead.normalise();
 
-                vector right = normal ^ ahead;
-                right /= mag(right);
+                const vector right = normalised(normal ^ ahead);
 
                 // Pout<< "normal: " << normal
                 //     << " ahead: " << ahead

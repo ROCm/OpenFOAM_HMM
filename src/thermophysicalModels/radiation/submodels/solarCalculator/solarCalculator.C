@@ -123,12 +123,8 @@ void Foam::solarCalculator::calculateBetaTetha()
 
 void Foam::solarCalculator::calculateSunDirection()
 {
-
-    dict_.lookup("gridUp") >> gridUp_;
-    gridUp_ /= mag(gridUp_);
-
-    dict_.lookup("gridEast") >> eastDir_;
-    eastDir_ /= mag(eastDir_);
+    gridUp_  = normalised(dict_.get<vector>("gridUp"));
+    eastDir_ = normalised(dict_.get<vector>("gridEast"));
 
     coord_.reset
     (
@@ -140,7 +136,7 @@ void Foam::solarCalculator::calculateSunDirection()
     direction_.y() =  cos(beta_)*cos(tetha_); // South axis
     direction_.x() =  cos(beta_)*sin(tetha_); // West axis
 
-    direction_ /= mag(direction_);
+    direction_.normalise();
 
     if (debug)
     {
@@ -163,10 +159,9 @@ void Foam::solarCalculator::init()
     {
         case mSunDirConstant:
         {
-            if (dict_.found("sunDirection"))
+            if (dict_.readIfPresent("sunDirection", direction_))
             {
-                dict_.lookup("sunDirection") >> direction_;
-                direction_ /= mag(direction_);
+                direction_.normalise();
             }
             else
             {

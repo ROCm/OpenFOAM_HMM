@@ -107,8 +107,7 @@ Foam::pointToPointPlanarInterpolation::calcCoordinateSystem
             << exit(FatalError);
     }
 
-    vector n = e1^(points[index2]-p0);
-    n /= mag(n);
+    const vector n = normalised(e1 ^ (points[index2]-p0));
 
     if (debug)
     {

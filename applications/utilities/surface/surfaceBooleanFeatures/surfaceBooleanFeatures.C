@@ -317,11 +317,9 @@ label calcNormalDirection
     const vector& pointOnEdge
 )
 {
-    vector cross = (normal ^ edgeDir);
-    cross /= mag(cross);
+    const vector cross = normalised(normal ^ edgeDir);
 
-    vector fC0tofE0 = faceCentre - pointOnEdge;
-    fC0tofE0 /= mag(fC0tofE0);
+    const vector fC0tofE0 = normalised(faceCentre - pointOnEdge);
 
     label nDir = ((cross & fC0tofE0) > 0.0 ? 1 : -1);
 

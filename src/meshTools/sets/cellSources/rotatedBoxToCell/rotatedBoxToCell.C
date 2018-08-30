@@ -62,11 +62,7 @@ void Foam::rotatedBoxToCell::combine(topoSet& set, const bool add) const
     boxPoints[6] = origin_ + k_ + i_ + j_;
     boxPoints[7] = origin_ + k_ + j_;
 
-    labelList boxVerts(8);
-    forAll(boxVerts, i)
-    {
-        boxVerts[i] = i;
-    }
+    labelList boxVerts(identity(8));
 
     const cellModel& hex = cellModel::ref(cellModel::HEX);
 
@@ -77,7 +73,7 @@ void Foam::rotatedBoxToCell::combine(topoSet& set, const bool add) const
     vectorField boxFaceNormals(boxFaces.size());
     forAll(boxFaces, i)
     {
-        boxFaceNormals[i] = boxFaces[i].normal(boxPoints);
+        boxFaceNormals[i] = boxFaces[i].areaNormal(boxPoints);
 
         //Pout<< "Face:" << i << " position:" << boxFaces[i].centre(boxPoints)
         //    << " normal:" << boxFaceNormals[i] << endl;

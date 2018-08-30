@@ -16,11 +16,6 @@ FoamFile
 
 dynamicFvMesh       dynamicOversetFvMesh;
 
-dynamicOversetFvMeshCoeffs
-{
-//    layerRelax 0.3;
-}
-
 //motionSolverLibs ( "libfvMotionSolvers.so" );
 //
 //solver          displacementLaplacian;

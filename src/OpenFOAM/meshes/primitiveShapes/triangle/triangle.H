@@ -323,6 +323,14 @@ public:
                 pointHit& edgePoint
             ) const;
 
+            //- The sign for which side of the face plane the point is on.
+            //  Uses the supplied tolerance for rounding around zero.
+            //  \return
+            //  -  0: on plane
+            //  - +1: front-side
+            //  - -1: back-side
+            inline int sign(const point& p, const scalar tol = SMALL) const;
+
             //- Decompose triangle into triangles above and below plane
             template<class AboveOp, class BelowOp>
             inline void sliceWithPlane

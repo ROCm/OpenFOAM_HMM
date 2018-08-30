@@ -243,8 +243,7 @@ Foam::Map<Foam::label> Foam::meshRefinement::findEdgeConnectedProblemCells
     {
         label facei = candidateFaces[i];
 
-        vector n = mesh_.faceAreas()[facei];
-        n /= mag(n);
+        const vector n = normalised(mesh_.faceAreas()[facei]);
 
         label region = surfaces_.globalRegion
         (
@@ -296,7 +295,7 @@ bool Foam::meshRefinement::isCollapsedFace
     const scalar severeNonorthogonalityThreshold =
         ::cos(degToRad(maxNonOrtho));
 
-    vector s = mesh_.faces()[facei].normal(points);
+    vector s = mesh_.faces()[facei].areaNormal(points);
     scalar magS = mag(s);
 
     // Check face area

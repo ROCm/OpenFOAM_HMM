@@ -481,10 +481,9 @@ void Foam::conformalVoronoiMesh::calcFaceZones
                     norm
                 );
 
-                vector fN = faces[facei].normal(mesh.points());
-                fN /= mag(fN) + SMALL;
+                const vector areaNorm = faces[facei].areaNormal(mesh.points());
 
-                if ((norm[0] & fN) < 0)
+                if ((norm[0] & areaNorm) < 0)
                 {
                     flipMap[facei] = true;
                 }

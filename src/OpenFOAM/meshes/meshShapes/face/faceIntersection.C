@@ -309,4 +309,23 @@ Foam::pointHit Foam::face::nearestPointClassify
 }
 
 
+int Foam::face::sign
+(
+    const point& p,
+    const UList<point>& points,
+    const scalar tol
+) const
+{
+    // Take three points [0, 1/3, 2/3] from the face
+    // - assumes the face is not severely warped
+
+    return triPointRef
+    (
+        points[operator[](0)],
+        points[operator[](size()/3)],
+        points[operator[]((2*size())/3)]
+    ).sign(p, tol);
+}
+
+
 // ************************************************************************* //

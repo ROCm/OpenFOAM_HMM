@@ -271,8 +271,8 @@ Foam::label Foam::meshDualiser::addInternalFace
         );
 
         //pointField dualPoints(meshMod.points());
-        //vector n(newFace.normal(dualPoints));
-        //n /= mag(n);
+        //const vector n(newFace.unitNormal(dualPoints));
+        //
         //Pout<< "Generated internal dualFace:" << dualFacei
         //    << " verts:" << newFace
         //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)
@@ -298,8 +298,8 @@ Foam::label Foam::meshDualiser::addInternalFace
         );
 
         //pointField dualPoints(meshMod.points());
-        //vector n(newFace.normal(dualPoints));
-        //n /= mag(n);
+        //const vector n(newFace.unitNormal(dualPoints));
+        //
         //Pout<< "Generated internal dualFace:" << dualFacei
         //    << " verts:" << newFace
         //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)
@@ -355,8 +355,8 @@ Foam::label Foam::meshDualiser::addBoundaryFace
     );
 
     //pointField dualPoints(meshMod.points());
-    //vector n(newFace.normal(dualPoints));
-    //n /= mag(n);
+    //const vector n(newFace.unitNormal(dualPoints));
+    //
     //Pout<< "Generated boundary dualFace:" << dualFacei
     //    << " verts:" << newFace
     //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)

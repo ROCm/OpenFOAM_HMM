@@ -172,8 +172,7 @@ void Foam::meshRefinement::calcNeighbourData
             forAll(faceCells, i)
             {
                 // Extrapolate the face centre.
-                vector fn = faceAreas[i];
-                fn /= mag(fn)+VSMALL;
+                const vector fn = normalised(faceAreas[i]);
 
                 label own = faceCells[i];
                 label ownLevel = cellLevel[own];
@@ -2344,7 +2343,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
     label nRemove = findRegions
     (
         mesh_,
-        mergeDistance_*vector(1,1,1),   // perturbVec
+        mergeDistance_ * vector::one,   // perturbVec
         locationsInMesh,
         locationsOutsideMesh,
         cellRegion.nRegions(),

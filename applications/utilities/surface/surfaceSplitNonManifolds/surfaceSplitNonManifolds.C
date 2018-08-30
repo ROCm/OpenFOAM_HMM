@@ -565,16 +565,24 @@ void calcPointVecs
             if (face0I != -1)
             {
                 label v0 = triSurfaceTools::oppositeVertex(surf, face0I, edgeI);
-                vector e0 = (points[v0] - points[e.start()]) ^ eVec;
-                e0 /= mag(e0);
+                const vector e0 =
+                    normalised
+                    (
+                        (points[v0] - points[e.start()]) ^ eVec
+                    );
+
                 midVec = e0;
             }
 
             if (face1I != -1)
             {
                 label v1 = triSurfaceTools::oppositeVertex(surf, face1I, edgeI);
-                vector e1 = (points[e.start()] - points[v1]) ^ eVec;
-                e1 /= mag(e1);
+                const vector e1 =
+                    normalised
+                    (
+                        (points[e.start()] - points[v1]) ^ eVec
+                    );
+
                 midVec += e1;
             }
 
@@ -895,8 +903,7 @@ int main(int argc, char *argv[])
             {
                 scalar minLen = minEdgeLen(surf, pointi);
 
-                vector n = borderPointVec[pointi];
-                n /= mag(n);
+                const vector n = normalised(borderPointVec[pointi]);
 
                 newPoints[newPointi] = newPoints[pointi] + 0.1 * minLen * n;
             }

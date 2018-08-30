@@ -433,11 +433,14 @@ Foam::label Foam::intersectedSurface::nextEdge
     const edge& prevE = edges[prevEdgei];
 
     // x-axis of coordinate system
-    vector e0 = n ^ (points[prevE.otherVertex(prevVerti)] - points[prevVerti]);
-    e0 /= mag(e0) + VSMALL;
+    const vector e0 =
+        normalised
+        (
+            n ^ (points[prevE.otherVertex(prevVerti)] - points[prevVerti])
+        );
 
-    // Get y-axis of coordinate system
-    vector e1 = n ^ e0;
+    // y-axis of coordinate system
+    const vector e1 = n ^ e0;
 
     if (mag(mag(e1) - 1) > SMALL)
     {
@@ -489,10 +492,12 @@ Foam::label Foam::intersectedSurface::nextEdge
             )
             {
                 // Calculate angle of edge with respect to base e0, e1
-                vector vec =
-                    n ^ (points[e.otherVertex(prevVerti)] - points[prevVerti]);
-
-                vec /= mag(vec) + VSMALL;
+                const vector vec =
+                    normalised
+                    (
+                        n
+                      ^ (points[e.otherVertex(prevVerti)] - points[prevVerti])
+                    );
 
                 scalar angle = pseudoAngle(e0, e1, vec);
 
@@ -1021,7 +1026,7 @@ Foam::faceList Foam::intersectedSurface::splitFace
     // See if normal needs flipping.
     faces.shrink();
 
-    vector n = faces[0].normal(eSurf.points());
+    const vector n = faces[0].areaNormal(eSurf.points());
 
     if ((n & surf.faceNormals()[facei]) < 0)
     {

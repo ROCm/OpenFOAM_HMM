@@ -52,7 +52,7 @@ void Foam::tetOverlapVolume::tetTetOverlap
     tetPointRef tetATet = tetA.tet();
     for (label facei = 0; facei < 4; ++facei)
     {
-        tetAFaceAreas[facei] = -tetATet.tri(facei).normal();
+        tetAFaceAreas[facei] = -tetATet.tri(facei).areaNormal();
         tetAMag2FaceAreas[facei] = magSqr(tetAFaceAreas[facei]);
         if (tetAMag2FaceAreas[facei] < ROOTVSMALL)
         {
@@ -65,7 +65,7 @@ void Foam::tetOverlapVolume::tetTetOverlap
     tetPointRef tetBTet = tetB.tet();
     for (label facei = 0; facei < 4; ++facei)
     {
-        tetBFaceAreas[facei] = -tetBTet.tri(facei).normal();
+        tetBFaceAreas[facei] = -tetBTet.tri(facei).areaNormal();
         tetBMag2FaceAreas[facei] = magSqr(tetBFaceAreas[facei]);
         if (tetBMag2FaceAreas[facei] < ROOTVSMALL)
         {

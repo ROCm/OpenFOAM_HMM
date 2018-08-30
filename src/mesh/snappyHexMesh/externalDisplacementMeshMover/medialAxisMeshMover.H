@@ -114,7 +114,8 @@ class medialAxisMeshMover
             (
                 const List<PointData<vector>>& pointWallDist,
                 const label edgeI,
-                const scalar minCos
+                const scalar minCos,
+                const bool checkWall
             ) const;
 
             //- Initialise medial axis. Uses pointDisplacement field only

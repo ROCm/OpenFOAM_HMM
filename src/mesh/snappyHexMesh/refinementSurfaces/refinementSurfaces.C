@@ -207,6 +207,7 @@ Foam::refinementSurfaces::refinementSurfaces
             (
                 globalMinLevel[surfI] < 0
              || globalMaxLevel[surfI] < globalMinLevel[surfI]
+             || globalMaxLevel[surfI] < 0
              || globalLevelIncr[surfI] < 0
             )
             {

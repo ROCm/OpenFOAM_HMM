@@ -558,7 +558,7 @@ void Foam::CV2D::newPoints()
 
                     alignmentDirs[aA] = a + sign(dotProduct)*b;
 
-                    alignmentDirs[aA] /= mag(alignmentDirs[aA]);
+                    alignmentDirs[aA].normalise();
                 }
             }
         }
@@ -845,7 +845,7 @@ void Foam::CV2D::newPoints()
             cd0 = vector2D(cd0.x() + cd0.y(), cd0.y() - cd0.x());
 
             // Normalise the primary coordinate direction
-            cd0 /= mag(cd0);
+            cd0.normalise();
 
             // Calculate the orthogonal coordinate direction
             vector2D cd1(-cd0.y(), cd0.x());

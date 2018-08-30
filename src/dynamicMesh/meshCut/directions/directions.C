@@ -315,8 +315,7 @@ Foam::directions::directions
         vector tan2(globalDict.lookup("tan2"));
         check2D(correct2DPtr, tan2);
 
-        vector normal = tan1 ^ tan2;
-        normal /= mag(normal);
+        const vector normal = normalised(tan1 ^ tan2);
 
         Info<< "Global Coordinate system:" << endl
             << "     normal : " << normal << endl

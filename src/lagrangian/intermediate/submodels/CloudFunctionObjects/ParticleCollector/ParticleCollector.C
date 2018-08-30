@@ -167,7 +167,7 @@ void Foam::ParticleCollector<CloudType>::initConcentricCircles()
     {
         refDir = this->coeffDict().lookup("refDir");
         refDir -= normal_[0]*(normal_[0] & refDir);
-        refDir /= mag(refDir);
+        refDir.normalise();
     }
     else
     {
@@ -315,13 +315,14 @@ void Foam::ParticleCollector<CloudType>::collectParcelPolygon
         // the face's decomposed triangles does not work due to ambiguity along
         // the diagonals.
         const face& f = faces_[facei];
-        const vector n = f.normal(points_);
+        const vector areaNorm = f.areaNormal(points_);
         bool inside = true;
-        for (label i = 0; i < f.size(); ++ i)
+        for (label i = 0; i < f.size(); ++i)
         {
             const label j = f.fcIndex(i);
             const triPointRef t(pIntersect, points_[f[i]], points_[f[j]]);
-            if ((n & t.normal()) < 0)
+
+            if ((areaNorm & t.areaNormal()) < 0)
             {
                 inside = false;
                 break;
@@ -580,8 +581,7 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
         forAll(polygons, polyI)
         {
             polygons[polyI] = polygonAndNormal[polyI].first();
-            normal_[polyI] = polygonAndNormal[polyI].second();
-            normal_[polyI] /= mag(normal_[polyI]) + ROOTVSMALL;
+            normal_[polyI] = normalised(polygonAndNormal[polyI].second());
         }
 
         initPolygons(polygons);

@@ -47,6 +47,39 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+Foam::bitSet Foam::functionObjects::ensightWrite::cellSelection() const
+{
+    bitSet cellsToSelect;
+
+    // Could also deal with cellZones here, as required
+
+    if (bounds_.empty())
+    {
+        return cellsToSelect;
+    }
+
+
+    const auto& cellCentres = static_cast<const fvMesh&>(mesh_).C();
+
+    const label len = mesh_.nCells();
+
+    cellsToSelect.resize(len);
+
+    for (label celli=0; celli < len; ++celli)
+    {
+        const point& cc = cellCentres[celli];
+
+        if (bounds_.contains(cc))
+        {
+            cellsToSelect.set(celli);
+        }
+    }
+
+    return cellsToSelect;
+}
+
+
+
 int Foam::functionObjects::ensightWrite::process(const word& fieldName)
 {
     int state = 0;
@@ -83,7 +116,8 @@ Foam::functionObjects::ensightWrite::ensightWrite
     caseOpts_(writeOpts_.format()),
     selectFields_(),
     dirName_("ensightWrite"),
-    consecutive_(false)
+    consecutive_(false),
+    bounds_()
 {
     if (postProcess)
     {
@@ -104,6 +138,12 @@ bool Foam::functionObjects::ensightWrite::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
 
+    // Ensure consistency
+
+    meshSubset_.clear();
+    ensMesh_.clear();
+
+
     //
     // writer options
     //
@@ -121,6 +161,10 @@ bool Foam::functionObjects::ensightWrite::read(const dictionary& dict)
         list.uniq();
         writeOpts_.faceZoneSelection(list);
     }
+
+
+    bounds_.clear();
+    dict.readIfPresent("bounds", bounds_);
 
 
     //
@@ -197,7 +241,25 @@ bool Foam::functionObjects::ensightWrite::write()
     if (!ensMesh_.valid())
     {
         writeGeom = true;
-        ensMesh_.reset(new ensightMesh(mesh_, writeOpts_));
+
+        bitSet selection = this->cellSelection();
+
+        if (returnReduce(!selection.empty(), orOp<bool>()))
+        {
+            meshSubset_.clear();
+            meshSubset_.reset(new fvMeshSubset(mesh_, selection));
+            ensMesh_.reset
+            (
+                new ensightMesh(meshSubset_->subMesh(), writeOpts_)
+            );
+        }
+        else
+        {
+            ensMesh_.reset
+            (
+                new ensightMesh(mesh_, writeOpts_)
+            );
+        }
     }
     if (ensMesh_().needsUpdate())
     {
@@ -219,12 +281,12 @@ bool Foam::functionObjects::ensightWrite::write()
     DynamicList<word> missing(selectFields_.size());
     DynamicList<word> ignored(selectFields_.size());
 
-    // check exact matches first
+    // Check exact matches first
     for (const wordRe& select : selectFields_)
     {
         if (!select.isPattern())
         {
-            const word& fieldName = static_cast<const word&>(select);
+            const word& fieldName = select;
 
             if (!candidates.erase(fieldName))
             {
@@ -271,7 +333,14 @@ void Foam::functionObjects::ensightWrite::updateMesh(const mapPolyMesh& mpm)
 {
     // fvMeshFunctionObject::updateMesh(mpm);
 
-    if (ensMesh_.valid())
+    // This is heavy-handed, but with a bounding-box limited sub-mesh,
+    // we don't readily know if the updates affect the subsetted mesh.
+    if (!bounds_.empty())
+    {
+        ensMesh_.clear();
+        meshSubset_.clear();
+    }
+    else if (ensMesh_.valid())
     {
         ensMesh_->expire();
     }
@@ -282,7 +351,14 @@ void Foam::functionObjects::ensightWrite::movePoints(const polyMesh& mpm)
 {
     // fvMeshFunctionObject::updateMesh(mpm);
 
-    if (ensMesh_.valid())
+    // This is heavy-handed, but with a bounding-box limited sub-mesh,
+    // we don't readily know if the updates affect the subsetted mesh.
+    if (!bounds_.empty())
+    {
+        ensMesh_.clear();
+        meshSubset_.clear();
+    }
+    else if (ensMesh_.valid())
     {
         ensMesh_->expire();
     }

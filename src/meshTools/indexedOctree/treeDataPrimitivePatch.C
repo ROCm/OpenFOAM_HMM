@@ -172,7 +172,7 @@ Foam::volumeType Foam::treeDataPrimitivePatch<PatchType>::getVolumeType
     // already have point.
 
     pointHit curHit = f.nearestPoint(sample, points);
-    const vector area = f.normal(points);
+    const vector area = f.areaNormal(points);
     const point& curPt = curHit.rawPoint();
 
     //
@@ -310,11 +310,8 @@ Foam::volumeType Foam::treeDataPrimitivePatch<PatchType>::getVolumeType
             vector ePrev = points[f[f.rcIndex(fp)]] - fc;
             vector eNext = points[f[f.fcIndex(fp)]] - fc;
 
-            vector nLeft = ePrev ^ e;
-            nLeft /= mag(nLeft) + VSMALL;
-
-            vector nRight = e ^ eNext;
-            nRight /= mag(nRight) + VSMALL;
+            vector nLeft = normalised(ePrev ^ e);
+            vector nRight = normalised(e ^ eNext);
 
             if (debug & 2)
             {
