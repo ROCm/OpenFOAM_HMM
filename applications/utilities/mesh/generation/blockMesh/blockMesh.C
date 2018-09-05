@@ -55,6 +55,9 @@ Usage
       - \par -noClean
         Do not remove any existing polyMesh/ directory or files
 
+      - \par -time
+        Write resulting mesh to a time directory (instead of constant)
+
 \*---------------------------------------------------------------------------*/
 
 #include "Time.H"
@@ -125,6 +128,12 @@ int main(int argc, char *argv[])
         "sets",
         "Write cellZones as cellSets too (for processing purposes)"
     );
+    argList::addOption
+    (
+        "time",
+        "time",
+        "specify a time to write mesh to"
+    );
 
     #include "addRegionOption.H"
     #include "setRootCase.H"
@@ -193,11 +202,22 @@ int main(int argc, char *argv[])
 
 
 
+    // Instance for resulting mesh
+    word meshInstance(runTime.constant());
+    if (args.readIfPresent("time", meshInstance))
+    {
+        Info<< "Writing polyMesh to " << meshInstance << nl << endl;
+        // Make sure that the time is seen to be the current time. This
+        // is the logic inside regIOobject which resets the instance to the
+        // current time before writting
+        runTime.setTime(instant(meshInstance), 0);
+    }
+
     if (!args.found("noClean"))
     {
         fileName polyMeshPath
         (
-            runTime.path()/runTime.constant()/regionPath/polyMesh::meshSubDir
+            runTime.path()/meshInstance/regionPath/polyMesh::meshSubDir
         );
 
         if (exists(polyMeshPath))
@@ -228,7 +248,7 @@ int main(int argc, char *argv[])
         IOobject
         (
             regionName,
-            runTime.constant(),
+            meshInstance,
             runTime
         ),
         pointField(blocks.points()),  // Copy, could we re-use space?
