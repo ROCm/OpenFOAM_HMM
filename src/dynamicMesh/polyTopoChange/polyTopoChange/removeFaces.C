@@ -997,6 +997,11 @@ void Foam::removeFaces::setRefinement
                         << " face1:" << f1
                         << abort(FatalError);
                 }
+                else
+                {
+                    // Both kept faces are internal. Mark edge for preserving
+                    nFacesPerEdge[edgeI] = 3;
+                }
             }
         }
 
