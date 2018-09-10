@@ -25,7 +25,7 @@ Class
     Foam::functionObjects::vtkCloud
 
 Group
-    grpUtilitiesFunctionObjects
+    grpLagrangianFunctionObjects
 
 Description
     This functionObject writes cloud(s) in VTK PolyData format
