@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,42 +31,109 @@ License
 template<class Type, template<class> class PatchField>
 void Foam::vtk::patchWriter::write
 (
-    const GeometricField<Type, PatchField, volMesh>& field
+    const GeometricField<Type, PatchField, pointMesh>& field
 )
 {
-    const int nCmpt(pTraits<Type>::nComponents);
-    const uint64_t payLoad(nFaces_ * nCmpt * sizeof(float));
-
-    if (legacy_)
+    if (isState(outputState::POINT_DATA))
     {
-        legacy::floatField<nCmpt>(format(), field.name(), nFaces_);
+        ++nPointData_;
     }
     else
     {
-        format().openDataArray<float, nCmpt>(field.name())
-            .closeTag();
+        FatalErrorInFunction
+            << "Bad writer state (" << stateNames[state_]
+            << ") - should be (" << stateNames[outputState::POINT_DATA]
+            << ") for field " << field.name() << nl << endl
+            << exit(FatalError);
     }
 
-    format().writeSize(payLoad);
+    const direction nCmpt(pTraits<Type>::nComponents);
 
-    for (const label patchId : patchIDs_)
+    label nPoints = nLocalPoints_;
+
+    if (parallel_)
     {
-        const auto& pfld = field.boundaryField()[patchId];
+        reduce(nPoints, sumOp<label>());
+    }
 
-        if (nearCellValue_)
+
+    if (format_)
+    {
+        if (legacy())
         {
-            vtk::writeList(format(), pfld.patchInternalField()());
+            legacy::floatField<nCmpt>(format(), field.name(), nPoints);
         }
         else
         {
-            vtk::writeList(format(), pfld);
+            const uint64_t payLoad =
+                vtk::sizeofData<float, nCmpt>(nPoints);
+
+            format().beginDataArray<float, nCmpt>(field.name());
+            format().writeSize(payLoad);
         }
     }
 
-    format().flush();
 
-    if (!legacy_)
+    if (parallel_ ? Pstream::master() : true)
     {
+        for (const label patchId : patchIDs_)
+        {
+            const auto& pfld = field.boundaryField()[patchId];
+
+            vtk::writeList(format(), pfld.patchInternalField()());
+        }
+    }
+
+
+    if (parallel_)
+    {
+        // Patch Ids are identical across all processes
+        const label nPatches = patchIDs_.size();
+
+        if (Pstream::master())
+        {
+            Field<Type> recv;
+
+            // Receive each patch field and write
+            for
+            (
+                int slave=Pstream::firstSlave();
+                slave<=Pstream::lastSlave();
+                ++slave
+            )
+            {
+                IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+
+                for (label i=0; i < nPatches; ++i)
+                {
+                    fromSlave >> recv;
+
+                    vtk::writeList(format(), recv);
+                }
+            }
+        }
+        else
+        {
+            // Send each patch field to master
+            OPstream toMaster
+            (
+                Pstream::commsTypes::blocking,
+                Pstream::masterNo()
+            );
+
+            for (const label patchId : patchIDs_)
+            {
+                const auto& pfld = field.boundaryField()[patchId];
+
+                toMaster << pfld.patchInternalField()();
+            }
+        }
+    }
+
+
+    if (format_)
+    {
+        format().flush();
         format().endDataArray();
     }
 }
@@ -75,99 +142,123 @@ void Foam::vtk::patchWriter::write
 template<class Type, template<class> class PatchField>
 void Foam::vtk::patchWriter::write
 (
-    const GeometricField<Type, PatchField, pointMesh>& field
+    const GeometricField<Type, PatchField, volMesh>& field
 )
 {
-    const int nCmpt(pTraits<Type>::nComponents);
-    const uint64_t payLoad(nPoints_ * nCmpt * sizeof(float));
-
-    if (legacy_)
+    if (isState(outputState::CELL_DATA))
     {
-        legacy::floatField<nCmpt>(format(), field.name(), nPoints_);
+        ++nCellData_;
     }
     else
     {
-        format().openDataArray<float, nCmpt>(field.name())
-            .closeTag();
+        FatalErrorInFunction
+            << "Bad writer state (" << stateNames[state_]
+            << ") - should be (" << stateNames[outputState::CELL_DATA]
+            << ") for field " << field.name() << nl << endl
+            << exit(FatalError);
     }
 
-    format().writeSize(payLoad);
+    const direction nCmpt(pTraits<Type>::nComponents);
 
-    for (const label patchId : patchIDs_)
+    label nFaces = nLocalFaces_;
+
+    if (parallel_)
     {
-        const auto& pfld = field.boundaryField()[patchId];
-
-        vtk::writeList(format(), pfld.patchInternalField()());
+        reduce(nFaces, sumOp<label>());
     }
 
-    format().flush();
 
-    if (!legacy_)
+    if (format_)
     {
-        format().endDataArray();
-    }
-}
-
-
-template<class Type>
-void Foam::vtk::patchWriter::write
-(
-    const PrimitivePatchInterpolation<primitivePatch>& pInter,
-    const GeometricField<Type, fvPatchField, volMesh>& field
-)
-{
-    const int nCmpt(pTraits<Type>::nComponents);
-    const uint64_t payLoad(nPoints_ * nCmpt * sizeof(float));
-
-    if (legacy_)
-    {
-        legacy::floatField<nCmpt>(format(), field.name(), nPoints_);
-    }
-    else
-    {
-        format().openDataArray<float, nCmpt>(field.name())
-            .closeTag();
-    }
-
-    format().writeSize(payLoad);
-
-    for (const label patchId : patchIDs_)
-    {
-        const auto& pfld = field.boundaryField()[patchId];
-
-        if (nearCellValue_)
+        if (legacy())
         {
-            auto tfield =
-                pInter.faceToPointInterpolate(pfld.patchInternalField()());
-
-            vtk::writeList(format(), tfield());
+            legacy::floatField<nCmpt>(format(), field.name(), nFaces);
         }
         else
         {
-            auto tfield = pInter.faceToPointInterpolate(pfld);
+            const uint64_t payLoad =
+                vtk::sizeofData<float, nCmpt>(nFaces);
 
-            vtk::writeList(format(), tfield());
+            format().beginDataArray<float, nCmpt>(field.name());
+            format().writeSize(payLoad);
         }
     }
 
-    format().flush();
 
-    if (!legacy_)
+    if (parallel_ ? Pstream::master() : true)
     {
-        format().endDataArray();
+        for (const label patchId : patchIDs_)
+        {
+            const auto& pfld = field.boundaryField()[patchId];
+
+            if (useNearCellValue_)
+            {
+                vtk::writeList(format(), pfld.patchInternalField()());
+            }
+            else
+            {
+                vtk::writeList(format(), pfld);
+            }
+        }
     }
-}
 
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::vtk::patchWriter::write
-(
-    const UPtrList<const GeometricField<Type, PatchField, GeoMesh>>& flds
-)
-{
-    for (const auto& field : flds)
+    if (parallel_)
     {
-        write(field);
+        // Patch Ids are identical across all processes
+        const label nPatches = patchIDs_.size();
+
+        if (Pstream::master())
+        {
+            Field<Type> recv;
+
+            // Receive each patch field and write
+            for
+            (
+                int slave=Pstream::firstSlave();
+                slave<=Pstream::lastSlave();
+                ++slave
+            )
+            {
+                IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+
+                for (label i=0; i < nPatches; ++i)
+                {
+                    fromSlave >> recv;
+
+                    vtk::writeList(format(), recv);
+                }
+            }
+        }
+        else
+        {
+            // Send each patch field to master
+            OPstream toMaster
+            (
+                Pstream::commsTypes::blocking,
+                Pstream::masterNo()
+            );
+
+            for (const label patchId : patchIDs_)
+            {
+                const auto& pfld = field.boundaryField()[patchId];
+
+                if (useNearCellValue_)
+                {
+                    toMaster << pfld.patchInternalField()();
+                }
+                else
+                {
+                    toMaster << static_cast<const Field<Type>&>(pfld);
+                }
+            }
+        }
+    }
+
+
+    if (format_)
+    {
+        format().flush();
+        format().endDataArray();
     }
 }
 
@@ -175,13 +266,141 @@ void Foam::vtk::patchWriter::write
 template<class Type>
 void Foam::vtk::patchWriter::write
 (
-    const PrimitivePatchInterpolation<primitivePatch>& pInter,
-    const UPtrList<const GeometricField<Type, fvPatchField, volMesh>>& flds
+    const GeometricField<Type, fvPatchField, volMesh>& field,
+    const PrimitivePatchInterpolation<primitivePatch>& pInter
 )
 {
-    for (const auto& field : flds)
+    if (isState(outputState::POINT_DATA))
     {
-        write(pInter, field);
+        ++nPointData_;
+    }
+    else
+    {
+        FatalErrorInFunction
+            << "Bad writer state (" << stateNames[state_]
+            << ") - should be (" << stateNames[outputState::POINT_DATA]
+            << ") for field " << field.name() << nl << endl
+            << exit(FatalError);
+    }
+
+    const direction nCmpt(pTraits<Type>::nComponents);
+
+    label nPoints = nLocalPoints_;
+
+    if (parallel_)
+    {
+        reduce(nPoints, sumOp<label>());
+    }
+
+
+    if (format_)
+    {
+        if (legacy())
+        {
+            legacy::floatField<nCmpt>(format(), field.name(), nPoints);
+        }
+        else
+        {
+            const uint64_t payLoad =
+                vtk::sizeofData<float, nCmpt>(nPoints);
+
+            format().beginDataArray<float, nCmpt>(field.name());
+            format().writeSize(payLoad);
+        }
+    }
+
+
+    if (parallel_ ? Pstream::master() : true)
+    {
+        for (const label patchId : patchIDs_)
+        {
+            const auto& pfld = field.boundaryField()[patchId];
+
+            if (useNearCellValue_)
+            {
+                auto tfield =
+                    pInter.faceToPointInterpolate
+                    (
+                        pfld.patchInternalField()()
+                    );
+
+                vtk::writeList(format(), tfield());
+            }
+            else
+            {
+                auto tfield = pInter.faceToPointInterpolate(pfld);
+
+                vtk::writeList(format(), tfield());
+            }
+        }
+    }
+
+
+    if (parallel_)
+    {
+        // Patch Ids are identical across all processes
+        const label nPatches = patchIDs_.size();
+
+        if (Pstream::master())
+        {
+            Field<Type> recv;
+
+            // Receive each patch field and write
+            for
+            (
+                int slave=Pstream::firstSlave();
+                slave<=Pstream::lastSlave();
+                ++slave
+            )
+            {
+                IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+
+                for (label i=0; i < nPatches; ++i)
+                {
+                    fromSlave >> recv;
+
+                    vtk::writeList(format(), recv);
+                }
+            }
+        }
+        else
+        {
+            // Send each patch field to master
+            OPstream toMaster
+            (
+                Pstream::commsTypes::blocking,
+                Pstream::masterNo()
+            );
+
+            for (const label patchId : patchIDs_)
+            {
+                const auto& pfld = field.boundaryField()[patchId];
+
+                if (useNearCellValue_)
+                {
+                    auto tfield =
+                        pInter.faceToPointInterpolate
+                        (
+                            pfld.patchInternalField()()
+                        );
+
+                    toMaster << tfield();
+                }
+                else
+                {
+                    auto tfield = pInter.faceToPointInterpolate(pfld);
+
+                    toMaster << tfield();
+                }
+            }
+        }
+    }
+
+
+    if (format_)
+    {
+        format().flush();
+        format().endDataArray();
     }
 }
 

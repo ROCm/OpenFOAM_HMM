@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,19 +25,53 @@ License
 
 #include "foamVtkPatchWriter.H"
 #include "foamVtkOutput.H"
-
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::vtk::patchWriter::beginPiece()
 {
-    if (!legacy_)
+    // Basic sizes
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    nLocalPoints_ = nLocalFaces_ = nLocalVerts_ = 0;
+
+    for (const label patchId : patchIDs_)
+    {
+        const polyPatch& pp = patches[patchId];
+
+        nLocalPoints_ += pp.nPoints();
+        nLocalFaces_  += pp.size();
+
+        for (const face& f : pp)
+        {
+            nLocalVerts_ += f.size();
+        }
+    }
+
+    numberOfPoints_ = nLocalPoints_;
+    numberOfCells_ = nLocalFaces_;
+
+    if (parallel_)
+    {
+        reduce(numberOfPoints_, sumOp<label>());
+        reduce(numberOfCells_,  sumOp<label>());
+    }
+
+
+    // Nothing else to do for legacy
+    if (legacy()) return;
+
+
+    if (format_)
     {
         format()
-            .openTag(vtk::fileTag::PIECE)
-            .xmlAttr(vtk::fileAttr::NUMBER_OF_POINTS, nPoints_)
-            .xmlAttr(vtk::fileAttr::NUMBER_OF_POLYS,  nFaces_)
-            .closeTag();
+            .tag
+            (
+                vtk::fileTag::PIECE,
+                vtk::fileAttr::NUMBER_OF_POINTS, numberOfPoints_,
+                vtk::fileAttr::NUMBER_OF_POLYS,  numberOfCells_
+            );
     }
 }
 
@@ -46,135 +80,244 @@ void Foam::vtk::patchWriter::writePoints()
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    const uint64_t payLoad = (nPoints_*3*sizeof(float));
-
-    if (legacy_)
+    if (format_)
     {
-        legacy::beginPoints(os_, nPoints_);
+        if (legacy())
+        {
+            legacy::beginPoints(os_, numberOfPoints_);
+        }
+        else
+        {
+            const uint64_t payLoad =
+                vtk::sizeofData<float, 3>(numberOfPoints_);
+
+            format()
+                .tag(vtk::fileTag::POINTS)
+                .beginDataArray<float, 3>(vtk::dataArrayAttr::POINTS);
+
+            format().writeSize(payLoad);
+        }
+    }
+
+
+    if (parallel_ ? Pstream::master() : true)
+    {
+        for (const label patchId : patchIDs_)
+        {
+            const polyPatch& pp = patches[patchId];
+
+            vtk::writeList(format(), pp.localPoints());
+        }
+    }
+
+
+    if (parallel_)
+    {
+        // Patch Ids are identical across all processes
+        const label nPatches = patchIDs_.size();
+
+        if (Pstream::master())
+        {
+            pointField recv;
+
+            // Receive each point field and write
+            for
+            (
+                int slave=Pstream::firstSlave();
+                slave<=Pstream::lastSlave();
+                ++slave
+            )
+            {
+                IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+
+                for (label i=0; i < nPatches; ++i)
+                {
+                    fromSlave >> recv;
+
+                    vtk::writeList(format(), recv);
+                }
+            }
+        }
+        else
+        {
+            // Send each point field to master
+            OPstream toMaster
+            (
+                Pstream::commsTypes::blocking,
+                Pstream::masterNo()
+            );
+
+            for (const label patchId : patchIDs_)
+            {
+                const polyPatch& pp = patches[patchId];
+
+                toMaster << pp.localPoints();
+            }
+        }
+    }
+
+
+    if (format_)
+    {
+        format().flush();
+        format().endDataArray();
+
+        if (!legacy())
+        {
+            format()
+                .endTag(vtk::fileTag::POINTS);
+        }
+    }
+}
+
+
+void Foam::vtk::patchWriter::writePolysLegacy
+(
+    const globalIndex& pointOffsets
+)
+{
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    // Connectivity count without additional storage (done internally)
+
+    label nFaces = nLocalFaces_;
+    label nVerts = nLocalVerts_;
+
+    if (parallel_)
+    {
+        reduce(nFaces, sumOp<label>());
+        reduce(nVerts, sumOp<label>());
+    }
+
+    if (nFaces != numberOfCells_)
+    {
+        FatalErrorInFunction
+            << "Expecting " << numberOfCells_
+            << " faces, but found " << nFaces
+            << exit(FatalError);
+    }
+
+    legacy::beginPolys(os_, nFaces, nVerts);
+
+    labelList vertLabels(nLocalFaces_ + nLocalVerts_);
+
+    {
+        // Legacy: size + connectivity together
+        // [nPts, id1, id2, ..., nPts, id1, id2, ...]
+
+        auto iter = vertLabels.begin();
+
+        label off = pointOffsets.localStart();
+
+        for (const label patchId : patchIDs_)
+        {
+            const polyPatch& pp = patches[patchId];
+
+            for (const face& f : pp.localFaces())
+            {
+                *iter = f.size();       // The size prefix
+                ++iter;
+
+                for (const label pfi : f)
+                {
+                    *iter = pfi + off;  // Face vertex label
+                    ++iter;
+                }
+            }
+            off += pp.nPoints();
+        }
+    }
+
+
+    if (parallel_)
+    {
+        vtk::writeListParallel(format_.ref(), vertLabels);
     }
     else
     {
-        format().tag(vtk::fileTag::POINTS)
-            .openDataArray<float, 3>(vtk::dataArrayAttr::POINTS)
-            .closeTag();
+        vtk::writeList(format(), vertLabels);
     }
 
-    format().writeSize(payLoad);
-
-    for (const label patchId : patchIDs_)
+    if (format_)
     {
-        const polyPatch& pp = patches[patchId];
-
-        vtk::writeList(format(), pp.localPoints());
-    }
-    format().flush();
-
-    if (!legacy_)
-    {
-        format()
-            .endDataArray()
-            .endTag(vtk::fileTag::POINTS);
-    }
-}
-
-
-void Foam::vtk::patchWriter::writePolysLegacy()
-{
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-    // connectivity count without additional storage (done internally)
-    uint64_t nConnectivity = 0;
-    for (const label patchId : patchIDs_)
-    {
-        const polyPatch& pp = patches[patchId];
-
-        forAll(pp, facei)
-        {
-            nConnectivity += pp[facei].size();
-        }
-    }
-
-    legacy::beginPolys(os_, nFaces_, nConnectivity);
-
-
-    // legacy: size + connectivity together
-    // [nPts, id1, id2, ..., nPts, id1, id2, ...]
-
-    label off = 0;
-    for (const label patchId : patchIDs_)
-    {
-        const polyPatch& pp = patches[patchId];
-
-        forAll(pp, facei)
-        {
-            const face& f = pp.localFaces()[facei];
-
-            format().write(f.size());  // The size prefix
-            forAll(f, fi)
-            {
-                format().write(off + f[fi]);
-            }
-        }
-        off += pp.nPoints();
-    }
-
-    format().flush();
-}
-
-
-void Foam::vtk::patchWriter::writePolys()
-{
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-    //
-    // 'connectivity'
-    //
-
-    format().tag(vtk::fileTag::POLYS);
-
-    //
-    // 'connectivity'
-    //
-    {
-        // payload count
-        uint64_t payLoad = 0;
-        for (const label patchId : patchIDs_)
-        {
-            const polyPatch& pp = patches[patchId];
-
-            forAll(pp, facei)
-            {
-                payLoad += pp[facei].size();
-            }
-        }
-
-        format().openDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY)
-            .closeTag();
-
-        // payload size
-        format().writeSize(payLoad * sizeof(label));
-
-        label off = 0;
-        for (const label patchId : patchIDs_)
-        {
-            const polyPatch& pp = patches[patchId];
-
-            forAll(pp, facei)
-            {
-                const face& f = pp.localFaces()[facei];
-                forAll(f, fi)
-                {
-                    format().write(off + f[fi]);
-                }
-            }
-
-            off += pp.nPoints();
-        }
-
         format().flush();
+    }
+}
 
-        format()
-            .endDataArray();
+
+void Foam::vtk::patchWriter::writePolys
+(
+    const globalIndex& pointOffsets
+)
+{
+    if (format_)
+    {
+        format().tag(vtk::fileTag::POLYS);
+    }
+
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    //
+    // 'connectivity'
+    //
+    {
+        labelList vertLabels(nLocalVerts_);
+
+        label nVerts = nLocalVerts_;
+
+        if (parallel_)
+        {
+            reduce(nVerts, sumOp<label>());
+        }
+
+        if (format_)
+        {
+            const uint64_t payLoad =
+                vtk::sizeofData<label>(nVerts);
+
+            format().beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
+            format().writeSize(payLoad);
+        }
+
+        {
+            // XML: connectivity only
+            // [id1, id2, ..., id1, id2, ...]
+
+            auto iter = vertLabels.begin();
+
+            label off = pointOffsets.localStart();
+
+            for (const label patchId : patchIDs_)
+            {
+                const polyPatch& pp = patches[patchId];
+
+                for (const face& f : pp.localFaces())
+                {
+                    for (const label pfi : f)
+                    {
+                        *iter = pfi + off;  // Face vertex label
+                        ++iter;
+                    }
+                }
+                off += pp.nPoints();
+            }
+        }
+
+
+        if (parallel_)
+        {
+            vtk::writeListParallel(format_.ref(), vertLabels);
+        }
+        else
+        {
+            vtk::writeList(format(), vertLabels);
+        }
+
+        if (format_)
+        {
+            format().flush();
+            format().endDataArray();
+        }
     }
 
 
@@ -182,44 +325,64 @@ void Foam::vtk::patchWriter::writePolys()
     // 'offsets'  (connectivity offsets)
     //
     {
-        format()
-            .openDataArray<label>(vtk::dataArrayAttr::OFFSETS)
-            .closeTag();
+        labelList vertOffsets(nLocalFaces_);
+        label nOffs = vertOffsets.size();
 
-        // payload size
-        format().writeSize(nFaces_ * sizeof(label));
+        // global connectivity offsets
+        const globalIndex procOffset(nLocalVerts_);
 
-        label off = 0;
+        if (parallel_)
+        {
+            reduce(nOffs, sumOp<label>());
+        }
+
+        if (format_)
+        {
+            const uint64_t payLoad =
+                vtk::sizeofData<label>(nOffs);
+
+            format().beginDataArray<label>(vtk::dataArrayAttr::OFFSETS);
+            format().writeSize(payLoad);
+        }
+
+
+        label off = procOffset.localStart();
+
+        auto iter = vertOffsets.begin();
+
         for (const label patchId : patchIDs_)
         {
             const polyPatch& pp = patches[patchId];
 
-            forAll(pp, facei)
+            for (const face& f : pp)
             {
-                off += pp[facei].size();
-
-                format().write(off);
+                off += f.size();   // End offset
+                *iter = off;
+                ++iter;
             }
         }
 
-        format().flush();
-        format().endDataArray();
+
+        if (parallel_)
+        {
+            vtk::writeListParallel(format_.ref(), vertOffsets);
+        }
+        else
+        {
+            vtk::writeList(format_.ref(), vertOffsets);
+        }
+
+
+        if (format_)
+        {
+            format().flush();
+            format().endDataArray();
+        }
     }
 
-    format().endTag(vtk::fileTag::POLYS);
-}
-
-
-void Foam::vtk::patchWriter::writeMesh()
-{
-    writePoints();
-    if (legacy_)
+    if (format_)
     {
-        writePolysLegacy();
-    }
-    else
-    {
-        writePolys();
+        format().endTag(vtk::fileTag::POLYS);
     }
 }
 
@@ -229,161 +392,273 @@ void Foam::vtk::patchWriter::writeMesh()
 Foam::vtk::patchWriter::patchWriter
 (
     const fvMesh& mesh,
-    const fileName& baseName,
-    const vtk::outputOptions outOpts,
-    const bool nearCellValue,
-    const labelList& patchIDs
+    const labelList& patchIDs,
+    const vtk::outputOptions opts,
+    const bool useNearCellValue
 )
 :
+    vtk::fileWriter(vtk::fileTag::POLY_DATA, opts),
     mesh_(mesh),
-    legacy_(outOpts.legacy()),
-    format_(),
-    nearCellValue_(nearCellValue),
     patchIDs_(patchIDs),
-    os_(),
-    nPoints_(0),
-    nFaces_(0)
+    useNearCellValue_(useNearCellValue),
+    numberOfPoints_(0),
+    numberOfCells_(0),
+    nLocalPoints_(0),
+    nLocalFaces_(0),
+    nLocalVerts_(0)
 {
-    outputOptions opts(outOpts);
-    opts.append(false);  // No append supported
-
-    os_.open((baseName + (legacy_ ? ".vtk" : ".vtp")).c_str());
-    format_ = opts.newFormatter(os_);
-
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-    const word& title =
-    (
-        patchIDs_.size() == 1
-      ? patches[patchIDs_.first()].name()
-      : "patches"
-    );
-
-    // Basic sizes
-    nPoints_ = nFaces_ = 0;
-    for (const label patchId : patchIDs_)
-    {
-        const polyPatch& pp = patches[patchId];
-
-        nPoints_ += pp.nPoints();
-        nFaces_  += pp.size();
-    }
-
-
-    if (legacy_)
-    {
-        legacy::fileHeader(format(), title, vtk::fileTag::POLY_DATA);
-    }
-    else
-    {
-        // XML (inline)
-
-        format()
-            .xmlHeader()
-            .xmlComment(title)
-            .beginVTKFile(vtk::fileTag::POLY_DATA, "0.1");
-    }
-
-    beginPiece();
-    writeMesh();
+    // We do not currently support append mode
+    opts_.append(false);
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+Foam::vtk::patchWriter::patchWriter
+(
+    const fvMesh& mesh,
+    const labelList& patchIDs,
+    const fileName& file,
+    bool parallel
+)
+:
+    patchWriter(mesh, patchIDs)
+{
+    open(file, parallel);
+}
 
-Foam::vtk::patchWriter::~patchWriter()
-{}
+
+Foam::vtk::patchWriter::patchWriter
+(
+    const fvMesh& mesh,
+    const labelList& patchIDs,
+    const vtk::outputOptions opts,
+    const fileName& file,
+    bool parallel
+)
+:
+    patchWriter(mesh, patchIDs, opts)
+{
+    open(file, parallel);
+}
+
+
+Foam::vtk::patchWriter::patchWriter
+(
+    const fvMesh& mesh,
+    const labelList& patchIDs,
+    const vtk::outputOptions opts,
+    const bool useNearCellValue,
+    const fileName& file,
+    bool parallel
+)
+:
+    patchWriter(mesh, patchIDs, opts, useNearCellValue)
+{
+    open(file, parallel);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::vtk::patchWriter::beginCellData(label nFields)
+bool Foam::vtk::patchWriter::beginFile(std::string title)
 {
-    if (legacy_)
+    if (title.size())
     {
-        legacy::beginCellData(format(), nFaces_, nFields);
+        return vtk::fileWriter::beginFile(title);
+    }
+
+    // Provide default title
+
+    if (legacy())
+    {
+        title =
+        (
+            patchIDs_.size() == 1
+          ? mesh_.boundaryMesh()[patchIDs_.first()].name()
+          : "patches"
+        );
+
+        return vtk::fileWriter::beginFile(title);
+    }
+
+
+    // XML (inline)
+
+    if (patchIDs_.size() == 1)
+    {
+        title =
+        (
+            "patch='" + mesh_.boundaryMesh()[patchIDs_.first()].name() + "'"
+        );
     }
     else
     {
-        format().beginCellData();
+        title =
+        (
+            "npatches='" + Foam::name(patchIDs_.size()) + "'"
+        );
     }
+
+    title +=
+    (
+        " time='" + mesh_.time().timeName()
+      + "' index='" + Foam::name(mesh_.time().timeIndex())
+      + "'"
+    );
+
+    return vtk::fileWriter::beginFile(title);
 }
 
 
-void Foam::vtk::patchWriter::endCellData()
+bool Foam::vtk::patchWriter::writeGeometry()
 {
-    if (!legacy_)
-    {
-        format().endCellData();
-    }
-}
+    enter_Piece();
 
+    beginPiece();
 
-void Foam::vtk::patchWriter::beginPointData(label nFields)
-{
-    if (legacy_)
+    writePoints();
+
+    const globalIndex globalPointOffset(nLocalPoints_);
+
+    if (legacy())
     {
-        legacy::beginPointData(format(), nPoints_, nFields);
+        writePolysLegacy(globalPointOffset);
     }
     else
     {
-        format().beginPointData();
+        writePolys(globalPointOffset);
     }
+
+    return true;
 }
 
 
-void Foam::vtk::patchWriter::endPointData()
+bool Foam::vtk::patchWriter::beginCellData(label nFields)
 {
-    if (!legacy_)
-    {
-        format().endPointData();
-    }
+    return enter_CellData(numberOfCells_, nFields);
 }
 
 
-void Foam::vtk::patchWriter::writeFooter()
+bool Foam::vtk::patchWriter::beginPointData(label nFields)
 {
-    if (!legacy_)
-    {
-        // slight cheat. </Piece> too
-        format().endTag(vtk::fileTag::PIECE);
-
-        format().endTag(vtk::fileTag::POLY_DATA)
-            .endVTKFile();
-    }
+    return enter_PointData(numberOfPoints_, nFields);
 }
 
 
 void Foam::vtk::patchWriter::writePatchIDs()
 {
-    // Patch ids first
-    const uint64_t payLoad = nFaces_ * sizeof(label);
-
-    if (legacy_)
+    if (isState(outputState::CELL_DATA))
     {
-        legacy::intField<1>(format(), "patchID", nFaces_);  // 1 component
+        ++nCellData_;
     }
     else
     {
-        format().openDataArray<label>("patchID")
-            .closeTag();
+        FatalErrorInFunction
+            << "Bad writer state (" << stateNames[state_]
+            << ") - should be (" << stateNames[outputState::CELL_DATA]
+            << ") for patchID field" << nl << endl
+            << exit(FatalError);
     }
 
-    format().writeSize(payLoad);
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    for (const label patchId : patchIDs_)
+    label nFaces = nLocalFaces_;
+
+    if (parallel_)
     {
-        const label sz = mesh_.boundaryMesh()[patchId].size();
+        reduce(nFaces, sumOp<label>());
+    }
 
-        for (label facei = 0; facei < sz; ++facei)
+    if (format_)
+    {
+        if (legacy())
         {
-            format().write(patchId);
+            legacy::intField<1>(format(), "patchID", nFaces);  // 1 component
+        }
+        else
+        {
+            const uint64_t payLoad =
+                vtk::sizeofData<label>(nFaces);
+
+            format().beginDataArray<label>("patchID");
+            format().writeSize(payLoad);
         }
     }
-    format().flush();
 
-    if (!legacy_)
+    if (parallel_ ? Pstream::master() : true)
     {
+        for (const label patchId : patchIDs_)
+        {
+            label count = patches[patchId].size();
+            const label val = patchId;
+
+            while (count--)
+            {
+                format().write(val);
+            }
+        }
+    }
+
+    if (parallel_)
+    {
+        if (Pstream::master())
+        {
+            labelList recv;
+
+            // Receive each pair
+            for
+            (
+                int slave=Pstream::firstSlave();
+                slave<=Pstream::lastSlave();
+                ++slave
+            )
+            {
+                IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+
+                fromSlave >> recv;
+
+                for (label i=0; i < recv.size(); ++i)
+                {
+                    label count = recv[i];
+                    ++i;
+                    const label val = recv[i];
+
+                    while (count--)
+                    {
+                        format().write(val);
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Send to master
+            OPstream toMaster
+            (
+                Pstream::commsTypes::blocking,
+                Pstream::masterNo()
+            );
+
+
+            labelList send(2*patchIDs_.size());
+
+            // Encode as [size, id] pairs
+            label i = 0;
+            for (const label patchId : patchIDs_)
+            {
+                send[i] = patches[patchId].size();
+                send[i+1] = patchId;
+
+                i += 2;
+            }
+
+            toMaster << send;
+        }
+    }
+
+
+    if (format_)
+    {
+        format().flush();
         format().endDataArray();
     }
 }
