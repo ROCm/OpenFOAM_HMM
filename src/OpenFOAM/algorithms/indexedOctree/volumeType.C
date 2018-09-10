@@ -66,18 +66,11 @@ const Foam::word& Foam::volumeType::str() const
 
 Foam::Istream& Foam::operator>>(Istream& is, volumeType& vt)
 {
-    // Read beginning of volumeType
-    is.readBegin("volumeType");
-
     int val;
     is  >> val;
 
     vt.t_ = static_cast<volumeType::type>(val);
 
-    // Read end of volumeType
-    is.readEnd("volumeType");
-
-    is.check(FUNCTION_NAME);
     return is;
 }
 
