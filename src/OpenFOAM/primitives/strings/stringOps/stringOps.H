@@ -218,10 +218,10 @@ namespace stringOps
     //  -# current directory
     //    - leading "./" : the current directory
     //  -# leading tag expansion for commonly used directories
-    //    - <etc>/        : user/group/other OpenFOAM directory
-    //    - <case>/       : FOAM_CASE directory
-    //    - <constant>/   : FOAM_CASE/constant directory
-    //    - <system>/     : FOAM_CASE/system directory
+    //    - \<etc\>/        : user/group/other OpenFOAM directory
+    //    - \<case\>/       : FOAM_CASE directory
+    //    - \<constant\>/   : FOAM_CASE/constant directory
+    //    - \<system\>/     : FOAM_CASE/system directory
     //  -# tilde expansion
     //    - leading "~/" : home directory
     //    - leading "~user" : home directory for specified user
@@ -258,10 +258,10 @@ namespace stringOps
     //  -# current directory
     //    - leading "./" : the current directory
     //  -# leading tag expansion for commonly used directories
-    //    - <etc>/        : user/group/other OpenFOAM directory
-    //    - <case>/       : FOAM_CASE directory
-    //    - <constant>/   : FOAM_CASE/constant directory
-    //    - <system>/     : FOAM_CASE/system directory
+    //    - \<etc\>/        : user/group/other OpenFOAM directory
+    //    - \<case\>/       : FOAM_CASE directory
+    //    - \<constant\>/   : FOAM_CASE/constant directory
+    //    - \<system\>/     : FOAM_CASE/system directory
     //  -# tilde expansion
     //    - leading "~/" : home directory
     //    - leading "~user" : home directory for specified user

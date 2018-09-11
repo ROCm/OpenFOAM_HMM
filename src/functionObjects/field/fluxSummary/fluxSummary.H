@@ -71,7 +71,7 @@ Usage
     - surface
     - surfaceAndDirection
 
-    Output data is written to files of the form \<timeDir\>/<faceZoneName>.dat
+    Output data is written to files of the form \<timeDir\>/\<faceZoneName\>.dat
 
 See also
     Foam::functionObjects::fvMeshFunctionObject

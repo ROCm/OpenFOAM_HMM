@@ -231,6 +231,7 @@ public:
         //
         //      if (nOrig == zones.size()) { existing... } else { new... }
         //  \endcode
+        //  \param zoneName the name of the zone
         //  \param verbose report if an existing zone was selected or
         //      a new zone was created.
         //  \return non-const reference to the existing or new zone

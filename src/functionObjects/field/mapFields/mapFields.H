@@ -53,7 +53,7 @@ Usage
         type         | Type name: mapFields       | yes       |
         mapRegion    | Name of region to map to   | yes       |
         mapMethod    | Mapping method             | yes       |
-        patchMapMethod | Patch mapping method     | no        | <auto>
+        patchMapMethod | Patch mapping method     | no        | \<auto\>
         consistent   | Mapping meshes have consistent boundaries | yes |
         fields       | List of field names to map | yes       |
         log          | Log to standard output     | no        | yes

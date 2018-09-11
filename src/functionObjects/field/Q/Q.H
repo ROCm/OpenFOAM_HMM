@@ -56,7 +56,7 @@ Usage
         Property     | Description             | Required    | Default value
         type         | type name: Q            | yes         |
         U            | Name of velocity field  | no          | U
-        result       | Name of Q field         | no          | <function name>
+        result       | Name of Q field         | no          | \<function name\>
         log          | Log to standard output  | no          | yes
     \endtable
 

@@ -47,7 +47,7 @@ Usage
         type         | type name: Peclet       | yes         |
         phi          | Name of flux field      | no          | phi
         rho          | Name of density field   | no          | rho
-        result       | Name of Peclet field    | no          | <function name>
+        result       | Name of Peclet field    | no          | \<function name\>
         log          | Log to standard output  | no          | yes
     \endtable
 

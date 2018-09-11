@@ -49,7 +49,7 @@ Usage
         type         | Type name: CourantNo    | yes         |
         rho          | Name of density field   | no          | rho
         field        | Name of flux field      | no          | phi
-        result       | Name of Courant number field | no     | <function name>
+        result       | Name of Courant number field | no     | \<function name\>
         log          | Log to standard output  | no          | yes
     \endtable
 
