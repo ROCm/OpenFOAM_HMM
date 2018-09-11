@@ -37,7 +37,7 @@ namespace Foam
 
 void Foam::solutionControl::read(const bool absTolOnly)
 {
-    const dictionary& solutionDict = this->dict();
+    const dictionary solutionDict(this->dict());
 
     // Read solution controls
     nNonOrthCorr_ =
