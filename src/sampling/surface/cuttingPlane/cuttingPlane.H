@@ -77,14 +77,12 @@ class cuttingPlane
 
     // Private Member Functions
 
-        //- Classify sides of plane (0=BACK, 1=ONPLANE, 2=FRONT) for each point
-        static PackedList<2> classifySides
-        (
-            const plane& pln,
-            const pointField& pts
-        );
-
         //- Determine cut cells, possibly restricted to a list of cells
+        //
+        //  \param cellCuts [in,out] On input an empty set (ie, no restriction)
+        //      or subsetted cells. On output, the cells cut according to the
+        //      planeSides detection.
+        //
         //  \return number of faces cut
         label calcCellCuts
         (
@@ -94,11 +92,13 @@ class cuttingPlane
         );
 
         //- Walk the cell cuts to create faces
+        //
+        //  \param planeSides [in] Used to determine edge cuts
         void walkCellCuts
         (
             const primitiveMesh& mesh,
-            const PackedList<2>& planeSides,
             const bitSet& cellCuts,
+            const PackedList<2>& planeSides,
             const bool triangulate,
             const label nFaceCuts = 0
         );

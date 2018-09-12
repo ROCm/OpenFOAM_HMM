@@ -56,6 +56,23 @@ namespace Foam
     }
 
 
+    // Classify sides of plane (0=BACK, 1=ONPLANE, 2=FRONT) for each point
+    inline PackedList<2> classifySides(const plane& pln, const pointField& pts)
+    {
+        const label len = pts.size();
+
+        PackedList<2> output(len);
+
+        // From signed (-1,0,+1) to (0,1,2) for PackedList
+        for (label i=0; i < len; ++i)
+        {
+            output.set(i, unsigned(1 + pln.sign(pts[i], SMALL)));
+        }
+
+        return output;
+    }
+
+
     // Check for face/plane intersection based on crossings
     // Took (-1,0,+1) from plane::sign and packed as (0,1,2).
     // Now use for left shift to obtain (1,2,4).
@@ -78,34 +95,10 @@ namespace Foam
         return (accum == 3 || accum >= 5);
     }
 
-
-    //- For hashing face point labels, which are pre-sorted.
-    typedef HashSet<labelList, labelList::Hash<>> labelListHashSet;
-
 } // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-Foam::PackedList<2> Foam::cuttingPlane::classifySides
-(
-    const plane& pln,
-    const pointField& pts
-)
-{
-    const label len = pts.size();
-
-    PackedList<2> output(len);
-
-    // From signed (-1,0,+1) to (0,1,2) for PackedList
-    for (label i=0; i < len; ++i)
-    {
-        output.set(i, unsigned(1 + pln.sign(pts[i], SMALL)));
-    }
-
-    return output;
-}
-
 
 Foam::label Foam::cuttingPlane::calcCellCuts
 (
@@ -231,12 +224,18 @@ Foam::label Foam::cuttingPlane::calcCellCuts
 void Foam::cuttingPlane::walkCellCuts
 (
     const primitiveMesh& mesh,
-    const PackedList<2>& sides,
     const bitSet& cellCuts,
+    const PackedList<2>& sides,
     const bool triangulate,
     label nFaceCuts
 )
 {
+    // Information required from the mesh
+    const faceList& faces = mesh.faces();
+    const cellList& cells = mesh.cells();
+    const pointField& points = mesh.points();
+
+
     // Dynamic lists to handle triangulation and/or missed cuts etc
     const label nCellCuts = cellCuts.count();
 
@@ -249,12 +248,6 @@ void Foam::cuttingPlane::walkCellCuts
     {
         nFaceCuts = 4*nCellCuts;
     }
-
-    // Information required from the mesh
-    const faceList& faces = mesh.faces();
-    const cellList& cells = mesh.cells();
-    const pointField& points = mesh.points();
-
 
     // Edge to pointId mapping
     EdgeMap<label> handledEdges(4*nFaceCuts);
@@ -273,8 +266,8 @@ void Foam::cuttingPlane::walkCellCuts
     // that "owns" the point.
     Map<label> endPoints;
 
-    // Hash of faces (face points) exactly on-plane
-    labelListHashSet onPlaneFaces;
+    // Hash of faces (face points) that are exactly on a cell face
+    HashSet<labelList, labelList::Hash<>> onCellFace;
 
 
     // Failure handling
@@ -363,7 +356,6 @@ void Foam::cuttingPlane::walkCellCuts
                 // Expected id for the cut point
                 cutPointId = dynCutPoints.size();
 
-
                 const point& p0 = points[e[0]];
                 const point& p1 = points[e[1]];
 
@@ -429,16 +421,16 @@ void Foam::cuttingPlane::walkCellCuts
         }
 
 
-        // Handling cuts between two cells (on-plane cuts)
-        // After the previous intersectEdgeOrient call, the edge is oriented
-        // to have 0-1 in the positive plane normal.
+        // Handling cuts between two cells
+        // After the previous intersectEdgeOrient call, the edge oriented
+        // according to the gradient.
         // If we only ever cut at the same edge end we know that we have
-        // an on-plane cut.
+        // a cut coinciding with a cell face.
 
         if (pointCutType == 1 || pointCutType == 2)
         {
             // Hash the face-points to avoid duplicate faces
-            if (!onPlaneFaces.insert(HashTableOps::values(localEdges, true)))
+            if (!onCellFace.insert(HashTableOps::values(localEdges, true)))
             {
                 DebugInfo
                     <<"skip duplicate on-place cut for cell " << celli
@@ -451,7 +443,12 @@ void Foam::cuttingPlane::walkCellCuts
         }
 
 
-        // Start somewhere
+        // Start somewhere.
+
+        // Since the local edges are oriented according to the gradient,
+        // they can also be used to determine the correct face orientation.
+
+        const edge refEdge = localFaces.begin().key();
         label nextFace = localFaces.begin().object()[0];
 
         DebugInfo
@@ -471,6 +468,7 @@ void Foam::cuttingPlane::walkCellCuts
                 DebugInfo
                     << "lookup " << nextFace << " in " << iter.object() << nl;
 
+                // Find local index (0,1) or -1 on failure
                 const label got = iter.object().which(nextFace);
 
                 if (got != -1)
@@ -507,7 +505,7 @@ void Foam::cuttingPlane::walkCellCuts
         if (nTargetLoop != localFaceLoop.size())
         {
             DebugInfo
-                <<"Warn expected " << nTargetLoop << " but got "
+                << "Warn expected " << nTargetLoop << " but got "
                 << localFaceLoop.size() << endl;
 
             unwindWalk(celli);
@@ -520,9 +518,8 @@ void Foam::cuttingPlane::walkCellCuts
 
         face f(localFaceLoop);
 
-        // Action #3: orient face
-        // Orient face to point in the same direction as the plane normal
-        if ((f.areaNormal(dynCutPoints) & this->normal()) < 0)
+        // Orient face to point in the same direction as the edge gradient
+        if ((f.areaNormal(dynCutPoints) & refEdge.vec(points)) < 0)
         {
             f.flip();
         }
@@ -646,7 +643,7 @@ void Foam::cuttingPlane::performCut
     const label nFaceCuts = calcCellCuts(mesh, sides, cellCuts);
 
     // Find closed loop from cell cuts
-    walkCellCuts(mesh, sides, cellCuts, triangulate, nFaceCuts);
+    walkCellCuts(mesh, cellCuts, sides, triangulate, nFaceCuts);
 }
 
 
