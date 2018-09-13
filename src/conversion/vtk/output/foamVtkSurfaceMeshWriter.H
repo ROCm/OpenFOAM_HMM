@@ -25,10 +25,19 @@ Class
     Foam::vtk::surfaceMeshWriter
 
 Description
-    Write faces with fields
+    Write faces (eg face-zones or face-sets) with fields.
+
+    The file output states are managed by the Foam::vtk::fileWriter class.
+    FieldData (eg, TimeValue) must appear before any geometry pieces.
+
+Note
+    Parallel output is combined into a single Piece without point merging,
+    which is similar to using multi-piece data sets, but allows more
+    convenient creation as a streaming process.
+    In the future, the duplicate points at processor connections
+    may be addressed using ghost points.
 
 SourceFiles
-    foamVtkSurfaceMeshWriter.C
     foamVtkSurfaceMeshWriterTemplates.C
 
 \*---------------------------------------------------------------------------*/
@@ -36,105 +45,27 @@ SourceFiles
 #ifndef foamVtkSurfaceMeshWriter_H
 #define foamVtkSurfaceMeshWriter_H
 
-#include "pointMesh.H"
-#include "OFstream.H"
-#include "volFields.H"
-#include "surfaceFields.H"
+#include <fstream>
 #include "areaFields.H"
-#include "indirectPrimitivePatch.H"
-#include "foamVtkOutputOptions.H"
+#include "surfaceFields.H"
+#include "foamVtkIndPatchWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-class volPointInterpolation;
-
 namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class surfaceMeshWriter Declaration
+                   Class vtk::surfaceMeshWriter Declaration
 \*---------------------------------------------------------------------------*/
 
 class surfaceMeshWriter
+:
+    public vtk::indirectPatchWriter
 {
-    // Private Member Data
-
-        const indirectPrimitivePatch& pp_;
-
-        //- Commonly used query
-        const bool legacy_;
-
-        autoPtr<vtk::formatter> format_;
-
-        std::ofstream os_;
-
-
     // Private Member Functions
-
-        //- Begin piece
-        void beginPiece();
-
-        //- Write patch points
-        void writePoints();
-
-        //- Write patch faces
-        void writePolysLegacy();
-
-        //- Write patch faces
-        void writePolys();
-
-        //- Write mesh topology
-        void writeMesh();
-
-
-        //- No copy construct
-        surfaceMeshWriter(const surfaceMeshWriter&) = delete;
-
-        //- No copy assignment
-        void operator=(const surfaceMeshWriter&) = delete;
-
-public:
-
-    // Constructors
-
-        //- Construct from components
-        surfaceMeshWriter
-        (
-            const indirectPrimitivePatch& pp,
-            const word& name,
-            const fileName& baseName,
-            const vtk::outputOptions outOpts
-        );
-
-
-    //- Destructor
-    ~surfaceMeshWriter();
-
-
-    // Member Functions
-
-        inline std::ofstream& os()
-        {
-            return os_;
-        }
-
-        inline vtk::formatter& format()
-        {
-            return *format_;
-        }
-
-        //- Open write for CellData of count fields.
-        //  The parameters are only used for the legacy format.
-        void beginCellData(label nFields);
-
-        //- Close write for CellData
-        void endCellData();
-
-        //- Write file footer
-        void writeFooter();
-
 
         //- Get face field (internal face or boundary face)
         template<class Type>
@@ -144,43 +75,72 @@ public:
         ) const;
 
 
-      // Write fields (individually)
+        //- No copy construct
+        surfaceMeshWriter(const surfaceMeshWriter&) = delete;
 
-        //- Write surface field
+        //- No copy assignment
+        void operator=(const surfaceMeshWriter&) = delete;
+
+
+public:
+
+    // Constructors
+
+        //- Construct from patch (default format INLINE_BASE64)
+        surfaceMeshWriter
+        (
+            const indirectPrimitivePatch& pp,
+            const vtk::outputOptions opts = vtk::formatType::INLINE_BASE64
+        )
+        :
+            vtk::indirectPatchWriter(pp, opts)
+        {}
+
+        //- Construct from patch (default format INLINE_BASE64),
+        //- and open the file for writing.
+        //  The file name is with/without an extension.
+        surfaceMeshWriter
+        (
+            const indirectPrimitivePatch& pp,
+            const fileName& file,
+            bool parallel = Pstream::parRun()
+        )
+        :
+            vtk::indirectPatchWriter(pp, file, parallel)
+        {}
+
+        //- Construct from patch and open the file for writing.
+        //  The file name is with/without an extension.
+        surfaceMeshWriter
+        (
+            const indirectPrimitivePatch& pp,
+            const vtk::outputOptions opts,
+            const fileName& file,
+            bool parallel = Pstream::parRun()
+        )
+        :
+            vtk::indirectPatchWriter(pp, opts, file, parallel)
+        {}
+
+
+    //- Destructor
+    virtual ~surfaceMeshWriter() = default;
+
+
+    // Member Functions
+
+        //- Write surface field (CellData)
         template<class Type>
         void write
         (
             const GeometricField<Type, fvsPatchField, surfaceMesh>& field
         );
 
-        //- Write surface field
+        //- Write surface field (CellData)
         template<class Type>
         void write
         (
             const GeometricField<Type, faPatchField, areaMesh>& field
-        );
-
-
-      // Write fields (collectively)
-
-        //- Write surface fields
-        template<class Type>
-        void write
-        (
-            const UPtrList
-            <
-                const GeometricField<Type, fvsPatchField, surfaceMesh>
-            >& sflds
-        );
-
-        //- Write surface fields
-        template<class Type>
-        void write
-        (
-            const UPtrList
-            <
-                const GeometricField<Type, faPatchField, areaMesh>
-            >& sflds
         );
 };
 
