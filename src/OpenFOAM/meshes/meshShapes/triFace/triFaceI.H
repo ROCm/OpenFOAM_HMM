@@ -209,18 +209,15 @@ inline Foam::triFace Foam::triFace::reverseFace() const
 }
 
 
-inline bool Foam::triFace::found(const label globalIndex) const
+inline bool Foam::triFace::found(const label pointLabel) const
 {
-    return which(globalIndex) != -1;
+    return FixedList<label, 3>::found(pointLabel);
 }
 
 
-inline Foam::label Foam::triFace::which(const label globalIndex) const
+inline Foam::label Foam::triFace::which(const label pointLabel) const
 {
-    if (operator[](0) == globalIndex) return 0;
-    if (operator[](1) == globalIndex) return 1;
-    if (operator[](2) == globalIndex) return 2;
-    return -1;
+    return FixedList<label, 3>::find(pointLabel);
 }
 
 

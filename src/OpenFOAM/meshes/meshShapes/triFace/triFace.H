@@ -146,12 +146,12 @@ public:
         //  The starting points of the original and reverse face are identical.
         inline triFace reverseFace() const;
 
-        //- Return true if the global point label is found in face.
-        bool found(const label globalIndex) const;
+        //- Return true if the point label is found in face.
+        inline bool found(const label pointLabel) const;
 
-        //- Which local index (0,1,2) on face given a global index.
-        //  returns -1 if not found
-        label which(const label globalIndex) const;
+        //- Find local index on face for the point label.
+        //  \return position in face (0,1,2) or -1 if not found.
+        inline label which(const label pointLabel) const;
 
         //- Return swept-volume from old-points to new-points
         inline scalar sweptVol
