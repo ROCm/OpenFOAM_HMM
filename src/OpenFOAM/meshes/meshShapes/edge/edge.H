@@ -134,6 +134,9 @@ public:
         //  No special handling of negative point labels.
         inline label maxVertex() const;
 
+        //- Return true if the vertices are unique and non-negative.
+        inline bool valid() const;
+
         //- Return true if point label is found in edge.
         //  Always false for a negative label.
         inline bool found(const label pointLabel) const;
@@ -146,19 +149,19 @@ public:
         //  Negative point labels never connect.
         inline bool connects(const edge& other) const;
 
-        //- Return vertex common with otherEdge or -1 on failure
+        //- Return vertex common with other edge or -1 on failure
         //  Negative point labels are never considered common between edges.
         inline label commonVertex(const edge& other) const;
 
-        //- Given one vertex index, return the other one.
+        //- Given the point label for one vertex, return the other one.
         //  No special treatment for negative point labels.
-        inline label otherVertex(const label index) const;
+        inline label otherVertex(const label pointLabel) const;
 
 
     // Editing
 
         //- 'Collapse' edge by marking duplicate point labels as '-1',
-        //  the lower vertex is retained.
+        //- the lower vertex is retained.
         //  Return the effective size after collapsing.
         inline label collapse();
 

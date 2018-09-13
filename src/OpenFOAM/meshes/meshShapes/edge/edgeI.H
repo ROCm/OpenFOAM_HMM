@@ -114,6 +114,12 @@ inline Foam::label Foam::edge::maxVertex() const
 }
 
 
+inline bool Foam::edge::valid() const
+{
+    return (first() != second() && first() >= 0 && second() >= 0);
+}
+
+
 inline bool Foam::edge::found(const label pointLabel) const
 {
     // -1: always false
@@ -166,13 +172,13 @@ inline Foam::label Foam::edge::commonVertex(const edge& other) const
 }
 
 
-inline Foam::label Foam::edge::otherVertex(const label index) const
+inline Foam::label Foam::edge::otherVertex(const label pointLabel) const
 {
-    if (index == first())
+    if (pointLabel == first())
     {
         return second();
     }
-    if (index == second())
+    if (pointLabel == second())
     {
         return first();
     }
