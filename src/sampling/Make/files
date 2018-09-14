@@ -21,7 +21,9 @@ sampledSet/shortestPath/shortestPathSet.C
 
 surface/cutting/cuttingPlane.C
 surface/cutting/cuttingPlaneCuts.C
+surface/cutting/cuttingPlaneSelection.C
 surface/cutting/cuttingSurfaceBase.C
+surface/cutting/cuttingSurfaceBaseSelection.C
 surface/distanceSurface/distanceSurface.C
 surface/isoSurface/isoSurface.C
 surface/isoSurface/isoSurfaceCell.C

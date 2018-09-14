@@ -46,6 +46,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+class polyMesh;
+
 /*---------------------------------------------------------------------------*\
                         Class cuttingPlane Declaration
 \*---------------------------------------------------------------------------*/
@@ -97,6 +100,35 @@ protected:
         );
 
 
+        //- Check and warn if bounding boxes do not intersect,
+        //- and if the plane does not intersect the bounding boxes
+        void checkOverlap
+        (
+            const word callerName,
+            const boundBox& meshBounds,
+            const boundBox& userBounds
+        ) const;
+
+        //- Define cell selection from bounding-box and zones.
+        //
+        //  \param userBounds Optionally user-specified bounding box
+        //  \param zoneNames  Optionally user-specified zone names
+        //  \param warn Check and warn if the plane does not
+        //      intersect with the bounds of the mesh (or submesh) or
+        //      if the bounding box does not overlap with the mesh (or submesh)
+        //
+        //  \return A set of nCells size with the selected cells or an empty
+        //      set if no bounding-box or zones were specified.
+        bitSet cellSelection
+        (
+            const polyMesh& mesh,
+            const boundBox& userBounds,
+            const wordRes& zoneNames,
+            const word callerName,
+            const bool warn
+        ) const;
+
+
 public:
 
     // Constructors
@@ -134,8 +166,14 @@ public:
 
     // Member Functions
 
-        //- Return the plane used
+        //- The plane used.
         const plane& planeDesc() const
+        {
+            return *this;
+        }
+
+        //- The plane used. Non-const access.
+        plane& planeDesc()
         {
             return *this;
         }

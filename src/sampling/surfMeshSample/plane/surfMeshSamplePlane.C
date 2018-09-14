@@ -47,152 +47,16 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::surfMeshSamplePlane::checkBoundsIntersection
-(
-    const plane& pln,
-    const boundBox& meshBb
-) const
+Foam::bitSet Foam::surfMeshSamplePlane::cellSelection(const bool warn) const
 {
-    // Verify specified bounding box
-    if (!bounds_.empty())
-    {
-        // Bounding box does not overlap with (global) mesh!
-        if (!bounds_.overlaps(meshBb))
-        {
-            WarningInFunction
-                << nl
-                << name() << " : "
-                << "Bounds " << bounds_
-                << " do not overlap the mesh bounding box " << mesh().bounds()
-                << nl << endl;
-        }
-
-        // Plane does not intersect the bounding box
-        if (!bounds_.intersects(pln))
-        {
-            WarningInFunction
-                << nl
-                << name() << " : "
-                << "Plane "<< pln << " does not intersect the bounds "
-                << bounds_
-                << nl << endl;
-        }
-    }
-
-    // Plane does not intersect the (global) mesh!
-    if (!meshBb.intersects(pln))
-    {
-        WarningInFunction
-            << nl
-            << name() << " : "
-            << "Plane "<< pln << " does not intersect the mesh bounds "
-            << meshBb
-            << nl << endl;
-    }
-}
-
-
-Foam::bitSet Foam::surfMeshSamplePlane::cellSelection
-(
-    const bool warnIntersect
-) const
-{
-    // Zones requested and in use?
-    const bool hasZones =
-        returnReduce
-        (
-            (-1 != mesh().cellZones().findIndex(zoneNames_)),
-            andOp<bool>()
-        );
-
-
-    bitSet cellsToSelect;
-
-    if (hasZones)
-    {
-        cellsToSelect = mesh().cellZones().selection(zoneNames_);
-    }
-
-    // Subset the zoned cells with the bounds_.
-    // For a full mesh, use the bounds to define the cell selection.
-
-    // If there are zones cells, use them to build the effective mesh
-    // bound box.
-    // Note that for convenience we use cell centres here instead of the
-    // cell points, since it will only be used for checking.
-
-    boundBox meshBb;
-
-    if (bounds_.empty())
-    {
-        // No bounds restriction, but will need the effective mesh boundBox
-        // for checking intersections
-
-        if (hasZones && warnIntersect)
-        {
-            const auto& cellCentres = static_cast<const fvMesh&>(mesh()).C();
-
-            for (const label celli : cellsToSelect)
-            {
-                const point& cc = cellCentres[celli];
-
-                meshBb.add(cc);
-            }
-
-            meshBb.reduce();
-        }
-        else
-        {
-            meshBb = mesh().bounds();  // use the regular mesh bounding box
-        }
-    }
-    else
-    {
-        const auto& cellCentres = static_cast<const fvMesh&>(mesh()).C();
-
-        // Only examine cells already set
-        if (hasZones)
-        {
-            for (const label celli : cellsToSelect)
-            {
-                const point& cc = cellCentres[celli];
-
-                meshBb.add(cc);
-
-                if (!bounds_.contains(cc))
-                {
-                    cellsToSelect.unset(celli);
-                }
-            }
-
-            meshBb.reduce();
-        }
-        else
-        {
-            const label len = mesh().nCells();
-
-            cellsToSelect.resize(len);
-
-            for (label celli=0; celli < len; ++celli)
-            {
-                const point& cc = cellCentres[celli];
-
-                if (bounds_.contains(cc))
-                {
-                    cellsToSelect.set(celli);
-                }
-            }
-
-            meshBb = mesh().bounds();  // use the regular mesh bounding box
-        }
-    }
-
-    if (warnIntersect)
-    {
-        checkBoundsIntersection(*this, meshBb);
-    }
-
-    return cellsToSelect;
+    return cuttingPlane::cellSelection
+    (
+        mesh(),
+        bounds_,
+        zoneNames_,
+        name(),
+        warn
+    );
 }
 
 
@@ -256,9 +120,10 @@ Foam::surfMeshSamplePlane::surfMeshSamplePlane
     if (dict.found("coordinateSystem"))
     {
         coordinateSystem cs(mesh, dict.subDict("coordinateSystem"));
+        plane& pln = planeDesc();
 
-        const point  orig = cs.globalPosition(planeDesc().origin());
-        const vector norm = cs.globalVector(planeDesc().normal());
+        const point  orig = cs.globalPosition(pln.origin());
+        const vector norm = cs.globalVector(pln.normal());
 
         if (debug)
         {
@@ -268,8 +133,8 @@ Foam::surfMeshSamplePlane::surfMeshSamplePlane
                 << " defined within a local coordinateSystem" << endl;
         }
 
-        // Assign the plane description
-        static_cast<plane&>(*this) = plane(orig, norm);
+        // Reassign the plane
+        pln = plane(orig, norm);
     }
 
     if (debug)
@@ -325,7 +190,7 @@ bool Foam::surfMeshSamplePlane::update()
         return false;
     }
 
-    performCut(mesh(), triangulate_, this->cellSelection(true));
+    performCut(mesh(), triangulate_, cellSelection(true));
 
     if (debug)
     {

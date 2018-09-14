@@ -29,6 +29,34 @@ Description
     The cuttingPlane algorithm 'cuts' the mesh.
     The plane is triangulated by default.
 
+    Example of function object partial specification:
+    \verbatim
+    surfaces
+    (
+        surface1
+        {
+            type        plane;
+            planeType   pointAndNormal;
+            pointAndNormalDict
+            {
+                ...
+            }
+        }
+    );
+    \endverbatim
+
+    Where the sub-entries comprise:
+    \table
+        Property | Description                             | Required | Default
+        type     | plane                                   | yes      |
+        planeType | plane description (pointAndNormal etc) | yes      |
+        triangulate | triangulate faces                    | no       | true
+        bounds   | limit with bounding box                 | no       |
+        zone     | limit to cell zone (name or regex)      | no       |
+        zones    | limit to cell zones (names, regexs)     | no       |
+        coordinateSystem | define plane within given coordinate system | no |
+    \endtable
+
 Note
     Does not actually cut until update() called.
 
@@ -66,10 +94,10 @@ class surfMeshSamplePlane
         //- The zone or zones in which cutting is to occur
         wordRes zoneNames_;
 
-        //- Optional bounding box to trim triangles against
+        //- Optional bounding box to trim against
         const boundBox bounds_;
 
-        //- Triangulated faces or keep faces as is
+        //- Triangulate faces or not
         const bool triangulate_;
 
         //- Track if the surface needs an update
@@ -78,18 +106,11 @@ class surfMeshSamplePlane
 
     // Private Member Functions
 
-        //- Check and warn if bounding box does not intersect mesh or plane
-        void checkBoundsIntersection
-        (
-            const plane& pln,
-            const boundBox& meshBb
-        ) const;
-
         //- Define cell selection from zones and bounding box.
         //  Optionally check and warn if the plane does not intersect
         //  with the bounds of the mesh (or submesh) or if the bounding box
         //  does not overlap with the mesh (or submesh)
-        bitSet cellSelection(const bool warnIntersect=false) const;
+        bitSet cellSelection(const bool warn=false) const;
 
 
         //- Sample field on surface

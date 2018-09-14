@@ -127,6 +127,52 @@ protected:
         virtual void remapFaces(const labelUList& faceMap);
 
 
+        //- Check and warn if bounding boxes do not intersect
+        static void checkOverlap
+        (
+            const word callerName,
+            const boundBox& meshBounds,
+            const boundBox& userBounds
+        );
+
+
+        //- Define cell selection from bounding-box and zones.
+        //
+        //  \param userBounds Optionally user-specified bounding box
+        //  \param zoneNames  Optionally user-specified zone names
+        //  \param meshBounds [out] The effective mesh bounds after applying
+        //      the user-specified zone names
+        //
+        //  \return A set of nCells size with the selected cells or an empty
+        //      set if no bounding-box or zones were specified.
+        static bitSet cellSelection
+        (
+            const polyMesh& mesh,
+            const boundBox& userBounds,
+            const wordRes& zoneNames,
+            boundBox& meshBounds
+        );
+
+        //- Define cell selection from bounding-box and zones.
+        //
+        //  \param userBounds Optionally user-specified bounding box
+        //  \param zoneNames  Optionally user-specified zone names
+        //  \param callerName The caller name for warnings
+        //  \param warn Check and warn if the bounding box does not
+        //      overlap with the mesh (or submesh)
+        //
+        //  \return A set of nCells size with the selected cells or an empty
+        //      set if no bounding-box or zones were specified.
+        static bitSet cellSelection
+        (
+            const polyMesh& mesh,
+            const boundBox& userBounds,
+            const wordRes& zoneNames,
+            const word callerName,
+            const bool warn
+        );
+
+
 public:
 
     //- Debug information
