@@ -39,17 +39,12 @@ SourceFiles
 #define cuttingPlane_H
 
 #include "plane.H"
-#include "faceList.H"
-#include "bitSet.H"
-#include "MeshedSurface.H"
+#include "cuttingSurfaceBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward declarations
-class primitiveMesh;
 
 /*---------------------------------------------------------------------------*\
                         Class cuttingPlane Declaration
@@ -58,18 +53,8 @@ class primitiveMesh;
 class cuttingPlane
 :
     public plane,
-    public MeshedSurface<face>
+    public cuttingSurfaceBase
 {
-    //- Private typedef for convenience
-    typedef MeshedSurface<face> MeshStorage;
-
-
-    // Private data
-
-        //- List of cells cut by the plane
-        labelList meshCells_;
-
-
     // Private Member Functions
 
         //- Determine cut cells, possibly restricted to a list of cells
@@ -88,21 +73,6 @@ class cuttingPlane
             bitSet& cellCuts
         );
 
-        //- Walk the cell cuts to create faces
-        //
-        //  \param cellCuts [in] The cells to walk.
-        //  \param sides [in] For each mesh point, the encoded side of the
-        //      plane (0=BACK, 1=ONPLANE, 2=FRONT), which is used to determine
-        //      the edge cuts
-        void walkCellCuts
-        (
-            const primitiveMesh& mesh,
-            const bitSet& cellCuts,
-            const PackedList<2>& sides,
-            const bool triangulate,
-            const label nFaceCuts = 0
-        );
-
 
 protected:
 
@@ -114,40 +84,20 @@ protected:
 
     // Protected Member Functions
 
-        //- Cut mesh with existing plane, restricted to a list of cells
+        //- Cut mesh, restricted to a list of cells
+        using cuttingSurfaceBase::performCut;
+
+        //- Cut mesh, restricted to a list of cells
         //  Reclaim memory for cellIdLabels
-        void performCut
+        virtual void performCut
         (
             const primitiveMesh& mesh,
             const bool triangulate,
             bitSet&& cellIdLabels
         );
 
-        //- Cut mesh with existing plane, restricted to a list of cells
-        void performCut
-        (
-            const primitiveMesh& mesh,
-            const bool triangulate,
-            const bitSet& cellIdLabels = bitSet()
-        );
-
-        //- Cut mesh with existing plane, restricted to a list of cells
-        void performCut
-        (
-            const primitiveMesh& mesh,
-            const bool triangulate,
-            const labelUList& cellIdLabels
-        );
-
-        //- Remap action on triangulation or cleanup
-        virtual void remapFaces(const labelUList& faceMap);
-
 
 public:
-
-    //- Debug information
-    static int debug;
-
 
     // Constructors
 
@@ -188,24 +138,6 @@ public:
         const plane& planeDesc() const
         {
             return *this;
-        }
-
-        //- The mesh cells cut by the plane
-        const labelList& meshCells() const
-        {
-            return meshCells_;
-        }
-
-        //- The mesh cells cut by the plane
-        labelList& meshCells()
-        {
-            return meshCells_;
-        }
-
-        //- Have any cells been cut?
-        bool cut() const
-        {
-            return meshCells_.size();
         }
 
 

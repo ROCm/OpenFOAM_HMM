@@ -23,40 +23,19 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "cuttingPlane.H"
+#include "volFields.H"
 #include "edgeHashes.H"
 #include "HashOps.H"
 
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-namespace Foam
-{
-    // Check edge/plane intersection based on crossings ... trivial check.
-    // Orients the edge (first,last) points in the positive normal direction
-    inline bool intersectEdgeOrient(const PackedList<2>& sides, edge& e)
-    {
-        if (sides[e.first()] == sides[e.last()])
-        {
-            return false;
-        }
-        else if (sides[e.last()] < sides[e.first()])
-        {
-            e.flip();
-        }
-
-        return true;
-    }
-
-} // End namespace Foam
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::cuttingPlane::walkCellCuts
+template<class EdgeOrientIntersect, class EdgeAlphaIntersect>
+void Foam::cuttingSurfaceBase::walkCellCuts
 (
     const primitiveMesh& mesh,
     const bitSet& cellCuts,
-    const PackedList<2>& sides,
+    const EdgeOrientIntersect& edgeOrientIntersect,
+    const EdgeAlphaIntersect&  edgeAlphaIntersect,
     const bool triangulate,
     label nFaceCuts
 )
@@ -65,7 +44,6 @@ void Foam::cuttingPlane::walkCellCuts
     const faceList& faces = mesh.faces();
     const cellList& cells = mesh.cells();
     const pointField& points = mesh.points();
-
 
     // Dynamic lists to handle triangulation and/or missed cuts etc
     const label nCellCuts = cellCuts.count();
@@ -156,8 +134,8 @@ void Foam::cuttingPlane::walkCellCuts
             {
                 edge e(f.faceEdge(fp));
 
-                // Action #1: orient edge and detect intersection
-                if (!intersectEdgeOrient(sides, e))
+                // Action #1: Orient edge (+ve gradient) and detect intersect
+                if (!edgeOrientIntersect(e))
                 {
                     continue;
                 }
@@ -191,8 +169,7 @@ void Foam::cuttingPlane::walkCellCuts
                 const point& p1 = points[e.last()];
 
                 // Action #2: edge cut alpha
-                const scalar alpha =
-                    this->lineIntersect(linePointRef(p0, p1));
+                const scalar alpha = edgeAlphaIntersect(e);
 
                 if (alpha < SMALL)
                 {
@@ -253,7 +230,7 @@ void Foam::cuttingPlane::walkCellCuts
 
 
         // Handling cuts between two cells
-        // After the previous intersectEdgeOrient call, the edge oriented
+        // After the previous edgeIntersectAndOrient call, the edge is oriented
         // according to the gradient.
         // If we only ever cut at the same edge end we know that we have
         // a cut coinciding with a cell face.

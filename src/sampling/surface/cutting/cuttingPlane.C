@@ -25,11 +25,6 @@ License
 
 #include "cuttingPlane.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-int Foam::cuttingPlane::debug(Foam::debug::debugSwitch("cuttingPlane", 0));
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::cuttingPlane::cuttingPlane(const plane& pln)
@@ -89,6 +84,9 @@ void Foam::cuttingPlane::performCut
     bitSet&& cellIdLabels
 )
 {
+    const plane& pln = *this;
+    const pointField& pts = mesh.points();
+
     MeshStorage::clear();
     meshCells_.clear();
 
@@ -107,57 +105,40 @@ void Foam::cuttingPlane::performCut
     // - some ambiguity when plane is exactly between cells
     const label nFaceCuts = calcCellCuts(mesh, sides, cellCuts);
 
-    // Find closed loop from cell cuts
-    walkCellCuts(mesh, cellCuts, sides, triangulate, nFaceCuts);
-}
 
+    // Walk cell cuts to create faces
 
-void Foam::cuttingPlane::performCut
-(
-    const primitiveMesh& mesh,
-    const bool triangulate,
-    const bitSet& cellIdLabels
-)
-{
-    bitSet subsetCells(cellIdLabels);
-
-    performCut(mesh, triangulate, std::move(subsetCells));
-}
-
-
-void Foam::cuttingPlane::performCut
-(
-    const primitiveMesh& mesh,
-    const bool triangulate,
-    const labelUList& cellIdLabels
-)
-{
-    bitSet subsetCells;
-
-    if (notNull(cellIdLabels))
-    {
-        // Pre-populate with restriction
-        subsetCells.resize(mesh.nCells());
-        subsetCells.set(cellIdLabels);
-    }
-
-    performCut(mesh, triangulate, std::move(subsetCells));
-}
-
-
-void Foam::cuttingPlane::remapFaces(const labelUList& faceMap)
-{
-    if (notNull(faceMap) && !faceMap.empty())
-    {
-        MeshStorage::remapFaces(faceMap);
-
-        List<label> remappedCells(faceMap.size());
-        forAll(faceMap, facei)
+    // Action #1:
+    // - Orient edge so it points in the positive normal direction.
+    // - Edge/plane intersection when the sign changes
+    const auto edgeOrientIntersect =
+        [=](edge& e) -> bool
         {
-            remappedCells[facei] = meshCells_[faceMap[facei]];
-        }
-        meshCells_.transfer(remappedCells);
-    }
+            if (sides[e.last()] < sides[e.first()])
+            {
+                e.flip();
+            }
+
+            return sides[e.first()] != sides[e.last()];
+        };
+
+    // Action #2:
+    // - The edge intersection alpha
+    const auto edgeAlphaIntersect =
+        [=](const edge& e) -> scalar
+        {
+            return pln.lineIntersect(e.line(pts));
+        };
+
+    walkCellCuts
+    (
+        mesh,
+        cellCuts,
+        edgeOrientIntersect,
+        edgeAlphaIntersect,
+        triangulate,
+        nFaceCuts
+    );
 }
 
 
