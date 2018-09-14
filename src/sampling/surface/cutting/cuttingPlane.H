@@ -30,10 +30,6 @@ Description
     No attempt at resolving degenerate cases.
     Since the cut faces can be quite ugly, they will often be triangulated.
 
-Note
-    When the cutting plane coincides with a mesh face, the cell edge on the
-    positive side of the plane is taken.
-
 SourceFiles
     cuttingPlane.C
 
@@ -43,7 +39,6 @@ SourceFiles
 #define cuttingPlane_H
 
 #include "plane.H"
-#include "pointField.H"
 #include "faceList.H"
 #include "bitSet.H"
 #include "MeshedSurface.H"
@@ -79,26 +74,31 @@ class cuttingPlane
 
         //- Determine cut cells, possibly restricted to a list of cells
         //
+        //  \param sides [out] For each mesh point, the encoded side of the
+        //      plane (0=BACK, 1=ONPLANE, 2=FRONT).
         //  \param cellCuts [in,out] On input an empty set (ie, no restriction)
         //      or subsetted cells. On output, the cells cut according to the
-        //      planeSides detection.
+        //      plane-sides detection.
         //
         //  \return number of faces cut
         label calcCellCuts
         (
             const primitiveMesh& mesh,
-            const PackedList<2>& planeSides,
+            PackedList<2>& sides,
             bitSet& cellCuts
         );
 
         //- Walk the cell cuts to create faces
         //
-        //  \param planeSides [in] Used to determine edge cuts
+        //  \param cellCuts [in] The cells to walk.
+        //  \param sides [in] For each mesh point, the encoded side of the
+        //      plane (0=BACK, 1=ONPLANE, 2=FRONT), which is used to determine
+        //      the edge cuts
         void walkCellCuts
         (
             const primitiveMesh& mesh,
             const bitSet& cellCuts,
-            const PackedList<2>& planeSides,
+            const PackedList<2>& sides,
             const bool triangulate,
             const label nFaceCuts = 0
         );
@@ -115,20 +115,20 @@ protected:
     // Protected Member Functions
 
         //- Cut mesh with existing plane, restricted to a list of cells
+        //  Reclaim memory for cellIdLabels
         void performCut
         (
             const primitiveMesh& mesh,
             const bool triangulate,
-            const bitSet& cellSelectionMask = bitSet()
+            bitSet&& cellIdLabels
         );
 
         //- Cut mesh with existing plane, restricted to a list of cells
-        //  Reclaim memory for cellSelectionMask
         void performCut
         (
             const primitiveMesh& mesh,
             const bool triangulate,
-            bitSet&& cellSelectionMask
+            const bitSet& cellIdLabels = bitSet()
         );
 
         //- Cut mesh with existing plane, restricted to a list of cells

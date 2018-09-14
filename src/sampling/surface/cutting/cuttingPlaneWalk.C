@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,16 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cuttingPlane.H"
-#include "fvMesh.H"
-#include "volFields.H"
-#include "meshTools.H"
 #include "edgeHashes.H"
 #include "HashOps.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-int Foam::cuttingPlane::debug(Foam::debug::debugSwitch("cuttingPlane", 0));
-
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
@@ -55,171 +47,10 @@ namespace Foam
         return true;
     }
 
-
-    // Classify sides of plane (0=BACK, 1=ONPLANE, 2=FRONT) for each point
-    inline PackedList<2> classifySides(const plane& pln, const pointField& pts)
-    {
-        const label len = pts.size();
-
-        PackedList<2> output(len);
-
-        // From signed (-1,0,+1) to (0,1,2) for PackedList
-        for (label i=0; i < len; ++i)
-        {
-            output.set(i, unsigned(1 + pln.sign(pts[i], SMALL)));
-        }
-
-        return output;
-    }
-
-
-    // Check for face/plane intersection based on crossings
-    // Took (-1,0,+1) from plane::sign and packed as (0,1,2).
-    // Now use for left shift to obtain (1,2,4).
-    //
-    // Test accumulated value for an intersection with the plane.
-    inline bool intersectsFace
-    (
-        const PackedList<2>& sides,
-        const labelUList& indices
-    )
-    {
-        unsigned accum = 0u;
-
-        for (const label pointi : indices)
-        {
-            accum |= (1u << sides[pointi]);
-        }
-
-        // Accumulated value 3,5,6,7 indicates an intersection
-        return (accum == 3 || accum >= 5);
-    }
-
 } // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-Foam::label Foam::cuttingPlane::calcCellCuts
-(
-    const primitiveMesh& mesh,
-    const PackedList<2>& sides,
-    bitSet& cellCuts
-)
-{
-    const faceList& faces = mesh.faces();
-
-    const label nCells = mesh.nCells();
-    const label nFaces = mesh.nFaces();
-    const label nInternFaces = mesh.nInternalFaces();
-
-    // Detect cells cuts from the face cuts
-
-    label nFaceCuts = 0;
-
-    // 1st face cut of cell
-    bitSet hasCut1(nCells);
-
-    // 2nd face cut of cell
-    bitSet hasCut2(nCells);
-
-    for (label facei = 0; facei < nInternFaces; ++facei)
-    {
-        if (intersectsFace(sides, faces[facei]))
-        {
-            const label own = mesh.faceOwner()[facei];
-            const label nei = mesh.faceNeighbour()[facei];
-
-            ++nFaceCuts;
-
-            if (!hasCut1.set(own))
-            {
-                hasCut2.set(own);
-            }
-            if (!hasCut1.set(nei))
-            {
-                hasCut2.set(nei);
-            }
-        }
-    }
-
-    for (label facei = nInternFaces; facei < nFaces; ++facei)
-    {
-        if (intersectsFace(sides, faces[facei]))
-        {
-            const label own = mesh.faceOwner()[facei];
-
-            ++nFaceCuts;
-
-            if (!hasCut1.set(own))
-            {
-                hasCut2.set(own);
-            }
-        }
-    }
-
-    hasCut1.clearStorage();   // Not needed now
-
-    if (cellCuts.size())
-    {
-        cellCuts.resize(nCells);    // safety
-        cellCuts &= hasCut2;        // restrict to cell subset
-
-        if (debug)
-        {
-            Pout<<"detected " << cellCuts.count() << "/" << nCells
-                << " cells cut, subsetted from "
-                << hasCut2.count() << "/" << nCells << " cells." << endl;
-        }
-    }
-    else
-    {
-        cellCuts = std::move(hasCut2);
-
-        if (debug)
-        {
-            Pout<<"detected " << cellCuts.count() << "/" << nCells
-                << " cells cut." << endl;
-        }
-    }
-
-
-    if (debug && isA<fvMesh>(mesh))
-    {
-        const fvMesh& fvm = dynamicCast<const fvMesh&>(mesh);
-
-        volScalarField debugField
-        (
-            IOobject
-            (
-                "cuttingPlane.cellCuts",
-                fvm.time().timeName(),
-                fvm.time(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            fvm,
-            dimensionedScalar(dimless, Zero)
-        );
-
-        auto& debugFld = debugField.primitiveFieldRef();
-
-        for (const label celli : cellCuts)
-        {
-            debugFld[celli] = 1;
-        }
-
-        Pout<< "Writing cut types:"
-            << debugField.objectPath() << endl;
-
-        debugField.write();
-    }
-
-
-    return nFaceCuts;
-}
-
 
 void Foam::cuttingPlane::walkCellCuts
 (
@@ -325,7 +156,7 @@ void Foam::cuttingPlane::walkCellCuts
             {
                 edge e(f.faceEdge(fp));
 
-                // Action #1: detect edge intersection and orient edge
+                // Action #1: orient edge and detect intersection
                 if (!intersectEdgeOrient(sides, e))
                 {
                     continue;
@@ -356,8 +187,8 @@ void Foam::cuttingPlane::walkCellCuts
                 // Expected id for the cut point
                 cutPointId = dynCutPoints.size();
 
-                const point& p0 = points[e[0]];
-                const point& p1 = points[e[1]];
+                const point& p0 = points[e.first()];
+                const point& p1 = points[e.last()];
 
                 // Action #2: edge cut alpha
                 const scalar alpha =
@@ -365,41 +196,41 @@ void Foam::cuttingPlane::walkCellCuts
 
                 if (alpha < SMALL)
                 {
-                    // -> equal(alpha, 0) with more tolerance
+                    pointCutType |= 0x1; // Cut at 0 (first)
 
-                    if (endPoints.insert(e[0], cutPointId))
+                    const label endp = e.first();
+
+                    if (endPoints.insert(endp, cutPointId))
                     {
-                        localEndPoints.insert(e[0]);
+                        localEndPoints.insert(endp);
                         dynCutPoints.append(p0);
                     }
                     else
                     {
-                        cutPointId = endPoints[e[0]];
+                        cutPointId = endPoints[endp];
                     }
-
-                    pointCutType |= 0x1; // Cut at 0
                 }
                 else if (alpha >= (1.0 - SMALL))
                 {
-                    // -> equal(alpha, 1) with more tolerance
+                    pointCutType |= 0x2; // Cut at 1 (last)
 
-                    if (endPoints.insert(e[1], cutPointId))
+                    const label endp = e.last();
+
+                    if (endPoints.insert(endp, cutPointId))
                     {
-                        localEndPoints.insert(e[1]);
+                        localEndPoints.insert(endp);
                         dynCutPoints.append(p1);
                     }
                     else
                     {
-                        cutPointId = endPoints[e[1]];
+                        cutPointId = endPoints[endp];
                     }
-
-                    pointCutType |= 0x2; // Cut at 1
                 }
                 else
                 {
-                    dynCutPoints.append((1-alpha)*p0 + alpha*p1);
-
                     pointCutType |= 0x4; // Cut between
+
+                    dynCutPoints.append((1-alpha)*p0 + alpha*p1);
                 }
 
                 // Introduce new edge cut point
@@ -562,154 +393,6 @@ void Foam::cuttingPlane::walkCellCuts
         this->storedFaces().transfer(dynCutFaces);
         meshCells_.transfer(dynCutCells);
     }
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::cuttingPlane::cuttingPlane(const plane& pln)
-:
-    plane(pln)
-{}
-
-
-Foam::cuttingPlane::cuttingPlane
-(
-    const plane& pln,
-    const primitiveMesh& mesh,
-    const bool triangulate,
-    const bitSet& cellIdLabels
-)
-:
-    plane(pln)
-{
-    performCut(mesh, triangulate, cellIdLabels);
-}
-
-
-Foam::cuttingPlane::cuttingPlane
-(
-    const plane& pln,
-    const primitiveMesh& mesh,
-    const bool triangulate,
-    bitSet&& cellIdLabels
-)
-:
-    plane(pln)
-{
-    performCut(mesh, triangulate, cellIdLabels);
-}
-
-
-Foam::cuttingPlane::cuttingPlane
-(
-    const plane& pln,
-    const primitiveMesh& mesh,
-    const bool triangulate,
-    const labelUList& cellIdLabels
-)
-:
-    plane(pln)
-{
-    performCut(mesh, triangulate, cellIdLabels);
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::cuttingPlane::performCut
-(
-    const primitiveMesh& mesh,
-    const bool triangulate,
-    bitSet&& cellIdLabels
-)
-{
-    MeshStorage::clear();
-    meshCells_.clear();
-
-    // Pre-populate with restriction
-    bitSet cellCuts(std::move(cellIdLabels));
-
-    if (cellCuts.size())
-    {
-        cellCuts.resize(mesh.nCells());
-    }
-
-    // Classification of points with respect to the plane
-    PackedList<2> sides = classifySides(*this, mesh.points());
-
-    // Determine cells that are (likely) cut
-    // - some ambiguity when plane is exactly between cells
-    const label nFaceCuts = calcCellCuts(mesh, sides, cellCuts);
-
-    // Find closed loop from cell cuts
-    walkCellCuts(mesh, cellCuts, sides, triangulate, nFaceCuts);
-}
-
-
-void Foam::cuttingPlane::performCut
-(
-    const primitiveMesh& mesh,
-    const bool triangulate,
-    const bitSet& cellIdLabels
-)
-{
-    bitSet subsetCells(cellIdLabels);
-
-    performCut(mesh, triangulate, std::move(subsetCells));
-}
-
-
-void Foam::cuttingPlane::performCut
-(
-    const primitiveMesh& mesh,
-    const bool triangulate,
-    const labelUList& cellIdLabels
-)
-{
-    bitSet subsetCells;
-
-    if (notNull(cellIdLabels))
-    {
-        // Pre-populate with restriction
-        subsetCells.resize(mesh.nCells());
-        subsetCells.set(cellIdLabels);
-    }
-
-    performCut(mesh, triangulate, std::move(subsetCells));
-}
-
-
-void Foam::cuttingPlane::remapFaces(const labelUList& faceMap)
-{
-    if (notNull(faceMap) && !faceMap.empty())
-    {
-        MeshStorage::remapFaces(faceMap);
-
-        List<label> newCutCells(faceMap.size());
-        forAll(faceMap, facei)
-        {
-            newCutCells[facei] = meshCells_[faceMap[facei]];
-        }
-        meshCells_.transfer(newCutCells);
-    }
-}
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-void Foam::cuttingPlane::operator=(const cuttingPlane& rhs)
-{
-    if (this == &rhs)
-    {
-        FatalErrorInFunction
-            << "Attempted assignment to self"
-            << abort(FatalError);
-    }
-
-    static_cast<MeshStorage&>(*this) = rhs;
-    static_cast<plane&>(*this) = rhs;
-    meshCells_ = rhs.meshCells();
 }
 
 

@@ -19,7 +19,9 @@ sampledSet/uniform/uniformSet.C
 sampledSet/array/arraySet.C
 sampledSet/shortestPath/shortestPathSet.C
 
-surface/cuttingPlane/cuttingPlane.C
+surface/cutting/cuttingPlane.C
+surface/cutting/cuttingPlaneCuts.C
+surface/cutting/cuttingPlaneWalk.C
 surface/distanceSurface/distanceSurface.C
 surface/isoSurface/isoSurface.C
 surface/isoSurface/isoSurfaceCell.C
