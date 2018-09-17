@@ -118,5 +118,8 @@ clouds/Templates/KinematicCloud/cloudSolution/cloudSolution.C
 /* averaging methods */
 submodels/MPPIC/AveragingMethods/makeAveragingMethods.C
 
+/* conversion methods */
+conversion/vtk/foamVtkLagrangianWriter.C
+
 
 LIB = $(FOAM_LIBBIN)/liblagrangianIntermediate
