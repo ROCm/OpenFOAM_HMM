@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,36 +23,34 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "foamVtkWriteCellSetFaces.H"
-#include "foamVtkOutputOptions.H"
-#include "OFstream.H"
-#include "primitiveMesh.H"
+#include "foamVtkWriteTopoSet.H"
+#include "foamVtkIndPatchWriter.H"
+#include "polyMesh.H"
 #include "cellSet.H"
-#include "uindirectPrimitivePatch.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-void Foam::vtk::writeCellSetFaces
+bool Foam::vtk::writeCellSetFaces
 (
-    const primitiveMesh& mesh,
+    const polyMesh& mesh,
     const cellSet& set,
-    const fileName& baseName,
-    const vtk::outputOptions outOpts
+    const vtk::outputOptions opts,
+    const fileName& file,
+    bool parallel
 )
 {
-    outputOptions opts(outOpts);
-    opts.legacy(true);  // Legacy only, no xml, no append
+    typedef IndirectList<face> FaceListType;
 
-    const bool legacy_(opts.legacy());
+    const globalIndex cellIdOffset(mesh.nCells());
 
-    std::ofstream os(baseName + (legacy_ ? ".vtk" : ".vtp"));
+    indirectPrimitivePatch pp
+    (
+        FaceListType(mesh.faces(), labelList()),
+        mesh.points()
+    );
+    FaceListType& faces = pp;
 
-    autoPtr<vtk::formatter> format = opts.newFormatter(os);
-
-    if (legacy_)
-    {
-        legacy::fileHeader(format(), set.name(), vtk::fileTag::POLY_DATA);
-    }
 
     //-------------------------------------------------------------------------
 
@@ -87,57 +85,48 @@ void Foam::vtk::writeCellSetFaces
         }
     }
 
-    const labelList faceLabels(cellFaces.sortedToc());
-    labelList faceValues(cellFaces.size());
+    // Use these faces
+    faces.resetAddressing(cellFaces.sortedToc());
 
-    forAll(faceLabels, facei)
+    // For each face, the corresponding cellID
+
+    labelList faceValues(faces.size());
+
+    // Cell ID
     {
-        faceValues[facei] = cellFaces[faceLabels[facei]];  // Cell ID
-    }
+        const labelList& faceIds = faces.addressing();
 
-    uindirectPrimitivePatch pp
-    (
-        UIndirectList<face>(mesh.faces(), faceLabels),
-        mesh.points()
-    );
+        const label off = cellIdOffset.localStart();
+
+        forAll(faceValues, facei)
+        {
+            faceValues[facei] = cellFaces[faceIds[facei]] + off;
+        }
+    }
 
     //-------------------------------------------------------------------------
 
-    // Write points and faces as polygons
-    legacy::beginPoints(os, pp.nPoints());
+    indirectPatchWriter writer(pp, opts);
 
-    vtk::writeList(format(), pp.localPoints());
-    format().flush();
+    writer.open(file, parallel);
 
-    // connectivity count without additional storage (done internally)
-    uint64_t nConnectivity = 0;
-    forAll(pp, facei)
+    writer.beginFile(set.name());
+    writer.writeGeometry();
+
+    //-------------------------------------------------------------------------
+
+    // CellData - cellID only
     {
-        nConnectivity += pp[facei].size();
+        writer.beginCellData(1);
+
+        writer.write("faceID", faceValues);
+
+        // End CellData/PointData is implicit
     }
 
-    legacy::beginPolys(os, pp.size(), nConnectivity);
+    writer.close();
 
-
-    // legacy: size + connectivity together
-    // [nPts, id1, id2, ..., nPts, id1, id2, ...]
-    forAll(pp, facei)
-    {
-        const face& f = pp.localFaces()[facei];
-
-        format().write(f.size());  // The size prefix
-        vtk::writeList(format(), f);
-    }
-    format().flush();
-
-
-    // Write data - faceId/cellId
-    legacy::beginCellData(format(), pp.size(), 1);
-
-    os << "cellID 1 " << pp.size() << " int" << nl;
-
-    vtk::writeList(format(), faceValues);
-    format().flush();
+    return true;
 }
 
 

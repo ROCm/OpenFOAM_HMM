@@ -297,6 +297,8 @@ meshStructure/meshStructure.C
 meshStructure/topoDistanceData.C
 meshStructure/pointTopoDistanceData.C
 
+output/foamVtkIndPatchWriter.C
+output/foamVtkWriteTopoSet.C
 output/foamVtkWriteFaceSet.C
 output/foamVtkWritePointSet.C
 output/foamVtkWriteCellSetFaces.C

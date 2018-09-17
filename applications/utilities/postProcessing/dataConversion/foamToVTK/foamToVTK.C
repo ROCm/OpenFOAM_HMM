@@ -168,8 +168,7 @@ Note
 #include "foamVtkPatchWriter.H"
 #include "foamVtkSurfaceMeshWriter.H"
 #include "foamVtkLagrangianWriter.H"
-#include "foamVtkWriteFaceSet.H"
-#include "foamVtkWritePointSet.H"
+#include "foamVtkWriteTopoSet.H"
 #include "foamVtkWriteSurfFields.H"
 
 #include "memInfo.H"
@@ -629,21 +628,25 @@ int main(int argc, char *argv[])
             vtuMeshCells.clear();
         }
 
+
+        // Attempt topoSets first
+        bool shortCircuit = false;
+
         // If faceSet: write faceSet only (as polydata)
         if (faceSetName.size())
         {
-            // Load the faceSet
+            // Load
             faceSet set(mesh, faceSetName);
 
             // Filename as if patch with same name.
-            mkDir(fvPath/set.name());
-
-            fileName outputName
+            const fileName outputName
             (
-                fvPath/set.name()/set.name()
-              + "_"
-              + timeDesc
+                fvPath/set.name()
+              / set.name() + "_" + timeDesc
             );
+
+            mkDir(outputName.path());
+
             Info<< "    faceSet   : "
                 << outputName.relative(runTime.path()) << nl;
 
@@ -651,27 +654,29 @@ int main(int argc, char *argv[])
             (
                 meshProxy.mesh(),
                 set,
+                fmtType,
                 outputName,
-                fmtType
+                false // In parallel (later)
             );
-            continue;
+
+            shortCircuit = true;
         }
 
         // If pointSet: write pointSet only (as polydata)
         if (pointSetName.size())
         {
-            // Load the pointSet
+            // Load
             pointSet set(mesh, pointSetName);
 
             // Filename as if patch with same name.
-            mkDir(fvPath/set.name());
-
-            fileName outputName
+            const fileName outputName
             (
-                fvPath/set.name()/set.name()
-              + "_"
-              + timeDesc
+                fvPath/set.name()
+              / set.name() + "_" + timeDesc
             );
+
+            mkDir(outputName.path());
+
             Info<< "    pointSet  : "
                 << outputName.relative(runTime.path()) << nl;
 
@@ -679,9 +684,16 @@ int main(int argc, char *argv[])
             (
                 meshProxy.mesh(),
                 set,
+                fmtType,
                 outputName,
-                fmtType
+                false // In parallel (later)
             );
+
+            shortCircuit = true;
+        }
+
+        if (shortCircuit)
+        {
             continue;
         }
 

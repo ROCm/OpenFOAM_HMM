@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,20 +25,21 @@ InNamespace
     Foam::vtk
 
 Description
-    Write faces of cellSet to vtk polydata file.
-
-    The data are the original cell ids
+    Write topoSet in VTK format
 
 SourceFiles
+    foamVtkWriteTopoSet.C
     foamVtkWriteCellSetFaces.C
+    foamVtkWriteFaceSet.C
+    foamVtkWritePointSet.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef foamVtkWriteCellSetFaces_H
 #define foamVtkWriteCellSetFaces_H
 
-#include "primitiveMesh.H"
-#include "uindirectPrimitivePatch.H"
+#include "fileName.H"
+#include "UPstream.H"
 #include "foamVtkOutputOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -47,26 +48,73 @@ namespace Foam
 {
 
 // Forward declarations
-class primitiveMesh;
+class polyMesh;
+class topoSet;
+class faceSet;
 class cellSet;
-class fileName;
+class pointSet;
 
 namespace vtk
 {
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Dispatch to vtk::writeCellSetFaces, vtk::writeFaceSet, vtk::writePointSet
+//  The file name is with/without an extension.
+//  \return True on successful dispatch
+bool writeTopoSet
+(
+    const polyMesh& mesh,
+    const topoSet& set,
+    const vtk::outputOptions opts,
+    const fileName& file,
+    bool parallel = Pstream::parRun()
+);
+
+
+//- Write faceSet as VTK polydata file.
+//  Only one CELL_DATA, which is the original faceID
+//  The file name is with/without an extension.
+bool writeFaceSet
+(
+    const polyMesh& mesh,
+    const faceSet& set,
+    const vtk::outputOptions opts,
+    const fileName& file,
+    bool parallel = Pstream::parRun()
+);
+
+
 //- Write perimeter faces of cellset to vtk polydata file.
 //  The data are the original cell ids
-void writeCellSetFaces
+//  The file name is with/without an extension.
+bool writeCellSetFaces
 (
-    const primitiveMesh& mesh,
+    const polyMesh& mesh,
     const cellSet& set,
-    const fileName& baseName,
-    const vtk::outputOptions outOpts
+    const vtk::outputOptions opts,
+    const fileName& file,
+    bool parallel = Pstream::parRun()
 );
+
+
+//- Write pointSet to VTK polydata file.
+//  Only one CELL_DATA, which is the original pointID
+//  The file name is with/without an extension.
+bool writePointSet
+(
+    const polyMesh& mesh,
+    const pointSet& set,
+    const vtk::outputOptions opts,
+    const fileName& file,
+    bool parallel = Pstream::parRun()
+);
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace vtk
 } // End namespace Foam
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
