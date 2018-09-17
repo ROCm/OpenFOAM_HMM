@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,13 +62,13 @@ Foam::vtk::vtuCells::vtuCells
 
 Foam::vtk::vtuCells::vtuCells
 (
-    const vtk::outputOptions outOpts,
+    const vtk::outputOptions opts,
     const bool decompose
 )
 :
     vtuCells
     (
-        (outOpts.legacy() ? contentType::LEGACY : contentType::XML),
+        (opts.legacy() ? contentType::LEGACY : contentType::XML),
         decompose
     )
 {}
@@ -77,20 +77,14 @@ Foam::vtk::vtuCells::vtuCells
 Foam::vtk::vtuCells::vtuCells
 (
     const polyMesh& mesh,
-    const vtk::outputOptions outOpts,
+    const vtk::outputOptions opts,
     const bool decompose
 )
 :
-    vtuCells(outOpts, decompose)
+    vtuCells(opts, decompose)
 {
     reset(mesh);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::vtk::vtuCells::~vtuCells()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -108,9 +102,9 @@ void Foam::vtk::vtuCells::clear()
 }
 
 
-void Foam::vtk::vtuCells::reset(const polyMesh& mesh)
+void Foam::vtk::vtuCells::repopulate(const polyMesh& mesh)
 {
-    vtuSizing::reset(mesh, decomposeRequest_);
+    // vtuSizing::reset() called prior to this method
 
     cellTypes_.setSize(nFieldCells());
     vertLabels_.setSize(sizeOf(output_, slotType::CELLS));
@@ -154,6 +148,13 @@ void Foam::vtk::vtuCells::reset(const polyMesh& mesh)
             );
             break;
     }
+}
+
+
+void Foam::vtk::vtuCells::reset(const polyMesh& mesh)
+{
+    vtuSizing::reset(mesh, decomposeRequest_);
+    repopulate(mesh);
 }
 
 

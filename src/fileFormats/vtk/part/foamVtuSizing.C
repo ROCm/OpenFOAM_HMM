@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,6 +42,12 @@ void Foam::vtk::vtuSizing::presizeMaps(foamVtkMeshMaps& maps) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::vtk::vtuSizing::vtuSizing()
+{
+    clear();
+}
+
+
 Foam::vtk::vtuSizing::vtuSizing
 (
     const polyMesh& mesh,
@@ -53,13 +59,24 @@ Foam::vtk::vtuSizing::vtuSizing
 }
 
 
-Foam::vtk::vtuSizing::vtuSizing()
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::vtk::vtuSizing::clear()
 {
-    clear();
+    decompose_   = false;
+    nCells_      = 0;
+    nPoints_     = 0;
+    nVertLabels_ = 0;
+
+    nFaceLabels_ = 0;
+    nCellsPoly_  = 0;
+    nVertPoly_   = 0;
+
+    nAddCells_   = 0;
+    nAddPoints_  = 0;
+    nAddVerts_   = 0;
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::vtk::vtuSizing::reset
 (
@@ -90,7 +107,9 @@ void Foam::vtk::vtuSizing::reset
     nFaceLabels_ = 0;
     nVertPoly_   = 0;
 
-    forAll(shapes, celli)
+    const label len = mesh.nCells();
+
+    for (label celli=0; celli < len; ++celli)
     {
         const cellShape& shape = shapes[celli];
         const cellModel& model = shape.model();
@@ -177,7 +196,7 @@ void Foam::vtk::vtuSizing::reset
         }
     }
 
-    // decompose requested and needed
+    // Requested and actually required
     decompose_ = (decompose && nCellsPoly_);
 }
 
@@ -261,6 +280,8 @@ Foam::label Foam::vtk::vtuSizing::sizeOf
     return 0;
 }
 
+
+// * * * * * * * * * * * * * *  Populate Lists * * * * * * * * * * * * * * * //
 
 void Foam::vtk::vtuSizing::populateLegacy
 (
@@ -491,30 +512,235 @@ void Foam::vtk::vtuSizing::populateInternal
 }
 
 
-void Foam::vtk::vtuSizing::clear()
+// * * * * * * * * * * * * * * Renumber vertices * * * * * * * * * * * * * * //
+
+Foam::labelList Foam::vtk::vtuSizing::copyVertLabelsLegacy
+(
+    const labelUList& vertLabels,
+    const label globalPointOffset
+)
 {
-    decompose_   = false;
-    nCells_      = 0;
-    nPoints_     = 0;
-    nVertLabels_ = 0;
+    if (!globalPointOffset)
+    {
+        return vertLabels;
+    }
 
-    nFaceLabels_ = 0;
-    nCellsPoly_  = 0;
-    nVertPoly_   = 0;
+    labelList output(vertLabels);
+    renumberVertLabelsLegacy(output, globalPointOffset);
 
-    nAddCells_   = 0;
-    nAddPoints_  = 0;
-    nAddVerts_   = 0;
+    return output;
 }
 
+
+void Foam::vtk::vtuSizing::renumberVertLabelsLegacy
+(
+    labelUList& vertLabels,
+    const label globalPointOffset
+)
+{
+    if (!globalPointOffset)
+    {
+        return;
+    }
+
+    // LEGACY vertLabels = "cells" contains
+    // - connectivity
+    // [nLabels, vertex labels...]
+    // - face-stream
+    // [nLabels nFaces, nFace0Pts, id1,id2,..., nFace1Pts, id1,id2,...]
+
+    // Note the simplest volume cell is a tet (4 points, 4 faces)
+    // As a poly-face stream this would have
+    // 2 for nLabels, nFaces
+    // 4 labels (size + ids) per face * 4 == 16 labels
+    //
+    // Therefore anything with 18 labels or more must be a poly
+
+    auto iter = vertLabels.begin();
+    auto last = vertLabels.end();
+
+    while (iter < last)
+    {
+        label nLabels = *iter;  // nLabels (for this cell)
+        ++iter;
+
+        if (nLabels < 18)
+        {
+            // Normal primitive type
+
+            while (nLabels--)
+            {
+                *iter += globalPointOffset;
+                ++iter;
+            }
+        }
+        else
+        {
+            // Polyhedral face-stream (explained above)
+
+            label nFaces = *iter;
+            ++iter;
+
+            while (nFaces--)
+            {
+                nLabels = *iter;  // nLabels (for this face)
+                ++iter;
+
+                while (nLabels--)
+                {
+                    *iter += globalPointOffset;
+                    ++iter;
+                }
+            }
+        }
+    }
+}
+
+
+Foam::labelList Foam::vtk::vtuSizing::copyVertLabelsXml
+(
+    const labelUList& vertLabels,
+    const label globalPointOffset
+)
+{
+    if (!globalPointOffset)
+    {
+        return vertLabels;
+    }
+
+    labelList output(vertLabels);
+    renumberVertLabelsXml(output, globalPointOffset);
+
+    return output;
+}
+
+
+void Foam::vtk::vtuSizing::renumberVertLabelsXml
+(
+    labelUList& vertLabels,
+    const label globalPointOffset
+)
+{
+    if (!globalPointOffset)
+    {
+        return;
+    }
+
+    // XML vertLabels = "connectivity" contains
+    // [cell1-verts, cell2-verts, ...]
+
+    for (label& vertId : vertLabels)
+    {
+        vertId += globalPointOffset;
+    }
+}
+
+
+Foam::labelList Foam::vtk::vtuSizing::copyFaceLabelsXml
+(
+    const labelUList& faceLabels,
+    const label globalPointOffset
+)
+{
+    if (!globalPointOffset)
+    {
+        return faceLabels;
+    }
+
+    labelList output(faceLabels);
+    renumberFaceLabelsXml(output, globalPointOffset);
+
+    return output;
+}
+
+
+void Foam::vtk::vtuSizing::renumberFaceLabelsXml
+(
+    labelUList& faceLabels,
+    const label globalPointOffset
+)
+{
+    if (!globalPointOffset)
+    {
+        return;
+    }
+
+    // XML face-stream
+    // [nFaces, nFace0Pts, id1,id2,..., nFace1Pts, id1,id2,...]
+
+    auto iter = faceLabels.begin();
+    auto last = faceLabels.end();
+
+    while (iter < last)
+    {
+        label nFaces = *iter;
+        ++iter;
+
+        while (nFaces--)
+        {
+            label nLabels = *iter;
+            ++iter;
+
+            while (nLabels--)
+            {
+                *iter += globalPointOffset;
+                ++iter;
+            }
+        }
+    }
+}
+
+
+Foam::labelList Foam::vtk::vtuSizing::copyFaceOffsetsXml
+(
+    const labelUList& faceOffsets,
+    const label prevOffset
+)
+{
+    if (!prevOffset)
+    {
+        return faceOffsets;
+    }
+
+    labelList output(faceOffsets);
+    renumberFaceOffsetsXml(output, prevOffset);
+
+    return output;
+}
+
+
+void Foam::vtk::vtuSizing::renumberFaceOffsetsXml
+(
+    labelUList& faceOffsets,
+    const label prevOffset
+)
+{
+    if (!prevOffset)
+    {
+        return;
+    }
+
+    // offsets
+    // [-1, off1, off2, ... -1, ..]
+
+    for (label& val : faceOffsets)
+    {
+        if (val != -1)
+        {
+            val += prevOffset;
+        }
+    }
+}
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 void Foam::vtk::vtuSizing::info(Ostream& os) const
 {
     os  << "nFieldCells:" << nFieldCells();
     if (nAddCells_)
     {
-        os  << " (" << nCells_
-            << "+" << nAddCells_ << ")";
+        os  << " (" << nCells_ << "+" << nAddCells_ << ")";
     }
     else
     {
@@ -549,6 +775,7 @@ bool Foam::vtk::vtuSizing::operator==(const vtuSizing& rhs) const
     return
     (
         decompose()   == rhs.decompose()
+        // required?  && pointOffset() == rhs.pointOffset()
      && nCells()      == rhs.nCells()
      && nPoints()     == rhs.nPoints()
      && nVertLabels() == rhs.nVertLabels()

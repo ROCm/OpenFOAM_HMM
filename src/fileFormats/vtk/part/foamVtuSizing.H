@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -76,6 +76,13 @@ Description
     The VTK storage concept for "connectivity" and "faces" somewhat resemble
     a CompactListList.
 
+Note
+    It is possible to specify a global point offset (via the globalIndex)
+    so that the cell point labels will use global numbering.
+    There is no support for point renumbering with merged mesh points,
+    since it likely more efficient to use VTK point-blanking to mark duplicate
+    points instead of merging points ourselves.
+
 SourceFiles
     foamVtuSizing.C
     foamVtuSizingI.H
@@ -94,7 +101,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class polyMesh;
 
 namespace vtk
@@ -144,7 +151,7 @@ private:
         //- Number of vertex labels to represent the mesh
         label nVertLabels_;
 
-      // Polyhedrals
+    // Polyhedrals
 
         //- Number of polyhedral face labels for the mesh
         label nFaceLabels_;
@@ -155,7 +162,7 @@ private:
         //- Number of vertex labels used by polyhedrals
         label nVertPoly_;
 
-      // Decomposed polyhedrals
+    // Decomposed polyhedrals
 
         //- Number of additional (decomposed) cells for the mesh
         label nAddCells_;
@@ -172,7 +179,7 @@ private:
         //- set-size for cellMap and additionalIds
         void presizeMaps(foamVtkMeshMaps& maps) const;
 
-        //- Populate lists for internal VTK representation
+        //- Populate lists. For (legacy | xml | internal) VTK representations
         template<class LabelType, class LabelType2>
         static void populateArrays
         (
@@ -188,7 +195,6 @@ private:
             UList<LabelType2>& addPointsIds
         );
 
-        // Allow default bitwise copy/assignment
 
 public:
 
@@ -197,9 +203,13 @@ public:
         //- Construct null.
         vtuSizing();
 
-        //- Construct sizes by analyzing the mesh,
-        //  optionally with polyhedral decomposition.
-        vtuSizing(const polyMesh& mesh, const bool decompose=false);
+        //- Construct sizing by analyzing the mesh.
+        //  No polyhedral decomposition.
+        explicit vtuSizing(const polyMesh& mesh);
+
+        //- Construct sizing by analyzing the mesh.
+        //  Optionally with polyhedral decomposition.
+        vtuSizing(const polyMesh& mesh, const bool decompose);
 
 
     //- Destructor
@@ -208,19 +218,19 @@ public:
 
     // Member Functions
 
-      // Edit
+    // Edit
 
-        //- Construct sizes by analyzing the mesh,
-        //  optionally with polyhedral decomposition.
+        //- Reset sizing by analyzing the mesh.
+        //  Optionally with polyhedral decomposition.
         void reset(const polyMesh& mesh, const bool decompose=false);
 
         //- Reset all sizes to zero.
         void clear();
 
 
-      // Access
+    // Access
 
-        //- Query the decompose flag
+        //- Query the decompose flag (normally off)
         inline bool decompose() const;
 
         //- Number of cells for the mesh
@@ -258,7 +268,7 @@ public:
         inline label nFieldPoints() const;
 
 
-      // Derived sizes
+    // Derived sizes
 
         //- Return the required size for the storage slot
         label sizeOf
@@ -281,7 +291,7 @@ public:
         inline label sizeInternal(const enum slotType slot) const;
 
 
-      // Utility routines
+    // Routines for populating the output lists
 
         //- Populate lists for Legacy output
         void populateLegacy
@@ -380,13 +390,73 @@ public:
         ) const;
 
 
-      // Write
+    // Routines for renumber vertices with a global point offset
+    // Legacy and xml only, internal version less likely to be needed
+
+        //- Copy vertex labels with a global point offset - legacy format
+        static labelList copyVertLabelsLegacy
+        (
+            const labelUList& connectivity,
+            const label globalPointOffset
+        );
+
+        //- Copy vertex labels with a global point offset - XML format
+        static labelList copyVertLabelsXml
+        (
+            const labelUList& connectivity,
+            const label globalPointOffset
+        );
+
+        //- Copy faces stream labels with a global point offset - XML format
+        static labelList copyFaceLabelsXml
+        (
+            const labelUList& faceLabels,
+            const label globalPointOffset
+        );
+
+        //- Copy face offsets with an offset from previous - XML format
+        static labelList copyFaceOffsetsXml
+        (
+            const labelUList& faceOffsets,
+            const label prevOffset
+        );
+
+        //- Renumber vertex labels by global point offset - legacy format
+        static void renumberVertLabelsLegacy
+        (
+            labelUList& connectivity,
+            const label globalPointOffset
+        );
+
+        //- Renumber vertex labels by global point offset - XML format
+        static void renumberVertLabelsXml
+        (
+            labelUList& connectivity,
+            const label globalPointOffset
+        );
+
+        //- Renumber faces stream labels by global point offset - XML format
+        static void renumberFaceLabelsXml
+        (
+            labelUList& faceLabels,
+            const label globalPointOffset
+        );
+
+        //- Renumber face offsets with an offset from previous - XML format
+        static void renumberFaceOffsetsXml
+        (
+            labelUList& faceOffsets,
+            const label prevOffset
+        );
+
+
+    // Write
 
         //- Report some information
         void info(Ostream& os) const;
 
 
-      // Member Operators
+    // Member Operators
 
         //- Test equality
         bool operator==(const vtuSizing& rhs) const;
