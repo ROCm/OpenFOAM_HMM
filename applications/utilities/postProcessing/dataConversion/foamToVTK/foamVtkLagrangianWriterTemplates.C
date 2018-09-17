@@ -78,7 +78,7 @@ void Foam::vtk::lagrangianWriter::writeIOField(const wordList& fieldNames)
 
             if (legacy_)
             {
-                legacy::intField(os(), fldName, nCmpt, fld.size());
+                legacy::intField<nCmpt>(format(), fldName, fld.size());
             }
             else
             {
@@ -103,7 +103,7 @@ void Foam::vtk::lagrangianWriter::writeIOField(const wordList& fieldNames)
 
             if (legacy_)
             {
-                legacy::floatField(os(), fldName, nCmpt, fld.size());
+                legacy::floatField<nCmpt>(format(), fldName, fld.size());
             }
             else
             {

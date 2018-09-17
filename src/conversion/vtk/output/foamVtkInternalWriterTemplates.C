@@ -43,7 +43,7 @@ void Foam::vtk::internalWriter::write
 
     if (legacy_)
     {
-        legacy::floatField(os(), field.name(), nCmpt, cellMap.size());
+        legacy::floatField<nCmpt>(format(), field.name(), cellMap.size());
     }
     else
     {
@@ -87,7 +87,7 @@ void Foam::vtk::internalWriter::write
 
     if (legacy_)
     {
-        legacy::floatField(os(), field.name(), nCmpt, nVals);
+        legacy::floatField<nCmpt>(format(), field.name(), nVals);
     }
     else
     {
@@ -136,7 +136,7 @@ void Foam::vtk::internalWriter::write
 
     if (legacy_)
     {
-        legacy::floatField(os(), vfield.name(), nCmpt, nVals);
+        legacy::floatField<nCmpt>(format(), vfield.name(), nVals);
     }
     else
     {
@@ -179,7 +179,7 @@ void Foam::vtk::internalWriter::write
 
     if (legacy_)
     {
-        legacy::floatField(os(), vfield.name(), nCmpt, nVals);
+        legacy::floatField<nCmpt>(format(), vfield.name(), nVals);
     }
     else
     {

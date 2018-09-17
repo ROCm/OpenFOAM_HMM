@@ -43,7 +43,7 @@ namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class foamVtkBase64Layer Declaration
+                   Class vtk::foamVtkBase64Layer Declaration
 \*---------------------------------------------------------------------------*/
 
 class foamVtkBase64Layer
@@ -89,9 +89,9 @@ public:
         //- Name for the XML append encoding ("base64").
         virtual const char* encoding() const;
 
-
         //- Write leading size for binary output
-        virtual void writeSize(const uint64_t nBytes);
+        //  \return True - format uses this information
+        virtual bool writeSize(const uint64_t numbytes);
 
         virtual void write(const uint8_t val);
         virtual void write(const label val);

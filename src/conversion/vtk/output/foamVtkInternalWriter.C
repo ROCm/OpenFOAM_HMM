@@ -284,17 +284,11 @@ void Foam::vtk::internalWriter::beginCellData(label nFields)
 {
     if (legacy_)
     {
-        legacy::dataHeader
-        (
-            os(),
-            vtk::fileTag::CELL_DATA,
-            vtuCells_.nFieldCells(),
-            nFields
-        );
+        legacy::beginCellData(format(), vtuCells_.nFieldCells(), nFields);
     }
     else
     {
-        format().tag(vtk::fileTag::CELL_DATA);
+        format().beginCellData();
     }
 }
 
@@ -303,7 +297,7 @@ void Foam::vtk::internalWriter::endCellData()
 {
     if (!legacy_)
     {
-        format().endTag(vtk::fileTag::CELL_DATA);
+        format().endCellData();
     }
 }
 
@@ -312,17 +306,16 @@ void Foam::vtk::internalWriter::beginPointData(label nFields)
 {
     if (legacy_)
     {
-        legacy::dataHeader
+        legacy::beginPointData
         (
-            os(),
-            vtk::fileTag::POINT_DATA,
+            format(),
             vtuCells_.nFieldPoints(),
             nFields
         );
     }
     else
     {
-        format().tag(vtk::fileTag::POINT_DATA);
+        format().beginPointData();
     }
 }
 
@@ -331,7 +324,7 @@ void Foam::vtk::internalWriter::endPointData()
 {
     if (!legacy_)
     {
-        format().endTag(vtk::fileTag::POINT_DATA);
+        format().endPointData();
     }
 }
 

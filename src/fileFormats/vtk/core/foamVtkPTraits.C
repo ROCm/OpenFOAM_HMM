@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,6 +65,10 @@ template<>
 const char* const
 Foam::vtkPTraits<Foam::endian>::typeName = "BigEndian";
 #endif
+
+template<>
+const char* const
+Foam::vtkPTraits<std::string>::typeName = "String";
 
 
 // ************************************************************************* //

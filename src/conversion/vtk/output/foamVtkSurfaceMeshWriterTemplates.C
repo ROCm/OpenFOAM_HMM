@@ -70,7 +70,7 @@ void Foam::vtk::surfaceMeshWriter::write
 
     if (legacy_)
     {
-        legacy::floatField(os(), field.name(), nCmpt, pp_.size());
+        legacy::floatField<nCmpt>(format(), field.name(), pp_.size());
     }
     else
     {
@@ -100,7 +100,7 @@ void Foam::vtk::surfaceMeshWriter::write
 
     if (legacy_)
     {
-        legacy::floatField(os(), field.name(), nCmpt, pp_.size());
+        legacy::floatField<nCmpt>(format(), field.name(), pp_.size());
     }
     else
     {

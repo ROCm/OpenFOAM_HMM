@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,87 +59,149 @@ inline void write<double>(vtk::formatter& fmt, const double& val)
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
-inline std::ostream& Foam::vtk::legacy::fileHeader
-(
-    std::ostream& os,
-    const std::string& title,
-    const bool binary
-)
-{
-    os  << "# vtk DataFile Version 2.0" << nl
-        << title << nl
-        << (binary ? "BINARY" : "ASCII") << nl;
-
-    return os;
-}
-
-
 inline void Foam::vtk::legacy::fileHeader
 (
     vtk::formatter& fmt,
     const std::string& title,
-    const vtk::fileTag& contentTypeTag
+    vtk::fileTag contentType
 )
 {
-    fileHeader(fmt, title, contentNames[contentTypeTag]);
+    legacy::fileHeader(fmt, title, legacy::contentNames[contentType]);
 }
 
 
-inline void Foam::vtk::legacy::beginPoints
+template<Foam::vtk::fileTag ContentType>
+inline void Foam::vtk::legacy::fileHeader
 (
-    std::ostream& os,
-    const label nPoints
+    vtk::formatter& fmt,
+    const std::string& title
 )
 {
-    os  << "POINTS " << nPoints << " float" << nl;
+    legacy::fileHeader(fmt, title, legacy::contentNames[ContentType]);
+}
+
+
+inline void Foam::vtk::legacy::beginPoints(std::ostream& os, label nPoints)
+{
+    os  << nl
+        << "POINTS " << nPoints << " float" << nl;
 }
 
 
 inline void Foam::vtk::legacy::beginPolys
 (
     std::ostream& os,
-    const label nPolys,
-    const label nConnectivity
+    label nPolys,
+    label nConnectivity
 )
 {
-    os  << "POLYGONS " << nPolys << ' ' << (nPolys + nConnectivity) << nl;
+    os  << nl
+        << "POLYGONS " << nPolys << ' ' << (nPolys + nConnectivity) << nl;
 }
 
 
-inline void Foam::vtk::legacy::dataHeader
+inline void Foam::vtk::legacy::fieldData
 (
-    std::ostream& os,
-    const vtk::fileTag& dataTypeTag,
-    const label nEntries,
-    const label nFields
+    vtk::formatter& fmt,
+    label nFields
 )
 {
-    os  << dataTypeNames[dataTypeTag] << ' ' << nEntries << nl
-        << "FIELD attributes " << nFields << nl;
+    fmt.os()
+        << "FIELD FieldData " << nFields << nl;
 }
 
 
+inline void Foam::vtk::legacy::beginFieldData
+(
+    vtk::formatter& fmt,
+    label nFields
+)
+{
+    legacy::fieldData(fmt, nFields);
+}
+
+
+inline void Foam::vtk::legacy::beginCellData
+(
+    vtk::formatter& fmt,
+    label nCells,
+    label nFields
+)
+{
+    fmt.os()
+        << nl
+        << legacy::dataTypeNames[vtk::fileTag::CELL_DATA]
+        << ' ' << nCells << nl;
+    legacy::fieldData(fmt, nFields);
+}
+
+
+inline void Foam::vtk::legacy::beginPointData
+(
+    vtk::formatter& fmt,
+    label nPoints,
+    label nFields
+)
+{
+    fmt.os()
+        << nl
+        << legacy::dataTypeNames[vtk::fileTag::POINT_DATA]
+        << ' ' << nPoints << nl;
+    legacy::fieldData(fmt, nFields);
+}
+
+
+inline void Foam::vtk::legacy::writeTimeValue
+(
+    vtk::formatter& fmt,
+    scalar timeValue
+)
+{
+    legacy::floatField<1>(fmt, "TimeValue", 1);
+    fmt.write(timeValue);
+    fmt.flush();
+}
+
+
+template<Foam::direction nComp>
+inline void Foam::vtk::legacy::doubleField
+(
+    vtk::formatter& fmt,
+    const word& fieldName,
+    label nEntries
+)
+{
+    fmt.os()
+        << fieldName << ' '
+        << int(nComp) << ' ' << nEntries << " double" << nl;
+}
+
+
+template<Foam::direction nComp>
 inline void Foam::vtk::legacy::floatField
 (
-    std::ostream& os,
+    vtk::formatter& fmt,
     const word& fieldName,
-    const int nCmpt,
-    const label nEntries
+    label nEntries
 )
 {
-    os  << fieldName << ' ' << nCmpt << ' ' << nEntries << " float" << nl;
+    fmt.os()
+        << fieldName << ' '
+        << int(nComp) << ' ' << nEntries << " float" << nl;
 }
 
 
+template<Foam::direction nComp>
 inline void Foam::vtk::legacy::intField
 (
-    std::ostream& os,
+    vtk::formatter& fmt,
     const word& fieldName,
-    const int nCmpt,
-    const label nEntries
+    label nEntries
 )
 {
-    os  << fieldName << ' ' << nCmpt << ' ' << nEntries << " int" << nl;
+    fmt.os()
+        << fieldName << ' '
+        << int(nComp) << ' ' << nEntries << " int" << nl;
 }
 
 

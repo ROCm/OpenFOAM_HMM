@@ -39,7 +39,7 @@ void Foam::vtk::patchWriter::write
 
     if (legacy_)
     {
-        legacy::floatField(os_, field.name(), nCmpt, nFaces_);
+        legacy::floatField<nCmpt>(format(), field.name(), nFaces_);
     }
     else
     {
@@ -83,7 +83,7 @@ void Foam::vtk::patchWriter::write
 
     if (legacy_)
     {
-        legacy::floatField(os_, field.name(), nCmpt, nPoints_);
+        legacy::floatField<nCmpt>(format(), field.name(), nPoints_);
     }
     else
     {
@@ -121,7 +121,7 @@ void Foam::vtk::patchWriter::write
 
     if (legacy_)
     {
-        legacy::floatField(os_, field.name(), nCmpt, nPoints_);
+        legacy::floatField<nCmpt>(format(), field.name(), nPoints_);
     }
     else
     {

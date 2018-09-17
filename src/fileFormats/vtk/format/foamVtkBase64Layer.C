@@ -68,9 +68,10 @@ const char* Foam::vtk::foamVtkBase64Layer::encoding() const
 }
 
 
-void Foam::vtk::foamVtkBase64Layer::writeSize(const uint64_t nBytes)
+bool Foam::vtk::foamVtkBase64Layer::writeSize(const uint64_t numbytes)
 {
-    write(reinterpret_cast<const char*>(&nBytes), sizeof(uint64_t));
+    write(reinterpret_cast<const char*>(&numbytes), sizeof(uint64_t));
+    return true;
 }
 
 
@@ -121,10 +122,7 @@ void Foam::vtk::foamVtkBase64Layer::flush()
 }
 
 
-std::size_t Foam::vtk::foamVtkBase64Layer::encodedLength
-(
-    std::size_t n
-) const
+std::size_t Foam::vtk::foamVtkBase64Layer::encodedLength(std::size_t n) const
 {
     return base64Layer::encodedLength(n);
 }

@@ -94,10 +94,9 @@ void Foam::vtk::writeSurfFields
     // Fields
     if (legacy_)
     {
-        legacy::dataHeader
+        legacy::beginPointData
         (
-            os,
-            vtk::fileTag::POINT_DATA,
+            format(),
             mesh.nFaces(),
             surfVectorFields.size()
         );
@@ -114,7 +113,7 @@ void Foam::vtk::writeSurfFields
 
         if (legacy_)
         {
-            legacy::floatField(os, fld.name(), nCmpt, mesh.nFaces());
+            legacy::floatField<nCmpt>(format(), fld.name(), mesh.nFaces());
         }
         else
         {

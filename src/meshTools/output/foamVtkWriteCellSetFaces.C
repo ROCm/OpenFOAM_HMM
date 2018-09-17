@@ -132,7 +132,7 @@ void Foam::vtk::writeCellSetFaces
 
 
     // Write data - faceId/cellId
-    legacy::dataHeader(os, vtk::fileTag::CELL_DATA, pp.size(), 1);
+    legacy::beginCellData(format(), pp.size(), 1);
 
     os << "cellID 1 " << pp.size() << " int" << nl;
 

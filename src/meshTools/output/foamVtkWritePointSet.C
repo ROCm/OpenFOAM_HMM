@@ -64,7 +64,7 @@ void Foam::vtk::writePointSet
     format().flush();
 
     // Write data - pointID
-    legacy::dataHeader(os, vtk::fileTag::POINT_DATA, pointLabels.size(), 1);
+    legacy::beginPointData(format(), pointLabels.size(), 1);
 
     os << "pointID 1 " << pointLabels.size() << " int" << nl;
 

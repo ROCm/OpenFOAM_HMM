@@ -44,7 +44,7 @@ namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class base64Formatter Declaration
+                    Class vtk::base64Formatter Declaration
 \*---------------------------------------------------------------------------*/
 
 class base64Formatter

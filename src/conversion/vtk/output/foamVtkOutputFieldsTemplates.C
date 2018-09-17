@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ void Foam::vtk::writeField
     );
 
     fmt.writeSize(payLoad);
-    writeList(fmt, fld);
+    vtk::writeList(fmt, fld);
 
     fmt.flush();
 }
@@ -59,7 +59,7 @@ void Foam::vtk::writeField
     );
 
     fmt.writeSize(payLoad);
-    writeList(fmt, fld, cellMap);
+    vtk::writeList(fmt, fld, cellMap);
 
     fmt.flush();
 }
@@ -78,7 +78,7 @@ void Foam::vtk::writeField
     );
 
     fmt.writeSize(payLoad);
-    writeList(fmt, fld.internalField());
+    vtk::writeList(fmt, fld.internalField());
 
     fmt.flush();
 }
@@ -98,7 +98,7 @@ void Foam::vtk::writeField
     );
 
     fmt.writeSize(payLoad);
-    writeList(fmt, fld.internalField(), cellMap);
+    vtk::writeList(fmt, fld.internalField(), cellMap);
 
     fmt.flush();
 }

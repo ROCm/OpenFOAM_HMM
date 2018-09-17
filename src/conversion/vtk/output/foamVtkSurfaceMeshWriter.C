@@ -230,11 +230,11 @@ void Foam::vtk::surfaceMeshWriter::beginCellData(label nFields)
 {
     if (legacy_)
     {
-        legacy::dataHeader(os(), vtk::fileTag::CELL_DATA, pp_.size(), nFields);
+        legacy::beginCellData(format(), pp_.size(), nFields);
     }
     else
     {
-        format().tag(vtk::fileTag::CELL_DATA);
+        format().beginCellData();
     }
 }
 
@@ -243,7 +243,7 @@ void Foam::vtk::surfaceMeshWriter::endCellData()
 {
     if (!legacy_)
     {
-        format().endTag(vtk::fileTag::CELL_DATA);
+        format().endCellData();
     }
 }
 

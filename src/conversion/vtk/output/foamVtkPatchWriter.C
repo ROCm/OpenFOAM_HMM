@@ -301,17 +301,11 @@ void Foam::vtk::patchWriter::beginCellData(label nFields)
 {
     if (legacy_)
     {
-        legacy::dataHeader
-        (
-            os(),
-            vtk::fileTag::CELL_DATA,
-            nFaces_,
-            nFields
-        );
+        legacy::beginCellData(format(), nFaces_, nFields);
     }
     else
     {
-        format().tag(vtk::fileTag::CELL_DATA);
+        format().beginCellData();
     }
 }
 
@@ -320,7 +314,7 @@ void Foam::vtk::patchWriter::endCellData()
 {
     if (!legacy_)
     {
-        format().endTag(vtk::fileTag::CELL_DATA);
+        format().endCellData();
     }
 }
 
@@ -329,17 +323,11 @@ void Foam::vtk::patchWriter::beginPointData(label nFields)
 {
     if (legacy_)
     {
-        legacy::dataHeader
-        (
-            os(),
-            vtk::fileTag::POINT_DATA,
-            nPoints_,
-            nFields
-        );
+        legacy::beginPointData(format(), nPoints_, nFields);
     }
     else
     {
-        format().tag(vtk::fileTag::POINT_DATA);
+        format().beginPointData();
     }
 }
 
@@ -348,7 +336,7 @@ void Foam::vtk::patchWriter::endPointData()
 {
     if (!legacy_)
     {
-        format().endTag(vtk::fileTag::POINT_DATA);
+        format().endPointData();
     }
 }
 
@@ -373,7 +361,7 @@ void Foam::vtk::patchWriter::writePatchIDs()
 
     if (legacy_)
     {
-        legacy::intField(os_, "patchID", 1, nFaces_);
+        legacy::intField<1>(format(), "patchID", nFaces_);  // 1 component
     }
     else
     {

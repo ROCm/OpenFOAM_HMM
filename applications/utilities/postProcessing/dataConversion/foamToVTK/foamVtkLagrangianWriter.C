@@ -226,20 +226,27 @@ void Foam::vtk::lagrangianWriter::beginParcelData(label nFields)
 {
     if (!nParcels_) return;   // Skip if there are no parcels
 
-    const vtk::fileTag dataType =
-    (
-        useVerts_
-      ? vtk::fileTag::CELL_DATA
-      : vtk::fileTag::POINT_DATA
-    );
-
-    if (legacy_)
+    if (useVerts_)
     {
-        legacy::dataHeader(os_, dataType, nParcels_, nFields);
+        if (legacy_)
+        {
+            legacy::beginCellData(format(), nParcels_, nFields);
+        }
+        else
+        {
+            format().beginCellData();
+        }
     }
     else
     {
-        format().tag(dataType);
+        if (legacy_)
+        {
+            legacy::beginPointData(format(), nParcels_, nFields);
+        }
+        else
+        {
+            format().beginPointData();
+        }
     }
 }
 
@@ -248,16 +255,17 @@ void Foam::vtk::lagrangianWriter::endParcelData()
 {
     if (!nParcels_) return;   // Skip if there are no parcels
 
-    const vtk::fileTag dataType =
-    (
-        useVerts_
-      ? vtk::fileTag::CELL_DATA
-      : vtk::fileTag::POINT_DATA
-    );
-
     if (!legacy_)
     {
-        format().endTag(dataType);
+
+        if (useVerts_)
+        {
+            format().endCellData();
+        }
+        else
+        {
+            format().endPointData();
+        }
     }
 }
 

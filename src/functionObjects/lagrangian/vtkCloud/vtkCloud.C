@@ -466,10 +466,12 @@ bool Foam::functionObjects::vtkCloud::write()
     // Each cloud separately
     for (const word& cloudName : cloudNames)
     {
-        const word prefix(cloudName + "_");
-        const word suffix(".vtp");    // No legacy supported
+        // Legacy is not to be supported
 
-        const fileName outputName(vtkDir/prefix + timeDesc + suffix);
+        const fileName outputName
+        (
+            vtkDir/cloudName + "_" + timeDesc + ".vtp"
+        );
 
         if (writeCloud(outputName, cloudName))
         {
@@ -483,9 +485,11 @@ bool Foam::functionObjects::vtkCloud::write()
 
                 series_(cloudName).append({time_.value(), timeDesc});
 
-                OFstream os(vtkDir/cloudName + ".vtp.series", IOstream::ASCII);
-
-                vtk::writeSeries(os, prefix, suffix, series_[cloudName]);
+                vtk::seriesWrite
+                (
+                    vtkDir/cloudName + ".vtp",
+                    series_[cloudName]
+                );
             }
         }
     }
