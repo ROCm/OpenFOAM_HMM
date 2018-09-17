@@ -53,14 +53,14 @@ Usage
         type         | Type name: vtkCloud              | yes         |
         writeControl | Output control                   | recommended | timeStep
         cloud        |                                  | no  | defaultCloud
-        clouds       | wordRe list of clouds            | no          |
-        fields       | wordRe list of fields            | no          |
-        cellData     | Emit cellData instead of pointData | no        | false
-        directory    | The output directory name        | no          | VTK
-        width        | Padding width for file name      | no          | 8
-        format       | ascii or binary format           | no          | binary
-        prune        | suppress writing of empty clouds | no          | false
-        writePrecision | write precision in ascii       | no | same as IOstream
+        clouds       | wordRe list of clouds            | no    |
+        fields       | wordRe list of fields            | no    |
+        prune        | Suppress writing of empty clouds | no    | false
+        cellData     | Emit cellData instead of pointData | no  | false
+        directory    | The output directory name     | no | postProcessing/NAME
+        width        | Padding width for file name      | no    | 8
+        format       | Format as ascii or binary        | no    | binary
+        precision    | Write precision in ascii         | no | same as IOstream
     \endtable
 
     The output filename and fields are added to the functionObjectProperties
@@ -94,11 +94,9 @@ SourceFiles
 
 #include "fvMeshFunctionObject.H"
 #include "foamVtkOutputOptions.H"
+#include "foamVtkSeriesWriter.H"
 #include "wordRes.H"
-#include "instant.H"
-#include "DynamicList.H"
 #include "HashTable.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -135,27 +133,25 @@ class vtkCloud
         //- Subset of cloud fields to process
         wordRes selectFields_;
 
-        //- Output directory name
-        fileName dirName_;
+        //- Output directory
+        fileName directory_;
 
         //- Per cloud output for file series
-        HashTable<DynamicList<instant>> series_;
+        HashTable<vtk::seriesWriter, fileName> series_;
 
 
     // Private Member Functions
 
-        //- Write a cloud to disk, and record on the cloud OutputProperties
-        bool writeCloud
-        (
-            const fileName& outputName,
-            const word& cloudName
-        );
+        //- Write a cloud to disk (creates parent directory),
+        //- and record on the cloud OutputProperties.
+        //  \param file is the output file name, with extension.
+        bool writeCloud(const fileName& file, const word& cloudName);
 
-        //- Write VERTS connectivity
+        //- Write vertex (cells) - callable on master only
         void writeVerts
         (
             autoPtr<vtk::formatter>& format,
-            const label nParcels
+            const label nTotParcels
         ) const;
 
         //- Write fields of IOField<Type>

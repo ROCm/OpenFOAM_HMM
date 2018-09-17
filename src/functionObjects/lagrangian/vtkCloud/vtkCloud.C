@@ -44,65 +44,62 @@ namespace functionObjects
 }
 }
 
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::functionObjects::vtkCloud::writeVerts
 (
     autoPtr<vtk::formatter>& format,
-    const label nParcels
+    const label nTotParcels
 ) const
 {
-    if (Pstream::master())
+    // No collectives - can skip on slave processors
+    if (!format) return;
+
+    // Same payload for connectivity and offsets
+    const uint64_t payLoad = vtk::sizeofData<label>(nTotParcels);
+
+    format().tag(vtk::fileTag::VERTS);
+
+    //
+    // 'connectivity'
+    // = linear mapping onto points
+    //
     {
-        format().tag(vtk::fileTag::VERTS);
+        format().beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
+        format().writeSize(payLoad);
 
-        // Same payload throughout
-        const uint64_t payLoad = (nParcels * sizeof(label));
-
-        //
-        // 'connectivity'
-        // = linear mapping onto points
-        //
+        for (label i=0; i < nTotParcels; ++i)
         {
-            format().openDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY)
-                .closeTag();
-
-            format().writeSize(payLoad);
-            for (label i=0; i < nParcels; ++i)
-            {
-                format().write(i);
-            }
-            format().flush();
-
-            format().endDataArray();
+            format().write(i);
         }
-
-        //
-        // 'offsets'  (connectivity offsets)
-        // = linear mapping onto points (with 1 offset)
-        //
-        {
-            format().openDataArray<label>(vtk::dataArrayAttr::OFFSETS)
-                .closeTag();
-
-            format().writeSize(payLoad);
-            for (label i=0; i < nParcels; ++i)
-            {
-                format().write(i+1);
-            }
-            format().flush();
-
-            format().endDataArray();
-        }
-
-        format().endTag(vtk::fileTag::VERTS);
+        format().flush();
+        format().endDataArray();
     }
+
+    //
+    // 'offsets' (connectivity offsets)
+    // = linear mapping onto points (with 1 offset)
+    //
+    {
+        format().beginDataArray<label>(vtk::dataArrayAttr::OFFSETS);
+        format().writeSize(payLoad);
+
+        for (label i=0; i < nTotParcels; ++i)
+        {
+            format().write(i+1);
+        }
+        format().flush();
+        format().endDataArray();
+    }
+
+    format().endTag(vtk::fileTag::VERTS);
 }
 
 
 bool Foam::functionObjects::vtkCloud::writeCloud
 (
-    const fileName& outputName,
+    const fileName& file,
     const word& cloudName
 )
 {
@@ -136,8 +133,8 @@ bool Foam::functionObjects::vtkCloud::writeCloud
     }
 
     // Total number of parcels on all processes
-    label nTotParcels = pointsPtr->size();
-    reduce(nTotParcels, sumOp<label>());
+    const label nTotParcels =
+        returnReduce(pointsPtr->size(), sumOp<label>());
 
     if (pruneEmpty_ && !nTotParcels)
     {
@@ -147,88 +144,91 @@ bool Foam::functionObjects::vtkCloud::writeCloud
     std::ofstream os;
     autoPtr<vtk::formatter> format;
 
-    // Header
+    if (!file.hasExt("vtp"))
+    {
+        FatalErrorInFunction
+            << type() << " File missing .vtp extension!" << nl << endl
+            << exit(FatalError);
+    }
+
     if (Pstream::master())
     {
-        os.open(outputName);
+        mkDir(file.path());
+        os.open(file);
+
         format = writeOpts_.newFormatter(os);
+
+        // beginFile()
 
         // XML (inline)
         format()
             .xmlHeader()
             .xmlComment
             (
-                "cloud=" + cloudName
-              + " time=" + time_.timeName()
-              + " index=" + Foam::name(time_.timeIndex())
+                "case='" + time_.globalCaseName()
+              + "' cloud='" + cloudName
+              + "' time='" + time_.timeName()
+              + "' index='" + Foam::name(time_.timeIndex())
+              + "'"
             )
-            .beginVTKFile(vtk::fileTag::POLY_DATA, "0.1");
+            .beginVTKFile<vtk::fileTag::POLY_DATA>();
 
-        // Begin piece
+
+        // FieldData with TimeValue
+        format()
+            .beginFieldData()
+            .writeTimeValue(time_.value())
+            .endFieldData();
+
+
+        // writeGeometry()
+
+        // beginPiece()
         if (useVerts_)
         {
             format()
-                .openTag(vtk::fileTag::PIECE)
-                .xmlAttr(vtk::fileAttr::NUMBER_OF_POINTS, nTotParcels)
-                .xmlAttr(vtk::fileAttr::NUMBER_OF_VERTS, nTotParcels)
-                .closeTag();
+                .tag
+                (
+                    vtk::fileTag::PIECE,
+                    vtk::fileAttr::NUMBER_OF_POINTS, nTotParcels,
+                    vtk::fileAttr::NUMBER_OF_VERTS, nTotParcels
+                );
         }
         else
         {
             format()
-                .openTag(vtk::fileTag::PIECE)
-                .xmlAttr(vtk::fileAttr::NUMBER_OF_POINTS, nTotParcels)
-                .closeTag();
+                .tag
+                (
+                    vtk::fileTag::PIECE,
+                    vtk::fileAttr::NUMBER_OF_POINTS, nTotParcels
+                );
+        }
+
+        // writePoints()
+        {
+            const uint64_t payLoad = vtk::sizeofData<float,3>(nTotParcels);
+
+            format().tag(vtk::fileTag::POINTS)
+                .beginDataArray<float,3>(vtk::dataArrayAttr::POINTS);
+
+            format().writeSize(payLoad);
         }
     }
 
 
-    // Points
+    vtk::writeListParallel(format.ref(), *pointsPtr);
+
+
     if (Pstream::master())
     {
-        const uint64_t payLoad = (nTotParcels * 3 * sizeof(float));
-
-        format().tag(vtk::fileTag::POINTS)
-            .openDataArray<float,3>(vtk::dataArrayAttr::POINTS)
-            .closeTag();
-
-        format().writeSize(payLoad);
-
-        // Master
-        vtk::writeList(format(), *pointsPtr);
-
-        // Slaves - recv
-        for (int slave=1; slave<Pstream::nProcs(); ++slave)
-        {
-            IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-            pointList points(fromSlave);
-
-            vtk::writeList(format(), points);
-        }
-
         format().flush();
-
-        format()
-            .endDataArray()
-            .endTag(vtk::fileTag::POINTS);
+        format().endDataArray();
+        format().endTag(vtk::fileTag::POINTS);
 
         if (useVerts_)
         {
             writeVerts(format, nTotParcels);
         }
-    }
-    else
-    {
-        // Slaves - send
-
-        OPstream toMaster
-        (
-            Pstream::commsTypes::scheduled,
-            Pstream::masterNo()
-        );
-
-        toMaster
-            << *pointsPtr;
     }
 
 
@@ -237,8 +237,7 @@ bool Foam::functionObjects::vtkCloud::writeCloud
     (
         [](const word& k)
         {
-            return k.startsWith("position")
-                || k.startsWith("coordinate");
+            return k.startsWith("position") || k.startsWith("coordinate");
         },
         true  // prune
     );
@@ -251,16 +250,17 @@ bool Foam::functionObjects::vtkCloud::writeCloud
 
 
     // Write fields
-    const vtk::fileTag dataType =
-    (
-        useVerts_
-      ? vtk::fileTag::CELL_DATA
-      : vtk::fileTag::POINT_DATA
-    );
 
     if (Pstream::master())
     {
-        format().tag(dataType);
+        if (useVerts_)
+        {
+            format().beginCellData();
+        }
+        else
+        {
+            format().beginPointData();
+        }
     }
 
     DynamicList<word> written(obrTmp.size());
@@ -271,15 +271,16 @@ bool Foam::functionObjects::vtkCloud::writeCloud
 
     if (Pstream::master())
     {
-        format().endTag(dataType);
-    }
+        if (useVerts_)
+        {
+            format().endCellData();
+        }
+        else
+        {
+            format().endPointData();
+        }
 
-    // Footer
-    if (Pstream::master())
-    {
-        // slight cheat. </Piece> too
-        format().endTag(vtk::fileTag::PIECE);
-
+        format().endPiece();
         format().endTag(vtk::fileTag::POLY_DATA)
             .endVTKFile();
     }
@@ -291,7 +292,7 @@ bool Foam::functionObjects::vtkCloud::writeCloud
     // {
     //     cloudName
     //     {
-    //         file   "<case>/VTK/cloud1_000.vtp";
+    //         file   "<case>/postProcessing/name/cloud1_0001.vtp";
     //         fields (U T rho);
     //     }
     // }
@@ -299,9 +300,9 @@ bool Foam::functionObjects::vtkCloud::writeCloud
     dictionary propsDict;
 
     // Use case-local filename and "<case>" shortcut for readable output
-    // and possibly relocation of files
+    // and for possibly relocation of files
 
-    fileName fName(outputName.relative(stringOps::expand("<case>")));
+    fileName fName(file.relative(time_.globalPath()));
     if (fName.isAbsolute())
     {
         propsDict.add("file", fName);
@@ -334,17 +335,18 @@ Foam::functionObjects::vtkCloud::vtkCloud
     pruneEmpty_(false),
     selectClouds_(),
     selectFields_(),
-    dirName_("VTK"),
+    directory_(),
     series_()
 {
-    if (postProcess)
-    {
-        // Disable for post-process mode.
-        // Emit as FatalError for the try/catch in the caller.
-        FatalError
-            << type() << " disabled in post-process mode"
-            << exit(FatalError);
-    }
+    // May still want this? (OCT-2018)
+    // if (postProcess)
+    // {
+    //     // Disable for post-process mode.
+    //     // Emit as FatalError for the try/catch in the caller.
+    //     FatalError
+    //         << type() << " disabled in post-process mode"
+    //         << exit(FatalError);
+    // }
 
     read(dict);
 }
@@ -356,8 +358,11 @@ bool Foam::functionObjects::vtkCloud::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
 
+    // We probably cannot trust old information after a reread
+    series_.clear();
+
     //
-    // writer options - default is xml base64. Legacy is not desired.
+    // Default format is xml base64. Legacy is not desired.
     //
     writeOpts_ = vtk::formatType::INLINE_BASE64;
 
@@ -374,7 +379,7 @@ bool Foam::functionObjects::vtkCloud::read(const dictionary& dict)
     (
         dict.lookupOrDefault
         (
-            "writePrecision",
+            "precision",
             IOstream::defaultPrecision()
         )
     );
@@ -382,7 +387,7 @@ bool Foam::functionObjects::vtkCloud::read(const dictionary& dict)
     // Info<< type() << " " << name() << " output-format: "
     //     << writeOpts_.description() << nl;
 
-    int padWidth = dict.lookupOrDefault<int>("width", 8);
+    const int padWidth = dict.lookupOrDefault<int>("width", 8);
 
     // Appropriate printf format - Enforce min/max sanity limits
     if (padWidth < 1 || padWidth > 31)
@@ -400,11 +405,6 @@ bool Foam::functionObjects::vtkCloud::read(const dictionary& dict)
     pruneEmpty_ = dict.lookupOrDefault<bool>("prune", false);
 
 
-    //
-    // other options
-    //
-    dict.readIfPresent("directory", dirName_);
-
     selectClouds_.clear();
     dict.readIfPresent("clouds", selectClouds_);
 
@@ -417,6 +417,28 @@ bool Foam::functionObjects::vtkCloud::read(const dictionary& dict)
 
     selectFields_.clear();
     dict.readIfPresent("fields", selectFields_);
+
+
+    // Output directory
+
+    directory_.clear();
+    dict.readIfPresent("directory", directory_);
+
+    if (directory_.size())
+    {
+        // User-defined output directory
+        directory_.expand();
+        if (!directory_.isAbsolute())
+        {
+            directory_ = time_.globalPath()/directory_;
+        }
+    }
+    else
+    {
+        // Standard postProcessing/ naming
+        directory_ = time_.globalPath()/functionObject::outputPrefix/name();
+    }
+    directory_.clean();
 
     return true;
 }
@@ -437,29 +459,14 @@ bool Foam::functionObjects::vtkCloud::write()
         return true;  // skip - not available
     }
 
-//     const word timeDesc =
-//     (
-//         useTimeName_
-//       ? time_.timeName()
-//       : printf_.empty()
-//       ? Foam::name(time_.timeIndex())
-//       : word::printf(printf_, time_.timeIndex())
-//     );
+    const scalar timeValue = time_.value();
 
-    const word timeDesc =
+    const word timeDesc = "_" +
     (
         printf_.empty()
       ? Foam::name(time_.timeIndex())
       : word::printf(printf_, time_.timeIndex())
     );
-
-    fileName vtkDir(dirName_);
-    vtkDir.expand();
-    if (!vtkDir.isAbsolute())
-    {
-        vtkDir = stringOps::expand("<case>")/vtkDir;
-    }
-    mkDir(vtkDir);
 
     Log << name() << " output Time: " << time_.timeName() << nl;
 
@@ -470,26 +477,33 @@ bool Foam::functionObjects::vtkCloud::write()
 
         const fileName outputName
         (
-            vtkDir/cloudName + "_" + timeDesc + ".vtp"
+            directory_/cloudName + timeDesc + ".vtp"
         );
+
+        // writeCloud() includes mkDir (on master)
 
         if (writeCloud(outputName, cloudName))
         {
-            Log << "    cloud  : " << outputName << endl;
+            Log << "    cloud  : "
+                << outputName.relative(time_.globalPath()) << endl;
 
             if (Pstream::master())
             {
                 // Add to file-series and emit as JSON
-                // - misbehaves if vtkDir changes during the run,
-                // but that causes other issues too.
+                fileName seriesName(vtk::seriesWriter::base(outputName));
 
-                series_(cloudName).append({time_.value(), timeDesc});
+                vtk::seriesWriter& series = series_(seriesName);
 
-                vtk::seriesWrite
-                (
-                    vtkDir/cloudName + ".vtp",
-                    series_[cloudName]
-                );
+                // First time?
+                // Load from file, verify against filesystem,
+                // prune time >= currentTime
+                if (series.empty())
+                {
+                    series.load(seriesName, true, timeValue);
+                }
+
+                series.append(timeValue, outputName);
+                series.write(seriesName);
             }
         }
     }
