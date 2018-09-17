@@ -1,7 +1,7 @@
-Info<< "\nConstructing reacting cloud" << endl;
-basicReactingMultiphaseCloud parcels
+Info<< "\nConstructing " << CLOUD_BASE_TYPE_NAME << " cloud" << endl;
+basicReactingTypeCloud parcels
 (
-    "reactingCloud1",
+    word(CLOUD_BASE_TYPE_NAME) + "1",
     rho,
     U,
     g,
