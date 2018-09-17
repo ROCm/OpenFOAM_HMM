@@ -55,7 +55,7 @@ void Foam::lumpedPointMovement::writeForcesAndMomentsVTP
     );
 
     format().xmlHeader()
-        .beginVTKFile(vtk::fileTag::POLY_DATA, "0.1");
+        .beginVTKFile<vtk::fileTag::POLY_DATA>();
 
     //
     // The 'spine' of lumped mass points
@@ -64,19 +64,20 @@ void Foam::lumpedPointMovement::writeForcesAndMomentsVTP
 
     {
         format()
-            .openTag(vtk::fileTag::PIECE)
-            .xmlAttr(vtk::fileAttr::NUMBER_OF_POINTS, nPoints)
-            .xmlAttr(vtk::fileAttr::NUMBER_OF_VERTS,  nPoints)
-            .closeTag();
+            .tag
+            (
+                vtk::fileTag::PIECE,
+                vtk::fileAttr::NUMBER_OF_POINTS, nPoints,
+                vtk::fileAttr::NUMBER_OF_VERTS,  nPoints
+            );
 
         // 'points'
         {
-            const uint64_t payLoad = (nPoints*3* sizeof(float));
+            const uint64_t payLoad = vtk::sizeofData<float, 3>(nPoints);
 
             format()
                 .tag(vtk::fileTag::POINTS)
-                .openDataArray<float, 3>(vtk::dataArrayAttr::POINTS)
-                .closeTag();
+                .beginDataArray<float, 3>(vtk::dataArrayAttr::POINTS);
 
             format().writeSize(payLoad);
             vtk::writeList(format(), state().points());
@@ -94,12 +95,11 @@ void Foam::lumpedPointMovement::writeForcesAndMomentsVTP
         // 'connectivity'
         //
         {
-            const uint64_t payLoad = (nPoints*sizeof(label));
+            const uint64_t payLoad = vtk::sizeofData<label>(nPoints);
 
-            format().openDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY)
-                .closeTag();
-
+            format().beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
             format().writeSize(payLoad);
+
             for (label i=0; i<nPoints; ++i)
             {
                 format().write(i);
@@ -114,12 +114,11 @@ void Foam::lumpedPointMovement::writeForcesAndMomentsVTP
         // = linear mapping onto points (with 1 offset)
         //
         {
-            const uint64_t payLoad = (nPoints*sizeof(label));
+            const uint64_t payLoad = vtk::sizeofData<label>(nPoints);
 
-            format().openDataArray<label>(vtk::dataArrayAttr::OFFSETS)
-                .closeTag();
-
+            format().beginDataArray<label>(vtk::dataArrayAttr::OFFSETS);
             format().writeSize(payLoad);
+
             for (label i=0; i<nPoints; ++i)
             {
                 format().write(i+1);
@@ -133,17 +132,16 @@ void Foam::lumpedPointMovement::writeForcesAndMomentsVTP
         // </Verts>
     }
 
-    format().tag(vtk::fileTag::POINT_DATA);
+    format().beginPointData();
 
     // forces
     if (forces.size() == nPoints)
     {
-        const uint64_t payLoad = (nPoints * 3 * sizeof(float));
+        const uint64_t payLoad = vtk::sizeofData<float, 3>(nPoints);
 
-        format().openDataArray<float, 3>("forces")
-            .closeTag();
-
+        format().beginDataArray<float, 3>("forces");
         format().writeSize(payLoad);
+
         vtk::writeList(format(), forces);
         format().flush();
 
@@ -153,23 +151,23 @@ void Foam::lumpedPointMovement::writeForcesAndMomentsVTP
     // moments
     if (moments.size() == nPoints)
     {
-        const uint64_t payLoad = (nPoints * 3 * sizeof(float));
+        const uint64_t payLoad = vtk::sizeofData<float, 3>(nPoints);
 
-        format().openDataArray<float, 3>("moments")
-            .closeTag();
-
+        format().beginDataArray<float, 3>("moments");
         format().writeSize(payLoad);
+
         vtk::writeList(format(), moments);
         format().flush();
 
         format().endDataArray();
     }
 
-    format().endTag(vtk::fileTag::POINT_DATA);
+    format().endPointData();
 
-    format().endTag(vtk::fileTag::PIECE);
-    format().endTag(vtk::fileTag::POLY_DATA);
-    format().endVTKFile();
+    format().endPiece();
+
+    format().endTag(vtk::fileTag::POLY_DATA)
+        .endVTKFile();
 }
 
 
@@ -190,7 +188,7 @@ void Foam::lumpedPointMovement::writeZonesVTP
     );
 
     format().xmlHeader()
-        .beginVTKFile(vtk::fileTag::POLY_DATA, "0.1");
+        .beginVTKFile<vtk::fileTag::POLY_DATA>();
 
     forAll(faceZones_, zoneI)
     {
@@ -201,19 +199,20 @@ void Foam::lumpedPointMovement::writeZonesVTP
         );
 
         format()
-            .openTag(vtk::fileTag::PIECE)
-            .xmlAttr(vtk::fileAttr::NUMBER_OF_POINTS, pp.nPoints())
-            .xmlAttr(vtk::fileAttr::NUMBER_OF_POLYS,  pp.size())
-            .closeTag();
+            .tag
+            (
+                vtk::fileTag::PIECE,
+                vtk::fileAttr::NUMBER_OF_POINTS, pp.nPoints(),
+                vtk::fileAttr::NUMBER_OF_POLYS,  pp.size()
+            );
 
         // 'points'
         {
-            const uint64_t payLoad = (pp.nPoints()*3* sizeof(float));
+            const uint64_t payLoad = vtk::sizeofData<float, 3>(pp.nPoints());
 
             format()
                 .tag(vtk::fileTag::POINTS)
-                .openDataArray<float, 3>(vtk::dataArrayAttr::POINTS)
-                .closeTag();
+                .beginDataArray<float, 3>(vtk::dataArrayAttr::POINTS);
 
             format().writeSize(payLoad);
             vtk::writeList(format(), pp.localPoints());
@@ -231,17 +230,16 @@ void Foam::lumpedPointMovement::writeZonesVTP
         // 'connectivity'
         //
         {
-            uint64_t payLoad = 0;
-            forAll(pp, facei)
+            label nVerts = 0;
+            for (const face& f : pp)
             {
-                const face& f = pp[facei];
-                payLoad += f.size();
+                nVerts += f.size();
             }
 
-            format().openDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY)
-                .closeTag();
+            const uint64_t payLoad = vtk::sizeofData<label>(nVerts);
 
-            format().writeSize(payLoad * sizeof(label));
+            format().beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
+            format().writeSize(payLoad);
 
             for (const face& f : pp.localFaces())
             {
@@ -256,11 +254,9 @@ void Foam::lumpedPointMovement::writeZonesVTP
         // 'offsets'  (connectivity offsets)
         //
         {
-            const uint64_t payLoad = (pp.size() * sizeof(label));
+            const uint64_t payLoad = vtk::sizeofData<label>(pp.size());
 
-            format().openDataArray<label>(vtk::dataArrayAttr::OFFSETS)
-                .closeTag();
-
+            format().beginDataArray<label>(vtk::dataArrayAttr::OFFSETS);
             format().writeSize(payLoad);
 
             label off = 0;
@@ -279,15 +275,13 @@ void Foam::lumpedPointMovement::writeZonesVTP
         format().endTag(vtk::fileTag::POLYS);
 
 
-        format().tag(vtk::fileTag::CELL_DATA);
+        format().beginCellData();
 
         // zone Id
         {
-            const uint64_t payLoad = (pp.size() * sizeof(label));
+            const uint64_t payLoad = vtk::sizeofData<label>(pp.size());
 
-            format().openDataArray<label>("zoneId")
-                .closeTag();
-
+            format().beginDataArray<label>("zoneId");
             format().writeSize(payLoad);
 
             forAll(pp, facei)
@@ -299,13 +293,13 @@ void Foam::lumpedPointMovement::writeZonesVTP
             format().endDataArray();
         }
 
-        format().endTag(vtk::fileTag::CELL_DATA);
+        format().endCellData();
 
-        format().endTag(vtk::fileTag::PIECE);
+        format().endPiece();
     }
 
-    format().endTag(vtk::fileTag::POLY_DATA);
-    format().endVTKFile();
+    format().endTag(vtk::fileTag::POLY_DATA)
+        .endVTKFile();
 }
 
 
@@ -342,26 +336,27 @@ void Foam::lumpedPointMovement::writeVTP
     );
 
     format().xmlHeader()
-        .beginVTKFile(vtk::fileTag::POLY_DATA, "0.1");
+        .beginVTKFile<vtk::fileTag::POLY_DATA>();
 
     for (const label patchId : patchIds)
     {
         const polyPatch& pp = boundaryMesh[patchId];
 
         format()
-            .openTag(vtk::fileTag::PIECE)
-            .xmlAttr(vtk::fileAttr::NUMBER_OF_POINTS, pp.nPoints())
-            .xmlAttr(vtk::fileAttr::NUMBER_OF_POLYS,  pp.size())
-            .closeTag();
+            .tag
+            (
+                vtk::fileTag::PIECE,
+                vtk::fileAttr::NUMBER_OF_POINTS, pp.nPoints(),
+                vtk::fileAttr::NUMBER_OF_POLYS,  pp.size()
+            );
 
         // 'points'
         {
-            const uint64_t payLoad = (pp.nPoints()*3* sizeof(float));
+            const uint64_t payLoad = vtk::sizeofData<float, 3>(pp.nPoints());
 
             format()
                 .tag(vtk::fileTag::POINTS)
-                .openDataArray<float, 3>(vtk::dataArrayAttr::POINTS)
-                .closeTag();
+                .beginDataArray<float, 3>(vtk::dataArrayAttr::POINTS);
 
             // Could be more efficient, but not often needed
             tmp<pointField> tpts = displacePoints
@@ -390,16 +385,16 @@ void Foam::lumpedPointMovement::writeVTP
         // 'connectivity'
         //
         {
-            uint64_t payLoad = 0;
+            label nVerts = 0;
             for (const face& f : pp)
             {
-                payLoad += f.size();
+                nVerts += f.size();
             }
 
-            format().openDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY)
-                .closeTag();
+            const uint64_t payLoad = vtk::sizeofData<label>(nVerts);
 
-            format().writeSize(payLoad * sizeof(label));
+            format().beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
+            format().writeSize(payLoad);
 
             for (const face& f : pp.localFaces())
             {
@@ -414,17 +409,14 @@ void Foam::lumpedPointMovement::writeVTP
         // 'offsets'  (connectivity offsets)
         //
         {
-            const uint64_t payLoad = (pp.size() * sizeof(label));
+            const uint64_t payLoad = vtk::sizeofData<label>(pp.size());
 
-            format().openDataArray<label>(vtk::dataArrayAttr::OFFSETS)
-                .closeTag();
-
+            format().beginDataArray<label>(vtk::dataArrayAttr::OFFSETS);
             format().writeSize(payLoad);
 
             label off = 0;
-            forAll(pp, facei)
+            for (const face& f : pp)
             {
-                const face& f = pp[facei];
                 off += f.size();
 
                 format().write(off);
@@ -436,11 +428,11 @@ void Foam::lumpedPointMovement::writeVTP
 
         format().endTag(vtk::fileTag::POLYS);
 
-        format().endTag(vtk::fileTag::PIECE);
+        format().endPiece();
     }
 
-    format().endTag(vtk::fileTag::POLY_DATA);
-    format().endVTKFile();
+    format().endTag(vtk::fileTag::POLY_DATA)
+        .endVTKFile();
 }
 
 

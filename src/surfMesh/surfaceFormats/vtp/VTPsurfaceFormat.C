@@ -41,16 +41,16 @@ void Foam::fileFormats::VTPsurfaceFormat<Face>::writePolys
     // 'connectivity'
     //
     {
-        uint64_t payLoad = 0;
+        label nVerts = 0;
         for (const auto& f : faces)
         {
-            payLoad += f.size();
+            nVerts += f.size();
         }
 
-        format.openDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY)
-            .closeTag();
+        const uint64_t payLoad = vtk::sizeofData<label>(nVerts);
 
-        format.writeSize(payLoad * sizeof(label));
+        format.beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
+        format.writeSize(payLoad);
 
         for (const auto& f : faces)
         {
@@ -66,12 +66,9 @@ void Foam::fileFormats::VTPsurfaceFormat<Face>::writePolys
     // 'offsets'  (connectivity offsets)
     //
     {
-        const uint64_t payLoad(faces.size() * sizeof(label));
+        const uint64_t payLoad = vtk::sizeofData<label>(faces.size());
 
-        format
-            .openDataArray<label>(vtk::dataArrayAttr::OFFSETS)
-            .closeTag();
-
+        format.beginDataArray<label>(vtk::dataArrayAttr::OFFSETS);
         format.writeSize(payLoad);
 
         label off = 0;
@@ -129,16 +126,16 @@ void Foam::fileFormats::VTPsurfaceFormat<Face>::write
         // 'connectivity'
         //
         {
-            uint64_t payLoad = 0;
+            label nVerts = 0;
             for (const auto& f : faceLst)
             {
-                payLoad += f.size();
+                nVerts += f.size();
             }
 
-            format().openDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY)
-                .closeTag();
+            const uint64_t payLoad = vtk::sizeofData<label>(nVerts);
 
-            format().writeSize(payLoad * sizeof(label));
+            format().beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
+            format().writeSize(payLoad);
 
             label faceIndex = 0;
             for (const surfZone& zone : zones)
@@ -160,12 +157,9 @@ void Foam::fileFormats::VTPsurfaceFormat<Face>::write
         // 'offsets'  (connectivity offsets)
         //
         {
-            const uint64_t payLoad(faceLst.size() * sizeof(label));
+            const uint64_t payLoad = vtk::sizeofData<label>(faceLst.size());
 
-            format()
-                .openDataArray<label>(vtk::dataArrayAttr::OFFSETS)
-                    .closeTag();
-
+            format().beginDataArray<label>(vtk::dataArrayAttr::OFFSETS);
             format().writeSize(payLoad);
 
             label off = 0, faceIndex = 0;

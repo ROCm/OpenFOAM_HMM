@@ -63,11 +63,10 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeHeader
     const UList<point>& pts
 )
 {
-    vtk::legacy::fileHeader
+    vtk::legacy::fileHeader<vtk::fileTag::POLY_DATA>
     (
         format,
-        ("surface written " + clock::dateTime()),
-        vtk::fileTag::POLY_DATA
+        ("surface written " + clock::dateTime())
     );
 
     vtk::legacy::beginPoints(format.os(), pts.size());
