@@ -18,6 +18,7 @@ stl/STLAsciiParseRagel.C
 
 vtk/core/foamVtkCore.C
 vtk/core/foamVtkPTraits.C
+
 vtk/format/foamVtkFormatter.C
 vtk/format/foamVtkAsciiFormatter.C
 vtk/format/foamVtkBase64Formatter.C
@@ -26,8 +27,14 @@ vtk/format/foamVtkAppendRawFormatter.C
 vtk/format/foamVtkBase64Layer.C
 vtk/format/foamVtkLegacyAsciiFormatter.C
 vtk/format/foamVtkLegacyRawFormatter.C
+
 vtk/output/foamVtkOutput.C
 vtk/output/foamVtkOutputOptions.C
+
+vtk/part/foamVtkMeshMaps.C
+vtk/part/foamVtuCells.C
+vtk/part/foamVtuSizing.C
+
 vtk/read/vtkUnstructuredReader.C
 
 coordSet/coordSet.C
