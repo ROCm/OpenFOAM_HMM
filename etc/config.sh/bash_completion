@@ -109,7 +109,7 @@ _of_complete_()
     local choices
 
     case ${prev} in
-    -help | -help-full | -doc | -doc-source)
+    -help | -help-compat | -help-full | -doc | -doc-source)
         # These options are usage - we can stop now.
         COMPREPLY=()
         return 0
@@ -139,10 +139,13 @@ _of_complete_()
             # Treat ',' like space so '-a, -all' parses like '-a | -all'
             # Options with '=' (Eg, -mode=ugo) are not handled very well.
             local helpText=$($appName -help-full 2>/dev/null | \
-                sed -n -e 's/,/ /g' -e 's/=.*$/=/' -e '/^  *-/p')
+                sed -ne 's/,/ /g' -e 's/=.*$/=/' -e '/^  *-/p')
 
-            if [ -n "$helpText" ]
+            if [ -z "$helpText" ]
             then
+                echo "Error calling $appName" 1>&2
+                choices="false"  # Mark failure to prevent repeating again
+            else
                 # Array of options with args
                 local argOpts=($(awk '/^ {0,4}-[a-z]/ && /</ {print $1}' <<< "$helpText"))
 
@@ -150,9 +153,6 @@ _of_complete_()
                 local boolOpts=($(awk '/^ {0,4}-[a-z]/ && !/</ {print $1}' <<< "$helpText"))
 
                 choices="${argOpts[@]} | ${boolOpts[@]}"
-            else
-                echo "Error calling $appName" 1>&2
-                choices="false"  # Mark failure to prevent repeating again
             fi
             _of_complete_cache_[$appName]="$choices"
             ## echo "generated $appName = $choices" 1>&2   # Debugging
@@ -169,7 +169,7 @@ _of_complete_()
                 # Option with unknown type of arg - set to files.
                 # Not always correct but can still navigate path if needed...
                 COMPREPLY=($(compgen -f -- ${cur}))
-            elif [ -n "$cur" -a "${cur#-}" = "${cur}" ]
+            elif [ -n "$cur" ] && [ "${cur#-}" = "${cur}" ]
             then
                 # Already started a (non-empty) word that isn't an option,
                 # in which case revert to filenames.
