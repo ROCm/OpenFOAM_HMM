@@ -56,9 +56,9 @@ void Foam::allReduce
         {
             for
             (
-                int slave=UPstream::firstSlave();
-                slave<=UPstream::lastSlave(communicator);
-                slave++
+                int proci=UPstream::firstSlave();
+                proci<=UPstream::lastSlave(communicator);
+                ++proci
             )
             {
                 Type value;
@@ -70,7 +70,7 @@ void Foam::allReduce
                         &value,
                         MPICount,
                         MPIType,
-                        slave,  //UPstream::procID(slave),
+                        proci,
                         tag,
                         PstreamGlobals::MPICommunicators_[communicator],
                         MPI_STATUS_IGNORE
@@ -94,7 +94,7 @@ void Foam::allReduce
                     &Value,
                     MPICount,
                     MPIType,
-                    UPstream::masterNo(),//UPstream::procID(masterNo()),
+                    UPstream::masterNo(),
                     tag,
                     PstreamGlobals::MPICommunicators_[communicator]
                 )
@@ -111,9 +111,9 @@ void Foam::allReduce
         {
             for
             (
-                int slave=UPstream::firstSlave();
-                slave<=UPstream::lastSlave(communicator);
-                slave++
+                int proci=UPstream::firstSlave();
+                proci<=UPstream::lastSlave(communicator);
+                ++proci
             )
             {
                 if
@@ -123,7 +123,7 @@ void Foam::allReduce
                         &Value,
                         MPICount,
                         MPIType,
-                        slave,      //UPstream::procID(slave),
+                        proci,
                         tag,
                         PstreamGlobals::MPICommunicators_[communicator]
                     )
@@ -144,7 +144,7 @@ void Foam::allReduce
                     &Value,
                     MPICount,
                     MPIType,
-                    UPstream::masterNo(),//UPstream::procID(masterNo()),
+                    UPstream::masterNo(),
                     tag,
                     PstreamGlobals::MPICommunicators_[communicator],
                     MPI_STATUS_IGNORE
