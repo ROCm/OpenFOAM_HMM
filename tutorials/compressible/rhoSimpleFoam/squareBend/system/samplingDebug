@@ -62,6 +62,32 @@ debug
             surfaceName angledPlane.obj;
         }
 
+        angledPlaneCut
+        {
+            type        surfaceCut;
+            triangulate false;
+            surfaceType triSurfaceMesh;
+            surfaceName angledPlane.obj;
+        }
+
+        angledPlane1
+        {
+            type        distanceSurface;
+            distance    0;
+            signed      true;
+            regularise  true;
+            surfaceType triSurfaceMesh;
+            surfaceName angledPlane1.obj;
+        }
+
+        angledPlane1Cut
+        {
+            type        surfaceCut;
+            triangulate false;
+            surfaceType triSurfaceMesh;
+            surfaceName angledPlane1.obj;
+        }
+
         disk1
         {
             ${_disk1}
