@@ -325,10 +325,10 @@ public:
         mapDistribute();
 
         //- Copy construct
-        mapDistribute(const mapDistribute& map);
+        explicit mapDistribute(const mapDistribute& map);
 
         //- Move construct
-        mapDistribute(mapDistribute&& map);
+        explicit mapDistribute(mapDistribute&& map);
 
         //- Move construct from components
         mapDistribute
@@ -416,8 +416,18 @@ public:
             const int tag = Pstream::msgType()
         );
 
+        //- Construct from my elements to send. Assumes layout is my elements
+        //  first followed by elements from all other processors in consecutive
+        //  order
+        mapDistribute
+        (
+            labelListList&& subMap,
+            const bool subHasFlip = false,
+            const bool constructHasFlip = false
+        );
+
         //- Construct from Istream
-        mapDistribute(Istream& is);
+        explicit mapDistribute(Istream& is);
 
         //- Clone
         autoPtr<mapDistribute> clone() const;

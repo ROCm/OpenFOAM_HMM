@@ -199,10 +199,10 @@ public:
         mapDistributeBase();
 
         //- Copy construct
-        mapDistributeBase(const mapDistributeBase& map);
+        explicit mapDistributeBase(const mapDistributeBase& map);
 
         //- Move construct
-        mapDistributeBase(mapDistributeBase&& map);
+        explicit mapDistributeBase(mapDistributeBase&& map);
 
         //- Construct from components
         mapDistributeBase
@@ -244,6 +244,16 @@ public:
             labelListList& cellCells,
             List<Map<label>>& compactMap,
             const int tag = Pstream::msgType()
+        );
+
+        //- Construct from my elements to send. Assumes layout is my elements
+        //  first followed by elements from all other processors in consecutive
+        //  order
+        mapDistributeBase
+        (
+            labelListList&& subMap,
+            const bool subHasFlip = false,
+            const bool constructHasFlip = false
         );
 
         //- Construct from Istream
