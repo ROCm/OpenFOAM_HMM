@@ -384,26 +384,6 @@ int main(int argc, char *argv[])
             << "        momentOfInertia " << eVal << token::END_STATEMENT << nl
             << "        orientation     " << eVec.T() << token::END_STATEMENT
             << endl;
-
-
-        // Get inertia as a symmetric tensor
-        const symmTensor st
-        (
-            eVal.xx(),
-            eVal.xy(),
-            eVal.xz(),
-            eVal.yy(),
-            eVal.yz(),
-            eVal.zz()
-        );
-
-        Info<< nl
-            << "Entries for rigidBodyDynamics dynamicMeshDict:"
-            << nl
-            << "        mass            " << m << token::END_STATEMENT << nl
-            << "        centreOfMass    " << cM << token::END_STATEMENT << nl
-            << "        inertia         " << st << token::END_STATEMENT << nl
-            << endl;
     }
 
     if (calcAroundRefPt)
