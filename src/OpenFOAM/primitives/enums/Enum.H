@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -76,11 +76,11 @@ class Enum
         //- The index for the given enumeration. -1 if not found.
         label getIndex(const EnumType e) const;
 
-        //- Lookup enumeration corresponding to the given name.
+        //- Get enumeration corresponding to the given name.
         //  FatalError if not found.
         EnumType getEnum(const word& enumName) const;
 
-        //- Lookup name corresponding to the given enumeration.
+        //- Get name corresponding to the given enumeration.
         //  Return empty word if not found.
         const word& getName(const EnumType e) const;
 
@@ -114,7 +114,7 @@ public:
 
     // Access
 
-        //- The number of lookup names for the enumeration
+        //- The number of enum names for the enumeration
         inline label size() const;
 
         //- The list of enum names, in construction order
@@ -147,16 +147,15 @@ public:
         inline bool hasName(const EnumType e) const;
 
 
-    // Lookup
+    // Read
 
-        //- Lookup the key in the dictionary and return the corresponding
+        //- Get the key in the dictionary and return the corresponding
         //- enumeration element based on its name.
         //  FatalError if anything is incorrect.
-        EnumType lookup
-        (
-            const word& key,
-            const dictionary& dict
-        ) const;
+        EnumType get(const word& key, const dictionary& dict) const;
+
+        //- Same as get()
+        EnumType lookup(const word& key, const dictionary& dict) const;
 
         //- Find the key in the dictionary and return the corresponding
         //- enumeration element based on its name.

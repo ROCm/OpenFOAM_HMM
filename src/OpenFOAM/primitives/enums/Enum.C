@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -180,7 +180,7 @@ void Foam::Enum<EnumType>::write(const EnumType e, Ostream& os) const
 
 
 template<class EnumType>
-EnumType Foam::Enum<EnumType>::lookup
+EnumType Foam::Enum<EnumType>::get
 (
     const word& key,
     const dictionary& dict
@@ -202,6 +202,17 @@ EnumType Foam::Enum<EnumType>::lookup
 
 
 template<class EnumType>
+EnumType Foam::Enum<EnumType>::lookup
+(
+    const word& key,
+    const dictionary& dict
+) const
+{
+    return this->get(key, dict);
+}
+
+
+template<class EnumType>
 EnumType Foam::Enum<EnumType>::lookupOrDefault
 (
     const word& key,
@@ -211,7 +222,7 @@ EnumType Foam::Enum<EnumType>::lookupOrDefault
 {
     if (dict.found(key))
     {
-        return lookup(key, dict);
+        return get(key, dict);
     }
 
     return deflt;
