@@ -185,11 +185,15 @@ static void printBuildInfo(const bool full=true)
 {
     Info<<"Using: OpenFOAM-" << Foam::FOAMversion
         << " (see www.OpenFOAM.com)" << nl
-        << "Build: " << Foam::FOAMbuild << nl;
+        << "Build: " << Foam::FOAMbuild
+        #if OPENFOAM
+        << " (OPENFOAM=" << OPENFOAM << ')'
+        #endif
+        << nl;
 
     if (full)
     {
-        Info << "Arch:  " << Foam::FOAMbuildArch << nl;
+        Info << "Arch:  " << Foam::FOAMbuildArch.c_str() << nl;
     }
 }
 
@@ -967,12 +971,16 @@ void Foam::argList::parse
         if (Pstream::master() && bannerEnabled())
         {
             IOobject::writeBanner(Info, true)
-                << "Build  : " << Foam::FOAMbuild << nl
+                << "Build  : " << Foam::FOAMbuild
+                #if OPENFOAM
+                << " (OPENFOAM=" << OPENFOAM << ')'
+                #endif
+                << nl
                 << "Arch   : " << Foam::FOAMbuildArch << nl
                 << "Exec   : " << argListStr_.c_str() << nl
                 << "Date   : " << dateString.c_str() << nl
                 << "Time   : " << timeString.c_str() << nl
-                << "Host   : " << hostName() << nl
+                << "Host   : " << hostName().c_str() << nl
                 << "PID    : " << pid() << endl;
         }
 
