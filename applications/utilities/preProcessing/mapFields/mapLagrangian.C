@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,13 +85,13 @@ void mapLagrangian(const meshToMesh0& meshToMesh0Interp)
     // Determine which particles are in meshTarget
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // target to source cell map
+    // Target to source cell map
     const labelList& cellAddressing = meshToMesh0Interp.cellAddressing();
 
     // Invert celladdressing to get source to target(s).
     // Note: could use sparse addressing but that is too storage inefficient
     // (Map<labelList>)
-    labelListList sourceToTargets
+    const labelListList sourceToTargets
     (
         invertOneToMany(meshToMesh0Interp.fromMesh().nCells(), cellAddressing)
     );
@@ -99,8 +99,7 @@ void mapLagrangian(const meshToMesh0& meshToMesh0Interp)
     const fvMesh& meshSource = meshToMesh0Interp.fromMesh();
     const fvMesh& meshTarget = meshToMesh0Interp.toMesh();
 
-
-    fileNameList cloudDirs
+    const fileNameList cloudDirs
     (
         readDir
         (
@@ -109,25 +108,26 @@ void mapLagrangian(const meshToMesh0& meshToMesh0Interp)
         )
     );
 
-    forAll(cloudDirs, cloudI)
+    for (const fileName& cloudDir : cloudDirs)
     {
         // Search for list of lagrangian objects for this time
         IOobjectList objects
         (
             meshSource,
             meshSource.time().timeName(),
-            cloud::prefix/cloudDirs[cloudI]
+            cloud::prefix/cloudDir
         );
 
         if (objects.found("coordinates") || objects.found("positions"))
         {
-            Info<< nl << "    processing cloud " << cloudDirs[cloudI] << endl;
+            // Has coordinates/positions - so must be a valid cloud
+            Info<< nl << "    processing cloud " << cloudDir << endl;
 
             // Read positions & cell
             passiveParticleCloud sourceParcels
             (
                 meshSource,
-                cloudDirs[cloudI],
+                cloudDir,
                 false
             );
             Info<< "    read " << sourceParcels.size()
@@ -137,7 +137,7 @@ void mapLagrangian(const meshToMesh0& meshToMesh0Interp)
             passiveParticleCloud targetParcels
             (
                 meshTarget,
-                cloudDirs[cloudI],
+                cloudDir,
                 IDLList<passiveParticle>()
             );
 
@@ -157,7 +157,7 @@ void mapLagrangian(const meshToMesh0& meshToMesh0Interp)
             // This requires there to be no boundary in the way.
 
 
-            forAllConstIter(Cloud<passiveParticle>, sourceParcels, iter)
+            forAllConstIters(sourceParcels, iter)
             {
                 bool foundCell = false;
 
@@ -171,7 +171,7 @@ void mapLagrangian(const meshToMesh0& meshToMesh0Interp)
                     // all by tracking from their cell centre to the parcel
                     // position.
 
-                    forAll(targetCells, i)
+                    for (const label targetCell : targetCells)
                     {
                         // Track from its cellcentre to position to make sure.
                         autoPtr<passiveParticle> newPtr
@@ -180,8 +180,8 @@ void mapLagrangian(const meshToMesh0& meshToMesh0Interp)
                             (
                                 meshTarget,
                                 barycentric(1, 0, 0, 0),
-                                targetCells[i],
-                                meshTarget.cells()[targetCells[i]][0],
+                                targetCell,
+                                meshTarget.cells()[targetCell][0],
                                 1
                             )
                         );
@@ -221,11 +221,11 @@ void mapLagrangian(const meshToMesh0& meshToMesh0Interp)
             {
                 sourceParticleI = 0;
 
-                forAllIter(Cloud<passiveParticle>, sourceParcels, iter)
+                forAllIters(sourceParcels, iter)
                 {
                     if (unmappedSource.found(sourceParticleI))
                     {
-                        label targetCell =
+                        const label targetCell =
                             findCell(targetParcels, iter().position());
 
                         if (targetCell >= 0)
@@ -263,17 +263,17 @@ void mapLagrangian(const meshToMesh0& meshToMesh0Interp)
                 // ~~~~~~~~~~~~~~~~~~~~~
 
                 MapLagrangianFields<label>
-                (cloudDirs[cloudI], objects, meshToMesh0Interp, addParticles);
+                (cloudDir, objects, meshToMesh0Interp, addParticles);
                 MapLagrangianFields<scalar>
-                (cloudDirs[cloudI], objects, meshToMesh0Interp, addParticles);
+                (cloudDir, objects, meshToMesh0Interp, addParticles);
                 MapLagrangianFields<vector>
-                (cloudDirs[cloudI], objects, meshToMesh0Interp, addParticles);
+                (cloudDir, objects, meshToMesh0Interp, addParticles);
                 MapLagrangianFields<sphericalTensor>
-                (cloudDirs[cloudI], objects, meshToMesh0Interp, addParticles);
+                (cloudDir, objects, meshToMesh0Interp, addParticles);
                 MapLagrangianFields<symmTensor>
-                (cloudDirs[cloudI], objects, meshToMesh0Interp, addParticles);
+                (cloudDir, objects, meshToMesh0Interp, addParticles);
                 MapLagrangianFields<tensor>
-                (cloudDirs[cloudI], objects, meshToMesh0Interp, addParticles);
+                (cloudDir, objects, meshToMesh0Interp, addParticles);
             }
         }
     }
