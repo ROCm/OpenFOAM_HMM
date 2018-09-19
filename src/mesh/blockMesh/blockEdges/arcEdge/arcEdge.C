@@ -43,15 +43,15 @@ namespace blockEdges
 
 Foam::cylindricalCS Foam::blockEdges::arcEdge::calcAngle()
 {
-    vector a = p2_ - p1_;
-    vector b = p3_ - p1_;
+    const vector a = p2_ - p1_;
+    const vector b = p3_ - p1_;
 
-    // find centre of arcEdge
-    scalar asqr = a & a;
-    scalar bsqr = b & b;
-    scalar adotb = a & b;
+    // Find centre of arcEdge
+    const scalar asqr = a & a;
+    const scalar bsqr = b & b;
+    const scalar adotb = a & b;
 
-    scalar denom = asqr*bsqr - adotb*adotb;
+    const scalar denom = asqr*bsqr - adotb*adotb;
 
     if (mag(denom) < VSMALL)
     {
@@ -60,46 +60,46 @@ Foam::cylindricalCS Foam::blockEdges::arcEdge::calcAngle()
             << abort(FatalError);
     }
 
-    scalar fact = 0.5*(bsqr - adotb)/denom;
+    const scalar fact = 0.5*(bsqr - adotb)/denom;
 
     point centre = 0.5*a + fact*((a ^ b) ^ a);
 
     centre += p1_;
 
-    // find position vectors w.r.t. the arcEdge centre
-    vector r1(p1_ - centre);
-    vector r2(p2_ - centre);
-    vector r3(p3_ - centre);
+    // Find position vectors w.r.t. the arcEdge centre
+    const vector r1(p1_ - centre);
+    const vector r2(p2_ - centre);
+    const vector r3(p3_ - centre);
 
-    // find angles
+    // Find angle (in degrees)
     angle_ = radToDeg(acos((r3 & r1)/(mag(r3) * mag(r1))));
 
-    // check if the vectors define an exterior or an interior arcEdge
+    // Check if the vectors define an exterior or an interior arcEdge
     if (((r1 ^ r2) & (r1 ^ r3)) < 0.0)
     {
         angle_ = 360.0 - angle_;
     }
 
-    vector tempAxis;
+    vector arcAxis;
 
     if (angle_ <= 180.0)
     {
-        tempAxis = r1 ^ r3;
+        arcAxis = r1 ^ r3;
 
-        if (mag(tempAxis)/(mag(r1)*mag(r3)) < 0.001)
+        if (mag(arcAxis)/(mag(r1)*mag(r3)) < 0.001)
         {
-            tempAxis = r1 ^ r2;
+            arcAxis = r1 ^ r2;
         }
     }
     else
     {
-        tempAxis = r3 ^ r1;
+        arcAxis = r3 ^ r1;
     }
 
     radius_ = mag(r3);
 
-    // set up and return the local coordinate system
-    return cylindricalCS("arcEdgeCS", centre, tempAxis, r1);
+    // The corresponding local cylindrical coordinate system (degrees)
+    return cylindricalCS("arcEdgeCS", centre, arcAxis, r1, true);
 }
 
 
@@ -157,10 +157,8 @@ Foam::point Foam::blockEdges::arcEdge::position(const scalar lambda) const
     {
         return p3_;
     }
-    else
-    {
-        return cs_.globalPosition(vector(radius_, lambda*angle_, 0.0));
-    }
+
+    return cs_.globalPosition(vector(radius_, lambda*angle_, 0.0));
 }
 
 
