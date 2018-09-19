@@ -3,7 +3,7 @@
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
    \\  /     A nd            | Copyright (C) 2011-2016 OpenFOAM Foundation
-    \\/      M anipulation   | Copyright (C) 2015 OpenCFD Ltd.
+    \\/      M anipulation   | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -383,6 +383,26 @@ int main(int argc, char *argv[])
             << "        centreOfMass    " << cM << token::END_STATEMENT << nl
             << "        momentOfInertia " << eVal << token::END_STATEMENT << nl
             << "        orientation     " << eVec.T() << token::END_STATEMENT
+            << endl;
+
+
+        // Get inertia as a symmetric tensor
+        const symmTensor st
+        (
+            eVal.xx(),
+            eVal.xy(),
+            eVal.xz(),
+            eVal.yy(),
+            eVal.yz(),
+            eVal.zz()
+        );
+
+        Info<< nl
+            << "Entries for rigidBodyDynamics dynamicMeshDict:"
+            << nl
+            << "        mass            " << m << token::END_STATEMENT << nl
+            << "        centreOfMass    " << cM << token::END_STATEMENT << nl
+            << "        inertia         " << st << token::END_STATEMENT << nl
             << endl;
     }
 
