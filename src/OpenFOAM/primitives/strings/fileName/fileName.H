@@ -52,11 +52,11 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 template<class T> class List;
 template<class T> class UList;
 typedef List<word> wordList;
 
-// Forward declaration of friend functions and operators
 class wordRe;
 class fileName;
 

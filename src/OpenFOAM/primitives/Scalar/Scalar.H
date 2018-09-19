@@ -105,9 +105,21 @@ public:
 
 // * * * * * * * * * * * * * * * IO/Conversion * * * * * * * * * * * * * * * //
 
-//- Return a word representation of a Scalar.
+//- A word representation of a floating-point value.
 //  Uses stringstream instead of std::to_string for more consistent formatting.
 word name(const Scalar val);
+
+
+//- A word representation of a floating-point value.
+template<>
+struct nameOp<Scalar>
+{
+    inline word operator()(const Scalar val) const
+    {
+        return Foam::name(val);
+    }
+};
+
 
 //- Parse entire buffer as a float/double, skipping leading/trailing whitespace.
 //  \return Parsed value or FatalIOError on any problem

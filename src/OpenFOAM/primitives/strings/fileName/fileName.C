@@ -589,7 +589,7 @@ Foam::fileName Foam::operator/(const string& a, const string& b)
 Foam::fileName Foam::search(const word& file, const fileName& directory)
 {
     // Search the current directory for the file
-    fileNameList files(fileHandler().readDir(directory));
+    fileNameList files(fileHandler().readDir(directory, fileName::FILE));
     for (const fileName& item : files)
     {
         if (item == file)

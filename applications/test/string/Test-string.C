@@ -271,32 +271,31 @@ int main(int argc, char *argv[])
 
     Info<< "hash: = " << word::printf("0x%012X", string::hash()(s2)) << endl;
 
-    // test formatting on int
+    // Test formatting on int
     {
         label val = 25;
-        Info<<"val: " << val << "\n";
-
-        Info<< "int " << val << " as word >"
-            << Foam::name(val) << "< or "
-            << word::printf("formatted >%08d<", val) << "\n";
+        Info<< "int " << val << " nameOp='"
+            << nameOp<label>()(val) << "', name='"
+            << Foam::name(val) << "' or "
+            << word::printf("formatted '%08d'", val) << "\n";
     }
 
-    // test formatting on scalar
+    // Test formatting on scalar
     {
         scalar val = 3.1415926535897931;
-        Info<< "scalar " << val << " as word >"
-            << Foam::name(val) << "< or "
-            << word::printf("formatted >%.9f<", val) << "\n";
+        Info<< "scalar " << val << " nameOp='"
+            << nameOp<scalar>()(val) << "', name='"
+            << Foam::name(val) << "' or "
+            << word::printf("formatted '%.9f'", val) << "\n";
     }
 
-    // test formatting on uint
+    // Test formatting on uint
     {
         uint64_t val = 25000000ul;
-        Info<<"val: " << val << "\n";
-
-        Info<< "uint64 " << val << " as word >"
-            << Foam::name(val) << "< or "
-            << word::printf("formatted >%08d<", val) << "\n";
+        Info<< "uint64 " << val << " nameOp='"
+            << nameOp<uint64_t>()(val) << "', name='"
+            << Foam::name(val) << "' or "
+            << word::printf("formatted '%08d'", val) << "\n";
     }
 
     // test startsWith, endsWith methods

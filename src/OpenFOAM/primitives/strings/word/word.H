@@ -47,7 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 class word;
 Istream& operator>>(Istream& is, word& w);
 Ostream& operator<<(Ostream& os, const word& w);
@@ -218,11 +218,35 @@ public:
 };
 
 
-// Global Operators
+// * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * * //
 
 //- Join words as camelCase, capitalizing the first letter of b.
 //  No effect if either argument is empty.
 word operator&(const word& a, const word& b);
+
+
+// * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
+
+//- Extract name (as a word) from an object, typically using its name() method.
+template<class T>
+struct nameOp
+{
+    inline word operator()(const T& obj) const
+    {
+        return obj.name();
+    }
+};
+
+
+//- Extract type (as a word) from an object, typically using its type() method.
+template<class T>
+struct typeOp
+{
+    inline word operator()(const T& obj) const
+    {
+        return obj.type();
+    }
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

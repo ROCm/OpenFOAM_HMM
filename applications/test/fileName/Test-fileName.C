@@ -617,6 +617,7 @@ int main(int argc, char *argv[])
     fileName pathName(wrdList);
 
     Info<< "pathName = " << pathName << nl
+        << "nameOp   = " << nameOp<fileName>()(pathName) << nl
         << "pathName.name()     = >" << pathName.name() << "<\n"
         << "pathName.path()     = "  << pathName.path() << nl
         << "pathName.ext()      = >" << pathName.ext() << "<\n"

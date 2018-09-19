@@ -216,9 +216,9 @@ public:
 
 // * * * * * * * * * * * * * * Global functions  * * * * * * * * * * * * * * //
 
-//- Return a string representation of a VectorSpace
+//- A word representation of a VectorSpace
 template<class Form, class Cmpt, direction Ncmpts>
-word name(const VectorSpace<Form, Cmpt, Ncmpts>&);
+word name(const VectorSpace<Form, Cmpt, Ncmpts>& vs);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

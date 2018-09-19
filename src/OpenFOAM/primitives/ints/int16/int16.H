@@ -48,12 +48,21 @@ class Ostream;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Return a word representation of an int16
+//- A word representation of int16 value
 inline word name(const int16_t val)
 {
-    // No stripping required
-    return word(std::to_string(int(val)), false);
+    return word(std::to_string(int(val)), false); // Needs no stripping
 }
+
+//- A word representation of int16 value
+template<>
+struct nameOp<int16_t>
+{
+    inline word operator()(const int16_t val) const
+    {
+        return word(std::to_string(int(val)), false); // Needs no stripping
+    }
+};
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //

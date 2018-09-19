@@ -87,12 +87,12 @@ static const Enum<restoreMethod> methodEndings
 
 
 // Files in given directory at time instant
-wordList getFiles(const fileName& dir, const word& instance)
+inline wordList getFiles(const fileName& dir, const word& instance)
 {
     return ListOps::create<word>
     (
         Foam::readDir(dir/instance, fileName::FILE),
-        [](const fileName& f){ return f.name(); }
+        nameOp<fileName>()
     );
 }
 
