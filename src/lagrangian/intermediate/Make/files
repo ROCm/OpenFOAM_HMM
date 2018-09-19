@@ -1,5 +1,3 @@
-submodels/CloudFunctionObjects/CloudToVTK/vtkTools.C
-
 PARCELS=parcels
 BASEPARCELS=$(PARCELS)/baseClasses
 DERIVEDPARCELS=$(PARCELS)/derived

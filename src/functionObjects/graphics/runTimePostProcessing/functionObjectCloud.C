@@ -95,41 +95,14 @@ addGeometryToScene
         return;
     }
 
-    inputFileName_.clear();
+    // The vtkCloud stores 'file' via the stateFunctionObject
+    // (lookup by cloudName).
+    // It only generates VTP format, which means there is a single file
+    // containing all fields.
 
-    // The CloudToVTK functionObject from
-    //
-    //   lagrangian/intermediate/submodels/CloudFunctionObjects/
-    //
-    // stores file state on cloud OutputProperties itself,
-    //
-    // whereas the vtkCloud functionObject treats it like other
-    // output and stores via the stateFunctionObject.
-    // Since it uses VTP format, there is only a single file with all fields
-    // - lookup by cloudName.
-
-    const dictionary& cloudDict =
-        geometryBase::parent_.mesh().lookupObject<IOdictionary>
-        (
-            cloudName_ + "OutputProperties"
-        );
-
-    if (cloudDict.found("cloudFunctionObject"))
-    {
-        const dictionary& foDict = cloudDict.subDict("cloudFunctionObject");
-        if (foDict.found(functionObjectName_))
-        {
-            foDict.subDict(functionObjectName_)
-                .readIfPresent("file", inputFileName_);
-        }
-    }
-    else
-    {
-        inputFileName_ = getFileName("file", cloudName_);
-    }
-
-
+    inputFileName_ = getFileName("file", cloudName_);
     inputFileName_.expand();
+
     if (inputFileName_.empty())
     {
         WarningInFunction
@@ -150,17 +123,11 @@ addGeometryToScene
 
         dataset = reader->GetOutput();
     }
-    else if (inputFileName_.hasExt("vtk"))
-    {
-        auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
-        reader->SetFileName(inputFileName_.c_str());
-        reader->Update();
-
-        dataset = reader->GetOutput();
-    }
     else
     {
-        // Invalid name - ignore
+        // Invalid name - ignore.
+        // Don't support VTK legacy format at all - it is too wasteful
+        // and cumbersome.
         inputFileName_.clear();
     }
 

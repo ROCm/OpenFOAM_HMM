@@ -28,7 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "CloudToVTK.H"
 #include "FacePostProcessing.H"
 #include "ParticleCollector.H"
 #include "ParticleErosion.H"
