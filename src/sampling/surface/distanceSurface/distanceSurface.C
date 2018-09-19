@@ -68,8 +68,7 @@ Foam::distanceSurface::distanceSurface
     distance_(dict.get<scalar>("distance")),
     signed_
     (
-        // Always signed when distance = 0.
-        dict.get<bool>("signed") || equal(distance_, Zero)
+        distance_ < 0 || equal(distance_, Zero) || dict.get<bool>("signed")
     ),
     cell_(dict.lookupOrDefault("cell", true)),
     regularise_(dict.lookupOrDefault("regularise", true)),
@@ -113,8 +112,7 @@ Foam::distanceSurface::distanceSurface
     distance_(distance),
     signed_
     (
-        // Always signed when distance = 0.
-        signedDistance || equal(distance_, Zero)
+        signedDistance || distance_ < 0 || equal(distance_, Zero)
     ),
     cell_(cell),
     regularise_(regularise),
@@ -148,7 +146,7 @@ void Foam::distanceSurface::createGeometry()
         (
             IOobject
             (
-                "cellDistance",
+                "distanceSurface.cellDistance",
                 fvm.time().timeName(),
                 fvm.time(),
                 IOobject::NO_READ,
@@ -164,7 +162,8 @@ void Foam::distanceSurface::createGeometry()
     // For distance = 0 (and isoSurfaceCell) we apply additional filtering
     // to limit the extent of open edges.
 
-    const bool filterCells = (cell_ && signed_ && equal(distance_, Zero));
+    const bool isZeroDist  = equal(distance_, Zero);
+    const bool filterCells = (cell_ && isZeroDist);
 
     bitSet ignoreCells;
     if (filterCells)
@@ -185,7 +184,7 @@ void Foam::distanceSurface::createGeometry()
             nearest
         );
 
-        if (signed_)
+        if (signed_ || isZeroDist)
         {
             vectorField norms;
             surfPtr_().getNormal(nearest, norms);
@@ -196,7 +195,12 @@ void Foam::distanceSurface::createGeometry()
             {
                 const point diff(cc[i] - nearest[i].hitPoint());
 
-                fld[i] = sign(diff & norms[i]) * Foam::mag(diff);
+                fld[i] =
+                (
+                    isZeroDist // Use normal distance
+                  ? (diff & norms[i])
+                  : Foam::sign(diff & norms[i]) * Foam::mag(diff)
+                );
 
                 // Since cellPoints() is used in isoSurfaceCell too,
                 // no additional overhead caused here
@@ -250,7 +254,12 @@ void Foam::distanceSurface::createGeometry()
                 {
                     const point diff(cc[i] - nearest[i].hitPoint());
 
-                    fld[i] = sign(diff & norms[i]) * Foam::mag(diff);
+                    fld[i] =
+                    (
+                        isZeroDist // Use normal distance
+                      ? (diff & norms[i])
+                      : Foam::sign(diff & norms[i]) * Foam::mag(diff)
+                    );
                 }
             }
             else
@@ -290,7 +299,12 @@ void Foam::distanceSurface::createGeometry()
             {
                 const point diff(pts[i] - nearest[i].hitPoint());
 
-                pointDistance_[i] = sign(diff & norms[i]) * Foam::mag(diff);
+                pointDistance_[i] =
+                (
+                    isZeroDist // Use normal distance
+                  ? (diff & norms[i])
+                  : Foam::sign(diff & norms[i]) * Foam::mag(diff)
+                );
             }
         }
         else
@@ -311,7 +325,7 @@ void Foam::distanceSurface::createGeometry()
         (
             IOobject
             (
-                "pointDistance",
+                "distanceSurface.pointDistance",
                 fvm.time().timeName(),
                 fvm.time(),
                 IOobject::NO_READ,

@@ -42,6 +42,13 @@ debug
         }
     }
 
+    _disk1
+    {
+        surfaceType disk;
+        origin      (-0.1 -0.05 0);
+        normal      (1 1 1);
+        radius      0.015;
+    }
 
     surfaces
     (
@@ -53,6 +60,16 @@ debug
             regularise  true;
             surfaceType triSurfaceMesh;
             surfaceName angledPlane.obj;
+        }
+
+        disk1
+        {
+            ${_disk1}
+            type        distanceSurface;
+            distance    0;
+            cell        false;
+            signed      true;
+            triangulate false;
         }
 
         iso

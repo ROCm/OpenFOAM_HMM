@@ -1481,7 +1481,7 @@ Foam::isoSurface::isoSurface
         (
             IOobject
             (
-                "cutType",
+                "isoSurface.cutType",
                 fvm.time().timeName(),
                 fvm.time(),
                 IOobject::NO_READ,

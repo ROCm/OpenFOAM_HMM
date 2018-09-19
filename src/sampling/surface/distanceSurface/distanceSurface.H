@@ -25,27 +25,28 @@ Class
     Foam::distanceSurface
 
 Description
-    A surface defined by distance to an input surface - using either
-    an isoSurfaceCell or an isoSurface.
+    A surface defined by a distance from an input searchable surface.
+    Uses an isoSurfaceCell or an isoSurface algorithm for constructing the
+    distance surface.
 
 Usage
     Dictionary controls:
     \table
         Property | Description                             | Required | Default
         distance | distance from surface                   | yes      |
-        signed   | apply sign for +ve/-ve distance         | yes      |
+        signed   | Use sign when distance is positive      | partly   |
         cell     | use isoSurfaceCell algorithm            | no       | true
-        regularise | point snapping                        | yes      |
-        bounds   | limit with bounding box                 | no       |
-        surfaceType | type of surface                      | yes      |
-        surfaceName | name of surface in \c triSurface/    | no  | dict name
+        regularise | Point snapping for iso-surface        | yes      |
+        bounds   | Limit with bounding box                 | no       |
+        surfaceType | Type of surface                      | yes      |
+        surfaceName | Name of surface in \c triSurface/    | no  | dict name
     \endtable
 
 Note
-    Some special adjustments are undertaken for distance = 0.
-    - Always treated as signed (ignoring the input value), since it is
-      nearly impossible to generate any surface otherwise.
-    - With the isoSurfaceCell algorithm is used, additional checks for open
+    For distance = 0, some special adjustments.
+    - Always signed (ignoring the input value).
+    - Use normal distance from surface (for better treatment of open edges).
+    - When the isoSurfaceCell algorithm is used, additional checks for open
       surfaces edges are used to limit the extend of resulting distance
       surface. The resulting surface elements will not, however, contain
       partial cell coverage.
@@ -88,13 +89,13 @@ class distanceSurface
         //- Signed distance
         const bool signed_;
 
-        //- Whether to use isoSurfaceCell or isoSurface
+        //- Use isoSurfaceCell (true) or isoSurface (false) algorithm
         const bool cell_;
 
-        //- Whether to coarsen
+        //- Whether to coarsen iso-surface triangles
         const bool regularise_;
 
-        //- Optional bounding box to trim triangles against
+        //- Optional bounding box to trim against
         const boundBox bounds_;
 
         //- Distance to cell centres
