@@ -199,10 +199,10 @@ public:
         mapDistributeBase();
 
         //- Copy construct
-        explicit mapDistributeBase(const mapDistributeBase& map);
+        mapDistributeBase(const mapDistributeBase& map);
 
         //- Move construct
-        explicit mapDistributeBase(mapDistributeBase&& map);
+        mapDistributeBase(mapDistributeBase&& map);
 
         //- Construct from components
         mapDistributeBase
@@ -249,7 +249,7 @@ public:
         //- Construct from my elements to send. Assumes layout is my elements
         //  first followed by elements from all other processors in consecutive
         //  order
-        mapDistributeBase
+        explicit mapDistributeBase
         (
             labelListList&& subMap,
             const bool subHasFlip = false,
