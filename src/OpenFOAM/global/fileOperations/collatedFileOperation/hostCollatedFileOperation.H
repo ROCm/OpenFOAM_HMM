@@ -29,9 +29,9 @@ Description
 
     In parallel it will assume ranks are sorted according to hostname
     and the lowest rank per hostname will be the IO rank. The output directories
-    will get a unique name processors<N>_<low>-<high> where N is the overall
-    number of processors and low and high is the range of ranks contained
-    in the files. Each of these subsets uses its own communicator.
+    will get a unique name processors\<N\>_\<low\>-\<high\> where N is the
+    overall number of processors and low and high is the range of ranks
+    contained in the files. Each of these subsets uses its own communicator.
 
     Instead of using the hostnames the IO ranks can be assigned using the
     FOAM_IORANKS environment variable (also when running non-parallel), e.g.

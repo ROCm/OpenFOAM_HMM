@@ -241,7 +241,7 @@ getAllQueries()
     #-- Add ones from database, present in log file
     # Note: just like awk, line selected with regular expression,
     #       column with string.
-    local dbQueries=$(getDbQueryList $db)
+    local dbQueries="$(getDbQueryList $db)"
 
     for var in $dbQueries
     do

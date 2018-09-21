@@ -157,7 +157,7 @@ public:
         // \code
         //     (numElem / elem_per_block)
         //   + (numElem % elem_per_block) ? 1 : 0
-        // \code
+        // \endcode
         // But avoiding the modulus operation
         static constexpr label num_blocks(label numElem)
         {
@@ -498,7 +498,6 @@ public:
             Ostream& os,
             const PackedList<Width>& list
         );
-
 };
 
 

@@ -92,7 +92,7 @@ Foam::viscosityModels::Casson::Casson
     (
         IOobject
         (
-            "nu",
+            name,
             U_.time().timeName(),
             U_.db(),
             IOobject::NO_READ,

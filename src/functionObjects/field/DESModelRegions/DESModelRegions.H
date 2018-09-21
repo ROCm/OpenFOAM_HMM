@@ -51,7 +51,7 @@ Usage
     \table
         Property     | Description             | Required    | Default value
         type         | type name: DESModelRegions| yes       |
-        resultName   | Name of DES indicator field | no      | <function name>
+        resultName   | Name of DES indicator field | no      | \<function name\>
         log          | log to standard output  | no          | yes
     \endtable
 

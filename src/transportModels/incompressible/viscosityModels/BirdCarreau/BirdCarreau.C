@@ -87,7 +87,7 @@ Foam::viscosityModels::BirdCarreau::BirdCarreau
     (
         IOobject
         (
-            "nu",
+            name,
             U_.time().timeName(),
             U_.db(),
             IOobject::NO_READ,

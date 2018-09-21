@@ -42,7 +42,7 @@ Description
     The factor is a face-based quantity, which is converted to a cell-based
     quantity by assigning the minimum blending factor for any cell face.
 
-    An indicator (volume) field, named <functionObjectName>:<fieldName>, is
+    An indicator (volume) field, named \<functionObjectName\>:\<fieldName\>, is
     generated that is set to (1 - f), i.e. values of:
     - 0 represent scheme1 as active, and
     - 1 represent scheme2 as active.
