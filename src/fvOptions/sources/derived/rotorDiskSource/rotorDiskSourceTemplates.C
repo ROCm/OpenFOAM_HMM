@@ -26,6 +26,7 @@ License
 #include "rotorDiskSource.H"
 #include "volFields.H"
 #include "unitConversion.H"
+#include "transform.H"
 
 using namespace Foam::constant;
 
@@ -62,7 +63,7 @@ void Foam::fv::rotorDiskSource::calculate
             vector Uc = cylindrical_->invTransform(U[celli], i);
 
             // Transform velocity into local coning system
-            Uc = R_[i] & Uc;
+            Uc = transform(Rcone_[i], Uc);
 
             // Set radial component of velocity to zero
             Uc.x() = 0.0;
@@ -129,7 +130,7 @@ void Foam::fv::rotorDiskSource::calculate
             liftEff += rhoRef_*localForce.z();
 
             // Transform force from local coning system into rotor cylindrical
-            localForce = invR_[i] & localForce;
+            localForce = invTransform(Rcone_[i], localForce);
 
             // Transform force into global Cartesian co-ordinate system
             force[celli] = cylindrical_->transform(localForce, i);

@@ -188,10 +188,7 @@ protected:
         List<point> x_;
 
         //- Rotation tensor for flap angle
-        List<tensor> R_;
-
-        //- Inverse rotation tensor for flap angle
-        List<tensor> invR_;
+        List<tensor> Rcone_;
 
         //- Area [m2]
         List<scalar> area_;

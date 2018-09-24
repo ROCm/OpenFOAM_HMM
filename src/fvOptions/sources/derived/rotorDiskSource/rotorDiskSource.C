@@ -422,8 +422,7 @@ void Foam::fv::rotorDiskSource::constructGeometry()
             // rotor cone system
             scalar c = cos(beta);
             scalar s = sin(beta);
-            R_[i] = tensor(c, 0, -s, 0, 1, 0, s, 0, c);
-            invR_[i] = R_[i].T();
+            Rcone_[i] = tensor(c, 0, -s, 0, 1, 0, s, 0, c);
         }
     }
 }
@@ -480,9 +479,8 @@ Foam::fv::rotorDiskSource::rotorDiskSource
     tipEffect_(1.0),
     flap_(),
     x_(cells_.size(), Zero),
-    R_(cells_.size(), I),
-    invR_(cells_.size(), I),
-    area_(cells_.size(), 0.0),
+    Rcone_(cells_.size(), I),
+    area_(cells_.size(), Zero),
     coordSys_(),
     cylindrical_(),
     rMax_(0.0),
