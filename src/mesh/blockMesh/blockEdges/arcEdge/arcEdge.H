@@ -64,7 +64,7 @@ class arcEdge
         //- The arc radius
         scalar radius_;
 
-        //- The local cylindrical coordinate system (degrees)
+        //- The local cylindrical coordinate system
         cylindricalCS cs_;
 
 

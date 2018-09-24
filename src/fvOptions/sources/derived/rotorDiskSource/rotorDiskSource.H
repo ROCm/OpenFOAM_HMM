@@ -196,7 +196,7 @@ protected:
         //- Area [m2]
         List<scalar> area_;
 
-        //- Rotor local cylindrical coordinate system (r, theta, z)
+        //- Rotor local cylindrical coordinate system (r-theta-z)
         cylindricalCS coordSys_;
 
         //- Rotor transformation coordinate system
@@ -279,7 +279,7 @@ public:
             // (Cylindrical r, theta, z)
             inline const List<point>& x() const;
 
-            //- Return the rotor coordinate system (r, theta, z)
+            //- Return the rotor coordinate system (r-theta-z)
             inline const cylindricalCS& coordSys() const;
 
 

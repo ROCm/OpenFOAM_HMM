@@ -98,8 +98,8 @@ Foam::cylindricalCS Foam::blockEdges::arcEdge::calcAngle()
 
     radius_ = mag(r3);
 
-    // The corresponding local cylindrical coordinate system (degrees)
-    return cylindricalCS("arcEdgeCS", centre, arcAxis, r1, true);
+    // The corresponding local cylindrical coordinate system (radians)
+    return cylindricalCS("arc", centre, arcAxis, r1);
 }
 
 
@@ -158,13 +158,14 @@ Foam::point Foam::blockEdges::arcEdge::position(const scalar lambda) const
         return p3_;
     }
 
-    return cs_.globalPosition(vector(radius_, lambda*angle_, 0.0));
+    // The angle is degrees, the coordinate system in radians
+    return cs_.globalPosition(vector(radius_, degToRad(lambda*angle_), 0));
 }
 
 
 Foam::scalar Foam::blockEdges::arcEdge::length() const
 {
-    return degToRad(angle_*radius_);
+    return degToRad(radius_*angle_);
 }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::cylindricalCS
 
 Description
-    Cylindrical coordinate system
+    Cylindrical coordinate system, always in radians.
 
 SourceFiles
     cylindricalCS.C
@@ -50,12 +50,6 @@ class cylindricalCS
 :
     public coordinateSystem
 {
-    // Private data members
-
-        //- Are angles in degrees? (default = true)
-        bool inDegrees_;
-
-
 protected:
 
     // Protected Member Functions
@@ -92,21 +86,19 @@ public:
     // Constructors
 
         //- Construct null
-        cylindricalCS(const bool inDegrees=true);
+        cylindricalCS();
 
         //- Construct copy
         cylindricalCS
         (
-            const coordinateSystem&,
-            const bool inDegrees=true
+            const coordinateSystem&
         );
 
         //- Construct copy with a different name
         cylindricalCS
         (
             const word& name,
-            const coordinateSystem&,
-            const bool inDegrees=true
+            const coordinateSystem&
         );
 
         //- Construct from origin and rotation
@@ -114,8 +106,7 @@ public:
         (
             const word& name,
             const point& origin,
-            const coordinateRotation&,
-            const bool inDegrees=true
+            const coordinateRotation&
         );
 
         //- Construct from origin and 2 axes
@@ -124,8 +115,7 @@ public:
             const word& name,
             const point& origin,
             const vector& axis,
-            const vector& dirn,
-            const bool inDegrees=true
+            const vector& dirn
         );
 
         //- Construct from dictionary and name
@@ -136,16 +126,7 @@ public:
 
 
     //- Destructor
-    virtual ~cylindricalCS();
-
-
-    // Member Functions
-
-        //- Are angles in degrees?
-        bool inDegrees() const;
-
-        //- Non-const access to inDegrees
-        bool& inDegrees();
+    virtual ~cylindricalCS() = default;
 };
 
 

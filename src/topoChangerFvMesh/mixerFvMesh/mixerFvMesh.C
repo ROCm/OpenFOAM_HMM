@@ -269,13 +269,10 @@ Foam::mixerFvMesh::mixerFvMesh
     ),
     csPtr_
     (
-        coordinateSystem::New
-        (
-            "coordinateSystem",
-            motionDict_.subDict("coordinateSystem")
-        )
+        // Caution: must be a cylindricalCS
+        coordinateSystem::New(*this, motionDict_, "coordinateSystem")
     ),
-    rpm_(readScalar(motionDict_.lookup("rpm"))),
+    rpm_(motionDict_.get<scalar>("rpm")),
     movingPointsMaskPtr_(nullptr)
 {
     addZonesAndModifiers();
@@ -294,6 +291,7 @@ Foam::mixerFvMesh::~mixerFvMesh()
     deleteDemandDrivenData(movingPointsMaskPtr_);
 }
 
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Return moving points mask.  Moving points marked with 1
@@ -310,13 +308,15 @@ const Foam::scalarField& Foam::mixerFvMesh::movingPointsMask() const
 
 bool Foam::mixerFvMesh::update()
 {
-    // Rotational speed needs to be converted from rpm
+    // The tangential sweep (radians)
+    const vector theta(0, rpmToRads(rpm_)*time().deltaTValue(), 0);
+
     movePoints
     (
         csPtr_->globalPosition
         (
             csPtr_->localPosition(points())
-          + vector(0, rpm_*360.0*time().deltaTValue()/60.0, 0)
+          + theta
             *movingPointsMask()
         )
     );
@@ -339,7 +339,7 @@ bool Foam::mixerFvMesh::update()
         csPtr_->globalPosition
         (
             csPtr_->localPosition(oldPoints())
-          + vector(0, rpm_*360.0*time().deltaTValue()/60.0, 0)
+          + theta
             *movingPointsMask()
         )
     );

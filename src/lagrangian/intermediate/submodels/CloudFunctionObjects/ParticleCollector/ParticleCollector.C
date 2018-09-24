@@ -207,7 +207,7 @@ void Foam::ParticleCollector<CloudType>::initConcentricCircles()
     faces_.setSize(nFace);
     area_.setSize(nFace);
 
-    coordSys_ = cylindricalCS("coordSys", origin, normal_[0], refDir, false);
+    coordSys_ = cylindricalCS("collector", origin, normal_[0], refDir);
 
     List<label> ptIDs(identity(nPointPerRadius));
 
@@ -539,7 +539,7 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     faceTris_(),
     nSector_(0),
     radius_(),
-    coordSys_(false),
+    coordSys_(),
     normal_(),
     negateParcelsOppositeNormal_
     (
