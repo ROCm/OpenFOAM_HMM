@@ -56,6 +56,11 @@ inline void markUsed
 } // End anonymous namespace
 
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+Foam::word Foam::fvMeshSubset::exposedPatchName("oldInternalFaces");
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 bool Foam::fvMeshSubset::checkCellSubset() const
@@ -571,7 +576,7 @@ void Foam::fvMeshSubset::setCellSubset
     {
         // No explicit patch specified. Put in oldInternalFaces patch.
         // Check if patch with this name already exists.
-        wantedPatchID = oldPatches.findPatchID("oldInternalFaces");
+        wantedPatchID = oldPatches.findPatchID(exposedPatchName);
     }
     else if (wantedPatchID < 0 || wantedPatchID >= oldPatches.size())
     {
@@ -1078,7 +1083,7 @@ void Foam::fvMeshSubset::setCellSubset
         {
             newBoundary[nNewPatches] = new emptyPolyPatch
             (
-                "oldInternalFaces",
+                exposedPatchName,
                 boundaryPatchSizes[oldInternalPatchID],
                 patchStart,
                 nNewPatches,
@@ -1086,7 +1091,7 @@ void Foam::fvMeshSubset::setCellSubset
                 emptyPolyPatch::typeName
             );
 
-            //Pout<< "    oldInternalFaces : "
+            //Pout<< "    " << exposedPatchName << " : "
             //    << boundaryPatchSizes[oldInternalPatchID] << endl;
 
             // The index for the first patch is -1 as it originates from

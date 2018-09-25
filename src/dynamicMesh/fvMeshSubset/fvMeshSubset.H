@@ -153,6 +153,12 @@ class fvMeshSubset
 
 public:
 
+    // Static Data Members
+
+        //- Name for exposed internal faces (default: oldInternalFaces)
+        static word exposedPatchName;
+
+
     // Constructors
 
         //- Construct given a mesh to subset
