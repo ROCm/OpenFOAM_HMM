@@ -48,6 +48,7 @@ Description
 Usage
     Example of function object specification to solve a scalar transport
     equation:
+    \verbatim
     functions
     {
         scalar1

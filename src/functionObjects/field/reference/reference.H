@@ -67,8 +67,8 @@ Usage
         Property     | Description             | Required | Default value
         type         | Type name: reference    | yes      |
         field        | Name of field           | yes      |
-        result       | Name of result field    | no       | reference(<field>)
-        position     | Position to sample      | no       | <not used>
+        result       | Name of result field    | no       | reference(\<field\>)
+        position     | Position to sample      | no       | \<not used\>
         scale        | Scale value             | no       | 1
         offset       | Offset value            | no       | zero
         log          | Log to standard output  | no       | yes

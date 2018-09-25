@@ -63,7 +63,7 @@ Description
                     ),
                     1.0
                 )
-        \f[
+        \f]
 
     For option 2, the following relation is used:
         \f[
@@ -78,7 +78,7 @@ Description
                     ),
                     1.0
                 )
-        \f[
+        \f]
     Note that  magGradCC is equal to 3 for ortoghonal meshes
 
     For option 3 a PID control is used in order to control residual
@@ -89,14 +89,14 @@ Description
                 P*residual
               + I*residualIntegral
               + D*residualDifferential
-        \f[
+        \f]
 
         where P, I and D are user inputs
 
     The following relation is used:
     \f[
         fRes = (factor - meanRes)/(maxRes*meanRes);
-    \f[
+    \f]
 
         where:
             meanRes = average(residual)
@@ -120,7 +120,7 @@ Description
                 ),
                 1.0
             )
-        \f[
+        \f]
     Note that faceWeights for a orthogonal mesh is 0.5.
 
 
@@ -138,7 +138,7 @@ Description
                 ),
                 1.0
             )
-        \f[
+        \f]
 
 
     For option 6 , the following relation is used:
@@ -275,8 +275,7 @@ Usage
         tolerance    | Tolerance for number of blended cells | no | 0.001
         field        | Name of field to evaluate | yes       |
         result    | Name of surface field to be used in the localBlended scheme
-        | yes
-
+        | yes |
     \endtable
 
     The 'log' flag true write the number of cells on each scheme, plus it

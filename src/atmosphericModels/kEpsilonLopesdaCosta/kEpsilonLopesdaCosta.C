@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2018 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,14 +50,12 @@ void kEpsilonLopesdaCosta<BasicTurbulenceModel>::setPorosityCoefficient
 
         const scalar Cpm = readScalar(pm.dict().lookup(C.name()));
 
-        forAll(cellZoneIDs, zonei)
+        for (const label zonei : cellZoneIDs)
         {
-            const labelList& cells =
-                this->mesh_.cellZones()[cellZoneIDs[zonei]];
+            const labelList& cells = this->mesh_.cellZones()[zonei];
 
-            forAll(cells, i)
+            for (const label celli : cells)
             {
-                const label celli = cells[i];
                 C[celli] = Cpm;
             }
         }
@@ -79,15 +77,14 @@ void kEpsilonLopesdaCosta<BasicTurbulenceModel>::setCdSigma
 
         const scalar Cpm = readScalar(pm.dict().lookup(C.name()));
 
-        forAll(cellZoneIDs, zonei)
+        for (const label zonei : cellZoneIDs)
         {
-            const labelList& cells =
-                this->mesh_.cellZones()[cellZoneIDs[zonei]];
+            const labelList& cells = this->mesh_.cellZones()[zonei];
 
             forAll(cells, i)
             {
                 const label celli = cells[i];
-                C[celli] = Cpm*Sigma[celli];
+                C[celli] = Cpm*Sigma[i];
             }
         }
     }
@@ -115,10 +112,13 @@ void kEpsilonLopesdaCosta<BasicTurbulenceModel>::setPorosityCoefficients()
                     );
 
                 setPorosityCoefficient(Cmu_, pm);
+                Cmu_.correctBoundaryConditions();
                 setPorosityCoefficient(C1_, pm);
                 setPorosityCoefficient(C2_, pm);
                 setPorosityCoefficient(sigmak_, pm);
                 setPorosityCoefficient(sigmaEps_, pm);
+                sigmak_.correctBoundaryConditions();
+                sigmaEps_.correctBoundaryConditions();
 
                 setCdSigma(CdSigma_, pm);
                 setPorosityCoefficient(betap_, pm);

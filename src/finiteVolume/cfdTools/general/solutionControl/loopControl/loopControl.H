@@ -45,6 +45,7 @@ Usage
             }
         }
     }
+    \endverbatim
 
     Where the loop entries comprise:
     \table

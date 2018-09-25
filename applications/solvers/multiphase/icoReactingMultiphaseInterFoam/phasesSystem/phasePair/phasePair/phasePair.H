@@ -22,11 +22,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::phasePair description for mass transfer between a pair of
-    phases. The direction of the mass transfer is from the phase
-    'from' to the phasse 'to'.
+    Foam::phasePair
 
 Description
+    Description for mass transfer between a pair of phases. The direction of
+    the mass transfer is from the phase 'from' to the phasse 'to'.
 
 SourceFiles
     phasePair.C
