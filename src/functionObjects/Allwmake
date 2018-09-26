@@ -10,6 +10,6 @@ wmake $targetType lagrangian
 wmake $targetType utilities
 wmake $targetType solvers
 
-./graphics/Allwmake
+./graphics/Allwmake $targetType
 
 #------------------------------------------------------------------------------
