@@ -1386,7 +1386,7 @@ int main(int argc, char *argv[])
     DynamicList<polyPatch*> newPatches(nPatches);
 
     // For every boundary face the old patch.
-    labelList facePatchID(pShapeMesh.nFaces()-pShapeMesh.nInternalFaces(), -1);
+    labelList facePatchID(pShapeMesh.nBoundaryFaces(), -1);
     label cMeshFace = pShapeMesh.nInternalFaces();
     label nBoundaries = 0;
 

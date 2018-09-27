@@ -92,7 +92,7 @@ Foam::isoAdvection::isoAdvection
     isoCutFace_(mesh_, ap_),
     cellIsBounded_(mesh_.nCells(), false),
     checkBounding_(mesh_.nCells(), false),
-    bsFaces_(label(0.2*(mesh_.nFaces() - mesh_.nInternalFaces()))),
+    bsFaces_(label(0.2*mesh_.nBoundaryFaces())),
     bsx0_(bsFaces_.size()),
     bsn0_(bsFaces_.size()),
     bsUn0_(bsFaces_.size()),

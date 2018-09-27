@@ -169,7 +169,7 @@ Foam::discreteSurface::sampleOnFaces
         // Sample boundary faces
 
         const polyBoundaryMesh& pbm = mesh().boundaryMesh();
-        const label nBnd = mesh().nFaces()-mesh().nInternalFaces();
+        const label nBnd = mesh().nBoundaryFaces();
 
         // Create flat boundary field
 

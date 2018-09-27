@@ -44,7 +44,7 @@ void Foam::syncTools::swapBoundaryCellPositions
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    neighbourCellData.resize(mesh.nFaces()-mesh.nInternalFaces());
+    neighbourCellData.resize(mesh.nBoundaryFaces());
 
     for (const polyPatch& pp : patches)
     {

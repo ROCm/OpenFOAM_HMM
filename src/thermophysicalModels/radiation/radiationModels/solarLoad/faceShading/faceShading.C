@@ -80,10 +80,7 @@ Foam::triSurface Foam::faceShading::triangulate
     const polyBoundaryMesh& bMesh = mesh_.boundaryMesh();
 
     // Storage for surfaceMesh. Size estimate.
-    DynamicList<labelledTri> triangles
-    (
-        mesh_.nFaces() - mesh_.nInternalFaces()
-    );
+    DynamicList<labelledTri> triangles(mesh_.nBoundaryFaces());
 
     label newPatchI = 0;
 

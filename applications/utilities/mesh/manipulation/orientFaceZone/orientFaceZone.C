@@ -295,11 +295,7 @@ int main(int argc, char *argv[])
     {
         const polyBoundaryMesh& bm = mesh.boundaryMesh();
 
-        labelList neiStatus
-        (
-            mesh.nFaces()-mesh.nInternalFaces(),
-            orientedSurface::UNVISITED
-        );
+        labelList neiStatus(mesh.nBoundaryFaces(), orientedSurface::UNVISITED);
 
         forAll(faceLabels, i)
         {

@@ -140,7 +140,7 @@ void simpleMarkFeatures
         SubList<face>
         (
             mesh.faces(),
-            mesh.nFaces()-mesh.nInternalFaces(),
+            mesh.nBoundaryFaces(),
             mesh.nInternalFaces()
         ),
         mesh.points()
@@ -238,7 +238,7 @@ void simpleMarkFeatures
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Face centres that need inclusion in the dual mesh
-    labelHashSet featureFaceSet(mesh.nFaces()-mesh.nInternalFaces());
+    labelHashSet featureFaceSet(mesh.nBoundaryFaces());
     // A. boundary faces.
     for (label facei = mesh.nInternalFaces(); facei < mesh.nFaces(); facei++)
     {

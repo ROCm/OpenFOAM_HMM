@@ -535,7 +535,7 @@ void Foam::decompositionMethod::calcCellCells
     // Get agglomerate owner on other side of coupled faces
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    labelList globalNeighbour(mesh.nFaces()-mesh.nInternalFaces());
+    labelList globalNeighbour(mesh.nBoundaryFaces());
 
     for (const polyPatch& pp : patches)
     {
@@ -734,7 +734,7 @@ void Foam::decompositionMethod::calcCellCells
     // Get agglomerate owner on other side of coupled faces
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    labelList globalNeighbour(mesh.nFaces()-mesh.nInternalFaces());
+    labelList globalNeighbour(mesh.nBoundaryFaces());
 
     for (const polyPatch& pp : patches)
     {

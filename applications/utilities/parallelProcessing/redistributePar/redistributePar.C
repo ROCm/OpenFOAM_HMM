@@ -172,7 +172,7 @@ void printMeshData(const polyMesh& mesh)
 
     // Print stats
 
-    globalIndex globalBoundaryFaces(mesh.nFaces()-mesh.nInternalFaces());
+    globalIndex globalBoundaryFaces(mesh.nBoundaryFaces());
 
     label maxProcCells = 0;
     label totProcFaces = 0;

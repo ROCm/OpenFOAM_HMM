@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     }
 
     // Sync agglomeration across coupled patches
-    labelList nbrAgglom(mesh.nFaces() - mesh.nInternalFaces(), -1);
+    labelList nbrAgglom(mesh.nBoundaryFaces(), -1);
 
     forAll(boundary, patchi)
     {

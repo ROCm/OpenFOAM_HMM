@@ -133,7 +133,7 @@ Foam::labelList Foam::removeCells::getExposedFaces
         SubList<label> bndValues
         (
             nCellsUsingFace,
-            mesh_.nFaces()-mesh_.nInternalFaces(),
+            mesh_.nBoundaryFaces(),
             mesh_.nInternalFaces()
         );
 

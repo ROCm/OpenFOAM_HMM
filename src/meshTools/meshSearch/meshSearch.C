@@ -566,12 +566,11 @@ Foam::meshSearch::boundaryTree() const
             overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         }
 
-        // all boundary faces (not just walls)
-        labelList bndFaces(mesh_.nFaces()-mesh_.nInternalFaces());
-        forAll(bndFaces, i)
-        {
-            bndFaces[i] = mesh_.nInternalFaces() + i;
-        }
+        // All boundary faces (not just walls)
+        labelList bndFaces
+        (
+            identity(mesh_.nBoundaryFaces(), mesh_.nInternalFaces())
+        );
 
         boundaryTreePtr_.reset
         (

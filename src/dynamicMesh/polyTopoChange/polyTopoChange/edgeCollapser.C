@@ -462,7 +462,7 @@ Foam::scalarField Foam::edgeCollapser::calcTargetFaceSizes() const
     const labelList& cellOwner = mesh_.faceOwner();
     const labelList& cellNeighbour = mesh_.faceNeighbour();
 
-    const label nBoundaryFaces = mesh_.nFaces() - mesh_.nInternalFaces();
+    const label nBoundaryFaces = mesh_.nBoundaryFaces();
 
     // Calculate face size from cell volumes for internal faces
     for (label intFacei = 0; intFacei < mesh_.nInternalFaces(); ++intFacei)

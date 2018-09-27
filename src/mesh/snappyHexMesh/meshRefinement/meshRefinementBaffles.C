@@ -2413,8 +2413,8 @@ void Foam::meshRefinement::zonify
     const PtrList<surfaceZonesInfo>& surfZones = surfaces_.surfZones();
 
     // Swap neighbouring cell centres and cell level
-    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-    pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelList neiLevel(mesh_.nBoundaryFaces());
+    pointField neiCc(mesh_.nBoundaryFaces());
     calcNeighbourData(neiLevel, neiCc);
 
 
@@ -3268,7 +3268,7 @@ void Foam::meshRefinement::consistentOrientation
     {
         labelList neiStatus
         (
-            mesh_.nFaces()-mesh_.nInternalFaces(),
+            mesh_.nBoundaryFaces(),
             orientedSurface::UNVISITED
         );
 
@@ -3575,8 +3575,8 @@ void Foam::meshRefinement::baffleAndSplitMesh
         << " faces that are intersected by the surface." << nl << endl;
 
     // Swap neighbouring cell centres and cell level
-    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-    pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelList neiLevel(mesh_.nBoundaryFaces());
+    pointField neiCc(mesh_.nBoundaryFaces());
     calcNeighbourData(neiLevel, neiCc);
 
     labelList ownPatch, neiPatch;
@@ -3646,8 +3646,8 @@ void Foam::meshRefinement::baffleAndSplitMesh
         // so re-do the surface intersections
         {
             // Swap neighbouring cell centres and cell level
-            neiLevel.setSize(mesh_.nFaces()-mesh_.nInternalFaces());
-            neiCc.setSize(mesh_.nFaces()-mesh_.nInternalFaces());
+            neiLevel.setSize(mesh_.nBoundaryFaces());
+            neiCc.setSize(mesh_.nBoundaryFaces());
             calcNeighbourData(neiLevel, neiCc);
 
             labelList ownPatch, neiPatch;
@@ -3834,8 +3834,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Swap neighbouring cell centres and cell level
-    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-    pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelList neiLevel(mesh_.nBoundaryFaces());
+    pointField neiCc(mesh_.nBoundaryFaces());
     calcNeighbourData(neiLevel, neiCc);
 
     // Find intersections with all unnamed(!) surfaces
@@ -4133,8 +4133,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::removeLimitShells
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Swap neighbouring cell centres and cell level
-    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-    pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelList neiLevel(mesh_.nBoundaryFaces());
+    pointField neiCc(mesh_.nBoundaryFaces());
     calcNeighbourData(neiLevel, neiCc);
 
     // Find intersections with all unnamed(!) surfaces
@@ -4459,8 +4459,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
 
     // Swap neighbouring cell centres and cell level
-    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-    pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelList neiLevel(mesh_.nBoundaryFaces());
+    pointField neiCc(mesh_.nBoundaryFaces());
     calcNeighbourData(neiLevel, neiCc);
 
 

@@ -468,7 +468,7 @@ void Foam::backgroundMeshDecomposition::printMeshData
 
     // // Print stats
 
-    // globalIndex globalBoundaryFaces(mesh.nFaces()-mesh.nInternalFaces());
+    // globalIndex globalBoundaryFaces(mesh.nBoundaryFaces());
 
     for (label proci = 0; proci < Pstream::nProcs(); proci++)
     {
@@ -671,7 +671,7 @@ void Foam::backgroundMeshDecomposition::buildPatchAndTree()
         SubList<face>
         (
             mesh_.faces(),
-            mesh_.nFaces() - mesh_.nInternalFaces(),
+            mesh_.nBoundaryFaces(),
             mesh_.nInternalFaces()
         ),
         mesh_.points()

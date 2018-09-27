@@ -153,7 +153,7 @@ public:
         //  polyBoundaryMesh and not parallel
         const List<labelPairList>& neighbourEdges() const;
 
-        //- Return the number of non-processor patches
+        //- The number of patches before the first processor patch.
         label nNonProcessor() const;
 
         //- Return a list of patch names
@@ -165,8 +165,16 @@ public:
         //- Return a list of physical types
         wordList physicalTypes() const;
 
-        //- Return the range used for all boundary faces
-        //  Spans [nInternalFaces, nFaces)
+        //- The start label of the boundary faces in the polyMesh face list
+        //  Same as mesh.nInternalFaces()
+        label start() const;
+
+        //- The number of boundary faces in the underlying mesh
+        //  Same as mesh.nBoundaryFaces()
+        label nFaces() const;
+
+        //- The face range for all boundary faces
+        //  Spans [nInternalFaces, nFaces) of the underlying mesh
         labelRange range() const;
 
         //- Return the range used for boundary faces on patchi.

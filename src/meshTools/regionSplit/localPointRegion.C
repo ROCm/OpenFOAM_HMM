@@ -251,7 +251,7 @@ void Foam::localPointRegion::calcPointRegions
     boolList& candidatePoint
 )
 {
-    label nBnd = mesh.nFaces()-mesh.nInternalFaces();
+    const label nBnd = mesh.nBoundaryFaces();
     const labelList& faceOwner = mesh.faceOwner();
     const labelList& faceNeighbour = mesh.faceNeighbour();
 
@@ -419,7 +419,7 @@ void Foam::localPointRegion::calcPointRegions
         SubList<face> l
         (
             minRegion,
-            mesh.nFaces()-mesh.nInternalFaces(),
+            mesh.nBoundaryFaces(),
             mesh.nInternalFaces()
         );
         syncTools::syncBoundaryFaceList
@@ -628,7 +628,7 @@ Foam::List<Foam::labelPair> Foam::localPointRegion::findDuplicateFacePairs
     // Faces to test: all boundary faces
     labelList testFaces
     (
-        identity(mesh.nFaces()-mesh.nInternalFaces(), mesh.nInternalFaces())
+        identity(mesh.nBoundaryFaces(), mesh.nInternalFaces())
     );
 
     // Find corresponding baffle face (or -1)

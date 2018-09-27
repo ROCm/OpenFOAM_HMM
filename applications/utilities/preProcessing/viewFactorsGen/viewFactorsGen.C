@@ -82,10 +82,7 @@ triSurface triangulate
     const polyMesh& mesh = bMesh.mesh();
 
     // Storage for surfaceMesh. Size estimate.
-    DynamicList<labelledTri> triangles
-    (
-        mesh.nFaces() - mesh.nInternalFaces()
-    );
+    DynamicList<labelledTri> triangles(mesh.nBoundaryFaces());
 
     label newPatchI = 0;
     label localTriFaceI = 0;

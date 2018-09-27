@@ -1453,7 +1453,7 @@ Foam::isoSurface::isoSurface
 
 
     // Pre-calculate patch-per-face to avoid whichPatch call.
-    labelList boundaryRegion(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelList boundaryRegion(mesh_.nBoundaryFaces());
 
     forAll(patches, patchi)
     {

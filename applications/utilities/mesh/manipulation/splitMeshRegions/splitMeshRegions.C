@@ -353,7 +353,7 @@ void getInterfaceSizes
     // ~~~~~~~~~~~~~~
 
     // Neighbour cellRegion.
-    labelList coupledRegion(mesh.nFaces()-mesh.nInternalFaces());
+    labelList coupledRegion(mesh.nBoundaryFaces());
 
     forAll(coupledRegion, i)
     {
@@ -641,7 +641,7 @@ autoPtr<mapPolyMesh> createRegionMesh
 
 
     // Neighbour cellRegion.
-    labelList coupledRegion(mesh.nFaces()-mesh.nInternalFaces());
+    labelList coupledRegion(mesh.nBoundaryFaces());
 
     forAll(coupledRegion, i)
     {
@@ -1232,7 +1232,7 @@ void getZoneID
     }
 
     // Neighbour zoneID.
-    neiZoneID.setSize(mesh.nFaces()-mesh.nInternalFaces());
+    neiZoneID.setSize(mesh.nBoundaryFaces());
 
     forAll(neiZoneID, i)
     {
@@ -1263,7 +1263,7 @@ void matchRegions
 
     // Get current per cell zoneID
     labelList zoneID(mesh.nCells(), -1);
-    labelList neiZoneID(mesh.nFaces()-mesh.nInternalFaces());
+    labelList neiZoneID(mesh.nBoundaryFaces());
     getZoneID(mesh, cellZones, zoneID, neiZoneID);
 
     // Sizes per cellzone
@@ -1552,7 +1552,7 @@ int main(int argc, char *argv[])
     // Existing zoneID
     labelList zoneID(mesh.nCells(), -1);
     // Neighbour zoneID.
-    labelList neiZoneID(mesh.nFaces()-mesh.nInternalFaces());
+    labelList neiZoneID(mesh.nBoundaryFaces());
     getZoneID(mesh, cellZones, zoneID, neiZoneID);
 
 
@@ -1622,7 +1622,7 @@ int main(int argc, char *argv[])
         );
 
         labelList newZoneID(mesh.nCells(), -1);
-        labelList newNeiZoneID(mesh.nFaces()-mesh.nInternalFaces());
+        labelList newNeiZoneID(mesh.nBoundaryFaces());
         getZoneID(mesh, newCellZones, newZoneID, newNeiZoneID);
 
         label unzonedCelli = newZoneID.find(-1);

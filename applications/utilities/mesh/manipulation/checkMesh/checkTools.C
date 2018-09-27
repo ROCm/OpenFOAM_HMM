@@ -314,7 +314,7 @@ void Foam::mergeAndWrite
     }
 
 
-    boolList bndInSet(mesh.nFaces()-mesh.nInternalFaces());
+    boolList bndInSet(mesh.nBoundaryFaces());
     forAll(pbm, patchi)
     {
         const polyPatch& pp = pbm[patchi];

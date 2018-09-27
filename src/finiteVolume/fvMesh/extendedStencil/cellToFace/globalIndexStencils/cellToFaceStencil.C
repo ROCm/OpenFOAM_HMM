@@ -164,7 +164,7 @@ void Foam::cellToFaceStencil::validBoundaryFaces(boolList& isValidBFace) const
 {
     const polyBoundaryMesh& patches = mesh().boundaryMesh();
 
-    isValidBFace.setSize(mesh().nFaces()-mesh().nInternalFaces(), true);
+    isValidBFace.setSize(mesh().nBoundaryFaces(), true);
 
     forAll(patches, patchi)
     {
@@ -333,7 +333,7 @@ void Foam::cellToFaceStencil::calcFaceStencil
     // Calculates per face a list of global cell/face indices.
 
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-    const label nBnd = mesh_.nFaces()-mesh_.nInternalFaces();
+    const label nBnd = mesh_.nBoundaryFaces();
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
 
@@ -482,7 +482,7 @@ void Foam::cellToFaceStencil::calcFaceStencil
 Foam::cellToFaceStencil::cellToFaceStencil(const polyMesh& mesh)
 :
     mesh_(mesh),
-    globalNumbering_(mesh_.nCells()+mesh_.nFaces()-mesh_.nInternalFaces())
+    globalNumbering_(mesh_.nCells()+mesh_.nBoundaryFaces())
 {}
 
 

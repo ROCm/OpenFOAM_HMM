@@ -1608,7 +1608,7 @@ Foam::label Foam::hexRef8::faceConsistentRefinement
 
     // Coupled faces. Swap owner level to get neighbouring cell level.
     // (only boundary faces of neiLevel used)
-    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelList neiLevel(mesh_.nBoundaryFaces());
 
     forAll(neiLevel, i)
     {
@@ -1685,7 +1685,7 @@ void Foam::hexRef8::checkWantedRefinementLevels
 
     // Coupled faces. Swap owner level to get neighbouring cell level.
     // (only boundary faces of neiLevel used)
-    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelList neiLevel(mesh_.nBoundaryFaces());
 
     forAll(neiLevel, i)
     {
@@ -2696,9 +2696,9 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
         // Coupled faces. Swap owner level to get neighbouring cell level.
         // (only boundary faces of neiLevel used)
 
-        labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-        labelList neiCount(mesh_.nFaces()-mesh_.nInternalFaces());
-        labelList neiRefCount(mesh_.nFaces()-mesh_.nInternalFaces());
+        labelList neiLevel(mesh_.nBoundaryFaces());
+        labelList neiCount(mesh_.nBoundaryFaces());
+        labelList neiRefCount(mesh_.nBoundaryFaces());
 
         forAll(neiLevel, i)
         {
@@ -3471,7 +3471,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
     //  refinining and subsetting)
 
     {
-        labelList newNeiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
+        labelList newNeiLevel(mesh_.nBoundaryFaces());
 
         forAll(newNeiLevel, i)
         {
@@ -3528,7 +3528,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
         // above
         pointField bFaceMids
         (
-            mesh_.nFaces()-mesh_.nInternalFaces(),
+            mesh_.nBoundaryFaces(),
             point(-GREAT, -GREAT, -GREAT)
         );
 
@@ -4562,7 +4562,7 @@ void Foam::hexRef8::checkMesh() const
     // otherwise mesh redistribution might cause multiple faces between two
     // cells
     {
-        labelList nei(mesh_.nFaces()-mesh_.nInternalFaces());
+        labelList nei(mesh_.nBoundaryFaces());
         forAll(nei, i)
         {
             nei[i] = mesh_.faceOwner()[i+mesh_.nInternalFaces()];
@@ -4616,7 +4616,7 @@ void Foam::hexRef8::checkMesh() const
     // ~~~~~~~~~~~~~~~~~
 
     {
-        scalarField neiFaceAreas(mesh_.nFaces()-mesh_.nInternalFaces());
+        scalarField neiFaceAreas(mesh_.nBoundaryFaces());
         forAll(neiFaceAreas, i)
         {
             neiFaceAreas[i] = mag(mesh_.faceAreas()[i+mesh_.nInternalFaces()]);
@@ -4658,7 +4658,7 @@ void Foam::hexRef8::checkMesh() const
     // Check number of points on faces.
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     {
-        labelList nVerts(mesh_.nFaces()-mesh_.nInternalFaces());
+        labelList nVerts(mesh_.nBoundaryFaces());
 
         forAll(nVerts, i)
         {
@@ -4700,7 +4700,7 @@ void Foam::hexRef8::checkMesh() const
     // ~~~~~~~~~~~~~~~~~~~~
     {
         // Anchor points.
-        pointField anchorPoints(mesh_.nFaces()-mesh_.nInternalFaces());
+        pointField anchorPoints(mesh_.nBoundaryFaces());
 
         forAll(anchorPoints, i)
         {
@@ -4808,7 +4808,7 @@ void Foam::hexRef8::checkRefinementLevels
         }
 
         // Coupled faces. Get neighbouring value
-        labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
+        labelList neiLevel(mesh_.nBoundaryFaces());
 
         forAll(neiLevel, i)
         {
@@ -5379,7 +5379,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
 
 
         // Coupled faces. Swap owner level to get neighbouring cell level.
-        labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
+        labelList neiLevel(mesh_.nBoundaryFaces());
 
         forAll(neiLevel, i)
         {

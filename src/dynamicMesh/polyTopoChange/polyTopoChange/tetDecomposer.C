@@ -222,7 +222,7 @@ void Foam::tetDecomposer::setRefinement
             }
         }
 
-        boolList neiDecomposeCell(mesh_.nFaces()-mesh_.nInternalFaces());
+        boolList neiDecomposeCell(mesh_.nBoundaryFaces());
         forAll(neiDecomposeCell, bFacei)
         {
             label facei = mesh_.nInternalFaces()+bFacei;

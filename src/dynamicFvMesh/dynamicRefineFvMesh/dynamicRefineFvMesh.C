@@ -86,7 +86,7 @@ void Foam::dynamicRefineFvMesh::calculateProtectedCells
     unrefineableCell = protectedCell_;
 
     // Get neighbouring cell level
-    labelList neiLevel(nFaces()-nInternalFaces());
+    labelList neiLevel(nBoundaryFaces());
 
     for (label facei = nInternalFaces(); facei < nFaces(); facei++)
     {

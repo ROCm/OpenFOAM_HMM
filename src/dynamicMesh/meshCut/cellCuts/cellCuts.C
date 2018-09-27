@@ -139,7 +139,7 @@ void Foam::cellCuts::syncProc()
     syncTools::syncEdgeList(mesh(), edgeWeight_, maxEqOp<scalar>(), -GREAT);
 
     {
-        const label nBnd = mesh().nFaces()-mesh().nInternalFaces();
+        const label nBnd = mesh().nBoundaryFaces();
 
         // Convert faceSplitCut into face-local data: vertex and edge w.r.t.
         // vertex 0: (since this is same on both sides)

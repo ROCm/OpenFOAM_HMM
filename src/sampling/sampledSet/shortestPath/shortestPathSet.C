@@ -238,7 +238,7 @@ void Foam::shortestPathSet::genSamples(const polyMesh& mesh)
 
             // Situation 2: we're on a coupled patch and might need to
             //              switch processor/cell
-            boolList isFront(mesh.nFaces()-mesh.nInternalFaces(), false);
+            boolList isFront(mesh.nBoundaryFaces(), false);
 
             if (frontFaceI != -1)
             {

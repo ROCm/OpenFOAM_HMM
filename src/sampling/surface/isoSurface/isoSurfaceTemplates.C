@@ -606,7 +606,7 @@ void Foam::isoSurface::generateTriPoints
 
 
     // Determine neighbouring snap status
-    boolList neiSnapped(mesh_.nFaces()-mesh_.nInternalFaces(), false);
+    boolList neiSnapped(mesh_.nBoundaryFaces(), false);
     List<Type> neiSnappedPoint(neiSnapped.size(), Type(Zero));
     for (const polyPatch& pp : patches)
     {

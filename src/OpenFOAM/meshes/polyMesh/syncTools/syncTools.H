@@ -395,7 +395,7 @@ public:
                 SubList<T> bndValues
                 (
                     faceValues,
-                    mesh.nFaces()-mesh.nInternalFaces(),
+                    mesh.nBoundaryFaces(),
                     mesh.nInternalFaces()
                 );
 
@@ -420,7 +420,7 @@ public:
                 SubList<point> bndValues
                 (
                     positions,
-                    mesh.nFaces()-mesh.nInternalFaces(),
+                    mesh.nBoundaryFaces(),
                     mesh.nInternalFaces()
                 );
                 syncBoundaryFaceList
@@ -476,7 +476,7 @@ public:
                 SubList<T> bndValues
                 (
                     faceValues,
-                    mesh.nFaces()-mesh.nInternalFaces(),
+                    mesh.nBoundaryFaces(),
                     mesh.nInternalFaces()
                 );
                 syncBoundaryFaceList
