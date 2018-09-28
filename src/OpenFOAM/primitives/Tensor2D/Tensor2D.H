@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,7 +97,7 @@ public:
         //- Construct given SphericalTensor2D
         inline Tensor2D(const SphericalTensor2D<Cmpt>&);
 
-        //- Construct given the two vectors
+        //- Construct given the two row vectors
         inline Tensor2D
         (
             const Vector2D<Cmpt>& x,
@@ -117,7 +117,7 @@ public:
 
     // Member Functions
 
-        // Access
+        // Component access
 
             inline const Cmpt& xx() const;
             inline const Cmpt& xy() const;
@@ -129,13 +129,40 @@ public:
             inline Cmpt& yx();
             inline Cmpt& yy();
 
-            // Access vector components.
 
+        // Column-vector access.
+
+            //- Extract vector for column 0
+            inline Vector2D<Cmpt> cx() const;
+
+            //- Extract vector for column 1
+            inline Vector2D<Cmpt> cy() const;
+
+
+        // Row-vector access.
+
+            //- Extract vector for row 0
             inline Vector2D<Cmpt> x() const;
+
+            //- Extract vector for row 1
             inline Vector2D<Cmpt> y() const;
+
+
+    // Tensor Operations
 
         //- Transpose
         inline Tensor2D<Cmpt> T() const;
+
+        //- Inner-product of this with another Tensor2D.
+        inline Tensor2D<Cmpt> inner(const Tensor2D<Cmpt>& t2) const;
+
+        //- Inner-product of this with transpose of another Tensor2D.
+        //  Primarily useful for coordinate transformations
+        //  (where transpose is the same as the inverse).
+        inline Tensor2D<Cmpt> innerT(const Tensor2D<Cmpt>& t2) const;
+
+        //- Schur-product of this with another Tensor2D.
+        inline Tensor2D<Cmpt> schur(const Tensor2D<Cmpt>& t2) const;
 
 
     // Member Operators
