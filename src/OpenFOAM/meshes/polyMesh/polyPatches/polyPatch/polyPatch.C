@@ -336,6 +336,25 @@ Foam::tmp<Foam::vectorField> Foam::polyPatch::faceCellCentres() const
 }
 
 
+Foam::tmp<Foam::scalarField> Foam::polyPatch::areaFraction() const
+{
+    tmp<scalarField> tfraction(new scalarField(size()));
+    scalarField& fraction = tfraction.ref();
+
+    const vectorField::subField faceAreas = this->faceAreas();
+    const pointField& points = this->points();
+
+    forAll(*this, facei)
+    {
+        const face& curFace = this->operator[](facei);
+        fraction[facei] =
+            mag(faceAreas[facei])/(curFace.mag(points) + ROOTVSMALL);
+    }
+
+    return tfraction;
+}
+
+
 const Foam::labelUList& Foam::polyPatch::faceCells() const
 {
     if (!faceCellsPtr_)

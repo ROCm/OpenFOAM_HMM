@@ -373,6 +373,10 @@ public:
             //- Return face cell centres
             tmp<vectorField> faceCellCentres() const;
 
+            //- Return the area fraction as the ratio of the stored face area
+            //- and the area given by the face points
+            tmp<scalarField> areaFraction() const;
+
 
         // Addressing into mesh
 
