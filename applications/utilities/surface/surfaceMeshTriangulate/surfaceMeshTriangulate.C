@@ -411,7 +411,7 @@ int main(int argc, char *argv[])
               ? outFileName
               : (
                     runTime.processorCase()
-                  ? runTime.rootPath()/runTime.globalCaseName()/outFileName
+                  ? runTime.globalPath()/outFileName
                   : runTime.path()/outFileName
                 )
             );

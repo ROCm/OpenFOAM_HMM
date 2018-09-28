@@ -525,7 +525,7 @@ void extractSurface
         fileName globalCasePath
         (
             runTime.processorCase()
-          ? runTime.path()/".."/outFileName
+          ? runTime.globalPath()/outFileName
           : runTime.path()/outFileName
         );
         globalCasePath.clean();

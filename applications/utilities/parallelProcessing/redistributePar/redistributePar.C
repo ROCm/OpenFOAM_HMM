@@ -2451,7 +2451,7 @@ int main(int argc, char *argv[])
             << " on all processors" << nl << endl;
         instantList timeDirs;
 
-        const fileName basePath(args.rootPath()/args.globalCaseName());
+        const fileName basePath(args.globalPath());
 
         if (Pstream::master())
         {

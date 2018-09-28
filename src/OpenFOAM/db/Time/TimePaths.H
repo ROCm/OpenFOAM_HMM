@@ -64,7 +64,7 @@ class TimePaths
         const word constant_;
 
 
-    // Private Member functions
+    // Private Member Functions
 
         //- Determine from case name whether it is a processor directory
         bool detectProcessorCase();
@@ -105,7 +105,7 @@ public:
         );
 
 
-    // Member functions
+    // Member Functions
 
         //- Return true if this is a processor case
         bool processorCase() const
@@ -164,10 +164,16 @@ public:
         //- \c ../constant() for parallel runs.
         fileName caseConstant() const;
 
-        //- Return path
+        //- Return path for the case
         fileName path() const
         {
             return rootPath()/caseName();
+        }
+
+        //- Return global path for the case
+        fileName globalPath() const
+        {
+            return rootPath()/globalCaseName();
         }
 
         //- Return system path

@@ -8,7 +8,7 @@ if (Pstream::master())
     (
         new OFstream
         (
-            runTime.rootPath()/runTime.globalCaseName()
+            runTime.globalPath()
            /("logSummary." + runTime.timeName() + ".dat")
         )
     );
