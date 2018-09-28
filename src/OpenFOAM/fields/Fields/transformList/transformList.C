@@ -85,9 +85,9 @@ void Foam::transformList(const tensorField& rotTensor, UList<T>& field)
 template<class T>
 void Foam::transformList(const tensor& rotTensor, Map<T>& field)
 {
-    forAllIter(typename Map<T>, field, iter)
+    forAllIters(field, iter)
     {
-        iter() = transform(rotTensor[0], iter());
+        iter() = transform(rotTensor, iter());
     }
 }
 
@@ -115,9 +115,9 @@ void Foam::transformList(const tensorField& rotTensor, Map<T>& field)
 template<class T>
 void Foam::transformList(const tensor& rotTensor, EdgeMap<T>& field)
 {
-    forAllIter(typename EdgeMap<T>, field, iter)
+    forAllIters(field, iter)
     {
-        iter() = transform(rotTensor[0], iter());
+        iter() = transform(rotTensor, iter());
     }
 }
 
