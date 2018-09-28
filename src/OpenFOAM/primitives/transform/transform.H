@@ -142,31 +142,38 @@ inline tensor Ra(const vector& a, const scalar omega)
 }
 
 
-inline label transform(const tensor&, const bool i)
+//- No-op rotational transform of a bool
+inline bool transform(const tensor&, const bool b)
 {
-    return i;
+    return b;
 }
 
 
+//- No-op rotational transform of a label
 inline label transform(const tensor&, const label i)
 {
     return i;
 }
 
 
+//- No-op rotational transform of a label
 inline scalar transform(const tensor&, const scalar s)
 {
     return s;
 }
 
 
+//- Use rotational tensor to transform a vector.
+//  Same as (rot & v)
 template<class Cmpt>
 inline Vector<Cmpt> transform(const tensor& tt, const Vector<Cmpt>& v)
 {
-    return tt & v;
+    return (tt & v);
 }
 
 
+//- Use rotational tensor to transform a tensor.
+//  Same as (rot & input & rot.T())
 template<class Cmpt>
 inline Tensor<Cmpt> transform(const tensor& tt, const Tensor<Cmpt>& t)
 {
@@ -211,6 +218,7 @@ inline Tensor<Cmpt> transform(const tensor& tt, const Tensor<Cmpt>& t)
 }
 
 
+//- Use rotational tensor to transform a spherical tensor (no-op).
 template<class Cmpt>
 inline SphericalTensor<Cmpt> transform
 (
@@ -222,6 +230,8 @@ inline SphericalTensor<Cmpt> transform
 }
 
 
+//- Use rotational tensor to transform a symmetrical tensor.
+//  Same as (rot & input & rot.T())
 template<class Cmpt>
 inline SymmTensor<Cmpt> transform(const tensor& tt, const SymmTensor<Cmpt>& st)
 {
@@ -292,16 +302,16 @@ inline scalar pseudoAngle
     const vector& vec
 )
 {
-    scalar cos = vec & e0;
-    scalar sin = vec & e1;
+    const scalar cos_angle = vec & e0;
+    const scalar sin_angle = vec & e1;
 
-    if (sin < -SMALL)
+    if (sin_angle < -SMALL)
     {
-        return (3.0 + cos)*constant::mathematical::piByTwo;
+        return (3.0 + cos_angle)*constant::mathematical::piByTwo;
     }
     else
     {
-        return (1.0 - cos)*constant::mathematical::piByTwo;
+        return (1.0 - cos_angle)*constant::mathematical::piByTwo;
     }
 }
 
