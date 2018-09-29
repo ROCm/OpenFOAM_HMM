@@ -16,6 +16,7 @@ stl/STLAsciiParseFlex.L
 stl/STLAsciiParseManual.C
 stl/STLAsciiParseRagel.C
 
+vtk/file/foamVtkFileWriter.C
 vtk/core/foamVtkCore.C
 vtk/core/foamVtkPTraits.C
 
