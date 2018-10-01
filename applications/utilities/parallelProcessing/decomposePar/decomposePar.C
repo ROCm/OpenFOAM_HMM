@@ -330,19 +330,14 @@ int main(int argc, char *argv[])
     fileName decompDictFile;
     args.readIfPresent("decomposeParDict", decompDictFile);
 
+    // Get all region names
     wordList regionNames;
     if (allRegions)
     {
-        Info<< "Decomposing all regions in regionProperties" << nl << nl;
-        regionProperties rp(runTime);
+        regionNames = regionProperties(runTime).names();
 
-        wordHashSet names;
-        forAllConstIters(rp, iter)
-        {
-            names.insert(iter.object());
-        }
-
-        regionNames = names.sortedToc();
+        Info<< "Decomposing all regions in regionProperties" << nl
+            << "    " << flatOutput(regionNames) << nl << endl;
     }
     else
     {

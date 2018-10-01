@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,32 +25,106 @@ License
 
 #include "regionProperties.H"
 #include "IOdictionary.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::regionProperties::regionProperties(const Time& runTime)
 :
-    HashTable<wordList>
+    regionProperties(runTime, IOobject::MUST_READ_IF_MODIFIED)
+{}
+
+
+Foam::regionProperties::regionProperties
+(
+    const Time& runTime,
+    IOobject::readOption rOpt
+)
+{
+    HashTable<wordList>& props = *this;
+
+    IOdictionary iodict
     (
-        IOdictionary
+        IOobject
         (
-            IOobject
-            (
-                "regionProperties",
-                runTime.time().constant(),
-                runTime.db(),
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
-            )
-        ).lookup("regions")
+            "regionProperties",
+            runTime.time().constant(),
+            runTime.db(),
+            rOpt,
+            IOobject::NO_WRITE
+        )
+    );
+
+    if
+    (
+        (rOpt == IOobject::MUST_READ || rOpt == IOobject::MUST_READ_IF_MODIFIED)
+     || iodict.size()
     )
-{}
+    {
+        iodict.readEntry("regions", props);
+    }
+}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::regionProperties::~regionProperties()
-{}
+Foam::label Foam::regionProperties::count() const
+{
+    label n = 0;
+
+    const HashTable<wordList>& props = *this;
+
+    forAllConstIters(props, iter)
+    {
+        n += iter.object().size();
+    }
+
+    return n;
+}
+
+
+Foam::wordList Foam::regionProperties::names() const
+{
+    wordList list(this->count());
+
+    label n = 0;
+
+    const HashTable<wordList>& props = *this;
+
+    for (const word& grp : props.sortedToc())
+    {
+        for (const word& name : props[grp])
+        {
+            list[n] = name;
+            ++n;
+        }
+    }
+
+    return list;
+}
+
+
+Foam::wordList Foam::regionProperties::sortedNames() const
+{
+    wordList list(this->count());
+
+    label n = 0;
+
+    const HashTable<wordList>& props = *this;
+
+    forAllConstIters(props, iter)
+    {
+        for (const word& name : iter.object())
+        {
+            list[n] = name;
+            ++n;
+        }
+    }
+
+    Foam::sort(list);
+
+    return list;
+}
 
 
 // ************************************************************************* //

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,13 +39,17 @@ SourceFiles
 #ifndef regionProperties_H
 #define regionProperties_H
 
-#include "Time.H"
 #include "HashTable.H"
+#include "wordList.H"
+#include "IOobject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward Declarations
+class Time;
 
 /*---------------------------------------------------------------------------*\
                        Class regionProperties Declaration
@@ -55,23 +59,35 @@ class regionProperties
 :
     public HashTable<wordList>
 {
-
-        //- No copy construct
-        regionProperties(const regionProperties&) = delete;
-
-        //- No copy assignment
-        void operator=(const regionProperties&) = delete;
-
 public:
 
     // Constructors
 
-        //- Construct from components
-        regionProperties(const Time& runTime);
+        //- Construct from Time
+        explicit regionProperties(const Time& runTime);
+
+        //- Construct from Time with specified read options
+        regionProperties
+        (
+            const Time& runTime,
+            IOobject::readOption rOpt
+        );
 
 
     //- Destructor
-    ~regionProperties();
+    ~regionProperties() = default;
+
+
+    // Member Functions
+
+        //- Total count of all region names.
+        label count() const;
+
+        //- The region names. Sorted by region type.
+        wordList names() const;
+
+        //- The region names in sorted order.
+        wordList sortedNames() const;
 
 };
 
