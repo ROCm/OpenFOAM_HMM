@@ -65,7 +65,7 @@ class enginePiston
         polyPatchID patchID_;
 
         //- Coordinate system
-        autoPtr<coordinateSystem> csPtr_;
+        autoPtr<coordinateSystem> csysPtr_;
 
 
         // Piston layering data
@@ -112,7 +112,8 @@ public:
         );
 
 
-    // Destructor - default
+    //- Destructor
+    ~enginePiston() = default;
 
 
     // Member Functions
@@ -120,7 +121,7 @@ public:
         //- Return coordinate system
         const coordinateSystem& cs() const
         {
-            return *csPtr_;
+            return *csysPtr_;
         }
 
         //- Return ID of piston patch

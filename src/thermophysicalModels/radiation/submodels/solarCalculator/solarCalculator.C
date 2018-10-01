@@ -144,7 +144,7 @@ void Foam::solarCalculator::calculateSunDirection()
     }
 
     // Transform to actual coordinate system
-    direction_ = coord_->R().transform(direction_);
+    direction_ = coord_->transform(direction_);
 
     if (debug)
     {

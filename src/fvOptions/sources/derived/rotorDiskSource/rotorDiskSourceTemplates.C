@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,6 @@ License
 #include "rotorDiskSource.H"
 #include "volFields.H"
 #include "unitConversion.H"
-#include "transform.H"
 
 using namespace Foam::constant;
 
@@ -51,6 +50,9 @@ void Foam::fv::rotorDiskSource::calculate
     scalar AOAmin = GREAT;
     scalar AOAmax = -GREAT;
 
+    // Cached position-dependent rotations available?
+    const bool hasCache = Rcyl_.valid();
+
     forAll(cells_, i)
     {
         if (area_[i] > ROOTVSMALL)
@@ -59,8 +61,15 @@ void Foam::fv::rotorDiskSource::calculate
 
             const scalar radius = x_[i].x();
 
+            const tensor Rcyl =
+            (
+                hasCache
+              ? (*Rcyl_)[i]
+              : coordSys_.R(mesh_.C()[celli])
+            );
+
             // Transform velocity into local cylindrical reference frame
-            vector Uc = cylindrical_->invTransform(U[celli], i);
+            vector Uc = invTransform(Rcyl, U[celli]);
 
             // Transform velocity into local coning system
             Uc = transform(Rcone_[i], Uc);
@@ -132,8 +141,8 @@ void Foam::fv::rotorDiskSource::calculate
             // Transform force from local coning system into rotor cylindrical
             localForce = invTransform(Rcone_[i], localForce);
 
-            // Transform force into global Cartesian co-ordinate system
-            force[celli] = cylindrical_->transform(localForce, i);
+            // Transform force into global Cartesian coordinate system
+            force[celli] = transform(Rcyl, localForce);
 
             if (divideVolume)
             {

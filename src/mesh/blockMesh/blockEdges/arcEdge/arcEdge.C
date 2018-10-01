@@ -41,7 +41,7 @@ namespace blockEdges
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::cylindricalCS Foam::blockEdges::arcEdge::calcAngle()
+Foam::coordSystem::cylindrical Foam::blockEdges::arcEdge::calcAngle()
 {
     const vector a = p2_ - p1_;
     const vector b = p3_ - p1_;
@@ -99,7 +99,7 @@ Foam::cylindricalCS Foam::blockEdges::arcEdge::calcAngle()
     radius_ = mag(r3);
 
     // The corresponding local cylindrical coordinate system (radians)
-    return cylindricalCS("arc", centre, arcAxis, r1);
+    return coordSystem::cylindrical("arc", centre, arcAxis, r1);
 }
 
 

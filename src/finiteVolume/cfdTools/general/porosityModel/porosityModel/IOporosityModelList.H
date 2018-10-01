@@ -71,12 +71,11 @@ public:
     // Constructors
 
         //- Construct from mesh
-        IOporosityModelList(const fvMesh& mesh);
+        explicit IOporosityModelList(const fvMesh& mesh);
 
 
         //- Destructor
-        virtual ~IOporosityModelList()
-        {}
+        virtual ~IOporosityModelList() = default;
 
 
     // Member Functions

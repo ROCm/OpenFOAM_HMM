@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,59 +24,68 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cartesianCS.H"
-
-#include "one.H"
-#include "mathematicalConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(cartesianCS, 0);
-    addToRunTimeSelectionTable(coordinateSystem, cartesianCS, dictionary);
+namespace coordSystem
+{
+    defineTypeName(cartesian);
+    addToRunTimeSelectionTable(coordinateSystem, cartesian, dictionary);
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::cartesianCS::cartesianCS()
+Foam::coordSystem::cartesian::cartesian()
 :
     coordinateSystem()
 {}
 
 
-Foam::cartesianCS::cartesianCS
-(
-    const coordinateSystem& cs
-)
+Foam::coordSystem::cartesian::cartesian(const coordinateSystem& csys)
 :
-    coordinateSystem(cs)
+    coordinateSystem(csys)
 {}
 
 
-Foam::cartesianCS::cartesianCS
-(
-    const word& name,
-    const coordinateSystem& cs
-)
+Foam::coordSystem::cartesian::cartesian(coordinateSystem&& csys)
 :
-    coordinateSystem(name, cs)
+    coordinateSystem(std::move(csys))
 {}
 
 
-Foam::cartesianCS::cartesianCS
+Foam::coordSystem::cartesian::cartesian(autoPtr<coordinateSystem>&& csys)
+:
+    coordinateSystem(std::move(csys))
+{}
+
+
+Foam::coordSystem::cartesian::cartesian
 (
-    const word& name,
     const point& origin,
-    const coordinateRotation& cr
+    const coordinateRotation& crot
 )
 :
-    coordinateSystem(name, origin, cr)
+    coordinateSystem(origin, crot)
 {}
 
 
-Foam::cartesianCS::cartesianCS
+Foam::coordSystem::cartesian::cartesian
+(
+    const point& origin,
+    const vector& axis,
+    const vector& dirn
+)
+:
+    coordinateSystem(origin, axis, dirn)
+{}
+
+
+Foam::coordSystem::cartesian::cartesian
 (
     const word& name,
     const point& origin,
@@ -88,7 +97,7 @@ Foam::cartesianCS::cartesianCS
 {}
 
 
-Foam::cartesianCS::cartesianCS
+Foam::coordSystem::cartesian::cartesian
 (
     const word& name,
     const dictionary& dict
@@ -98,63 +107,20 @@ Foam::cartesianCS::cartesianCS
 {}
 
 
-Foam::cartesianCS::cartesianCS
+Foam::coordSystem::cartesian::cartesian(const dictionary& dict)
+:
+    coordinateSystem(dict)
+{}
+
+
+Foam::coordSystem::cartesian::cartesian
 (
-    const objectRegistry& obr,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& dictName
 )
 :
-    coordinateSystem(obr, dict)
+    coordinateSystem(dict, dictName)
 {}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cartesianCS::~cartesianCS()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-
-Foam::vector Foam::cartesianCS::localToGlobal
-(
-    const vector& local,
-    bool translate
-) const
-{
-    return coordinateSystem::localToGlobal(local, translate);
-}
-
-
-Foam::tmp<Foam::vectorField> Foam::cartesianCS::localToGlobal
-(
-    const vectorField& local,
-    bool translate
-) const
-{
-    return coordinateSystem::localToGlobal(local, translate);
-}
-
-
-Foam::vector Foam::cartesianCS::globalToLocal
-(
-    const vector& global,
-    bool translate
-) const
-{
-    return coordinateSystem::globalToLocal(global, translate);
-}
-
-
-Foam::tmp<Foam::vectorField> Foam::cartesianCS::globalToLocal
-(
-    const vectorField& global,
-    bool translate
-) const
-{
-    return coordinateSystem::globalToLocal(global, translate);
-}
 
 
 // ************************************************************************* //

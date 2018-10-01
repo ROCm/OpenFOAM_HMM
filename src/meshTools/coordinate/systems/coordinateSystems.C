@@ -24,17 +24,19 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "coordinateSystems.H"
-#include "IOPtrList.H"
 #include "Time.H"
-#include "stringListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(coordinateSystems, 0);
-    defineTemplateTypeNameAndDebug(IOPtrList<coordinateSystem>, 0);
+    defineTypeName(coordinateSystems);
 }
+
+// File-local
+
+//- Header name for 1806 and earlier
+static const char* headerTypeCompat = "IOPtrList<coordinateSystem>";
 
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
@@ -127,12 +129,77 @@ namespace Foam
 } // End namespace Foam
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+
+void Foam::coordinateSystems::readFromStream(const bool valid)
+{
+    Istream& is = readStream(word::null, valid);
+
+    if (valid)
+    {
+        if (headerClassName() == typeName)
+        {
+            this->readIstream(is, coordinateSystem::iNew());
+            close();
+        }
+        else if (headerClassName() == headerTypeCompat)
+        {
+            // Older (1806 and earlier) header name
+            std::cerr
+                << "--> FOAM IOWarning :" << nl
+                << "    Found header class name '" << headerTypeCompat
+                << "' instead of '" << typeName << "'" << nl;
+
+            error::warnAboutAge("header class", 1806);
+
+            this->readIstream(is, coordinateSystem::iNew());
+            close();
+        }
+        else
+        {
+            FatalIOErrorInFunction
+            (
+                is
+            )   << "unexpected class name " << headerClassName()
+                << " expected " << typeName
+                << " or " << headerTypeCompat << nl
+                << "    while reading object " << name()
+                << exit(FatalIOError);
+        }
+    }
+}
+
+
+bool Foam::coordinateSystems::readObject(const IOobject& io)
+{
+    if
+    (
+        (
+            io.readOpt() == IOobject::MUST_READ
+         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
+        )
+     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        readFromStream();
+        return true;
+    }
+
+    return false;
+}
+
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::coordinateSystems::coordinateSystems(const IOobject& io)
 :
-    IOPtrList<coordinateSystem>(io)
-{}
+    regIOobject(io),
+    PtrList<coordinateSystem>()
+{
+    readObject(io);
+}
 
 
 Foam::coordinateSystems::coordinateSystems
@@ -141,8 +208,14 @@ Foam::coordinateSystems::coordinateSystems
     const PtrList<coordinateSystem>& content
 )
 :
-    IOPtrList<coordinateSystem>(io, content)
-{}
+    regIOobject(io),
+    PtrList<coordinateSystem>()
+{
+    if (!readObject(io))
+    {
+        static_cast<PtrList<coordinateSystem>&>(*this) = content;
+    }
+}
 
 
 Foam::coordinateSystems::coordinateSystems
@@ -151,8 +224,11 @@ Foam::coordinateSystems::coordinateSystems
     PtrList<coordinateSystem>&& content
 )
 :
-    IOPtrList<coordinateSystem>(io, std::move(content))
-{}
+    regIOobject(io),
+    PtrList<coordinateSystem>(std::move(content))
+{
+    readObject(io);
+}
 
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
@@ -253,18 +329,64 @@ bool Foam::coordinateSystems::found(const keyType& key) const
 }
 
 
-Foam::wordList Foam::coordinateSystems::names() const
+const Foam::coordinateSystem*
+Foam::coordinateSystems::lookupPtr(const word& name) const
 {
-    const PtrList<coordinateSystem>& systems = *this;
+    const label index = this->findIndex(name);
 
-    wordList list(systems.size());
-
-    forAll(systems, i)
+    if (coordinateSystem::debug)
     {
-        list[i] = systems[i].name();
+        InfoInFunction
+            << "Global coordinate system: "
+            << name << "=" << index << endl;
     }
 
-    return list;
+    if (index < 0)
+    {
+        return nullptr;
+    }
+
+    return this->operator()(index);
+}
+
+
+const Foam::coordinateSystem&
+Foam::coordinateSystems::lookup(const word& name) const
+{
+    const label index = this->findIndex(name);
+
+    if (index < 0)
+    {
+        FatalErrorInFunction
+            << "Could not find coordinate system: " << name << nl
+            << "available coordinate systems: "
+            << flatOutput(names()) << nl << nl
+            << exit(FatalError);
+    }
+    if (coordinateSystem::debug)
+    {
+        InfoInFunction
+            << "Global coordinate system: "
+            << name << "=" << index << endl;
+    }
+
+    return this->operator[](index);
+}
+
+
+Foam::wordList Foam::coordinateSystems::names() const
+{
+    const PtrList<coordinateSystem>& list = *this;
+
+    wordList result(list.size());
+
+    forAll(list, i)
+    {
+        result[i] = list[i].name();
+    }
+
+    return result;
+    // return ListOps::create<word>(list, nameOp<coordinateSystem>());
 }
 
 
@@ -303,17 +425,38 @@ Foam::wordList Foam::coordinateSystems::names(const wordRes& matcher) const
 
 bool Foam::coordinateSystems::writeData(Ostream& os) const
 {
+    const PtrList<coordinateSystem>& list = *this;
+
     os << nl << size() << nl << token::BEGIN_LIST;
 
-    forAll(*this, i)
+    for (const coordinateSystem& csys : list)
     {
         os << nl;
-        operator[](i).writeDict(os, true);
+        csys.writeEntry(csys.name(), os);
     }
 
     os << token::END_LIST << nl;
 
     return os.good();
+}
+
+
+bool Foam::coordinateSystems::writeObject
+(
+    IOstream::streamFormat,
+    IOstream::versionNumber ver,
+    IOstream::compressionType,
+    const bool valid
+) const
+{
+    // Force ASCII writing
+    return regIOobject::writeObject
+    (
+        IOstream::ASCII,
+        ver,
+        IOstream::UNCOMPRESSED,
+        valid
+    );
 }
 
 

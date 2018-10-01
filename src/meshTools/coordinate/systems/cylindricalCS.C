@@ -26,6 +26,18 @@ License
 #include "cylindricalCS.H"
 #include "addToRunTimeSelectionTable.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace coordSystem
+{
+    defineTypeName(cylindrical);
+    addToRunTimeSelectionTable(coordinateSystem, cylindrical, dictionary);
+}
+}
+
+
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -65,43 +77,52 @@ static inline vector toCartesian(const vector& v)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::cylindricalCS::cylindricalCS()
+Foam::coordSystem::cylindrical::cylindrical()
 :
     coordinateSystem()
 {}
 
 
-Foam::cylindricalCS::cylindricalCS
-(
-    const coordinateSystem& cs
-)
+Foam::coordSystem::cylindrical::cylindrical(const coordinateSystem& csys)
 :
-    coordinateSystem(cs)
+    coordinateSystem(csys)
 {}
 
 
-Foam::cylindricalCS::cylindricalCS
-(
-    const word& name,
-    const coordinateSystem& cs
-)
+Foam::coordSystem::cylindrical::cylindrical(coordinateSystem&& csys)
 :
-    coordinateSystem(name, cs)
+    coordinateSystem(std::move(csys))
 {}
 
 
-Foam::cylindricalCS::cylindricalCS
+Foam::coordSystem::cylindrical::cylindrical(autoPtr<coordinateSystem>&& csys)
+:
+    coordinateSystem(std::move(csys))
+{}
+
+
+Foam::coordSystem::cylindrical::cylindrical
 (
-    const word& name,
     const point& origin,
-    const coordinateRotation& cr
+    const coordinateRotation& crot
 )
 :
-    coordinateSystem(name, origin, cr)
+    coordinateSystem(origin, crot)
 {}
 
 
-Foam::cylindricalCS::cylindricalCS
+Foam::coordSystem::cylindrical::cylindrical
+(
+    const point& origin,
+    const vector& axis,
+    const vector& dirn
+)
+:
+    coordinateSystem(origin, axis, dirn)
+{}
+
+
+Foam::coordSystem::cylindrical::cylindrical
 (
     const word& name,
     const point& origin,
@@ -113,7 +134,7 @@ Foam::cylindricalCS::cylindricalCS
 {}
 
 
-Foam::cylindricalCS::cylindricalCS
+Foam::coordSystem::cylindrical::cylindrical
 (
     const word& name,
     const dictionary& dict
@@ -128,13 +149,9 @@ Foam::cylindricalCS::cylindricalCS
 }
 
 
-Foam::cylindricalCS::cylindricalCS
-(
-    const objectRegistry& obr,
-    const dictionary& dict
-)
+Foam::coordSystem::cylindrical::cylindrical(const dictionary& dict)
 :
-    coordinateSystem(obr, dict)
+    coordinateSystem(dict)
 {
     if (dict.lookupOrDefault("degrees", false))
     {
@@ -143,9 +160,65 @@ Foam::cylindricalCS::cylindricalCS
 }
 
 
+Foam::coordSystem::cylindrical::cylindrical
+(
+    const dictionary& dict,
+    const word& dictName
+)
+:
+    coordinateSystem(dict, dictName)
+{
+    const dictionary* dictPtr =
+    (
+        dictName.size()
+      ? &(dict.subDict(dictName))
+      : &(dict)
+    );
+
+    if (dictPtr->lookupOrDefault("degrees", false))
+    {
+        warnCompatDegrees(dict);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::vector Foam::cylindricalCS::localToGlobal
+Foam::tensor Foam::coordSystem::cylindrical::R(const point& global) const
+{
+    // Robuster version of coordinateRotations::axes::rotation()
+    // using an E3_E1 order and falling back to the top-level rotation
+    // tensor if the directional input is borderline.
+
+    tensor rotTensor(rot_);
+
+    const vector ax1 = rotTensor.col<2>(); // == e3 (already normalized)
+
+    vector ax2(global - origin_);
+
+    // Remove colinear component
+    ax2 -= ((ax1 & ax2) * ax1);
+
+    const scalar magAxis2(mag(ax2));
+
+    // Trap zero size and colinearity
+    if (magAxis2 < SMALL)
+    {
+        return rotTensor;
+    }
+
+    ax2 /= magAxis2;  // normalise
+
+    // Replace with updated local axes
+
+    rotTensor.col<0>(ax2);
+    rotTensor.col<1>(ax1^ax2);
+
+    return rotTensor;
+}
+
+
+Foam::vector Foam::coordSystem::cylindrical::localToGlobal
 (
     const vector& local,
     bool translate
@@ -159,7 +232,7 @@ Foam::vector Foam::cylindricalCS::localToGlobal
 }
 
 
-Foam::tmp<Foam::vectorField> Foam::cylindricalCS::localToGlobal
+Foam::tmp<Foam::vectorField> Foam::coordSystem::cylindrical::localToGlobal
 (
     const vectorField& local,
     bool translate
@@ -184,7 +257,7 @@ Foam::tmp<Foam::vectorField> Foam::cylindricalCS::localToGlobal
 }
 
 
-Foam::vector Foam::cylindricalCS::globalToLocal
+Foam::vector Foam::coordSystem::cylindrical::globalToLocal
 (
     const vector& global,
     bool translate
@@ -197,7 +270,7 @@ Foam::vector Foam::cylindricalCS::globalToLocal
 }
 
 
-Foam::tmp<Foam::vectorField> Foam::cylindricalCS::globalToLocal
+Foam::tmp<Foam::vectorField> Foam::coordSystem::cylindrical::globalToLocal
 (
     const vectorField& global,
     bool translate
@@ -218,6 +291,7 @@ Foam::tmp<Foam::vectorField> Foam::cylindricalCS::globalToLocal
 
     return tresult;
 }
+
 
 
 // ************************************************************************* //

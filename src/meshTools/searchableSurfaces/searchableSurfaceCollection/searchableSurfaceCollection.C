@@ -201,7 +201,8 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
                 surfI,
                 coordinateSystem::New
                 (
-                    subDict.subDict("transform")
+                    subDict,
+                    "transform"
                 )
             );
 
@@ -229,7 +230,7 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
             Info<< "    instance : " << instance_[surfI] << endl;
             Info<< "    surface  : " << s.name() << endl;
             Info<< "    scale    : " << scale_[surfI] << endl;
-            Info<< "    coordsys : " << transform_[surfI] << endl;
+            Info<< "    transform: " << transform_[surfI] << endl;
 
             surfI++;
         }

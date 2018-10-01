@@ -208,7 +208,6 @@ DebugSwitches
     Ergun               0;
     Euler               0;
     EulerImplicit       0;
-    EulerRotation       0;
     extendedCellToFaceStencil 0;
     FDIC                0;
     FaceCellWave        0;
@@ -239,7 +238,6 @@ DebugSwitches
     IFstream            0;
     IOMap<dictionary>   0;
     IOPtrList<MRFZone>  0;
-    IOPtrList<coordinateSystem> 0;
     IOPtrList<injector> 0;
     IOPtrList<porousZone>   0;
     IOobject            0;
@@ -336,7 +334,6 @@ DebugSwitches
     SLTS                0;
     SRFModel            0;
     SRFVelocity         0;
-    STARCDRotation      0;
     Schaeffer           0;
     SchillerNaumann     0;
     SinclairJackson     0;
@@ -456,9 +453,7 @@ DebugSwitches
     constantAbsorptionEmission  0;
     constantAlphaContactAngle   0;
     constantScatter     0;
-    coordinateRotation  0;
     coordinateSystem    0;
-    coordinateSystems   0;
     corrected           0;
     coupled             0;
     cubeRootVol         0;
@@ -478,9 +473,9 @@ DebugSwitches
     diagonal            0;
     dictionary          0;
     dimensionSet        1;
-    mappedBase    0;
-    mappedPatch   0;
-    mappedVelocityFlux 0;
+    mappedBase          0;
+    mappedPatch         0;
+    mappedVelocityFlux  0;
     directionMixed      0;
     directional         0;
     disallowGenericFvPatchField 0;
@@ -745,7 +740,6 @@ DebugSwitches
     outletInlet         0;
     outletStabilised    0;
     pair                0;
-    parabolicCylindrical 0;
     parcel              0;
     partialSlip         0;
     passiveParticle     0;
@@ -1099,7 +1093,6 @@ DimensionSets
         //writeUnits (lb ft s R mol A Cd);
     }
 }
-
 
 
 // ************************************************************************* //

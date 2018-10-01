@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,14 +37,12 @@ void Foam::porosityModels::powerLaw::apply
     const scalar C0 = C0_;
     const scalar C1m1b2 = (C1_ - 1.0)/2.0;
 
-    forAll(cellZoneIDs_, zoneI)
+    for (const label zonei : cellZoneIDs_)
     {
-        const labelList& cells = mesh_.cellZones()[cellZoneIDs_[zoneI]];
+        const labelList& cells = mesh_.cellZones()[zonei];
 
-        forAll(cells, i)
+        for (const label celli : cells)
         {
-            const label celli = cells[i];
-
             Udiag[celli] +=
                 V[celli]*rho[celli]*C0*pow(magSqr(U[celli]), C1m1b2);
         }
@@ -63,14 +61,12 @@ void Foam::porosityModels::powerLaw::apply
     const scalar C0 = C0_;
     const scalar C1m1b2 = (C1_ - 1.0)/2.0;
 
-    forAll(cellZoneIDs_, zoneI)
+    for (const label zonei : cellZoneIDs_)
     {
-        const labelList& cells = mesh_.cellZones()[cellZoneIDs_[zoneI]];
+        const labelList& cells = mesh_.cellZones()[zonei];
 
-        forAll(cells, i)
+        for (const label celli : cells)
         {
-            const label celli = cells[i];
-
             AU[celli] =
                 AU[celli] + I*(rho[celli]*C0*pow(magSqr(U[celli]), C1m1b2));
         }

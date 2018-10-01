@@ -2,7 +2,7 @@ Divergence scheme test
 ======================
 
 Various divergence schemes are examined on a 2-D structured mesh, where a
-passive scalar is convected at 45deg to the mesh co-ordinate system using a
+passive scalar is convected at 45deg to the mesh coordinate system using a
 uniform flow velocity.  Executing:
 
 ./Allrun

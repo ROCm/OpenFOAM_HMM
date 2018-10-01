@@ -63,14 +63,9 @@ Description
             // use the global coordinate system
             coordinateSystem
             {
-                type    cartesian;
                 origin  (0 0 0);
-                coordinateRotation
-                {
-                    type    axesRotation;
-                    e1      (1 0 0);
-                    e2      (0 1 0);
-                }
+                e1      (1 0 0);
+                e2      (0 1 0);
             }
         }
     \endverbatim

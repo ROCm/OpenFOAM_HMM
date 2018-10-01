@@ -63,7 +63,7 @@ Foam::injectedParticle::injectedParticle
     if (readFields)
     {
         // After the base particle class has read the fields from file and
-        // constructed the necessary barycentric co-ordinates we can update the
+        // constructed the necessary barycentric coordinates we can update the
         // particle position on this mesh
         position_ = particle::position();
 

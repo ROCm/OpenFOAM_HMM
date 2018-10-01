@@ -31,25 +31,34 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(axesRotation, 0);
-    addToRunTimeSelectionTable
-    (
-        coordinateRotation,
-        axesRotation,
-        dictionary
-    );
-    addToRunTimeSelectionTable
-    (
-        coordinateRotation,
-        axesRotation,
-        objectRegistry
-    );
+    namespace coordinateRotations
+    {
+        defineTypeName(axes);
+
+        // Standard short name
+        addNamedToRunTimeSelectionTable
+        (
+            coordinateRotation,
+            axes,
+            dictionary,
+            axes
+        );
+
+        // Longer name - Compat 1806
+        addNamedToRunTimeSelectionTable
+        (
+            coordinateRotation,
+            axes,
+            dictionary,
+            axesRotation
+        );
+    }
 }
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::tensor Foam::axesRotation::rotation
+Foam::tensor Foam::coordinateRotations::axes::rotation
 (
     const vector& axis1,
     const vector& axis2,
@@ -143,221 +152,193 @@ Foam::tensor Foam::axesRotation::rotation
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::axesRotation::read(const dictionary& dict)
+void Foam::coordinateRotations::axes::read(const dictionary& dict)
 {
-    vector axis1, axis2;
-    axisOrder order = E3_E1;
-
     if
     (
-        dict.readIfPresent("e1", axis1)
-     && dict.readIfPresent("e2", axis2)
+        dict.readIfPresent("e1", axis1_)
+     && dict.readIfPresent("e2", axis2_)
     )
     {
-        order = E1_E2;
+        order_ = E1_E2;
     }
     else if
     (
-        dict.readIfPresent("e2", axis1)
-     && dict.readIfPresent("e3", axis2)
+        dict.readIfPresent("e2", axis1_)
+     && dict.readIfPresent("e3", axis2_)
     )
     {
-        order = E2_E3;
+        order_ = E2_E3;
     }
     else if
     (
-        dict.readIfPresent("e3", axis1)
-     && dict.readIfPresent("e1", axis2)
+        dict.readIfPresent("e3", axis1_)
+     && dict.readIfPresent("e1", axis2_)
     )
     {
-        order = E3_E1;
+        order_ = E3_E1;
     }
     else if
     (
-        dict.readIfPresent("axis", axis1)
-     && dict.readIfPresent("direction", axis2)
+        dict.readIfPresent("axis", axis1_)
+     && dict.readIfPresent("direction", axis2_)
     )
     {
-        order = E3_E1_COMPAT;
+        order_ = E3_E1_COMPAT;
     }
     else
     {
-        FatalErrorInFunction
+        FatalIOErrorInFunction(dict)
             << "No entries of the type (e1, e2) or (e2, e3) or (e3, e1) found"
-            << exit(FatalError);
+            << exit(FatalIOError);
     }
-
-    R_ = rotation(axis1, axis2, order);
-    Rtr_ = R_.T();
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::axesRotation::axesRotation()
+Foam::coordinateRotations::axes::axes()
 :
-    R_(sphericalTensor::I),
-    Rtr_(sphericalTensor::I)
+    coordinateRotation(),
+    axis1_(0,0,1),  // e3 = global Z
+    axis2_(1,0,0),  // e1 = global X
+    order_(E3_E1)
 {}
 
 
-Foam::axesRotation::axesRotation(const axesRotation& r)
+Foam::coordinateRotations::axes::axes(const axes& crot)
 :
-    R_(r.R_),
-    Rtr_(r.Rtr_)
+    coordinateRotation(crot),
+    axis1_(crot.axis1_),
+    axis2_(crot.axis2_),
+    order_(crot.order_)
 {}
 
 
-Foam::axesRotation::axesRotation(const tensor& R)
+Foam::coordinateRotations::axes::axes(axes&& crot)
 :
-    R_(R),
-    Rtr_(R_.T())
+    coordinateRotation(std::move(crot)),
+    axis1_(std::move(crot.axis1_)),
+    axis2_(std::move(crot.axis2_)),
+    order_(crot.order_)
 {}
 
 
-Foam::axesRotation::axesRotation
+Foam::coordinateRotations::axes::axes
 (
-    const vector& axis,
-    const vector& dir,
-    const axisOrder& order
+    const vector& axis1,
+    const vector& axis2,
+    axisOrder order
 )
 :
-    R_(rotation(axis, dir, order)),
-    Rtr_(R_.T())
+    coordinateRotation(),
+    axis1_(axis1),
+    axis2_(axis2),
+    order_(order)
 {}
 
 
-Foam::axesRotation::axesRotation
-(
-    const vector& axis
-)
+Foam::coordinateRotations::axes::axes(const vector& axis)
 :
-    R_(rotation(axis, findOrthogonal(axis), E3_E1)),
-    Rtr_(R_.T())
+    coordinateRotations::axes(axis, Zero, E3_E1_COMPAT)  // Guess second axis
 {}
 
 
-Foam::axesRotation::axesRotation
-(
-    const dictionary& dict
-)
+Foam::coordinateRotations::axes::axes(const dictionary& dict)
 :
-    R_(sphericalTensor::I),
-    Rtr_(sphericalTensor::I)
+    coordinateRotations::axes()
 {
     read(dict);
 }
-
-
-Foam::axesRotation::axesRotation
-(
-    const dictionary& dict,
-    const objectRegistry&
-)
-:
-    axesRotation(dict)
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-const Foam::tensorField& Foam::axesRotation::Tr() const
+void Foam::coordinateRotations::axes::clear()
 {
-    NotImplemented;
-    return NullObjectRef<tensorField>();
+    axis1_ = vector(0,0,1);  // e3 = global Z
+    axis2_ = vector(1,0,0);  // e1 = global X
+    order_ = E3_E1;
 }
 
 
-Foam::tmp<Foam::vectorField> Foam::axesRotation::transform
-(
-    const vectorField& st
-) const
+Foam::tensor Foam::coordinateRotations::axes::R() const
 {
-    return (R_ & st);
+    return axes::rotation(axis1_, axis2_, order_);
 }
 
 
-Foam::vector Foam::axesRotation::transform(const vector& st) const
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::coordinateRotations::axes::write(Ostream& os) const
 {
-    return (R_ & st);
-}
-
-
-Foam::tmp<Foam::vectorField> Foam::axesRotation::invTransform
-(
-    const vectorField& st
-) const
-{
-    return (Rtr_ & st);
-}
-
-
-Foam::vector Foam::axesRotation::invTransform(const vector& st) const
-{
-    return (Rtr_ & st);
-}
-
-
-Foam::tmp<Foam::tensorField> Foam::axesRotation::transformTensor
-(
-    const tensorField& st
-) const
-{
-    NotImplemented;
-    return nullptr;
-}
-
-
-Foam::tensor Foam::axesRotation::transformTensor
-(
-    const tensor& st
-) const
-{
-    return (R_ & st & Rtr_);
-}
-
-
-Foam::tmp<Foam::tensorField> Foam::axesRotation::transformTensor
-(
-    const tensorField& st,
-    const labelList& cellMap
-) const
-{
-    NotImplemented;
-    return nullptr;
-}
-
-
-Foam::tmp<Foam::symmTensorField> Foam::axesRotation::transformVector
-(
-    const vectorField& st
-) const
-{
-    tmp<symmTensorField> tfld(new symmTensorField(st.size()));
-    symmTensorField& fld = tfld.ref();
-
-    forAll(fld, i)
+    switch (order_)
     {
-        fld[i] = transformPrincipal(R_, st[i]);
+        case E1_E2:
+            os << "e1: " << axis1_ << " e2: " << axis2_;
+            break;
+        case E2_E3:
+            os << "e2: " << axis1_ << " e3: " << axis2_;
+            break;
+        case E3_E1:
+            os << "e1: " << axis2_ << " e3: " << axis1_;
+            break;
+        case E3_E1_COMPAT:
+            os << "axis: " << axis1_ << " direction: " << axis2_;
+            break;
     }
-    return tfld;
 }
 
 
-Foam::symmTensor Foam::axesRotation::transformVector
+void Foam::coordinateRotations::axes::writeEntry
 (
-    const vector& st
+    const word& keyword,
+    Ostream& os
 ) const
 {
-    return transformPrincipal(R_, st);
-}
+    // We permit direct embedding of the axes specification without
+    // requiring a sub-dictionary.
 
+    const bool subDict = !keyword.empty();
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+    if (subDict)
+    {
+        os.beginBlock(keyword);
+        os.writeEntry("type", type());
+    }
 
-void Foam::axesRotation::operator=(const dictionary& dict)
-{
-    read(dict);
+    switch (order_)
+    {
+        case E1_E2:
+        {
+            os.writeEntry("e1", axis1_);
+            os.writeEntry("e2", axis2_);
+            break;
+        }
+        case E2_E3:
+        {
+            os.writeEntry("e2", axis1_);
+            os.writeEntry("e3", axis2_);
+            break;
+        }
+        case E3_E1:
+        {
+            os.writeEntry("e1", axis2_);
+            os.writeEntry("e3", axis1_);
+            break;
+        }
+        case E3_E1_COMPAT:
+        {
+            os.writeEntry("axis", axis1_);
+            os.writeEntry("direction", axis2_);
+            break;
+        }
+    }
+
+    if (subDict)
+    {
+        os.endBlock();
+    }
 }
 
 

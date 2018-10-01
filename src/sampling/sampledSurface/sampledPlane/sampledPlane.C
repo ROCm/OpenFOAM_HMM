@@ -119,7 +119,8 @@ Foam::sampledPlane::sampledPlane
     // allow lookup from global coordinate systems
     if (dict.found("coordinateSystem"))
     {
-        coordinateSystem cs(mesh, dict.subDict("coordinateSystem"));
+        auto csysPtr = coordinateSystem::New(mesh, dict, "coordinateSystem");
+        const auto& cs = *csysPtr;
         plane& pln = planeDesc();
 
         const point  orig = cs.globalPosition(pln.origin());

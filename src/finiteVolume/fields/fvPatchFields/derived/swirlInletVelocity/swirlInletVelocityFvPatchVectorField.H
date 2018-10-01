@@ -29,7 +29,7 @@ Group
 
 Description
     This boundary condition describes an inlet vector boundary condition in
-    swirl co-ordinates given a central axis, central point, axial, radial and
+    swirl coordinates given a central axis, central point, axial, radial and
     tangential velocity profiles.
 
 Usage

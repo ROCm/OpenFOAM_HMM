@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,21 +56,17 @@ fieldCoordinateSystemTransform
 :
     fvMeshFunctionObject(name, runTime, dict),
     fieldSet_(mesh_),
-    coordSys_(mesh_, dict.subDict("coordinateSystem"))
+    csysPtr_
+    (
+        coordinateSystem::New(mesh_, dict, coordinateSystem::typeName_())
+    )
 {
     read(dict);
 
     Info<< type() << " " << name << ":" << nl
         << "   Applying transformation from global Cartesian to local "
-        << coordSys_ << nl << endl;
+        << *csysPtr_ << nl << endl;
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::fieldCoordinateSystemTransform::
-~fieldCoordinateSystemTransform()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

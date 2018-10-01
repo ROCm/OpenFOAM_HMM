@@ -54,17 +54,9 @@ geometry
             scale   (1.0 1.0 2.1);
             transform
             {
-                coordinateSystem
-                {
-                    type    cartesian;
-                    origin  (2 2 0);
-                    coordinateRotation
-                    {
-                        type    axesRotation;
-                        e1      (1 0 0);
-                        e3      (0 0 1);
-                    }
-                }
+                origin  (2 2 0);
+                e1      (1 0 0);
+                e3      (0 0 1);
             }
         }
         herring
@@ -73,17 +65,9 @@ geometry
             scale   (1.0 1.0 2.1);
             transform
             {
-                coordinateSystem
-                {
-                    type    cartesian;
-                    origin  (3.5 3 0);
-                    coordinateRotation
-                    {
-                        type    axesRotation;
-                        e1      (1 0 0);
-                        e3      (0 0 1);
-                    }
-                }
+                origin  (3.5 3 0);
+                e1      (1 0 0);
+                e3      (0 0 1);
             }
         }
     }
@@ -121,7 +105,6 @@ castellatedMeshControls
     nCellsBetweenLevels 1;
 
 
-
     // Explicit feature edge refinement
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -134,7 +117,6 @@ castellatedMeshControls
             levels ((0.01 3));
         }
     );
-
 
 
     // Surface based refinement

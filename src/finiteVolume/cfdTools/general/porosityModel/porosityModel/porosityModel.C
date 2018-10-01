@@ -61,17 +61,6 @@ void Foam::porosityModel::adjustNegativeResistance(dimensionedVector& resist)
 }
 
 
-Foam::label Foam::porosityModel::fieldIndex(const label i) const
-{
-    label index = 0;
-    if (!coordSys_.R().uniform())
-    {
-        index = i;
-    }
-    return index;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::porosityModel::porosityModel
@@ -101,7 +90,10 @@ Foam::porosityModel::porosityModel
     active_(true),
     zoneName_(cellZoneName),
     cellZoneIDs_(),
-    coordSys_(*(coordinateSystem::New(mesh, coeffs_)))
+    csysPtr_
+    (
+        coordinateSystem::New(mesh, coeffs_, coordinateSystem::typeName_())
+    )
 {
     if (zoneName_ == word::null)
     {
@@ -123,43 +115,34 @@ Foam::porosityModel::porosityModel
             << exit(FatalError);
     }
 
-    Info<< incrIndent << indent << coordSys_ << decrIndent << endl;
+    Info<< incrIndent << indent << csys() << decrIndent << endl;
 
     const pointField& points = mesh_.points();
     const cellList& cells = mesh_.cells();
     const faceList& faces = mesh_.faces();
-    forAll(cellZoneIDs_, zoneI)
-    {
-        const cellZone& cZone = mesh_.cellZones()[cellZoneIDs_[zoneI]];
-        point bbMin = point::max;
-        point bbMax = point::min;
 
-        forAll(cZone, i)
+    for (const label zonei : cellZoneIDs_)
+    {
+        const cellZone& cZone = mesh_.cellZones()[zonei];
+
+        boundBox bb;
+
+        for (const label celli : cZone)
         {
-            const label cellI = cZone[i];
-            const cell& c = cells[cellI];
+            const cell& c = cells[celli];
             const pointField cellPoints(c.points(faces, points));
 
-            forAll(cellPoints, pointI)
+            for (const point& pt : cellPoints)
             {
-                const point pt = coordSys_.localPosition(cellPoints[pointI]);
-                bbMin = min(bbMin, pt);
-                bbMax = max(bbMax, pt);
+                bb.add(csys().localPosition(pt));
             }
         }
 
-        reduce(bbMin, minOp<point>());
-        reduce(bbMax, maxOp<point>());
+        bb.reduce();
 
-        Info<< "    local bounds: " << (bbMax - bbMin) << nl << endl;
+        Info<< "    local bounds: " << bb.span() << nl << endl;
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::porosityModel::~porosityModel()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

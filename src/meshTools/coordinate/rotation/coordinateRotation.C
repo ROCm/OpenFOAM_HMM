@@ -31,9 +31,8 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(coordinateRotation, 0);
+    defineTypeName(coordinateRotation);
     defineRunTimeSelectionTable(coordinateRotation, dictionary);
-    defineRunTimeSelectionTable(coordinateRotation, objectRegistry);
 }
 
 
@@ -64,46 +63,28 @@ Foam::vector Foam::coordinateRotation::findOrthogonal(const vector& axis)
 }
 
 
-Foam::symmTensor Foam::coordinateRotation::transformPrincipal
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
 (
-    const tensor& tt,
-    const vector& v
+    const dictionary& dict
 )
 {
-    return symmTensor
-    (
-        tt.xx()*v.x()*tt.xx()
-      + tt.xy()*v.y()*tt.xy()
-      + tt.xz()*v.z()*tt.xz(),
+    const word modelType(dict.get<word>("type"));
 
-        tt.xx()*v.x()*tt.yx()
-      + tt.xy()*v.y()*tt.yy()
-      + tt.xz()*v.z()*tt.yz(),
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
-        tt.xx()*v.x()*tt.zx()
-      + tt.xy()*v.y()*tt.zy()
-      + tt.xz()*v.z()*tt.zz(),
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInFunction(dict)
+            << "Unknown coordinateRotation type "
+            << modelType << nl << nl
+            << "Valid types: "
+            << flatOutput(dictionaryConstructorTablePtr_->sortedToc())
+            << exit(FatalIOError);
+    }
 
-        tt.yx()*v.x()*tt.yx()
-      + tt.yy()*v.y()*tt.yy()
-      + tt.yz()*v.z()*tt.yz(),
-
-        tt.yx()*v.x()*tt.zx()
-      + tt.yy()*v.y()*tt.zy()
-      + tt.yz()*v.z()*tt.zz(),
-
-        tt.zx()*v.x()*tt.zx()
-      + tt.zy()*v.y()*tt.zy()
-      + tt.zz()*v.z()*tt.zz()
-    );
-}
-
-
-void Foam::coordinateRotation::write(Ostream& os) const
-{
-     os.writeEntry("e1", e1());
-     os.writeEntry("e2", e2());
-     os.writeEntry("e3", e3());
+    return autoPtr<coordinateRotation>(cstrIter()(dict));
 }
 
 

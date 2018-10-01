@@ -22,13 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::cylindricalCS
+    Foam::coordSystem::cylindrical
 
 Description
-    Cylindrical coordinate system, always in radians.
+    A cylindrical coordinate system (r-theta-z).
+    The coordinate system angle theta is always in radians.
+
+    \heading Dictionary entries
+    \table
+        Property    | Description                           | Required | Default
+        type        | type name: cylindrical                | yes   |
+    \endtable
 
 SourceFiles
     cylindricalCS.C
+    cylindricalCSTransform.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -41,12 +49,14 @@ SourceFiles
 
 namespace Foam
 {
+namespace coordSystem
+{
 
 /*---------------------------------------------------------------------------*\
-                        Class cylindricalCS Declaration
+                  Class coordSystem::cylindrical Declaration
 \*---------------------------------------------------------------------------*/
 
-class cylindricalCS
+class cylindrical
 :
     public coordinateSystem
 {
@@ -54,63 +64,78 @@ protected:
 
     // Protected Member Functions
 
+        //- From local coordinate system to the global Cartesian system
+        //- with optional translation for the origin
+        virtual vector localToGlobal
+        (
+            const vector& local,
+            bool translate
+        ) const;
 
-        //- Convert from local coordinate system to the global Cartesian system
-        //  with optional translation for the origin
-        virtual vector localToGlobal(const vector&, bool translate) const;
-
-        //- Convert from local coordinate system to the global Cartesian system
-        //  with optional translation for the origin
+        //- From local coordinate system to the global Cartesian system
+        //- with optional translation for the origin
         virtual tmp<vectorField> localToGlobal
         (
-            const vectorField&,
+            const vectorField& local,
+            bool translate
+        ) const;
+
+        //- From global Cartesian system to the local coordinate system
+        //- with optional translation for the origin
+        virtual vector globalToLocal
+        (
+            const vector& global,
             bool translate
         ) const;
 
         //- Convert from global Cartesian system to the local coordinate system
-        //  with optional translation for the origin
-        virtual vector globalToLocal(const vector&, bool translate) const;
-
-        //- Convert from global Cartesian system to the local coordinate system
-        //  with optional translation for the origin
+        //- with optional translation for the origin
         virtual tmp<vectorField> globalToLocal
         (
-            const vectorField&,
+            const vectorField& global,
             bool translate
         ) const;
 
 
 public:
 
+    //- Runtime type information
+    TypeNameNoDebug("cylindrical");
+
 
     // Constructors
 
-        //- Construct null
-        cylindricalCS();
+        //- Construct null (identity coordinateSystem)
+        cylindrical();
 
-        //- Construct copy
-        cylindricalCS
-        (
-            const coordinateSystem&
-        );
+        //- Copy construct
+        cylindrical(const cylindrical& csys) = default;
 
-        //- Construct copy with a different name
-        cylindricalCS
-        (
-            const word& name,
-            const coordinateSystem&
-        );
+        //- Move construct
+        cylindrical(cylindrical&& csys) = default;
+
+        //- Copy construct from another coordinateSystem type
+        explicit cylindrical(const coordinateSystem& csys);
+
+        //- Move construct from another coordinateSystem type
+        explicit cylindrical(coordinateSystem&& csys);
+
+        //- Move construct from autoPtr of another coordinateSystem type
+        explicit cylindrical(autoPtr<coordinateSystem>&& csys);
 
         //- Construct from origin and rotation
-        cylindricalCS
+        cylindrical(const point& origin, const coordinateRotation& crot);
+
+        //- Construct from origin and 2 axes
+        cylindrical
         (
-            const word& name,
             const point& origin,
-            const coordinateRotation&
+            const vector& axis,
+            const vector& dirn
         );
 
         //- Construct from origin and 2 axes
-        cylindricalCS
+        cylindrical
         (
             const word& name,
             const point& origin,
@@ -118,17 +143,58 @@ public:
             const vector& dirn
         );
 
-        //- Construct from dictionary and name
-        cylindricalCS(const word&, const dictionary&);
+        //- Construct from dictionary with a given name
+        cylindrical(const word& name, const dictionary& dict);
 
-        //- Construct from dictionary and objectRegistry
-        cylindricalCS(const objectRegistry&, const dictionary&);
+        //- Construct from dictionary without a name
+        explicit cylindrical(const dictionary& dict);
 
+        //- Construct from dictionary with optional subDict lookup.
+        //
+        //  \param dictName If non-empty, the sub-dictionary to use.
+        cylindrical(const dictionary& dict, const word& dictName);
 
     //- Destructor
-    virtual ~cylindricalCS() = default;
+    virtual ~cylindrical() = default;
+
+
+    // Member Functions
+
+        //- Treat the rotation tensor as non-uniform
+        virtual bool uniform() const
+        {
+            return false;
+        }
+
+
+    // Rotations
+
+        //- Position-dependent rotation tensors at multiple points
+        using coordinateSystem::R;
+
+        //- Position-dependent rotation tensor at a single point
+        //- \return tensor
+        virtual tensor R(const point& global) const;
+
+
+    // Member Operators
+
+        //- Copy assignment
+        cylindrical& operator=(const cylindrical&) = default;
+
+        //- Move assignment
+        cylindrical& operator=(cylindrical&&) = default;
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace coordSystem
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Compatibility typedef 1806
+typedef coordSystem::cylindrical cylindricalCS;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -85,16 +85,16 @@ protected:
         //- Number of paddles
         label nPaddle_;
 
-        //- Paddle x co-ordinates / [m]
+        //- Paddle x coordinates / [m]
         scalarField xPaddle_;
 
-        //- Paddle y co-ordinates / [m]
+        //- Paddle y coordinates / [m]
         scalarField yPaddle_;
 
         //- Addressing from patch face index to paddle index
         labelList faceToPaddle_;
 
-        //- Patch face centre z co-ordinates / [m]
+        //- Patch face centre z coordinates / [m]
         scalarField z_;
 
         //- Overall (point) span in z-direction / [m]

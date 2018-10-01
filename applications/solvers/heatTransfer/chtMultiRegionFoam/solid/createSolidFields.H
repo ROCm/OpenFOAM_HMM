@@ -31,7 +31,12 @@
             coordinates.set
             (
                 i,
-                coordinateSystem::New(solidRegions[i], thermos[i])
+                coordinateSystem::New
+                (
+                    solidRegions[i],
+                    thermos[i],
+                    coordinateSystem::typeName_()
+                )
             );
 
             tmp<volVectorField> tkappaByCp =
@@ -57,7 +62,11 @@
             );
 
             aniAlphas[i].primitiveFieldRef() =
-                coordinates[i].R().transformVector(tkappaByCp());
+                coordinates[i].transformPrincipal
+                (
+                    solidRegions[i].cellCentres(),
+                    tkappaByCp()
+                );
             aniAlphas[i].correctBoundaryConditions();
 
         }

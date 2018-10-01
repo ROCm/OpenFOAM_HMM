@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::EulerCoordinateRotation
+    Foam::coordinateRotations::euler
 
 Description
     A coordinateRotation defined in the z-x-z (intrinsic) Euler convention.
@@ -34,24 +34,29 @@ Description
     For reference and illustration, see
     https://en.wikipedia.org/wiki/Euler_angles
 
-    The rotation angles are in degrees, unless otherwise explicitly specified:
-
     \verbatim
     coordinateRotation
     {
-        type        EulerRotation;
-        degrees     false;
-        rotation    (0 0 3.141592654);
+        type    euler;
+        angles  (0 0 180);
     }
     \endverbatim
+
+    \heading Dictionary entries
+    \table
+        Property    | Description                           | Required | Default
+        type        | Type name: euler (or EulerRotation)   | yes   |
+        angles      | The z-x-z rotation angles             | yes   |
+        degrees     | Angles are in degrees                 | no    | true
+    \endtable
 
 SourceFiles
     EulerCoordinateRotation.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef EulerCoordinateRotation_H
-#define EulerCoordinateRotation_H
+#ifndef coordinateRotations_euler_H
+#define coordinateRotations_euler_H
 
 #include "coordinateRotation.H"
 
@@ -59,71 +64,60 @@ SourceFiles
 
 namespace Foam
 {
+namespace coordinateRotations
+{
 
 /*---------------------------------------------------------------------------*\
-                   Class EulerCoordinateRotation Declaration
+                 Class coordinateRotations::euler Declaration
 \*---------------------------------------------------------------------------*/
 
-class EulerCoordinateRotation
+class euler
 :
     public coordinateRotation
 {
-    // Private Member Data
+    // Private Data
 
-        //- Local-to-global transformation tensor
-        tensor R_;
+        //- The rotation angles
+        vector angles_;
 
-        //- Global-to-Local transformation tensor
-        tensor Rtr_;
+        //- Angles measured in degrees
+        bool degrees_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("EulerRotation");
+    TypeNameNoDebug("euler");
 
 
     // Constructors
 
-        //- Construct null
-        EulerCoordinateRotation();
+        //- Construct null - an identity transform
+        euler();
 
-        //- Construct as copy
-        EulerCoordinateRotation(const EulerCoordinateRotation& r);
+        //- Copy construct
+        euler(const euler& crot);
 
-        //- Construct from rotation vector
-        EulerCoordinateRotation
-        (
-            const vector& phiThetaPsi,
-            const bool degrees
-        );
+        //- Construct from Euler rotation angles (z-x-z)
+        euler(const vector& phiThetaPsi, bool degrees);
 
-        //- Construct from components of rotation vector
-        EulerCoordinateRotation
-        (
-            const scalar phi,
-            const scalar theta,
-            const scalar psi,
-            const bool degrees
-        );
+        //- Construct from Euler rotation angles (z-x-z)
+        euler(scalar phi, scalar theta, scalar psi, bool degrees);
 
         //- Construct from dictionary
-        explicit EulerCoordinateRotation(const dictionary& dict);
-
-        //- Construct from dictionary and a registry (typically a mesh)
-        EulerCoordinateRotation
-        (
-            const dictionary& dict,
-            const objectRegistry& unused
-        );
+        explicit euler(const dictionary& dict);
 
         //- Return clone
         autoPtr<coordinateRotation> clone() const
         {
             return
                 autoPtr<coordinateRotation>::NewFrom
-                <EulerCoordinateRotation>(*this);
+                <coordinateRotations::euler>(*this);
         }
+
+
+    //- Destructor
+    virtual ~euler() = default;
 
 
     // Static Member Functions
@@ -135,90 +129,28 @@ public:
 
     // Member Functions
 
-        //- Reset rotation to an identity rotation
-        virtual void clear()
-        {
-            R_ = sphericalTensor::I;
-            Rtr_ = sphericalTensor::I;
-        }
+        //- Reset specification
+        virtual void clear();
 
-        //- Update the rotation for a list of cells
-        virtual void updateCells(const polyMesh&, const labelList&)
-        {}
+        //- The rotation tensor calculated for the specified Euler angles.
+        virtual tensor R() const;
 
-        //- Return local-to-global transformation tensor
-        virtual const tensor& R() const
-        {
-            return R_;
-        }
+        //- Write information
+        virtual void write(Ostream& os) const;
 
-        //- Return global-to-local transformation tensor
-        virtual const tensor& Rtr() const
-        {
-            return Rtr_;
-        };
-
-        //- Return local Cartesian x-axis in global coordinates
-        virtual const vector e1() const
-        {
-            return Rtr_.x();
-        }
-
-        //- Return local Cartesian y-axis in global coordinates
-        virtual const vector e2() const
-        {
-            return Rtr_.y();
-        }
-
-        //- Return local Cartesian z-axis in global coordinates
-        virtual const vector e3() const
-        {
-            return Rtr_.z();
-        }
-
-        //- Return transformation tensor field
-        virtual const tensorField& Tr() const;
-
-        //- Transform vectorField using transformation tensor field
-        virtual tmp<vectorField> transform(const vectorField& st) const;
-
-        //- Transform vector using transformation tensor
-        virtual vector transform(const vector& st) const;
-
-        //- Inverse transform vectorField using transformation tensor field
-        virtual tmp<vectorField> invTransform(const vectorField& st) const;
-
-        //- Inverse transform vector using transformation tensor
-        virtual vector invTransform(const vector& st) const;
-
-        //- Transform tensor field using transformation tensorField
-        virtual tmp<tensorField> transformTensor(const tensorField& st) const;
-
-        //- Transform tensor using transformation tensorField
-        virtual tensor transformTensor(const tensor& st) const;
-
-        //- Transform tensor sub-field using transformation tensorField
-        virtual tmp<tensorField> transformTensor
-        (
-            const tensorField& st,
-            const labelList& cellMap
-        ) const;
-
-        //- Transform vectorField using transformation tensorField and return
-        // symmetrical tensorField
-        virtual tmp<symmTensorField> transformVector
-        (
-            const vectorField& st
-        ) const;
-
-        //- Transform vector using transformation tensor and return
-        // symmetrical tensor
-        virtual symmTensor transformVector(const vector& st) const;
+        //- Write dictionary entry
+        virtual void writeEntry(const word& keyword, Ostream& os) const;
 
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace coordinateRotations
+
+
+//- Compatibility typedef 1806
+typedef coordinateRotations::euler EulerCoordinateRotation;
 
 } // End namespace Foam
 

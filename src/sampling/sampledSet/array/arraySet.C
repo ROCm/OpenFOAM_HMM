@@ -81,10 +81,16 @@ void Foam::arraySet::calcSamples
         }
     }
 
-    forAll(sampleCoords, i)
+    // Local to global (Cartesian)
     {
-        sampleCoords[i] = transform(coordSys_.R().R(), sampleCoords[i]);
+        const tensor& rotTensor = coordSys_.R();
+
+        forAll(sampleCoords, i)
+        {
+            sampleCoords[i] = Foam::transform(rotTensor, sampleCoords[i]);
+        }
     }
+
 
     forAll(sampleCoords, sampleI)
     {

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,7 @@ Group
 
 Description
     Transforms a user-specified selection of fields from global Cartesian
-    co-ordinates to a local co-ordinate system.  The fields are run-time
+    coordinates to a local coordinate system.  The fields are run-time
     modifiable.
 
 Usage
@@ -50,11 +50,11 @@ Usage
         coordinateSystem
         {
             origin      (0.001 0 0);
-            coordinateRotation
+            rotation
             {
-                type        axesRotation;
-                e1          (1      0.15    0);
-                e3          (0      0      -1);
+                type    axes;
+                e1      (1 0.15 0);
+                e3      (0 0 -1);
             }
         }
     }
@@ -65,7 +65,7 @@ Usage
         Property     | Description             | Required    | Default value
         type         | type name: fieldCoordinateSystemTransform | yes |
         fields       | list of fields to be transformed |yes |
-        coordinateSystem | local co-ordinate system | yes    |
+        coordinateSystem | local coordinate system | yes    |
     \endtable
 
 See also
@@ -107,8 +107,8 @@ protected:
         //- Fields to transform
         volFieldSelection fieldSet_;
 
-        //- Co-ordinate system to transform to
-        coordinateSystem coordSys_;
+        //- Coordinate system to transform to
+        autoPtr<coordinateSystem> csysPtr_;
 
 
     // Protected Member Functions
@@ -143,7 +143,7 @@ public:
 
 
     //- Destructor
-    virtual ~fieldCoordinateSystemTransform();
+    virtual ~fieldCoordinateSystemTransform() = default;
 
 
     // Member Functions

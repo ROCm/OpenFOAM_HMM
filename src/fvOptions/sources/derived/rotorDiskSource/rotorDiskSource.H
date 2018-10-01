@@ -102,7 +102,6 @@ SourceFiles
 
 #include "cellSetOption.H"
 #include "cylindricalCS.H"
-#include "cylindrical.H"
 #include "Enum.H"
 #include "bladeModel.H"
 #include "profileModelList.H"
@@ -184,7 +183,7 @@ protected:
         flapData flap_;
 
         //- Cell centre positions in local rotor frame
-        //  (Cylindrical r, theta, z)
+        //  (Cylindrical r-theta-z)
         List<point> x_;
 
         //- Rotation tensor for flap angle
@@ -194,10 +193,10 @@ protected:
         List<scalar> area_;
 
         //- Rotor local cylindrical coordinate system (r-theta-z)
-        cylindricalCS coordSys_;
+        coordSystem::cylindrical coordSys_;
 
-        //- Rotor transformation coordinate system
-        autoPtr<cylindrical> cylindrical_;
+        //- Cached rotation tensors for cylindrical coordinates
+        autoPtr<tensorField> Rcyl_;
 
         //- Maximum radius
         scalar rMax_;
@@ -273,11 +272,11 @@ public:
             inline scalar omega() const;
 
             //- Return the cell centre positions in local rotor frame
-            // (Cylindrical r, theta, z)
+            //  (Cylindrical r-theta-z)
             inline const List<point>& x() const;
 
             //- Return the rotor coordinate system (r-theta-z)
-            inline const cylindricalCS& coordSys() const;
+            inline const coordSystem::cylindrical& coordSys() const;
 
 
         // Evaluation

@@ -25,7 +25,6 @@ License
 
 #include "searchableRotatedBox.H"
 #include "addToRunTimeSelectionTable.H"
-#include "axesRotation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

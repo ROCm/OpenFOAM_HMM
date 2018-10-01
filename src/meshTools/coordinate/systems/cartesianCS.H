@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,10 +22,16 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::cartesianCS
+    Foam::coordSystem::cartesian
 
 Description
-    Cartesian coordinate system
+    A Cartesian coordinate system
+
+    \heading Dictionary entries
+    \table
+        Property    | Description                           | Required | Default
+        type        | Type name: cartesian                  | yes   |
+    \endtable
 
 SourceFiles
     cartesianCS.C
@@ -36,85 +42,61 @@ SourceFiles
 #define cartesianCS_H
 
 #include "coordinateSystem.H"
-#include "typeInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace coordSystem
+{
 
 /*---------------------------------------------------------------------------*\
-                        Class cartesianCS Declaration
+                   Class coordSystem::cartesian Declaration
 \*---------------------------------------------------------------------------*/
 
-class cartesianCS
+class cartesian
 :
     public coordinateSystem
 {
-protected:
-
-    // Protected Member Functions
-
-
-        //- Convert from local coordinate system to the global Cartesian system
-        //  with optional translation for the origin
-        virtual vector localToGlobal(const vector&, bool translate) const;
-
-        //- Convert from local coordinate system to the global Cartesian system
-        //  with optional translation for the origin
-        virtual tmp<vectorField> localToGlobal
-        (
-            const vectorField&,
-            bool translate
-        ) const;
-
-        //- Convert from global Cartesian system to the local coordinate system
-        //  with optional translation for the origin
-        virtual vector globalToLocal(const vector&, bool translate) const;
-
-        //- Convert from global Cartesian system to the local coordinate system
-        //  with optional translation for the origin
-        virtual tmp<vectorField> globalToLocal
-        (
-            const vectorField&,
-            bool translate
-        ) const;
-
-
 public:
 
     //- Runtime type information
-    TypeName("cartesian");
+    TypeNameNoDebug("cartesian");
 
 
     // Constructors
 
-        //- Construct null
-        cartesianCS();
+        //- Construct null. This is an identity coordinateSystem.
+        cartesian();
 
-        //- Construct copy
-        cartesianCS
-        (
-            const coordinateSystem&
-        );
+        //- Copy construct
+        cartesian(const cartesian& csys) = default;
 
-        //- Construct copy with a different name
-        cartesianCS
-        (
-            const word& name,
-            const coordinateSystem&
-        );
+        //- Move construct
+        cartesian(cartesian&& csys) = default;
+
+        //- Copy construct from another coordinateSystem type
+        explicit cartesian(const coordinateSystem& csys);
+
+        //- Move construct from another coordinateSystem type
+        explicit cartesian(coordinateSystem&& csys);
+
+        //- Move construct from autoPtr of another coordinateSystem type
+        explicit cartesian(autoPtr<coordinateSystem>&& csys);
 
         //- Construct from origin and rotation
-        cartesianCS
+        cartesian(const point& origin, const coordinateRotation& crot);
+
+        //- Construct from origin and 2 axes
+        cartesian
         (
-            const word& name,
             const point& origin,
-            const coordinateRotation&
+            const vector& axis,
+            const vector& dirn
         );
 
         //- Construct from origin and 2 axes
-        cartesianCS
+        cartesian
         (
             const word& name,
             const point& origin,
@@ -122,23 +104,47 @@ public:
             const vector& dirn
         );
 
-        //- Construct from dictionary
-        cartesianCS(const word&, const dictionary&);
+        //- Construct from dictionary with a given name
+        cartesian(const word& name, const dictionary& dict);
 
+        //- Construct from dictionary without a name
+        explicit cartesian(const dictionary& dict);
 
-        //- Construct from dictionary and objectRegistry
-        cartesianCS(const objectRegistry&, const dictionary&);
+        //- Construct from dictionary with optional subDict lookup.
+        //
+        //  \param dictName If non-empty, the sub-dictionary to use.
+        cartesian(const dictionary& dict, const word& dictName);
 
 
     //- Destructor
-    virtual ~cartesianCS();
+    virtual ~cartesian() = default;
 
+
+    // Member Operators
+
+        //- Copy assignment
+        cartesian& operator=(const cartesian&) = default;
+
+        //- Move assignment
+        cartesian& operator=(cartesian&&) = default;
+
+        //- Copy/move assignment from coordinateSystem, autoPtr
+        using coordinateSystem::operator=;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace coordSystem
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Compatibility typedef 1806
+typedef coordSystem::cartesian cartesianCS;
+
+
 } // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

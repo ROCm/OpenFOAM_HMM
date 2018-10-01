@@ -35,7 +35,7 @@ Foam::autoPtr<Foam::porosityModel> Foam::porosityModel::New
     const word& cellZoneName
 )
 {
-    const word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Porosity region " << name << ":" << nl
         << "    selecting model: " << modelType << endl;
@@ -46,7 +46,7 @@ Foam::autoPtr<Foam::porosityModel> Foam::porosityModel::New
     {
         FatalErrorInFunction
             << "Unknown " << typeName << " type " << modelType << nl << nl
-            << "Valid " << typeName << " types are:" << nl
+            << "Valid types are:" << nl
             << meshConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
