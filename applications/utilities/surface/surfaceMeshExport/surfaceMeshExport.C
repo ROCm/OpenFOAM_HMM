@@ -67,6 +67,7 @@ Note
 
 #include "MeshedSurfaces.H"
 #include "coordinateSystems.H"
+#include "cartesianCS.H"
 
 using namespace Foam;
 
@@ -135,9 +136,9 @@ int main(int argc, char *argv[])
     }
 
 
-    // get the coordinate transformations
-    autoPtr<coordinateSystem> fromCsys;
-    autoPtr<coordinateSystem> toCsys;
+    // The coordinate transformations (must be cartesian)
+    autoPtr<coordSystem::cartesian> fromCsys;
+    autoPtr<coordSystem::cartesian> toCsys;
 
     if (args.found("from") || args.found("to"))
     {
@@ -162,45 +163,47 @@ int main(int argc, char *argv[])
                 << exit(FatalError);
         }
 
-        coordinateSystems csLst(ioCsys);
+        coordinateSystems globalCoords(ioCsys);
 
         if (args.found("from"))
         {
-            const word csName = args["from"];
+            const word csName(args["from"]);
+            const auto* csPtr = globalCoords.lookupPtr(csName);
 
-            const label csIndex = csLst.findIndex(csName);
-            if (csIndex < 0)
+            if (!csPtr)
             {
                 FatalErrorInFunction
                     << "Cannot find -from " << csName << nl
-                    << "available coordinateSystems: " << csLst.toc() << nl
+                    << "available coordinateSystems: "
+                    << flatOutput(globalCoords.names()) << nl
                     << exit(FatalError);
             }
 
-            fromCsys.reset(new coordinateSystem(csLst[csIndex]));
+            fromCsys = autoPtr<coordSystem::cartesian>::New(*csPtr);
         }
 
         if (args.found("to"))
         {
-            const word csName = args["to"];
+            const word csName(args["to"]);
+            const auto* csPtr = globalCoords.lookupPtr(csName);
 
-            const label csIndex = csLst.findIndex(csName);
-            if (csIndex < 0)
+            if (!csPtr)
             {
                 FatalErrorInFunction
                     << "Cannot find -to " << csName << nl
-                    << "available coordinateSystems: " << csLst.toc() << nl
+                    << "available coordinateSystems: "
+                    << flatOutput(globalCoords.names()) << nl
                     << exit(FatalError);
             }
 
-            toCsys.reset(new coordinateSystem(csLst[csIndex]));
+            toCsys = autoPtr<coordSystem::cartesian>::New(*csPtr);
         }
 
-
-        // maybe fix this later
-        if (fromCsys.valid() && toCsys.valid())
+        // Maybe fix this later
+        if (fromCsys && toCsys)
         {
             FatalErrorInFunction
+                << "Only allowed '-from' or '-to' option at the moment."
                 << exit(FatalError);
         }
     }
@@ -233,28 +236,30 @@ int main(int argc, char *argv[])
     scalar scaleIn = 0;
     if (args.readIfPresent("scaleIn", scaleIn) && scaleIn > 0)
     {
-        Info<< " -scaleIn " << scaleIn << endl;
+        Info<< "scale input " << scaleIn << endl;
         surf.scalePoints(scaleIn);
     }
 
     if (fromCsys.valid())
     {
-        Info<< " -from " << fromCsys().name() << endl;
-        tmp<pointField> tpf = fromCsys().localPosition(surf.points());
+        Info<< "move points from coordinate system: "
+            << fromCsys->name() << endl;
+        tmp<pointField> tpf = fromCsys->localPosition(surf.points());
         surf.movePoints(tpf());
     }
 
     if (toCsys.valid())
     {
-        Info<< " -to " << toCsys().name() << endl;
-        tmp<pointField> tpf = toCsys().globalPosition(surf.points());
+        Info<< "move points to coordinate system: "
+            << toCsys->name() << endl;
+        tmp<pointField> tpf = toCsys->globalPosition(surf.points());
         surf.movePoints(tpf());
     }
 
     scalar scaleOut = 0;
     if (args.readIfPresent("scaleOut", scaleOut) && scaleOut > 0)
     {
-        Info<< " -scaleOut " << scaleOut << endl;
+        Info<< "scale output " << scaleOut << endl;
         surf.scalePoints(scaleOut);
     }
 

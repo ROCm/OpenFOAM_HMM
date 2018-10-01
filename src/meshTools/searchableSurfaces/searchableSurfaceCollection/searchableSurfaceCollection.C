@@ -199,11 +199,7 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
             transform_.set
             (
                 surfI,
-                coordinateSystem::New
-                (
-                    subDict,
-                    "transform"
-                )
+                new coordSystem::cartesian(subDict, "transform")
             );
 
             const word subGeomName(subDict.get<word>("surface"));
@@ -716,10 +712,7 @@ void Foam::searchableSurfaceCollection::distribute
         // pointField bbPoints =
         // cmptDivide
         // (
-        //     transform_[surfI].localPosition
-        //     (
-        //         bbs[i].points()
-        //     ),
+        //     transform_[surfI].localPosition(bbs[i].points()),
         //     scale_[surfI]
         // );
         // treeBoundBox newBb(bbPoints);
