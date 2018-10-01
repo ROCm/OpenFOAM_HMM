@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +30,6 @@ License
 #include "polyMesh.H"
 #include "addToRunTimeSelectionTable.H"
 #include "word.H"
-#include "transform.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -54,55 +53,35 @@ void Foam::arraySet::calcSamples
 {
     const meshSearch& queryMesh = searchEngine();
 
-    label nTotalSamples
-    (
-        pointsDensity_.x()
-       *pointsDensity_.y()
-       *pointsDensity_.z()
-    );
+    const scalar dx = spanBox_.x()/(pointsDensity_.x() + 1);
+    const scalar dy = spanBox_.y()/(pointsDensity_.y() + 1);
+    const scalar dz = spanBox_.z()/(pointsDensity_.z() + 1);
 
-    List<point> sampleCoords(nTotalSamples);
+    label sampleI(0);
 
-    const scalar deltax = spanBox_.x()/(pointsDensity_.x() + 1);
-    const scalar deltay = spanBox_.y()/(pointsDensity_.y() + 1);
-    const scalar deltaz = spanBox_.z()/(pointsDensity_.z() + 1);
-
-    label p(0);
     for (label k=1; k<=pointsDensity_.z(); ++k)
     {
         for (label j=1; j<=pointsDensity_.y(); ++j)
         {
             for (label i=1; i<=pointsDensity_.x(); ++i)
             {
-                vector t(deltax*i , deltay*j, deltaz*k);
-                sampleCoords[p] = coordSys_.origin() + t;
-                ++p;
+                // Local Cartesian
+                point pt(i*dx*i , j*dy, k*dz);
+
+                // Global Cartesian
+                pt = csys_.globalPosition(pt);
+
+                const label celli = queryMesh.findCell(pt);
+
+                if (celli != -1)
+                {
+                    samplingPts.append(pt);
+                    samplingCells.append(celli);
+                    samplingFaces.append(-1);
+                    samplingSegments.append(0);
+                    samplingCurveDist.append(1.0 * sampleI);
+                }
             }
-        }
-    }
-
-    // Local to global (Cartesian)
-    {
-        const tensor& rotTensor = coordSys_.R();
-
-        forAll(sampleCoords, i)
-        {
-            sampleCoords[i] = Foam::transform(rotTensor, sampleCoords[i]);
-        }
-    }
-
-
-    forAll(sampleCoords, sampleI)
-    {
-        label celli = queryMesh.findCell(sampleCoords[sampleI]);
-
-        if (celli != -1)
-        {
-            samplingPts.append(sampleCoords[sampleI]);
-            samplingCells.append(celli);
-            samplingFaces.append(-1);
-            samplingSegments.append(0);
-            samplingCurveDist.append(1.0 * sampleI);
         }
     }
 }
@@ -157,13 +136,13 @@ Foam::arraySet::arraySet
     const polyMesh& mesh,
     const meshSearch& searchEngine,
     const word& axis,
-    const coordinateSystem& origin,
+    const coordSystem::cartesian& csys,
     const Vector<label>& pointsDensity,
     const Vector<scalar>& spanBox
 )
 :
     sampledSet(name, mesh, searchEngine, axis),
-    coordSys_(origin),
+    csys_(csys),
     pointsDensity_(pointsDensity),
     spanBox_(spanBox)
 {
@@ -180,7 +159,7 @@ Foam::arraySet::arraySet
 )
 :
     sampledSet(name, mesh, searchEngine, dict),
-    coordSys_(dict),
+    csys_(dict),  // Note: no indirect cs with this constructor
     pointsDensity_(dict.get<labelVector>("pointsDensity")),
     spanBox_(dict.get<vector>("spanBox"))
 {
