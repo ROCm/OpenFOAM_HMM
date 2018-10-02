@@ -104,8 +104,14 @@ int main(int argc, char *argv[])
             Uf *= faceMaskOld;
             // Update Uf and phi on new C-I faces
             Uf += (1-faceMaskOld)*fvc::interpolate(U);
-
             phi = mesh.Sf() & Uf;
+
+            // Zero phi on current H-I
+            surfaceScalarField faceMask
+            (
+                localMin<scalar>(mesh).interpolate(cellMask)
+            );
+            phi *= faceMask;
         }
 
 

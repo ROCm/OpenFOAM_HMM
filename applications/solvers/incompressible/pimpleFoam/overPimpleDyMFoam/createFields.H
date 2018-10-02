@@ -39,31 +39,18 @@ mesh.setFluxRequired(p.name());
 
 // Add solver-specific interpolations
 {
-    dictionary suppressDict;
-    {
-        const wordHashSet& nonInt = Stencil::New(mesh).nonInterpolatedFields();
-        for (auto fldName : nonInt)
-        {
-            suppressDict.add(fldName, true);
-        }
-        suppressDict.add("HbyA", true);
-        suppressDict.add("grad(p)", true);
-        suppressDict.add("surfaceIntegrate(phi)", true);
-        suppressDict.add("surfaceIntegrate(phiHbyA)", true);
-        suppressDict.add("cellMask", true);
-        suppressDict.add("cellDisplacement", true);
-        suppressDict.add("interpolatedCells", true);
-    }
+    wordHashSet& nonInt =
+        const_cast<wordHashSet&>(Stencil::New(mesh).nonInterpolatedFields());
 
-    const_cast<dictionary&>
-    (
-        mesh.schemesDict()
-    ).add
-    (
-        "oversetInterpolationSuppressed",
-        suppressDict,
-        true
-    );
+    nonInt.insert("HbyA");
+    nonInt.insert("grad(p)");
+    nonInt.insert("surfaceIntegrate(phi)");
+    nonInt.insert("surfaceIntegrate(phiHbyA)");
+    nonInt.insert("cellMask");
+    nonInt.insert("cellDisplacement");
+    nonInt.insert("interpolatedCells");
+    nonInt.insert("cellInterpolationWeight");
+
 }
 
 // Mask field for zeroing out contributions on hole cells
