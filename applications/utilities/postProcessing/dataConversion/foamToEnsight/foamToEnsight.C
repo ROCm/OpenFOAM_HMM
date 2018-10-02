@@ -88,14 +88,48 @@ Note
 #include "ensightGeoFile.H"
 #include "ensightMesh.H"
 #include "ensightOutput.H"
+#include "fvMeshSubsetProxy.H"
 
 // local files
-#include "fvMeshSubsetProxy.H"
 #include "ensightOutputCloud.H"
 
 #include "memInfo.H"
 
 using namespace Foam;
+
+
+//- Get the field and subset it
+template<class GeoField>
+tmp<GeoField> getField(IOobject& io, const fvMeshSubsetProxy& proxy)
+{
+    auto tfield = tmp<GeoField>::New(io, proxy.baseMesh());
+    return proxy.interpolate(tfield);
+}
+
+
+//- Get the field and subset it, or return nullptr
+template<class GeoField>
+tmp<GeoField> getField(const IOobject* io, const fvMeshSubsetProxy& proxy)
+{
+    if (io)
+    {
+        auto tfield = tmp<GeoField>::New(*io, proxy.baseMesh());
+        return proxy.interpolate(tfield);
+    }
+
+    return nullptr;
+}
+
+
+//- Get internal field and make it a zero-gradient volume field with subsetting
+template<class GeoField>
+tmp<GeoField>
+getZeroGradInternalField(IOobject& io, const fvMeshSubsetProxy& proxy)
+{
+    auto tfield = tmp<typename GeoField::Internal>::New(io, proxy.baseMesh());
+    return proxy.interpolateInternal(tfield);
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -256,12 +290,12 @@ int main(int argc, char *argv[])
     if (args.readIfPresent("cellZone", cellZoneName))
     {
         Info<< "Converting cellZone " << cellZoneName
-            << " only. Places new outside faces into \"oldInternalFaces\"."
+            << " only, with new outside faces as \"oldInternalFaces\"."
             << nl;
     }
 
-    // fvMeshSubset is ignored if cellZoneName is empty
-    fvMeshSubsetProxy meshRef(mesh, fvMeshSubsetProxy::ZONE, cellZoneName);
+    // Ignored (unproxied) if cellZoneName is empty
+    fvMeshSubsetProxy meshProxy(mesh, fvMeshSubsetProxy::ZONE, cellZoneName);
 
     //
     // Open new ensight case file, initialize header etc.
@@ -275,7 +309,7 @@ int main(int argc, char *argv[])
 
 
     // Construct the Ensight mesh
-    ensightMesh ensMesh(meshRef.mesh(), writeOpts);
+    ensightMesh ensMesh(meshProxy.mesh(), writeOpts);
 
     if (Pstream::master())
     {
@@ -344,7 +378,7 @@ int main(int argc, char *argv[])
         polyMesh::readUpdateState meshState = mesh.readUpdate();
         if (meshState != polyMesh::UNCHANGED)
         {
-            meshRef.correct();
+            meshProxy.correct();
             ensMesh.expire();
             ensMesh.correct();
         }
@@ -396,10 +430,9 @@ int main(int argc, char *argv[])
                         fieldName
                     );
 
-                    volScalarField vf(fieldObject, mesh);
                     wrote = ensightOutput::writeField<scalar>
                     (
-                        meshRef.interpolate(vf),
+                        getField<volScalarField>(fieldObject, meshProxy),
                         ensMesh,
                         os,
                         nodeValues
@@ -412,10 +445,9 @@ int main(int argc, char *argv[])
                         fieldName
                     );
 
-                    volVectorField vf(fieldObject, mesh);
                     wrote = ensightOutput::writeField<vector>
                     (
-                        meshRef.interpolate(vf),
+                        getField<volVectorField>(fieldObject, meshProxy),
                         ensMesh,
                         os,
                         nodeValues
@@ -428,10 +460,13 @@ int main(int argc, char *argv[])
                         fieldObject.name()
                     );
 
-                    volSphericalTensorField vf(fieldObject, mesh);
                     wrote = ensightOutput::writeField<sphericalTensor>
                     (
-                        meshRef.interpolate(vf),
+                        getField<volSphericalTensorField>
+                        (
+                            fieldObject,
+                            meshProxy
+                        ),
                         ensMesh,
                         os,
                         nodeValues
@@ -444,10 +479,13 @@ int main(int argc, char *argv[])
                         fieldName
                     );
 
-                    volSymmTensorField vf(fieldObject, mesh);
                     wrote = ensightOutput::writeField<symmTensor>
                     (
-                        meshRef.interpolate(vf),
+                        getField<volSymmTensorField>
+                        (
+                            fieldObject,
+                            meshProxy
+                        ),
                         ensMesh,
                         os,
                         nodeValues
@@ -460,10 +498,9 @@ int main(int argc, char *argv[])
                         fieldName
                     );
 
-                    volTensorField vf(fieldObject, mesh);
                     wrote = ensightOutput::writeField<tensor>
                     (
-                        meshRef.interpolate(vf),
+                        getField<volTensorField>(fieldObject, meshProxy),
                         ensMesh,
                         os,
                         nodeValues
@@ -481,14 +518,13 @@ int main(int argc, char *argv[])
                         fieldName
                     );
 
-                    volScalarField::Internal df
-                    (
-                        fieldObject,
-                        mesh
-                    );
                     wrote = ensightOutput::writeField<scalar>
                     (
-                        meshRef.interpolate<scalar>(df),
+                        getZeroGradInternalField<volScalarField>
+                        (
+                            fieldObject,
+                            meshProxy
+                        ),
                         ensMesh,
                         os,
                         nodeValues
@@ -505,14 +541,13 @@ int main(int argc, char *argv[])
                         fieldName
                     );
 
-                    volVectorField::Internal df
-                    (
-                        fieldObject,
-                        mesh
-                    );
                     wrote = ensightOutput::writeField<vector>
                     (
-                        meshRef.interpolate<vector>(df),
+                        getZeroGradInternalField<volVectorField>
+                        (
+                            fieldObject,
+                            meshProxy
+                        ),
                         ensMesh,
                         os,
                         nodeValues
@@ -529,14 +564,13 @@ int main(int argc, char *argv[])
                         fieldName
                     );
 
-                    volSphericalTensorField::Internal df
-                    (
-                        fieldObject,
-                        mesh
-                    );
                     wrote = ensightOutput::writeField<sphericalTensor>
                     (
-                        meshRef.interpolate<sphericalTensor>(df),
+                        getZeroGradInternalField<volSphericalTensorField>
+                        (
+                            fieldObject,
+                            meshProxy
+                        ),
                         ensMesh,
                         os,
                         nodeValues
@@ -553,14 +587,13 @@ int main(int argc, char *argv[])
                         fieldName
                     );
 
-                    volSymmTensorField::Internal df
-                    (
-                        fieldObject,
-                        mesh
-                    );
                     wrote = ensightOutput::writeField<symmTensor>
                     (
-                        meshRef.interpolate<symmTensor>(df),
+                        getZeroGradInternalField<volSymmTensorField>
+                        (
+                            fieldObject,
+                            meshProxy
+                        ),
                         ensMesh,
                         os,
                         nodeValues
@@ -577,14 +610,13 @@ int main(int argc, char *argv[])
                         fieldName
                     );
 
-                    volTensorField::Internal df
-                    (
-                        fieldObject,
-                        mesh
-                    );
                     wrote = ensightOutput::writeField<tensor>
                     (
-                        meshRef.interpolate<tensor>(df),
+                        getZeroGradInternalField<volTensorField>
+                        (
+                            fieldObject,
+                            meshProxy
+                        ),
                         ensMesh,
                         os,
                         nodeValues

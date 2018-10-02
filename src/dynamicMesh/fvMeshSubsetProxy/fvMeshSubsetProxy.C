@@ -30,18 +30,19 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fvMeshSubsetProxy::fvMeshSubsetProxy
-(
-    fvMesh& baseMesh
-)
+Foam::fvMeshSubsetProxy::fvMeshSubsetProxy(fvMesh& baseMesh)
 :
     baseMesh_(baseMesh),
     subsetter_(baseMesh),
+    exposedPatchId_(-1),
     type_(NONE),
     name_(),
-    exposedPatchId_(-1)
+    names_()
 {
-    correct();
+    if (useSubMesh())
+    {
+        correct();
+    }
 }
 
 
@@ -49,17 +50,74 @@ Foam::fvMeshSubsetProxy::fvMeshSubsetProxy
 (
     fvMesh& baseMesh,
     const subsetType type,
-    const word& name,
-    const label exposedPatchId
+    const word& selectionName,
+    label exposedPatchId
 )
 :
     baseMesh_(baseMesh),
     subsetter_(baseMesh),
-    type_(name.empty() ? NONE : type),
-    name_(name),
-    exposedPatchId_(exposedPatchId)
+    exposedPatchId_(exposedPatchId),
+    type_(selectionName.empty() ? NONE : type),
+    name_(),
+    names_()
 {
-    correct();
+    if (type_ == ZONES)
+    {
+        // Populate wordRes for ZONES
+        names_.resize(1);
+        names_.first() = selectionName;
+    }
+    else if (type_ != NONE)
+    {
+        name_ = selectionName;
+    }
+
+    if (useSubMesh())
+    {
+        correct();
+    }
+}
+
+
+Foam::fvMeshSubsetProxy::fvMeshSubsetProxy
+(
+    fvMesh& baseMesh,
+    const wordRes& zoneNames,
+    label exposedPatchId
+)
+:
+    baseMesh_(baseMesh),
+    subsetter_(baseMesh),
+    exposedPatchId_(exposedPatchId),
+    type_(ZONES),
+    name_(),
+    names_(zoneNames)
+{
+    if (useSubMesh())
+    {
+        correct();
+    }
+}
+
+
+Foam::fvMeshSubsetProxy::fvMeshSubsetProxy
+(
+    fvMesh& baseMesh,
+    wordRes&& zoneNames,
+    label exposedPatchId
+)
+:
+    baseMesh_(baseMesh),
+    subsetter_(baseMesh),
+    exposedPatchId_(exposedPatchId),
+    type_(ZONES),
+    name_(),
+    names_(std::move(zoneNames))
+{
+    if (useSubMesh())
+    {
+        correct();
+    }
 }
 
 
@@ -67,6 +125,16 @@ Foam::fvMeshSubsetProxy::fvMeshSubsetProxy
 
 void Foam::fvMeshSubsetProxy::correct(bool verbose)
 {
+    if (type_ == NONE)
+    {
+        subsetter_.clear();
+        return;
+    }
+
+    const label nCells = baseMesh_.nCells();
+
+    bitSet selectedCells;
+
     if (type_ == SET)
     {
         if (verbose)
@@ -74,11 +142,13 @@ void Foam::fvMeshSubsetProxy::correct(bool verbose)
             Info<< "Subsetting mesh based on cellSet " << name_ << endl;
         }
 
-        subsetter_.setCellSubset
-        (
-            cellSet(baseMesh_, name_),
-            exposedPatchId_
-        );
+        cellSet cset(baseMesh_, name_);
+
+        selectedCells.resize(nCells);
+        for (const label idx : cset)
+        {
+            selectedCells.set(idx);
+        }
     }
     else if (type_ == ZONE)
     {
@@ -87,12 +157,21 @@ void Foam::fvMeshSubsetProxy::correct(bool verbose)
             Info<< "Subsetting mesh based on cellZone " << name_ << endl;
         }
 
-        subsetter_.setCellSubset
-        (
-            baseMesh_.cellZones()[name_],
-            exposedPatchId_
-        );
+        selectedCells.resize(nCells);
+        selectedCells.set(baseMesh_.cellZones()[name_]);
     }
+    else if (type_ == ZONES)
+    {
+        if (verbose)
+        {
+            Info<< "Subsetting mesh based on cellZones "
+                << flatOutput(names_) << endl;
+        }
+
+        selectedCells = baseMesh_.cellZones().selection(names_);
+    }
+
+    subsetter_.setCellSubset(selectedCells, exposedPatchId_);
 }
 
 

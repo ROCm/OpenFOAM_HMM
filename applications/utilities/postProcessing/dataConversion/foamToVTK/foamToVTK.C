@@ -554,7 +554,7 @@ int main(int argc, char *argv[])
     instantList timeDirs = timeSelector::select0(runTime, args);
 
     // Mesh wrapper: does subsetting and decomposition
-    fvMeshSubsetProxy meshRef(mesh, cellSubsetType, cellSubsetName);
+    fvMeshSubsetProxy meshProxy(mesh, cellSubsetType, cellSubsetName);
 
     // Collect decomposition information etc.
     vtk::vtuCells vtuMeshCells(fmtType, decomposePoly);
@@ -616,9 +616,9 @@ int main(int argc, char *argv[])
 
         // Check for new polyMesh/ and update mesh, fvMeshSubset and cell
         // decomposition.
-        polyMesh::readUpdateState meshState = meshRef.readUpdate();
+        polyMesh::readUpdateState meshState = meshProxy.readUpdate();
 
-        const fvMesh& mesh = meshRef.mesh();
+        const fvMesh& mesh = meshProxy.mesh();
         if
         (
             meshState == polyMesh::TOPO_CHANGE
@@ -649,7 +649,7 @@ int main(int argc, char *argv[])
 
             vtk::writeFaceSet
             (
-                meshRef.mesh(),
+                meshProxy.mesh(),
                 set,
                 outputName,
                 fmtType
@@ -677,7 +677,7 @@ int main(int argc, char *argv[])
 
             vtk::writePointSet
             (
-                meshRef.mesh(),
+                meshProxy.mesh(),
                 set,
                 outputName,
                 fmtType
@@ -718,8 +718,8 @@ int main(int argc, char *argv[])
         {
             readFields
             (
-                meshRef,
-                meshRef.baseMesh(),
+                meshProxy,
+                meshProxy.baseMesh(),
                 objects,
                 selectedFields,
                 vScalarFld
@@ -728,8 +728,8 @@ int main(int argc, char *argv[])
 
             readFields
             (
-                meshRef,
-                meshRef.baseMesh(),
+                meshProxy,
+                meshProxy.baseMesh(),
                 objects,
                 selectedFields,
                 vVectorFld
@@ -738,8 +738,8 @@ int main(int argc, char *argv[])
 
             readFields
             (
-                meshRef,
-                meshRef.baseMesh(),
+                meshProxy,
+                meshProxy.baseMesh(),
                 objects,
                 selectedFields,
                 vSphTensorf
@@ -748,8 +748,8 @@ int main(int argc, char *argv[])
 
             readFields
             (
-                meshRef,
-                meshRef.baseMesh(),
+                meshProxy,
+                meshProxy.baseMesh(),
                 objects,
                 selectedFields,
                 vSymTensorFld
@@ -758,8 +758,8 @@ int main(int argc, char *argv[])
 
             readFields
             (
-                meshRef,
-                meshRef.baseMesh(),
+                meshProxy,
+                meshProxy.baseMesh(),
                 objects,
                 selectedFields,
                 vTensorFld
@@ -797,8 +797,8 @@ int main(int argc, char *argv[])
         {
             readFields
             (
-                meshRef,
-                meshRef.baseMesh(),
+                meshProxy,
+                meshProxy.baseMesh(),
                 objects,
                 selectedFields,
                 dScalarFld
@@ -807,8 +807,8 @@ int main(int argc, char *argv[])
 
             readFields
             (
-                meshRef,
-                meshRef.baseMesh(),
+                meshProxy,
+                meshProxy.baseMesh(),
                 objects,
                 selectedFields,
                 dVectorFld
@@ -817,8 +817,8 @@ int main(int argc, char *argv[])
 
             readFields
             (
-                meshRef,
-                meshRef.baseMesh(),
+                meshProxy,
+                meshProxy.baseMesh(),
                 objects,
                 selectedFields,
                 dSphTensorFld
@@ -827,8 +827,8 @@ int main(int argc, char *argv[])
 
             readFields
             (
-                meshRef,
-                meshRef.baseMesh(),
+                meshProxy,
+                meshProxy.baseMesh(),
                 objects,
                 selectedFields,
                 dSymTensorFld
@@ -837,8 +837,8 @@ int main(int argc, char *argv[])
 
             readFields
             (
-                meshRef,
-                meshRef.baseMesh(),
+                meshProxy,
+                meshProxy.baseMesh(),
                 objects,
                 selectedFields,
                 dTensorFld
@@ -865,7 +865,7 @@ int main(int argc, char *argv[])
                 const bool throwing = FatalError.throwExceptions();
                 try
                 {
-                    aMeshPtr.reset(new faMesh(meshRef.baseMesh()));
+                    aMeshPtr.reset(new faMesh(meshProxy.baseMesh()));
                 }
                 catch (Foam::error& err)
                 {
@@ -992,11 +992,11 @@ int main(int argc, char *argv[])
             ).size()
         )
         {
-            const pointMesh& ptMesh = pointMesh::New(meshRef.baseMesh());
+            const pointMesh& ptMesh = pointMesh::New(meshProxy.baseMesh());
 
             readFields
             (
-                meshRef,
+                meshProxy,
                 ptMesh,
                 objects,
                 selectedFields,
@@ -1006,7 +1006,7 @@ int main(int argc, char *argv[])
 
             readFields
             (
-                meshRef,
+                meshProxy,
                 ptMesh,
                 objects,
                 selectedFields,
@@ -1016,7 +1016,7 @@ int main(int argc, char *argv[])
 
             readFields
             (
-                meshRef,
+                meshProxy,
                 ptMesh,
                 objects,
                 selectedFields,
@@ -1026,7 +1026,7 @@ int main(int argc, char *argv[])
 
             readFields
             (
-                meshRef,
+                meshProxy,
                 ptMesh,
                 objects,
                 selectedFields,
@@ -1036,7 +1036,7 @@ int main(int argc, char *argv[])
 
             readFields
             (
-                meshRef,
+                meshProxy,
                 ptMesh,
                 objects,
                 selectedFields,
@@ -1057,7 +1057,7 @@ int main(int argc, char *argv[])
             if (vtuMeshCells.empty())
             {
                 // subMesh or baseMesh
-                vtuMeshCells.reset(meshRef.mesh());
+                vtuMeshCells.reset(meshProxy.mesh());
             }
 
             // Create file and write header
@@ -1073,7 +1073,7 @@ int main(int argc, char *argv[])
             // Write mesh
             vtk::internalWriter writer
             (
-                meshRef.mesh(),
+                meshProxy.mesh(),
                 vtuMeshCells,
                 outputName,
                 fmtType
@@ -1147,8 +1147,8 @@ int main(int argc, char *argv[])
             PtrList<const surfaceScalarField> sScalarFld;
             readFields
             (
-                meshRef,
-                meshRef.baseMesh(),
+                meshProxy,
+                meshProxy.baseMesh(),
                 objects,
                 selectedFields,
                 sScalarFld
@@ -1158,8 +1158,8 @@ int main(int argc, char *argv[])
             PtrList<const surfaceVectorField> sVectorFld;
             readFields
             (
-                meshRef,
-                meshRef.baseMesh(),
+                meshProxy,
+                meshProxy.baseMesh(),
                 objects,
                 selectedFields,
                 sVectorFld
@@ -1199,7 +1199,7 @@ int main(int argc, char *argv[])
 
                 vtk::writeSurfFields
                 (
-                    meshRef.mesh(),
+                    meshProxy.mesh(),
                     outputName,
                     fmtType,
                     sVectorFld
@@ -1223,7 +1223,7 @@ int main(int argc, char *argv[])
             fileName outputName
             (
                 fvPath/"allPatches"
-              / (meshRef.useSubMesh() ? cellSubsetName : "allPatches")
+              / (meshProxy.useSubMesh() ? cellSubsetName : "allPatches")
               + "_"
               + timeDesc
             );
@@ -1232,7 +1232,7 @@ int main(int argc, char *argv[])
 
             vtk::patchWriter writer
             (
-                meshRef.mesh(),
+                meshProxy.mesh(),
                 outputName,
                 fmtType,
                 nearCellValue,
@@ -1293,7 +1293,7 @@ int main(int argc, char *argv[])
                 fileName outputName
                 (
                     fvPath/pp.name()
-                  / (meshRef.useSubMesh() ? cellSubsetName : pp.name())
+                  / (meshProxy.useSubMesh() ? cellSubsetName : pp.name())
                   + "_"
                   + timeDesc
                 );
@@ -1302,7 +1302,7 @@ int main(int argc, char *argv[])
 
                 vtk::patchWriter writer
                 (
-                    meshRef.mesh(),
+                    meshProxy.mesh(),
                     outputName,
                     fmtType,
                     nearCellValue,
@@ -1368,8 +1368,8 @@ int main(int argc, char *argv[])
             PtrList<const surfaceScalarField> sScalarFld;
             readFields
             (
-                meshRef,
-                meshRef.baseMesh(),
+                meshProxy,
+                meshProxy.baseMesh(),
                 objects,
                 selectedFields,
                 sScalarFld
@@ -1379,8 +1379,8 @@ int main(int argc, char *argv[])
             PtrList<const surfaceVectorField> sVectorFld;
             readFields
             (
-                meshRef,
-                meshRef.baseMesh(),
+                meshProxy,
+                meshProxy.baseMesh(),
                 objects,
                 selectedFields,
                 sVectorFld
@@ -1394,7 +1394,7 @@ int main(int argc, char *argv[])
                 fileName outputName =
                 (
                     fvPath/fz.name()
-                  / (meshRef.useSubMesh() ? cellSubsetName : fz.name())
+                  / (meshProxy.useSubMesh() ? cellSubsetName : fz.name())
                   + "_"
                   + timeDesc
                 );
@@ -1528,7 +1528,7 @@ int main(int argc, char *argv[])
 
                 vtk::lagrangianWriter writer
                 (
-                    meshRef.mesh(),
+                    meshProxy.mesh(),
                     cloudName,
                     outputName,
                     fmtType
@@ -1553,7 +1553,7 @@ int main(int argc, char *argv[])
             {
                 vtk::lagrangianWriter writer
                 (
-                    meshRef.mesh(),
+                    meshProxy.mesh(),
                     cloudName,
                     outputName,
                     fmtType,

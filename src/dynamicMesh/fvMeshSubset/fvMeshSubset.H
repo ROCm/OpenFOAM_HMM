@@ -213,6 +213,9 @@ public:
         //- Original mesh
         inline const fvMesh& baseMesh() const;
 
+        //- Return baseMesh or subMesh, depending on the current state.
+        inline const fvMesh& mesh() const;
+
         //- Have subMesh?
         inline bool hasSubMesh() const;
 
@@ -244,10 +247,10 @@ public:
         void clear();
 
 
-        //- Define the cell subset based on the selectedCells.
+        //- Define cell subset based on the selectedCells.
         //  Create "oldInternalFaces" patch for exposed
         //  internal faces (patchID==-1) or use supplied patch.
-        //  Handles coupled patches by if necessary making coupled patch
+        //  Handles coupled patches if necessary by making coupled patch
         //  face part of patchID (so uncoupled)
         void setCellSubset
         (
@@ -256,7 +259,7 @@ public:
             const bool syncPar = true
         );
 
-        //- Define the cell subset, using the specified cells
+        //- Define cell subset, using the specified cells
         //- to define the selection
         void setCellSubset
         (
@@ -265,7 +268,7 @@ public:
             const bool syncPar = true
         );
 
-        //- Define the cell subset, using the specified cells
+        //- Define cell subset, using the specified cells
         //- labelHashSet to define the selection
         void setCellSubset
         (
@@ -274,8 +277,7 @@ public:
             const bool syncPar = true
         );
 
-        //- Define the cell subset, using the cells for which
-        //  region == regioni.
+        //- Define cell subset, using the cells for which region == regioni.
         void setCellSubset
         (
             const label regioni,
@@ -285,7 +287,7 @@ public:
         );
 
 
-    // Two step subsetting
+    // Two-step subsetting
 
         //- Get labels of exposed faces.
         //  These are
@@ -332,7 +334,7 @@ public:
         );
 
 
-    // Field mapping
+    // Field Mapping
 
         //- Map volume field
         template<class Type>
@@ -341,9 +343,9 @@ public:
         (
             const GeometricField<Type, fvPatchField, volMesh>&,
             const fvMesh& sMesh,
-            const labelList& patchMap,
-            const labelList& cellMap,
-            const labelList& faceMap
+            const labelUList& patchMap,
+            const labelUList& cellMap,
+            const labelUList& faceMap
         );
 
         template<class Type>
@@ -361,9 +363,9 @@ public:
         (
             const GeometricField<Type, fvsPatchField, surfaceMesh>&,
             const fvMesh& sMesh,
-            const labelList& patchMap,
-            const labelList& cellMap,
-            const labelList& faceMap
+            const labelUList& patchMap,
+            const labelUList& cellMap,
+            const labelUList& faceMap
         );
 
         template<class Type>
@@ -380,8 +382,8 @@ public:
         (
             const GeometricField<Type, pointPatchField, pointMesh>&,
             const pointMesh& sMesh,
-            const labelList& patchMap,
-            const labelList& pointMap
+            const labelUList& patchMap,
+            const labelUList& pointMap
         );
 
         template<class Type>
@@ -398,7 +400,7 @@ public:
         (
             const DimensionedField<Type, volMesh>&,
             const fvMesh& sMesh,
-            const labelList& cellMap
+            const labelUList& cellMap
         );
 
         template<class Type>

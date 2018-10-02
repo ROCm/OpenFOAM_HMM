@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,18 +26,16 @@ License
 #include "fvMeshSubsetProxy.H"
 #include "volFields.H"
 
-// * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::tmp
+<
+    Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>
+>
 Foam::fvMeshSubsetProxy::zeroGradientField
 (
-    const typename GeometricField
-    <
-        Type,
-        fvPatchField,
-        volMesh
-    >::Internal& df
+    const DimensionedField<Type, volMesh>& df
 )
 {
     IOobject io(df);
@@ -62,44 +60,55 @@ Foam::fvMeshSubsetProxy::zeroGradientField
 
 template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
-Foam::fvMeshSubsetProxy::interpolate
+Foam::fvMeshSubsetProxy::interpolateInternal
 (
-    const GeometricField<Type, fvPatchField, volMesh>& vf
-) const
+    const fvMeshSubset& subsetter,
+    const DimensionedField<Type, volMesh>& df
+)
 {
-    if (subsetter_.hasSubMesh())
-    {
-        auto tfield(subsetter_.interpolate(vf));
+    auto tfield = zeroGradientField<Type>(df);
 
-        tfield.ref().checkOut();
-        tfield.ref().rename(vf.name());
-        return tfield;
+    if (subsetter.hasSubMesh())
+    {
+        return interpolate(subsetter, tfield());
     }
 
-    return vf;
+    return tfield;
 }
 
 
 template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
-Foam::fvMeshSubsetProxy::interpolate
+Foam::fvMeshSubsetProxy::interpolateInternal
 (
-    const typename GeometricField
-    <
-        Type,
-        fvPatchField,
-        volMesh
-    >::Internal& df
-) const
+    const fvMeshSubset& subsetter,
+    const tmp<DimensionedField<Type, volMesh>>& tdf
+)
 {
-    auto tfield = zeroGradientField<Type>(df);
+    // TODO - move dimensioned mesh into internal,
+    // but needs different GeometricField constructors
 
-    if (subsetter_.hasSubMesh())
+    if (tdf.valid())
     {
-        return interpolate<Type>(tfield());
+        if (subsetter.hasSubMesh())
+        {
+            auto tproxied = interpolate(subsetter, tdf);
+            auto tfield = zeroGradientField<Type>(tproxied());
+
+            tdf.clear();
+            tproxied.clear();
+            return tfield;
+        }
+        else
+        {
+            auto tfield = zeroGradientField<Type>(tdf());
+
+            tdf.clear();
+            return tfield;
+        }
     }
 
-    return tfield;
+    return nullptr;
 }
 
 
@@ -107,18 +116,81 @@ template<class GeoField>
 Foam::tmp<GeoField>
 Foam::fvMeshSubsetProxy::interpolate
 (
+    const fvMeshSubset& subsetter,
     const GeoField& fld
-) const
+)
 {
-    if (subsetter_.hasSubMesh())
+    if (subsetter.hasSubMesh())
     {
-        tmp<GeoField> tfield = subsetter_.interpolate(fld);
+        auto tfield = subsetter.interpolate(fld);
+
         tfield.ref().checkOut();
         tfield.ref().rename(fld.name());
         return tfield;
     }
 
     return fld;
+}
+
+
+template<class GeoField>
+Foam::tmp<GeoField>
+Foam::fvMeshSubsetProxy::interpolate
+(
+    const fvMeshSubset& subsetter,
+    const tmp<GeoField>& tfield
+)
+{
+    if (tfield.valid() && subsetter.hasSubMesh())
+    {
+        auto tproxied = interpolate(subsetter, tfield());
+        tfield.clear();
+
+        return tproxied;
+    }
+
+    // Nothing to be done
+    return tfield;
+}
+
+
+// * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::fvMeshSubsetProxy::interpolateInternal
+(
+    const DimensionedField<Type, volMesh>& df
+) const
+{
+    return interpolateInternal(subsetter_, df);
+}
+
+
+template<class Type>
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::fvMeshSubsetProxy::interpolateInternal
+(
+    const tmp<DimensionedField<Type, volMesh>>& tdf
+) const
+{
+    return interpolateInternal(subsetter_, tdf);
+}
+
+
+template<class GeoField>
+Foam::tmp<GeoField>
+Foam::fvMeshSubsetProxy::interpolate(const GeoField& fld) const
+{
+    return interpolate(subsetter_, fld);
+}
+
+
+template<class GeoField>
+Foam::tmp<GeoField>
+Foam::fvMeshSubsetProxy::interpolate(const tmp<GeoField>& tfield) const
+{
+    return interpolate(subsetter_, tfield);
 }
 
 

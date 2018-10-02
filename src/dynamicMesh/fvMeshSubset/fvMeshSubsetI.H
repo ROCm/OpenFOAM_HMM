@@ -31,6 +31,12 @@ inline const Foam::fvMesh& Foam::fvMeshSubset::baseMesh() const
 }
 
 
+inline const Foam::fvMesh& Foam::fvMeshSubset::mesh() const
+{
+    return fvMeshSubsetPtr_.valid() ? *fvMeshSubsetPtr_ : baseMesh_;
+}
+
+
 inline bool Foam::fvMeshSubset::hasSubMesh() const
 {
     return fvMeshSubsetPtr_.valid();
