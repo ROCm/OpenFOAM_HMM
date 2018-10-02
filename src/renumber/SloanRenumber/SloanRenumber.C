@@ -113,7 +113,7 @@ Foam::labelList Foam::SloanRenumber::renumber
     // Construct graph : faceOwner + connections across cyclics.
 
     // Determine neighbour cell
-    labelList nbr(mesh.nFaces()-mesh.nInternalFaces(), -1);
+    labelList nbr(mesh.nBoundaryFaces(), -1);
     forAll(pbm, patchi)
     {
         if (pbm[patchi].coupled() && !isA<processorPolyPatch>(pbm[patchi]))

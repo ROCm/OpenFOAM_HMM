@@ -249,7 +249,7 @@ labelList findBaffles(const polyMesh& mesh, const labelList& boundaryFaces)
         (
             mesh,
             "duplicateFaces",
-            (mesh.nFaces() - mesh.nInternalFaces())/256
+            mesh.nBoundaryFaces()/256
         );
 
         forAll(duplicates, bFacei)

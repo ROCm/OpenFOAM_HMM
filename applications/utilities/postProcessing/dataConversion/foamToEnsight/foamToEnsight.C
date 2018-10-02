@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
     fileName ensightDir = args.lookupOrDefault<word>("name", "EnSight");
     if (!ensightDir.isAbsolute())
     {
-        ensightDir = args.rootPath()/args.globalCaseName()/ensightDir;
+        ensightDir = args.globalPath()/ensightDir;
     }
 
 

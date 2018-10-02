@@ -172,7 +172,7 @@ void printMeshData(const polyMesh& mesh)
 
     // Print stats
 
-    globalIndex globalBoundaryFaces(mesh.nFaces()-mesh.nInternalFaces());
+    globalIndex globalBoundaryFaces(mesh.nBoundaryFaces());
 
     label maxProcCells = 0;
     label totProcFaces = 0;
@@ -2451,7 +2451,7 @@ int main(int argc, char *argv[])
             << " on all processors" << nl << endl;
         instantList timeDirs;
 
-        const fileName basePath(args.rootPath()/args.globalCaseName());
+        const fileName basePath(args.globalPath());
 
         if (Pstream::master())
         {

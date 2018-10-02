@@ -239,7 +239,7 @@ bool setFaceFieldType
         const Type& value = pTraits<Type>(fieldValueStream);
 
         // Create flat list of selected faces and their value.
-        Field<Type> allBoundaryValues(mesh.nFaces()-mesh.nInternalFaces());
+        Field<Type> allBoundaryValues(mesh.nBoundaryFaces());
         forAll(field.boundaryField(), patchi)
         {
             SubField<Type>
@@ -447,7 +447,7 @@ int main(int argc, char *argv[])
             (
                 mesh,
                 "faceSet",
-                (mesh.nFaces()-mesh.nInternalFaces())/10+1
+                mesh.nBoundaryFaces()/10+1
             );
 
             source->applyToSet

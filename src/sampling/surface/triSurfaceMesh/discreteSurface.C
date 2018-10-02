@@ -110,7 +110,7 @@ Foam::discreteSurface::nonCoupledboundaryTree() const
         // all non-coupled boundary faces (not just walls)
         const polyBoundaryMesh& patches = mesh().boundaryMesh();
 
-        labelList bndFaces(mesh().nFaces()-mesh().nInternalFaces());
+        labelList bndFaces(patches.nFaces());
         label bndI = 0;
         for (const polyPatch& pp : patches)
         {

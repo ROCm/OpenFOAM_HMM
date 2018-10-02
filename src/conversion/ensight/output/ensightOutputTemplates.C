@@ -261,7 +261,7 @@ bool Foam::ensightOutput::writeField
         // flat boundary field
         // as per volPointInterpolation::flatBoundaryField()
 
-        Field<Type> flat(mesh.nFaces() - mesh.nInternalFaces());
+        Field<Type> flat(mesh.nBoundaryFaces());
 
         const fvBoundaryMesh& bm = mesh.boundary();
         forAll(vf.boundaryField(), patchI)

@@ -351,7 +351,7 @@ void Foam::faceZoneSet::sync(const polyMesh& mesh)
     //-1 : in faceZone and flipped
     const label UNFLIPPED = 1;
     const label FLIPPED = -1;
-    labelList myZoneFace(mesh.nFaces()-mesh.nInternalFaces(), 0);
+    labelList myZoneFace(mesh.nBoundaryFaces(), Zero);
 
     forAll(addressing_, i)
     {

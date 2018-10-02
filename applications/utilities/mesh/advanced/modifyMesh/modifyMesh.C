@@ -413,7 +413,7 @@ int main(int argc, char *argv[])
     const SubList<face> outsideFaces
     (
         mesh.faces(),
-        mesh.nFaces() - mesh.nInternalFaces(),
+        mesh.nBoundaryFaces(),
         mesh.nInternalFaces()
     );
 

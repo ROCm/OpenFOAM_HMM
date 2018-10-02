@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,6 +40,12 @@ inline Foam::triad::triad(const Vector<vector>& vv)
 inline Foam::triad::triad(const vector& x, const vector& y, const vector& z)
 :
     Vector<vector>(x, y, z)
+{}
+
+
+inline Foam::triad::triad(const tensor& t)
+:
+    Vector<vector>(t.x(), t.y(), t.z())
 {}
 
 
@@ -116,11 +122,43 @@ inline void Foam::triad::normalize()
 }
 
 
+inline Foam::vector Foam::triad::cx() const
+{
+    return vector(x().x(), y().x(), z().x());
+}
+
+
+inline Foam::vector Foam::triad::cy() const
+{
+    return vector(x().y(), y().y(), z().y());
+}
+
+
+inline Foam::vector Foam::triad::cz() const
+{
+    return vector(x().z(), y().z(), z().z());
+}
+
+
+inline Foam::triad Foam::triad::T() const
+{
+    return triad(cx(), cy(), cz());
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 inline void Foam::triad::operator=(const Vector<vector>& vv)
 {
     Vector<vector>::operator=(vv);
+}
+
+
+inline void Foam::triad::operator=(const tensor& t)
+{
+    x() = t.x();
+    y() = t.y();
+    z() = t.z();
 }
 
 

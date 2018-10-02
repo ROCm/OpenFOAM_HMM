@@ -214,7 +214,7 @@ bool Foam::functionObjects::ensightWrite::write()
         fileName ensightDir = dirName_;
         if (!ensightDir.isAbsolute())
         {
-            ensightDir = t.rootPath()/t.globalCaseName()/ensightDir;
+            ensightDir = t.globalPath()/ensightDir;
         }
 
         ensCase_.reset

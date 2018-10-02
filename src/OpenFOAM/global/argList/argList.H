@@ -293,7 +293,7 @@ public:
         //- Return case name (parallel run) or global case (serial run)
         inline const fileName& caseName() const;
 
-        //- Return case name
+        //- Return global case name
         inline const fileName& globalCaseName() const;
 
         //- Return parRunControl
@@ -301,6 +301,9 @@ public:
 
         //- Return the path to the caseName
         inline fileName path() const;
+
+        //- Return the path to the globalCaseName
+        inline fileName globalPath() const;
 
         //- Return the number of arguments
         inline label size() const;

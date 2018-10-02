@@ -324,10 +324,15 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
 
         if (isA<wallPolyPatch>(patch))
         {
-            localWallFaces.append
-            (
-                identity(patch.size(), patch.start())
-            );
+            const scalarField areaFraction(patch.areaFraction());
+
+            forAll(areaFraction, facei)
+            {
+                if (areaFraction[facei] > 0.5)
+                {
+                    localWallFaces.append(facei + patch.start());
+                }
+            }
         }
     }
 
@@ -335,10 +340,12 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
 
     forAll(wallFaceBbs, i)
     {
-        wallFaceBbs[i] = treeBoundBox
-        (
-            mesh_.faces()[localWallFaces[i]].points(mesh_.points())
-        );
+        wallFaceBbs[i] =
+            treeBoundBox
+            (
+                mesh_.points(),
+                mesh_.faces()[localWallFaces[i]]
+            );
     }
 
     // IAndT: index and transform

@@ -36,7 +36,7 @@ void Foam::CFCFaceToCellStencil::calcFaceBoundaryData
 ) const
 {
     const polyBoundaryMesh& patches = mesh().boundaryMesh();
-    const label nBnd = mesh().nFaces()-mesh().nInternalFaces();
+    const label nBnd = mesh().nBoundaryFaces();
     const labelList& own = mesh().faceOwner();
 
     neiGlobal.setSize(nBnd);
@@ -93,7 +93,7 @@ void Foam::CFCFaceToCellStencil::calcCellStencil
     labelListList& globalCellFaces
 ) const
 {
-    const label nBnd = mesh().nFaces()-mesh().nInternalFaces();
+    const label nBnd = mesh().nBoundaryFaces();
     const labelList& own = mesh().faceOwner();
     const labelList& nei = mesh().faceNeighbour();
 
@@ -107,7 +107,7 @@ void Foam::CFCFaceToCellStencil::calcCellStencil
 
 
     // Non-empty boundary faces
-    boolList validBFace(mesh().nFaces()-mesh().nInternalFaces(), true);
+    boolList validBFace(mesh().nBoundaryFaces(), true);
 
     const polyBoundaryMesh& patches = mesh().boundaryMesh();
     forAll(patches, patchi)

@@ -146,7 +146,7 @@ void Foam::decompositionConstraints::preservePatchesConstraint::apply
 
     const polyBoundaryMesh& pbm = mesh.boundaryMesh();
 
-    labelList destProc(mesh.nFaces()-mesh.nInternalFaces(), labelMax);
+    labelList destProc(mesh.nBoundaryFaces(), labelMax);
 
     for (const polyPatch& pp : pbm)
     {

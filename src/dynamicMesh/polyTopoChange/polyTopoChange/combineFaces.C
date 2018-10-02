@@ -384,7 +384,7 @@ Foam::labelListList Foam::combineFaces::getMergeSets
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
     // Pick up all cells on boundary
-    labelHashSet boundaryCells(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelHashSet boundaryCells(mesh_.nBoundaryFaces());
 
     forAll(patches, patchi)
     {

@@ -638,7 +638,7 @@ void Foam::removePoints::getUnrefimentSet
         // restoring. Note that this is over all saved faces, not just over
         // the ones in undoFaces.
 
-        boolListList faceVertexRestore(mesh_.nFaces()-mesh_.nInternalFaces());
+        boolListList faceVertexRestore(mesh_.nBoundaryFaces());
 
         // Populate with my local points-to-restore.
         forAll(savedFaces_, saveI)

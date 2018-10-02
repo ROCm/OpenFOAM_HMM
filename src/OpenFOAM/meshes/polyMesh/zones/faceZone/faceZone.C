@@ -537,8 +537,8 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     {
-        boolList neiZoneFace(mesh.nFaces()-mesh.nInternalFaces(), false);
-        boolList neiZoneFlip(mesh.nFaces()-mesh.nInternalFaces(), false);
+        boolList neiZoneFace(mesh.nBoundaryFaces(), false);
+        boolList neiZoneFlip(mesh.nBoundaryFaces(), false);
         forAll(*this, i)
         {
             const label facei = operator[](i);

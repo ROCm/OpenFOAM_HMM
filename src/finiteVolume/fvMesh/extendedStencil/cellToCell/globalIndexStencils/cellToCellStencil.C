@@ -169,7 +169,7 @@ void Foam::cellToCellStencil::validBoundaryFaces(boolList& isValidBFace) const
 {
     const polyBoundaryMesh& patches = mesh().boundaryMesh();
 
-    isValidBFace.setSize(mesh().nFaces()-mesh().nInternalFaces(), true);
+    isValidBFace.setSize(mesh().nBoundaryFaces(), true);
 
     for (const polyPatch& pp : patches)
     {
@@ -328,7 +328,7 @@ Foam::labelList Foam::cellToCellStencil::calcFaceCells
 Foam::cellToCellStencil::cellToCellStencil(const polyMesh& mesh)
 :
     mesh_(mesh),
-    globalNumbering_(mesh_.nCells()+mesh_.nFaces()-mesh_.nInternalFaces())
+    globalNumbering_(mesh_.nCells()+mesh_.nBoundaryFaces())
 {}
 
 

@@ -65,7 +65,7 @@ void Foam::FECCellToFaceStencil::calcFaceStencil
 ) const
 {
     const polyBoundaryMesh& patches = mesh().boundaryMesh();
-    const label nBnd = mesh().nFaces()-mesh().nInternalFaces();
+    const label nBnd = mesh().nBoundaryFaces();
     const labelList& own = mesh().faceOwner();
     const labelList& nei = mesh().faceNeighbour();
 

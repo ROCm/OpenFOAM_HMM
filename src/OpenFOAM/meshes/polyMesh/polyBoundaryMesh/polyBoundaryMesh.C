@@ -450,10 +450,7 @@ const Foam::labelList& Foam::polyBoundaryMesh::patchID() const
 {
     if (!patchIDPtr_.valid())
     {
-        patchIDPtr_.reset
-        (
-            new labelList(mesh_.nFaces() - mesh_.nInternalFaces())
-        );
+        patchIDPtr_.reset(new labelList(mesh_.nBoundaryFaces()));
         labelList& list = *patchIDPtr_;
 
         const polyPatchList& patches = *this;
@@ -613,13 +610,21 @@ Foam::wordList Foam::polyBoundaryMesh::physicalTypes() const
 }
 
 
+Foam::label Foam::polyBoundaryMesh::start() const
+{
+    return mesh_.nInternalFaces();
+}
+
+
+Foam::label Foam::polyBoundaryMesh::nFaces() const
+{
+    return mesh_.nBoundaryFaces();
+}
+
+
 Foam::labelRange Foam::polyBoundaryMesh::range() const
 {
-    return labelRange
-    (
-        mesh_.nInternalFaces(),
-        mesh_.nFaces() - mesh_.nInternalFaces()
-    );
+    return labelRange(mesh_.nInternalFaces(), mesh_.nBoundaryFaces());
 }
 
 

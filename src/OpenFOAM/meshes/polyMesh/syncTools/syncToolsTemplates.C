@@ -929,7 +929,7 @@ void Foam::syncTools::syncBoundaryFaceList
     const bool parRun
 )
 {
-    const label nBFaces = mesh.nFaces() - mesh.nInternalFaces();
+    const label nBFaces = mesh.nBoundaryFaces();
 
     if (faceValues.size() != nBFaces)
     {
@@ -1160,7 +1160,7 @@ void Foam::syncTools::swapBoundaryCellList
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    neighbourCellData.resize(mesh.nFaces()-mesh.nInternalFaces());
+    neighbourCellData.resize(mesh.nBoundaryFaces());
 
     for (const polyPatch& pp : patches)
     {

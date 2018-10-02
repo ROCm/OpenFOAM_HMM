@@ -57,7 +57,7 @@ void Foam::volPointInterpolation::calcBoundaryAddressing()
             SubList<face>
             (
                 mesh().faces(),
-                mesh().nFaces()-mesh().nInternalFaces(),
+                mesh().nBoundaryFaces(),
                 mesh().nInternalFaces()
             ),
             mesh().points()

@@ -385,7 +385,7 @@ bool Foam::polyMeshGeometry::checkFaceDotProduct
     const scalar severeNonorthogonalityThreshold = ::cos(degToRad(orthWarn));
 
     // Calculate coupled cell centre
-    pointField neiCc(mesh.nFaces() - mesh.nInternalFaces());
+    pointField neiCc(mesh.nBoundaryFaces());
 
     for (label facei = mesh.nInternalFaces(); facei < mesh.nFaces(); facei++)
     {
@@ -745,7 +745,7 @@ bool Foam::polyMeshGeometry::checkFaceTets
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     // Calculate coupled cell centre
-    pointField neiCc(mesh.nFaces() - mesh.nInternalFaces());
+    pointField neiCc(mesh.nBoundaryFaces());
 
     for (label facei = mesh.nInternalFaces(); facei < mesh.nFaces(); facei++)
     {
@@ -1187,7 +1187,7 @@ bool Foam::polyMeshGeometry::checkFaceWeights
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     // Calculate coupled cell centre
-    pointField neiCc(mesh.nFaces()-mesh.nInternalFaces());
+    pointField neiCc(mesh.nBoundaryFaces());
 
     for (label facei = mesh.nInternalFaces(); facei < mesh.nFaces(); facei++)
     {
@@ -1340,7 +1340,7 @@ bool Foam::polyMeshGeometry::checkVolRatio
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     // Calculate coupled cell vol
-    scalarField neiVols(mesh.nFaces()-mesh.nInternalFaces());
+    scalarField neiVols(mesh.nBoundaryFaces());
 
     for (label facei = mesh.nInternalFaces(); facei < mesh.nFaces(); facei++)
     {
@@ -1671,7 +1671,7 @@ bool Foam::polyMeshGeometry::checkFaceTwist
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     // Calculate coupled cell centre
-    pointField neiCc(mesh.nFaces()-mesh.nInternalFaces());
+    pointField neiCc(mesh.nBoundaryFaces());
 
     for (label facei = mesh.nInternalFaces(); facei < mesh.nFaces(); facei++)
     {

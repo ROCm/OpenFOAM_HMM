@@ -1407,7 +1407,7 @@ Foam::polyDualMesh::polyDualMesh
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        labelList(mesh.nFaces() - mesh.nInternalFaces())
+        labelList(mesh.nBoundaryFaces(), -1)
     )
 {
     calcDual(mesh, featureEdges, featurePoints);
@@ -1446,7 +1446,7 @@ Foam::polyDualMesh::polyDualMesh
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        labelList(mesh.nFaces() - mesh.nInternalFaces(), -1)
+        labelList(mesh.nBoundaryFaces(), -1)
     )
 {
     labelList featureEdges, featurePoints;
@@ -1470,7 +1470,7 @@ void Foam::polyDualMesh::calcFeatures
         SubList<face>
         (
             mesh.faces(),
-            mesh.nFaces() - mesh.nInternalFaces(),
+            mesh.nBoundaryFaces(),
             mesh.nInternalFaces()
         ),
         mesh.points()

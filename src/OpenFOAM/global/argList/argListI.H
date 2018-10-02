@@ -87,6 +87,12 @@ inline Foam::fileName Foam::argList::path() const
 }
 
 
+inline Foam::fileName Foam::argList::globalPath() const
+{
+    return rootPath()/globalCaseName();
+}
+
+
 inline Foam::label Foam::argList::size() const
 {
     return args_.size();

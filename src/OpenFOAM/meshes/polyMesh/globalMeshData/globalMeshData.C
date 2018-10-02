@@ -1325,7 +1325,7 @@ void Foam::globalMeshData::calcGlobalPointBoundaryFaces() const
     // Global indices for boundary faces
     globalBoundaryFaceNumberingPtr_.reset
     (
-        new globalIndex(mesh_.nFaces()-mesh_.nInternalFaces())
+        new globalIndex(mesh_.nBoundaryFaces())
     );
     globalIndex& globalIndices = globalBoundaryFaceNumberingPtr_();
 

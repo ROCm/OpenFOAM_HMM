@@ -55,7 +55,7 @@ void Foam::channelIndex::walkOppositeFaces
 {
     const cellList& cells = mesh.cells();
     const faceList& faces = mesh.faces();
-    label nBnd = mesh.nFaces() - mesh.nInternalFaces();
+    const label nBnd = mesh.nBoundaryFaces();
 
     DynamicList<label> frontFaces(startFaces);
     forAll(frontFaces, i)

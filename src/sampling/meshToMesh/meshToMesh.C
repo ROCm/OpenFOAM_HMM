@@ -492,7 +492,7 @@ void Foam::meshToMesh::calculate(const word& methodName, const bool normalise)
         patches[0] = new polyPatch
         (
             "defaultFaces",
-            newTgt.nFaces() - newTgt.nInternalFaces(),
+            newTgt.nBoundaryFaces(),
             newTgt.nInternalFaces(),
             0,
             newTgt.boundaryMesh(),

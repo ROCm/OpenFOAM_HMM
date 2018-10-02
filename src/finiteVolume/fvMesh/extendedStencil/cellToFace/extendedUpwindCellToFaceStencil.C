@@ -205,7 +205,7 @@ void Foam::extendedUpwindCellToFaceStencil::transportStencils
 )
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-    const label nBnd = mesh_.nFaces()-mesh_.nInternalFaces();
+    const label nBnd = mesh_.nBoundaryFaces();
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
 

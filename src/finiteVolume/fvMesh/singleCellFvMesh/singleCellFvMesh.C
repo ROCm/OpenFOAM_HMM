@@ -68,7 +68,7 @@ void Foam::singleCellFvMesh::agglomerateMesh
     // Check agglomeration is sync
     {
         // Get neighbouring agglomeration
-        labelList nbrAgglom(mesh.nFaces()-mesh.nInternalFaces());
+        labelList nbrAgglom(mesh.nBoundaryFaces());
         forAll(oldPatches, patchi)
         {
             const polyPatch& pp = oldPatches[patchi];

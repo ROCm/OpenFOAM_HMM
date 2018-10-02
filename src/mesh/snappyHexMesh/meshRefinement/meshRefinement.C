@@ -130,7 +130,7 @@ void Foam::meshRefinement::calcNeighbourData
     const labelList& cellLevel = meshCutter_.cellLevel();
     const pointField& cellCentres = mesh_.cellCentres();
 
-    label nBoundaryFaces = mesh_.nFaces() - mesh_.nInternalFaces();
+    const label nBoundaryFaces = mesh_.nBoundaryFaces();
 
     if (neiLevel.size() != nBoundaryFaces || neiCc.size() != nBoundaryFaces)
     {
@@ -297,8 +297,8 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
 
 
     // Get boundary face centre and level. Coupled aware.
-    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-    pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelList neiLevel(mesh_.nBoundaryFaces());
+    pointField neiCc(mesh_.nBoundaryFaces());
     calcNeighbourData(neiLevel, neiCc);
 
     // Collect segments we want to test for
@@ -458,7 +458,7 @@ void Foam::meshRefinement::checkData()
     meshCutter_.checkRefinementLevels(1, labelList(0));
 
 
-    label nBnd = mesh_.nFaces()-mesh_.nInternalFaces();
+    const label nBnd = mesh_.nBoundaryFaces();
 
     Pout<< "meshRefinement::checkData() : Checking synchronization."
         << endl;
@@ -597,7 +597,7 @@ void Foam::meshRefinement::checkData()
         labelList::subList boundarySurface
         (
             surfaceIndex_,
-            mesh_.nFaces()-mesh_.nInternalFaces(),
+            mesh_.nBoundaryFaces(),
             mesh_.nInternalFaces()
         );
 
@@ -628,11 +628,7 @@ void Foam::meshRefinement::checkData()
         localPointRegion::findDuplicateFaces
         (
             mesh_,
-            identity
-            (
-                mesh_.nFaces() - mesh_.nInternalFaces(),
-                mesh_.nInternalFaces()
-            )
+            identity(mesh_.nBoundaryFaces(), mesh_.nInternalFaces())
         )
     );
 
@@ -998,12 +994,7 @@ Foam::label Foam::meshRefinement::splitFacesUndo
         // Check mesh for errors
         // ~~~~~~~~~~~~~~~~~~~~~
 
-        faceSet errorFaces
-        (
-            mesh_,
-            "errorFaces",
-            mesh_.nFaces()-mesh_.nInternalFaces()
-        );
+        faceSet errorFaces(mesh_, "errorFaces", mesh_.nBoundaryFaces());
         bool hasErrors = motionSmoother::checkMesh
         (
             false,  // report
@@ -1405,7 +1396,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 
             if (keepBaffles)
             {
-                label nBnd = mesh_.nFaces()-mesh_.nInternalFaces();
+                const label nBnd = mesh_.nBoundaryFaces();
 
                 labelList coupledFace(mesh_.nFaces(), -1);
                 {
@@ -1752,7 +1743,7 @@ void Foam::meshRefinement::checkCoupledFaceZones(const polyMesh& mesh)
 
     // Check that coupled faces are present on both sides.
 
-    labelList faceToZone(mesh.nFaces()-mesh.nInternalFaces(), -1);
+    labelList faceToZone(mesh.nBoundaryFaces(), -1);
 
     forAll(fZones, zonei)
     {
@@ -2891,8 +2882,8 @@ void Foam::meshRefinement::dumpIntersections(const fileName& prefix) const
         // ~~~~~~~~~~~~~~~~~~~~~~
 
         // Get boundary face centre and level. Coupled aware.
-        labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-        pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+        labelList neiLevel(mesh_.nBoundaryFaces());
+        pointField neiCc(mesh_.nBoundaryFaces());
         calcNeighbourData(neiLevel, neiCc);
 
         labelList intersectionFaces(intersectedFaces());

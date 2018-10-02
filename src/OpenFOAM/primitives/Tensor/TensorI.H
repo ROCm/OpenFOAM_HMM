@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -297,30 +297,177 @@ inline Foam::Vector<Cmpt> Foam::Tensor<Cmpt>::z() const
 
 
 template<class Cmpt>
+inline Foam::Vector<Cmpt> Foam::Tensor<Cmpt>::cx() const
+{
+    return Vector<Cmpt>(this->v_[XX], this->v_[YX], this->v_[ZX]);
+}
+
+
+template<class Cmpt>
+inline Foam::Vector<Cmpt> Foam::Tensor<Cmpt>::cy() const
+{
+    return Vector<Cmpt>(this->v_[XY], this->v_[YY], this->v_[ZY]);
+}
+
+
+template<class Cmpt>
+inline Foam::Vector<Cmpt> Foam::Tensor<Cmpt>::cz() const
+{
+    return Vector<Cmpt>(this->v_[XZ], this->v_[YZ], this->v_[ZZ]);
+}
+
+
+template<class Cmpt>
+template<Foam::direction Col>
+inline Foam::Vector<Cmpt> Foam::Tensor<Cmpt>::col() const
+{
+    if (Col == 0) return cx();
+    else if (Col == 1) return cy();
+    else if (Col == 2) return cz();
+
+    static_assert(Col < 3, "Invalid column access");
+    return Zero;
+}
+
+
+template<class Cmpt>
+inline Foam::Vector<Cmpt> Foam::Tensor<Cmpt>::col(const direction c) const
+{
+    switch (c)
+    {
+        case 0: return cx(); break;
+        case 1: return cy(); break;
+        case 2: return cz(); break;
+    }
+
+    FatalErrorInFunction
+        << "Invalid column access " << c << abort(FatalError);
+
+    return Zero;
+}
+
+
+template<class Cmpt>
+template<Foam::direction Row>
+inline Foam::Vector<Cmpt> Foam::Tensor<Cmpt>::row() const
+{
+    if (Row == 0) return x();
+    else if (Row == 1) return y();
+    else if (Row == 2) return z();
+
+    static_assert(Row < 3, "Invalid row access");
+    return Zero;
+}
+
+
+template<class Cmpt>
+inline Foam::Vector<Cmpt> Foam::Tensor<Cmpt>::row(const direction r) const
+{
+    switch (r)
+    {
+        case 0: return x(); break;
+        case 1: return y(); break;
+        case 2: return z(); break;
+    }
+
+    FatalErrorInFunction
+        << "Invalid row access " << r << abort(FatalError);
+
+    return Zero;
+}
+
+
+template<class Cmpt>
+template<Foam::direction Col>
+inline void Foam::Tensor<Cmpt>::col(const Vector<Cmpt>& v)
+{
+    if (Col == 0)
+    {
+        this->v_[XX] = v.x();
+        this->v_[YX] = v.y();
+        this->v_[ZX] = v.z();
+    }
+    else if (Col == 1)
+    {
+        this->v_[XY] = v.x();
+        this->v_[YY] = v.y();
+        this->v_[ZY] = v.z();
+    }
+    else if (Col == 2)
+    {
+        this->v_[XZ] = v.x();
+        this->v_[YZ] = v.y();
+        this->v_[ZZ] = v.z();
+    }
+
+    static_assert(Col < 3, "Invalid column access");
+}
+
+
+template<class Cmpt>
+template<Foam::direction Row>
+inline void Foam::Tensor<Cmpt>::row(const Vector<Cmpt>& v)
+{
+    if (Row == 0)
+    {
+        this->v_[XX] = v.x(); this->v_[XY] = v.y(); this->v_[XZ] = v.z();
+    }
+    else if (Row == 1)
+    {
+        this->v_[YX] = v.x(); this->v_[YY] = v.y(); this->v_[YZ] = v.z();
+    }
+    else if (Row == 2)
+    {
+        this->v_[ZX] = v.x(); this->v_[ZY] = v.y(); this->v_[ZZ] = v.z();
+    }
+
+    static_assert(Row < 3, "Invalid row access");
+}
+
+
+template<class Cmpt>
+inline void Foam::Tensor<Cmpt>::col(const direction c, const Vector<Cmpt>& v)
+{
+    switch (c)
+    {
+        case 0: col<0>(v); break;
+        case 1: col<1>(v); break;
+        case 2: col<2>(v); break;
+        default:
+            FatalErrorInFunction
+                << "Invalid column access " << c << abort(FatalError);
+            break;
+    }
+}
+
+
+template<class Cmpt>
+inline void Foam::Tensor<Cmpt>::row(const direction r, const Vector<Cmpt>& v)
+{
+    switch (r)
+    {
+        case 0: row<0>(v); break;
+        case 1: row<1>(v); break;
+        case 2: row<2>(v); break;
+        default:
+            FatalErrorInFunction
+                << "Invalid row access " << r << abort(FatalError);
+            break;
+    }
+}
+
+
+template<class Cmpt>
 inline Foam::Vector<Cmpt> Foam::Tensor<Cmpt>::vectorComponent
 (
     const direction cmpt
 ) const
 {
-    switch (cmpt)
-    {
-        case 0:
-            return x();
-            break;
-        case 1:
-            return y();
-            break;
-        case 2:
-            return z();
-            break;
-    }
-
-    FatalErrorInFunction
-        << "Unhandled component " << cmpt << abort(FatalError);
-
-    return x();
+    return row(cmpt);
 }
 
+
+// * * * * * * * * * * * * * * * Member Operations * * * * * * * * * * * * * //
 
 template<class Cmpt>
 inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::T() const
@@ -334,28 +481,73 @@ inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::T() const
 }
 
 
+template<class Cmpt>
+inline Foam::Tensor<Cmpt>
+Foam::Tensor<Cmpt>::inner(const Tensor<Cmpt>& t2) const
+{
+    const Tensor<Cmpt>& t1 = *this;
+
+    return Tensor<Cmpt>
+    (
+        t1.xx()*t2.xx() + t1.xy()*t2.yx() + t1.xz()*t2.zx(),
+        t1.xx()*t2.xy() + t1.xy()*t2.yy() + t1.xz()*t2.zy(),
+        t1.xx()*t2.xz() + t1.xy()*t2.yz() + t1.xz()*t2.zz(),
+
+        t1.yx()*t2.xx() + t1.yy()*t2.yx() + t1.yz()*t2.zx(),
+        t1.yx()*t2.xy() + t1.yy()*t2.yy() + t1.yz()*t2.zy(),
+        t1.yx()*t2.xz() + t1.yy()*t2.yz() + t1.yz()*t2.zz(),
+
+        t1.zx()*t2.xx() + t1.zy()*t2.yx() + t1.zz()*t2.zx(),
+        t1.zx()*t2.xy() + t1.zy()*t2.yy() + t1.zz()*t2.zy(),
+        t1.zx()*t2.xz() + t1.zy()*t2.yz() + t1.zz()*t2.zz()
+    );
+}
+
+
+template<class Cmpt>
+inline Foam::Tensor<Cmpt>
+Foam::Tensor<Cmpt>::innerT(const Tensor<Cmpt>& t2) const
+{
+    const Tensor<Cmpt>& t1 = *this;
+
+    return Tensor<Cmpt>
+    (
+        t1.xx()*t2.xx() + t1.xy()*t2.xy() + t1.xz()*t2.xz(),
+        t1.xx()*t2.yx() + t1.xy()*t2.yy() + t1.xz()*t2.yz(),
+        t1.xx()*t2.zx() + t1.xy()*t2.zy() + t1.xz()*t2.zz(),
+
+        t1.yx()*t2.xx() + t1.yy()*t2.xy() + t1.yz()*t2.xz(),
+        t1.yx()*t2.yx() + t1.yy()*t2.yy() + t1.yz()*t2.yz(),
+        t1.yx()*t2.zx() + t1.yy()*t2.zy() + t1.yz()*t2.zz(),
+
+        t1.zx()*t2.xx() + t1.zy()*t2.xy() + t1.zz()*t2.xz(),
+        t1.zx()*t2.yx() + t1.zy()*t2.yy() + t1.zz()*t2.yz(),
+        t1.zx()*t2.zx() + t1.zy()*t2.zy() + t1.zz()*t2.zz()
+    );
+}
+
+
+template<class Cmpt>
+inline Foam::Tensor<Cmpt>
+Foam::Tensor<Cmpt>::schur(const Tensor<Cmpt>& t2) const
+{
+    const Tensor<Cmpt>& t1 = *this;
+
+    return Tensor<Cmpt>
+    (
+        t1.xx()*t2.xx(), t1.xy()*t2.xy(), t1.xz()*t2.xz(),
+        t1.yx()*t2.yx(), t1.yy()*t2.yy(), t1.yz()*t2.yz(),
+        t1.zx()*t2.zx(), t1.zy()*t2.zy(), t1.zz()*t2.zz()
+    );
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Cmpt>
 inline void Foam::Tensor<Cmpt>::operator&=(const Tensor<Cmpt>& t)
 {
-    *this =
-    (
-        Tensor<Cmpt>
-        (
-            this->xx()*t.xx() + this->xy()*t.yx() + this->xz()*t.zx(),
-            this->xx()*t.xy() + this->xy()*t.yy() + this->xz()*t.zy(),
-            this->xx()*t.xz() + this->xy()*t.yz() + this->xz()*t.zz(),
-
-            this->yx()*t.xx() + this->yy()*t.yx() + this->yz()*t.zx(),
-            this->yx()*t.xy() + this->yy()*t.yy() + this->yz()*t.zy(),
-            this->yx()*t.xz() + this->yy()*t.yz() + this->yz()*t.zz(),
-
-            this->zx()*t.xx() + this->zy()*t.yx() + this->zz()*t.zx(),
-            this->zx()*t.xy() + this->zy()*t.yy() + this->zz()*t.zy(),
-            this->zx()*t.xz() + this->zy()*t.yz() + this->zz()*t.zz()
-        )
-    );
+    *this = this->inner(t);
 }
 
 
@@ -435,20 +627,7 @@ template<class Cmpt>
 inline typename innerProduct<Tensor<Cmpt>, Tensor<Cmpt>>::type
 operator&(const Tensor<Cmpt>& t1, const Tensor<Cmpt>& t2)
 {
-    return Tensor<Cmpt>
-    (
-        t1.xx()*t2.xx() + t1.xy()*t2.yx() + t1.xz()*t2.zx(),
-        t1.xx()*t2.xy() + t1.xy()*t2.yy() + t1.xz()*t2.zy(),
-        t1.xx()*t2.xz() + t1.xy()*t2.yz() + t1.xz()*t2.zz(),
-
-        t1.yx()*t2.xx() + t1.yy()*t2.yx() + t1.yz()*t2.zx(),
-        t1.yx()*t2.xy() + t1.yy()*t2.yy() + t1.yz()*t2.zy(),
-        t1.yx()*t2.xz() + t1.yy()*t2.yz() + t1.yz()*t2.zz(),
-
-        t1.zx()*t2.xx() + t1.zy()*t2.yx() + t1.zz()*t2.zx(),
-        t1.zx()*t2.xy() + t1.zy()*t2.yy() + t1.zz()*t2.zy(),
-        t1.zx()*t2.xz() + t1.zy()*t2.yz() + t1.zz()*t2.zz()
-    );
+    return t1.inner(t2);
 }
 
 

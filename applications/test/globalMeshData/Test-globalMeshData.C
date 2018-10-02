@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
         const labelListList& transformedSlaves =
             globalData.globalPointTransformedBoundaryFaces();
 
-        label nBnd = mesh.nFaces()-mesh.nInternalFaces();
+        const label nBnd = mesh.nBoundaryFaces();
 
         pointField fc(globalPointBoundaryFacesMap.constructSize());
         SubList<point>(fc, nBnd) =
