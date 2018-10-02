@@ -25,6 +25,7 @@ License
 
 #include "volFields.H"
 #include "cellCellStencil.H"
+#include "cellCellStencilObject.H"
 #include "dynamicOversetFvMesh.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -130,11 +131,20 @@ void Foam::oversetFvPatchField<Type>::initEvaluate
         }
         else if (fvSchemes.found("oversetInterpolationSuppressed"))
         {
-            const dictionary& intDict = fvSchemes.subDict
+             // Add the stencil suppression list
+            wordHashSet suppressed(Stencil::New(mesh).nonInterpolatedFields());
+
+            const dictionary* dictPtr
             (
-                "oversetInterpolationSuppressed"
+                fvSchemes.subDictPtr("oversetInterpolationSuppressed")
             );
-            if (!intDict.found(fldName))
+
+            if (dictPtr)
+            {
+                suppressed.insert(dictPtr->sortedToc());
+            }
+
+            if (!suppressed.found(fldName))
             {
                 if (debug)
                 {

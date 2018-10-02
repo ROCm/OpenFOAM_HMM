@@ -184,6 +184,9 @@ public:
         //  should not be interpolated
         virtual const wordHashSet& nonInterpolatedFields() const;
 
+        //- Return non-const non-interpolating fields
+        virtual wordHashSet& nonInterpolatedFields();
+
         //- Helper: is stencil fully local
         bool localStencil(const labelUList&) const;
 

@@ -20,23 +20,24 @@ DebugSwitches
 {
     overset                 0;
     dynamicOversetFvMesh    0;
+    cellVolumeWeight        0;
 }
 
 application     overPimpleDyMFoam;
 
-startFrom       startTime;
+startFrom       latestTime;
 
 startTime       0;
 
 stopAt          endTime;
 
-endTime         0.08;
+endTime         0.8;
 
 deltaT          2e-5;
 
-writeControl    adjustableRunTime;
+writeControl    timeStep;
 
-writeInterval   0.005;
+writeInterval   30;
 
 purgeWrite      0;
 
@@ -52,10 +53,9 @@ timePrecision   6;
 
 runTimeModifiable true;
 
-adjustTimeStep  no;
+adjustTimeStep  true;
 
-maxCo           1;
-
+maxCo          1;
 
 functions
 {
@@ -80,7 +80,7 @@ functions
 
         probeLocations
         (
-            (0.015 0.005 0.005)      // at inlet
+            (0.015 0.005 0.005)
         );
 
     }

@@ -161,6 +161,12 @@ const Foam::wordHashSet& Foam::cellCellStencil::nonInterpolatedFields() const
 }
 
 
+Foam::wordHashSet& Foam::cellCellStencil::nonInterpolatedFields()
+{
+    return nonInterpolatedFields_;
+}
+
+
 bool Foam::cellCellStencil::localStencil(const labelUList& slots) const
 {
     forAll(slots, i)
