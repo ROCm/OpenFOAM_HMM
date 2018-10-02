@@ -84,40 +84,6 @@ namespace vtk
     );
 
 
-    //- Print file series (JSON format) for specified time instances
-    //
-    //  \param os     The output stream
-    //  \param base   The name for the series (eg, "path/file.vtm")
-    //  \param series The list of suffix/value entries
-    //  \param sep    The separator used between file stem and suffix.
-    void seriesInfo
-    (
-        Ostream& os,
-        const fileName& base,
-        const UList<instant>& series,
-        const char sep = '_'
-    );
-
-    //- Write file series (JSON format) to disk, for specified time instances
-    //
-    //  \param base   The name for the series (eg, "path/file.vtm")
-    //  \param series The list of suffix/value entries
-    //  \param sep    The separator used between file stem and suffix.
-    void seriesWrite
-    (
-        const fileName& base,
-        const UList<instant>& series,
-        const char sep = '_'
-    );
-
-    //- Extract the base name for a file series
-    //
-    //  \param outputName   The name of the data output file
-    //      Eg, "somefile_0001.vtm" would extract to "somefile.vtm"
-    //  \param sep    The separator used between file stem and suffix.
-    fileName seriesBase(const fileName& outputName, const char sep = '_');
-
-
     //- Write a list of uint8_t values.
     //  The output does not include the payload size.
     void writeList
