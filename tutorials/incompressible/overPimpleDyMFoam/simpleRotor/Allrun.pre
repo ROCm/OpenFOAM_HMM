@@ -10,9 +10,7 @@ runApplication topoSet
 runApplication subsetMesh box -patch hole -overwrite
 
 # Select cellSets
-rm log.topoSet
-
-runApplication topoSet
+runApplication -s box topoSet
 
 restore0Dir
 
