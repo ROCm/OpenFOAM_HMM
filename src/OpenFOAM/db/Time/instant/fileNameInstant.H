@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,35 +21,30 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::fileNameInstant
+
+Description
+    A tuple of value and fileName.
+
 \*---------------------------------------------------------------------------*/
 
-#include "instant.H"
-#include "Time.H"
-#include <cstdlib>
+#ifndef fileNameInstant_H
+#define fileNameInstant_H
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "fileName.H"
+#include "Instant.H"
 
-const char* const Foam::instant::typeName = "instant";
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+namespace Foam
+{
+    typedef Instant<fileName> fileNameInstant;
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+} // End namespace Foam
 
-Foam::instant::instant(scalar timeValue)
-:
-    Instant<word>(timeValue, Time::timeName(timeValue))
-{}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-Foam::instant::instant(const word& timeName)
-:
-    Instant<word>(std::atof(timeName.c_str()), timeName)
-{}
-
-
-Foam::instant::instant(word&& timeName)
-:
-    Instant<word>(std::atof(timeName.c_str()), std::move(timeName))
-{}
-
+#endif
 
 // ************************************************************************* //
