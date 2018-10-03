@@ -52,17 +52,17 @@ Foam::Istream& Foam::operator>>(Istream& is, word& w)
     }
     else if (t.isString())
     {
-        // try a bit harder and convert string to word
+        // Try a bit harder and convert string to word
         w = t.stringToken();
         string::stripInvalid<word>(w);
 
-        // flag empty strings and bad chars as an error
+        // Flag empty strings and bad chars as an error
         if (w.empty() || w.size() != t.stringToken().size())
         {
             is.setBad();
             FatalIOErrorInFunction(is)
-                << "wrong token type - expected word, found "
-                "non-word characters "
+                << "wrong token type - expected word,"
+                " found non-word characters "
                 << t.info()
                 << exit(FatalIOError);
             return is;

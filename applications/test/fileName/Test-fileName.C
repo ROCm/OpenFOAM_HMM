@@ -621,11 +621,17 @@ int main(int argc, char *argv[])
         << "pathName.name()     = >" << pathName.name() << "<\n"
         << "pathName.path()     = "  << pathName.path() << nl
         << "pathName.ext()      = >" << pathName.ext() << "<\n"
-        << "pathName.name(true) = >" << pathName.name(true) << "<\n";
+        << "pathName.nameLessExt= >" << pathName.nameLessExt() << "<\n";
 
     Info<< "pathName.components() = " << pathName.components() << nl
         << "pathName.component(2) = " << pathName.component(2) << nl
         << endl;
+
+    Info<< "hasPath = " << Switch(pathName.hasPath()) << nl;
+    pathName.removePath();
+    Info<< "removed path = " << pathName << nl;
+
+    Info<< nl << nl;
 
     // try with different combination
     // The final one should emit warnings

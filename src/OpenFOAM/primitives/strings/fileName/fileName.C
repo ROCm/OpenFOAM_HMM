@@ -24,10 +24,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fileName.H"
+#include "wordRe.H"
 #include "wordList.H"
 #include "DynamicList.H"
 #include "OSspecific.H"
-#include "wordRe.H"
 #include "fileOperation.H"
 #include "stringOps.H"
 
@@ -142,7 +142,7 @@ bool Foam::fileName::isBackup(const std::string& str)
         return false;
     }
 
-    const std::string ending = str.substr(dot+1, npos);
+    const std::string ending = str.substr(dot+1);
 
     if (ending.empty())
     {
@@ -159,44 +159,40 @@ bool Foam::fileName::isBackup(const std::string& str)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fileName::fileName(const UList<word>& lst)
+Foam::fileName::fileName(const UList<word>& list)
 {
-    // Estimate overall size
-    size_type sz = lst.size();  // Approx number of '/' needed
-    for (const word& item : lst)
+    size_type len = 0;
+    for (const word& item : list)
     {
-        sz += item.size();
+        len += 1 + item.length();   // Include space for '/' needed
     }
-    reserve(sz);
+    reserve(len);
 
-    sz = 0;
-    for (const word& item : lst)
+    for (const word& item : list)
     {
-        if (item.size())
+        if (item.length())
         {
-            if (sz++) operator+=('/');
+            if (length()) operator+=('/');
             operator+=(item);
         }
     }
 }
 
 
-Foam::fileName::fileName(std::initializer_list<word> lst)
+Foam::fileName::fileName(std::initializer_list<word> list)
 {
-    // Estimate overall size
-    size_type sz = lst.size();  // Approx number of '/' needed
-    for (const word& item : lst)
+    size_type len = 0;
+    for (const word& item : list)
     {
-        sz += item.size();
+        len += 1 + item.length();   // Include space for '/' needed
     }
-    reserve(sz);
+    reserve(len);
 
-    sz = 0;
-    for (const word& item : lst)
+    for (const word& item : list)
     {
-        if (item.size())
+        if (item.length())
         {
-            if (sz++) operator+=('/');
+            if (length()) operator+=('/');
             operator+=(item);
         }
     }
@@ -238,11 +234,11 @@ bool Foam::fileName::clean(std::string& str)
     }
 
     // Number of output characters
-    std::string::size_type nChar = top+1;
+    auto nChar = top+1;
 
-    const string::size_type maxLen = str.size();
+    const auto maxLen = str.size();
 
-    for (string::size_type src = nChar; src < maxLen; /*nil*/)
+    for (auto src = nChar; src < maxLen; /*nil*/)
     {
         const char c = str[src++];
 
@@ -329,29 +325,10 @@ Foam::fileName Foam::fileName::clean() const
 }
 
 
-std::string Foam::fileName::name(const std::string& str)
-{
-    const auto beg = str.rfind('/');
-
-    if (beg == npos)
-    {
-        return str;
-    }
-
-    return str.substr(beg+1);
-}
-
-
-Foam::word Foam::fileName::name() const
-{
-    return fileName::name(*this);
-}
-
-
 std::string Foam::fileName::nameLessExt(const std::string& str)
 {
-    size_type beg = str.rfind('/');
-    size_type dot = str.rfind('.');
+    auto beg = str.rfind('/');
+    auto dot = str.rfind('.');
 
     if (beg == npos)
     {
@@ -376,35 +353,6 @@ std::string Foam::fileName::nameLessExt(const std::string& str)
 }
 
 
-Foam::word Foam::fileName::nameLessExt() const
-{
-    return nameLessExt(*this);
-}
-
-
-std::string Foam::fileName::path(const std::string& str)
-{
-    const auto i = str.rfind('/');
-
-    if (i == npos)
-    {
-        return ".";
-    }
-    else if (i)
-    {
-        return str.substr(0, i);
-    }
-
-    return "/";
-}
-
-
-Foam::fileName Foam::fileName::path() const
-{
-    return path(*this);
-}
-
-
 Foam::fileName Foam::fileName::relative(const fileName& parent) const
 {
     const auto top = parent.size();
@@ -421,38 +369,6 @@ Foam::fileName Foam::fileName::relative(const fileName& parent) const
     }
 
     return f;
-}
-
-
-Foam::fileName Foam::fileName::lessExt() const
-{
-    const auto i = find_ext();
-
-    if (i == npos)
-    {
-        return *this;
-    }
-
-    return substr(0, i);
-}
-
-
-Foam::word Foam::fileName::ext() const
-{
-    return string::ext();
-}
-
-
-Foam::fileName& Foam::fileName::ext(const word& ending)
-{
-    string::ext(ending);
-    return *this;
-}
-
-
-bool Foam::fileName::hasExt(const word& ending) const
-{
-    return string::hasExt(ending);
 }
 
 
@@ -499,39 +415,6 @@ Foam::word Foam::fileName::component
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-void Foam::fileName::operator=(const fileName& str)
-{
-    assign(str);
-}
-
-
-void Foam::fileName::operator=(const word& str)
-{
-    assign(str);
-}
-
-
-void Foam::fileName::operator=(const string& str)
-{
-    assign(str);
-    stripInvalid();
-}
-
-
-void Foam::fileName::operator=(const std::string& str)
-{
-    assign(str);
-    stripInvalid();
-}
-
-
-void Foam::fileName::operator=(const char* str)
-{
-    assign(str);
-    stripInvalid();
-}
-
 
 Foam::fileName& Foam::fileName::operator/=(const string& other)
 {
