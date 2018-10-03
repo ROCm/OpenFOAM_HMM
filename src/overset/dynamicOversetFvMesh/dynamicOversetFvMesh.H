@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,6 +64,8 @@ protected:
         //- Select base addressing (false) or locally stored extended
         //  lduAddressing (true)
         mutable bool active_;
+
+        mutable bool stencilIsUpToDate_;
 
         //- Extended addressing (extended with local interpolation stencils)
         mutable autoPtr<fvMeshPrimitiveLduAddressing> lduPtr_;

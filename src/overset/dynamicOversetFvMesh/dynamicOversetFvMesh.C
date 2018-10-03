@@ -44,6 +44,15 @@ namespace Foam
 bool Foam::dynamicOversetFvMesh::updateAddressing() const
 {
     const cellCellStencilObject& overlap = Stencil::New(*this);
+    // Make sure that stencil is not still in the initial, non-uptodate
+    // state. This gets triggered by e.g. Poisson wall distance that
+    // triggers the stencil even though time has not been updated (and hence
+    // mesh.update() has not been called.
+    if (!stencilIsUpToDate_)
+    {
+        stencilIsUpToDate_ = true;
+        const_cast<cellCellStencilObject&>(overlap).update();
+    }
 
     // The (processor-local part of the) stencil determines the local
     // faces to add to the matrix. tbd: parallel
@@ -227,6 +236,7 @@ Foam::dynamicOversetFvMesh::dynamicOversetFvMesh(const IOobject& io)
 {
     // Load stencil (but do not update)
     (void)Stencil::New(*this, false);
+    stencilIsUpToDate_ = false;
 }
 
 
