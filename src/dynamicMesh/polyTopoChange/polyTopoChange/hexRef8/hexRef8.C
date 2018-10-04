@@ -3148,7 +3148,6 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
         bitSet refineCell(mesh_.nCells(), newCellsToRefine);
 
         const bitSet savedRefineCell(refineCell);
-
         label nChanged = faceConsistentRefinement(true, cellLevel_, refineCell);
 
         {

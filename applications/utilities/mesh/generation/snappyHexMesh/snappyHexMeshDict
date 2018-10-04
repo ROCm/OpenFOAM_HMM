@@ -306,6 +306,35 @@ castellatedMeshControls
         //    // - cellLevel will include any directional refinement
         //    //   (i.e. it will be the maximum of all three directions)
         //}
+
+        //wakeBox
+        //{
+        //    mode        inside;
+        //    // Dummy base level
+        //    levels      ((10000 0));
+        //
+        //    // Optional directional refinement (after all other refinement)
+        //    // Directional refinement
+        //    // for all cells according to 'mode' ('inside' or 'outside';
+        //    // 'distance' not supported) and within certain range. E.g.
+        //    //  - for all cells with level 2-5
+        //    //  - do one split in x direction
+        //    levelIncrement  (2 5 (1 0 0));
+        //
+        //    // Note
+        //    // - ignores 'levels' and gap* settings.
+        //    // - the cellLevel/pointLevels files are no longer consistent
+        //    //   with the mesh, the resulting mesh is no longer compatible
+        //    //   with e.g. dynamic refinement/unrefinement.
+        //    // - cellLevel will include any directional refinement
+        //    //   (i.e. it will be the maximum of all three directions)
+        //
+        //    // Optional directional expansion-ratio smoothing (after all
+        //    // refinement). This will try to smooth out edge/cell size jumps
+        //    // Specify smoothing direction and number of iterations
+        //    nSmoothExpansion    100;
+        //    smoothDirection     (1 0 0);
+        //}
     }
 
 
