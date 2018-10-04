@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,10 +36,8 @@ SourceFiles
 
 #include "wordPairHashTable.H"
 #include "labelList.H"
-#include "PackedBoolList.H"
-#include "labelVector.H"
-#include "vector.H"
 #include "scalarField.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,6 +51,7 @@ class snapParameters;
 class meshRefinement;
 class decompositionMethod;
 class fvMeshDistribute;
+class fvMesh;
 
 /*---------------------------------------------------------------------------*\
                            Class snappyRefineDriver Declaration
@@ -156,19 +155,16 @@ class snappyRefineDriver
             );
 
             //- Calculate local edge length from cell volumes
-            void getVirtualEdgeLength
+            void mergeAndSmoothRatio
             (
-                const vector& userDirection,
-                const labelList& pointLabels,
-                const PackedBoolList& isXFace,
-                scalarField& maxUserSize
-            ) const;
+                const scalarList& allSeedPointDist,
+                const label nSmoothExpansion,
+                List<Tuple2<scalar, scalar>>&  keyAndValue
+            );
 
             //- Smooth the directional expansion ratio
-            label directionalSmooth
-            (
-                const refinementParameters& refineParams
-            );
+            label directionalSmooth(const refinementParameters& refineParams);
+
 
         //- Add baffles and remove unreachable cells
         void baffleAndSplitMesh
@@ -248,7 +244,6 @@ public:
             const refinementParameters& refineParams,
             const HashTable<Pair<word>>& faceZoneToPatches
         );
-
 };
 
 

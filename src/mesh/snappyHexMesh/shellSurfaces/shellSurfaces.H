@@ -98,6 +98,9 @@ private:
             //- Per shell the directional smoothing iterations
             labelList nSmoothExpansion_;
 
+            //- Per shell the positional smoothing iterations
+            labelList nSmoothPosition_;
+
 
         // Gap level refinement
 
@@ -246,6 +249,9 @@ public:
 
             //- Per shell the directional smoothing iterations
             const labelList& nSmoothExpansion() const;
+
+            //- Per shell the positional smoothing iterations
+            const labelList& nSmoothPosition() const;
 };
 
 
