@@ -56,18 +56,20 @@ cellDist/wallPoint/wallPoint.C
 
 cellFeatures/cellFeatures.C
 
-csys = coordinateSystems
+csys = coordinate/systems
 $(csys)/coordinateSystem.C
 $(csys)/coordinateSystemNew.C
 $(csys)/coordinateSystems.C
 $(csys)/cylindricalCS.C
 $(csys)/cartesianCS.C
-$(csys)/coordinateRotation/axesRotation.C
-$(csys)/coordinateRotation/coordinateRotation.C
-$(csys)/coordinateRotation/coordinateRotationNew.C
-$(csys)/coordinateRotation/EulerCoordinateRotation.C
-$(csys)/coordinateRotation/STARCDCoordinateRotation.C
-$(csys)/coordinateRotation/cylindrical.C
+
+crot = coordinate/rotation
+$(crot)/axesRotation.C
+$(crot)/coordinateRotation.C
+$(crot)/coordinateRotationNew.C
+$(crot)/EulerCoordinateRotation.C
+$(crot)/STARCDCoordinateRotation.C
+$(crot)/cylindrical.C
 
 polyMeshZipUpCells/polyMeshZipUpCells.C
 primitiveMeshGeometry/primitiveMeshGeometry.C
