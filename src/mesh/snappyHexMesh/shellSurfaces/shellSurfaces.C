@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -587,6 +587,7 @@ Foam::shellSurfaces::shellSurfaces
     dirLevels_.setSize(shellI);
     smoothDirection_.setSize(shellI);
     nSmoothExpansion_.setSize(shellI);
+    nSmoothPosition_.setSize(shellI);
 
     extendedGapLevel_.setSize(shellI);
     extendedGapMode_.setSize(shellI);
@@ -666,10 +667,16 @@ Foam::shellSurfaces::shellSurfaces
             // Directional smoothing
             // ~~~~~~~~~~~~~~~~~~~~~
 
+            nSmoothExpansion_[shellI] = 0;
+            nSmoothPosition_[shellI] = 0;
             smoothDirection_[shellI] =
                 dict.lookupOrDefault("smoothDirection", vector::zero);
-            nSmoothExpansion_[shellI] =
-                dict.lookupOrDefault("nSmoothExpansion", 0);
+
+            if (smoothDirection_[shellI] != vector::zero)
+            {
+                dict.lookup("nSmoothExpansion") >> nSmoothExpansion_[shellI];
+                dict.lookup("nSmoothPosition") >> nSmoothPosition_[shellI];
+            }
 
 
             // Gap specification
@@ -821,6 +828,12 @@ const Foam::labelList& Foam::shellSurfaces::nSmoothExpansion() const
 const Foam::vectorField& Foam::shellSurfaces::smoothDirection() const
 {
     return smoothDirection_;
+}
+
+
+const Foam::labelList& Foam::shellSurfaces::nSmoothPosition() const
+{
+    return nSmoothPosition_;
 }
 
 

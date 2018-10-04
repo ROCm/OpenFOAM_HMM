@@ -124,10 +124,10 @@ castellatedMeshControls
     // actually be a lot less.
     maxGlobalCells 2000000;
 
-    // The surface refinement loop might spend lots of iterations refining just a
-    // few cells. This setting will cause refinement to stop if <= minimumRefine
-    // are selected for refinement. Note: it will at least do one iteration
-    // (unless the number of cells to refine is 0)
+    // The surface refinement loop might spend lots of iterations refining
+    // just a few cells. This setting will cause refinement to stop if <=
+    // minimumRefineare selected for refinement. Note: it will at least do one
+    // iteration (unless the number of cells to refine is 0)
     minRefinementCells 100;
 
     // Number of buffer layers between different levels.
@@ -229,10 +229,10 @@ castellatedMeshControls
             // (after all other refinement). Directional refinement
             // for all cells according to 'mode' ('inside' or 'outside';
             // 'distance' not supported) and within certain range. E.g.
-            //  - for all cells with level 0-100
-            //  - do two splits in z direction. The resulting mesh is
+            //  - for all cells with level 0-1
+            //  - do one split in z direction. The resulting mesh is
             // no longer compatible with e.g. dynamic refinement/unrefinement.
-            levelIncrement  (0 0 (0 0 1));
+            levelIncrement  (0 1 (0 0 1));
         }
         dirRefineBox2
         {
@@ -245,7 +245,7 @@ castellatedMeshControls
             // (after all other refinement). Directional refinement
             // for all cells according to 'mode' ('inside' or 'outside';
             // 'distance' not supported) and within certain range. E.g.
-            //  - for all cells with level 0-100
+            //  - for all cells with level 0-1
             //  - do two splits in z direction. The resulting mesh is
             // no longer compatible with e.g. dynamic refinement/unrefinement.
             levelIncrement  (0 1 (0 0 2));
