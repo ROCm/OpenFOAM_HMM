@@ -73,7 +73,6 @@ class EulerCoordinateRotation
 :
     public coordinateRotation
 {
-
     // Private Member Data
 
         //- Local-to-global transformation tensor
@@ -81,18 +80,6 @@ class EulerCoordinateRotation
 
         //- Global-to-Local transformation tensor
         tensor Rtr_;
-
-
-    // Private Member Functions
-
-        //- Calculate transformation tensor
-        void calcTransform
-        (
-            const scalar phiAngle,
-            const scalar thetaAngle,
-            const scalar psiAngle,
-            const bool inDegrees
-        );
 
 
 public:
@@ -113,16 +100,16 @@ public:
         EulerCoordinateRotation
         (
             const vector& phiThetaPsi,
-            const bool inDegrees
+            const bool degrees
         );
 
         //- Construct from components of rotation vector
         EulerCoordinateRotation
         (
-            const scalar phiAngle,
-            const scalar thetaAngle,
-            const scalar psiAngle,
-            const bool inDegrees
+            const scalar phi,
+            const scalar theta,
+            const scalar psi,
+            const bool degrees
         );
 
         //- Construct from dictionary
@@ -142,6 +129,13 @@ public:
                 autoPtr<coordinateRotation>::NewFrom
                 <EulerCoordinateRotation>(*this);
         }
+
+
+    // Static Member Functions
+
+        //- The rotation tensor calculated for the specified Euler angles
+        //- interpreted as phi/theta/psi (z-x-z order)
+        static tensor rotation(const vector& angles, bool degrees);
 
 
     // Member Functions

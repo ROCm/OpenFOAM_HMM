@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,8 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "STARCDCoordinateRotation.H"
-
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -148,29 +147,26 @@ Foam::symmTensor Foam::STARCDCoordinateRotation::transformVector
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-void Foam::STARCDCoordinateRotation::calcTransform
+Foam::tensor Foam::STARCDCoordinateRotation::rotation
 (
-    const scalar rotZ,
-    const scalar rotX,
-    const scalar rotY,
-    const bool inDegrees
+    const vector& angles,
+    const bool degrees
 )
 {
-    scalar x = rotX;
-    scalar y = rotY;
-    scalar z = rotZ;
+    scalar z = angles.component(vector::X);    // 1. Rotate about Z
+    scalar x = angles.component(vector::Y);    // 2. Rotate about X
+    scalar y = angles.component(vector::Z);    // 3. Rotate about Y
 
-    if (inDegrees)
+    if (degrees)
     {
-        x *= constant::mathematical::pi/180.0;
-        y *= constant::mathematical::pi/180.0;
-        z *= constant::mathematical::pi/180.0;
+        x *= degToRad();
+        y *= degToRad();
+        z *= degToRad();
     }
 
-    R_ =
-    (
+    return
         tensor
         (
             cos(y)*cos(z) - sin(x)*sin(y)*sin(z),
@@ -184,10 +180,7 @@ void Foam::STARCDCoordinateRotation::calcTransform
             -cos(x)*sin(y),
             sin(x),
             cos(x)*cos(y)
-        )
-    );
-
-    Rtr_ = R_.T();
+        );
 }
 
 
@@ -213,20 +206,12 @@ Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
 Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
 (
     const vector& rotZrotXrotY,
-    const bool inDegrees
+    const bool degrees
 )
 :
-    R_(sphericalTensor::I),
-    Rtr_(sphericalTensor::I)
-{
-    calcTransform
-    (
-        rotZrotXrotY.component(vector::X),
-        rotZrotXrotY.component(vector::Y),
-        rotZrotXrotY.component(vector::Z),
-        inDegrees
-    );
-}
+    R_(rotation(rotZrotXrotY, degrees)),
+    Rtr_(R_.T())
+{}
 
 
 Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
@@ -234,14 +219,12 @@ Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
     const scalar rotZ,
     const scalar rotX,
     const scalar rotY,
-    const bool inDegrees
+    const bool degrees
 )
 :
-    R_(sphericalTensor::I),
-    Rtr_(sphericalTensor::I)
-{
-    calcTransform(rotZ, rotX, rotY, inDegrees);
-}
+    R_(rotation(vector(rotZ, rotX, rotY), degrees)),
+    Rtr_(R_.T())
+{}
 
 
 Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
@@ -249,19 +232,16 @@ Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
     const dictionary& dict
 )
 :
-    R_(sphericalTensor::I),
-    Rtr_(sphericalTensor::I)
-{
-    const vector rotation(dict.lookup("rotation"));
-
-    calcTransform
+    R_
     (
-        rotation.component(vector::X),
-        rotation.component(vector::Y),
-        rotation.component(vector::Z),
-        dict.lookupOrDefault("degrees", true)
-    );
-}
+        rotation
+        (
+            dict.get<vector>("rotation"),
+            dict.lookupOrDefault("degrees", true)
+        )
+    ),
+    Rtr_(R_.T())
+{}
 
 
 Foam::STARCDCoordinateRotation::STARCDCoordinateRotation

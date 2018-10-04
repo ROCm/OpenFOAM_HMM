@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,41 +37,65 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::vector Foam::coordinateRotation::findOrthogonal(const vector& axis)
+{
+    direction maxCmpt = 0;
+    scalar maxVal = mag(axis[maxCmpt]);
+
+    for (direction cmpt=1; cmpt < vector::nComponents; ++cmpt)
+    {
+        const scalar val = mag(axis[cmpt]);
+
+        if (maxVal < val)
+        {
+            maxVal  = val;
+            maxCmpt = cmpt;
+        }
+    }
+
+    direction cmpt = ((maxCmpt == vector::nComponents-1) ? 0 : (maxCmpt+1));
+
+    vector dirn(Zero);
+    dirn.component(cmpt) = ((axis[maxCmpt] < 0) ? -1 : 1);
+
+    return dirn;
+}
+
 
 Foam::symmTensor Foam::coordinateRotation::transformPrincipal
 (
     const tensor& tt,
-    const vector& st
-) const
+    const vector& v
+)
 {
     return symmTensor
     (
-        tt.xx()*st.x()*tt.xx()
-      + tt.xy()*st.y()*tt.xy()
-      + tt.xz()*st.z()*tt.xz(),
+        tt.xx()*v.x()*tt.xx()
+      + tt.xy()*v.y()*tt.xy()
+      + tt.xz()*v.z()*tt.xz(),
 
-        tt.xx()*st.x()*tt.yx()
-      + tt.xy()*st.y()*tt.yy()
-      + tt.xz()*st.z()*tt.yz(),
+        tt.xx()*v.x()*tt.yx()
+      + tt.xy()*v.y()*tt.yy()
+      + tt.xz()*v.z()*tt.yz(),
 
-        tt.xx()*st.x()*tt.zx()
-      + tt.xy()*st.y()*tt.zy()
-      + tt.xz()*st.z()*tt.zz(),
+        tt.xx()*v.x()*tt.zx()
+      + tt.xy()*v.y()*tt.zy()
+      + tt.xz()*v.z()*tt.zz(),
 
-        tt.yx()*st.x()*tt.yx()
-      + tt.yy()*st.y()*tt.yy()
-      + tt.yz()*st.z()*tt.yz(),
+        tt.yx()*v.x()*tt.yx()
+      + tt.yy()*v.y()*tt.yy()
+      + tt.yz()*v.z()*tt.yz(),
 
-        tt.yx()*st.x()*tt.zx()
-      + tt.yy()*st.y()*tt.zy()
-      + tt.yz()*st.z()*tt.zz(),
+        tt.yx()*v.x()*tt.zx()
+      + tt.yy()*v.y()*tt.zy()
+      + tt.yz()*v.z()*tt.zz(),
 
-        tt.zx()*st.x()*tt.zx()
-      + tt.zy()*st.y()*tt.zy()
-      + tt.zz()*st.z()*tt.zz()
+        tt.zx()*v.x()*tt.zx()
+      + tt.zy()*v.y()*tt.zy()
+      + tt.zz()*v.z()*tt.zz()
     );
-
 }
 
 

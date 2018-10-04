@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,9 +73,10 @@ public:
     //  Note that these follow the right-hand rule.
     enum axisOrder
     {
-        E1_E2,  //!< The axis is X-dominant, the direction is Y-dominant
-        E2_E3,  //!< The axis is Y-dominant, the direction is Z-dominant
-        E3_E1   //!< The axis is Z-dominant, the direction is X-dominant
+        E1_E2,  //!< The axis1 (dominant) is local X, axis2 is local Y.
+        E2_E3,  //!< The axis1 (dominant) is local Y, axis2 is local Z.
+        E3_E1,  //!< The axis1 (dominant) is local Z, axis2 is local X.
+        E3_E1_COMPAT, //!< E3_E1 specified as axis/direction.
     };
 
 
@@ -88,6 +89,12 @@ private:
 
         //- Global-to-Local transformation tensor
         tensor Rtr_;
+
+
+    // Protected Member Functions
+
+        //- Read from dictionary
+        void read(const dictionary& dict);
 
 
 public:
@@ -149,13 +156,18 @@ public:
             Rtr_ = sphericalTensor::I;
         }
 
-        //- Set the transformation tensors from two axes (axis and direction)
-        void setTransform
+
+    // Static Member Functions
+
+        //- The rotation tensor calculated from two axes and their order.
+        //  The input axes will be normalised.
+        static tensor rotation
         (
             const vector& axis1,
             const vector& axis2,
-            const axisOrder& order = E3_E1
+            axisOrder order = E3_E1
         );
+
 
         //- Update the rotation for a list of cells
         virtual void updateCells(const polyMesh&, const labelList&)

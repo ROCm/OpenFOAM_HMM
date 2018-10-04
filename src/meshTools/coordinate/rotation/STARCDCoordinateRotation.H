@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +65,6 @@ class STARCDCoordinateRotation
 :
     public coordinateRotation
 {
-
     // Private Member Data
 
         //- Local-to-Global transformation tensor
@@ -73,18 +72,6 @@ class STARCDCoordinateRotation
 
         //- Global-to-Local transformation tensor
         tensor Rtr_;
-
-
-    // Private Member Functions
-
-        //- Calculate transformation tensor
-        void calcTransform
-        (
-            const scalar rotZ,
-            const scalar rotX,
-            const scalar rotY,
-            const bool inDegrees
-        );
 
 
 public:
@@ -105,7 +92,7 @@ public:
         STARCDCoordinateRotation
         (
             const vector& rotZrotXrotY,
-            const bool inDegrees
+            const bool degrees
         );
 
         //- Construct from components of rotation vector
@@ -114,7 +101,7 @@ public:
             const scalar rotZ,
             const scalar rotX,
             const scalar rotY,
-            const bool inDegrees
+            const bool degrees
         );
 
         //- Construct from dictionary
@@ -135,6 +122,13 @@ public:
                 autoPtr<coordinateRotation>::NewFrom
                 <STARCDCoordinateRotation>(*this);
         }
+
+
+    // Static Member Functions
+
+        //- The rotation tensor calculated for the specified STARCD angles
+        //- interpreted as rotate-Z, rotate-X, rotate-Y
+        static tensor rotation(const vector& angles, bool degrees);
 
 
     // Member Functions

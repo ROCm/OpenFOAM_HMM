@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,11 +75,13 @@ protected:
     // Protected member functions
 
         //- Transform principal
-        symmTensor transformPrincipal(const tensor&, const vector&) const;
+        static symmTensor transformPrincipal(const tensor&, const vector&);
+
+        //- Determine best-guess for an orthogonal axis
+        static vector findOrthogonal(const vector& axis);
 
 
 public:
-
 
     //- Runtime type information
     TypeName("coordinateRotation");
@@ -135,8 +137,7 @@ public:
 
 
     //- Destructor
-    virtual ~coordinateRotation()
-    {}
+    virtual ~coordinateRotation() = default;
 
 
     // Member Functions
