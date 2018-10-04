@@ -400,6 +400,59 @@ bool Foam::dynamicOversetFvMesh::writeObject
         volZoneID.correctBoundaryConditions();
         volZoneID.writeObject(fmt, ver, cmp, valid);
     }
+    if (debug)
+    {
+        const cellCellStencilObject& overlap = Stencil::New(*this);
+        const labelIOList& zoneID = overlap.zoneID();
+        const labelListList& cellStencil = overlap.cellStencil();
+
+        labelList donorZoneID(zoneID);
+        overlap.cellInterpolationMap().distribute(donorZoneID);
+
+        forAll(cellStencil, cellI)
+        {
+            const labelList& stencil = cellStencil[cellI];
+            if (stencil.size())
+            {
+                donorZoneID[cellI] = zoneID[stencil[0]];
+                for (label i = 1; i < stencil.size(); i++)
+                {
+                    if (zoneID[stencil[i]] != donorZoneID[cellI])
+                    {
+                        WarningInFunction << "Mixed donor meshes for cell "
+                            << cellI << " at " << C()[cellI]
+                            << " donors:" << UIndirectList<point>(C(), stencil)
+                            << endl;
+                        donorZoneID[cellI] = -2;
+                    }
+                }
+            }
+        }
+
+        volScalarField volDonorZoneID
+        (
+            IOobject
+            (
+                "donorZoneID",
+                this->time().timeName(),
+                *this,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            *this,
+            dimensionedScalar("minOne", dimless, scalar(-1)),
+            zeroGradientFvPatchScalarField::typeName
+        );
+        forAll(donorZoneID, celli)
+        {
+            volDonorZoneID[celli] = donorZoneID[celli];
+        }
+        //- Do not correctBoundaryConditions since re-interpolates!
+        //volDonorZoneID.correctBoundaryConditions();
+        volDonorZoneID.writeObject(fmt, ver, cmp, valid);
+    }
+
     return ok;
 }
 
