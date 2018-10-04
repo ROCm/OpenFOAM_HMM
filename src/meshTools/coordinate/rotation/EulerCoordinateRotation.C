@@ -65,20 +65,21 @@ Foam::tensor Foam::EulerCoordinateRotation::rotation
         psi   *= degToRad();
     }
 
+    const scalar c1 = cos(phi);   const scalar s1 = sin(phi);
+    const scalar c2 = cos(theta); const scalar s2 = sin(theta);
+    const scalar c3 = cos(psi);   const scalar s3 = sin(psi);
+
+    // Compare
+    // https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix
+    //
+    // Z1-X2-Z3 rotation
+
     return
         tensor
         (
-            cos(phi)*cos(psi) - sin(phi)*sin(psi)*cos(theta),
-            -sin(phi)*cos(psi)*cos(theta) - cos(phi)*sin(psi),
-            sin(phi)*sin(theta),
-
-            cos(phi)*sin(psi)*cos(theta) + sin(phi)*cos(psi),
-            cos(phi)*cos(psi)*cos(theta) - sin(phi)*sin(psi),
-            -cos(phi)*sin(theta),
-
-            sin(psi)*sin(theta),
-            cos(psi)*sin(theta),
-            cos(theta)
+            c1*c3 - c2*s1*s3, -c1*s3 - c2*c3*s1,  s1*s2,
+            c3*s1 + c1*c2*s3,  c1*c2*c3 - s1*s3, -c1*s2,
+            s2*s3,             c3*s2,             c2
         );
 }
 

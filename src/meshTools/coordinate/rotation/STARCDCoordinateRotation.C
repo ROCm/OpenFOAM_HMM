@@ -166,20 +166,17 @@ Foam::tensor Foam::STARCDCoordinateRotation::rotation
         z *= degToRad();
     }
 
+    const scalar cx = cos(x);  const scalar sx = sin(x);
+    const scalar cy = cos(y);  const scalar sy = sin(y);
+    const scalar cz = cos(z);  const scalar sz = sin(z);
+
+
     return
         tensor
         (
-            cos(y)*cos(z) - sin(x)*sin(y)*sin(z),
-            -cos(x)*sin(z),
-            sin(x)*cos(y)*sin(z) + sin(y)*cos(z),
-
-            cos(y)*sin(z) + sin(x)*sin(y)*cos(z),
-            cos(x)*cos(z),
-            sin(y)*sin(z) - sin(x)*cos(y)*cos(z),
-
-            -cos(x)*sin(y),
-            sin(x),
-            cos(x)*cos(y)
+            cy*cz - sx*sy*sz, -cx*sz,  sx*cy*sz + sy*cz,
+            cy*sz + sx*sy*cz,  cx*cz,  sy*sz - sx*cy*cz,
+            -cx*sy,            sx,     cx*cy
         );
 }
 

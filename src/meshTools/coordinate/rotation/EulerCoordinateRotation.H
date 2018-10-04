@@ -32,14 +32,9 @@ Description
     The order of the parameter arguments matches this rotation order.
 
     For reference and illustration, see
-    http://mathworld.wolfram.com/EulerAngles.html
-    and
-    https://en.wikipedia.org/wiki/Euler_angles#Conventions
+    https://en.wikipedia.org/wiki/Euler_angles
 
-    Note, however, that it is the reverse transformation
-    (local->global) that is defined here.
-
-    - the rotation angles are in degrees, unless otherwise explicitly specified:
+    The rotation angles are in degrees, unless otherwise explicitly specified:
 
     \verbatim
     coordinateRotation
