@@ -595,6 +595,9 @@ Foam::shellSurfaces::shellSurfaces
     distances_.setSize(shellI);
     levels_.setSize(shellI);
     dirLevels_.setSize(shellI);
+    smoothDirection_.setSize(shellI);
+    nSmoothExpansion_.setSize(shellI);
+    nSmoothPosition_.setSize(shellI);
 
     extendedGapLevel_.setSize(shellI);
     extendedGapMode_.setSize(shellI);
@@ -671,6 +674,19 @@ Foam::shellSurfaces::shellSurfaces
                 }
             }
 
+            // Directional smoothing
+            // ~~~~~~~~~~~~~~~~~~~~~
+
+            nSmoothExpansion_[shellI] = 0;
+            nSmoothPosition_[shellI] = 0;
+            smoothDirection_[shellI] =
+                dict.lookupOrDefault("smoothDirection", vector::zero);
+
+            if (smoothDirection_[shellI] != vector::zero)
+            {
+                dict.lookup("nSmoothExpansion") >> nSmoothExpansion_[shellI];
+                dict.lookup("nSmoothPosition") >> nSmoothPosition_[shellI];
+            }
 
 
             // Gap specification
@@ -794,6 +810,24 @@ Foam::labelPairList Foam::shellSurfaces::directionalSelectLevel() const
         levels[shelli] = dirLevels_[shelli].first();
     }
     return levels;
+}
+
+
+const Foam::labelList& Foam::shellSurfaces::nSmoothExpansion() const
+{
+    return nSmoothExpansion_;
+}
+
+
+const Foam::vectorField& Foam::shellSurfaces::smoothDirection() const
+{
+    return smoothDirection_;
+}
+
+
+const Foam::labelList& Foam::shellSurfaces::nSmoothPosition() const
+{
+    return nSmoothPosition_;
 }
 
 

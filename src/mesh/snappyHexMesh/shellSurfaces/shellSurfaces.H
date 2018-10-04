@@ -86,8 +86,20 @@ private:
         //- Per shell per distance the refinement level
         labelListList levels_;
 
-        //- Per shell any additional directional refinement
-        List<Tuple2<labelPair,labelVector>> dirLevels_;
+
+        // Directional
+
+            //- Per shell any additional directional refinement
+            List<Tuple2<labelPair,labelVector>> dirLevels_;
+
+            //- Per shell the smoothing direction
+            vectorField smoothDirection_;
+
+            //- Per shell the directional smoothing iterations
+            labelList nSmoothExpansion_;
+
+            //- Per shell the positional smoothing iterations
+            labelList nSmoothPosition_;
 
 
         // Gap level refinement
@@ -231,6 +243,15 @@ public:
                 const direction dir,
                 labelList& shell
             ) const;
+
+            //- Per shell the smoothing direction
+            const vectorField& smoothDirection() const;
+
+            //- Per shell the directional smoothing iterations
+            const labelList& nSmoothExpansion() const;
+
+            //- Per shell the positional smoothing iterations
+            const labelList& nSmoothPosition() const;
 };
 
 

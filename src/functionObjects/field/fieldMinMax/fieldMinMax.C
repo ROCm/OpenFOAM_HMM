@@ -123,12 +123,6 @@ Foam::functionObjects::fieldMinMax::fieldMinMax
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::fieldMinMax::~fieldMinMax()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::fieldMinMax::read(const dictionary& dict)

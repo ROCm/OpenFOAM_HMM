@@ -28,6 +28,7 @@ License
 #include "meshTools.H"
 #include "mapDistribute.H"
 #include "flipOp.H"
+#include "profiling.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -100,10 +101,9 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::projectPointsToSurface
     pointField& pts
 ) const
 {
-    if (debug)
-    {
-        Info<< "AMI: projecting points to surface" << endl;
-    }
+    addProfiling(ami, "AMIInterpolation::projectPointsToSurface");
+
+    DebugInfo<< "AMI: projecting points to surface" << endl;
 
     List<pointIndexHit> nearInfo;
 
@@ -120,8 +120,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::projectPointsToSurface
         }
         else
         {
-            pts[i] = pts[i];
-            nMiss++;
+            // Point remains unchanged
+            ++nMiss;
         }
     }
 
@@ -148,6 +148,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
     const scalar lowWeightTol
 )
 {
+    addProfiling(ami, "AMIInterpolation::normaliseWeights");
+
     // Normalise the weights
     wghtSum.setSize(wght.size(), 0.0);
     label nLowWeight = 0;
@@ -233,6 +235,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
     autoPtr<mapDistribute>& tgtMap
 )
 {
+    addProfiling(ami, "AMIInterpolation::agglomerate");
+
     label sourceCoarseSize =
     (
         sourceRestrictAddressing.size()
@@ -329,7 +333,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
                     {
                         oldToNew[coarseElem] = newi;
                         newSubMap[newi] = coarseElem;
-                        newi++;
+                        ++newi;
                     }
                 }
                 newSubMap.setSize(newi);
@@ -407,7 +411,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
                             oldToNew[coarseElem] = newi;
                             tgtCompactMap[fineElem] = compacti;
                             newConstructMap[newi] = compacti++;
-                            newi++;
+                            ++newi;
                         }
                         else
                         {
@@ -843,6 +847,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
     const TargetPatch& tgtPatch
 )
 {
+    addProfiling(ami, "AMIInterpolation::update");
+
     label srcTotalSize = returnReduce(srcPatch.size(), sumOp<label>());
     label tgtTotalSize = returnReduce(tgtPatch.size(), sumOp<label>());
 
@@ -1057,6 +1063,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::append
     const TargetPatch& tgtPatch
 )
 {
+    addProfiling(ami, "AMIInterpolation::append");
+
     // Create a new interpolation
     autoPtr<AMIInterpolation<SourcePatch, TargetPatch>> newPtr
     (
@@ -1283,6 +1291,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
     const UList<Type>& defaultValues
 ) const
 {
+    addProfiling(ami, "AMIInterpolation::interpolateToTarget");
+
     if (fld.size() != srcAddress_.size())
     {
         FatalErrorInFunction
@@ -1368,6 +1378,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
     const UList<Type>& defaultValues
 ) const
 {
+    addProfiling(ami, "AMIInterpolation::interpolateToSource");
+
     if (fld.size() != tgtAddress_.size())
     {
         FatalErrorInFunction

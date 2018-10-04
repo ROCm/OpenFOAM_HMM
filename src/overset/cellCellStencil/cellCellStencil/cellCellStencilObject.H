@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,12 +55,7 @@ typedef MeshObject
 
 class cellCellStencilObject
 :
-    public MeshObject
-    <
-        fvMesh,
-        MoveableMeshObject,
-        cellCellStencilObject
-    >,
+    public Stencil,
     public cellCellStencil
 {
     // Private data
