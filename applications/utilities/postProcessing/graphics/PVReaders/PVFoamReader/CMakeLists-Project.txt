@@ -8,6 +8,7 @@ link_directories(
 include_directories(
     ${LIB_SRC}/OpenFOAM/lnInclude
     ${LIB_SRC}/OSspecific/${WM_OSTYPE}/lnInclude
+    ${LIB_SRC}/fileFormats/lnInclude
     ${LIB_SRC}/conversion/lnInclude
     ${LIB_SRC}/finiteArea/lnInclude
     ${LIB_SRC}/finiteVolume/lnInclude
@@ -19,6 +20,7 @@ set(OPENFOAM_LIBRARIES
     OpenFOAM
     finiteVolume
     finiteArea
+    fileFormats
     conversion
 )
 
