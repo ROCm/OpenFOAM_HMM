@@ -48,24 +48,59 @@ bool Foam::dictionary::writeOptionalEntries
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::dictionary::excessTokens
+void Foam::dictionary::checkITstream
 (
     const word& keyword,
     const ITstream& is
 ) const
 {
-    const label nExcess = is.nRemainingTokens();
-
-    if (!nExcess)
+    if (is.nRemainingTokens())
     {
-        return;
+        const label remaining = is.nRemainingTokens();
+
+        // Similar to SafeFatalIOError
+        if (JobInfo::constructed)
+        {
+            OSstream& err =
+                FatalIOError
+                (
+                    "",                 // functionName
+                    "",                 // sourceFileName
+                    0,                  // sourceFileLineNumber
+                    this->name(),       // ioFileName
+                    is.lineNumber()     // ioStartLineNumber
+                );
+
+            err << "'" << keyword << "' has "
+                << remaining << " excess tokens in stream" << nl << nl
+                << "    ";
+            is.writeList(err, 0);
+
+            err << exit(FatalIOError);
+        }
+        else
+        {
+            std::cerr
+                << nl
+                << "--> FOAM FATAL IO ERROR:" << nl;
+
+            std::cerr
+                << "'" << keyword << "' has "
+                << remaining << " excess tokens in stream" << nl << nl;
+
+            std::cerr
+                << "file: " << this->name()
+                << " at line " << is.lineNumber() << '.' << nl
+                << std::endl;
+
+            ::exit(1);
+        }
     }
-
-    // Similar to SafeFatalIOError
-
-    if (JobInfo::constructed)
+    else if (!is.size())
     {
-        OSstream& err =
+        // Similar to SafeFatalIOError
+        if (JobInfo::constructed)
+        {
             FatalIOError
             (
                 "",                 // functionName
@@ -73,31 +108,24 @@ void Foam::dictionary::excessTokens
                 0,                  // sourceFileLineNumber
                 this->name(),       // ioFileName
                 is.lineNumber()     // ioStartLineNumber
-            );
+            )
+                << "'" << keyword << "' had no tokens in stream" << nl << nl
+                << exit(FatalIOError);
+        }
+        else
+        {
+            std::cerr
+                << nl
+                << "--> FOAM FATAL IO ERROR:" << nl
+                << "'" << keyword << "' had no tokens in stream" << nl << nl;
 
-        err << "'" << keyword << "' has "
-            << nExcess << " excess tokens in stream" << nl << nl
-            << "    ";
-        is.writeList(err, 0);
+            std::cerr
+                << "file: " << this->name()
+                << " at line " << is.lineNumber() << '.' << nl
+                << std::endl;
 
-        err << exit(FatalIOError);
-    }
-    else
-    {
-        std::cerr
-            << nl
-            << "--> FOAM FATAL IO ERROR:" << nl;
-
-        std::cerr
-            << "'" << keyword << "' has "
-            << nExcess << " excess tokens in stream" << nl << nl;
-
-        std::cerr
-            << "file: " << this->name()
-            << " at line " << is.lineNumber() << '.' << nl
-            << std::endl;
-
-        ::exit(1);
+            ::exit(1);
+        }
     }
 }
 

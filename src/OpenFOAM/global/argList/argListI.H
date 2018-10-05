@@ -230,7 +230,7 @@ inline T Foam::argList::get(const label index) const
     T val;
     is >> val;
 
-    warnTrailing(is, index);
+    checkITstream(is, index);
 
     return val;
 }
@@ -244,7 +244,7 @@ inline T Foam::argList::opt(const word& optName) const
     T val;
     is >> val;
 
-    warnTrailing(is, optName);
+    checkITstream(is, optName);
 
     return val;
 }
@@ -309,7 +309,7 @@ inline Foam::List<T> Foam::argList::getList(const label index) const
     List<T> list;
     readList(is, list);
 
-    warnTrailing(is, index);
+    checkITstream(is, index);
 
     return list;
 }
@@ -323,7 +323,7 @@ inline Foam::List<T> Foam::argList::getList(const word& optName) const
     List<T> list;
     readList(is, list);
 
-    warnTrailing(is, optName);
+    checkITstream(is, optName);
 
     return list;
 }
@@ -341,7 +341,7 @@ inline bool Foam::argList::readListIfPresent
         ITstream is(optName, options_[optName]);
         readList(is, list);
 
-        warnTrailing(is, optName);
+        checkITstream(is, optName);
 
         return true;
     }

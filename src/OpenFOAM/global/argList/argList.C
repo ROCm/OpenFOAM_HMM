@@ -202,32 +202,46 @@ static void printBuildInfo(const bool full=true)
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-void Foam::argList::warnTrailing(const ITstream& is, const label index)
+void Foam::argList::checkITstream(const ITstream& is, const label index)
 {
-    const label nExcess = is.nRemainingTokens();
+    const label remaining = is.nRemainingTokens();
 
-    if (nExcess)
+    if (remaining)
     {
         std::cerr
             << nl
             << "--> FOAM WARNING:" << nl
             << "argument " << index << " has "
-            << nExcess << " excess tokens" << nl << nl;
+            << remaining << " excess tokens" << nl << nl;
+    }
+    else if (!is.size())
+    {
+        std::cerr
+            << nl
+            << "--> FOAM WARNING:" << nl
+            << "argument " << index << " had no tokens" << nl << nl;
     }
 }
 
 
-void Foam::argList::warnTrailing(const ITstream& is, const word& optName)
+void Foam::argList::checkITstream(const ITstream& is, const word& optName)
 {
-    const label nExcess = is.nRemainingTokens();
+    const label remaining = is.nRemainingTokens();
 
-    if (nExcess)
+    if (remaining)
     {
         std::cerr
             << nl
             << "--> FOAM WARNING:" << nl
             << "option -" << optName << " has "
-            << nExcess << " excess tokens" << nl << nl;
+            << remaining << " excess tokens" << nl << nl;
+    }
+    else if (!is.size())
+    {
+        std::cerr
+            << nl
+            << "--> FOAM WARNING:" << nl
+            << "option -" << optName << " had no tokens" << nl << nl;
     }
 }
 
@@ -1141,7 +1155,7 @@ void Foam::argList::parse
                 source = "-hostRoots";
                 ITstream is = this->lookup("hostRoots");
                 List<Tuple2<wordRe, fileName>> hostRoots(is);
-                warnTrailing(is, "hostRoots");
+                checkITstream(is, "hostRoots");
 
                 for (const auto& hostRoot : hostRoots)
                 {
