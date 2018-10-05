@@ -129,9 +129,9 @@ Foam::caseInfo::caseInfo(const Time& runTime, const word& regionName)
     forAll(conditionNames_, i)
     {
         const dictionary& dict = bcDict_.subDict(conditionNames_[i]);
-        dict.lookup("category") >> patchCategories_[i];
-        dict.lookup("type") >> patchTypes_[i];
-        dict.lookup("patches") >> patchNames_[i];
+        dict.readEntry("category", patchCategories_[i]);
+        dict.readEntry("type", patchTypes_[i]);
+        dict.readEntry("patches", patchNames_[i]);
     }
 
     updateGeometricBoundaryField();

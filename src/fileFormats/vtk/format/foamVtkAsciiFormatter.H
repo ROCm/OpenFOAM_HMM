@@ -90,7 +90,7 @@ public:
         asciiFormatter(std::ostream& os, unsigned precision);
 
 
-    //- Destructor
+    //- Destructor. Finishes the output line as required.
     virtual ~asciiFormatter();
 
 

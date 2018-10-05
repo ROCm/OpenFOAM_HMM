@@ -681,8 +681,8 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     {
         case ROTATIONAL:
         {
-            dict.lookup("rotationAxis") >> rotationAxis_;
-            dict.lookup("rotationCentre") >> rotationCentre_;
+            dict.readEntry("rotationAxis", rotationAxis_);
+            dict.readEntry("rotationCentre", rotationCentre_);
 
             scalar magRot = mag(rotationAxis_);
             if (magRot < SMALL)
@@ -698,7 +698,7 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
         }
         case TRANSLATIONAL:
         {
-            dict.lookup("separationVector") >> separationVector_;
+            dict.readEntry("separationVector", separationVector_);
             break;
         }
         default:

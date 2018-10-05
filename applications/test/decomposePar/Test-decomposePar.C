@@ -121,41 +121,27 @@ int main(int argc, char *argv[])
     fileName decompDictFile;
     args.readIfPresent("decomposeParDict", decompDictFile);
 
+    // Get all region names
     wordList regionNames;
-    wordList regionDirs;
     if (allRegions)
     {
-        Info<< "Decomposing all regions in regionProperties" << nl << endl;
-        regionProperties rp(runTime);
-        forAllConstIters(rp, iter)
-        {
-            const wordList& regions = iter();
-            forAll(regions, i)
-            {
-                if (!regionNames.found(regions[i]))
-                {
-                    regionNames.append(regions[i]);
-                }
-            }
-        }
-        regionDirs = regionNames;
+        regionNames = regionProperties(runTime).names();
+
+        Info<< "Decomposing all regions in regionProperties" << nl
+            << "    " << flatOutput(regionNames) << nl << endl;
     }
     else
     {
-        regionNames.resize(1, fvMesh::defaultRegion);
-        regionDirs.resize(1, word::null);
-
-        if (args.readIfPresent("region", regionNames.first()))
-        {
-            regionDirs.first() = regionNames.first();
-        }
+        regionNames.resize(1);
+        regionNames.first() =
+            args.lookupOrDefault<word>("region", fvMesh::defaultRegion);
     }
-
 
     forAll(regionNames, regioni)
     {
         const word& regionName = regionNames[regioni];
-        const word& regionDir = regionDirs[regioni];
+        const word& regionDir =
+            (regionName == fvMesh::defaultRegion ? word::null : regionName);
 
         Info<< "\n\nDecomposing mesh " << regionName << nl << endl;
         Info<< "Create mesh..." << flush;

@@ -50,7 +50,7 @@ Foam::functionObjects::fieldSelection::~fieldSelection()
 
 bool Foam::functionObjects::fieldSelection::read(const dictionary& dict)
 {
-    dict.lookup("fields") >> *this;
+    dict.readEntry("fields", *this);
 
     return true;
 }

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,9 +44,29 @@ inline std::string::size_type Foam::string::find_ext() const
 }
 
 
+inline bool Foam::string::hasPath() const
+{
+    return (npos != find('/'));
+}
+
+
 inline bool Foam::string::hasExt() const
 {
-    return (find_ext() != npos);
+    return (npos != find_ext());
+}
+
+
+inline bool Foam::string::removePath()
+{
+    const auto i = rfind('/');
+
+    if (npos == i)
+    {
+        return false;
+    }
+
+    this->erase(0, i+1);
+    return true;
 }
 
 
@@ -54,7 +74,7 @@ inline bool Foam::string::removeExt()
 {
     const auto i = find_ext();
 
-    if (i == npos)
+    if (npos == i)
     {
         return false;
     }
@@ -64,17 +84,18 @@ inline bool Foam::string::removeExt()
 }
 
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-inline Foam::string::string()
-:
-    std::string()
-{}
-
 
 inline Foam::string::string(const std::string& str)
 :
     std::string(str)
+{}
+
+
+inline Foam::string::string(std::string&& str)
+:
+    std::string(std::move(str))
 {}
 
 
@@ -99,12 +120,6 @@ inline Foam::string::string(const char c)
 inline Foam::string::string(const size_type len, const char c)
 :
     std::string(len, c)
-{}
-
-
-inline Foam::string::string(std::string&& str)
-:
-    std::string(std::move(str))
 {}
 
 

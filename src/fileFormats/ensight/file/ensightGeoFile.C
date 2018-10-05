@@ -80,17 +80,11 @@ Foam::ensightGeoFile::ensightGeoFile
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::ensightGeoFile::~ensightGeoFile()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::ensightGeoFile::writeKeyword(const keyType& key)
 {
-    // ensure we get ensightFile::write(const string&)
+    // Ensure we get ensightFile::write(const string&)
     write(static_cast<const string&>(key));
     newline();
 

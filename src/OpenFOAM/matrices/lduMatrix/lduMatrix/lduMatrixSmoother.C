@@ -47,7 +47,7 @@ Foam::lduMatrix::smoother::getName
     const entry& e = solverControls.lookupEntry("smoother", false, false);
     if (e.isDict())
     {
-        e.dict().lookup("smoother") >> name;
+        e.dict().readEntry("smoother", name);
     }
     else
     {
@@ -74,7 +74,7 @@ Foam::autoPtr<Foam::lduMatrix::smoother> Foam::lduMatrix::smoother::New
     const entry& e = solverControls.lookupEntry("smoother", false, false);
     if (e.isDict())
     {
-        e.dict().lookup("smoother") >> name;
+        e.dict().readEntry("smoother", name);
     }
     else
     {

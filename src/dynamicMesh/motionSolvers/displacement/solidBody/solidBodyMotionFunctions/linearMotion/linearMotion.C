@@ -89,7 +89,7 @@ bool Foam::solidBodyMotionFunctions::linearMotion::read
 {
     solidBodyMotionFunction::read(SBMFCoeffs);
 
-    SBMFCoeffs_.lookup("velocity") >> velocity_;
+    SBMFCoeffs_.readEntry("velocity", velocity_);
 
     return true;
 }

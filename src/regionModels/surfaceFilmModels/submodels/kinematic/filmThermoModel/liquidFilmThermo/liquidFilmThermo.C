@@ -76,7 +76,7 @@ void liquidFilmThermo::initLiquid(const dictionary& dict)
         return;
     }
 
-    dict.lookup("liquid") >> name_;
+    dict.readEntry("liquid", name_);
 
     if (filmModel_.primaryMesh().foundObject<SLGThermo>("SLGThermo"))
     {
@@ -119,8 +119,8 @@ liquidFilmThermo::liquidFilmThermo
 
     if (useReferenceValues_)
     {
-        coeffDict_.lookup("pRef") >> pRef_;
-        coeffDict_.lookup("TRef") >> TRef_;
+        coeffDict_.readEntry("pRef", pRef_);
+        coeffDict_.readEntry("TRef", TRef_);
     }
 }
 

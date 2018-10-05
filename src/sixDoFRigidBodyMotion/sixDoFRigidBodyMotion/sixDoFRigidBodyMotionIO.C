@@ -31,8 +31,8 @@ License
 
 bool Foam::sixDoFRigidBodyMotion::read(const dictionary& dict)
 {
-    dict.lookup("mass") >> mass_;
-    dict.lookup("momentOfInertia") >> momentOfInertia_;
+    dict.readEntry("mass", mass_);
+    dict.readEntry("momentOfInertia", momentOfInertia_);
     aRelax_ = dict.lookupOrDefault<scalar>("accelerationRelaxation", 1.0);
     aDamp_ = dict.lookupOrDefault<scalar>("accelerationDamping", 1.0);
     report_ = dict.lookupOrDefault<Switch>("report", false);

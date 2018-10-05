@@ -74,7 +74,7 @@ public:
         base64Formatter(std::ostream& os);
 
 
-    //- Destructor
+    //- Destructor. Closes/flushes the underlying layer.
     virtual ~base64Formatter();
 
 

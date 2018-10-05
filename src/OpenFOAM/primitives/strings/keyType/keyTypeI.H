@@ -145,6 +145,13 @@ inline void Foam::keyType::operator=(const keyType& s)
 }
 
 
+inline void Foam::keyType::operator=(keyType&& s)
+{
+    clear();
+    swap(s);
+}
+
+
 inline void Foam::keyType::operator=(const word& s)
 {
     assign(s); // Bypasses char checking
@@ -163,13 +170,6 @@ inline void Foam::keyType::operator=(const char* s)
 {
     assign(s); // Bypasses char checking
     isPattern_ = false;
-}
-
-
-inline void Foam::keyType::operator=(keyType&& s)
-{
-    clear();
-    swap(s);
 }
 
 

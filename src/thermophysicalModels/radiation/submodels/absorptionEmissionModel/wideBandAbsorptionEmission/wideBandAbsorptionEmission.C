@@ -74,8 +74,8 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
         }
 
         const dictionary& dict = iter().dict();
-        dict.lookup("bandLimits") >> iBands_[nBand];
-        dict.lookup("EhrrCoeff") >> iEhrrCoeffs_[nBand];
+        dict.readEntry("bandLimits", iBands_[nBand]);
+        dict.readEntry("EhrrCoeff", iEhrrCoeffs_[nBand]);
         totalWaveLength_ += iBands_[nBand][1] - iBands_[nBand][0];
 
         label nSpec = 0;

@@ -75,6 +75,7 @@ class keyType
         //- No assignment where we cannot determine string/word type
         void operator=(const std::string&) = delete;
 
+
 public:
 
     // Static data members
@@ -91,14 +92,13 @@ public:
         //- Copy construct, retaining type (literal or regex)
         inline keyType(const keyType& s);
 
-        //- Copy construct from word. Not treated as a regular expression
+        //- Copy construct from word, treat as literal.
         inline keyType(const word& s);
 
-        //- Copy construct from string. Treat as regular expression.
+        //- Copy construct from string, treat as regular expression.
         inline keyType(const string& s);
 
-        //- Construct as copy of character array.
-        //  Not treated as a regular expression
+        //- Construct as copy of character array, treat as literal.
         inline keyType(const char* s);
 
         //- Copy construct from std::string with specified treatment
@@ -149,17 +149,17 @@ public:
         //- Copy assignment, retaining type (literal or regex)
         inline void operator=(const keyType& s);
 
-        //- Assign as word, not treated as a regular expression.
-        inline void operator=(const word& s);
-
-        //- Assign from Foam::string as regular expression
-        inline void operator=(const string& s);
-
-        //- Assign as word, not treated as a regular expression.
-        inline void operator=(const char* s);
-
         //- Move assignment, retaining type (literal or regex)
         inline void operator=(keyType&& s);
+
+        //- Assign as word, treat as literal
+        inline void operator=(const word& s);
+
+        //- Assign from Foam::string, treat as regular expression
+        inline void operator=(const string& s);
+
+        //- Assign as word, treat as literal
+        inline void operator=(const char* s);
 
 
     // IOstream operators

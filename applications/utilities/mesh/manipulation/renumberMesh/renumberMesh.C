@@ -749,7 +749,7 @@ int main(int argc, char *argv[])
                 << endl;
         }
 
-        renumberDict.lookup("writeMaps") >> writeMaps;
+        renumberDict.readEntry("writeMaps", writeMaps);
         if (writeMaps)
         {
             Info<< "Writing renumber maps (new to old) to polyMesh." << nl

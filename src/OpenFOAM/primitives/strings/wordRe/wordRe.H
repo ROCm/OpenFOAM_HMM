@@ -122,41 +122,41 @@ public:
         //- Construct null
         inline wordRe();
 
-        //- Construct as copy
+        //- Copy construct
         inline wordRe(const wordRe& str);
+
+        //- Move construct
+        inline wordRe(wordRe&& str);
 
         //- Construct from keyType, using its compile information
         inline explicit wordRe(const keyType& str);
 
-        //- Construct as copy of character array, treat as a literal
+        //- Copy from character array, treat as a literal
         inline explicit wordRe(const char* str);
 
-        //- Construct as copy of std::string, treat as a literal
+        //- Copy from std::string, treat as a literal
         inline explicit wordRe(const std::string& str);
 
-        //- Construct as copy of string, treat as a literal
+        //- Copy from string, treat as a literal
         inline explicit wordRe(const string& str);
 
-        //- Construct as copy of word, treat as a literal
+        //- Copy from word, treat as a literal
         inline explicit wordRe(const word& str);
 
-        //- Construct from keyType, use specified compile option
+        //- Copy from keyType, use specified compile option
         inline wordRe(const keyType& str, const compOption opt);
 
-        //- Construct as copy of character array, use specified compile option
+        //- Copy from character array, use specified compile option
         inline wordRe(const char* str, const compOption opt);
 
-        //- Construct as copy of std::string, use specified compile option
+        //- Copy from std::string, use specified compile option
         inline wordRe(const std::string& str, const compOption opt);
 
-        //- Construct as copy of string, use specified compile option
+        //- Copy from string, use specified compile option
         inline wordRe(const string& str, const compOption opt);
 
-        //- Construct as copy of word, use specified compile option
+        //- Copy from word, use specified compile option
         inline wordRe(const word& str, const compOption opt);
-
-        //- Move construct
-        inline wordRe(wordRe&& str);
 
         //- Construct from Istream
         //  Words are treated as literals, strings with an auto-test
@@ -181,7 +181,7 @@ public:
 
         //- Make wordRe a literal again, instead of a regular expression.
         //  Optionally strip invalid word characters.
-        inline void uncompile(const bool doStripInvalid = false) const;
+        inline void uncompile(bool doStrip = false) const;
 
 
     // Editing

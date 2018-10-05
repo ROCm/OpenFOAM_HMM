@@ -180,8 +180,11 @@ void Foam::solarCalculator::init()
                     << " case is steady " << nl << exit(FatalError);
             }
 
-            dict_.lookup("sunTrackingUpdateInterval") >>
-                sunTrackingUpdateInterval_;
+            dict_.readEntry
+            (
+                "sunTrackingUpdateInterval",
+                sunTrackingUpdateInterval_
+            );
 
             calculateBetaTetha();
             calculateSunDirection();
@@ -193,8 +196,8 @@ void Foam::solarCalculator::init()
     {
         case mSunLoadConstant:
         {
-            dict_.lookup("directSolarRad") >> directSolarRad_;
-            dict_.lookup("diffuseSolarRad") >> diffuseSolarRad_;
+            dict_.readEntry("directSolarRad", directSolarRad_);
+            dict_.readEntry("diffuseSolarRad", diffuseSolarRad_);
             break;
         }
         case mSunLoadFairWeatherConditions:
@@ -205,14 +208,10 @@ void Foam::solarCalculator::init()
                 skyCloudCoverFraction_
             );
 
-            A_ = readScalar(dict_.lookup("A"));
-            B_ = readScalar(dict_.lookup("B"));
+            A_ = dict_.get<scalar>("A");
+            B_ = dict_.get<scalar>("B");
 
-            if (dict_.found("beta"))
-            {
-                dict_.lookup("beta") >> beta_;
-            }
-            else
+            if (!dict_.readIfPresent("beta",beta_))
             {
                 calculateBetaTetha();
             }
@@ -221,19 +220,16 @@ void Foam::solarCalculator::init()
                 (1.0 - 0.75*pow(skyCloudCoverFraction_, 3.0))
               * A_/exp(B_/sin(beta_));
 
-            groundReflectivity_ =
-                readScalar(dict_.lookup("groundReflectivity"));
-
+            dict_.readEntry("groundReflectivity", groundReflectivity_);
             break;
         }
         case mSunLoadTheoreticalMaximum:
         {
-            Setrn_ = readScalar(dict_.lookup("Setrn"));
-            SunPrime_ = readScalar(dict_.lookup("SunPrime"));
+            dict_.readEntry("Setrn", Setrn_);
+            dict_.readEntry("SunPrime", SunPrime_);
             directSolarRad_ = Setrn_*SunPrime_;
 
-            groundReflectivity_ =
-                readScalar(dict_.lookup("groundReflectivity"));
+            dict_.readEntry("groundReflectivity", groundReflectivity_);
             break;
         }
     }

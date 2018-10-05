@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,8 +25,7 @@ Application
     Test-dictionary2
 
 Description
-
-    Test dictionary insertion
+    Test dictionary insertion and some reading functionality.
 
 \*---------------------------------------------------------------------------*/
 
@@ -207,6 +206,83 @@ int main(int argc, char *argv[])
 
     Info<< nl << "dictionary" << nl << nl;
     dict1.write(Info, false);
+
+
+    {
+        Info<< nl << "Test reading good/bad/empty scalar entries" << nl;
+        dictionary dict2
+        (
+            IStringStream
+            (
+                "good 3.14159;\n"
+                "empty;\n"
+                // "bad  text;\n"            // always fails
+                // "bad  3.14159 1234;\n"    // fails for readScalar
+            )()
+        );
+        dict2.write(Info);
+
+
+        // With readScalar
+        {
+            Info<< nl << "Test some bad input with readScalar()" << nl;
+
+            const bool throwingIOError = FatalIOError.throwExceptions();
+            const bool throwingError = FatalError.throwExceptions();
+
+            try
+            {
+                scalar val1 = readScalar(dict2.lookup("good"));
+                // scalar val2 = readScalar(dict2.lookup("bad"));
+                scalar val2 = -1;
+                scalar val3 = readScalar(dict2.lookup("empty"));
+
+                Info<< "got good=" << val1 << " bad=" << val2
+                    << " empty=" << val3 << nl;
+            }
+            catch (Foam::IOerror& err)
+            {
+                Info<< "Caught FatalIOError " << err << nl << endl;
+            }
+            catch (Foam::error& err)
+            {
+                Info<< "Caught FatalError " << err << nl << endl;
+            }
+            FatalError.throwExceptions(throwingError);
+            FatalIOError.throwExceptions(throwingIOError);
+        }
+
+
+        // With get<scalar>
+        {
+            Info<< nl << "Test some bad input with get<scalar>()" << nl;
+
+            const bool throwingIOError = FatalIOError.throwExceptions();
+            const bool throwingError = FatalError.throwExceptions();
+
+            try
+            {
+                scalar val1 = dict2.get<scalar>("good");
+                // scalar val2 = dict2.get<scalar>("bad");
+                scalar val2 = -1;
+                scalar val3 = dict2.get<scalar>("empty");
+
+                Info<< "got good=" << val1 << " bad=" << val2
+                    << " empty=" << val3 << nl;
+            }
+            catch (Foam::IOerror& err)
+            {
+                Info<< "Caught FatalIOError " << err << nl << endl;
+            }
+            catch (Foam::error& err)
+            {
+                Info<< "Caught FatalError " << err << nl << endl;
+            }
+            FatalError.throwExceptions(throwingError);
+            FatalIOError.throwExceptions(throwingIOError);
+        }
+    }
+
 
     Info<< "\nDone\n" << endl;
 

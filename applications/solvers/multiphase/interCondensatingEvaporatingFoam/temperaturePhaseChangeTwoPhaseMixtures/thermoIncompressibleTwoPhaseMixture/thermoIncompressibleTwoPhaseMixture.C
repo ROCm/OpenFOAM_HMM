@@ -109,17 +109,17 @@ bool Foam::thermoIncompressibleTwoPhaseMixture::read()
 {
     if (incompressibleTwoPhaseMixture::read())
     {
-        subDict(phase1Name_).lookup("kappa") >> kappa1_;
-        subDict(phase2Name_).lookup("kappa") >> kappa2_;
+        subDict(phase1Name_).readEntry("kappa", kappa1_);
+        subDict(phase2Name_).readEntry("kappa", kappa2_);
 
-        subDict(phase1Name_).lookup("Cp") >> Cp1_;
-        subDict(phase2Name_).lookup("Cp") >> Cp2_;
+        subDict(phase1Name_).readEntry("Cp", Cp1_);
+        subDict(phase2Name_).readEntry("Cp", Cp2_);
 
-        subDict(phase1Name_).lookup("Cv") >> Cv1_;
-        subDict(phase2Name_).lookup("Cv") >> Cv2_;
+        subDict(phase1Name_).readEntry("Cv", Cv1_);
+        subDict(phase2Name_).readEntry("Cv", Cv2_);
 
-        subDict(phase1Name_).lookup("hf") >> Hf1_;
-        subDict(phase2Name_).lookup("hf") >> Hf2_;
+        subDict(phase1Name_).readEntry("hf", Hf1_);
+        subDict(phase2Name_).readEntry("hf", Hf2_);
 
         return true;
     }

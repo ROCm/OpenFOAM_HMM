@@ -128,7 +128,7 @@ bool Foam::combustionModels::PaSR<ReactionThermo>::read()
 {
     if (laminar<ReactionThermo>::read())
     {
-        this->coeffs().lookup("Cmix") >> Cmix_;
+        this->coeffs().readEntry("Cmix", Cmix_);
         return true;
     }
     else

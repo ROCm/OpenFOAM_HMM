@@ -75,10 +75,9 @@ class DimensionedField
     public regIOobject,
     public Field<Type>
 {
-
 public:
 
-    // Public typedefs
+    // Public Typedefs
 
         //- Type of mesh on which this DimensionedField is instantiated
         typedef typename GeoMesh::Mesh Mesh;
@@ -120,7 +119,7 @@ public:
 
     // Static Member Functions
 
-        //- Return a null DimensionedField
+        //- Return a NullObjectRef DimensionedField
         inline static const DimensionedField<Type, GeoMesh>& null();
 
 
@@ -135,7 +134,16 @@ public:
             const Field<Type>& field
         );
 
-        //- Construct from components, transferring the initial field content
+        //- Construct from components, transferring initial field content
+        DimensionedField
+        (
+            const IOobject& io,
+            const Mesh& mesh,
+            const dimensionSet& dims,
+            Field<Type>&& field
+        );
+
+        //- Construct from components, transferring initial field content
         DimensionedField
         (
             const IOobject& io,
@@ -261,7 +269,7 @@ public:
 
 
     //- Destructor
-    virtual ~DimensionedField();
+    virtual ~DimensionedField() = default;
 
 
     // Member Functions

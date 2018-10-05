@@ -74,8 +74,8 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 {
     if (nonDimensional_)
     {
-        dict.lookup("rpm") >> rpm_;
-        dict.lookup("dm") >> dm_;
+        dict.readEntry("rpm", rpm_);
+        dict.readEntry("dm", dm_);
     }
 }
 

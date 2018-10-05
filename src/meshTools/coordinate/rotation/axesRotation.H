@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,35 +22,37 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::STARCDCoordinateRotation
+    Foam::axesRotation
 
 Description
-    A coordinateRotation defined by the STAR-CD convention.
+    A coordinate rotation specified using global axes
 
-    The 3 rotations are defined in the STAR-CD convention
-    (around Z, around X' and around Y'').
-    The order of the parameter arguments matches this rotation order.
-
-    - the rotation angles are in degrees, unless otherwise explicitly specified:
+    The rotation is defined by a combination of vectors (e1/e2), (e2/e3)
+    or (e3/e1). Any nonorthogonality will be absorbed into the second
+    vector. In terms of cylindrical coordinates, the 'axis' would
+    correspond to the \a z-axis and the 'direction' to the \a r-axis.
 
     \verbatim
-    coordinateRotation
+    axesRotation
     {
-        type        STARCDRotation;
-        degrees     false;
-        rotation    (0 0 3.141592654);
+        type        axesRotation;
+        e1          (1 0 0);
+        e2          (0 1 0);
     }
     \endverbatim
 
 SourceFiles
-    STARCDCoordinateRotation.C
+    axesRotation.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef STARCDCoordinateRotation_H
-#define STARCDCoordinateRotation_H
+#ifndef axesRotation_H
+#define axesRotation_H
 
+#include "vector.H"
 #include "coordinateRotation.H"
+#include "dictionary.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,15 +60,29 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class STARCDCoordinateRotation Declaration
+                    Class axesRotation Declaration
 \*---------------------------------------------------------------------------*/
 
-class STARCDCoordinateRotation
+class axesRotation
 :
     public coordinateRotation
 {
+public:
 
-    // Private Member Data
+    //- The order/combination of local axes for the axes-rotation definition
+    //  Note that these follow the right-hand rule.
+    enum axisOrder
+    {
+        E1_E2,  //!< The axis1 (dominant) is local X, axis2 is local Y.
+        E2_E3,  //!< The axis1 (dominant) is local Y, axis2 is local Z.
+        E3_E1,  //!< The axis1 (dominant) is local Z, axis2 is local X.
+        E3_E1_COMPAT, //!< E3_E1 specified as axis/direction.
+    };
+
+
+private:
+
+    // Private data
 
         //- Local-to-Global transformation tensor
         tensor R_;
@@ -75,66 +91,60 @@ class STARCDCoordinateRotation
         tensor Rtr_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
-        //- Calculate transformation tensor
-        void calcTransform
-        (
-            const scalar rotZ,
-            const scalar rotX,
-            const scalar rotY,
-            const bool inDegrees
-        );
+        //- Read from dictionary
+        void read(const dictionary& dict);
 
 
 public:
 
     //- Runtime type information
-    TypeName("STARCDRotation");
-
+    TypeName("axesRotation");
 
     // Constructors
 
         //- Construct null
-        STARCDCoordinateRotation();
+        axesRotation();
 
         //- Construct as copy
-        STARCDCoordinateRotation(const STARCDCoordinateRotation& r);
+        axesRotation(const axesRotation& r);
 
-        //- Construct from rotation vector
-        STARCDCoordinateRotation
+        //- Construct from local to global rotation matrix
+        explicit axesRotation(const tensor& R);
+
+        //- Construct from two axes (axis and direction)
+        axesRotation
         (
-            const vector& rotZrotXrotY,
-            const bool inDegrees
+            const vector& axis,
+            const vector& dir,
+            const axisOrder& order = E3_E1
         );
 
-        //- Construct from components of rotation vector
-        STARCDCoordinateRotation
-        (
-            const scalar rotZ,
-            const scalar rotX,
-            const scalar rotY,
-            const bool inDegrees
-        );
+        //- Construct from a single axis using a best-guess for the second axis
+        //  For the best-guess, the largest component value and sign of the
+        //  axis determines the direction orientation.
+        explicit axesRotation(const vector& axis);
 
         //- Construct from dictionary
-        explicit STARCDCoordinateRotation(const dictionary& dict);
+        explicit axesRotation(const dictionary& dict);
 
         //- Construct from dictionary and a registry (typically a mesh)
-        STARCDCoordinateRotation
+        axesRotation
         (
             const dictionary& dict,
             const objectRegistry& unused
         );
 
-
         //- Return clone
         autoPtr<coordinateRotation> clone() const
         {
-            return
-                autoPtr<coordinateRotation>::NewFrom
-                <STARCDCoordinateRotation>(*this);
+            return autoPtr<coordinateRotation>::NewFrom<axesRotation>(*this);
         }
+
+
+    //- Destructor
+    virtual ~axesRotation() = default;
 
 
     // Member Functions
@@ -145,6 +155,19 @@ public:
             R_ = sphericalTensor::I;
             Rtr_ = sphericalTensor::I;
         }
+
+
+    // Static Member Functions
+
+        //- The rotation tensor calculated from two axes and their order.
+        //  The input axes will be normalised.
+        static tensor rotation
+        (
+            const vector& axis1,
+            const vector& axis2,
+            axisOrder order = E3_E1
+        );
+
 
         //- Update the rotation for a list of cells
         virtual void updateCells(const polyMesh&, const labelList&)
@@ -160,7 +183,7 @@ public:
         virtual const tensor& Rtr() const
         {
             return Rtr_;
-        };
+        }
 
         //- Return local Cartesian x-axis in global coordinates
         virtual const vector e1() const
@@ -209,15 +232,21 @@ public:
         ) const;
 
         //- Transform vectorField using transformation tensorField and return
-        // symmetrical tensorField
+        //  symmetric tensorField
         virtual tmp<symmTensorField> transformVector
         (
             const vectorField& st
         ) const;
 
         //- Transform vector using transformation tensor and return
-        // symmetrical tensor
+        //  symmetric tensor
         virtual symmTensor transformVector(const vector& st) const;
+
+
+    // Member Operators
+
+        //- Assign from dictionary
+        void operator=(const dictionary& dict);
 
 };
 

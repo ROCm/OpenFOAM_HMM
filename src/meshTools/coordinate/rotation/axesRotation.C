@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,6 +47,151 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::tensor Foam::axesRotation::rotation
+(
+    const vector& axis1,
+    const vector& axis2,
+    axisOrder order
+)
+{
+    const scalar magAxis1(mag(axis1));
+    scalar magAxis2(mag(axis2));
+
+    if (magAxis1 < ROOTVSMALL)
+    {
+        FatalErrorInFunction
+            << "Dominant coordinate axis cannot have zero length"
+            << nl << endl
+            << abort(FatalError);
+    }
+
+    const vector ax1(axis1 / magAxis1);  // normalise
+    vector ax2(axis2);
+
+    if (magAxis2 < ROOTVSMALL)
+    {
+        // axis2 == Zero : Use best-guess for the second axis.
+        ax2 = findOrthogonal(axis1);
+    }
+
+    // Remove colinear component
+    ax2 -= ((ax1 & ax2) * ax1);
+
+    magAxis2 = mag(ax2);
+
+    if (magAxis2 < SMALL)
+    {
+        WarningInFunction
+            << "axis1, axis2 appear to be co-linear: "
+            << axis1 << ", " << axis2 << "  Revert to guessing axis2"
+            << nl << endl;
+
+        ax2 = findOrthogonal(axis1);
+
+        // Remove colinear component
+        ax2 -= ((ax1 & ax2) * ax1);
+
+        magAxis2 = mag(ax2);
+
+        if (magAxis2 < SMALL)
+        {
+            FatalErrorInFunction
+                << "Could not find an appropriate second axis"
+                << nl << endl
+                << abort(FatalError);
+        }
+    }
+
+    ax2 /= magAxis2;  // normalise
+
+
+    // The local axes are columns of the rotation matrix
+
+    tensor rotTensor;
+
+    switch (order)
+    {
+        case E1_E2:
+        {
+            rotTensor.col<0>(ax1);
+            rotTensor.col<1>(ax2);
+            rotTensor.col<2>(ax1^ax2);
+            break;
+        }
+        case E2_E3:
+        {
+            rotTensor.col<0>(ax1^ax2);
+            rotTensor.col<1>(ax1);
+            rotTensor.col<2>(ax2);
+            break;
+        }
+        case E3_E1:
+        case E3_E1_COMPAT:
+        {
+            rotTensor.col<0>(ax2);
+            rotTensor.col<1>(ax1^ax2);
+            rotTensor.col<2>(ax1);
+            break;
+        }
+    }
+
+    return rotTensor;
+}
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::axesRotation::read(const dictionary& dict)
+{
+    vector axis1, axis2;
+    axisOrder order = E3_E1;
+
+    if
+    (
+        dict.readIfPresent("e1", axis1)
+     && dict.readIfPresent("e2", axis2)
+    )
+    {
+        order = E1_E2;
+    }
+    else if
+    (
+        dict.readIfPresent("e2", axis1)
+     && dict.readIfPresent("e3", axis2)
+    )
+    {
+        order = E2_E3;
+    }
+    else if
+    (
+        dict.readIfPresent("e3", axis1)
+     && dict.readIfPresent("e1", axis2)
+    )
+    {
+        order = E3_E1;
+    }
+    else if
+    (
+        dict.readIfPresent("axis", axis1)
+     && dict.readIfPresent("direction", axis2)
+    )
+    {
+        order = E3_E1_COMPAT;
+    }
+    else
+    {
+        FatalErrorInFunction
+            << "No entries of the type (e1, e2) or (e2, e3) or (e3, e1) found"
+            << exit(FatalError);
+    }
+
+    R_ = rotation(axis1, axis2, order);
+    Rtr_ = R_.T();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::axesRotation::axesRotation()
@@ -77,11 +222,9 @@ Foam::axesRotation::axesRotation
     const axisOrder& order
 )
 :
-    R_(sphericalTensor::I),
-    Rtr_(sphericalTensor::I)
-{
-    setTransform(axis, dir, order);
-}
+    R_(rotation(axis, dir, order)),
+    Rtr_(R_.T())
+{}
 
 
 Foam::axesRotation::axesRotation
@@ -89,37 +232,9 @@ Foam::axesRotation::axesRotation
     const vector& axis
 )
 :
-    R_(sphericalTensor::I),
-    Rtr_(sphericalTensor::I)
-{
-    direction maxCmpt = 0, dirCmpt = 1;
-
-    scalar maxVal = mag(axis[maxCmpt]);
-    bool negative = (axis[maxCmpt] < 0);
-
-    for (direction cmpt = 1; cmpt < vector::nComponents; ++cmpt)
-    {
-        const scalar val = mag(axis[cmpt]);
-
-        if (maxVal < val)
-        {
-            maxVal  = val;
-            maxCmpt = cmpt;
-            dirCmpt = maxCmpt+1;
-            negative = (axis[cmpt] < 0);
-
-            if (dirCmpt >= vector::nComponents)
-            {
-                dirCmpt = 0;
-            }
-        }
-    }
-
-    vector dir = Zero;
-    dir.component(dirCmpt) = (negative ? -1 : 1);
-
-    setTransform(axis, dir, E3_E1);
-}
+    R_(rotation(axis, findOrthogonal(axis), E3_E1)),
+    Rtr_(R_.T())
+{}
 
 
 Foam::axesRotation::axesRotation
@@ -130,7 +245,7 @@ Foam::axesRotation::axesRotation
     R_(sphericalTensor::I),
     Rtr_(sphericalTensor::I)
 {
-    operator=(dict);
+    read(dict);
 }
 
 
@@ -145,62 +260,6 @@ Foam::axesRotation::axesRotation
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-void Foam::axesRotation::setTransform
-(
-    const vector& axis1,
-    const vector& axis2,
-    const axisOrder& order
-)
-{
-    const vector a = axis1/mag(axis1);
-    vector b = axis2;
-
-    b = b - (b & a)*a;
-
-    if (mag(b) < SMALL)
-    {
-        FatalErrorInFunction
-            << "axis1, axis2 appear to be co-linear: "
-            << axis1 << ", " << axis2 << endl
-            << abort(FatalError);
-    }
-
-    b = b/mag(b);
-    const vector c = a^b;
-
-    // Global->local transformation
-    switch (order)
-    {
-        case E1_E2:
-        {
-            Rtr_ = tensor(a, b, c);
-            break;
-        }
-        case E2_E3:
-        {
-            Rtr_ = tensor(c, a, b);
-            break;
-        }
-        case E3_E1:
-        {
-            Rtr_ = tensor(b, c, a);
-            break;
-        }
-        default:
-        {
-            FatalErrorInFunction
-                << "Unhandled axes specification" << endl
-                << abort(FatalError);
-
-            break;
-        }
-    }
-
-    // Local->global transformation
-    R_ = Rtr_.T();
-}
-
 
 const Foam::tensorField& Foam::axesRotation::Tr() const
 {
@@ -298,36 +357,7 @@ Foam::symmTensor Foam::axesRotation::transformVector
 
 void Foam::axesRotation::operator=(const dictionary& dict)
 {
-    vector axis1, axis2;
-
-    if (dict.readIfPresent("e1", axis1) && dict.readIfPresent("e2", axis2))
-    {
-        setTransform(axis1, axis2, E1_E2);
-    }
-    else if (dict.readIfPresent("e2", axis1) && dict.readIfPresent("e3", axis2))
-    {
-        setTransform(axis1, axis2, E2_E3);
-    }
-    else if (dict.readIfPresent("e3", axis1) && dict.readIfPresent("e1", axis2))
-    {
-        setTransform(axis1, axis2, E3_E1);
-    }
-    else if (dict.found("axis") || dict.found("direction"))
-    {
-        // Both "axis" and "direction" are required
-        // If one is missing the appropriate error message will be generated
-        dict.lookup("axis") >> axis1;
-        dict.lookup("direction") >> axis2;
-
-        setTransform(axis1, axis2, E3_E1);
-    }
-    else
-    {
-        FatalErrorInFunction
-            << "not entry of the type (e1, e2) or (e2, e3) or (e3, e1) "
-            << "found "
-            << exit(FatalError);
-    }
+    read(dict);
 }
 
 

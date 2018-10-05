@@ -80,7 +80,7 @@ protected:
 
 public:
 
-    //- Destructor
+    //- Destructor. Closes/flushes the underlying layer
     virtual ~foamVtkBase64Layer();
 
 

@@ -145,15 +145,15 @@ void Foam::cloudSolution::read()
         }
     }
 
-    dict_.lookup("coupled") >> coupled_;
-    dict_.lookup("cellValueSourceCorrection") >> cellValueSourceCorrection_;
+    dict_.readEntry("coupled", coupled_);
+    dict_.readEntry("cellValueSourceCorrection", cellValueSourceCorrection_);
     dict_.readIfPresent("maxCo", maxCo_);
     dict_.readIfPresent("deltaTMax", deltaTMax_);
 
     if (steadyState())
     {
-        dict_.lookup("calcFrequency") >> calcFrequency_;
-        dict_.lookup("maxTrackTime") >> maxTrackTime_;
+        dict_.readEntry("calcFrequency", calcFrequency_);
+        dict_.readEntry("maxTrackTime", maxTrackTime_);
 
         if (coupled_)
         {

@@ -91,7 +91,7 @@ bool Foam::diameterModels::constant::read(const dictionary& phaseProperties)
 {
     diameterModel::read(phaseProperties);
 
-    diameterProperties_.lookup("d") >> d_;
+    diameterProperties_.readEntry("d", d_);
 
     return true;
 }

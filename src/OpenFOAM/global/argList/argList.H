@@ -161,11 +161,15 @@ class argList
             const string& str
         );
 
-        //- Warn if there are input tokens remaining on the stream
-        static void warnTrailing(const ITstream& is, const label index);
+        //- Check after reading if the input token stream has unconsumed
+        //- tokens remaining or if there were no tokens in the first place.
+        //  Emits Warning
+        static void checkITstream(const ITstream& is, const label index);
 
-        //- Warn if there are input tokens remaining on the stream
-        static void warnTrailing(const ITstream& is, const word& optName);
+        //- Check after reading if the input token stream has unconsumed
+        //- tokens remaining or if there were no tokens in the first place.
+        //  Emits Warning
+        static void checkITstream(const ITstream& is, const word& optName);
 
         //- Read a List of values from ITstream,
         //- treating a single entry like a list of size 1.

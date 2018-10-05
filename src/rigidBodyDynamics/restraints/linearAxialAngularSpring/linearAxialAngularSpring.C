@@ -170,8 +170,8 @@ bool Foam::RBD::restraints::linearAxialAngularSpring::read
             << abort(FatalError);
     }
 
-    coeffs_.lookup("stiffness") >> stiffness_;
-    coeffs_.lookup("damping") >> damping_;
+    coeffs_.readEntry("stiffness", stiffness_);
+    coeffs_.readEntry("damping", damping_);
 
     return true;
 }

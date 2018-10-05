@@ -98,8 +98,8 @@ bool Foam::solidBodyMotionFunctions::axisRotationMotion::read
 {
     solidBodyMotionFunction::read(SBMFCoeffs);
 
-    SBMFCoeffs_.lookup("origin") >> origin_;
-    SBMFCoeffs_.lookup("radialVelocity") >> radialVelocity_;
+    SBMFCoeffs_.readEntry("origin", origin_);
+    SBMFCoeffs_.readEntry("radialVelocity", radialVelocity_);
 
     return true;
 }

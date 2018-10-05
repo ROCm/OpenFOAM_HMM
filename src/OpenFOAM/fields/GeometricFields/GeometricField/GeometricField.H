@@ -298,7 +298,7 @@ public:
             const IOobject& io,
             const Mesh& mesh,
             const dimensionSet& ds,
-            const word& patchFieldType=PatchField<Type>::calculatedType()
+            const word& patchFieldType = PatchField<Type>::calculatedType()
         );
 
         //- Construct given IOobject, mesh, dimensions and patch types.
@@ -321,7 +321,7 @@ public:
             const IOobject& io,
             const Mesh& mesh,
             const dimensioned<Type>& dt,
-            const word& patchFieldType=PatchField<Type>::calculatedType()
+            const word& patchFieldType = PatchField<Type>::calculatedType()
         );
 
         //- Construct given IOobject, mesh, dimensioned<Type> and patch types.
@@ -336,7 +336,7 @@ public:
             const wordList& actualPatchTypes = wordList()
         );
 
-        //- Constructor from components
+        //- Copy construct from components
         GeometricField
         (
             const IOobject& io,
@@ -344,13 +344,33 @@ public:
             const PtrList<PatchField<Type>>& ptfl
         );
 
-        //- Constructor from components
+        //- Copy construct from components
         GeometricField
         (
             const IOobject& io,
             const Mesh& mesh,
             const dimensionSet& ds,
             const Field<Type>& iField,
+            const PtrList<PatchField<Type>>& ptfl
+        );
+
+        //- Construct from components, moving initial internal field
+        GeometricField
+        (
+            const IOobject& io,
+            const Mesh& mesh,
+            const dimensionSet& ds,
+            Field<Type>&& iField,
+            const PtrList<PatchField<Type>>& ptfl
+        );
+
+        //- Construct from components, moving initial internal field
+        GeometricField
+        (
+            const IOobject& io,
+            const Mesh& mesh,
+            const dimensionSet& ds,
+            List<Type>&& iField,
             const PtrList<PatchField<Type>>& ptfl
         );
 

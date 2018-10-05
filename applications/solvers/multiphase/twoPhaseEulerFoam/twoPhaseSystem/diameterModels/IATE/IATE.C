@@ -184,8 +184,8 @@ bool Foam::diameterModels::IATE::read(const dictionary& phaseProperties)
 {
     diameterModel::read(phaseProperties);
 
-    diameterProperties_.lookup("dMax") >> dMax_;
-    diameterProperties_.lookup("dMin") >> dMin_;
+    diameterProperties_.readEntry("dMax", dMax_);
+    diameterProperties_.readEntry("dMin", dMin_);
 
     // Re-create all the sources updating number, type and coefficients
     PtrList<IATEsource>

@@ -362,7 +362,7 @@ int main(int argc, char *argv[])
                /"processor" + Foam::name(Pstream::myProcNo());
         }
         wordList sourcePatches;
-        dict.lookup("sourcePatches") >> sourcePatches;
+        dict.readEntry("sourcePatches", sourcePatches);
 
         if (sourcePatches.size() == 1)
         {
@@ -581,7 +581,7 @@ int main(int argc, char *argv[])
         labelList exposedPatchID;
         if (mode == PATCH)
         {
-            dict.lookup("exposedPatchName") >> backPatchName;
+            dict.readEntry("exposedPatchName", backPatchName);
             exposedPatchID.setSize
             (
                 extrudePatch.size(),

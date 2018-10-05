@@ -47,7 +47,7 @@ Foam::word Foam::lduMatrix::preconditioner::getName
     const entry& e = solverControls.lookupEntry("preconditioner", false, false);
     if (e.isDict())
     {
-        e.dict().lookup("preconditioner") >> name;
+        e.dict().readEntry("preconditioner", name);
     }
     else
     {
@@ -71,7 +71,7 @@ Foam::lduMatrix::preconditioner::New
     const entry& e = solverControls.lookupEntry("preconditioner", false, false);
     if (e.isDict())
     {
-        e.dict().lookup("preconditioner") >> name;
+        e.dict().readEntry("preconditioner", name);
     }
     else
     {

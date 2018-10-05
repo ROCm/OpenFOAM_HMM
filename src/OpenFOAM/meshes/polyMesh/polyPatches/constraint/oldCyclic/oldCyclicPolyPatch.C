@@ -616,13 +616,13 @@ Foam::oldCyclicPolyPatch::oldCyclicPolyPatch
     {
         case ROTATIONAL:
         {
-            dict.lookup("rotationAxis") >> rotationAxis_;
-            dict.lookup("rotationCentre") >> rotationCentre_;
+            dict.readEntry("rotationAxis", rotationAxis_);
+            dict.readEntry("rotationCentre", rotationCentre_);
             break;
         }
         case TRANSLATIONAL:
         {
-            dict.lookup("separationVector") >> separationVector_;
+            dict.readEntry("separationVector", separationVector_);
             break;
         }
         default:

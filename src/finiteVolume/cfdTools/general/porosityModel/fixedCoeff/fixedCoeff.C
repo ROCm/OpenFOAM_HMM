@@ -216,7 +216,7 @@ void Foam::porosityModels::fixedCoeff::correct
     scalar rho = 1.0;
     if (UEqn.dimensions() == dimForce)
     {
-        coeffs_.lookup("rhoRef") >> rho;
+        coeffs_.readEntry("rhoRef", rho);
     }
 
     apply(Udiag, Usource, V, U, rho);
@@ -238,7 +238,7 @@ void Foam::porosityModels::fixedCoeff::correct
     scalar rho = 1.0;
     if (UEqn.dimensions() == dimForce)
     {
-        coeffs_.lookup("rhoRef") >> rho;
+        coeffs_.readEntry("rhoRef", rho);
     }
 
     apply(Udiag, Usource, V, U, rho);
@@ -256,7 +256,7 @@ void Foam::porosityModels::fixedCoeff::correct
     scalar rho = 1.0;
     if (UEqn.dimensions() == dimForce)
     {
-        coeffs_.lookup("rhoRef") >> rho;
+        coeffs_.readEntry("rhoRef", rho);
     }
 
     apply(AU, U, rho);

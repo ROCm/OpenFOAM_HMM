@@ -62,7 +62,7 @@ autoPtr<surfaceFilmModel> surfaceFilmModel::New
                 surfaceFilmPropertiesDictHeader
             );
 
-            surfaceFilmPropertiesDict.lookup("surfaceFilmModel") >> modelType;
+            surfaceFilmPropertiesDict.readEntry("surfaceFilmModel", modelType);
         }
         else
         {

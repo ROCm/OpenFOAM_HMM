@@ -136,7 +136,7 @@ bool Foam::XiModels::transport::read(const dictionary& XiProperties)
 {
     XiModel::read(XiProperties);
 
-    XiModelCoeffs_.lookup("XiShapeCoef") >> XiShapeCoef;
+    XiModelCoeffs_.readEntry("XiShapeCoef", XiShapeCoef);
 
     return true;
 }

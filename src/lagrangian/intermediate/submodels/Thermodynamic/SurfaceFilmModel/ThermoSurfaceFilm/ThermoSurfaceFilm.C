@@ -504,14 +504,14 @@ Foam::ThermoSurfaceFilm<CloudType>::ThermoSurfaceFilm
 
     if (interactionType_ == itSplashBai)
     {
-        this->coeffDict().lookup("deltaWet") >> deltaWet_;
+        this->coeffDict().readEntry("deltaWet", deltaWet_);
         splashParcelType_ =
             this->coeffDict().lookupOrDefault("splashParcelType", -1);
         parcelsPerSplash_ =
             this->coeffDict().lookupOrDefault("parcelsPerSplash", 2);
-        this->coeffDict().lookup("Adry") >> Adry_;
-        this->coeffDict().lookup("Awet") >> Awet_;
-        this->coeffDict().lookup("Cf") >> Cf_;
+        this->coeffDict().readEntry("Adry", Adry_);
+        this->coeffDict().readEntry("Awet", Awet_);
+        this->coeffDict().readEntry("Cf", Cf_);
     }
 }
 

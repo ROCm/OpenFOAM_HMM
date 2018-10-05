@@ -128,9 +128,9 @@ bool Foam::mixtureViscosityModels::BinghamPlastic::read
 {
     plastic::read(viscosityProperties);
 
-    plasticCoeffs_.lookup("yieldStressCoeff") >> yieldStressCoeff_;
-    plasticCoeffs_.lookup("yieldStressExponent") >> yieldStressExponent_;
-    plasticCoeffs_.lookup("yieldStressOffset") >> yieldStressOffset_;
+    plasticCoeffs_.readEntry("yieldStressCoeff", yieldStressCoeff_);
+    plasticCoeffs_.readEntry("yieldStressExponent", yieldStressExponent_);
+    plasticCoeffs_.readEntry("yieldStressOffset", yieldStressOffset_);
 
     return true;
 }

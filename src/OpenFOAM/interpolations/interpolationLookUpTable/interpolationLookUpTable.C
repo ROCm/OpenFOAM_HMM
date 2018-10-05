@@ -207,9 +207,9 @@ void Foam::interpolationLookUpTable<Type>::readTable
         )
     );
 
-    control.lookup("fields") >> entries_;
-    control.lookup("output") >> output_;
-    control.lookup("values") >> *this;
+    control.readEntry("fields", entries_);
+    control.readEntry("output", output_);
+    control.readEntry("values", *this);
 
     dimensionTable();
 

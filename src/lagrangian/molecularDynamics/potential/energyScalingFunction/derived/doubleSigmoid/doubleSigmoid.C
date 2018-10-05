@@ -93,10 +93,10 @@ bool doubleSigmoid::read(const dictionary& energyScalingFunctionProperties)
     doubleSigmoidCoeffs_ =
         energyScalingFunctionProperties.subDict(typeName + "Coeffs");
 
-    doubleSigmoidCoeffs_.lookup("shift1") >> shift1_;
-    doubleSigmoidCoeffs_.lookup("scale1") >> scale1_;
-    doubleSigmoidCoeffs_.lookup("shift2") >> shift2_;
-    doubleSigmoidCoeffs_.lookup("scale2") >> scale2_;
+    doubleSigmoidCoeffs_.readEntry("shift1", shift1_);
+    doubleSigmoidCoeffs_.readEntry("scale1", scale1_);
+    doubleSigmoidCoeffs_.readEntry("shift2", shift2_);
+    doubleSigmoidCoeffs_.readEntry("scale2", scale2_);
 
     return true;
 }

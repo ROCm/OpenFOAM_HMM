@@ -52,7 +52,6 @@ mesh.setFluxRequired(p.name());
     nonInt.insert("cellInterpolationWeight");
 
 }
-
 // Mask field for zeroing out contributions on hole cells
 #include "createCellMask.H"
 

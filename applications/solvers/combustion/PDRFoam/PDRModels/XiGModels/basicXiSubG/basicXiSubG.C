@@ -104,7 +104,7 @@ bool Foam::XiGModels::basicSubGrid::read(const dictionary& XiGProperties)
 {
     XiGModel::read(XiGProperties);
 
-    XiGModelCoeffs_.lookup("k1") >> k1;
+    XiGModelCoeffs_.readEntry("k1", k1);
 
     return true;
 }

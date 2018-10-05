@@ -117,8 +117,8 @@ extrudePatchMesh::extrudePatchMesh
 
     forAll(dicts, patchi)
     {
-        dicts[patchi].lookup("name") >> patchNames[patchi];
-        dicts[patchi].lookup("type") >> patchTypes[patchi];
+        dicts[patchi].readEntry("name", patchNames[patchi]);
+        dicts[patchi].readEntry("type", patchTypes[patchi]);
     }
 
     forAll(regionPatches, patchi)
@@ -273,8 +273,8 @@ void extrudePatchMesh::extrudeMesh(const List<polyPatch*>& regionPatches)
 
         forAll(dicts, patchi)
         {
-            dicts[patchi].lookup("name") >> patchNames[patchi];
-            dicts[patchi].lookup("type") >> patchTypes[patchi];
+            dicts[patchi].readEntry("name", patchNames[patchi]);
+            dicts[patchi].readEntry("type", patchTypes[patchi]);
         }
 
         forAll(regionPatches, patchi)

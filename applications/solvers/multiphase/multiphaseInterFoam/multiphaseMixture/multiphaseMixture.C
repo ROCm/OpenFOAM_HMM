@@ -701,14 +701,12 @@ bool Foam::multiphaseMixture::read()
             readOK &= iter().read(phaseData[phasei++].dict());
         }
 
-        lookup("sigmas") >> sigmas_;
+        readEntry("sigmas", sigmas_);
 
         return readOK;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

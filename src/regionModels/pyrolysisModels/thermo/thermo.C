@@ -50,8 +50,8 @@ addToRunTimeSelectionTable(pyrolysisModel, thermo, dictionary);
 void thermo::readControls()
 {
     const dictionary& solution = this->solution().subDict("SIMPLE");
-    solution.lookup("nNonOrthCorr") >> nNonOrthCorr_;
-    time().controlDict().lookup("maxDi") >> maxDiff_;
+    solution.readEntry("nNonOrthCorr", nNonOrthCorr_);
+    time().controlDict().readEntry("maxDi", maxDiff_);
 }
 
 

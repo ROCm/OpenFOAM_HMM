@@ -106,7 +106,7 @@ Foam::porosityModel::porosityModel
     if (zoneName_ == word::null)
     {
         dict.readIfPresent("active", active_);
-        dict_.lookup("cellZone") >> zoneName_;
+        dict_.readEntry("cellZone", zoneName_);
     }
 
     cellZoneIDs_ = mesh_.cellZones().indices(zoneName_);

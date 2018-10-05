@@ -101,9 +101,9 @@ bool pitchForkRing::read(const dictionary& tetherPotentialProperties)
     pitchForkRingCoeffs_ =
         tetherPotentialProperties.subDict(typeName + "Coeffs");
 
-    pitchForkRingCoeffs_.lookup("mu") >> mu_;
-    pitchForkRingCoeffs_.lookup("alpha") >> alpha_;
-    pitchForkRingCoeffs_.lookup("rOrbit") >> rOrbit_;
+    pitchForkRingCoeffs_.readEntry("mu", mu_);
+    pitchForkRingCoeffs_.readEntry("alpha", alpha_);
+    pitchForkRingCoeffs_.readEntry("rOrbit", rOrbit_);
 
     return true;
 }

@@ -31,7 +31,7 @@ void Foam::geomDecomp::readCoeffs()
 {
     coeffsDict_.readIfPresent("delta", delta_);
 
-    coeffsDict_.lookup("n") >> n_;
+    coeffsDict_.readEntry("n", n_);
 
     // Verify that the input makes sense
     if (nDomains_ != n_.x()*n_.y()*n_.z())

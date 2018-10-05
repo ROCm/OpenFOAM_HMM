@@ -157,11 +157,11 @@ int main(int argc, char *argv[])
     functionObjects::fileFieldSelection fields(mesh);
     if (args.found("fields"))
     {
-        args.lookup("fields")() >> fields;
+        fields.insert(args.getList<wordRe>("fields"));
     }
     if (args.found("field"))
     {
-        fields.insert(args.lookup("field")());
+        fields.insert(args.opt<wordRe>("field"));
     }
 
     // Externally stored dictionary for functionObjectList

@@ -102,28 +102,40 @@ public:
     // Constructors
 
         //- Construct null
-        inline fileName();
+        fileName() = default;
 
-        //- Construct as copy
-        inline fileName(const fileName& fn);
+        //- Copy construct
+        fileName(const fileName&) = default;
 
-        //- Construct as copy of word
-        inline fileName(const word& w);
+        //- Move construct
+        fileName(fileName&&) = default;
 
-        //- Construct as copy of string
-        inline fileName(const string& s, const bool doStripInvalid=true);
+        //- Copy construct from word
+        inline fileName(const word& s);
 
-        //- Construct as copy of std::string
-        inline fileName(const std::string& s, const bool doStripInvalid=true);
+        //- Move construct from word
+        inline fileName(word&& s);
 
-        //- Construct as copy of character array
-        inline fileName(const char* s, const bool doStripInvalid=true);
+        //- Copy construct from string
+        inline fileName(const string& s, bool doStrip=true);
+
+        //- Move construct from string
+        inline fileName(string&& s, bool doStrip=true);
+
+        //- Copy construct from std::string
+        inline fileName(const std::string& s, bool doStrip=true);
+
+        //- Move construct from std::string
+        inline fileName(std::string&& s, bool doStrip=true);
+
+        //- Copy construct from character array
+        inline fileName(const char* s, bool doStrip=true);
 
         //- Construct by concatenating elements of wordList separated by '/'
-        explicit fileName(const UList<word>& lst);
+        explicit fileName(const UList<word>& list);
 
         //- Construct by concatenating words separated by '/'
-        explicit fileName(std::initializer_list<word> lst);
+        explicit fileName(std::initializer_list<word> list);
 
 
         //- Construct from Istream
@@ -226,17 +238,17 @@ public:
         //    "/foo/bar"      "bar"     "bar"
         //    "/foo/bar/"     ""        "bar"
         // \endverbatim
-        static std::string name(const std::string& str);
+        inline static std::string name(const std::string& str);
 
         //- Return basename (part beyond last /), including its extension
-        word name() const;
+        inline word name() const;
 
         //- Return basename, without extension
         //  The result normally corresponds to a Foam::word
         static std::string nameLessExt(const std::string& str);
 
         //- Return basename, without extension
-        word nameLessExt() const;
+        inline word nameLessExt() const;
 
         //- Return basename, optionally without extension
         // \deprecated in favour of name() or nameLessExt() which describe
@@ -260,30 +272,36 @@ public:
         //    "/foo/bar"      "/foo"          "/foo"
         //    "/foo/bar/"     "/foo/bar/"     "/foo"
         // \endverbatim
-        static std::string path(const std::string& str);
+        inline static std::string path(const std::string& str);
 
         //- Return directory path name (part before last /)
-        fileName path() const;
+        inline fileName path() const;
+
+        //- Return true if it contains a '/' character
+        inline bool hasPath() const;
+
+        //- Remove leading path, returning true if string changed.
+        inline bool removePath();
 
         //- Return name after stripping off the parent directory
         fileName relative(const fileName& parent) const;
 
         //- Return file name without extension (part before last .)
-        fileName lessExt() const;
+        inline fileName lessExt() const;
 
         //- Return file name extension (part after last .)
-        word ext() const;
+        inline word ext() const;
 
         //- Append a '.' and the ending, and return the object.
         //  The '.' and ending will not be added when the ending is empty,
         //  or when the file name is empty or ended with a '/'.
-        fileName& ext(const word& ending);
+        inline fileName& ext(const word& ending);
 
         //- Return true if it has an extension or simply ends with a '.'
         inline bool hasExt() const;
 
         //- Return true if the extension is the same as the given ending.
-        bool hasExt(const word& ending) const;
+        inline bool hasExt(const word& ending) const;
 
         //- Return true if the extension matches the given ending.
         bool hasExt(const wordRe& ending) const;
@@ -318,20 +336,32 @@ public:
 
     // Assignment
 
-        //- Copy, no character validation required
-        void operator=(const fileName& str);
+        //- Copy assignment, no character validation required
+        fileName& operator=(const fileName&) = default;
 
-        //- Copy, no character validation required
-        void operator=(const word& str);
+        //- Move assignment, no character validation required
+        fileName& operator=(fileName&&) = default;
+
+        //- Copy assignment, no character validation required
+        inline fileName& operator=(const word& str);
+
+        //- Move assignment, no character validation required
+        inline fileName& operator=(word&& str);
+
+        //- Copy assignment, stripping invalid characters
+        inline fileName& operator=(const string& str);
+
+        //- Move assignment, stripping invalid characters
+        inline fileName& operator=(string&& str);
+
+        //- Copy assignment, stripping invalid characters
+        inline fileName& operator=(const std::string& str);
+
+        //- Move assignment, stripping invalid characters
+        inline fileName& operator=(std::string&& str);
 
         //- Copy, stripping invalid characters
-        void operator=(const string& str);
-
-        //- Copy, stripping invalid characters
-        void operator=(const std::string& str);
-
-        //- Copy, stripping invalid characters
-        void operator=(const char* str);
+        inline fileName& operator=(const char* str);
 
 
     // Other operators

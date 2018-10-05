@@ -90,16 +90,12 @@ void Foam::combustionModels::laminar<ReactionThermo>::correct()
                 const scalarField& rDeltaT =
                     fv::localEulerDdt::localRDeltaT(this->mesh());
 
-                if (this->coeffs().found("maxIntegrationTime"))
+                scalar maxTime;
+                if (this->coeffs().readIfPresent("maxIntegrationTime", maxTime))
                 {
-                    scalar maxIntegrationTime
-                    (
-                        readScalar(this->coeffs().lookup("maxIntegrationTime"))
-                    );
-
                     this->chemistryPtr_->solve
                     (
-                        min(1.0/rDeltaT, maxIntegrationTime)()
+                        min(1.0/rDeltaT, maxTime)()
                     );
                 }
                 else

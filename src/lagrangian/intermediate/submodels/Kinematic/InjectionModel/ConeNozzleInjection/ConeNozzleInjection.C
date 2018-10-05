@@ -92,7 +92,7 @@ void Foam::ConeNozzleInjection<CloudType>::setFlowType()
     {
         case flowType::ftConstantVelocity:
         {
-            this->coeffDict().lookup("UMag") >> UMag_;
+            this->coeffDict().readEntry("UMag", UMag_);
             break;
         }
         case flowType::ftPressureDrivenVelocity:

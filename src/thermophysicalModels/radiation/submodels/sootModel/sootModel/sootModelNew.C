@@ -37,10 +37,8 @@ Foam::radiation::sootModel::New
 {
     word modelType("none");
 
-    if (dict.found("sootModel"))
+    if (dict.readIfPresent("sootModel", modelType))
     {
-        dict.lookup("sootModel") >> modelType;
-
         Info<< "Selecting sootModel " << modelType << endl;
     }
 

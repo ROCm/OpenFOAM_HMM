@@ -307,9 +307,9 @@ void Foam::radiation::solarLoad::initialise(const dictionary& coeffs)
 
     includePatches_ = mesh_.boundaryMesh().indices(viewFactorWalls);
 
-    coeffs.lookup("useVFbeamToDiffuse") >> useVFbeamToDiffuse_;
+    coeffs.readEntry("useVFbeamToDiffuse", useVFbeamToDiffuse_);
 
-    coeffs.lookup("spectralDistribution") >> spectralDistribution_;
+    coeffs.readEntry("spectralDistribution", spectralDistribution_);
 
     spectralDistribution_ =
         spectralDistribution_/sum(spectralDistribution_);

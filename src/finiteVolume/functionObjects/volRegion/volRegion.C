@@ -111,7 +111,7 @@ bool Foam::functionObjects::volRegion::read
     {
         case vrtCellZone:
         {
-            dict.lookup("name") >> regionName_;
+            dict.readEntry("name", regionName_);
 
             regionID_ = mesh_.cellZones().findZoneID(regionName_);
 

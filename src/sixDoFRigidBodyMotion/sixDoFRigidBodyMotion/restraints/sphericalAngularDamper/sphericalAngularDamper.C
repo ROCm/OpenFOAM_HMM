@@ -96,7 +96,7 @@ bool Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularDamper::read
 {
     sixDoFRigidBodyMotionRestraint::read(sDoFRBMRDict);
 
-    sDoFRBMRCoeffs_.lookup("coeff") >> coeff_;
+    sDoFRBMRCoeffs_.readEntry("coeff", coeff_);
 
     return true;
 }

@@ -105,9 +105,9 @@ Foam::SingleMixtureFraction<CloudType>::SingleMixtureFraction
             << exit(FatalError);
     }
 
-    this->coeffDict().lookup("YGasTot0") >> YMixture0_[idGas_];
-    this->coeffDict().lookup("YLiquidTot0") >> YMixture0_[idLiquid_];
-    this->coeffDict().lookup("YSolidTot0") >> YMixture0_[idSolid_];
+    this->coeffDict().readEntry("YGasTot0", YMixture0_[idGas_]);
+    this->coeffDict().readEntry("YLiquidTot0", YMixture0_[idLiquid_]);
+    this->coeffDict().readEntry("YSolidTot0", YMixture0_[idSolid_]);
 
     if (mag(sum(YMixture0_) - 1.0) > SMALL)
     {

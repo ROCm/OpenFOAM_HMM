@@ -96,7 +96,7 @@ bool diffusion<ReactionThermo, ThermoType>::read()
 {
     if (singleStepCombustion<ReactionThermo, ThermoType>::read())
     {
-        this->coeffs().lookup("C") >> C_ ;
+        this->coeffs().readEntry("C", C_);
         this->coeffs().readIfPresent("oxidant", oxidantName_);
         return true;
     }

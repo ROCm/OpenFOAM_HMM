@@ -89,7 +89,7 @@ Foam::laplaceFilter::laplaceFilter(const fvMesh& mesh, const dictionary& bd)
 
 void Foam::laplaceFilter::read(const dictionary& bd)
 {
-    bd.optionalSubDict(type() + "Coeffs").lookup("widthCoeff") >> widthCoeff_;
+    bd.optionalSubDict(type() + "Coeffs").readEntry("widthCoeff", widthCoeff_);
 }
 
 

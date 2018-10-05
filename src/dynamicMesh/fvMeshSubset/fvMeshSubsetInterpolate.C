@@ -96,6 +96,7 @@ fvMeshSubset::interpolate
         ),
         sMesh,
         vf.dimensions(),
+        // Move construct for internal field
         Field<Type>(vf.primitiveField(), cellMap),
         patchFields
     );
@@ -231,14 +232,11 @@ fvMeshSubset::interpolate
         ),
         sMesh,
         vf.dimensions(),
+        // Move construct for internal field
         Field<Type>
         (
             vf.primitiveField(),
-            SubList<label>
-            (
-                faceMap,
-                sMesh.nInternalFaces()
-            )
+            SubList<label>(faceMap, sMesh.nInternalFaces())
         ),
         patchFields
     );
@@ -411,6 +409,7 @@ fvMeshSubset::interpolate
         ),
         sMesh,
         vf.dimensions(),
+        // Move construct for internal field
         Field<Type>(vf.primitiveField(), pointMap),
         patchFields
     );

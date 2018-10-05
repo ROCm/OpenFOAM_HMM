@@ -100,7 +100,7 @@ externalWallHeatFluxTemperatureFvPatchScalarField
     {
         case fixedPower:
         {
-            dict.lookup("Q") >> Q_;
+            dict.readEntry("Q", Q_);
 
             break;
         }
@@ -115,10 +115,9 @@ externalWallHeatFluxTemperatureFvPatchScalarField
             h_ = scalarField("h", dict, p.size());
             Ta_ = Function1<scalar>::New("Ta", dict);
 
-            if (dict.found("thicknessLayers"))
+            if (dict.readIfPresent("thicknessLayers", thicknessLayers_))
             {
-                dict.lookup("thicknessLayers") >> thicknessLayers_;
-                dict.lookup("kappaLayers") >> kappaLayers_;
+                dict.readEntry("kappaLayers", kappaLayers_);
 
                 if (thicknessLayers_.size() != kappaLayers_.size())
                 {

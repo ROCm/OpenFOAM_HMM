@@ -77,7 +77,7 @@ Foam::Istream& Foam::operator>>
     const dictionaryEntry entry(dictionary::null, is);
 
     pid.patchName_ = entry.keyword();
-    entry.lookup("type") >> pid.interactionTypeName_;
+    entry.readEntry("type", pid.interactionTypeName_);
     pid.e_ = entry.lookupOrDefault<scalar>("e", 1.0);
     pid.mu_ = entry.lookupOrDefault<scalar>("mu", 0.0);
 

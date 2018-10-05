@@ -119,7 +119,7 @@ void Foam::helpType::displayDoc
     {
         const dictionary& docDict =
             debug::controlDict().subDict("Documentation");
-        docDict.lookup("docBrowser") >> docBrowser;
+        docDict.readEntry("docBrowser", docBrowser);
     }
 
     doxygenXmlParser parser

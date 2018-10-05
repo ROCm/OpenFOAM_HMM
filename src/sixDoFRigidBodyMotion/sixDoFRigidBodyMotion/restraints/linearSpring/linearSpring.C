@@ -110,11 +110,11 @@ bool Foam::sixDoFRigidBodyMotionRestraints::linearSpring::read
 {
     sixDoFRigidBodyMotionRestraint::read(sDoFRBMRDict);
 
-    sDoFRBMRCoeffs_.lookup("anchor") >> anchor_;
-    sDoFRBMRCoeffs_.lookup("refAttachmentPt") >> refAttachmentPt_;
-    sDoFRBMRCoeffs_.lookup("stiffness") >> stiffness_;
-    sDoFRBMRCoeffs_.lookup("damping") >> damping_;
-    sDoFRBMRCoeffs_.lookup("restLength") >> restLength_;
+    sDoFRBMRCoeffs_.readEntry("anchor", anchor_);
+    sDoFRBMRCoeffs_.readEntry("refAttachmentPt", refAttachmentPt_);
+    sDoFRBMRCoeffs_.readEntry("stiffness", stiffness_);
+    sDoFRBMRCoeffs_.readEntry("damping", damping_);
+    sDoFRBMRCoeffs_.readEntry("restLength", restLength_);
 
     return true;
 }

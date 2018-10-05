@@ -80,8 +80,8 @@ bool exponentialRepulsion::read(const dictionary& exponentialRepulsion)
     exponentialRepulsionCoeffs_ =
         exponentialRepulsion.subDict(typeName + "Coeffs");
 
-    exponentialRepulsionCoeffs_.lookup("rm") >> rm_;
-    exponentialRepulsionCoeffs_.lookup("epsilon") >> epsilon_;
+    exponentialRepulsionCoeffs_.readEntry("rm", rm_);
+    exponentialRepulsionCoeffs_.readEntry("epsilon", epsilon_);
 
     return true;
 }

@@ -117,11 +117,11 @@ bool Foam::RBD::restraints::linearSpring::read
 {
     restraint::read(dict);
 
-    coeffs_.lookup("anchor") >> anchor_;
-    coeffs_.lookup("refAttachmentPt") >> refAttachmentPt_;
-    coeffs_.lookup("stiffness") >> stiffness_;
-    coeffs_.lookup("damping") >> damping_;
-    coeffs_.lookup("restLength") >> restLength_;
+    coeffs_.readEntry("anchor", anchor_);
+    coeffs_.readEntry("refAttachmentPt", refAttachmentPt_);
+    coeffs_.readEntry("stiffness", stiffness_);
+    coeffs_.readEntry("damping", damping_);
+    coeffs_.readEntry("restLength", restLength_);
 
     return true;
 }

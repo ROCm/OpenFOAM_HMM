@@ -25,7 +25,6 @@ License
 
 #include "ensightMesh.H"
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::ensightMesh::options::options(IOstream::streamFormat format)

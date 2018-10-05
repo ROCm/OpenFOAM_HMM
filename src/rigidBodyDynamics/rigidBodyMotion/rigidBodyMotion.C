@@ -70,7 +70,7 @@ Foam::RBD::rigidBodyMotion::rigidBodyMotion
 {
     if (dict.found("g"))
     {
-        g() = vector(dict.lookup("g"));
+        g() = dict.get<vector>("g");
     }
 
     initialize();
@@ -95,7 +95,7 @@ Foam::RBD::rigidBodyMotion::rigidBodyMotion
 {
     if (dict.found("g"))
     {
-        g() = vector(dict.lookup("g"));
+        g() = dict.get<vector>("g");
     }
 
     initialize();

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,41 +22,33 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::EulerCoordinateRotation
+    Foam::STARCDCoordinateRotation
 
 Description
-    A coordinateRotation defined in the z-x-z (intrinsic) Euler convention.
+    A coordinateRotation defined by the STAR-CD convention.
 
-    The 3 rotations are defined in the Euler intrinsic convention
-    (around Z, around X' and around Z'').
+    The 3 rotations are defined in the STAR-CD convention
+    (around Z, around X' and around Y'').
     The order of the parameter arguments matches this rotation order.
-
-    For reference and illustration, see
-    http://mathworld.wolfram.com/EulerAngles.html
-    and
-    https://en.wikipedia.org/wiki/Euler_angles#Conventions
-
-    Note, however, that it is the reverse transformation
-    (local->global) that is defined here.
 
     - the rotation angles are in degrees, unless otherwise explicitly specified:
 
     \verbatim
     coordinateRotation
     {
-        type        EulerRotation;
+        type        STARCDRotation;
         degrees     false;
         rotation    (0 0 3.141592654);
     }
     \endverbatim
 
 SourceFiles
-    EulerCoordinateRotation.C
+    STARCDCoordinateRotation.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef EulerCoordinateRotation_H
-#define EulerCoordinateRotation_H
+#ifndef STARCDCoordinateRotation_H
+#define STARCDCoordinateRotation_H
 
 #include "coordinateRotation.H"
 
@@ -66,82 +58,77 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class EulerCoordinateRotation Declaration
+                  Class STARCDCoordinateRotation Declaration
 \*---------------------------------------------------------------------------*/
 
-class EulerCoordinateRotation
+class STARCDCoordinateRotation
 :
     public coordinateRotation
 {
-
     // Private Member Data
 
-        //- Local-to-global transformation tensor
+        //- Local-to-Global transformation tensor
         tensor R_;
 
         //- Global-to-Local transformation tensor
         tensor Rtr_;
 
 
-    // Private Member Functions
-
-        //- Calculate transformation tensor
-        void calcTransform
-        (
-            const scalar phiAngle,
-            const scalar thetaAngle,
-            const scalar psiAngle,
-            const bool inDegrees
-        );
-
-
 public:
 
     //- Runtime type information
-    TypeName("EulerRotation");
+    TypeName("STARCDRotation");
 
 
     // Constructors
 
         //- Construct null
-        EulerCoordinateRotation();
+        STARCDCoordinateRotation();
 
         //- Construct as copy
-        EulerCoordinateRotation(const EulerCoordinateRotation& r);
+        STARCDCoordinateRotation(const STARCDCoordinateRotation& r);
 
         //- Construct from rotation vector
-        EulerCoordinateRotation
+        STARCDCoordinateRotation
         (
-            const vector& phiThetaPsi,
-            const bool inDegrees
+            const vector& rotZrotXrotY,
+            const bool degrees
         );
 
         //- Construct from components of rotation vector
-        EulerCoordinateRotation
+        STARCDCoordinateRotation
         (
-            const scalar phiAngle,
-            const scalar thetaAngle,
-            const scalar psiAngle,
-            const bool inDegrees
+            const scalar rotZ,
+            const scalar rotX,
+            const scalar rotY,
+            const bool degrees
         );
 
         //- Construct from dictionary
-        explicit EulerCoordinateRotation(const dictionary& dict);
+        explicit STARCDCoordinateRotation(const dictionary& dict);
 
         //- Construct from dictionary and a registry (typically a mesh)
-        EulerCoordinateRotation
+        STARCDCoordinateRotation
         (
             const dictionary& dict,
             const objectRegistry& unused
         );
+
 
         //- Return clone
         autoPtr<coordinateRotation> clone() const
         {
             return
                 autoPtr<coordinateRotation>::NewFrom
-                <EulerCoordinateRotation>(*this);
+                <STARCDCoordinateRotation>(*this);
         }
+
+
+    // Static Member Functions
+
+        //- The rotation tensor calculated for the specified STARCD angles
+        //- interpreted as rotate-Z, rotate-X, rotate-Y
+        static tensor rotation(const vector& angles, bool degrees);
 
 
     // Member Functions

@@ -86,8 +86,8 @@ bool Foam::XiGModels::instabilityG::read(const dictionary& XiGProperties)
 {
     XiGModel::read(XiGProperties);
 
-    XiGModelCoeffs_.lookup("GIn") >> GIn_;
-    XiGModelCoeffs_.lookup("lambdaIn") >> lambdaIn_;
+    XiGModelCoeffs_.readEntry("GIn", GIn_);
+    XiGModelCoeffs_.readEntry("lambdaIn", lambdaIn_);
 
     return true;
 }

@@ -533,8 +533,8 @@ thermoSingleLayer::thermoSingleLayer
 
     if (hydrophilic_)
     {
-        coeffs_.lookup("hydrophilicDryScale") >> hydrophilicDryScale_;
-        coeffs_.lookup("hydrophilicWetScale") >> hydrophilicWetScale_;
+        coeffs_.readEntry("hydrophilicDryScale", hydrophilicDryScale_);
+        coeffs_.readEntry("hydrophilicWetScale", hydrophilicWetScale_);
     }
 
     if (readFields)

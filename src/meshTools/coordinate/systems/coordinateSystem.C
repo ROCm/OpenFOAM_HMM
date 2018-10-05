@@ -366,7 +366,7 @@ void Foam::coordinateSystem::operator=(coordinateSystem&& cs)
 
 void Foam::coordinateSystem::init(const dictionary& dict)
 {
-    dict.lookup("origin") >> origin_;
+    dict.readEntry("origin", origin_);
     note_.clear();
     dict.readIfPresent("note", note_);
     R_ = coordinateRotation::New(dict.subDict("coordinateRotation"));
@@ -379,7 +379,7 @@ void Foam::coordinateSystem::init
     const objectRegistry& obr
 )
 {
-    dict.lookup("origin") >> origin_;
+    dict.readEntry("origin", origin_);
 
     // The 'note' entry is optional
     note_.clear();

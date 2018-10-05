@@ -94,7 +94,7 @@ bool infinitelyFastChemistry<ReactionThermo, ThermoType>::read()
 {
     if (singleStepCombustion<ReactionThermo, ThermoType>::read())
     {
-        this->coeffs().lookup("C") >> C_ ;
+        this->coeffs().readEntry("C", C_);
         return true;
     }
     else

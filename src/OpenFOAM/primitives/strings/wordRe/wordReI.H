@@ -64,6 +64,13 @@ inline Foam::wordRe::wordRe(const wordRe& str)
 }
 
 
+inline Foam::wordRe::wordRe(wordRe&& str)
+:
+    word(std::move(static_cast<word&>(str))),
+    re_(std::move(str.re_))
+{}
+
+
 inline Foam::wordRe::wordRe(const keyType& str)
 :
     word(str, false),
@@ -148,13 +155,6 @@ inline Foam::wordRe::wordRe(const word& str, const compOption opt)
 }
 
 
-inline Foam::wordRe::wordRe(wordRe&& str)
-:
-    word(std::move(static_cast<word&>(str))),
-    re_(std::move(str.re_))
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline bool Foam::wordRe::isPattern() const
@@ -200,9 +200,9 @@ inline bool Foam::wordRe::compile() const
 }
 
 
-inline void Foam::wordRe::uncompile(const bool doStripInvalid) const
+inline void Foam::wordRe::uncompile(bool doStrip) const
 {
-    if (re_.clear() && doStripInvalid)
+    if (re_.clear() && doStrip)
     {
         // Skip stripping unless debug is active to avoid costly operations
         if (word::debug)

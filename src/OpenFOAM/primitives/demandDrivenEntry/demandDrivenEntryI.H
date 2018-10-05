@@ -32,7 +32,7 @@ inline void Foam::demandDrivenEntry<Type>::initialise() const
 {
     if (!stored_)
     {
-        dict_.lookup(keyword_) >> value_;
+        dict_.readEntry(keyword_, value_);
         stored_ = true;
     }
 }

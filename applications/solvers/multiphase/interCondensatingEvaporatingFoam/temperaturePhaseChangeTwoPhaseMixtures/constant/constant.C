@@ -158,8 +158,8 @@ bool Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::read()
 {
     if (temperaturePhaseChangeTwoPhaseMixture::read())
     {
-        subDict(type() + "Coeffs").lookup("coeffC") >> coeffC_;
-        subDict(type() + "Coeffs").lookup("coeffE") >> coeffE_;
+        subDict(type() + "Coeffs").readEntry("coeffC", coeffC_);
+        subDict(type() + "Coeffs").readEntry("coeffE", coeffE_);
 
         return true;
     }

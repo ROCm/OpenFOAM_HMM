@@ -180,17 +180,11 @@ int main(int argc, char *argv[])
     wordList regionDirs;
     if (allRegions)
     {
-        Info<< "Reconstructing all regions in regionProperties" << nl << endl;
-        regionProperties rp(runTime);
-
-        wordHashSet names;
-        forAllConstIters(rp, iter)
-        {
-            names.insert(iter.object());
-        }
-
-        regionNames = names.sortedToc();
+        regionNames = regionProperties(runTime).names();
         regionDirs = regionNames;
+
+        Info<< "Reconstructing all regions in regionProperties" << nl
+            << "    " << flatOutput(regionNames) << nl << endl;
     }
     else
     {

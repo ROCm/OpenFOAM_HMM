@@ -217,7 +217,7 @@ void Foam::solverTemplate::setRegionProperties
         const word& fieldName = fieldNames_[regionI][i];
         const dictionary& dict = fieldDict.subDict(fieldName);
 
-        dict.lookup("type") >> fieldTypes_[regionI][i];
+        dict.readEntry("type", fieldTypes_[regionI][i]);
         fieldDimensions_[regionI].set
         (
             i,

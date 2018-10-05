@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,8 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "EulerCoordinateRotation.H"
-
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -46,6 +45,44 @@ namespace Foam
         objectRegistry
     );
 }
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::tensor Foam::EulerCoordinateRotation::rotation
+(
+    const vector& angles,
+    bool degrees
+)
+{
+    scalar phi   = angles.component(vector::X); // 1. Rotate about Z
+    scalar theta = angles.component(vector::Y); // 2. Rotate about X
+    scalar psi   = angles.component(vector::Z); // 3. Rotate about Z
+
+    if (degrees)
+    {
+        phi   *= degToRad();
+        theta *= degToRad();
+        psi   *= degToRad();
+    }
+
+    const scalar c1 = cos(phi);   const scalar s1 = sin(phi);
+    const scalar c2 = cos(theta); const scalar s2 = sin(theta);
+    const scalar c3 = cos(psi);   const scalar s3 = sin(psi);
+
+    // Compare
+    // https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix
+    //
+    // Z1-X2-Z3 rotation
+
+    return
+        tensor
+        (
+            c1*c3 - c2*s1*s3, -c1*s3 - c2*c3*s1,  s1*s2,
+            c3*s1 + c1*c2*s3,  c1*c2*c3 - s1*s3, -c1*s2,
+            s2*s3,             c3*s2,             c2
+        );
+}
+
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
@@ -147,49 +184,6 @@ Foam::symmTensor Foam::EulerCoordinateRotation::transformVector
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::EulerCoordinateRotation::calcTransform
-(
-    const scalar phiAngle,
-    const scalar thetaAngle,
-    const scalar psiAngle,
-    const bool inDegrees
-)
-{
-    scalar phi   = phiAngle;
-    scalar theta = thetaAngle;
-    scalar psi   = psiAngle;
-
-    if (inDegrees)
-    {
-        phi   *= constant::mathematical::pi/180.0;
-        theta *= constant::mathematical::pi/180.0;
-        psi   *= constant::mathematical::pi/180.0;
-    }
-
-    R_ =
-    (
-        tensor
-        (
-            cos(phi)*cos(psi) - sin(phi)*sin(psi)*cos(theta),
-            -sin(phi)*cos(psi)*cos(theta) - cos(phi)*sin(psi),
-            sin(phi)*sin(theta),
-
-            cos(phi)*sin(psi)*cos(theta) + sin(phi)*cos(psi),
-            cos(phi)*cos(psi)*cos(theta) - sin(phi)*sin(psi),
-            -cos(phi)*sin(theta),
-
-            sin(psi)*sin(theta),
-            cos(psi)*sin(theta),
-            cos(theta)
-        )
-    );
-
-    Rtr_ = R_.T();
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::EulerCoordinateRotation::EulerCoordinateRotation()
@@ -212,35 +206,25 @@ Foam::EulerCoordinateRotation::EulerCoordinateRotation
 Foam::EulerCoordinateRotation::EulerCoordinateRotation
 (
     const vector& phiThetaPsi,
-    const bool inDegrees
+    const bool degrees
 )
 :
-    R_(sphericalTensor::I),
-    Rtr_(sphericalTensor::I)
-{
-    calcTransform
-    (
-        phiThetaPsi.component(vector::X),
-        phiThetaPsi.component(vector::Y),
-        phiThetaPsi.component(vector::Z),
-        inDegrees
-    );
-}
+    R_(rotation(phiThetaPsi, degrees)),
+    Rtr_(R_.T())
+{}
 
 
 Foam::EulerCoordinateRotation::EulerCoordinateRotation
 (
-    const scalar phiAngle,
-    const scalar thetaAngle,
-    const scalar psiAngle,
-    const bool inDegrees
+    const scalar phi,
+    const scalar theta,
+    const scalar psi,
+    const bool degrees
 )
 :
-    R_(sphericalTensor::I),
-    Rtr_(sphericalTensor::I)
-{
-    calcTransform(phiAngle, thetaAngle, psiAngle, inDegrees);
-}
+    R_(rotation(vector(phi, theta, psi), degrees)),
+    Rtr_(R_.T())
+{}
 
 
 Foam::EulerCoordinateRotation::EulerCoordinateRotation
@@ -248,19 +232,16 @@ Foam::EulerCoordinateRotation::EulerCoordinateRotation
     const dictionary& dict
 )
 :
-    R_(sphericalTensor::I),
-    Rtr_(sphericalTensor::I)
-{
-    const vector rotation(dict.lookup("rotation"));
-
-    calcTransform
+    R_
     (
-        rotation.component(vector::X),
-        rotation.component(vector::Y),
-        rotation.component(vector::Z),
-        dict.lookupOrDefault("degrees", true)
-    );
-}
+        rotation
+        (
+            dict.get<vector>("rotation"),
+            dict.lookupOrDefault("degrees", true)
+        )
+    ),
+    Rtr_(R_.T())
+{}
 
 
 Foam::EulerCoordinateRotation::EulerCoordinateRotation

@@ -684,8 +684,8 @@ Foam::shellSurfaces::shellSurfaces
 
             if (smoothDirection_[shellI] != vector::zero)
             {
-                dict.lookup("nSmoothExpansion") >> nSmoothExpansion_[shellI];
-                dict.lookup("nSmoothPosition") >> nSmoothPosition_[shellI];
+                dict.readEntry("nSmoothExpansion", nSmoothExpansion_[shellI]);
+                dict.readEntry("nSmoothPosition", nSmoothPosition_[shellI]);
             }
 
 

@@ -111,8 +111,8 @@ bool restrainedHarmonicSpring::read
     restrainedHarmonicSpringCoeffs_ =
         tetherPotentialProperties.subDict(typeName + "Coeffs");
 
-    restrainedHarmonicSpringCoeffs_.lookup("springConstant") >> springConstant_;
-    restrainedHarmonicSpringCoeffs_.lookup("rR") >> rR_;
+    restrainedHarmonicSpringCoeffs_.readEntry("springConstant", springConstant_);
+    restrainedHarmonicSpringCoeffs_.readEntry("rR", rR_);
 
     return true;
 }

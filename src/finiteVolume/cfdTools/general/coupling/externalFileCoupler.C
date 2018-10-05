@@ -150,7 +150,7 @@ bool Foam::externalFileCoupler::readDict(const dictionary& dict)
     // if things have already been initialized
     if (!initialized())
     {
-        dict.lookup("commsDir") >> commsDir_;
+        dict.readEntry("commsDir", commsDir_);
         commsDir_.expand();
         commsDir_.clean();
         slaveFirst_ = dict.lookupOrDefault("initByExternal", false);

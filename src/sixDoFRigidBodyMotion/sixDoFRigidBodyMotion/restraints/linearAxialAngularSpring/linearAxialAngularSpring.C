@@ -174,8 +174,8 @@ bool Foam::sixDoFRigidBodyMotionRestraints::linearAxialAngularSpring::read
             << abort(FatalError);
     }
 
-    sDoFRBMRCoeffs_.lookup("stiffness") >> stiffness_;
-    sDoFRBMRCoeffs_.lookup("damping") >> damping_;
+    sDoFRBMRCoeffs_.readEntry("stiffness", stiffness_);
+    sDoFRBMRCoeffs_.readEntry("damping", damping_);
 
     return true;
 }

@@ -137,12 +137,8 @@ void Foam::potential::potential::readPotentialDict()
         << pairPotentialSiteIdList
         << endl;
 
-    List<word> tetherSiteIdList(0);
-
-    if (idListDict.found("tetherSiteIdList"))
-    {
-        tetherSiteIdList = List<word>(idListDict.lookup("tetherSiteIdList"));
-    }
+    List<word> tetherSiteIdList;
+    idListDict.readIfPresent("tetherSiteIdList", tetherSiteIdList);
 
     IOdictionary potentialDict
     (

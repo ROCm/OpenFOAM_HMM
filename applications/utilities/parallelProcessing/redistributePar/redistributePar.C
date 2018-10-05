@@ -2499,21 +2499,16 @@ int main(int argc, char *argv[])
     wordList regionNames;
     if (args.found("allRegions"))
     {
-        Info<< "Decomposing all regions in regionProperties" << nl << endl;
-        regionProperties rp(runTime);
+        regionNames = regionProperties(runTime).names();
 
-        wordHashSet names;
-        forAllConstIters(rp, iter)
-        {
-            names.insert(iter.object());
-        }
-
-        regionNames = names.sortedToc();
+        Info<< "Decomposing all regions in regionProperties" << nl
+            << "    " << flatOutput(regionNames) << nl << endl;
     }
     else
     {
-        regionNames = {fvMesh::defaultRegion};
-        args.readIfPresent("region", regionNames[0]);
+        regionNames.resize(1);
+        regionNames.first() =
+            args.lookupOrDefault<word>("region", fvMesh::defaultRegion);
     }
 
 

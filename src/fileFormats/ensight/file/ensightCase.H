@@ -87,7 +87,7 @@ private:
         //- Case name (with ".case" ending)
         word caseName_;
 
-        //- Output stream
+        //- Output stream (master only)
         mutable OFstream* os_;
 
         //- Track state changes since last write

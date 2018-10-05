@@ -383,8 +383,10 @@ private:
         ) const;
 
 
-        //- Emit FatalIOError if excess tokens exist
-        void excessTokens(const word& keyword, const ITstream& is) const;
+        //- Check after reading if the input token stream has unconsumed
+        //- tokens remaining or if there were no tokens in the first place.
+        //  Emits FatalIOError
+        void checkITstream(const word& keyword, const ITstream& is) const;
 
 
 public:

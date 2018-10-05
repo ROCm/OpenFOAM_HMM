@@ -865,19 +865,15 @@ Foam::chemkinReader::chemkinReader
         Info<< "Reading CHEMKIN thermo data in new file format" << endl;
     }
 
-    fileName chemkinFile(fileName(thermoDict.lookup("CHEMKINFile")).expand());
+    fileName chemkinFile(thermoDict.get<fileName>("CHEMKINFile"));
+    chemkinFile.expand();
 
     fileName thermoFile = fileName::null;
+    thermoDict.readIfPresent("CHEMKINThermoFile", thermoFile);
+    thermoFile.expand();
 
-    if (thermoDict.found("CHEMKINThermoFile"))
-    {
-        thermoFile = fileName(thermoDict.lookup("CHEMKINThermoFile")).expand();
-    }
-
-    fileName transportFile
-    (
-        fileName(thermoDict.lookup("CHEMKINTransportFile")).expand()
-    );
+    fileName transportFile(thermoDict.get<fileName>("CHEMKINTransportFile"));
+    transportFile.expand();
 
     // allow relative file names
     fileName relPath = thermoDict.name().path();

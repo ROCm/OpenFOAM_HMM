@@ -36,6 +36,7 @@ Description
 #include "uint.H"
 #include "scalar.H"
 #include "Switch.H"
+#include "fileName.H"
 #include "stringList.H"
 
 using namespace Foam;
@@ -63,6 +64,34 @@ int main(int argc, char *argv[])
     subDict.add("value1", "test1");
     subDict.add("value2", "test2");
     dict.add("FOAM_RUN", subDict);
+
+    if (false)
+    {
+        typedef std::string inputType;
+        typedef string outputType;
+
+        inputType in1("move-construct-from");
+
+        Info<<"move construct from " << in1.length() << nl;
+
+        outputType out1(std::move(in1));
+
+        Info<<"after move construct "
+            << out1.size() << ", " << in1.size() << nl;
+
+        in1 = "move-assign-from";
+        out1 = "some-text-rubbish";
+        out1.resize(10);
+
+        Info<<"move assign from " << in1.length() << nl;
+
+        out1 = std::move(in1);
+
+        Info<<"after move assign "
+            << out1.size() << ", " << in1.size() << nl;
+
+        return 0;
+    }
 
 
     // basic expansions

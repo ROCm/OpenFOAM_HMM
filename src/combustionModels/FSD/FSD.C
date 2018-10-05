@@ -347,8 +347,8 @@ bool FSD<ReactionThermo, ThermoType>::read()
 {
     if (singleStepCombustion<ReactionThermo, ThermoType>::read())
     {
-        this->coeffs().lookup("Cv") >> Cv_ ;
-        this->coeffs().lookup("ftVarMin") >> ftVarMin_;
+        this->coeffs().readEntry("Cv", Cv_);
+        this->coeffs().readEntry("ftVarMin", ftVarMin_);
         reactionRateFlameArea_->read(this->coeffs());
         return true;
     }

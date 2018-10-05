@@ -71,10 +71,9 @@ Foam::surfaceOffsetLinearDistance::surfaceOffsetLinearDistance
     totalDistance_(),
     totalDistanceSqr_()
 {
-    if (coeffsDict().found("totalDistanceCoeff"))
+    if (coeffsDict().readIfPresent("totalDistanceCoeff", totalDistance_))
     {
-        totalDistance_ =
-            coeffsDict().get<scalar>("totalDistanceCoeff") * defaultCellSize;
+        totalDistance_ *= defaultCellSize;
 
         if (coeffsDict().found("linearDistanceCoeff"))
         {
@@ -84,11 +83,10 @@ Foam::surfaceOffsetLinearDistance::surfaceOffsetLinearDistance
                 << nl << exit(FatalError) << endl;
         }
     }
-    else if (coeffsDict().found("linearDistanceCoeff"))
+    else if (coeffsDict().readIfPresent("linearDistanceCoeff", totalDistance_))
     {
-        totalDistance_ =
-            coeffsDict().get<scalar>("linearDistanceCoeff") * defaultCellSize
-            + surfaceOffset_;
+        totalDistance_ *= defaultCellSize;
+        totalDistance_ += surfaceOffset_;
     }
     else
     {

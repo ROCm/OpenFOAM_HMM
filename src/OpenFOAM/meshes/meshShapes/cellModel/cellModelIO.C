@@ -33,10 +33,10 @@ Foam::cellModel::cellModel(Istream& is)
     dictionaryEntry dict(dictionary::null, is);
 
     name_ = dict.keyword();
-    dict.lookup("index") >> index_;
-    dict.lookup("numberOfPoints") >> nPoints_;
-    dict.lookup("faces") >> faces_;
-    dict.lookup("edges") >> edges_;
+    dict.readEntry("index", index_);
+    dict.readEntry("numberOfPoints", nPoints_);
+    dict.readEntry("faces", faces_);
+    dict.readEntry("edges", edges_);
 }
 
 

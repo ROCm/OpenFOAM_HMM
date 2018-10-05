@@ -313,8 +313,8 @@ int main(int argc, char *argv[])
             )
         );
 
-        mapFieldsDict.lookup("patchMap") >> patchMap;
-        mapFieldsDict.lookup("cuttingPatches") >>  cuttingPatches;
+        mapFieldsDict.readEntry("patchMap", patchMap);
+        mapFieldsDict.readEntry("cuttingPatches", cuttingPatches);
     }
 
     #include "setTimeIndex.H"

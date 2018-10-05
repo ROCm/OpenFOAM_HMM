@@ -186,10 +186,7 @@ void Foam::radiation::fvDOM::initialise()
 
     Info<< endl;
 
-    if (this->found("useSolarLoad"))
-    {
-        this->lookup("useSolarLoad") >> useSolarLoad_;
-    }
+    this->readIfPresent("useSolarLoad", useSolarLoad_);
 
     if (useSolarLoad_)
     {

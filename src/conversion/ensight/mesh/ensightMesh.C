@@ -131,11 +131,8 @@ void Foam::ensightMesh::correct()
         wordList patchNames = mesh_.boundaryMesh().names();
         if (Pstream::parRun())
         {
-            patchNames.setSize
-            (
-                mesh_.boundary().size()
-              - mesh_.globalData().processorPatches().size()
-            );
+            // Do not include processor patches in matching
+            patchNames.setSize(mesh_.boundaryMesh().nNonProcessor());
         }
 
         labelList matched;
@@ -158,9 +155,8 @@ void Foam::ensightMesh::correct()
             matched = identity(patchNames.size());
         }
 
-        forAll(matched, matchi)
+        for (const label patchId : matched)
         {
-            const label patchId   = matched[matchi];
             const word& patchName = patchNames[patchId];
 
             // use fvPatch (not polyPatch) to automatically remove empty patches
@@ -224,9 +220,8 @@ void Foam::ensightMesh::correct()
         // Mark boundary faces to be excluded from export
         bitSet excludeFace(mesh_.nFaces()); // all false
 
-        forAll(mesh_.boundaryMesh(), patchi)
+        for (const polyPatch& pp : mesh_.boundaryMesh())
         {
-            const polyPatch& pp = mesh_.boundaryMesh()[patchi];
             if
             (
                 isA<processorPolyPatch>(pp)
@@ -250,9 +245,8 @@ void Foam::ensightMesh::correct()
         Foam::sort(selectZones);
 
         // Count face types in each selected faceZone
-        forAll(selectZones, zonei)
+        for (const word& zoneName : selectZones)
         {
-            const word& zoneName = selectZones[zonei];
             const label zoneID = mesh_.faceZones().findZoneID(zoneName);
             const faceZone& fz = mesh_.faceZones()[zoneID];
 
@@ -318,9 +312,8 @@ void Foam::ensightMesh::write(ensightGeoFile& os) const
     // use sortedToc for extra safety
     //
     const labelList patchIds = patchLookup_.sortedToc();
-    forAll(patchIds, listi)
+    for (const label patchId : patchIds)
     {
-        const label patchId   = patchIds[listi];
         const word& patchName = patchLookup_[patchId];
         const ensightFaces& ensFaces = boundaryPatchFaces_[patchName];
 
@@ -341,9 +334,9 @@ void Foam::ensightMesh::write(ensightGeoFile& os) const
         // Renumber the patch faces,
         // from local patch indexing to unique global index
         faceList patchFaces(pp.localFaces());
-        forAll(patchFaces, i)
+        for (face& f : patchFaces)
         {
-            inplaceRenumber(pointToGlobal, patchFaces[i]);
+            inplaceRenumber(pointToGlobal, f);
         }
 
         writeAllPoints
@@ -363,9 +356,8 @@ void Foam::ensightMesh::write(ensightGeoFile& os) const
     // write faceZones, if requested
     //
     const wordList zoneNames = faceZoneFaces_.sortedToc();
-    forAll(zoneNames, zonei)
+    for (const word& zoneName : zoneNames)
     {
-        const word& zoneName = zoneNames[zonei];
         const ensightFaces& ensFaces = faceZoneFaces_[zoneName];
 
         // Use the properly sorted faceIds (ensightFaces) and do NOT use the
