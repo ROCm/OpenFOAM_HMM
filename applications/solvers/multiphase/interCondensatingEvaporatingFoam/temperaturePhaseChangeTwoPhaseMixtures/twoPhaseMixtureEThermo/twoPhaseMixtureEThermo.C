@@ -581,14 +581,12 @@ bool Foam::twoPhaseMixtureEThermo::read()
 {
     if (basicThermo::read() && thermoIncompressibleTwoPhaseMixture::read())
     {
-        basicThermo::lookup("pDivU") >> pDivU_;
-        basicThermo::lookup("TSat") >> TSat_;
+        basicThermo::readEntry("pDivU", pDivU_);
+        basicThermo::readEntry("TSat", TSat_);
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

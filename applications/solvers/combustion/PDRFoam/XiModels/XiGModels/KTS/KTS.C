@@ -76,7 +76,7 @@ bool Foam::XiGModels::KTS::read(const dictionary& XiGProperties)
 {
     XiGModel::read(XiGProperties);
 
-    XiGModelCoeffs_.lookup("GEtaCoef") >> GEtaCoef_;
+    XiGModelCoeffs_.readEntry("GEtaCoef", GEtaCoef_);
 
     return true;
 }

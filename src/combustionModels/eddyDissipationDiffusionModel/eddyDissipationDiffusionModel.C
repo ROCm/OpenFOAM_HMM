@@ -107,7 +107,7 @@ bool eddyDissipationDiffusionModel<ReactionThermo, ThermoType>::read()
 {
     if (eddyDissipationModelBase<ReactionThermo, ThermoType>::read())
     {
-        this->coeffs().lookup("Cd") >> Cd_;
+        this->coeffs().readEntry("Cd", Cd_);
         return true;
     }
     else

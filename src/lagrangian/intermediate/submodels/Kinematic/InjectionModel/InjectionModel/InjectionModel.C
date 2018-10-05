@@ -328,8 +328,8 @@ Foam::InjectionModel<CloudType>::InjectionModel
     {
         if (owner.solution().transient())
         {
-            this->coeffDict().lookup("massTotal") >> massTotal_;
-            this->coeffDict().lookup("SOI") >> SOI_;
+            this->coeffDict().readEntry("massTotal", massTotal_);
+            this->coeffDict().readEntry("SOI", SOI_);
         }
         else
         {

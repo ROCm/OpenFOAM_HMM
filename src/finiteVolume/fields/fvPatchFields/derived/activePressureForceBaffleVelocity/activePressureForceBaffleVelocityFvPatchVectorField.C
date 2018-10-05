@@ -120,10 +120,7 @@ activePressureForceBaffleVelocityFvPatchVectorField
         ).neighbFvPatch().Sf();
     }
 
-    if (dict.found("p"))
-    {
-        dict.lookup("p") >> pName_;
-    }
+    dict.readIfPresent("p", pName_);
 }
 
 

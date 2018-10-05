@@ -85,8 +85,8 @@ bool Foam::compressibilityModels::linear::read
 {
     barotropicCompressibilityModel::read(compressibilityProperties);
 
-    compressibilityProperties_.lookup("psiv") >> psiv_;
-    compressibilityProperties_.lookup("psil") >> psil_;
+    compressibilityProperties_.readEntry("psiv", psiv_);
+    compressibilityProperties_.readEntry("psil", psil_);
 
     return true;
 }

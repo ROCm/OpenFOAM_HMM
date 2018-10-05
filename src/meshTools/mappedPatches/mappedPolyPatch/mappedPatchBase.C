@@ -1050,7 +1050,7 @@ Foam::mappedPatchBase::mappedPatchBase
         {
             case UNIFORM:
             {
-                offset_ = point(dict.lookup("offset"));
+                dict.readEntry("offset", offset_);
             }
             break;
 
@@ -1063,15 +1063,14 @@ Foam::mappedPatchBase::mappedPatchBase
 
             case NORMAL:
             {
-                distance_ = readScalar(dict.lookup("distance"));
+                dict.readEntry("distance", distance_);
             }
             break;
         }
     }
-    else if (dict.found("offset"))
+    else if (dict.readIfPresent("offset", offset_))
     {
         offsetMode_ = UNIFORM;
-        offset_ = point(dict.lookup("offset"));
     }
     else if (dict.found("offsets"))
     {

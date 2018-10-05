@@ -122,8 +122,8 @@ bool Foam::incompressibleTwoPhaseInteractingMixture::read()
          && nucModel_().read(subDict(phase2Name_))
         )
         {
-            muModel_->viscosityProperties().lookup("rho") >> rhod_;
-            nucModel_->viscosityProperties().lookup("rho") >> rhoc_;
+            muModel_->viscosityProperties().readEntry("rho", rhod_);
+            nucModel_->viscosityProperties().readEntry("rho", rhoc_);
 
             dd_ = dimensionedScalar
             (

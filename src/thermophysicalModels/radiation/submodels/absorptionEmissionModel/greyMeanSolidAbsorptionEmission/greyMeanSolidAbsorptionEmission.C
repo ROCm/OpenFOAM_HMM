@@ -123,8 +123,8 @@ greyMeanSolidAbsorptionEmission
         }
         speciesNames_.insert(key, nFunc);
         const dictionary& dict = iter().dict();
-        dict.lookup("absorptivity") >> solidData_[nFunc][absorptivity];
-        dict.lookup("emissivity") >> solidData_[nFunc][emissivity];
+        dict.readEntry("absorptivity", solidData_[nFunc][absorptivity]);
+        dict.readEntry("emissivity", solidData_[nFunc][emissivity]);
 
         nFunc++;
     }

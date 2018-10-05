@@ -51,7 +51,7 @@ void Foam::ThermoCloud<CloudType>::setModels()
         ).ptr()
     );
 
-    this->subModelProperties().lookup("radiation") >> radiation_;
+    this->subModelProperties().readEntry("radiation", radiation_);
 
     if (radiation_)
     {

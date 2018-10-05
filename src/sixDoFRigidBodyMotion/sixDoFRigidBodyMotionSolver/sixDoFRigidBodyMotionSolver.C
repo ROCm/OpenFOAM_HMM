@@ -193,9 +193,9 @@ void Foam::sixDoFRigidBodyMotionSolver::solve()
     {
         g = db().lookupObject<uniformDimensionedVectorField>("g");
     }
-    else if (coeffDict().found("g"))
+    else
     {
-        coeffDict().lookup("g") >> g;
+        coeffDict().readIfPresent("g", g);
     }
 
     // const scalar ramp = min(max((this->db().time().value() - 5)/10, 0), 1);

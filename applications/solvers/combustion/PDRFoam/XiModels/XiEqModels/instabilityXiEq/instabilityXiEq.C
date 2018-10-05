@@ -73,7 +73,7 @@ bool Foam::XiEqModels::instability::read(const dictionary& XiEqProperties)
 {
     XiEqModel::read(XiEqProperties);
 
-    XiEqModelCoeffs_.lookup("XiEqIn") >> XiEqIn;
+    XiEqModelCoeffs_.readEntry("XiEqIn", XiEqIn);
 
     return XiEqModel_->read(XiEqModelCoeffs_);
 }

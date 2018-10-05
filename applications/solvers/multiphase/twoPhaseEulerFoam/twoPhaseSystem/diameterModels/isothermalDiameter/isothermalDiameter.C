@@ -81,8 +81,8 @@ bool Foam::diameterModels::isothermal::read(const dictionary& phaseProperties)
 {
     diameterModel::read(phaseProperties);
 
-    diameterProperties_.lookup("d0") >> d0_;
-    diameterProperties_.lookup("p0") >> p0_;
+    diameterProperties_.readEntry("d0", d0_);
+    diameterProperties_.readEntry("p0", p0_);
 
     return true;
 }

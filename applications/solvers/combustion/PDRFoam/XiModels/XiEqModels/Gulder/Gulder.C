@@ -96,9 +96,9 @@ bool Foam::XiEqModels::Gulder::read(const dictionary& XiEqProperties)
 {
     XiEqModel::read(XiEqProperties);
 
-    XiEqModelCoeffs_.lookup("XiEqCoef") >> XiEqCoef_;
-    XiEqModelCoeffs_.lookup("uPrimeCoef") >> uPrimeCoef_;
-    XiEqModelCoeffs_.lookup("subGridSchelkin") >> subGridSchelkin_;
+    XiEqModelCoeffs_.readEntry("XiEqCoef", XiEqCoef_);
+    XiEqModelCoeffs_.readEntry("uPrimeCoef", uPrimeCoef_);
+    XiEqModelCoeffs_.readEntry("subGridSchelkin", subGridSchelkin_);
 
     return true;
 }

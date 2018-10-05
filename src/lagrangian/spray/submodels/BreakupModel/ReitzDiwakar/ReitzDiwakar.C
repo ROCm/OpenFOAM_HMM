@@ -42,10 +42,10 @@ Foam::ReitzDiwakar<CloudType>::ReitzDiwakar
 {
     if (!this->defaultCoeffs(true))
     {
-        this->coeffDict().lookup("Cbag") >> Cbag_;
-        this->coeffDict().lookup("Cb") >> Cb_;
-        this->coeffDict().lookup("Cstrip") >> Cstrip_;
-        this->coeffDict().lookup("Cs") >> Cs_;
+        this->coeffDict().readEntry("Cbag", Cbag_);
+        this->coeffDict().readEntry("Cb", Cb_);
+        this->coeffDict().readEntry("Cstrip", Cstrip_);
+        this->coeffDict().readEntry("Cs", Cs_);
     }
 }
 

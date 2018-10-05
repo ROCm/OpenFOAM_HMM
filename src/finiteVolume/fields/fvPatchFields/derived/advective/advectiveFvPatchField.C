@@ -103,7 +103,7 @@ Foam::advectiveFvPatchField<Type>::advectiveFvPatchField
 
     if (dict.readIfPresent("lInf", lInf_))
     {
-        dict.lookup("fieldInf") >> fieldInf_;
+        dict.readEntry("fieldInf", fieldInf_);
 
         if (lInf_ < 0.0)
         {

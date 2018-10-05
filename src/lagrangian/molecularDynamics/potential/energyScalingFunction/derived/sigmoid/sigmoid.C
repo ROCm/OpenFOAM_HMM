@@ -92,8 +92,8 @@ bool sigmoid::read(const dictionary& energyScalingFunctionProperties)
     sigmoidCoeffs_ =
         energyScalingFunctionProperties.subDict(typeName + "Coeffs");
 
-    sigmoidCoeffs_.lookup("shift") >> shift_;
-    sigmoidCoeffs_.lookup("scale") >> shift_;
+    sigmoidCoeffs_.readEntry("shift", shift_);
+    sigmoidCoeffs_.readEntry("scale", shift_);
 
     return true;
 }

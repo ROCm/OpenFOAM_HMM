@@ -87,11 +87,7 @@ Foam::plenumPressureFvPatchScalarField::plenumPressureFvPatchScalarField
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     UName_(dict.lookupOrDefault<word>("U", "U"))
 {
-    if (dict.found("rho"))
-    {
-        rho_ = readScalar(dict.lookup("rho"));
-        hasRho_ = true;
-    }
+    hasRho_ = dict.readIfPresent("rho", rho_);
 }
 
 

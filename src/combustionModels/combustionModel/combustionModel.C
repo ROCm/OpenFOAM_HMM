@@ -99,14 +99,12 @@ bool Foam::combustionModel::read()
 {
     if (regIOobject::read())
     {
-        this->lookup("active") >> active_;
+        this->readEntry("active", active_);
         coeffs_ = optionalSubDict(modelType_ + "Coeffs");
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

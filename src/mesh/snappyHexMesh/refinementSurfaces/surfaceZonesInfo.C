@@ -82,7 +82,7 @@ Foam::surfaceZonesInfo::surfaceZonesInfo
             zoneInside_ = areaSelectionAlgoNames[method];
             if (zoneInside_ == INSIDEPOINT)
             {
-                surfacesDict.lookup("insidePoint") >> zoneInsidePoint_;
+                surfacesDict.readEntry("insidePoint", zoneInsidePoint_);
             }
 
         }

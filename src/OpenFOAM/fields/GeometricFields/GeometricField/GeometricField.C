@@ -55,15 +55,15 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::readFields
 
     boundaryField_.readField(*this, dict.subDict("boundaryField"));
 
-    if (dict.found("referenceLevel"))
-    {
-        Type fieldAverage(pTraits<Type>(dict.lookup("referenceLevel")));
+    Type refLevel;
 
-        Field<Type>::operator+=(fieldAverage);
+    if (dict.readIfPresent("referenceLevel", refLevel))
+    {
+        Field<Type>::operator+=(refLevel);
 
         forAll(boundaryField_, patchi)
         {
-            boundaryField_[patchi] == boundaryField_[patchi] + fieldAverage;
+            boundaryField_[patchi] == boundaryField_[patchi] + refLevel;
         }
     }
 }

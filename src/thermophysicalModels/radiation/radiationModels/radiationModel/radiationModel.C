@@ -198,7 +198,7 @@ bool Foam::radiation::radiationModel::read()
 {
     if (regIOobject::read())
     {
-        lookup("radiation") >> radiation_;
+        readEntry("radiation", radiation_);
         coeffs_ = subOrEmptyDict(type() + "Coeffs");
 
         solverFreq_ = lookupOrDefault<label>("solverFreq", 1);
@@ -206,10 +206,8 @@ bool Foam::radiation::radiationModel::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

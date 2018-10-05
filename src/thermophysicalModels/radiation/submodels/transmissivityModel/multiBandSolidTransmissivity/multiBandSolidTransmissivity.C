@@ -57,7 +57,7 @@ Foam::radiation::multiBandSolidTransmissivity::multiBandSolidTransmissivity
     tauCoeffs_(),
     nBands_(0)
 {
-    coeffsDict_.lookup("transmissivity") >> tauCoeffs_;
+    coeffsDict_.readEntry("transmissivity", tauCoeffs_);
     nBands_ = tauCoeffs_.size();
 }
 

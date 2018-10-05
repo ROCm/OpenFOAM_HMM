@@ -83,7 +83,7 @@ bool harmonicSpring::read(const dictionary& tetherPotentialProperties)
     harmonicSpringCoeffs_ =
         tetherPotentialProperties.subDict(typeName + "Coeffs");
 
-    harmonicSpringCoeffs_.lookup("springConstant") >> springConstant_;
+    harmonicSpringCoeffs_.readEntry("springConstant", springConstant_);
 
     return true;
 }

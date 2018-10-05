@@ -178,7 +178,7 @@ void Foam::LESModels::smoothDelta::read(const dictionary& dict)
     const dictionary& coeffsDict(dict.optionalSubDict(type() + "Coeffs"));
 
     geometricDelta_().read(coeffsDict);
-    coeffsDict.lookup("maxDeltaRatio") >> maxDeltaRatio_;
+    coeffsDict.readEntry("maxDeltaRatio", maxDeltaRatio_);
     calcDelta();
 }
 

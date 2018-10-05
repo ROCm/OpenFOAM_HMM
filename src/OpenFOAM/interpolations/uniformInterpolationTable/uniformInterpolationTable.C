@@ -64,9 +64,9 @@ Foam::uniformInterpolationTable<Type>::uniformInterpolationTable
     {
         IOdictionary dict(io);
 
-        dict.lookup("data") >> *this;
-        dict.lookup("x0") >> x0_;
-        dict.lookup("dx") >> dx_;
+        dict.readEntry("data", *this);
+        dict.readEntry("x0", x0_);
+        dict.readEntry("dx", dx_);
         dict.readIfPresent("log10", log10_);
         dict.readIfPresent("bound", bound_);
     }
@@ -107,7 +107,7 @@ Foam::uniformInterpolationTable<Type>::uniformInterpolationTable
     }
     else
     {
-        dict.lookup("data") >> *this;
+        dict.readEntry("data", *this);
     }
 
     checkTable();

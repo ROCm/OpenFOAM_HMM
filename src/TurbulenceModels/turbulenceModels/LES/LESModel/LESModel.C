@@ -180,7 +180,7 @@ bool Foam::LESModel<BasicTurbulenceModel>::read()
     if (BasicTurbulenceModel::read())
     {
         LESDict_ <<= this->subDict("LES");
-        LESDict_.lookup("turbulence") >> turbulence_;
+        LESDict_.readEntry("turbulence", turbulence_);
 
         coeffDict_ <<= LESDict_.optionalSubDict(type() + "Coeffs");
 

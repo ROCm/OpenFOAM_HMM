@@ -106,7 +106,7 @@ bool Foam::sixDoFRigidBodyMotionConstraints::line::read
         motion_.initialCentreOfMass()
     );
 
-    sDoFRBMCCoeffs_.lookup("direction") >> direction_;
+    sDoFRBMCCoeffs_.readEntry("direction", direction_);
 
     scalar magDir(mag(direction_));
 

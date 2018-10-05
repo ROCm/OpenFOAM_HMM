@@ -82,8 +82,8 @@ bool lennardJones::read(const dictionary& pairPotentialProperties)
 
     lennardJonesCoeffs_ = pairPotentialProperties.subDict(typeName + "Coeffs");
 
-    lennardJonesCoeffs_.lookup("sigma") >> sigma_;
-    lennardJonesCoeffs_.lookup("epsilon") >> epsilon_;
+    lennardJonesCoeffs_.readEntry("sigma", sigma_);
+    lennardJonesCoeffs_.readEntry("epsilon", epsilon_);
 
     return true;
 }

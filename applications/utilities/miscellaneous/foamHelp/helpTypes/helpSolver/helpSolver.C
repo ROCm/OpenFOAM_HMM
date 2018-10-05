@@ -85,7 +85,7 @@ void Foam::helpTypes::helpSolver::execute
     }
     else if (args.found("read"))
     {
-        mesh.time().controlDict().lookup("application") >> solver;
+        mesh.time().controlDict().readEntry("application", solver);
         displayDoc(solver, ".*solvers/.*Foam/", true, "C");
     }
     else

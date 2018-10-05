@@ -84,7 +84,7 @@ bool Foam::phase::read(const dictionary& phaseDict)
 
     if (nuModel_->read(phaseDict_))
     {
-        phaseDict_.lookup("rho") >> rho_;
+        phaseDict_.readEntry("rho", rho_);
 
         return true;
     }

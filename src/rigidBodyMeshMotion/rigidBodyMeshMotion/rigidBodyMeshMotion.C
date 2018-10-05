@@ -122,7 +122,7 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
 {
     if (rhoName_ == "rhoInf")
     {
-        rhoInf_ = readScalar(coeffDict().lookup("rhoInf"));
+        readEntry("rhoInf", rhoInf_);
     }
 
     if (coeffDict().found("ramp"))

@@ -73,7 +73,7 @@ Foam::reactionRateFlameArea::~reactionRateFlameArea()
 
 bool Foam::reactionRateFlameArea::read(const dictionary& dict)
 {
-    dict.lookup("fuel") >> fuel_;
+    dict.readEntry("fuel", fuel_);
 
     return true;
 }

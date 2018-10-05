@@ -152,8 +152,8 @@ bool  Foam::reactionRateFlameAreaModels::relaxation::read
     if (reactionRateFlameArea::read(dict))
     {
         coeffDict_ = dict.optionalSubDict(typeName + "Coeffs");
-        coeffDict_.lookup("C") >> C_;
-        coeffDict_.lookup("alpha") >> alpha_;
+        coeffDict_.readEntry("C", C_);
+        coeffDict_.readEntry("alpha", alpha_);
         correlation_.read
         (
             coeffDict_.subDict(fuel_)

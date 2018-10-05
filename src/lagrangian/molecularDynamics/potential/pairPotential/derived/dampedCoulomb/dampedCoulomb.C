@@ -83,7 +83,7 @@ bool dampedCoulomb::read(const dictionary& pairPotentialProperties)
     dampedCoulombCoeffs_ =
         pairPotentialProperties.subDict(typeName + "Coeffs");
 
-    dampedCoulombCoeffs_.lookup("alpha") >> alpha_;
+    dampedCoulombCoeffs_.readEntry("alpha", alpha_);
 
     return true;
 }

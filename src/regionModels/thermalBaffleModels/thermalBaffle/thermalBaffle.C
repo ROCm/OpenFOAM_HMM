@@ -52,14 +52,14 @@ addToRunTimeSelectionTable(thermalBaffleModel, thermalBaffle, dictionary);
 
 bool thermalBaffle::read()
 {
-    this->solution().lookup("nNonOrthCorr") >> nNonOrthCorr_;
+    this->solution().readEntry("nNonOrthCorr", nNonOrthCorr_);
     return regionModel1D::read();
 }
 
 
 bool thermalBaffle::read(const dictionary& dict)
 {
-    this->solution().lookup("nNonOrthCorr") >> nNonOrthCorr_;
+    this->solution().readEntry("nNonOrthCorr", nNonOrthCorr_);
     return regionModel1D::read(dict);
 }
 

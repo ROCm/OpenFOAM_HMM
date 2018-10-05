@@ -567,8 +567,8 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     {
         case ROTATIONAL:
         {
-            dict.lookup("rotationAxis") >> rotationAxis_;
-            dict.lookup("rotationCentre") >> rotationCentre_;
+            dict.readEntry("rotationAxis", rotationAxis_);
+            dict.readEntry("rotationCentre", rotationCentre_);
             if (dict.readIfPresent("rotationAngle", rotationAngle_))
             {
                 rotationAngleDefined_ = true;
@@ -597,7 +597,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
         }
         case TRANSLATIONAL:
         {
-            dict.lookup("separationVector") >> separationVector_;
+            dict.readEntry("separationVector", separationVector_);
             break;
         }
         default:

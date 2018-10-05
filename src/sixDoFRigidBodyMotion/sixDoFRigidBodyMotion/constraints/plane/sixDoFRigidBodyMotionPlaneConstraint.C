@@ -106,7 +106,7 @@ bool Foam::sixDoFRigidBodyMotionConstraints::plane::read
         motion_.initialCentreOfMass()
     );
 
-    sDoFRBMCCoeffs_.lookup("normal") >> normal_;
+    sDoFRBMCCoeffs_.readEntry("normal", normal_);
 
     return true;
 }

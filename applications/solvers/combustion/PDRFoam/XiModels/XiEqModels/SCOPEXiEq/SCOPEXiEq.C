@@ -147,11 +147,11 @@ bool Foam::XiEqModels::SCOPEXiEq::read(const dictionary& XiEqProperties)
 {
     XiEqModel::read(XiEqProperties);
 
-    XiEqModelCoeffs_.lookup("XiEqCoef") >> XiEqCoef_;
-    XiEqModelCoeffs_.lookup("XiEqExp") >> XiEqExp_;
-    XiEqModelCoeffs_.lookup("lCoef") >> lCoef_;
-    XiEqModelCoeffs_.lookup("uPrimeCoef") >> uPrimeCoef_;
-    XiEqModelCoeffs_.lookup("subGridSchelkin") >> subGridSchelkin_;
+    XiEqModelCoeffs_.readEntry("XiEqCoef", XiEqCoef_);
+    XiEqModelCoeffs_.readEntry("XiEqExp", XiEqExp_);
+    XiEqModelCoeffs_.readEntry("lCoef", lCoef_);
+    XiEqModelCoeffs_.readEntry("uPrimeCoef", uPrimeCoef_);
+    XiEqModelCoeffs_.readEntry("subGridSchelkin", subGridSchelkin_);
 
     return true;
 }

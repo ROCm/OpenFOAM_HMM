@@ -29,7 +29,7 @@
             io.readOpt() = IOobject::MUST_READ_IF_MODIFIED;
             IOdictionary timeObject(io);
 
-            timeObject.lookup("index") >> timeIndex;
+            timeObject.readEntry("index", timeIndex);
         }
         else
         {

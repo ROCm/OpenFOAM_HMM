@@ -192,10 +192,7 @@ void Foam::radiation::viewFactor::initialise()
         }
     }
 
-    if (this->found("useSolarLoad"))
-    {
-        this->lookup("useSolarLoad") >> useSolarLoad_;
-    }
+    this->readIfPresent("useSolarLoad", useSolarLoad_);
 
     if (useSolarLoad_)
     {

@@ -170,7 +170,7 @@ bool Foam::RASModel<BasicTurbulenceModel>::read()
     if (BasicTurbulenceModel::read())
     {
         RASDict_ <<= this->subDict("RAS");
-        RASDict_.lookup("turbulence") >> turbulence_;
+        RASDict_.readEntry("turbulence", turbulence_);
 
         coeffDict_ <<= RASDict_.optionalSubDict(type() + "Coeffs");
 

@@ -102,15 +102,15 @@ bool azizChen::read(const dictionary& azizChen)
 
     azizChenCoeffs_ = azizChen.subDict(typeName + "Coeffs");
 
-    azizChenCoeffs_.lookup("epsilon") >> epsilon_;
-    azizChenCoeffs_.lookup("rm") >> rm_;
-    azizChenCoeffs_.lookup("A") >> A_;
-    azizChenCoeffs_.lookup("alpha") >> alpha_;
-    azizChenCoeffs_.lookup("C6") >> C6_;
-    azizChenCoeffs_.lookup("C8") >> C8_;
-    azizChenCoeffs_.lookup("C10") >> C10_;
-    azizChenCoeffs_.lookup("D") >> D_;
-    azizChenCoeffs_.lookup("gamma") >> gamma_;
+    azizChenCoeffs_.readEntry("epsilon", epsilon_);
+    azizChenCoeffs_.readEntry("rm", rm_);
+    azizChenCoeffs_.readEntry("A", A_);
+    azizChenCoeffs_.readEntry("alpha", alpha_);
+    azizChenCoeffs_.readEntry("C6", C6_);
+    azizChenCoeffs_.readEntry("C8", C8_);
+    azizChenCoeffs_.readEntry("C10", C10_);
+    azizChenCoeffs_.readEntry("D", D_);
+    azizChenCoeffs_.readEntry("gamma", gamma_);
 
     return true;
 }

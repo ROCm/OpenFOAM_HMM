@@ -40,8 +40,8 @@ Foam::PilchErdman<CloudType>::PilchErdman
 {
     if (!this->defaultCoeffs(true))
     {
-        this->coeffDict().lookup("B1") >> B1_;
-        this->coeffDict().lookup("B2") >> B2_;
+        this->coeffDict().readEntry("B1", B1_);
+        this->coeffDict().readEntry("B2", B2_);
     }
 }
 

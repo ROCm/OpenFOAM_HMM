@@ -140,7 +140,7 @@ Foam::cylindrical::cylindrical
     dict.parent().readIfPresent("origin", origin_);
 
     // Rotation axis
-    dict.lookup("e3") >> e3_;
+    dict.readEntry("e3", e3_);
 
     init(obr);
 }

@@ -101,10 +101,9 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
             << exit(FatalError);
     }
 
-    if (dict.found("thicknessLayers"))
+    if (dict.readIfPresent("thicknessLayers", thicknessLayers_))
     {
-        dict.lookup("thicknessLayers") >> thicknessLayers_;
-        dict.lookup("kappaLayers") >> kappaLayers_;
+        dict.readEntry("kappaLayers", kappaLayers_);
 
         if (thicknessLayers_.size() > 0)
         {

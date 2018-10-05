@@ -316,8 +316,8 @@ void Foam::axesRotation::operator=(const dictionary& dict)
     {
         // Both "axis" and "direction" are required
         // If one is missing the appropriate error message will be generated
-        dict.lookup("axis") >> axis1;
-        dict.lookup("direction") >> axis2;
+        dict.readEntry("axis", axis1);
+        dict.readEntry("direction", axis2);
 
         setTransform(axis1, axis2, E3_E1);
     }

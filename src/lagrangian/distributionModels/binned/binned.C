@@ -247,7 +247,7 @@ Foam::dictionary Foam::distributionModels::binned::writeDict
 void Foam::distributionModels::binned::readDict(const dictionary& dict)
 {
 //    distributionModel::readDict(dict);
-    dict.lookup("distribution") >> xy_;
+    dict.readEntry("distribution", xy_);
 }
 
 

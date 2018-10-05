@@ -42,9 +42,9 @@ Foam::ETAB<CloudType>::ETAB
 {
     if (!this->defaultCoeffs(true))
     {
-        this->coeffDict().lookup("k1") >> k1_;
-        this->coeffDict().lookup("k2") >> k2_;
-        this->coeffDict().lookup("WeTransition") >> WeTransition_;
+        this->coeffDict().readEntry("k1", k1_);
+        this->coeffDict().readEntry("k2", k2_);
+        this->coeffDict().readEntry("WeTransition", WeTransition_);
     }
 
     scalar k21 = k2_/k1_;

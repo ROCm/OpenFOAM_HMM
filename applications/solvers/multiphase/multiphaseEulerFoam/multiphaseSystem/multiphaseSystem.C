@@ -944,16 +944,14 @@ bool Foam::multiphaseSystem::read()
             readOK &= iter().read(phaseData[phasei++].dict());
         }
 
-        lookup("sigmas") >> sigmas_;
-        lookup("interfaceCompression") >> cAlphas_;
-        lookup("virtualMass") >> Cvms_;
+        readEntry("sigmas", sigmas_);
+        readEntry("interfaceCompression", cAlphas_);
+        readEntry("virtualMass", Cvms_);
 
         return readOK;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

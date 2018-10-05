@@ -51,8 +51,8 @@ Foam::functionObjects::FUNCTIONOBJECT::FUNCTIONOBJECT
 :
     fvMeshFunctionObject(name, runTime, dict),
     wordData_(dict.lookupOrDefault<word>("wordData", "defaultWord")),
-    scalarData_(readScalar(dict.lookup("scalarData"))),
-    labelData_(readLabel(dict.lookup("labelData")))
+    scalarData_(dict.get<scalar>("scalarData")),
+    labelData_(dict.get<label>("labelData"))
 {
     read(dict);
 }
@@ -69,8 +69,9 @@ Foam::functionObjects::FUNCTIONOBJECT::~FUNCTIONOBJECT()
 bool Foam::functionObjects::FUNCTIONOBJECT::read(const dictionary& dict)
 {
     dict.readIfPresent("wordData", wordData_);
-    dict.lookup("scalarData") >> scalarData_;
-    dict.lookup("labelData") >> labelData_;
+
+    dict.readEntry("scalarData", scalarData_);
+    dict.readEntry("labelData", labelData_);
 
     return true;
 }

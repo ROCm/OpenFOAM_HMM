@@ -58,10 +58,10 @@ bool kinematicSingleLayer::read()
     if (surfaceFilmRegionModel::read())
     {
         const dictionary& solution = this->solution().subDict("PISO");
-        solution.lookup("momentumPredictor") >> momentumPredictor_;
+        solution.readEntry("momentumPredictor", momentumPredictor_);
         solution.readIfPresent("nOuterCorr", nOuterCorr_);
-        solution.lookup("nCorr") >> nCorr_;
-        solution.lookup("nNonOrthCorr") >> nNonOrthCorr_;
+        solution.readEntry("nCorr", nCorr_);
+        solution.readEntry("nNonOrthCorr", nNonOrthCorr_);
 
         return true;
     }

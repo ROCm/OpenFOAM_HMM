@@ -109,10 +109,10 @@ bool Foam::compressibilityModels::Chung::read
 {
     barotropicCompressibilityModel::read(compressibilityProperties);
 
-    compressibilityProperties_.lookup("psiv") >> psiv_;
-    compressibilityProperties_.lookup("psil") >> psil_;
-    compressibilityProperties_.lookup("rhovSat") >> rhovSat_;
-    compressibilityProperties_.lookup("rholSat") >> rholSat_;
+    compressibilityProperties_.readEntry("psiv", psiv_);
+    compressibilityProperties_.readEntry("psil", psil_);
+    compressibilityProperties_.readEntry("rhovSat", rhovSat_);
+    compressibilityProperties_.readEntry("rholSat", rholSat_);
 
     return true;
 }

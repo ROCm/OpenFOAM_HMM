@@ -121,7 +121,7 @@ Foam::anisotropicFilter::anisotropicFilter
 
 void Foam::anisotropicFilter::read(const dictionary& bd)
 {
-    bd.optionalSubDict(type() + "Coeffs").lookup("widthCoeff") >> widthCoeff_;
+    bd.optionalSubDict(type() + "Coeffs").readEntry("widthCoeff", widthCoeff_);
 }
 
 

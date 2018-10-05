@@ -1514,7 +1514,7 @@ int main(int argc, char *argv[])
     const bool hasZones = dict.found("faceZones");
     if (hasZones)
     {
-        dict.lookup("faceZones") >> zoneNames;
+        dict.readEntry("faceZones", zoneNames);
         dict.readIfPresent("faceZonesShadow", zoneShadowNames);
 
         // Check
@@ -1528,7 +1528,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        dict.lookup("faceSets") >> zoneNames;
+        dict.readEntry("faceSets", zoneNames);
         dict.readIfPresent("faceSetsShadow", zoneShadowNames);
     }
 
