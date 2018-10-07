@@ -170,7 +170,7 @@ inline label invTransform(const tensor&, const label i)
 }
 
 
-//- No-op rotational transform of a label
+//- No-op rotational transform of a scalar
 inline scalar transform(const tensor&, const scalar s)
 {
     return s;
