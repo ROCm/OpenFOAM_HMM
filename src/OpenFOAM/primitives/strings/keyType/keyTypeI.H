@@ -84,7 +84,6 @@ inline Foam::keyType::keyType(const std::string& s, const bool isPattern)
 {}
 
 
-
 inline Foam::keyType::keyType(keyType&& s)
 :
     word(std::move(static_cast<word&>(s)), false),
@@ -116,6 +115,12 @@ inline Foam::keyType::keyType(std::string&& s, const bool isPattern)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline bool Foam::keyType::isLiteral() const
+{
+    return !isPattern_;
+}
+
 
 inline bool Foam::keyType::isPattern() const
 {
