@@ -161,6 +161,8 @@ heSolidThermo
     heThermo<BasicSolidThermo, MixtureType>(mesh, phaseName)
 {
     calculate();
+    this->mu_ == dimensionedScalar("zero", this->mu_.dimensions(), 0.0);
+    this->psi_ == dimensionedScalar("zero", this->psi_.dimensions(), 0.0);
 }
 
 
@@ -176,6 +178,8 @@ heSolidThermo
     heThermo<BasicSolidThermo, MixtureType>(mesh, dict, phaseName)
 {
     calculate();
+    this->mu_ == dimensionedScalar("zero", this->mu_.dimensions(), 0.0);
+    this->psi_ == dimensionedScalar("zero", this->psi_.dimensions(), 0.0);
 }
 
 
