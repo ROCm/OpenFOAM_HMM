@@ -440,7 +440,7 @@ int main(int argc, char *argv[])
     {
         const wordRes patchNames(args.getList<wordRe>("patches"));
 
-        if (patchNames.size() == 1 && !patchNames.first().isPattern())
+        if (patchNames.size() == 1 && patchNames.first().isLiteral())
         {
             exposedPatchIDs.first() =
                 getExposedPatchId(mesh, patchNames.first());

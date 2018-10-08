@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,6 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
+    Test word/regex
 
 \*---------------------------------------------------------------------------*/
 
@@ -35,6 +36,16 @@ Description
 #include "predicates.H"
 
 using namespace Foam;
+
+
+word typeOf(wordRe::compOption retval)
+{
+    if (wordRe::LITERAL == retval) return "(literal)";
+    if (wordRe::UNKNOWN == retval) return "(unknown)";
+    if (wordRe::REGEX == retval)   return "(regex)";
+    return "";
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
@@ -53,28 +64,30 @@ int main(int argc, char *argv[])
         {"this", wordRe::LITERAL},
         {"x.*", wordRe::REGEX},
         {"file[a-b]", wordRe::REGEX},
+        {"xvalues", wordRe::LITERAL},
+        {"xv.*", wordRe::REGEX},
     };
 
-    if (true)
+    if (false)
     {
-        Info<<"keyType: " << keyre << endl;
+        Info<<"keyType: " << keyre << nl;
 
         keyType key2(std::move(keyre));
 
-        Info<<"move construct: <" << keyre << "> <" << key2 << ">" << endl;
+        Info<<"move construct: <" << keyre << "> <" << key2 << ">" << nl;
 
         keyre = std::move(key2);
 
-        Info<<"move assign: <" << keyre << "> <" << key2 << ">" << endl;
+        Info<<"move assign: <" << keyre << "> <" << key2 << ">" << nl;
 
         keyType key3;
 
         keyre.swap(key3);
 
-        Info<<"swap: <" << keyre << "> <" << key3 << ">" << endl;
+        Info<<"swap: <" << keyre << "> <" << key3 << ">" << nl;
 
         keyre = std::move(key3);
-        Info<<"move assign: <" << keyre << "> <" << key3 << ">" << endl;
+        Info<<"move assign: <" << keyre << "> <" << key3 << ">" << nl;
 
         return 0;
     }
@@ -83,86 +96,92 @@ int main(int argc, char *argv[])
     {
         wordRe keyre("y.*", wordRe::REGEX);
 
-        Info<<"wordRe: " << keyre << endl;
+        Info<<"wordRe: " << keyre << nl;
 
         wordRe key2(std::move(keyre));
 
-        Info<<"keyTypes: " << keyre << " " << key2 << endl;
+        Info<<"keyTypes: " << keyre << " " << key2 << nl;
 
         keyre = std::move(key2);
 
-        Info<<"keyTypes: " << keyre << " " << key2 << endl;
+        Info<<"keyTypes: " << keyre << " " << key2 << nl;
 
         wordRe key3;
 
         keyre.swap(key3);
 
-        Info<<"keyTypes: <" << keyre << "> <" << key3 << ">" << endl;
+        Info<<"keyTypes: <" << keyre << "> <" << key3 << ">" << nl;
 
         keyre = std::move(key3);
-        Info<<"keyTypes: <" << keyre << "> <" << key3 << ">" << endl;
+        Info<<"keyTypes: <" << keyre << "> <" << key3 << ">" << nl;
 
         return 0;
     }
 
-    wordRes wrelist(wordrelist);
+    wordRes wres1(wordrelist);
 
-    Info<< "re-list:" << wrelist << endl;
-    Info<< "match this: " << wrelist("this") << endl;
-    Info<< "match xyz: "  << wrelist("xyz") << endl;
-    Info<< "match zyx: "  << wrelist("zyx") << endl;
-    Info<< "match xyz: "  << wrelist.match("xyz") << endl;
-    Info<< "match any: "  << predicates::always()("any junk") << endl;
-    Info<< "keyre match: "  << keyre("xyz") << endl;
-    Info<< "string match: "  << string("this").match("xyz") << endl;
-    Info<< "string match: "  << string("x.*")("xyz") << endl;
-    Info<< "string match: "  << string("x.*")(keyre) << endl;
+    Info<< "re-list:" << wres1 << nl;
+    Info<< "match this: " << wres1("this") << nl;
+    Info<< "match xyz: "  << wres1("xyz") << nl;
+    Info<< "match zyx: "  << wres1("zyx") << nl;
+    Info<< "match xyz: "  << wres1.match("xyz") << nl;
+    Info<< "match any: "  << predicates::always()("any junk") << nl;
 
-    wordRe(s1, wordRe::DETECT).info(Info) << endl;
-    wordRe(s2).info(Info) << endl;
-    wordRe(s2, wordRe::DETECT).info(Info) << endl;
-    wordRe(s3, wordRe::REGEX).info(Info) << endl;
+    Info<< "match xvalues: "  << wres1.match("xvalues") << nl;
+    Info<< "matched xvalues = "  << typeOf(wres1.matched("xvalues")) << nl;
+    Info<< "matched xval = "  << typeOf(wres1.matched("xval")) << nl;
+    Info<< "matched zyx = "  << typeOf(wres1.matched("zyx")) << nl;
+
+    Info<< "keyre match: "  << keyre("xyz") << nl;
+    Info<< "string match: "  << string("this").match("xyz") << nl;
+    Info<< "string match: "  << string("x.*")("xyz") << nl;
+    Info<< "string match: "  << string("x.*")(keyre) << nl;
+
+    wordRe(s1, wordRe::DETECT).info(Info) << nl;
+    wordRe(s2).info(Info) << nl;
+    wordRe(s2, wordRe::DETECT).info(Info) << nl;
+    wordRe(s3, wordRe::REGEX).info(Info) << nl;
 
     wre = "this .* file";
 
-    Info<<"substring: " << wre.substr(4) << endl;
+    Info<<"substring: " << wre.substr(4) << nl;
 
-    wre.info(Info) << endl;
+    wre.info(Info) << nl;
     wre = s1;
-    wre.info(Info) << endl;
+    wre.info(Info) << nl;
     wre.uncompile();
-    wre.info(Info) << endl;
+    wre.info(Info) << nl;
 
     wre = "something";
-    wre.info(Info) << " before" << endl;
+    wre.info(Info) << " before" << nl;
     wre.uncompile();
-    wre.info(Info) << " uncompiled" << endl;
+    wre.info(Info) << " uncompiled" << nl;
     wre.compile(wordRe::DETECT);
-    wre.info(Info) << " after DETECT" << endl;
+    wre.info(Info) << " after DETECT" << nl;
     wre.compile(wordRe::ICASE);
-    wre.info(Info) << " after ICASE" << endl;
+    wre.info(Info) << " after ICASE" << nl;
     wre.compile(wordRe::DETECT_ICASE);
-    wre.info(Info) << " after DETECT_ICASE" << endl;
+    wre.info(Info) << " after DETECT_ICASE" << nl;
 
     wre = "something .* value";
-    wre.info(Info) << " before" << endl;
+    wre.info(Info) << " before" << nl;
     wre.uncompile();
-    wre.info(Info) << " uncompiled" << endl;
+    wre.info(Info) << " uncompiled" << nl;
     wre.compile(wordRe::DETECT);
-    wre.info(Info) << " after DETECT" << endl;
+    wre.info(Info) << " after DETECT" << nl;
     wre.uncompile();
-    wre.info(Info) << " uncompiled" << endl;
+    wre.info(Info) << " uncompiled" << nl;
     wre.compile();
-    wre.info(Info) << " re-compiled" << endl;
+    wre.info(Info) << " re-compiled" << nl;
 
     wre.set("something .* value", wordRe::LITERAL);
-    wre.info(Info) << " set as LITERAL" << endl;
+    wre.info(Info) << " set as LITERAL" << nl;
 
     IOobject::writeDivider(Info);
 
     List<Tuple2<wordRe, string>> rawList(IFstream("testRegexps")());
-    Info<< "input list:" << rawList << endl;
-    IOobject::writeDivider(Info) << endl;
+    Info<< "input list:" << rawList << nl;
+    IOobject::writeDivider(Info) << nl;
 
     forAll(rawList, elemI)
     {
@@ -174,7 +193,7 @@ int main(int argc, char *argv[])
             << "(" << wre.match(str, true) << ")"
             << " match:" << wre.match(str)
             << "  str=" << str
-            << endl;
+            << nl;
 
         wordRe wre2;
         wre2.set(wre, wordRe::ICASE);
@@ -182,11 +201,11 @@ int main(int argc, char *argv[])
         wre2.info(Info)
             << " match:" << wre2.match(str)
             << "  str=" << str
-            << endl;
+            << nl;
 
     }
 
-    Info<< endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

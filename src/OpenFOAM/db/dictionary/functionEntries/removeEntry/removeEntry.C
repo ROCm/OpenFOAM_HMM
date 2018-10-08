@@ -58,7 +58,7 @@ bool Foam::functionEntries::removeEntry::execute
 
     for (const keyType& key : patterns)
     {
-        if (key.find('/') != string::npos || !key.isPattern())
+        if (key.isLiteral() && key.find('/') != string::npos)
         {
             // Remove scoped keyword, or keyword in the local scope
             dictionary::searcher finder =

@@ -53,7 +53,7 @@ readField
     //    patch name since is key of dictionary.
     forAllConstIter(dictionary, dict, iter)
     {
-        if (iter().isDict() && !iter().keyword().isPattern())
+        if (iter().isDict() && iter().keyword().isLiteral())
         {
             const label patchi = bmesh_.findPatchID(iter().keyword());
 
@@ -96,7 +96,7 @@ readField
         {
             const entry& e = iter();
 
-            if (e.isDict() && !e.keyword().isPattern())
+            if (e.isDict() && e.keyword().isLiteral())
             {
                 const labelList patchIds =
                     bmesh_.indices(e.keyword(), true); // use patchGroups

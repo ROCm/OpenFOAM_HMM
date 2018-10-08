@@ -284,7 +284,7 @@ bool Foam::functionObjects::ensightWrite::write()
     // Check exact matches first
     for (const wordRe& select : selectFields_)
     {
-        if (!select.isPattern())
+        if (select.isLiteral())
         {
             const word& fieldName = select;
 

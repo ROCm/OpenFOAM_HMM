@@ -50,11 +50,48 @@ inline bool Foam::wordRes::found_match
 }
 
 
+inline Foam::wordRe::compOption Foam::wordRes::found_matched
+(
+    const UList<wordRe>& patterns,
+    const std::string& text
+)
+{
+    auto retval(wordRe::compOption::UNKNOWN);
+
+    for (const wordRe& select : patterns)
+    {
+        if (select.isLiteral())
+        {
+            if (select.match(text, true))
+            {
+                return wordRe::compOption::LITERAL;
+            }
+        }
+        else if (wordRe::compOption::UNKNOWN == retval)
+        {
+            if (select.match(text, false))
+            {
+                retval = wordRe::compOption::REGEX;
+            }
+        }
+    }
+
+    return retval;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline bool Foam::wordRes::match(const std::string& text, bool literal) const
 {
     return found_match(*this, text, literal);
+}
+
+
+inline Foam::wordRe::compOption
+Foam::wordRes::matched(const std::string& text) const
+{
+    return found_matched(*this, text);
 }
 
 

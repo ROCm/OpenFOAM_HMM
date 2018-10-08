@@ -59,7 +59,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 class wordRe;
 class Istream;
 class Ostream;
@@ -81,6 +81,7 @@ class wordRe
         //- The regular expression
         mutable regExp re_;
 
+
 public:
 
     // Static data members
@@ -97,6 +98,7 @@ public:
         {
             LITERAL = 0, //!< Treat as a string literal
             DETECT  = 1, //!< Detect if the string contains meta-characters
+            UNKNOWN = 1, //!< Unknown content.
             REGEX   = 2, //!< Treat as regular expression
             ICASE   = 4, //!< Ignore case in regular expression
             NOCASE  = 4, //!< \deprecated Alias for ICASE (deprecated APR-2018)
@@ -163,11 +165,14 @@ public:
         wordRe(Istream& is);
 
 
-    // Member functions
+    // Member Functions
 
     // Access
 
-        //- Treat as a pattern rather than a literal string?
+        //- The wordRe is treated as literal, not as pattern.
+        inline bool isLiteral() const;
+
+        //- The wordRe is treated as a pattern, not as literal string.
         inline bool isPattern() const;
 
 
@@ -248,7 +253,7 @@ public:
         inline void operator=(wordRe&& str);
 
 
-    // IOstream operators
+    // IOstream Operators
 
         friend Istream& operator>>(Istream& is, wordRe& w);
         friend Ostream& operator<<(Ostream& os, const wordRe& w);

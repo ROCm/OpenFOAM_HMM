@@ -53,12 +53,23 @@ class wordRes
 {
     // Private Methods
 
-        //- Check for any match of text in list of matchers
+        //- Smart match as literal or regex, stopping on the first match.
         inline static bool found_match
         (
             const UList<wordRe>& patterns,
             const std::string& text,
             bool literal=false
+        );
+
+        //- Smart match across entire list, returning the match type.
+        //  Stops on the first literal match, or continues to examine
+        //  if a regex match occurs.
+        //  \return wordRe::LITERAL, wordRe::REGEX on match and
+        //      wordRe::UNKNOWN otherwise.
+        inline static wordRe::compOption found_matched
+        (
+            const UList<wordRe>& patterns,
+            const std::string& text
         );
 
 
@@ -111,16 +122,23 @@ public:
         //  No filtering attempted on regular expressions.
         void uniq();
 
-        //- Return true if string matches ANY of the regular expressions
-        //  Smart match as regular expression or as a string.
-        //  Optionally force a literal match only
-        inline bool match(const std::string& text, bool literal=false) const;
+        //- Smart match as literal or regex, stopping on the first match.
+        //
+        //  \param literal Force literal match only.
+        //  \return True if text matches ANY of the entries.
+        inline bool match(const std::string& text, bool literal = false) const;
+
+        //- Smart match in the list of matchers, returning the match type.
+        //  It stops if there is a literal match, or continues to examine
+        //  other regexs.
+        //  \return LITERAL if a lteral match was found, REGEX if a regex
+        //      match was found and UNKNOWN otherwise.
+        inline wordRe::compOption matched(const std::string& text) const;
 
 
-    // Member operators
+    // Member Operators
 
-        //- Perform smart match on text, as per match()
-        //  Allows use as a predicate.
+        //- Identical to match(), for use as a predicate.
         inline bool operator()(const std::string& text) const;
 };
 

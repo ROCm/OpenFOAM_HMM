@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,8 +29,7 @@ Description
 
     A keyType is the keyword of a dictionary.
     It differs from word in that it also accepts patterns (regular expressions).
-    It is very similar to wordRe, but doesn't store the regular expression
-    separately.
+    It is very similar to wordRe, but doesn't store a regular expression.
 
 SourceFiles
     keyType.C
@@ -47,12 +46,10 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
+class keyType;
 class Istream;
 class Ostream;
-
-// Forward declaration of friend functions and operators
-class keyType;
 Istream& operator>>(Istream& is, keyType& kw);
 Ostream& operator<<(Ostream& os, const keyType& kw);
 
@@ -69,6 +66,7 @@ class keyType
 
         //- Is the keyType a pattern (regular expression)
         bool isPattern_;
+
 
     // Private Member Functions
 
@@ -121,14 +119,17 @@ public:
         keyType(Istream& is);
 
 
-    // Member functions
+    // Member Functions
 
         //- Is this character valid for a keyType?
         //  This is largely identical with what word accepts, but also
         //  permit brace-brackets, which are valid for some regexs.
         inline static bool valid(char c);
 
-        //- Treat as a pattern rather than a literal string?
+        //- The keyType is treated as literal, not as pattern.
+        inline bool isLiteral() const;
+
+        //- The keyType is treated as a pattern, not as literal string.
         inline bool isPattern() const;
 
         //- Swap contents
@@ -139,7 +140,7 @@ public:
         bool match(const std::string& text, bool literal = false) const;
 
 
-    // Member operators
+    // Member Operators
 
         //- Perform smart match on text, as per match()
         //  Allows use as a predicate.
@@ -162,7 +163,7 @@ public:
         inline void operator=(const char* s);
 
 
-    // IOstream operators
+    // IOstream Operators
 
         friend Istream& operator>>(Istream& is, keyType& kw);
         friend Ostream& operator<<(Ostream& os, const keyType& kw);
