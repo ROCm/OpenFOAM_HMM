@@ -70,12 +70,8 @@ Foam::List<bool> Foam::timeSelector::selected(const instantList& times) const
         {
             const scalar target = range.value();
 
-            int nearestIndex =
-                TimePaths::findClosestTimeIndex
-                (
-                    times,
-                    target
-                );
+            const label nearestIndex =
+                TimePaths::findClosestTimeIndex(times, target);
 
             // Note could also test if the index is too far away.
             // Eg, for times (0 10 20 30 40) selecting 100 will currently
@@ -141,11 +137,6 @@ void Foam::timeSelector::addOptions
     (
         "latestTime",
         "Select the latest time"
-    );
-    argList::addBoolOption
-    (
-        "newTimes",
-        "Select the new times"
     );
     argList::addOption
     (
@@ -294,39 +285,6 @@ Foam::instantList Foam::timeSelector::selectIfPresent
 
     // No timeSelector option specified. Do not change runTime.
     return instantList(one(), instant(runTime.value(), runTime.timeName()));
-}
-
-
-Foam::instantList Foam::timeSelector::select
-(
-    Time& runTime,
-    const argList& args,
-    const word& fName
-)
-{
-    instantList times(timeSelector::select0(runTime, args));
-
-    const label nTimes = times.size();
-
-    if (nTimes && args.found("newTimes"))
-    {
-        List<bool> selectTimes(nTimes, true);
-
-        for (label timei=0; timei < nTimes; ++timei)
-        {
-            selectTimes[timei] =
-               !fileHandler().exists
-                (
-                    runTime.path()
-                  / times[timei].name()
-                  / fName
-                );
-        }
-
-        return subset(selectTimes, times);
-    }
-
-    return times;
 }
 
 
