@@ -332,52 +332,6 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& ds,
-    Field<Type>&& iField,
-    const PtrList<PatchField<Type>>& ptfl
-)
-:
-    Internal(io, mesh, ds, std::move(iField)),
-    timeIndex_(this->time().timeIndex()),
-    field0Ptr_(nullptr),
-    fieldPrevIterPtr_(nullptr),
-    boundaryField_(mesh.boundary(), *this, ptfl)
-{
-    DebugInFunction
-        << "Move construct from components" << nl << this->info() << endl;
-
-    readIfPresent();
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
-(
-    const IOobject& io,
-    const Mesh& mesh,
-    const dimensionSet& ds,
-    List<Type>&& iField,
-    const PtrList<PatchField<Type>>& ptfl
-)
-:
-    Internal(io, mesh, ds, std::move(iField)),
-    timeIndex_(this->time().timeIndex()),
-    field0Ptr_(nullptr),
-    fieldPrevIterPtr_(nullptr),
-    boundaryField_(mesh.boundary(), *this, ptfl)
-{
-    DebugInFunction
-        << "Move construct from components" << nl << this->info() << endl;
-
-    readIfPresent();
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
-(
-    const IOobject& io,
-    const Mesh& mesh,
     const bool readOldTime
 )
 :

@@ -354,26 +354,6 @@ public:
             const PtrList<PatchField<Type>>& ptfl
         );
 
-        //- Construct from components, moving initial internal field
-        GeometricField
-        (
-            const IOobject& io,
-            const Mesh& mesh,
-            const dimensionSet& ds,
-            Field<Type>&& iField,
-            const PtrList<PatchField<Type>>& ptfl
-        );
-
-        //- Construct from components, moving initial internal field
-        GeometricField
-        (
-            const IOobject& io,
-            const Mesh& mesh,
-            const dimensionSet& ds,
-            List<Type>&& iField,
-            const PtrList<PatchField<Type>>& ptfl
-        );
-
         //- Construct and read given IOobject
         GeometricField
         (
