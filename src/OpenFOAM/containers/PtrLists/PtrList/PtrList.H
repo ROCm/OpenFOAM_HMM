@@ -154,6 +154,7 @@ public:
         inline bool set(const label i) const;
 
         //- Set element to given pointer and return old element (can be null)
+        //  No-op if the new pointer value is identical to the current content.
         inline autoPtr<T> set(label i, T* ptr);
 
         //- Set element to given autoPtr and return old element

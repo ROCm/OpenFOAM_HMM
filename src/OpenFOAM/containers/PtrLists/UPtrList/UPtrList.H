@@ -182,7 +182,7 @@ public:
 
         //- Set element to specified pointer and return the old list element,
         //- which can be a nullptr.
-        //  No checks on new element
+        //  No-op if the new pointer value is identical to the current content.
         inline T* set(const label i, T* ptr);
 
         //- Reorder elements. Reordering must be unique (ie, shuffle).
