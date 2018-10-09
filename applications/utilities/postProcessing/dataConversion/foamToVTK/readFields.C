@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,91 +23,147 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "readFields.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class GeoField>
-label readFields
+Foam::tmp<GeoField> Foam::getField
 (
-    const fvMeshSubsetProxy& proxy,
+    const IOobject* io,
     const typename GeoField::Mesh& mesh,
-    const IOobjectList& objects,
-    const wordHashSet& selectedFields,
-    PtrList<const GeoField>& fields
+    const bool syncPar
 )
 {
-    // Available fields of type GeoField, sorted order
-    const wordList fieldNames =
-    (
-        selectedFields.empty()
-      ? objects.sortedNames(GeoField::typeName)
-      : objects.sortedNames(GeoField::typeName, selectedFields)
-    );
-
-    // Construct the fields
-    fields.resize(fieldNames.size());
-
-    label nFields = 0;
-
-    for (const word& fieldName : fieldNames)
+    if (io)
     {
-        fields.set
-        (
-            nFields++,
-            proxy.interpolate
-            (
-                GeoField(*(objects[fieldName]), mesh)
-            ).ptr()
-        );
+        return tmp<GeoField>::New(*io, mesh);
     }
 
-    return nFields;
+    return nullptr;
 }
 
 
 template<class GeoField>
-label readFields
+Foam::tmp<GeoField> Foam::getField
+(
+    const IOobject* io,
+    const fvMeshSubsetProxy& proxy,
+    const bool syncPar
+)
+{
+    return
+        proxy.interpolate
+        (
+            getField<GeoField>(io, proxy.baseMesh(), syncPar)
+        );
+}
+
+
+template<class GeoField>
+Foam::tmp<GeoField> Foam::getField
 (
     const typename GeoField::Mesh& mesh,
     const IOobjectList& objects,
-    const wordHashSet& selectedFields,
-    PtrList<const GeoField>& fields
+    const word& fieldName,
+    const bool syncPar
 )
 {
+    // Can do something with syncPar on failure ...
+
+    return getField<GeoField>(objects.findObject(fieldName), mesh, syncPar);
+}
+
+
+template<class GeoField>
+Foam::tmp<GeoField> Foam::getField
+(
+    const fvMeshSubsetProxy& proxy,
+    const IOobjectList& objects,
+    const word& fieldName,
+    const bool syncPar
+)
+{
+    // Can do something with syncPar on failure ...
+
+    return getField<GeoField>(objects.findObject(fieldName), proxy, syncPar);
+}
+
+
+template<class GeoField>
+Foam::PtrList<const GeoField> Foam::readFields
+(
+    const typename GeoField::Mesh& mesh,
+    const IOobjectList& objects,
+    const wordRes& selection
+)
+{
+    const bool syncPar = true;
+
     // Available fields of type GeoField, sorted order
     const wordList fieldNames =
     (
-        selectedFields.empty()
-      ? objects.sortedNames(GeoField::typeName)
-      : objects.sortedNames(GeoField::typeName, selectedFields)
+        selection.empty()
+      ? objects.sortedNames<GeoField>()
+      : objects.sortedNames<GeoField>(selection)
     );
 
     // Construct the fields
-    fields.resize(fieldNames.size());
+    PtrList<const GeoField> fields(fieldNames.size());
 
     label nFields = 0;
 
     for (const word& fieldName : fieldNames)
     {
-        fields.set
-        (
-            nFields++,
-            new GeoField(*(objects[fieldName]), mesh)
-        );
+        auto tfield =
+            getField<GeoField>(mesh, objects, fieldName, syncPar);
+
+        if (tfield.valid())
+        {
+            fields.set(nFields++, tfield.ptr());
+        }
     }
 
-    return nFields;
+    fields.resize(nFields);
+    return fields;
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class GeoField>
+Foam::PtrList<const GeoField> Foam::readFields
+(
+    const fvMeshSubsetProxy& proxy,
+    const IOobjectList& objects,
+    const wordRes& selection
+)
+{
+    const bool syncPar = true;
 
-} // End namespace Foam
+    // Available fields of type GeoField, sorted order
+    const wordList fieldNames =
+    (
+        selection.empty()
+      ? objects.sortedNames<GeoField>()
+      : objects.sortedNames<GeoField>(selection)
+    );
+
+    // Construct the fields
+    PtrList<const GeoField> fields(fieldNames.size());
+
+    label nFields = 0;
+
+    for (const word& fieldName : fieldNames)
+    {
+        auto tfield =
+            getField<GeoField>(proxy, objects, fieldName, syncPar);
+
+        if (tfield.valid())
+        {
+            fields.set(nFields++, tfield.ptr());
+        }
+    }
+
+    fields.resize(nFields);
+    return fields;
+}
+
 
 // ************************************************************************* //
