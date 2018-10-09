@@ -1,3 +1,4 @@
+readFields.C
 foamToEnsight.C
 
 EXE = $(FOAM_APPBIN)/foamToEnsight

@@ -4,29 +4,32 @@
 HashTable<HashTable<word>> cloudFields;
 
 // Identify if lagrangian data exist at any time step.
-if (timeDirs.size() && !noLagrangian)
+if (timeDirs.size() && doLagrangian)
 {
     const fileName& baseDir = mesh.time().path();
     const fileName cloudPrefix(regionPrefix/cloud::prefix);
 
     Info<< "Searching for lagrangian ... " << flush;
 
-    forAll(timeDirs, timeI)
+    for (const instant& inst : timeDirs)
     {
-        const word& timeName = timeDirs[timeI].name();
+        const word& timeName = inst.name();
 
         // DO NOT USE -->>  runTime.setTime(timeDirs[timeI], timeI);  <<--
         // It incurs a large overhead when done so frequently.
 
-        fileNameList cloudDirs = readDir
+        fileNameList cloudDirs
         (
-            baseDir/timeName/cloudPrefix,
-            fileName::DIRECTORY
+            readDir
+            (
+                baseDir/timeName/cloudPrefix,
+                fileName::DIRECTORY
+            )
         );
 
-        forAll(cloudDirs, cloudI)
+        for (fileName& cloudDir : cloudDirs)
         {
-            const word& cloudName = cloudDirs[cloudI];
+            const word cloudName(std::move(cloudDir));
 
             IOobjectList cloudObjs
             (
@@ -56,10 +59,10 @@ if (timeDirs.size() && !noLagrangian)
 
                 forAllConstIters(cloudObjs, fieldIter)
                 {
-                    const IOobject* obj = fieldIter();
+                    const IOobject* io = *fieldIter;
 
                     // Field name/type
-                    fieldsPerCloud.insert(obj->name(), obj->headerClassName());
+                    fieldsPerCloud.insert(io->name(), io->headerClassName());
                 }
             }
         }
