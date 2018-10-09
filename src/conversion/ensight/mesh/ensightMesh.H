@@ -66,6 +66,7 @@ class ensightMesh;
 class ensightMesh
 {
 public:
+
     // Forward declarations
     class options;
 
@@ -121,7 +122,8 @@ private:
             const labelUList& pointToGlobal
         );
 
-        static cellShapeList map
+        //- Copy and return renumbered cell-shapes
+        static cellShapeList renumberShapes
         (
             const cellShapeList& shapes,
             const labelUList& addr,
@@ -140,6 +142,18 @@ private:
         (
             const UIndirectList<face>& faces,
             ensightGeoFile& os
+        );
+
+        //- Return sizes of faces in the list
+        static labelList getFaceSizes
+        (
+            const faceList& faces
+        );
+
+        //- Return sizes of faces in the list
+        static labelList getFaceSizes
+        (
+            const UIndirectList<face>& faces
         );
 
         //- Write sizes of faces in the list
@@ -163,32 +177,47 @@ private:
             ensightGeoFile& os
         );
 
+        //- Return the number of faces per poly element
+        static labelList getPolysNFaces
+        (
+            const labelUList& polys,
+            const cellList& cellFaces
+        );
+
         //- Write the number of faces per poly element
-        void writePolysNFaces
+        static void writePolysNFaces
         (
             const labelUList& polys,
             const cellList& cellFaces,
             ensightGeoFile& os
-        ) const;
+        );
+
+        //- Return the number of points per poly element
+        static labelList getPolysNPointsPerFace
+        (
+            const labelUList& polys,
+            const cellList& cellFaces,
+            const faceList& faces
+        );
 
         //- Write the number of points per poly element
-        void writePolysNPointsPerFace
+        static void writePolysNPointsPerFace
         (
             const labelUList& polys,
             const cellList& cellFaces,
             const faceList& faces,
-            ensightGeoFile&
-        ) const;
+            ensightGeoFile& os
+        );
 
         //- Write the point ids per poly element
-        void writePolysPoints
+        static void writePolysPoints
         (
             const labelUList& addr,
             const cellList& cellFaces,
             const faceList& faces,
             const labelList& faceOwner,
-            ensightGeoFile&
-        ) const;
+            ensightGeoFile& os
+        );
 
         //- Write the poly connectivity
         void writePolysConnectivity
@@ -267,18 +296,13 @@ public:
     // Constructors
 
         //- Construct from components
-        ensightMesh
-        (
-            const fvMesh& mesh,
-            const options& opts
-        );
+        ensightMesh(const fvMesh& mesh, const options& opts);
 
-        //- Construct from fvMesh with all default options
-        ensightMesh
-        (
-            const fvMesh& mesh,
-            const IOstream::streamFormat format = IOstream::BINARY
-        );
+        //- Construct from fvMesh with all default options, binary output
+        explicit ensightMesh(const fvMesh& mesh);
+
+        //- Construct from fvMesh with all default options and specified format
+        ensightMesh(const fvMesh& mesh, const IOstream::streamFormat format);
 
 
     //- Destructor
@@ -298,8 +322,11 @@ public:
         //- Ascii/Binary file output
         inline IOstream::streamFormat format() const;
 
-        //- Using internalMesh?
+        //- Using internal?
         inline bool useInternalMesh() const;
+
+        //- Using boundary?
+        inline bool useBoundaryMesh() const;
 
         //- The volume cells (internalMesh)
         inline const ensightCells& meshCells() const;
@@ -346,12 +373,11 @@ public:
         //  Return false if already marked as expired.
         bool expire();
 
-
         //- Update for new mesh
         void correct();
 
 
-    // I-O
+    // Output
 
         //- Write to file
         inline void write(autoPtr<ensightGeoFile>& os) const;
@@ -371,49 +397,53 @@ class ensightMesh::options
     //- Create in 'expired' mode
     bool lazy_;
 
-    //- Suppress patches
-    bool noPatches_;
+    //- Use the internal mesh
+    bool internal_;
 
-    //- Output selected patches only
-    autoPtr<wordRes> patchPatterns_;
+    //- Use the boundary mesh
+    bool boundary_;
 
-    //- Output selected faceZones
-    autoPtr<wordRes> faceZonePatterns_;
+    //- Output of selected patches only
+    wordRes patchPatterns_;
+
+    //- Output of selected faceZones
+    wordRes faceZonePatterns_;
+
 
 public:
 
     // Constructors
 
-        //- Construct with the specified format (default is binary)
-        options(IOstream::streamFormat format = IOstream::BINARY);
+        //- Construct for binary output
+        options();
+
+        //- Construct for specified format
+        explicit options(IOstream::streamFormat format);
 
 
     // Member Functions
 
     // Access
 
-        //- Ascii/Binary file output
+        //- File output format (ascii | binary)
         IOstream::streamFormat format() const;
 
         //- Lazy creation? (ie, ensightMesh starts as needsUpdate)
         bool lazy() const;
 
-        //- Using internalMesh?
+        //- Using internal?
         bool useInternalMesh() const;
 
-        //- Using patches?
-        bool usePatches() const;
+        //- Using boundary?
+        bool useBoundaryMesh() const;
 
         //- Using faceZones?
         bool useFaceZones() const;
 
-        //- Selection of patches in effect?
-        bool usePatchSelection() const;
-
-        //- Selection of patches - null reference if not available
+        //- Selection of patches. Empty if unspecified.
         const wordRes& patchSelection() const;
 
-        //- Selection of faceZones - null reference if not available
+        //- Selection of faceZones. Empty if unspecified.
         const wordRes& faceZoneSelection() const;
 
 
@@ -423,16 +453,37 @@ public:
         void reset();
 
         //- Lazy creation - ensightMesh starts as needsUpdate.
-        void lazy(const bool);
+        void lazy(bool beLazy);
 
-        //- Alter the patches/no-patches state
-        void noPatches(const bool);
+        //- Alter the useBoundaryMesh state
+        void useInternalMesh(bool on);
+
+        //- Alter the useBoundaryMesh state
+        void useBoundaryMesh(bool on);
 
         //- Define patch selection matcher
         void patchSelection(const UList<wordRe>& patterns);
 
+        //- Define patch selection matcher
+        void patchSelection(List<wordRe>&& patterns);
+
         //- Define faceZone selection matcher
         void faceZoneSelection(const UList<wordRe>& patterns);
+
+        //- Define faceZone selection matcher
+        void faceZoneSelection(List<wordRe>&& patterns);
+
+
+    // Housekeeping
+
+        //- Older name for useBoundaryMesh()
+        //  \deprecated OCT-2018
+        bool usePatches() const { return useBoundaryMesh(); }
+
+        //- Older name for useBoundaryMesh()
+        //  \deprecated OCT-2018
+        void noPatches(bool off) { useBoundaryMesh(!off); }
+
 };
 
 

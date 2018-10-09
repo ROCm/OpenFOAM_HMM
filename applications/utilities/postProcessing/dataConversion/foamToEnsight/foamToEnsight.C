@@ -155,6 +155,11 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
+        "noInternal",
+        "Do not generate file for mesh, only for patches"
+    );
+    argList::addBoolOption
+    (
         "noPatches",
         "Suppress writing any patches"
     );
@@ -162,8 +167,7 @@ int main(int argc, char *argv[])
     (
         "patches",
         "wordRes",
-        "Specify particular patches to write - eg '(outlet \"inlet.*\")'. "
-        "An empty list suppresses writing the internalMesh."
+        "Specify particular patches to write - eg '(outlet \"inlet.*\")'."
     );
     argList::addOption
     (
@@ -267,7 +271,8 @@ int main(int argc, char *argv[])
     // Output configuration (geometry related)
     //
     ensightMesh::options writeOpts(format);
-    writeOpts.noPatches(args.found("noPatches"));
+    writeOpts.useInternalMesh(!args.found("noInternal"));
+    writeOpts.useBoundaryMesh(!args.found("noPatches"));
 
     if (args.found("patches"))
     {
