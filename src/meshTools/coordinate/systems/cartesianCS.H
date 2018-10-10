@@ -115,6 +115,12 @@ public:
         //  \param dictName If non-empty, the sub-dictionary to use.
         cartesian(const dictionary& dict, const word& dictName);
 
+        //- Return clone
+        virtual autoPtr<coordinateSystem> clone() const
+        {
+            return autoPtr<coordinateSystem>::NewFrom<cartesian>(*this);
+        }
+
 
     //- Destructor
     virtual ~cartesian() = default;

@@ -154,6 +154,13 @@ public:
         //  \param dictName If non-empty, the sub-dictionary to use.
         cylindrical(const dictionary& dict, const word& dictName);
 
+        //- Return clone
+        virtual autoPtr<coordinateSystem> clone() const
+        {
+            return autoPtr<coordinateSystem>::NewFrom<cylindrical>(*this);
+        }
+
+
     //- Destructor
     virtual ~cylindrical() = default;
 

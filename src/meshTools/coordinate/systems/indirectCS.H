@@ -141,6 +141,12 @@ public:
         //- Construct from global lookup
         indirect(const objectRegistry& obr, const dictionary& dict);
 
+        //- Return clone
+        virtual autoPtr<coordinateSystem> clone() const
+        {
+            return autoPtr<coordinateSystem>::NewFrom<indirect>(*this);
+        }
+
 
     //- Destructor
     virtual ~indirect() = default;

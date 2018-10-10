@@ -327,7 +327,7 @@ public:
 
 
     //- Return clone
-    autoPtr<coordinateSystem> clone() const
+    virtual autoPtr<coordinateSystem> clone() const
     {
         return autoPtr<coordinateSystem>::New(*this);
     }
