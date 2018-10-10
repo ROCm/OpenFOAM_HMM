@@ -73,6 +73,9 @@ Note
 #include <unordered_set>
 #include <vector>
 
+// Ragel switches may have several implicit fallthroughs
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+
 // Length of the input read buffer
 #define INBUFLEN 16384
 
@@ -309,7 +312,7 @@ namespace Files
 // Can use 'variable p xxx;' etc to change these names
 
 
-#line 334 "wmkdepend.rl"
+#line 341 "wmkdepend.rl"
 
 
 
@@ -318,22 +321,38 @@ namespace Files
 //
 
 
-#line 322 "wmkdepend.cpp"
+#line 325 "wmkdepend.cpp"
 static const int wmkdep_start = 21;
 static const int wmkdep_error = 0;
 
 static const int wmkdep_en_main = 21;
 
 
-#line 342 "wmkdepend.rl"
+#line 349 "wmkdepend.rl"
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+void processFile(std::string fileName);
+
+//
+// Open a file and process.
+// The file name is given by the [first,last) range
+//
+void processFile(const char* first, const char* last)
+{
+    // Extra safety
+    if (first && last && last > first)
+    {
+        processFile(std::string(first, last));
+    }
+}
+
+
 //
 // Open a file and process
 //
-void processFile(const std::string& fileName)
+void processFile(std::string fileName)
 {
     FILE* infile = Files::open(fileName);
     if (optVerbose)
@@ -348,7 +367,7 @@ void processFile(const std::string& fileName)
     int act, cs;
 
     
-#line 352 "wmkdepend.cpp"
+#line 371 "wmkdepend.cpp"
 	{
 	cs = wmkdep_start;
 	ts = 0;
@@ -356,7 +375,7 @@ void processFile(const std::string& fileName)
 	act = 0;
 	}
 
-#line 363 "wmkdepend.rl"
+#line 386 "wmkdepend.rl"
    /* ^^^ FSM initialization here ^^^ */;
 
     // Local token start
@@ -401,7 +420,7 @@ void processFile(const std::string& fileName)
         }
 
         
-#line 405 "wmkdepend.cpp"
+#line 424 "wmkdepend.cpp"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -420,35 +439,35 @@ tr0:
 	}
 	goto st21;
 tr2:
-#line 332 "wmkdepend.rl"
+#line 339 "wmkdepend.rl"
 	{te = p+1;}
 	goto st21;
 tr17:
-#line 332 "wmkdepend.rl"
+#line 339 "wmkdepend.rl"
 	{{p = ((te))-1;}}
 	goto st21;
 tr21:
-#line 327 "wmkdepend.rl"
+#line 334 "wmkdepend.rl"
 	{te = p+1;}
 	goto st21;
 tr29:
-#line 330 "wmkdepend.rl"
+#line 337 "wmkdepend.rl"
 	{te = p+1;}
 	goto st21;
 tr31:
-#line 329 "wmkdepend.rl"
+#line 336 "wmkdepend.rl"
 	{te = p+1;}
 	goto st21;
 tr36:
-#line 324 "wmkdepend.rl"
+#line 331 "wmkdepend.rl"
 	{te = p;p--;}
 	goto st21;
 tr37:
-#line 332 "wmkdepend.rl"
+#line 339 "wmkdepend.rl"
 	{te = p;p--;}
 	goto st21;
 tr38:
-#line 330 "wmkdepend.rl"
+#line 337 "wmkdepend.rl"
 	{te = p;p--;}
 	goto st21;
 st21:
@@ -461,7 +480,7 @@ st21:
 case 21:
 #line 1 "NONE"
 	{ts = p;}
-#line 465 "wmkdepend.cpp"
+#line 484 "wmkdepend.cpp"
 	switch( (*p) ) {
 		case 10: goto st23;
 		case 11: goto tr34;
@@ -482,14 +501,14 @@ case 1:
 tr32:
 #line 1 "NONE"
 	{te = p+1;}
-#line 324 "wmkdepend.rl"
+#line 331 "wmkdepend.rl"
 	{act = 1;}
 	goto st22;
 st22:
 	if ( ++p == pe )
 		goto _test_eof22;
 case 22:
-#line 493 "wmkdepend.cpp"
+#line 512 "wmkdepend.cpp"
 	switch( (*p) ) {
 		case 10: goto st23;
 		case 11: goto tr34;
@@ -511,14 +530,14 @@ case 23:
 tr34:
 #line 1 "NONE"
 	{te = p+1;}
-#line 324 "wmkdepend.rl"
+#line 331 "wmkdepend.rl"
 	{act = 1;}
 	goto st24;
 st24:
 	if ( ++p == pe )
 		goto _test_eof24;
 case 24:
-#line 522 "wmkdepend.cpp"
+#line 541 "wmkdepend.cpp"
 	switch( (*p) ) {
 		case 10: goto st23;
 		case 32: goto tr34;
@@ -616,14 +635,14 @@ case 10:
 	}
 	goto tr12;
 tr12:
-#line 312 "wmkdepend.rl"
-	{ tok = p; /* Local token start */ }
+#line 315 "wmkdepend.rl"
+	{ tok = p;  /* Local token start */ }
 	goto st11;
 st11:
 	if ( ++p == pe )
 		goto _test_eof11;
 case 11:
-#line 627 "wmkdepend.cpp"
+#line 646 "wmkdepend.cpp"
 	switch( (*p) ) {
 		case 10: goto tr15;
 		case 34: goto tr16;
@@ -632,8 +651,8 @@ case 11:
 tr13:
 #line 1 "NONE"
 	{te = p+1;}
-#line 312 "wmkdepend.rl"
-	{ tok = p; /* Local token start */ }
+#line 315 "wmkdepend.rl"
+	{ tok = p;  /* Local token start */ }
 	goto st25;
 tr15:
 #line 1 "NONE"
@@ -643,7 +662,7 @@ st25:
 	if ( ++p == pe )
 		goto _test_eof25;
 case 25:
-#line 647 "wmkdepend.cpp"
+#line 666 "wmkdepend.cpp"
 	if ( (*p) == 34 )
 		goto tr19;
 	goto st12;
@@ -655,26 +674,32 @@ case 12:
 		goto tr19;
 	goto st12;
 tr19:
-#line 313 "wmkdepend.rl"
-	{ processFile(std::string(tok, (p - tok))); }
+#line 317 "wmkdepend.rl"
+	{
+        processFile(tok, p);
+        tok = nullptr;          /* Done with buffer */
+    }
 	goto st13;
 st13:
 	if ( ++p == pe )
 		goto _test_eof13;
 case 13:
-#line 666 "wmkdepend.cpp"
+#line 688 "wmkdepend.cpp"
 	if ( (*p) == 10 )
 		goto tr21;
 	goto st13;
 tr16:
-#line 313 "wmkdepend.rl"
-	{ processFile(std::string(tok, (p - tok))); }
+#line 317 "wmkdepend.rl"
+	{
+        processFile(tok, p);
+        tok = nullptr;          /* Done with buffer */
+    }
 	goto st14;
 st14:
 	if ( ++p == pe )
 		goto _test_eof14;
 case 14:
-#line 678 "wmkdepend.cpp"
+#line 703 "wmkdepend.cpp"
 	if ( (*p) == 10 )
 		goto tr21;
 	goto st14;
@@ -705,7 +730,7 @@ st26:
 	if ( ++p == pe )
 		goto _test_eof26;
 case 26:
-#line 709 "wmkdepend.cpp"
+#line 734 "wmkdepend.cpp"
 	if ( (*p) == 42 )
 		goto st18;
 	goto st17;
@@ -738,14 +763,14 @@ case 19:
 tr30:
 #line 1 "NONE"
 	{te = p+1;}
-#line 330 "wmkdepend.rl"
+#line 337 "wmkdepend.rl"
 	{act = 4;}
 	goto st27;
 st27:
 	if ( ++p == pe )
 		goto _test_eof27;
 case 27:
-#line 749 "wmkdepend.cpp"
+#line 774 "wmkdepend.cpp"
 	if ( (*p) == 10 )
 		goto tr2;
 	goto st1;
@@ -820,7 +845,7 @@ cs = 0;
 	_out: {}
 	}
 
-#line 406 "wmkdepend.rl"
+#line 429 "wmkdepend.rl"
        /* ^^^ FSM execution here ^^^ */;
 
         if (0 == cs)
@@ -834,11 +859,23 @@ cs = 0;
 
         if (ts)
         {
-            // Preserve incomplete token
+            // Preserve incomplete token.
+            // We have the normal ragel range (ts, te) but potentially
+            // our own local buffer start as 'tok'
+
+            if (tok && tok >= ts)
+            {
+                tok = inbuf + (tok - ts);
+            }
+            else
+            {
+                tok = nullptr;          // safety
+            }
+
             pending = pe - ts;
             memmove(inbuf, ts, pending);
-            te = inbuf + (te - ts);   // token end (after memmove)
-            ts = inbuf;               // token start
+            te = inbuf + (te - ts);     // token end (after memmove)
+            ts = inbuf;                 // token start
         }
         else
         {
