@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,7 +69,7 @@ public:
         (
             const pointField& pts,
             const faceList& faces,
-            const labelUList& ids = Foam::emptyLabelList
+            const labelList& ids = labelList()
         )
         :
             points_(pts),
