@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,8 +43,8 @@ SourceFiles
 
 #include "scalarList.H"
 #include "mapDistribute.H"
-#include "fvMesh.H"
 #include "pointList.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -94,6 +94,11 @@ protected:
 
         //- Count ocurrences (in parallel)
         static labelList count(const label size, const labelUList& lst);
+
+        //- Helper: create volScalarField for postprocessing.
+        template<class Type>
+        tmp<volScalarField> createField(const word& name, UList<Type>&) const;
+
 
 private:
 
@@ -217,6 +222,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "cellCellStencilTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -787,9 +787,15 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
     interpolationCells_.transfer(interpolationCells);
 
     List<Map<label>> compactMap;
-    mapDistribute map(globalCells, cellStencil_, compactMap);
-    cellInterpolationMap_.transfer(map);
-
+    cellInterpolationMap_.reset
+    (
+        new mapDistribute
+        (
+            globalCells,
+            cellStencil_,
+            compactMap
+        )
+    );
     cellInterpolationWeight_.transfer(allWeight);
     cellInterpolationWeight_.correctBoundaryConditions();
 
@@ -802,7 +808,7 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
         Pout<< typeName << " : dumping injectionStencil to "
             << str.name() << endl;
         pointField cc(mesh_.cellCentres());
-        cellInterpolationMap_.distribute(cc);
+        cellInterpolationMap().distribute(cc);
 
         forAll(cellStencil_, celli)
         {
@@ -862,7 +868,7 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
         OBJstream str(mesh_.time().timePath()/"stencil.obj");
         Pout<< typeName << " : dumping to " << str.name() << endl;
         pointField cc(mesh_.cellCentres());
-        cellInterpolationMap_.distribute(cc);
+        cellInterpolationMap().distribute(cc);
 
         forAll(cellStencil_, celli)
         {
