@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,65 +21,77 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Namespace
+    Foam::ensightCloud
+
 Description
-    Miscellaneous collection of functions and template related to Ensight data
+    A collection of global functions for writing clouds as
+    ensight file content.
 
 SourceFiles
-    ensightOutputFunctions.C
+    ensightOutputCloud.C
+    ensightOutputCloudTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightOutputSerialCloud_H
-#define ensightOutputSerialCloud_H
+#ifndef ensightOutputCloud_H
+#define ensightOutputCloud_H
 
 #include "ensightFile.H"
-#include "Cloud.H"
-#include "polyMesh.H"
-#include "IOobject.H"
+#include "autoPtr.H"
+#include "IOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
 namespace Foam
 {
-namespace ensightSerialCloud
+// Forward declarations
+class fvMesh;
+
+namespace ensightCloud
 {
 
 //- Write cloud positions
-void writePositions
+bool writePositions
 (
-    const polyMesh& mesh,
+    const fvMesh& mesh,
     const word& cloudName,
-    autoPtr<ensightFile> output
+    bool exists,
+    autoPtr<ensightFile>& output,
+    Pstream::commsTypes comm = Pstream::commsTypes::blocking
 );
 
 
-//- Write cloud field
+//- Write cloud field, returning true if the field is non-empty.
 template<class Type>
 bool writeCloudField
 (
     const IOField<Type>& field,
-    ensightFile& os
+    ensightFile& os,
+    Pstream::commsTypes comm = Pstream::commsTypes::blocking
 );
 
 
-//- Write cloud field
+//- Read cloud field from IOobject (if exists == true) and write,
+//- always returning true.
 template<class Type>
 bool writeCloudField
 (
-    const IOobject& fieldObject,
-    autoPtr<ensightFile> output
+    const IOobject& io,
+    bool exists,
+    autoPtr<ensightFile>& output,
+    Pstream::commsTypes comm = Pstream::commsTypes::blocking
 );
 
 
-} // End namespace ensightSerialCloud
+} // End namespace ensightCloud
 } // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
 #ifdef NoRepository
-    #include "ensightOutputSerialCloudTemplates.C"
+    #include "ensightOutputCloudTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

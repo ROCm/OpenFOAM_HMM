@@ -119,6 +119,7 @@ clouds/Templates/KinematicCloud/cloudSolution/cloudSolution.C
 submodels/MPPIC/AveragingMethods/makeAveragingMethods.C
 
 /* conversion methods */
+conversion/ensight/ensightOutputCloud.C
 conversion/vtk/foamVtkLagrangianWriter.C
 
 
