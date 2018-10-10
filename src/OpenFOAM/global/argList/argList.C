@@ -51,6 +51,7 @@ License
 
 bool Foam::argList::argsMandatory_ = true;
 bool Foam::argList::checkProcessorDirectories_ = true;
+
 Foam::SLList<Foam::string>    Foam::argList::validArgs;
 Foam::HashSet<Foam::string>   Foam::argList::advancedOptions;
 Foam::HashTable<Foam::string> Foam::argList::validOptions;
@@ -59,9 +60,10 @@ Foam::HashTable<Foam::string> Foam::argList::optionUsage;
 Foam::HashTable<std::pair<Foam::word,int>> Foam::argList::validOptionsCompat;
 Foam::HashTable<std::pair<bool,int>> Foam::argList::ignoreOptionsCompat;
 Foam::SLList<Foam::string>    Foam::argList::notes;
-Foam::string::size_type Foam::argList::usageMin = 20;
-Foam::string::size_type Foam::argList::usageMax = 80;
 Foam::word Foam::argList::postProcessOptionName("postProcess");
+
+std::string::size_type Foam::argList::usageMin = 20;
+std::string::size_type Foam::argList::usageMax = 80;
 
 Foam::argList::initValidTables::initValidTables()
 {
@@ -256,7 +258,7 @@ void Foam::argList::addBoolOption
 (
     const word& optName,
     const string& usage,
-    const bool advanced
+    bool advanced
 )
 {
     addOption(optName, "", usage, advanced);
@@ -268,7 +270,7 @@ void Foam::argList::addOption
     const word& optName,
     const string& param,
     const string& usage,
-    const bool advanced
+    bool advanced
 )
 {
     validOptions.set(optName, param);
@@ -279,6 +281,19 @@ void Foam::argList::addOption
     if (advanced)
     {
         advancedOptions.set(optName);
+    }
+}
+
+
+void Foam::argList::setAdvanced(const word& optName, bool advanced)
+{
+    if (advanced && validOptions.found(optName))
+    {
+        advancedOptions.set(optName);
+    }
+    else
+    {
+        advancedOptions.erase(optName);
     }
 }
 
@@ -300,7 +315,7 @@ void Foam::argList::addOptionCompat
 void Foam::argList::ignoreOptionCompat
 (
     std::pair<const char*,int> compat,
-    const bool expectArg
+    bool expectArg
 )
 {
     ignoreOptionsCompat.insert
@@ -417,100 +432,107 @@ void Foam::argList::noCheckProcessorDirectories()
 
 void Foam::argList::printOptionUsage
 (
-    const label location,
+    std::string::size_type start,
     const string& str
 )
 {
-    const string::size_type textWidth = usageMax - usageMin;
-    const string::size_type strLen = str.size();
+    const auto strLen = str.length();
 
-    if (strLen)
+    if (!strLen)
     {
-        // Minimum of 2 spaces between option and usage:
-        if (string::size_type(location) + 2 <= usageMin)
+        Info<< nl;
+        return;
+    }
+
+    // Indent the first line. Min 2 spaces between option and usage
+    if (start + 2 > usageMin)
+    {
+        Info<< nl;
+        start = 0;
+    }
+    while (start < usageMin)
+    {
+        Info<<' ';
+        ++start;
+    }
+
+    const std::string::size_type textWidth = (usageMax - usageMin);
+
+    // Output with text wrapping
+    for (std::string::size_type pos = 0;  pos < strLen; /*ni*/)
+    {
+        // Potential end point and next point
+        std::string::size_type end  = pos + textWidth - 1;
+        std::string::size_type eol  = str.find('\n', pos);
+        std::string::size_type next = string::npos;
+
+        if (end >= strLen)
         {
-            for (string::size_type i = location; i < usageMin; ++i)
+            // No more wrapping needed
+            end = strLen;
+
+            if (std::string::npos != eol && eol <= end)
             {
-                Info<<' ';
+                end = eol;
+                next = str.find_first_not_of(" \t\n", end); // Next non-space
             }
+        }
+        else if (std::string::npos != eol && eol <= end)
+        {
+            // Embedded '\n' char
+            end = eol;
+            next = str.find_first_not_of(" \t\n", end);     // Next non-space
+        }
+        else if (isspace(str[end]))
+        {
+            // Ended on a space - can use this directly
+            next = str.find_first_not_of(" \t\n", end);     // Next non-space
+        }
+        else if (isspace(str[end+1]))
+        {
+            // The next one is a space - so we are okay
+            ++end;  // Otherwise the length is wrong
+            next = str.find_first_not_of(" \t\n", end);     // Next non-space
         }
         else
         {
-            // or start a new line
+            // Line break will be mid-word
+            auto prev = str.find_last_of(" \t\n", end);     // Prev word break
+
+            if (std::string::npos != prev && prev > pos)
+            {
+                end = prev;
+                next = prev + 1;  // Continue from here
+            }
+        }
+
+        // The next position to continue from
+        if (std::string::npos == next)
+        {
+            next = end + 1;
+        }
+
+        // Has a length
+        if (end > pos)
+        {
+            // Indent following lines. The first one was already done.
+            if (pos)
+            {
+                for (std::string::size_type i = 0; i < usageMin; ++i)
+                {
+                    Info<<' ';
+                }
+            }
+
+            while (pos < end)
+            {
+                Info<< str[pos];
+                ++pos;
+            }
             Info<< nl;
-            for (string::size_type i = 0; i < usageMin; ++i)
-            {
-                Info<<' ';
-            }
         }
 
-        // Text wrap
-        string::size_type pos = 0;
-        while (pos != string::npos && pos + textWidth < strLen)
-        {
-            // Potential end point and next point
-            string::size_type curr = pos + textWidth - 1;
-            string::size_type next = string::npos;
-
-            if (isspace(str[curr]))
-            {
-                // We were lucky: ended on a space
-                next = str.find_first_not_of(" \t\n", curr);
-            }
-            else if (isspace(str[curr+1]))
-            {
-                // The next one is a space - so we are okay
-                ++curr;  // otherwise the length is wrong
-                next = str.find_first_not_of(" \t\n", curr);
-            }
-            else
-            {
-                // Search for end of a previous word break
-                string::size_type prev = str.find_last_of(" \t\n", curr);
-
-                // Reposition to the end of previous word if possible
-                if (prev != string::npos && prev > pos)
-                {
-                    curr = prev;
-                }
-            }
-
-            if (next == string::npos)
-            {
-                next = curr + 1;
-            }
-
-            // Indent following lines (not the first one)
-            if (pos)
-            {
-                for (string::size_type i = 0; i < usageMin; ++i)
-                {
-                    Info<<' ';
-                }
-            }
-
-            Info<< str.substr(pos, (curr - pos)).c_str() << nl;
-            pos = next;
-        }
-
-        // Output the remainder of the string
-        if (pos != string::npos)
-        {
-            // Indent following lines (not the first one)
-            if (pos)
-            {
-                for (string::size_type i = 0; i < usageMin; ++i)
-                {
-                    Info<<' ';
-                }
-            }
-
-            Info<< str.substr(pos).c_str() << nl;
-        }
-    }
-    else
-    {
-        Info<< nl;
+        pos = next;
     }
 }
 
@@ -761,7 +783,7 @@ Foam::argList::argList
     char**& argv,
     bool checkArgs,
     bool checkOpts,
-    const bool initialise
+    bool initialise
 )
 :
     args_(argc),
@@ -1618,7 +1640,9 @@ void Foam::argList::printUsage(bool full) const
         }
 
         Info<< "  -" << optName;
-        label len = optName.size() + 3;  // Length includes leading '  -'
+
+        // Length includes leading '  -'
+        label len = optName.size() + 3;
 
         const auto optIter = validOptions.cfind(optName);
         if (optIter().size())

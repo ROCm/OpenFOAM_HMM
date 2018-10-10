@@ -157,7 +157,7 @@ class argList
         //- Helper function for printUsage
         static void printOptionUsage
         (
-            const label location,
+            std::string::size_type start,
             const string& str
         );
 
@@ -222,19 +222,17 @@ public:
         static SLList<string> notes;
 
         //- Min offset for displaying usage (default: 20)
-        static string::size_type usageMin;
+        static std::string::size_type usageMin;
 
         //- Max screen width for displaying usage (default: 80)
-        static string::size_type usageMax;
+        static std::string::size_type usageMax;
 
         //- Standard name for the post-processing option
         static word postProcessOptionName;
 
         //! \cond internalClass
-        class initValidTables
+        struct initValidTables
         {
-        public:
-
             initValidTables();
         };
         //! \endcond
@@ -274,12 +272,7 @@ public:
 
         //- Scan for -help, -doc options etc prior to checking the validity
         //- of other args/opts and finally initialising.
-        void parse
-        (
-            bool checkArgs,
-            bool checkOpts,
-            bool initialise
-        );
+        void parse(bool checkArgs, bool checkOpts, bool initialise);
 
 
     // Access
@@ -398,7 +391,7 @@ public:
         (
             const word& optName,
             const string& usage = "",
-            const bool advanced = false
+            bool advanced = false
         );
 
         //- Add an option to validOptions with usage information
@@ -408,8 +401,11 @@ public:
             const word& optName,
             const string& param = "",
             const string& usage = "",
-            const bool advanced = false
+            bool advanced = false
         );
+
+        //- Set an existing option as being 'advanced' or normal
+        static void setAdvanced(const word& optName, bool advanced = true);
 
         //- Specify an alias for the option name.
         //
@@ -434,7 +430,7 @@ public:
         static void ignoreOptionCompat
         (
             std::pair<const char*,int> compat,
-            const bool expectArg
+            bool expectArg
         );
 
         //- Add option usage information to optionUsage
