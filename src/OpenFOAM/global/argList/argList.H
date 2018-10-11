@@ -129,7 +129,7 @@ class argList
         static bool checkProcessorDirectories_;
 
         //- Switch on/off parallel mode.
-        //  Must be first to be constructed so destructor is done last.
+        //  Construct first so destructor is done last.
         ParRunControl parRunControl_;
 
         //- The arguments after removing known options
@@ -140,7 +140,6 @@ class argList
 
         word executable_;
         fileName rootPath_;
-        bool distributed_;
         fileName globalCase_;
         fileName case_;
 
@@ -288,18 +287,11 @@ public:
         //- Return root path
         inline const fileName& rootPath() const;
 
-        //- Return distributed flag
-        //- (i.e. are rootPaths different on different machines)
-        inline bool distributed() const;
-
         //- Return case name (parallel run) or global case (serial run)
         inline const fileName& caseName() const;
 
         //- Return global case name
         inline const fileName& globalCaseName() const;
-
-        //- Return parRunControl
-        inline const ParRunControl& parRunControl() const;
 
         //- Return the full path to the (processor local) case
         //  \note This is guaranteed to be an absolute path
@@ -308,6 +300,13 @@ public:
         //- Return the full path to the global case
         //  \note This is guaranteed to be an absolute path
         inline fileName globalPath() const;
+
+        //- Return distributed flag
+        //- (i.e. are rootPaths different on different machines)
+        inline bool distributed() const;
+
+        //- Return the ParRunControl
+        inline const ParRunControl& parRunControl() const;
 
         //- Return the number of arguments
         inline label size() const;

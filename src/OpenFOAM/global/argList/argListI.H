@@ -63,12 +63,6 @@ inline const Foam::fileName& Foam::argList::rootPath() const
 }
 
 
-inline bool Foam::argList::distributed() const
-{
-    return distributed_;
-}
-
-
 inline const Foam::fileName& Foam::argList::caseName() const
 {
     return case_;
@@ -81,12 +75,6 @@ inline const Foam::fileName& Foam::argList::globalCaseName() const
 }
 
 
-inline const Foam::ParRunControl& Foam::argList::parRunControl() const
-{
-    return parRunControl_;
-}
-
-
 inline Foam::fileName Foam::argList::path() const
 {
     return rootPath()/caseName();
@@ -96,6 +84,18 @@ inline Foam::fileName Foam::argList::path() const
 inline Foam::fileName Foam::argList::globalPath() const
 {
     return rootPath()/globalCaseName();
+}
+
+
+inline bool Foam::argList::distributed() const
+{
+    return parRunControl_.distributed();
+}
+
+
+inline const Foam::ParRunControl& Foam::argList::parRunControl() const
+{
+    return parRunControl_;
 }
 
 

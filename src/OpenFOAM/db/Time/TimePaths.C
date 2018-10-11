@@ -70,8 +70,8 @@ Foam::TimePaths::TimePaths
 )
 :
     processorCase_(args.parRunControl().parRun()),
+    distributed_(args.parRunControl().distributed()),
     rootPath_(args.rootPath()),
-    distributed_(args.distributed()),
     globalCaseName_(args.globalCaseName()),
     case_(args.caseName()),
     system_(systemName),
@@ -93,8 +93,8 @@ Foam::TimePaths::TimePaths
 )
 :
     processorCase_(false),
-    rootPath_(rootPath),
     distributed_(false),
+    rootPath_(rootPath),
     globalCaseName_(caseName),
     case_(caseName),
     system_(systemName),
@@ -117,8 +117,8 @@ Foam::TimePaths::TimePaths
 )
 :
     processorCase_(processorCase),
-    rootPath_(rootPath),
     distributed_(distributed),
+    rootPath_(rootPath),
     globalCaseName_(globalCaseName),
     case_(caseName),
     system_(systemName),

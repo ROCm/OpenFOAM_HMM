@@ -774,8 +774,7 @@ Foam::argList::argList
 )
 :
     args_(argc),
-    options_(argc),
-    distributed_(false)
+    options_(argc)
 {
     // Check for -fileHandler, which requires an argument.
     word handlerType(getEnv("FOAM_FILEHANDLER"));
@@ -1150,7 +1149,7 @@ void Foam::argList::parse
             label dictNProcs = -1;
             if (this->readListIfPresent("roots", roots))
             {
-                distributed_ = true;
+                parRunControl_.distributed(true);
                 source = "-roots";
                 if (roots.size() != 1)
                 {
@@ -1222,7 +1221,7 @@ void Foam::argList::parse
 
                 if (decompDict.lookupOrDefault("distributed", false))
                 {
-                    distributed_ = true;
+                    parRunControl_.distributed(true);
                     decompDict.readEntry("roots", roots);
                 }
             }
@@ -1350,12 +1349,16 @@ void Foam::argList::parse
         else
         {
             // Collect the master's argument list
+            label nroots;
+
             IPstream fromMaster
             (
                 Pstream::commsTypes::scheduled,
                 Pstream::masterNo()
             );
-            fromMaster >> args_ >> options_ >> distributed_;
+            fromMaster >> args_ >> options_ >> nroots;
+
+            parRunControl_.distributed(nroots);
 
             // Establish rootPath_/globalCase_/case_ for slave
             setCasePaths();

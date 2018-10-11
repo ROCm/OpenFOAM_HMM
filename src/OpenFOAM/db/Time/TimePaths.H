@@ -56,8 +56,9 @@ class TimePaths
     // Private data
 
         bool processorCase_;
-        const fileName rootPath_;
         bool distributed_;
+
+        const fileName rootPath_;
         fileName globalCaseName_;
         fileName case_;
         const word system_;
