@@ -1113,8 +1113,10 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
 
 
     List<Map<label>> compactMap;
-    mapDistribute map(globalCells, cellStencil_, compactMap);
-    cellInterpolationMap_.transfer(map);
+    cellInterpolationMap_.reset
+    (
+        new mapDistribute(globalCells, cellStencil_, compactMap)
+    );
 
     // Dump interpolation stencil
     if (debug)
@@ -1128,7 +1130,7 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
         OBJstream str(mesh_.time().timePath()/"stencil2.obj");
         Info<< typeName << " : dumping to " << str.name() << endl;
         pointField cc(mesh_.cellCentres());
-        cellInterpolationMap_.distribute(cc);
+        cellInterpolationMap().distribute(cc);
 
         forAll(interpolationCells_, compactI)
         {

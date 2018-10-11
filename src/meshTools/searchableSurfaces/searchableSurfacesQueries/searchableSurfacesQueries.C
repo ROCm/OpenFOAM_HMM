@@ -516,36 +516,47 @@ void Foam::searchableSurfacesQueries::findNearest
             //    - current surface     : info+normal1
             forAll(near, i)
             {
-                if (info[i].hit() && normal[i] != vector::zero)
+                if (info[i].hit())
                 {
-                    if (mag(normal[i]&normal1[i]) < 1.0-1e-6)
+                    if (normal[i] != vector::zero)
                     {
-                        plane pl0(near[i], normal[i], false);
-                        plane pl1(info[i].hitPoint(), normal1[i], false);
-
-                        plane::ray r(pl0.planeIntersect(pl1));
-                        vector n = r.dir() / mag(r.dir());
-
-                        // Calculate vector to move onto intersection line
-                        vector d(r.refPoint()-near[i]);
-                        d -= (d&n)*n;
-
-                        // Trim the max distance
-                        scalar magD = mag(d);
-                        if (magD > SMALL)
+                        // Have previous hit. Find intersection
+                        if (mag(normal[i]&normal1[i]) < 1.0-1e-6)
                         {
-                            scalar maxDist = Foam::sqrt(distSqr[i]);
-                            if (magD > maxDist)
-                            {
-                                // Clip
-                                d /= magD;
-                                d *= maxDist;
-                            }
+                            plane pl0(near[i], normal[i], false);
+                            plane pl1(info[i].hitPoint(), normal1[i], false);
 
-                            near[i] += d;
-                            normal[i] = normal1[i];
-                            constraint[i].applyConstraint(normal1[i]);
+                            plane::ray r(pl0.planeIntersect(pl1));
+                            vector n = r.dir() / mag(r.dir());
+
+                            // Calculate vector to move onto intersection line
+                            vector d(r.refPoint()-near[i]);
+                            d -= (d&n)*n;
+
+                            // Trim the max distance
+                            scalar magD = mag(d);
+                            if (magD > SMALL)
+                            {
+                                scalar maxDist = Foam::sqrt(distSqr[i]);
+                                if (magD > maxDist)
+                                {
+                                    // Clip
+                                    d /= magD;
+                                    d *= maxDist;
+                                }
+
+                                near[i] += d;
+                                normal[i] = normal1[i];
+                                constraint[i].applyConstraint(normal1[i]);
+                            }
                         }
+                    }
+                    else
+                    {
+                        // First hit
+                        near[i] = info[i].hitPoint();
+                        normal[i] = normal1[i];
+                        constraint[i].applyConstraint(normal1[i]);
                     }
                 }
             }
