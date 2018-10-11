@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +41,7 @@ void Foam::functionObjects::fieldCoordinateSystemTransform::transformField
     store
     (
         transFieldName,
-        Foam::transform(dimensionedTensor(coordSys_.R().R()), field)
+        Foam::transform(dimensionedTensor(csysPtr_->R()), field)
     );
 }
 
@@ -61,7 +61,10 @@ void Foam::functionObjects::fieldCoordinateSystemTransform::transform
             << type() << ": Field " << fieldName << " already in database"
             << endl;
 
-        transformField<VolFieldType>(lookupObject<VolFieldType>(fieldName));
+        transformField<VolFieldType>
+        (
+            lookupObject<VolFieldType>(fieldName)
+        );
     }
     else if (foundObject<SurfaceFieldType>(fieldName))
     {

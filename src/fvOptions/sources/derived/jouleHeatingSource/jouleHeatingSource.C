@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,16 +53,16 @@ const Foam::word Foam::fv::jouleHeatingSource::sigmaName(typeName + ":sigma");
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-const Foam::coordinateSystem& Foam::fv::jouleHeatingSource::coordSys() const
+const Foam::coordinateSystem& Foam::fv::jouleHeatingSource::csys() const
 {
-    if (!coordSysPtr_.valid())
+    if (!csysPtr_ || !csysPtr_.valid())
     {
         FatalErrorInFunction
-            << "Co-ordinate system invalid"
+            << "Coordinate system invalid"
             << abort(FatalError);
     }
 
-    return *coordSysPtr_;
+    return *csysPtr_;
 }
 
 
@@ -87,10 +87,18 @@ Foam::fv::jouleHeatingSource::transformSigma
         dimensionedSymmTensor(sigmaLocal.dimensions(), Zero),
         zeroGradientFvPatchField<symmTensor>::typeName
     );
-
     auto& sigma = tsigma.ref();
 
-    sigma.primitiveFieldRef() = coordSys().R().transformVector(sigmaLocal);
+    if (csys().uniform())
+    {
+        sigma.primitiveFieldRef() =
+            csys().transformPrincipal(sigmaLocal);
+    }
+    else
+    {
+        sigma.primitiveFieldRef() =
+            csys().transformPrincipal(mesh_.cellCentres(), sigmaLocal);
+    }
 
     sigma.correctBoundaryConditions();
 
@@ -125,7 +133,7 @@ Foam::fv::jouleHeatingSource::jouleHeatingSource
     anisotropicElectricalConductivity_(false),
     scalarSigmaVsTPtr_(nullptr),
     vectorSigmaVsTPtr_(nullptr),
-    coordSysPtr_(nullptr),
+    csysPtr_(nullptr),
     curTimeIndex_(-1)
 {
     // Set the field name to that of the energy field from which the temperature
@@ -223,7 +231,14 @@ bool Foam::fv::jouleHeatingSource::read(const dictionary& dict)
             Info<< "    Using vector electrical conductivity" << endl;
 
             initialiseSigma(coeffs_, vectorSigmaVsTPtr_);
-            coordSysPtr_ = coordinateSystem::New(mesh_, coeffs_);
+
+            csysPtr_ =
+                coordinateSystem::New
+                (
+                    mesh_,
+                    coeffs_,
+                    coordinateSystem::typeName_()
+                );
         }
         else
         {

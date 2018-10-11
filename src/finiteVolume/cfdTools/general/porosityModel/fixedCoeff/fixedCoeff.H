@@ -118,7 +118,7 @@ public:
     );
 
     //- Destructor
-    virtual ~fixedCoeff();
+    virtual ~fixedCoeff() = default;
 
 
     // Member Functions

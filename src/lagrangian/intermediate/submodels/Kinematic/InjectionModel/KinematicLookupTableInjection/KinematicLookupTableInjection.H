@@ -42,7 +42,7 @@ Description
 
     where:
     \plaintable
-        x, y, z | global cartesian co-ordinates [m]
+        x, y, z | global cartesian coordinates [m]
         u, v, w | global cartesian velocity components [m/s]
         d       | diameter [m]
         rho     | density [kg/m3]

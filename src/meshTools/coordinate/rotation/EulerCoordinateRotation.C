@@ -31,24 +31,34 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(EulerCoordinateRotation, 0);
-    addToRunTimeSelectionTable
-    (
-        coordinateRotation,
-        EulerCoordinateRotation,
-        dictionary
-    );
-    addToRunTimeSelectionTable
-    (
-        coordinateRotation,
-        EulerCoordinateRotation,
-        objectRegistry
-    );
+    namespace coordinateRotations
+    {
+        defineTypeName(euler);
+
+        // Standard short name
+        addNamedToRunTimeSelectionTable
+        (
+            coordinateRotation,
+            euler,
+            dictionary,
+            euler
+        );
+
+        // Longer name - Compat 1806
+        addNamedToRunTimeSelectionTable
+        (
+            coordinateRotation,
+            euler,
+            dictionary,
+            EulerRotation
+        );
+    }
 }
+
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::tensor Foam::EulerCoordinateRotation::rotation
+Foam::tensor Foam::coordinateRotations::euler::rotation
 (
     const vector& angles,
     bool degrees
@@ -84,174 +94,96 @@ Foam::tensor Foam::EulerCoordinateRotation::rotation
 }
 
 
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-Foam::vector Foam::EulerCoordinateRotation::transform(const vector& st) const
-{
-    return (R_ & st);
-}
-
-
-Foam::vector Foam::EulerCoordinateRotation::invTransform
-(
-    const vector& st
-) const
-{
-    return (Rtr_ & st);
-}
-
-
-Foam::tmp<Foam::vectorField> Foam::EulerCoordinateRotation::transform
-(
-    const vectorField& st
-) const
-{
-    NotImplemented;
-    return nullptr;
-}
-
-
-Foam::tmp<Foam::vectorField> Foam::EulerCoordinateRotation::invTransform
-(
-    const vectorField& st
-) const
-{
-    NotImplemented;
-    return nullptr;
-}
-
-
-const Foam::tensorField& Foam::EulerCoordinateRotation::Tr() const
-{
-    NotImplemented;
-    return NullObjectRef<tensorField>();
-}
-
-
-Foam::tmp<Foam::tensorField> Foam::EulerCoordinateRotation::transformTensor
-(
-    const tensorField& st
-) const
-{
-    NotImplemented;
-    return nullptr;
-}
-
-
-Foam::tensor Foam::EulerCoordinateRotation::transformTensor
-(
-    const tensor& st
-) const
-{
-    return (R_ & st & Rtr_);
-}
-
-
-Foam::tmp<Foam::tensorField> Foam::EulerCoordinateRotation::transformTensor
-(
-    const tensorField& st,
-    const labelList& cellMap
-) const
-{
-    NotImplemented;
-    return nullptr;
-}
-
-
-Foam::tmp<Foam::symmTensorField> Foam::EulerCoordinateRotation::
-transformVector
-(
-    const vectorField& st
-) const
-{
-    tmp<symmTensorField> tfld(new symmTensorField(st.size()));
-    symmTensorField& fld = tfld.ref();
-
-    forAll(fld, i)
-    {
-        fld[i] = transformPrincipal(R_, st[i]);
-    }
-    return tfld;
-}
-
-
-Foam::symmTensor Foam::EulerCoordinateRotation::transformVector
-(
-    const vector& st
-) const
-{
-    return transformPrincipal(R_, st);
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::EulerCoordinateRotation::EulerCoordinateRotation()
+Foam::coordinateRotations::euler::euler()
 :
-    R_(sphericalTensor::I),
-    Rtr_(sphericalTensor::I)
+    coordinateRotation(),
+    angles_(Zero),
+    degrees_(true)
 {}
 
 
-Foam::EulerCoordinateRotation::EulerCoordinateRotation
-(
-    const EulerCoordinateRotation& r
-)
+Foam::coordinateRotations::euler::euler(const euler& crot)
 :
-    R_(r.R_),
-    Rtr_(r.Rtr_)
+    coordinateRotation(crot),
+    angles_(crot.angles_),
+    degrees_(crot.degrees_)
 {}
 
 
-Foam::EulerCoordinateRotation::EulerCoordinateRotation
+Foam::coordinateRotations::euler::euler
 (
     const vector& phiThetaPsi,
-    const bool degrees
+    bool degrees
 )
 :
-    R_(rotation(phiThetaPsi, degrees)),
-    Rtr_(R_.T())
+    coordinateRotation(),
+    angles_(phiThetaPsi),
+    degrees_(degrees)
 {}
 
 
-Foam::EulerCoordinateRotation::EulerCoordinateRotation
+Foam::coordinateRotations::euler::euler
 (
-    const scalar phi,
-    const scalar theta,
-    const scalar psi,
-    const bool degrees
+    scalar phi,
+    scalar theta,
+    scalar psi,
+    bool degrees
 )
 :
-    R_(rotation(vector(phi, theta, psi), degrees)),
-    Rtr_(R_.T())
+    coordinateRotation(),
+    angles_(phi, theta, psi),
+    degrees_(degrees)
 {}
 
 
-Foam::EulerCoordinateRotation::EulerCoordinateRotation
+Foam::coordinateRotations::euler::euler(const dictionary& dict)
+:
+    coordinateRotation(),
+    angles_(dict.getCompat<vector>("angles", {{"rotation", 1806}})),
+    degrees_(dict.lookupOrDefault("degrees", true))
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::coordinateRotations::euler::clear()
+{
+    angles_ = Zero;
+    degrees_ = true;
+}
+
+
+Foam::tensor Foam::coordinateRotations::euler::R() const
+{
+    return euler::rotation(angles_, degrees_);
+}
+
+
+void Foam::coordinateRotations::euler::write(Ostream& os) const
+{
+    os  << "euler-angles(" << (degrees_ ? "deg" : "rad") << "): " << angles_;
+}
+
+
+void Foam::coordinateRotations::euler::writeEntry
 (
-    const dictionary& dict
-)
-:
-    R_
-    (
-        rotation
-        (
-            dict.get<vector>("rotation"),
-            dict.lookupOrDefault("degrees", true)
-        )
-    ),
-    Rtr_(R_.T())
-{}
+    const word& keyword,
+    Ostream& os
+) const
+{
+    os.beginBlock(keyword);
 
+    os.writeEntry("type", type());
+    os.writeEntry("angles", angles_);
+    if (!degrees_)
+    {
+        os.writeEntry("degrees", "false");
+    }
 
-Foam::EulerCoordinateRotation::EulerCoordinateRotation
-(
-    const dictionary& dict,
-    const objectRegistry&
-)
-:
-    EulerCoordinateRotation(dict)
-{}
+    os.endBlock();
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -230,8 +230,8 @@ void Foam::points0MotionSolver::updateMesh(const mapPolyMesh& mpm)
         else
         {
             FatalErrorInFunction
-                << "Cannot determine co-ordinates of introduced vertices."
-                << " New vertex " << pointi << " at co-ordinate "
+                << "Cannot determine coordinates of introduced vertices."
+                << " New vertex " << pointi << " at coordinate "
                 << points[pointi] << exit(FatalError);
         }
     }

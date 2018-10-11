@@ -32,6 +32,7 @@ Description
 
     E.g. box with sides 1 1 1 rotated 45 degrees around z-axis at
          origin (0.5 0.5 0.5)
+
     \verbatim
         span    (1 1 1);
         origin  (0.5 0.5 0.5);
@@ -58,8 +59,8 @@ SourceFiles
 #define searchableRotatedBox_H
 
 #include "searchableSurface.H"
-#include "coordinateSystem.H"
 #include "searchableBox.H"
+#include "cartesianCS.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,7 +83,7 @@ private:
         searchableBox box_;
 
         //- Transformation from local to global coordinates
-        coordinateSystem transform_;
+        coordSystem::cartesian transform_;
 
         //- The (global) corner points (in treeBoundBox order)
         pointField points_;

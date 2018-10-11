@@ -22,48 +22,59 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::axesRotation
+    Foam::coordinateRotations::axes
 
 Description
-    A coordinate rotation specified using global axes
+    A coordinateRotation specified using global axes.
 
     The rotation is defined by a combination of vectors (e1/e2), (e2/e3)
-    or (e3/e1). Any nonorthogonality will be absorbed into the second
-    vector. In terms of cylindrical coordinates, the 'axis' would
-    correspond to the \a z-axis and the 'direction' to the \a r-axis.
+    or (e3/e1). Any nonorthogonality is absorbed into the second vector.
 
     \verbatim
-    axesRotation
+    coordinateRotation
     {
-        type        axesRotation;
+        type        axes;
         e1          (1 0 0);
         e2          (0 1 0);
     }
     \endverbatim
+
+    \heading Dictionary entries
+    \table
+        Property    | Description                       | Required  | Default
+        type        | type name: axes (previously axesRotation)     | yes   |
+        e1          | local x-axis                      | partly    |
+        e2          | local y-axis                      | partly    |
+        e3          | local z-axis                      | partly    |
+    \endtable
+
+Note
+    It is also possible to specify in terms of \c axis and \c direction.
+    For cylindrical coordinates, the \c axis would correspond to the
+    \a z-axis and the \c direction to the \a r-axis.
 
 SourceFiles
     axesRotation.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef axesRotation_H
-#define axesRotation_H
+#ifndef coordinateRotations_axes_H
+#define coordinateRotations_axes_H
 
-#include "vector.H"
 #include "coordinateRotation.H"
-#include "dictionary.H"
-#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace coordinateRotations
+{
 
 /*---------------------------------------------------------------------------*\
-                    Class axesRotation Declaration
+                  Class coordinateRotations::axes Declaration
 \*---------------------------------------------------------------------------*/
 
-class axesRotation
+class axes
 :
     public coordinateRotation
 {
@@ -76,19 +87,22 @@ public:
         E1_E2,  //!< The axis1 (dominant) is local X, axis2 is local Y.
         E2_E3,  //!< The axis1 (dominant) is local Y, axis2 is local Z.
         E3_E1,  //!< The axis1 (dominant) is local Z, axis2 is local X.
-        E3_E1_COMPAT, //!< E3_E1 specified as axis/direction.
+        E3_E1_COMPAT  //!< E3_E1 specified as axis/direction.
     };
 
 
-private:
+protected:
 
-    // Private data
+    // Protected Data
 
-        //- Local-to-Global transformation tensor
-        tensor R_;
+        //- The primary axis
+        vector axis1_;
 
-        //- Global-to-Local transformation tensor
-        tensor Rtr_;
+        //- The secondary axis
+        vector axis2_;
+
+        //- The axis order
+        axisOrder order_;
 
 
     // Protected Member Functions
@@ -100,67 +114,52 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("axesRotation");
+    TypeNameNoDebug("axes");
+
 
     // Constructors
 
-        //- Construct null
-        axesRotation();
+        //- Construct null - an identity transform
+        axes();
 
-        //- Construct as copy
-        axesRotation(const axesRotation& r);
+        //- Copy construct
+        axes(const axes& crot);
 
-        //- Construct from local to global rotation matrix
-        explicit axesRotation(const tensor& R);
+        //- Move construct
+        axes(axes&& crot);
 
-        //- Construct from two axes (axis and direction)
-        axesRotation
-        (
-            const vector& axis,
-            const vector& dir,
-            const axisOrder& order = E3_E1
-        );
+        //- Construct from two axes
+        axes(const vector& axis1, const vector& axis2, axisOrder order=E3_E1);
 
-        //- Construct from a single axis using a best-guess for the second axis
-        //  For the best-guess, the largest component value and sign of the
-        //  axis determines the direction orientation.
-        explicit axesRotation(const vector& axis);
+        //- Construct from a single axis (as e3) using a best-guess for the
+        //- second axis.
+        //  The largest component and its sign are used when guessing
+        //  an appropriate orientation (direction).
+        explicit axes(const vector& axis);
 
         //- Construct from dictionary
-        explicit axesRotation(const dictionary& dict);
-
-        //- Construct from dictionary and a registry (typically a mesh)
-        axesRotation
-        (
-            const dictionary& dict,
-            const objectRegistry& unused
-        );
+        explicit axes(const dictionary& dict);
 
         //- Return clone
         autoPtr<coordinateRotation> clone() const
         {
-            return autoPtr<coordinateRotation>::NewFrom<axesRotation>(*this);
+            return
+                autoPtr<coordinateRotation>::NewFrom
+                <coordinateRotations::axes>(*this);
         }
 
 
     //- Destructor
-    virtual ~axesRotation() = default;
-
-
-    // Member Functions
-
-        //- Reset rotation to an identity rotation
-        virtual void clear()
-        {
-            R_ = sphericalTensor::I;
-            Rtr_ = sphericalTensor::I;
-        }
+    virtual ~axes() = default;
 
 
     // Static Member Functions
 
         //- The rotation tensor calculated from two axes and their order.
         //  The input axes will be normalised.
+        //  If axis2 is zero, an axis orthogonal to axis1 will be guessed.
+        //  The largest component and its sign are used when guessing
+        //  an appropriate orientation (direction).
         static tensor rotation
         (
             const vector& axis1,
@@ -169,89 +168,28 @@ public:
         );
 
 
-        //- Update the rotation for a list of cells
-        virtual void updateCells(const polyMesh&, const labelList&)
-        {}
+    // Member Functions
 
-        //- Return local-to-global transformation tensor
-        virtual const tensor& R() const
-        {
-            return R_;
-        }
+        //- Reset specification
+        virtual void clear();
 
-        //- Return global-to-local transformation tensor
-        virtual const tensor& Rtr() const
-        {
-            return Rtr_;
-        }
+        //- The rotation tensor calculated from the specified axes and order
+        virtual tensor R() const;
 
-        //- Return local Cartesian x-axis in global coordinates
-        virtual const vector e1() const
-        {
-            return Rtr_.x();
-        }
+        //- Write information
+        virtual void write(Ostream& os) const;
 
-        //- Return local Cartesian y-axis in global coordinates
-        virtual const vector e2() const
-        {
-            return Rtr_.y();
-        }
-
-        //- Return local Cartesian z-axis in global coordinates
-        virtual const vector e3() const
-        {
-            return Rtr_.z();
-        }
-
-        //- Return transformation tensor field
-        virtual const tensorField& Tr() const;
-
-        //- Transform vectorField using transformation tensor field
-        virtual tmp<vectorField> transform(const vectorField& st) const;
-
-        //- Transform vector using transformation tensor
-        virtual vector transform(const vector& st) const;
-
-        //- Inverse transform vectorField using transformation tensor field
-        virtual tmp<vectorField> invTransform(const vectorField& st) const;
-
-        //- Inverse transform vector using transformation tensor
-        virtual vector invTransform(const vector& st) const;
-
-        //- Transform tensor field using transformation tensorField
-        virtual tmp<tensorField> transformTensor(const tensorField& st) const;
-
-        //- Transform tensor using transformation tensorField
-        virtual tensor transformTensor(const tensor& st) const;
-
-        //- Transform tensor sub-field using transformation tensorField
-        virtual tmp<tensorField> transformTensor
-        (
-            const tensorField& st,
-            const labelList& cellMap
-        ) const;
-
-        //- Transform vectorField using transformation tensorField and return
-        //  symmetric tensorField
-        virtual tmp<symmTensorField> transformVector
-        (
-            const vectorField& st
-        ) const;
-
-        //- Transform vector using transformation tensor and return
-        //  symmetric tensor
-        virtual symmTensor transformVector(const vector& st) const;
-
-
-    // Member Operators
-
-        //- Assign from dictionary
-        void operator=(const dictionary& dict);
-
+        //- Write dictionary entry
+        virtual void writeEntry(const word& keyword, Ostream& os) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace coordinateRotations
+
+// Compatibility typedef 1806
+typedef coordinateRotations::axes axesRotation;
 
 } // End namespace Foam
 

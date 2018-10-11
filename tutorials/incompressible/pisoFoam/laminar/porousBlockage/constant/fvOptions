@@ -22,6 +22,7 @@ porosity1
     explicitPorositySourceCoeffs
     {
         selectionMode   cellZone;
+
         cellZone        porousBlockage;
 
         type            DarcyForchheimer;
@@ -36,13 +37,11 @@ porosity1
 
         coordinateSystem
         {
-            type    cartesian;
             origin  (0 0 0);
-            coordinateRotation
+
+            rotation
             {
-                type    axesRotation;
-                e1  (1 0 0);
-                e2  (0 1 0);
+                type    none;
             }
         }
     }

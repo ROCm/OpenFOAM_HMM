@@ -91,7 +91,7 @@ void Foam::fv::rotorDiskSource::checkData()
                 case ifSurfaceNormal:
                 {
                     scalar UIn(coeffs_.get<scalar>("inletNormalVelocity"));
-                    inletVelocity_ = -coordSys_.R().e3()*UIn;
+                    inletVelocity_ = -coordSys_.e3()*UIn;
                     break;
                 }
                 case ifLocal:
@@ -333,17 +333,6 @@ void Foam::fv::rotorDiskSource::createCoordinateSystem()
 
             coeffs_.readEntry("refDirection", refDir);
 
-            cylindrical_.reset
-            (
-                new cylindrical
-                (
-                    mesh_,
-                    axis,
-                    origin,
-                    cells_
-                )
-            );
-
             // Set the face areas and apply correction to calculated axis
             // e.g. if cellZone is more than a single layer in thickness
             setFaceArea(axis, true);
@@ -355,17 +344,6 @@ void Foam::fv::rotorDiskSource::createCoordinateSystem()
             coeffs_.readEntry("origin", origin);
             coeffs_.readEntry("axis", axis);
             coeffs_.readEntry("refDirection", refDir);
-
-            cylindrical_.reset
-            (
-                new cylindrical
-                (
-                    mesh_,
-                    axis,
-                    origin,
-                    cells_
-                )
-            );
 
             setFaceArea(axis, false);
 
@@ -381,7 +359,7 @@ void Foam::fv::rotorDiskSource::createCoordinateSystem()
         }
     }
 
-    coordSys_ = cylindricalCS("rotorCoordSys", origin, axis, refDir, false);
+    coordSys_ = coordSystem::cylindrical(origin, axis, refDir);
 
     const scalar sumArea = gSum(area_);
     const scalar diameter = Foam::sqrt(4.0*sumArea/mathematical::pi);
@@ -389,24 +367,25 @@ void Foam::fv::rotorDiskSource::createCoordinateSystem()
         << "    - disk diameter = " << diameter << nl
         << "    - disk area     = " << sumArea << nl
         << "    - origin        = " << coordSys_.origin() << nl
-        << "    - r-axis        = " << coordSys_.R().e1() << nl
-        << "    - psi-axis      = " << coordSys_.R().e2() << nl
-        << "    - z-axis        = " << coordSys_.R().e3() << endl;
+        << "    - r-axis        = " << coordSys_.e1() << nl
+        << "    - psi-axis      = " << coordSys_.e2() << nl
+        << "    - z-axis        = " << coordSys_.e3() << endl;
 }
 
 
 void Foam::fv::rotorDiskSource::constructGeometry()
 {
-    const vectorField& C = mesh_.C();
+    const pointUIndList cc(mesh_.C(), cells_);
+
+    // Optional: for later transform(), invTransform()
+    /// Rcyl_.reset(coordSys_.R(cc).ptr());
 
     forAll(cells_, i)
     {
         if (area_[i] > ROOTVSMALL)
         {
-            const label celli = cells_[i];
-
             // Position in (planar) rotor coordinate system
-            x_[i] = coordSys_.localPosition(C[celli]);
+            x_[i] = coordSys_.localPosition(cc[i]);
 
             // Cache max radius
             rMax_ = max(rMax_, x_[i].x());
@@ -422,8 +401,7 @@ void Foam::fv::rotorDiskSource::constructGeometry()
             // rotor cone system
             scalar c = cos(beta);
             scalar s = sin(beta);
-            R_[i] = tensor(c, 0, -s, 0, 1, 0, s, 0, c);
-            invR_[i] = R_[i].T();
+            Rcone_[i] = tensor(c, 0, -s, 0, 1, 0, s, 0, c);
         }
     }
 }
@@ -480,11 +458,9 @@ Foam::fv::rotorDiskSource::rotorDiskSource
     tipEffect_(1.0),
     flap_(),
     x_(cells_.size(), Zero),
-    R_(cells_.size(), I),
-    invR_(cells_.size(), I),
-    area_(cells_.size(), 0.0),
-    coordSys_(false),
-    cylindrical_(),
+    Rcone_(cells_.size(), I),
+    area_(cells_.size(), Zero),
+    coordSys_(),
     rMax_(0.0),
     trim_(trimModel::New(*this, coeffs_)),
     blade_(coeffs_.subDict("blade")),

@@ -15,7 +15,12 @@ if (!thermo.isotropic())
     const coordinateSystem& coodSys = coordinates[i];
 
     aniAlpha.primitiveFieldRef() =
-        coodSys.R().transformVector(tkappaByCp());
+        coodSys.transformPrincipal
+        (
+            mesh.cellCentres(),
+            tkappaByCp()
+        );
+
     aniAlpha.correctBoundaryConditions();
 
     taniAlpha = tmp<volSymmTensorField>

@@ -29,6 +29,7 @@ License
 #include "turbulentTransportModel.H"
 #include "turbulentFluidThermoModel.H"
 #include "addToRunTimeSelectionTable.H"
+#include "cartesianCS.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -37,7 +38,6 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(forces, 0);
-
     addToRunTimeSelectionTable(functionObject, forces, dictionary);
 }
 }
@@ -857,7 +857,23 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
     // specified directly, from coordinate system, or implicitly (0 0 0)
     if (!dict.readIfPresent<point>("CofR", coordSys_.origin()))
     {
-        coordSys_ = coordinateSystem(obr_, dict);
+        // The 'coordinateSystem' sub-dictionary is optional,
+        // but enforce use of a cartesian system.
+
+        if (dict.found(coordinateSystem::typeName_()))
+        {
+            // New() for access to indirect (global) coordinate system
+            coordSys_ =
+                coordinateSystem::New
+                (
+                    obr_, dict, coordinateSystem::typeName_()
+                );
+        }
+        else
+        {
+            coordSys_ = coordSystem::cartesian(dict);
+        }
+
         localSystem_ = true;
     }
 

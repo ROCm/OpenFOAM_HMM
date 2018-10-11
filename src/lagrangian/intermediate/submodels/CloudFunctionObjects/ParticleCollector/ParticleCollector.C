@@ -207,7 +207,7 @@ void Foam::ParticleCollector<CloudType>::initConcentricCircles()
     faces_.setSize(nFace);
     area_.setSize(nFace);
 
-    coordSys_ = cylindricalCS("coordSys", origin, normal_[0], refDir, false);
+    coordSys_ = coordSystem::cylindrical(origin, normal_[0], refDir);
 
     List<label> ptIDs(identity(nPointPerRadius));
 
@@ -356,7 +356,7 @@ void Foam::ParticleCollector<CloudType>::collectParcelConcentricCircles
         return;
     }
 
-    // Intersection point in cylindrical co-ordinate system
+    // Intersection point in cylindrical coordinate system
     const point pCyl = coordSys_.localPosition(p1 + (d1/(d1 - d2))*(p2 - p1));
 
     scalar r = pCyl[0];
@@ -539,7 +539,7 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     faceTris_(),
     nSector_(0),
     radius_(),
-    coordSys_(false),
+    coordSys_(),
     normal_(),
     negateParcelsOppositeNormal_
     (

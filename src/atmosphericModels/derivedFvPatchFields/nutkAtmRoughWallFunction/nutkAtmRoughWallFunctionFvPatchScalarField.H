@@ -43,7 +43,7 @@ Description
         U_f | frictional velocity
         K   | Von Karman's constant
         z_0 | surface roughness length
-        z   | vertical co-ordinate
+        z   | vertical coordinate
     \endvartable
 
 Usage

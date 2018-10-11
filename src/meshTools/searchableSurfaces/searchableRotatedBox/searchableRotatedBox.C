@@ -25,7 +25,6 @@ License
 
 #include "searchableRotatedBox.H"
 #include "addToRunTimeSelectionTable.H"
-#include "axesRotation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -73,7 +72,6 @@ Foam::searchableRotatedBox::searchableRotatedBox
     ),
     transform_
     (
-        "rotation",
         dict.get<point>("origin"),
         dict.get<vector>("e3"),
         dict.get<vector>("e1")

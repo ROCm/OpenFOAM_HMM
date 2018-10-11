@@ -276,7 +276,7 @@ Foam::directions::directions
     List<vectorField>(wordList(dict.lookup("directions")).size())
 {
     const wordList wantedDirs(dict.lookup("directions"));
-    const word coordSystem(dict.lookup("coordinateSystem"));
+    const word coordSystem(dict.get<word>("coordinateSystem"));
 
     bool wantNormal = false;
     bool wantTan1 = false;

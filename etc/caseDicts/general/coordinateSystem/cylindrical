@@ -14,8 +14,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-type      cartesian;
-coordinateRotation
+type      cylindrical;
+
+rotation
 {
     type  cylindrical;
     e3    $axis;

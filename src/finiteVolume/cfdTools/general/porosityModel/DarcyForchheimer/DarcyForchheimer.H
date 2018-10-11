@@ -41,7 +41,7 @@ Description
     to specify a multiplier (of the max component).
 
     The orientation of the porous region is defined with the same notation as
-    a co-ordinate system, but only a Cartesian co-ordinate system is valid.
+    a coordinate system, but only a Cartesian coordinate system is valid.
 
 SourceFiles
     DarcyForchheimer.C
@@ -141,7 +141,7 @@ public:
     );
 
     //- Destructor
-    virtual ~DarcyForchheimer();
+    virtual ~DarcyForchheimer() = default;
 
 
     // Member Functions

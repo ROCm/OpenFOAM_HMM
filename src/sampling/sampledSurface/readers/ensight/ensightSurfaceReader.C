@@ -130,7 +130,7 @@ void Foam::ensightSurfaceReader::readGeometryHeader(ensightReadFile& is) const
     is.read(buffer);
     if (debug) Info<< "buffer: " << buffer << endl;
 
-    // Co-ordinates
+    // Coordinates
     is.read(buffer);
     if (debug) Info<< "buffer: " << buffer << endl;
 }

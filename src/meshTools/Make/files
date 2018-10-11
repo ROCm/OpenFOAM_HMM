@@ -59,17 +59,20 @@ cellFeatures/cellFeatures.C
 csys = coordinate/systems
 $(csys)/coordinateSystem.C
 $(csys)/coordinateSystemNew.C
+$(csys)/coordinateSystemTransform.C
 $(csys)/coordinateSystems.C
-$(csys)/cylindricalCS.C
 $(csys)/cartesianCS.C
+$(csys)/cylindricalCS.C
+$(csys)/indirectCS.C
 
 crot = coordinate/rotation
 $(crot)/axesRotation.C
+$(crot)/axisAngleRotation.C
 $(crot)/coordinateRotation.C
-$(crot)/coordinateRotationNew.C
+$(crot)/cylindricalRotation.C
+$(crot)/identityRotation.C
 $(crot)/EulerCoordinateRotation.C
 $(crot)/STARCDCoordinateRotation.C
-$(crot)/cylindrical.C
 
 polyMeshZipUpCells/polyMeshZipUpCells.C
 primitiveMeshGeometry/primitiveMeshGeometry.C

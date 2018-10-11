@@ -242,11 +242,6 @@ public:
         //- Inner-product of this with another Tensor.
         inline Tensor<Cmpt> inner(const Tensor<Cmpt>& t2) const;
 
-        //- Inner-product of this with transpose of another Tensor.
-        //  Primarily useful for coordinate transformations
-        //  (where transpose is the same as the inverse).
-        inline Tensor<Cmpt> innerT(const Tensor<Cmpt>& t2) const;
-
         //- Schur-product of this with another Tensor.
         inline Tensor<Cmpt> schur(const Tensor<Cmpt>& t2) const;
 

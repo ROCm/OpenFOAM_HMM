@@ -38,33 +38,26 @@ Foam::porosityModelList::porosityModelList
     mesh_(mesh)
 {
     reset(dict);
-
     active(true);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::porosityModelList::~porosityModelList()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::porosityModelList::active(const bool warn) const
 {
-    bool a = false;
+    bool anyOk = false;
     forAll(*this, i)
     {
-        a = a || this->operator[](i).active();
+        anyOk = anyOk || this->operator[](i).active();
     }
 
-    if (warn && this->size() && !a)
+    if (warn && this->size() && !anyOk)
     {
         Info<< "No porosity models active" << endl;
     }
 
-    return a;
+    return anyOk;
 }
 
 

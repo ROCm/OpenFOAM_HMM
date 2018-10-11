@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::STARCDCoordinateRotation
+    Foam::coordinateRotations::starcd
 
 Description
     A coordinateRotation defined by the STAR-CD convention.
@@ -36,19 +36,26 @@ Description
     \verbatim
     coordinateRotation
     {
-        type        STARCDRotation;
-        degrees     false;
-        rotation    (0 0 3.141592654);
+        type    starcd;
+        angles  (0 0 180);
     }
     \endverbatim
+
+    \heading Dictionary entries
+    \table
+        Property    | Description                           | Required | Default
+        type        | Type name: starcd (or STARCDRotation) | yes   |
+        angles      | The z-x-y rotation angles             | yes   |
+        degrees     | Angles are in degrees                 | no    | true
+    \endtable
 
 SourceFiles
     STARCDCoordinateRotation.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef STARCDCoordinateRotation_H
-#define STARCDCoordinateRotation_H
+#ifndef coordinateRotations_starcd_H
+#define coordinateRotations_starcd_H
 
 #include "coordinateRotation.H"
 
@@ -56,72 +63,60 @@ SourceFiles
 
 namespace Foam
 {
+namespace coordinateRotations
+{
 
 /*---------------------------------------------------------------------------*\
-                  Class STARCDCoordinateRotation Declaration
+                 Class coordinateRotations::starcd Declaration
 \*---------------------------------------------------------------------------*/
 
-class STARCDCoordinateRotation
+class starcd
 :
     public coordinateRotation
 {
-    // Private Member Data
+    // Private Data
 
-        //- Local-to-Global transformation tensor
-        tensor R_;
+        //- The rotation angles
+        vector angles_;
 
-        //- Global-to-Local transformation tensor
-        tensor Rtr_;
+        //- Angles measured in degrees
+        bool degrees_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("STARCDRotation");
+    TypeNameNoDebug("starcd");
 
 
     // Constructors
 
-        //- Construct null
-        STARCDCoordinateRotation();
+        //- Construct null - an identity transform
+        starcd();
 
-        //- Construct as copy
-        STARCDCoordinateRotation(const STARCDCoordinateRotation& r);
+        //- Copy construct
+        starcd(const starcd& crot);
 
         //- Construct from rotation vector
-        STARCDCoordinateRotation
-        (
-            const vector& rotZrotXrotY,
-            const bool degrees
-        );
+        starcd(const vector& rotZrotXrotY, bool degrees);
 
         //- Construct from components of rotation vector
-        STARCDCoordinateRotation
-        (
-            const scalar rotZ,
-            const scalar rotX,
-            const scalar rotY,
-            const bool degrees
-        );
+        starcd(scalar rotZ, scalar rotX, scalar rotY, bool degrees);
 
         //- Construct from dictionary
-        explicit STARCDCoordinateRotation(const dictionary& dict);
-
-        //- Construct from dictionary and a registry (typically a mesh)
-        STARCDCoordinateRotation
-        (
-            const dictionary& dict,
-            const objectRegistry& unused
-        );
-
+        explicit starcd(const dictionary& dict);
 
         //- Return clone
         autoPtr<coordinateRotation> clone() const
         {
             return
                 autoPtr<coordinateRotation>::NewFrom
-                <STARCDCoordinateRotation>(*this);
+                <coordinateRotations::starcd>(*this);
         }
+
+
+    //- Destructor
+    virtual ~starcd() = default;
 
 
     // Static Member Functions
@@ -133,90 +128,28 @@ public:
 
     // Member Functions
 
-        //- Reset rotation to an identity rotation
-        virtual void clear()
-        {
-            R_ = sphericalTensor::I;
-            Rtr_ = sphericalTensor::I;
-        }
+        //- Reset specification
+        virtual void clear();
 
-        //- Update the rotation for a list of cells
-        virtual void updateCells(const polyMesh&, const labelList&)
-        {}
+        //- The rotation tensor calculated for the specified STARCD angles.
+        virtual tensor R() const;
 
-        //- Return local-to-global transformation tensor
-        virtual const tensor& R() const
-        {
-            return R_;
-        }
+        //- Write information
+        virtual void write(Ostream& os) const;
 
-        //- Return global-to-local transformation tensor
-        virtual const tensor& Rtr() const
-        {
-            return Rtr_;
-        };
-
-        //- Return local Cartesian x-axis in global coordinates
-        virtual const vector e1() const
-        {
-            return Rtr_.x();
-        }
-
-        //- Return local Cartesian y-axis in global coordinates
-        virtual const vector e2() const
-        {
-            return Rtr_.y();
-        }
-
-        //- Return local Cartesian z-axis in global coordinates
-        virtual const vector e3() const
-        {
-            return Rtr_.z();
-        }
-
-        //- Return transformation tensor field
-        virtual const tensorField& Tr() const;
-
-        //- Transform vectorField using transformation tensor field
-        virtual tmp<vectorField> transform(const vectorField& st) const;
-
-        //- Transform vector using transformation tensor
-        virtual vector transform(const vector& st) const;
-
-        //- Inverse transform vectorField using transformation tensor field
-        virtual tmp<vectorField> invTransform(const vectorField& st) const;
-
-        //- Inverse transform vector using transformation tensor
-        virtual vector invTransform(const vector& st) const;
-
-        //- Transform tensor field using transformation tensorField
-        virtual tmp<tensorField> transformTensor(const tensorField& st) const;
-
-        //- Transform tensor using transformation tensorField
-        virtual tensor transformTensor(const tensor& st) const;
-
-        //- Transform tensor sub-field using transformation tensorField
-        virtual tmp<tensorField> transformTensor
-        (
-            const tensorField& st,
-            const labelList& cellMap
-        ) const;
-
-        //- Transform vectorField using transformation tensorField and return
-        // symmetrical tensorField
-        virtual tmp<symmTensorField> transformVector
-        (
-            const vectorField& st
-        ) const;
-
-        //- Transform vector using transformation tensor and return
-        // symmetrical tensor
-        virtual symmTensor transformVector(const vector& st) const;
+        //- Write dictionary entry
+        virtual void writeEntry(const word& keyword, Ostream& os) const;
 
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace coordinateRotations
+
+
+//- Compatibility typedef 1806
+typedef coordinateRotations::starcd STARCDCoordinateRotation;
 
 } // End namespace Foam
 

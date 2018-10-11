@@ -39,7 +39,7 @@ Description
     \vartable
         p_{hyd} | hyrostatic pressure [Pa]
         p_{ref} | reference pressure [Pa]
-        x_{ref} | reference point in Cartesian co-ordinates
+        x_{ref} | reference point in Cartesian coordinates
         \rho    | density (assumed uniform)
         g       | acceleration due to gravity [m/s2]
     \endtable

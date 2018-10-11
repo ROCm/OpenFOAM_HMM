@@ -107,7 +107,7 @@ public:
     //- Debug switch
     static int debug;
 
-    //- Tolerance used in calculating barycentric co-ordinates
+    //- Tolerance used in calculating barycentric coordinates
     //  (applied to normalised values)
     static scalar tol;
 

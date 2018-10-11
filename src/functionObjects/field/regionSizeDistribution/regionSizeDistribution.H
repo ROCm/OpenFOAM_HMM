@@ -113,8 +113,8 @@ Usage
         maxDiameter  | maximum region equivalent diameter | yes |
         minDiameter  | minimum region equivalent diameter | no  | 0
         setFormat    | writing format          | yes         |
-        origin       | origin of local co-ordinate system | yes    |
-        coordinateRoation | orientation of local co-ordinate system | no
+        origin       | origin of local coordinate system | yes    |
+        coordinateRoation | orientation of local coordinate system | no
         log          | Log to standard output  | no          | yes
         isoPlanes    | switch for isoPlanes    | no          | false
         origin       | origin of the plane when isoPlanes is used | no | none
@@ -198,7 +198,7 @@ class regionSizeDistribution
         autoPtr<writer<scalar>> formatterPtr_;
 
         //- Optional coordinate system
-        autoPtr<coordinateSystem> coordSysPtr_;
+        autoPtr<coordinateSystem> csysPtr_;
 
         // Optional extra definition of bins on planes downstream to the origin
         // point and maximum diameter

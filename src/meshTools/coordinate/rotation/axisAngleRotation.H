@@ -1,0 +1,156 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Class
+    Foam::coordinateRotations::axisAngle
+
+Description
+    A coordinateRotation specified by a rotation axis and a rotation angle
+    about that axis.
+
+    \verbatim
+    coordinateRotation
+    {
+        type        axisAngle;
+        axis        (1 0 0);
+        angle       90;
+    }
+    \endverbatim
+
+    \heading Dictionary entries
+    \table
+        Property    | Description                           | Required | Default
+        type        | Type name: axisAngle                  | yes   |
+        axis        | Axis of rotation (vector)             | yes   |
+        angle       | Rotation angle                        | yes   |
+        degrees     | The angle is in degrees               | no    | true
+    \endtable
+
+Note
+    The rotation axis will be normalized internally.
+
+SourceFiles
+    axisAngle.C
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef coordinateRotations_axisAngle_H
+#define coordinateRotations_axisAngle_H
+
+#include "coordinateRotation.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace coordinateRotations
+{
+
+/*---------------------------------------------------------------------------*\
+               Class coordinateRotations::axisAngle Declaration
+\*---------------------------------------------------------------------------*/
+
+class axisAngle
+:
+    public coordinateRotation
+{
+    // Private Data
+
+        //- The rotation axis
+        vector axis_;
+
+        //- The rotation angle
+        scalar angle_;
+
+        //- Angle measured in degrees
+        bool degrees_;
+
+
+    // Private Member Functions
+
+        //- Check specification for an identity rotation
+        void checkSpec();
+
+
+public:
+
+    //- Runtime type information
+    TypeNameNoDebug("axisAngle");
+
+    // Constructors
+
+        //- Construct null
+        axisAngle();
+
+        //- Copy construct
+        axisAngle(const axisAngle& crot);
+
+        //- Move construct
+        axisAngle(axisAngle&& crot);
+
+        //- Construct from axis and angle
+        axisAngle(const vector& axis, scalar angle, bool degrees);
+
+        //- Construct from dictionary
+        explicit axisAngle(const dictionary& dict);
+
+        //- Return clone
+        autoPtr<coordinateRotation> clone() const
+        {
+            return
+                autoPtr<coordinateRotation>::NewFrom
+                <coordinateRotations::axisAngle>(*this);
+        }
+
+
+    //- Destructor
+    virtual ~axisAngle() = default;
+
+
+    // Member Functions
+
+        //- Reset specification
+        virtual void clear();
+
+        //- Calculate and return the rotation tensor
+        //- calculated from axis and angle
+        virtual tensor R() const;
+
+        //- Write information
+        virtual void write(Ostream& os) const;
+
+        //- Write dictionary entry
+        virtual void writeEntry(const word& keyword, Ostream& os) const;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace coordinateRotations
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //

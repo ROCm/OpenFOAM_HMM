@@ -43,8 +43,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-
 /*---------------------------------------------------------------------------*\
                            Class mixerFvMesh Declaration
 \*---------------------------------------------------------------------------*/
@@ -58,10 +56,10 @@ class mixerFvMesh
         //- Motion dictionary
         dictionary motionDict_;
 
-        //- Coordinate system
-        autoPtr<coordinateSystem> csPtr_;
+        //- Cylindrical coordinate system
+        coordSystem::cylindrical csys_;
 
-        // - Rotational speed in rotations per minute (rpm)
+        // - Rotational speed in revolutions per minute (rpm)
         scalar rpm_;
 
         //- Markup field for points.  Moving points marked with 1
@@ -106,9 +104,9 @@ public:
     // Member Functions
 
         //- Return coordinate system
-        const coordinateSystem& cs() const
+        const coordSystem::cylindrical& cs() const
         {
-            return *csPtr_;
+            return csys_;
         }
 
         //- Update the mesh for both mesh motion and topology change
