@@ -32,9 +32,11 @@ rm -f Make/options
 echo "Creating Make/options"
 
 echo 'EXE_INC = \
-    -I$(LIB_SRC)/finiteVolume/lnInclude' > Make/options
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude' > Make/options
 echo >> Make/options
 echo 'EXE_LIBS = \
-    -lfiniteVolume' >> Make/options
+    -lfiniteVolume \
+    -lmeshTools' >> Make/options
 
 #------------------------------------------------------------------------------

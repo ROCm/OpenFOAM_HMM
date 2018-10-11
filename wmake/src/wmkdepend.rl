@@ -71,7 +71,7 @@ Note
 #include <unordered_set>
 #include <vector>
 
-// Ragel switchs may have several implicit fallthroughs
+// Ragel switches may have several implicit fallthroughs
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 
 // Length of the input read buffer
@@ -312,8 +312,12 @@ namespace Files
 %%{
     machine wmkdep;
 
-    action  buffer  { tok = p; /* Local token start */ }
-    action  process { processFile(std::string(tok, (p - tok))); }
+    action  buffer  { tok = p;  /* Local token start */ }
+    action  process
+    {
+        processFile(tok, p);
+        tok = nullptr;          /* Done with buffer */
+    }
 
     white   = [ \t\f\r];        # Horizontal whitespace
     nl      = white* '\n';      # Newline (allow trailing whitespace)
@@ -346,10 +350,26 @@ namespace Files
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+void processFile(std::string fileName);
+
+//
+// Open a file and process.
+// The file name is given by the [first,last) range
+//
+void processFile(const char* first, const char* last)
+{
+    // Extra safety
+    if (first && last && last > first)
+    {
+        processFile(std::string(first, last));
+    }
+}
+
+
 //
 // Open a file and process
 //
-void processFile(const std::string& fileName)
+void processFile(std::string fileName)
 {
     FILE* infile = Files::open(fileName);
     if (optVerbose)
@@ -419,11 +439,23 @@ void processFile(const std::string& fileName)
 
         if (ts)
         {
-            // Preserve incomplete token
+            // Preserve incomplete token.
+            // We have the normal ragel range (ts, te) but potentially
+            // our own local buffer start as 'tok'
+
+            if (tok && tok >= ts)
+            {
+                tok = inbuf + (tok - ts);
+            }
+            else
+            {
+                tok = nullptr;          // safety
+            }
+
             pending = pe - ts;
             memmove(inbuf, ts, pending);
-            te = inbuf + (te - ts);   // token end (after memmove)
-            ts = inbuf;               // token start
+            te = inbuf + (te - ts);     // token end (after memmove)
+            ts = inbuf;                 // token start
         }
         else
         {
