@@ -51,6 +51,12 @@ inline const Foam::word& Foam::argList::executable() const
 }
 
 
+inline const Foam::string& Foam::argList::commandLine() const
+{
+    return commandLine_;
+}
+
+
 inline const Foam::fileName& Foam::argList::rootPath() const
 {
     return rootPath_;

@@ -143,7 +143,9 @@ class argList
         bool distributed_;
         fileName globalCase_;
         fileName case_;
-        string argListStr_;
+
+        //- The command line options and arguments concatenated as a string
+        string commandLine_;
 
 
     // Private Member Functions
@@ -176,14 +178,14 @@ class argList
         template<class T>
         static inline void readList(ITstream& is, List<T>& list);
 
-        //- Get rootPath_ / globalCase_ from one of the following forms
+        //- Set rootPath_, globalCase_, case_ from one of the following forms
         //   * [-case dir]
         //   * cwd
         //
         // Also export FOAM_CASE and FOAM_CASENAME environment variables
         // so they can be used immediately (eg, in decomposeParDict), as well
         // as the FOAM_EXECUTABLE environment.
-        void getRootCase();
+        void setCasePaths();
 
         //- Transcribe argv into internal args_.
         //  Transform sequences with "(" ... ")" into string lists
@@ -280,6 +282,9 @@ public:
         //- Name of executable without the path
         inline const word& executable() const;
 
+        //- The command line options and arguments concatenated as a string
+        inline const string& commandLine() const;
+
         //- Return root path
         inline const fileName& rootPath() const;
 
@@ -296,10 +301,12 @@ public:
         //- Return parRunControl
         inline const ParRunControl& parRunControl() const;
 
-        //- Return the path to the caseName
+        //- Return the full path to the (processor local) case
+        //  \note This is guaranteed to be an absolute path
         inline fileName path() const;
 
-        //- Return the path to the globalCaseName
+        //- Return the full path to the global case
+        //  \note This is guaranteed to be an absolute path
         inline fileName globalPath() const;
 
         //- Return the number of arguments

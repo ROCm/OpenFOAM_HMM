@@ -40,7 +40,6 @@ int main(int argc, char *argv[])
     argList::noBanner();
     argList::noParallel();
     // argList::noFunctionObjects();
-    argList::removeOption("case");
     argList::addOption("label",  "value", "Test parsing of label");
     argList::addOption("scalar", "value", "Test parsing of scalar");
     argList::addOption("string", "value", "Test string lookup");
@@ -73,6 +72,15 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv, false, true);
 
+    Info<< "command-line ("
+        << args.options().size() << " options, "
+        << args.args().size() << " args)" << nl
+        << "    " << args.commandLine().c_str() << nl << nl;
+
+    Info<< "rootPath:   " << args.rootPath() << nl
+        << "globalCase: " << args.globalCaseName() << nl
+        << "globalPath: " << args.globalPath() << nl
+        << nl;
 
     Info<<"have: "
         <<args.count({"label", "scalar"}) << " options" << nl;

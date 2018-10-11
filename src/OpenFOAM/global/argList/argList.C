@@ -706,72 +706,59 @@ bool Foam::argList::regroupArgv(int& argc, char**& argv)
     args_.resize(nArgs);
 
     std::string::size_type len = (nArgs-1); // Spaces between args
-    forAll(args_, argi)
+    for (const auto& s : args_)
     {
-        len += args_[argi].size();
+        len += s.length();
     }
 
     // Length needed for regrouped command-line
-    argListStr_.reserve(len);
+    commandLine_.reserve(len);
 
     return nArgs < argc;
 }
 
 
-void Foam::argList::getRootCase()
+void Foam::argList::setCasePaths()
 {
-    fileName casePath;
+    fileName caseDir;
 
-    // [-case dir] specified
-    const auto optIter = options_.cfind("case");
+    const auto optIter = options_.cfind("case");  // [-case dir] specified?
 
     if (optIter.found())
     {
-        casePath = optIter.object();
-        casePath.clean();
+        caseDir = optIter.object();
+        caseDir.clean();
 
-        if (casePath.empty() || casePath == ".")
+        if (caseDir.empty() || caseDir == ".")
         {
-            // Handle degenerate form and '-case .' like no -case specified
-            casePath = cwd();
+            // Treat "", "." and "./" as if -case was not specified
+            caseDir = cwd();
             options_.erase("case");
         }
-        else if (!casePath.isAbsolute() && casePath.name() == "..")
+        else if (!caseDir.isAbsolute())
         {
-            // Avoid relative cases ending in '..' - makes for very ugly names
-            casePath = cwd()/casePath;
-            casePath.clean();
+            caseDir = cwd()/caseDir;
+            caseDir.clean();
         }
     }
     else
     {
         // Nothing specified, use the current dir
-        casePath = cwd();
+        caseDir = cwd();
     }
 
-    rootPath_   = casePath.path();
-    globalCase_ = casePath.name();
-    case_       = globalCase_;
+    // The caseDir is a cleaned, absolute path
 
-    // The name of the executable, unless already present in the environment
+    rootPath_   = caseDir.path();
+    globalCase_ = caseDir.name();
+    case_       = globalCase_;  // The (processor) local case name
+
+    // Global case (directory) and case-name as environment variables
+    setEnv("FOAM_CASE", caseDir, true);
+    setEnv("FOAM_CASENAME", globalCase_, true);
+
+    // Executable name, unless already present in the environment
     setEnv("FOAM_EXECUTABLE", executable_, false);
-
-    // Set the case and case-name as an environment variable
-    if (rootPath_.isAbsolute())
-    {
-        // Absolute path - use as-is
-        setEnv("FOAM_CASE", rootPath_/globalCase_, true);
-        setEnv("FOAM_CASENAME", globalCase_, true);
-    }
-    else
-    {
-        // Qualify relative path
-        casePath = cwd()/rootPath_/globalCase_;
-        casePath.clean();
-
-        setEnv("FOAM_CASE", casePath, true);
-        setEnv("FOAM_CASENAME", casePath.name(), true);
-    }
 }
 
 
@@ -837,7 +824,7 @@ Foam::argList::argList
 
     // Convert argv -> args_ and capture ( ... ) lists
     regroupArgv(argc, argv);
-    argListStr_ += args_[0];
+    commandLine_ += args_[0];
 
     // Set executable name immediately - useful when emitting errors.
     executable_ = fileName(args_[0]).name();
@@ -846,8 +833,8 @@ Foam::argList::argList
     int nArgs = 1;
     for (int argi = 1; argi < args_.size(); ++argi)
     {
-        argListStr_ += ' ';
-        argListStr_ += args_[argi];
+        commandLine_ += ' ';
+        commandLine_ += args_[argi];
 
         if (args_[argi][0] == '-')
         {
@@ -881,8 +868,8 @@ Foam::argList::argList
                     Pstream::exit(1); // works for serial and parallel
                 }
 
-                argListStr_ += ' ';
-                argListStr_ += args_[argi];
+                commandLine_ += ' ';
+                commandLine_ += args_[argi];
                 // Handle duplicates by taking the last -option specified
                 options_.set(optName, args_[argi]);
             }
@@ -926,7 +913,7 @@ Foam::argList::argList
     rootPath_(args.rootPath_),
     globalCase_(args.globalCase_),
     case_(args.case_),
-    argListStr_(args.argListStr_)
+    commandLine_(args.commandLine_)
 {
     parse(checkArgs, checkOpts, initialise);
 }
@@ -1013,7 +1000,7 @@ void Foam::argList::parse
                 #endif
                 << nl
                 << "Arch   : " << Foam::FOAMbuildArch << nl
-                << "Exec   : " << argListStr_.c_str() << nl
+                << "Exec   : " << commandLine_.c_str() << nl
                 << "Date   : " << dateString.c_str() << nl
                 << "Time   : " << timeString.c_str() << nl
                 << "Host   : " << hostName().c_str() << nl
@@ -1025,7 +1012,7 @@ void Foam::argList::parse
         jobInfo.add("userName", userName());
         jobInfo.add("foamVersion", word(Foam::FOAMversion));
         jobInfo.add("code", executable_);
-        jobInfo.add("argList", argListStr_);
+        jobInfo.add("argList", commandLine_);
         jobInfo.add("currentDir", cwd());
         jobInfo.add("PPID", ppid());
         jobInfo.add("PGID", pgid());
@@ -1128,7 +1115,7 @@ void Foam::argList::parse
         if (Pstream::master())
         {
             // Establish rootPath_/globalCase_/case_ for master
-            getRootCase();
+            setCasePaths();
 
             // Establish location of decomposeParDict, allow override with
             // the -decomposeParDict option.
@@ -1288,9 +1275,9 @@ void Foam::argList::parse
                         << exit(FatalError);
                 }
 
-                forAll(roots, i)
+                for (fileName& dir : roots)
                 {
-                    roots[i].expand();
+                    dir.expand();
                 }
 
                 // Distribute the master's argument list (with new root)
@@ -1330,8 +1317,8 @@ void Foam::argList::parse
                     (
                         isDir
                         (
-                            rootPath_/globalCase_/"processor"
-                          + name(++nProcDirs)
+                            rootPath_/globalCase_
+                          / "processor" + Foam::name(++nProcDirs)
                         )
                     )
                     {}
@@ -1371,18 +1358,19 @@ void Foam::argList::parse
             fromMaster >> args_ >> options_ >> distributed_;
 
             // Establish rootPath_/globalCase_/case_ for slave
-            getRootCase();
+            setCasePaths();
         }
 
         nProcs = Pstream::nProcs();
-        case_ = globalCase_/(word("processor") + name(Pstream::myProcNo()));
+        case_ = globalCase_/("processor" + Foam::name(Pstream::myProcNo()));
     }
     else
     {
         // Establish rootPath_/globalCase_/case_
-        getRootCase();
-        case_ = globalCase_;
+        setCasePaths();
+        case_ = globalCase_;   // Redundant, but extra safety?
     }
+
 
     // Keep or discard slave and root information for reporting:
     if (Pstream::master() && parRunControl_.parRun())
