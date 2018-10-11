@@ -305,7 +305,7 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
 
         fileName processorCasePath
         (
-            time().caseName()/fileName(word("processor") + Foam::name(proci))
+            time().caseName()/("processor" + Foam::name(proci))
         );
 
         // create a database

@@ -1317,7 +1317,7 @@ void Foam::argList::parse
                         isDir
                         (
                             rootPath_/globalCase_
-                          / "processor" + Foam::name(++nProcDirs)
+                          / ("processor" + Foam::name(++nProcDirs))
                         )
                     )
                     {}

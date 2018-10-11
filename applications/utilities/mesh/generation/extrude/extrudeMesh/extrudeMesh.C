@@ -358,8 +358,7 @@ int main(int argc, char *argv[])
         if (Pstream::parRun())
         {
             sourceCaseDir =
-                sourceCaseDir
-               /"processor" + Foam::name(Pstream::myProcNo());
+                sourceCaseDir/("processor" + Foam::name(Pstream::myProcNo()));
         }
         wordList sourcePatches;
         dict.readEntry("sourcePatches", sourcePatches);

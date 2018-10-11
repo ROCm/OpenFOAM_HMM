@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     const label nProcs = fileHandler().nProcs(args.path());
     #else
     label nProcs = 0;
-    while (isDir(args.path()/(word("processor") + name(nProcs))))
+    while (isDir(args.path()/("processor" + Foam::name(nProcs))))
     {
         ++nProcs;
     }
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
             (
                 Time::controlDictName,
                 args.rootPath(),
-                args.caseName()/fileName(word("processor") + name(proci))
+                args.caseName()/("processor" + Foam::name(proci))
             )
         );
     }

@@ -426,13 +426,17 @@ Foam::fileName& Foam::fileName::operator/=(const string& other)
         {
             // Two non-empty strings: can concatenate
 
-            s.append("/");
+            if (s.back() != '/' && other.front() != '/')
+            {
+                s += '/';
+            }
+
             s.append(other);
         }
     }
     else if (other.size())
     {
-        // Or, if the first string is empty
+        // The first string is empty
         s = other;
     }
 
@@ -449,16 +453,23 @@ Foam::fileName Foam::operator/(const string& a, const string& b)
         if (b.size())
         {
             // Two non-empty strings: can concatenate
-            return fileName(a + '/' + b);
+
+            if (a.back() == '/' || b.front() == '/')
+            {
+                return fileName(a + b);
+            }
+            else
+            {
+                return fileName(a + '/' + b);
+            }
         }
 
-        return a;
+        return a;  // The second string was empty
     }
-
-    // Or, if the first string is empty
 
     if (b.size())
     {
+        // The first string is empty
         return b;
     }
 

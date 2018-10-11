@@ -589,7 +589,7 @@ int main(int argc, char *argv[])
                 (
                     Time::controlDictName,
                     args.rootPath(),
-                    args.caseName()/fileName(word("processor") + name(proci))
+                    args.caseName()/("processor" + Foam::name(proci))
                 );
                 processorDb.setTime(runTime);
 
@@ -1016,7 +1016,7 @@ int main(int argc, char *argv[])
                                 Time::controlDictName,
                                 args.rootPath(),
                                 args.caseName()
-                               /fileName(word("processor") + name(proci))
+                              / ("processor" + Foam::name(proci))
                             )
                         );
                     }
@@ -1374,8 +1374,8 @@ int main(int argc, char *argv[])
                         (
                             Time::controlDictName,
                             args.rootPath(),
-                            args.caseName()/
-                            fileName(word("processor") + name(procI))
+                            args.caseName()
+                          / ("processor" + Foam::name(procI))
                         );
 
                         processorDb.setTime(runTime);
