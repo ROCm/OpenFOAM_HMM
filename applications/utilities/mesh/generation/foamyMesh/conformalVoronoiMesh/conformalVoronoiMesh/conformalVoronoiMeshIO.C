@@ -816,7 +816,7 @@ void Foam::conformalVoronoiMesh::writeMesh
 
     forAll(patches, p)
     {
-        const label totalPatchSize = patchDicts[p].get<label>("nFaces");
+        label totalPatchSize = patchDicts[p].get<label>("nFaces");
 
         if
         (
