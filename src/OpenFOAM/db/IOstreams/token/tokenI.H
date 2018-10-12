@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,16 @@ License
 #include <algorithm>
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+inline Foam::token Foam::token::boolean(bool on)
+{
+    token tok;
+    tok.type_ = tokenType::BOOL;
+    tok.data_.labelVal = on;
+
+    return tok;
+}
+
 
 inline Foam::token Foam::token::flag(int bitmask)
 {
@@ -306,6 +316,23 @@ inline bool Foam::token::setType(token::tokenType variant)
 
     switch (variant)
     {
+        case tokenType::BOOL:
+        case tokenType::LABEL:
+        {
+            switch (type_)
+            {
+                case tokenType::BOOL:
+                case tokenType::LABEL:
+                    type_ = variant;
+                    return true;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+        break;
+
         case tokenType::STRING:
         case tokenType::VARIABLE:
         case tokenType::VERBATIMSTRING:
@@ -321,10 +348,10 @@ inline bool Foam::token::setType(token::tokenType variant)
                     break;
 
                 default:
-                    return false;
                     break;
             }
         }
+        break;
 
         default:
             break;
@@ -361,6 +388,24 @@ inline bool Foam::token::undefined() const
 inline bool Foam::token::error() const
 {
     return (type_ == tokenType::ERROR);
+}
+
+
+inline bool Foam::token::isBool() const
+{
+    return (type_ == tokenType::BOOL);
+}
+
+
+inline bool Foam::token::boolToken() const
+{
+    if (type_ == tokenType::BOOL)
+    {
+        return data_.labelVal;
+    }
+
+    parseError("bool");
+    return false;
 }
 
 
@@ -423,7 +468,7 @@ inline Foam::label Foam::token::labelToken() const
         return data_.labelVal;
     }
 
-    parseError(pTraits<label>::typeName);
+    parseError("label");
     return 0;
 }
 
@@ -441,8 +486,8 @@ inline Foam::floatScalar Foam::token::floatScalarToken() const
         return data_.floatVal;
     }
 
-    parseError("floatScalar");
-    return 0.0;
+    parseError("float");
+    return 0;
 }
 
 
@@ -459,8 +504,8 @@ inline Foam::doubleScalar Foam::token::doubleScalarToken() const
         return data_.doubleVal;
     }
 
-    parseError("doubleScalar");
-    return 0.0;
+    parseError("double");
+    return 0;
 }
 
 
@@ -485,8 +530,8 @@ inline Foam::scalar Foam::token::scalarToken() const
         return data_.doubleVal;
     }
 
-    parseError(pTraits<scalar>::typeName);
-    return 0.0;
+    parseError("scalar");
+    return 0;
 }
 
 
@@ -508,7 +553,7 @@ inline Foam::scalar Foam::token::number() const
     }
 
     parseError("number (label or scalar)");
-    return 0.0;
+    return 0;
 }
 
 
@@ -525,7 +570,7 @@ inline const Foam::word& Foam::token::wordToken() const
         return *data_.wordPtr;
     }
 
-    parseError(word::typeName);
+    parseError("word");
     return word::null;
 }
 
@@ -559,7 +604,7 @@ inline const Foam::string& Foam::token::stringToken() const
         return *data_.stringPtr;
     }
 
-    parseError(string::typeName);
+    parseError("string");
     return string::null;
 }
 
@@ -741,6 +786,9 @@ inline bool Foam::token::operator==(const token& tok) const
     {
         case tokenType::UNDEFINED:
             return true;
+
+        case tokenType::BOOL:
+            return data_.labelVal == tok.data_.labelVal;
 
         case tokenType::FLAG:
             return data_.flagVal == tok.data_.flagVal;
