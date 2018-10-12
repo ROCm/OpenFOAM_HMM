@@ -209,14 +209,8 @@ void Foam::movingConeTopoFvMesh::addZonesAndModifiers()
             nMods,
             topoChanger_,
             "rightExtrusionFaces",
-            readScalar
-            (
-                motionDict_.subDict("right").lookup("minThickness")
-            ),
-            readScalar
-            (
-                motionDict_.subDict("right").lookup("maxThickness")
-            )
+            motionDict_.subDict("right").get<scalar>("minThickness"),
+            motionDict_.subDict("right").get<scalar>("maxThickness")
         );
     ++nMods;
 
@@ -226,14 +220,8 @@ void Foam::movingConeTopoFvMesh::addZonesAndModifiers()
         nMods,
         topoChanger_,
         "leftExtrusionFaces",
-        readScalar
-        (
-            motionDict_.subDict("left").lookup("minThickness")
-        ),
-        readScalar
-        (
-            motionDict_.subDict("left").lookup("maxThickness")
-        )
+        motionDict_.subDict("left").get<scalar>("minThickness"),
+        motionDict_.subDict("left").get<scalar>("maxThickness")
     );
     ++nMods;
     tm.setSize(nMods);
@@ -266,14 +254,14 @@ Foam::movingConeTopoFvMesh::movingConeTopoFvMesh(const IOobject& io)
         ).optionalSubDict(typeName + "Coeffs")
     ),
     motionVelAmplitude_(motionDict_.lookup("motionVelAmplitude")),
-    motionVelPeriod_(readScalar(motionDict_.lookup("motionVelPeriod"))),
+    motionVelPeriod_(motionDict_.get<scalar>("motionVelPeriod")),
     curMotionVel_
     (
         motionVelAmplitude_*sin(time().value()*pi/motionVelPeriod_)
     ),
-    leftEdge_(readScalar(motionDict_.lookup("leftEdge"))),
-    curLeft_(readScalar(motionDict_.lookup("leftObstacleEdge"))),
-    curRight_(readScalar(motionDict_.lookup("rightObstacleEdge")))
+    leftEdge_(motionDict_.get<scalar>("leftEdge")),
+    curLeft_(motionDict_.get<scalar>("leftObstacleEdge")),
+    curRight_(motionDict_.get<scalar>("rightObstacleEdge"))
 {
     Pout<< "Initial time:" << time().value()
         << " Initial curMotionVel_:" << curMotionVel_

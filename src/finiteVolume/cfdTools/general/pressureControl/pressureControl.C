@@ -39,7 +39,7 @@ Foam::pressureControl::pressureControl
     refCell_(-1),
     refValue_(0),
     pMax_("pMax", dimPressure, GREAT),
-    pMin_("pMin", dimPressure, 0),
+    pMin_("pMin", dimPressure, Zero),
     limitMaxP_(false),
     limitMinP_(false)
 {
@@ -58,10 +58,8 @@ Foam::pressureControl::pressureControl
 
     if (dict.found("pMax") && dict.found("pMin"))
     {
-        pMax_.value() = readScalar(dict.lookup("pMax"));
-        limitMaxP_ = true;
-        pMin_.value() = readScalar(dict.lookup("pMin"));
-        limitMinP_ = true;
+        dict.readEntry("pMax", pMax_.value()); limitMaxP_ = true;
+        dict.readEntry("pMin", pMin_.value()); limitMinP_ = true;
     }
     else
     {
@@ -97,9 +95,8 @@ Foam::pressureControl::pressureControl
             reduce(rhoRefMin, minOp<scalar>());
         }
 
-        if (dict.found("pMax"))
+        if (dict.readIfPresent("pMax", pMax_.value()))
         {
-            pMax_.value() = readScalar(dict.lookup("pMax"));
             limitMaxP_ = true;
         }
         else if (dict.found("pMaxFactor"))
@@ -114,8 +111,7 @@ Foam::pressureControl::pressureControl
                     << exit(FatalIOError);
             }
 
-            const scalar pMaxFactor(readScalar(dict.lookup("pMaxFactor")));
-            pMax_.value() = pMaxFactor*pMax;
+            pMax_.value() = pMax * dict.get<scalar>("pMaxFactor");
             limitMaxP_ = true;
         }
         else if (dict.found("rhoMax"))
@@ -154,9 +150,8 @@ Foam::pressureControl::pressureControl
             limitMaxP_ = true;
         }
 
-        if (dict.found("pMin"))
+        if (dict.readIfPresent("pMin", pMin_.value()))
         {
-            pMin_.value() = readScalar(dict.lookup("pMin"));
             limitMinP_ = true;
         }
         else if (dict.found("pMinFactor"))
@@ -171,8 +166,7 @@ Foam::pressureControl::pressureControl
                     << exit(FatalIOError);
             }
 
-            const scalar pMinFactor(readScalar(dict.lookup("pMinFactor")));
-            pMin_.value() = pMinFactor*pMin;
+            pMin_.value() = pMin * dict.get<scalar>("pMinFactor");
             limitMinP_ = true;
         }
         else if (dict.found("rhoMin"))
@@ -260,10 +254,8 @@ bool Foam::pressureControl::limit(volScalarField& p) const
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

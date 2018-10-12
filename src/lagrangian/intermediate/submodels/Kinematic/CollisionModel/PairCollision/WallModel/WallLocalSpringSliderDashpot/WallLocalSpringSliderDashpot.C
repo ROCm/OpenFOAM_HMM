@@ -189,17 +189,14 @@ Foam::WallLocalSpringSliderDashpot<CloudType>::WallLocalSpringSliderDashpot
     maxEstarIndex_(-1),
     collisionResolutionSteps_
     (
-        readScalar
-        (
-            this->coeffDict().lookup("collisionResolutionSteps")
-        )
+        this->coeffDict().getScalar("collisionResolutionSteps")
     ),
     volumeFactor_(1.0),
     useEquivalentSize_(Switch(this->coeffDict().lookup("useEquivalentSize")))
 {
     if (useEquivalentSize_)
     {
-        volumeFactor_ = readScalar(this->coeffDict().lookup("volumeFactor"));
+        this->coeffDict().readEntry("volumeFactor", volumeFactor_);
     }
 
     scalar pNu = this->owner().constProps().poissonsRatio();
@@ -243,24 +240,22 @@ Foam::WallLocalSpringSliderDashpot<CloudType>::WallLocalSpringSliderDashpot
 
         patchMap_[wallPatchIndices[wPI]] = wPI;
 
-        scalar nu = readScalar(patchCoeffDict.lookup("poissonsRatio"));
+        scalar nu = patchCoeffDict.get<scalar>("poissonsRatio");
 
-        scalar E = readScalar(patchCoeffDict.lookup("youngsModulus"));
+        scalar E = patchCoeffDict.get<scalar>("youngsModulus");
 
         Estar_[wPI] = 1/((1 - sqr(pNu))/pE + (1 - sqr(nu))/E);
 
         Gstar_[wPI] = 1/(2*((2 + pNu - sqr(pNu))/pE + (2 + nu - sqr(nu))/E));
 
-        alpha_[wPI] = readScalar(patchCoeffDict.lookup("alpha"));
+        alpha_[wPI] = patchCoeffDict.get<scalar>("alpha");
 
-        b_[wPI] = readScalar(patchCoeffDict.lookup("b"));
+        b_[wPI] = patchCoeffDict.get<scalar>("b");
 
-        mu_[wPI] = readScalar(patchCoeffDict.lookup("mu"));
+        mu_[wPI] = patchCoeffDict.get<scalar>("mu");
 
-        cohesionEnergyDensity_[wPI] = readScalar
-        (
-            patchCoeffDict.lookup("cohesionEnergyDensity")
-        );
+        cohesionEnergyDensity_[wPI] =
+            patchCoeffDict.get<scalar>("cohesionEnergyDensity");
 
         cohesion_[wPI] = (mag(cohesionEnergyDensity_[wPI]) > VSMALL);
 

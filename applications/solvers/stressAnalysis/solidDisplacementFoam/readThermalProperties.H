@@ -58,10 +58,10 @@ if (thermalStress)
     );
 
     const dictionary& CDict(thermalProperties.subDict("C"));
-    word CType(CDict.lookup("type"));
+    word CType(CDict.get<word>("type"));
     if (CType == "uniform")
     {
-        scalar CValue(readScalar(CDict.lookup("value")));
+        scalar CValue(CDict.get<scalar>("value"));
 
         CPtr.reset
         (
@@ -113,10 +113,10 @@ if (thermalStress)
     );
 
     const dictionary& kDict(thermalProperties.subDict("k"));
-    word kType(kDict.lookup("type"));
+    word kType(kDict.get<word>("type"));
     if (kType == "uniform")
     {
-        scalar rhoKValue(readScalar(kDict.lookup("value")));
+        scalar rhoKValue(kDict.get<scalar>("value"));
 
         rhoKPtr.reset
         (
@@ -169,11 +169,11 @@ if (thermalStress)
 
 
     const dictionary& alphaDict(thermalProperties.subDict("alpha"));
-    word alphaType(alphaDict.lookup("type"));
+    word alphaType(alphaDict.get<word>("type"));
 
     if (alphaType == "uniform")
     {
-        scalar alphaValue(readScalar(alphaDict.lookup("value")));
+        scalar alphaValue(alphaDict.get<scalar>("value"));
         alphaPtr.reset
         (
             new volScalarField

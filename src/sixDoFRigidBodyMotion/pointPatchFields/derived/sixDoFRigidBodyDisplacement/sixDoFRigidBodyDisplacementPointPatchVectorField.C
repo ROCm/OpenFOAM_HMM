@@ -75,7 +75,7 @@ sixDoFRigidBodyDisplacementPointPatchVectorField
 {
     if (rhoName_ == "rhoInf")
     {
-        rhoInf_ = readScalar(dict.lookup("rhoInf"));
+        dict.readEntry("rhoInf", rhoInf_);
     }
 
     if (dict.readIfPresent("g", g_))

@@ -85,8 +85,8 @@ standardRadiation::standardRadiation
         dimensionedScalar(dimMass/pow3(dimTime), Zero),
         zeroGradientFvPatchScalarField::typeName
     ),
-    beta_(readScalar(coeffDict_.lookup("beta"))),
-    kappaBar_(readScalar(coeffDict_.lookup("kappaBar")))
+    beta_(coeffDict_.get<scalar>("beta")),
+    kappaBar_(coeffDict_.get<scalar>("kappaBar"))
 {}
 
 

@@ -39,10 +39,10 @@ Foam::consumptionSpeed::consumptionSpeed
 (
     const dictionary& dict
 )
-:   omega0_(readScalar(dict.lookup("omega0"))),
-    eta_(readScalar(dict.lookup("eta"))),
-    sigmaExt_(readScalar(dict.lookup("sigmaExt"))),
-    omegaMin_(readScalar(dict.lookup("omegaMin")))
+:   omega0_(dict.get<scalar>("omega0")),
+    eta_(dict.get<scalar>("eta")),
+    sigmaExt_(dict.get<scalar>("sigmaExt")),
+    omegaMin_(dict.get<scalar>("omegaMin"))
 {}
 
 

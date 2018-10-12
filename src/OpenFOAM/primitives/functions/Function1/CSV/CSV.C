@@ -209,12 +209,12 @@ Foam::Function1Types::CSV<Type>::CSV
 )
 :
     TableBase<Type>(entryName, dict),
-    nHeaderLine_(readLabel(dict.lookup("nHeaderLine"))),
-    refColumn_(readLabel(dict.lookup("refColumn"))),
+    nHeaderLine_(dict.get<label>("nHeaderLine")),
+    refColumn_(dict.get<label>("refColumn")),
     componentColumns_(dict.lookup("componentColumns")),
-    separator_(dict.lookupOrDefault<string>("separator", string(","))[0]),
-    mergeSeparators_(readBool(dict.lookup("mergeSeparators"))),
-    fName_(fName != fileName::null ? fName : dict.lookup("file"))
+    separator_(dict.lookupOrDefault<string>("separator", ",")[0]),
+    mergeSeparators_(dict.get<bool>("mergeSeparators")),
+    fName_(fName.empty() ? dict.get<fileName>("file") : fName)
 {
     if (componentColumns_.size() != pTraits<Type>::nComponents)
     {

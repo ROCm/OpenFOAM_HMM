@@ -111,7 +111,7 @@ liquidFilmThermo::liquidFilmThermo
     name_("unknown_liquid"),
     liquidPtr_(nullptr),
     ownLiquid_(false),
-    useReferenceValues_(readBool(coeffDict_.lookup("useReferenceValues"))),
+    useReferenceValues_(coeffDict_.get<bool>("useReferenceValues")),
     pRef_(0.0),
     TRef_(0.0)
 {

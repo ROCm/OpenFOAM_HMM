@@ -58,7 +58,7 @@ harmonicSpring::harmonicSpring
     (
         tetherPotentialProperties.subDict(typeName + "Coeffs")
     ),
-    springConstant_(readScalar(harmonicSpringCoeffs_.lookup("springConstant")))
+    springConstant_(harmonicSpringCoeffs_.get<scalar>("springConstant"))
 {}
 
 

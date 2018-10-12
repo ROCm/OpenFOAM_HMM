@@ -153,7 +153,7 @@ void Foam::MULES::limiterCorr
 
     const label nLimiterIter
     (
-        readLabel(MULEScontrols.lookup("nLimiterIter"))
+        MULEScontrols.get<label>("nLimiterIter")
     );
 
     const scalar smoothLimiter

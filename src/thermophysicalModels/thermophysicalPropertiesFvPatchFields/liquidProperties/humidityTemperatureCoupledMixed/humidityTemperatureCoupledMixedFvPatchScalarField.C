@@ -267,9 +267,9 @@ humidityTemperatureCoupledMixedFvPatchScalarField
             case mtEvaporation:
             case mtCondensationAndEvaporation:
             {
-                Mcomp_ = readScalar(dict.lookup("carrierMolWeight"));
-                L_ = readScalar(dict.lookup("L"));
-                Tvap_ = readScalar(dict.lookup("Tvap"));
+                dict.readEntry("carrierMolWeight", Mcomp_);
+                dict.readEntry("L", L_);
+                dict.readEntry("Tvap", Tvap_);
                 liquidDict_ = dict.subDict("liquid");
                 liquid_ =
                     liquidProperties::New(liquidDict_.subDict(specieName_));

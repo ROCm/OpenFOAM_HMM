@@ -35,7 +35,7 @@ Foam::constIsoSolidTransport<Thermo>::constIsoSolidTransport
 )
 :
     Thermo(dict),
-    kappa_(readScalar(dict.subDict("transport").lookup("kappa")))
+    kappa_(dict.subDict("transport").get<scalar>("kappa"))
 {}
 
 

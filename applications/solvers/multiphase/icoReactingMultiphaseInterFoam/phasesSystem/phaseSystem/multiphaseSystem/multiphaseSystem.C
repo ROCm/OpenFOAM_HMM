@@ -269,8 +269,8 @@ void Foam::multiphaseSystem::solve()
     const fvMesh& mesh = this->mesh();
 
     const dictionary& alphaControls = mesh.solverDict("alpha");
-    label nAlphaSubCycles(readLabel(alphaControls.lookup("nAlphaSubCycles")));
-    label nAlphaCorr(readLabel(alphaControls.lookup("nAlphaCorr")));
+    label nAlphaSubCycles(alphaControls.get<label>("nAlphaSubCycles"));
+    label nAlphaCorr(alphaControls.get<label>("nAlphaCorr"));
     mesh.solverDict("alpha").readEntry("cAlphas", cAlphas_);
 
     // Reset ddtAlphaMax

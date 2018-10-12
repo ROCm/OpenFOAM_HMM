@@ -122,7 +122,7 @@ bool Foam::fv::velocityDampingConstraint::read(const dictionary& dict)
 {
     if (cellSetOption::read(dict))
     {
-        UMax_ = coeffs_.get<scalar>("UMax");
+        coeffs_.readEntry("UMax", UMax_);
 
         if (!coeffs_.readIfPresent("UNames", fieldNames_))
         {

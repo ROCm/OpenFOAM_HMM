@@ -60,11 +60,11 @@ restrainedHarmonicSpring::restrainedHarmonicSpring
     ),
     springConstant_
     (
-        readScalar(restrainedHarmonicSpringCoeffs_.lookup("springConstant"))
+        restrainedHarmonicSpringCoeffs_.get<scalar>("springConstant")
     ),
     rR_
     (
-        readScalar(restrainedHarmonicSpringCoeffs_.lookup("rR"))
+        restrainedHarmonicSpringCoeffs_.get<scalar>("rR")
     )
 {}
 

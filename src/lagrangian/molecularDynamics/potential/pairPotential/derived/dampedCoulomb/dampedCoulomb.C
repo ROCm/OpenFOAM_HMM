@@ -62,7 +62,7 @@ dampedCoulomb::dampedCoulomb
     (
         pairPotentialProperties.subDict(typeName + "Coeffs")
     ),
-    alpha_(readScalar(dampedCoulombCoeffs_.lookup("alpha")))
+    alpha_(dampedCoulombCoeffs_.get<scalar>("alpha"))
 {
     setLookupTables();
 }

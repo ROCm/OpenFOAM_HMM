@@ -235,8 +235,8 @@ void Foam::refinementFeatures::read
         else
         {
             // Look up 'level' for single level
-            levels_[featI] = labelList(1, readLabel(dict.lookup("level")));
-            distances_[featI] = scalarField(1, 0.0);
+            levels_[featI] = labelList(1, dict.get<label>("level"));
+            distances_[featI] = scalarField(1, Zero);
         }
 
         Info<< "Refinement level according to distance to "

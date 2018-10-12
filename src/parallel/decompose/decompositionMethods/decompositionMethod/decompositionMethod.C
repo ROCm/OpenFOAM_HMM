@@ -57,7 +57,7 @@ namespace Foam
 
 Foam::label Foam::decompositionMethod::nDomains(const dictionary& decompDict)
 {
-    return readLabel(decompDict.lookup("numberOfSubdomains"));
+    return decompDict.get<label>("numberOfSubdomains");
 }
 
 

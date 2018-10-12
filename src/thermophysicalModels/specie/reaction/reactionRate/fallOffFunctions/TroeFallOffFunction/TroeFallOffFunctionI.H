@@ -42,10 +42,10 @@ inline Foam::TroeFallOffFunction::TroeFallOffFunction
 
 inline Foam::TroeFallOffFunction::TroeFallOffFunction(const dictionary& dict)
 :
-    alpha_(readScalar(dict.lookup("alpha"))),
-    Tsss_(readScalar(dict.lookup("Tsss"))),
-    Ts_(readScalar(dict.lookup("Ts"))),
-    Tss_(readScalar(dict.lookup("Tss")))
+    alpha_(dict.get<scalar>("alpha")),
+    Tsss_(dict.get<scalar>("Tsss")),
+    Ts_(dict.get<scalar>("Ts")),
+    Tss_(dict.get<scalar>("Tss"))
 {}
 
 

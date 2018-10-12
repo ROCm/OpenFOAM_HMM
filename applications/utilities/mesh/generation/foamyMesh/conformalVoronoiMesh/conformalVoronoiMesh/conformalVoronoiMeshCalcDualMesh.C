@@ -751,7 +751,7 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
 
     forAll(patches, p)
     {
-        label totalPatchSize = patchDicts[p].get<label>("nFaces");
+        const label totalPatchSize = patchDicts[p].get<label>("nFaces");
 
         if
         (

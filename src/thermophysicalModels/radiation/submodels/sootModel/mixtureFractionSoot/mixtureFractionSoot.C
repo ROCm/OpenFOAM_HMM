@@ -83,8 +83,8 @@ Foam::radiation::mixtureFractionSoot<ThermoType>::mixtureFractionSoot
         mesh_
     ),
     coeffsDict_(dict.subOrEmptyDict(modelType + "Coeffs")),
-    nuSoot_(readScalar(coeffsDict_.lookup("nuSoot"))),
-    Wsoot_(readScalar(coeffsDict_.lookup("Wsoot"))),
+    nuSoot_(coeffsDict_.get<scalar>("nuSoot")),
+    Wsoot_(coeffsDict_.get<scalar>("Wsoot")),
     sootMax_(-1),
     mappingFieldName_
     (

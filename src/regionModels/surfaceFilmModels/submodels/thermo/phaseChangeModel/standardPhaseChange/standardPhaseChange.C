@@ -76,8 +76,8 @@ standardPhaseChange::standardPhaseChange
 )
 :
     phaseChangeModel(typeName, film, dict),
-    deltaMin_(readScalar(coeffDict_.lookup("deltaMin"))),
-    L_(readScalar(coeffDict_.lookup("L"))),
+    deltaMin_(coeffDict_.get<scalar>("deltaMin")),
+    L_(coeffDict_.get<scalar>("L")),
     TbFactor_(coeffDict_.lookupOrDefault<scalar>("TbFactor", 1.1)),
     YInfZero_(coeffDict_.lookupOrDefault<Switch>("YInfZero", false))
 {}

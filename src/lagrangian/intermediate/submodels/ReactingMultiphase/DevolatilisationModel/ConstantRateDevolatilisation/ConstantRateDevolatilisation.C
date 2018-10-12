@@ -38,7 +38,7 @@ Foam::ConstantRateDevolatilisation<CloudType>::ConstantRateDevolatilisation
     volatileData_(this->coeffDict().lookup("volatileData")),
     YVolatile0_(volatileData_.size()),
     volatileToGasMap_(volatileData_.size()),
-    residualCoeff_(readScalar(this->coeffDict().lookup("residualCoeff")))
+    residualCoeff_(this->coeffDict().getScalar("residualCoeff"))
 {
     if (volatileData_.empty())
     {

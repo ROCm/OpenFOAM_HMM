@@ -250,19 +250,19 @@ InjectedParticleDistributionInjection
         this->template getModelProperty<scalarList>("volumeFlowRate")
     ),
     U_(this->template getModelProperty<List<vectorList>>("U")),
-    binWidth_(readScalar(this->coeffDict().lookup("binWidth"))),
+    binWidth_(this->coeffDict().getScalar("binWidth")),
     sizeDistribution_(),
     parcelsPerInjector_
     (
-        ceil(readScalar(this->coeffDict().lookup("parcelsPerInjector")))
+        ceil(this->coeffDict().getScalar("parcelsPerInjector"))
     ),
     resampleSize_
     (
-        this->coeffDict().template lookupOrDefault<label>("resampleSize", 100)
+        this->coeffDict().lookupOrDefault("resampleSize", label(100))
     ),
     applyDistributionMassTotal_
     (
-        readBool(dict.lookup("applyDistributionMassTotal"))
+        this->coeffDict().getBool("applyDistributionMassTotal")
     ),
     ignoreOutOfBounds_
     (

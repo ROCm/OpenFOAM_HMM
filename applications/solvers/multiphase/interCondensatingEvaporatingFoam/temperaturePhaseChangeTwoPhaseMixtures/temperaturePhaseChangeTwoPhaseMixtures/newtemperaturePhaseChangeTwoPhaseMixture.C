@@ -50,10 +50,7 @@ Foam::temperaturePhaseChangeTwoPhaseMixture::New
 
     const word modelType
     (
-        phaseChangePropertiesDict.lookup
-        (
-            "phaseChangeTwoPhaseModel"
-        )
+        phaseChangePropertiesDict.get<word>("phaseChangeTwoPhaseModel")
     );
 
     Info<< "Selecting phaseChange model " << modelType << endl;

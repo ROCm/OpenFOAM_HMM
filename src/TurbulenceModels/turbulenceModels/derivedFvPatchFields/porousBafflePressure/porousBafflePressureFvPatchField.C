@@ -58,7 +58,7 @@ Foam::porousBafflePressureFvPatchField::porousBafflePressureFvPatchField
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     D_(Function1<scalar>::New("D", dict)),
     I_(Function1<scalar>::New("I", dict)),
-    length_(readScalar(dict.lookup("length"))),
+    length_(dict.get<scalar>("length")),
     uniformJump_(dict.lookupOrDefault("uniformJump", false))
 {
     fvPatchField<scalar>::operator=

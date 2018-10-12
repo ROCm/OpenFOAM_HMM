@@ -707,8 +707,8 @@ Foam::surfaceFeatures::surfaceFeatures
     surf_(surf),
     featurePoints_(featInfoDict.lookup("featurePoints")),
     featureEdges_(featInfoDict.lookup("featureEdges")),
-    externalStart_(readLabel(featInfoDict.lookup("externalStart"))),
-    internalStart_(readLabel(featInfoDict.lookup("internalStart")))
+    externalStart_(featInfoDict.get<label>("externalStart")),
+    internalStart_(featInfoDict.get<label>("internalStart"))
 {}
 
 
@@ -730,8 +730,8 @@ Foam::surfaceFeatures::surfaceFeatures
 
     featureEdges_ = labelList(featInfoDict.lookup("featureEdges"));
     featurePoints_ = labelList(featInfoDict.lookup("featurePoints"));
-    externalStart_ = readLabel(featInfoDict.lookup("externalStart"));
-    internalStart_ = readLabel(featInfoDict.lookup("internalStart"));
+    externalStart_ = featInfoDict.get<label>("externalStart");
+    internalStart_ = featInfoDict.get<label>("internalStart");
 }
 
 

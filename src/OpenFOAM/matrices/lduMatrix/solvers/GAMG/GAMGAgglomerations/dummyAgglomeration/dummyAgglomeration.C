@@ -50,7 +50,7 @@ Foam::dummyAgglomeration::dummyAgglomeration
 )
 :
     GAMGAgglomeration(mesh, controlDict),
-    nLevels_(readLabel(controlDict.lookup("nLevels")))
+    nLevels_(controlDict.get<label>("nLevels"))
 {
     const label nCoarseCells = mesh.lduAddr().size();
 

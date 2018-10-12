@@ -58,9 +58,9 @@ pitchForkRing::pitchForkRing
     (
         tetherPotentialProperties.subDict(typeName + "Coeffs")
     ),
-    mu_(readScalar(pitchForkRingCoeffs_.lookup("mu"))),
-    alpha_(readScalar(pitchForkRingCoeffs_.lookup("alpha"))),
-    rOrbit_(readScalar(pitchForkRingCoeffs_.lookup("rOrbit")))
+    mu_(pitchForkRingCoeffs_.get<scalar>("mu")),
+    alpha_(pitchForkRingCoeffs_.get<scalar>("alpha")),
+    rOrbit_(pitchForkRingCoeffs_.get<scalar>("rOrbit"))
 {}
 
 

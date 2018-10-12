@@ -60,8 +60,8 @@ Foam::PackingModels::Implicit<CloudType>::Implicit
     uCorrect_(nullptr),
     applyLimiting_(this->coeffDict().lookup("applyLimiting")),
     applyGravity_(this->coeffDict().lookup("applyGravity")),
-    alphaMin_(readScalar(this->coeffDict().lookup("alphaMin"))),
-    rhoMin_(readScalar(this->coeffDict().lookup("rhoMin")))
+    alphaMin_(this->coeffDict().getScalar("alphaMin")),
+    rhoMin_(this->coeffDict().getScalar("rhoMin"))
 {
     alpha_ = this->owner().theta();
     alpha_.oldTime();

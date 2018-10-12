@@ -170,7 +170,7 @@ void thermalBaffleFvPatchScalarField::createPatchMesh()
     patchTypes[bottomPatchID] = mappedWallPolyPatch::typeName;
     patchTypes[topPatchID] = mappedWallPolyPatch::typeName;
 
-    if (readBool(dict_.lookup("columnCells")))
+    if (dict_.get<bool>("columnCells"))
     {
         patchTypes[sidePatchID] = emptyPolyPatch::typeName;
     }
@@ -264,31 +264,22 @@ void thermalBaffleFvPatchScalarField::write(Ostream& os) const
 
     if (owner_ && (thisMesh.name() == polyMesh::defaultRegion))
     {
-        os.writeKeyword("extrudeModel");
-        os << word(dict_.lookup("extrudeModel"))
-           << token::END_STATEMENT << nl;
+        os.writeEntry("extrudeModel", dict_.get<word>("extrudeModel"));
 
-        os.writeKeyword("nLayers");
-        os << readLabel(dict_.lookup("nLayers"))
-           << token::END_STATEMENT << nl;
+        os.writeEntry("nLayers", dict_.get<label>("nLayers"));
 
-        os.writeKeyword("expansionRatio");
-        os << readScalar(dict_.lookup("expansionRatio"))
-           << token::END_STATEMENT << nl;
+        os.writeEntry("expansionRatio", dict_.get<scalar>("expansionRatio"));
 
-        os.writeKeyword("columnCells");
-        os << readBool(dict_.lookup("columnCells"))
-           << token::END_STATEMENT << nl;
+        os.writeEntry("columnCells", dict_.get<Switch>("columnCells"));
 
-        word extrudeModel(word(dict_.lookup("extrudeModel")) + "Coeffs");
+        const word extrudeModel(dict_.get<word>("extrudeModel") + "Coeffs");
+
         os.writeKeyword(extrudeModel);
         os << dict_.subDict(extrudeModel) << nl;
 
-        word regionName = dict_.lookup("region");
-        os.writeEntry("region", regionName);
+        os.writeEntry("region", dict_.get<word>("region"));
 
-        bool active = readBool(dict_.lookup("active"));
-        os.writeEntry("active", active);
+        os.writeEntry("active", dict_.get<Switch>("active"));
 
         os.writeKeyword("thermoType");
         os << dict_.subDict("thermoType") << nl;

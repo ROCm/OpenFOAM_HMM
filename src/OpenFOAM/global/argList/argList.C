@@ -1217,7 +1217,7 @@ void Foam::argList::parse
 
                 dictionary decompDict(decompDictStream);
 
-                dictNProcs = decompDict.get<label>("numberOfSubdomains");
+                decompDict.readEntry("numberOfSubdomains", dictNProcs);
 
                 if (decompDict.lookupOrDefault("distributed", false))
                 {

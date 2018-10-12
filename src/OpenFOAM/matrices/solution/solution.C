@@ -74,7 +74,7 @@ void Foam::solution::read(const dictionary& dict)
             forAll(entryNames, i)
             {
                 const word& e = entryNames[i];
-                scalar value = readScalar(relaxDict.lookup(e));
+                scalar value = relaxDict.get<scalar>(e);
 
                 if (e.startsWith("p"))
                 {
@@ -274,7 +274,7 @@ Foam::scalar Foam::solution::fieldRelaxationFactor(const word& name) const
 
     if (fieldRelaxDict_.found(name))
     {
-        return readScalar(fieldRelaxDict_.lookup(name));
+        return fieldRelaxDict_.get<scalar>(name);
     }
     else if (fieldRelaxDefault_ > SMALL)
     {
@@ -303,7 +303,7 @@ Foam::scalar Foam::solution::equationRelaxationFactor(const word& name) const
 
     if (eqnRelaxDict_.found(name))
     {
-        return readScalar(eqnRelaxDict_.lookup(name));
+        return eqnRelaxDict_.get<scalar>(name);
     }
     else if (eqnRelaxDefault_ > SMALL)
     {
@@ -327,12 +327,10 @@ const Foam::dictionary& Foam::solution::solutionDict() const
 {
     if (found("select"))
     {
-        return subDict(word(lookup("select")));
+        return subDict(get<word>("select"));
     }
-    else
-    {
-        return *this;
-    }
+
+    return *this;
 }
 
 
@@ -366,10 +364,8 @@ bool Foam::solution::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

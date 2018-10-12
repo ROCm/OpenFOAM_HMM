@@ -38,7 +38,7 @@ Foam::InterfaceForce<CloudType>::InterfaceForce
 :
     ParticleForce<CloudType>(owner, mesh, dict, typeName, true),
     alphaName_(this->coeffs().lookup("alpha")),
-    C_(readScalar(this->coeffs().lookup("C"))),
+    C_(this->coeffs().getScalar("C")),
     gradInterForceInterpPtr_(nullptr)
 {}
 

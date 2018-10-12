@@ -54,7 +54,7 @@ Foam::radiation::constantTransmissivity::constantTransmissivity
 :
     transmissivityModel(dict, mesh),
     coeffsDict_(dict.subDict(typeName + "Coeffs")),
-    tau_(readScalar(coeffsDict_.lookup("transmissivity")))
+    tau_(coeffsDict_.get<scalar>("transmissivity"))
 {}
 
 

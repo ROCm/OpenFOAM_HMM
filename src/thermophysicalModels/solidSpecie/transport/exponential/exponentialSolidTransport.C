@@ -40,9 +40,9 @@ Foam::exponentialSolidTransport<Thermo>::exponentialSolidTransport
     Tref_(0.0)
 {
     const dictionary& subDict = dict.subDict("transport");
-    kappa0_ = readScalar(subDict.lookup("kappa0"));
-    n0_ = readScalar(subDict.lookup("n0"));
-    Tref_ = readScalar(subDict.lookup("Tref"));
+    subDict.readEntry("kappa0", kappa0_);
+    subDict.readEntry("n0", n0_);
+    subDict.readEntry("Tref", Tref_);
 }
 
 

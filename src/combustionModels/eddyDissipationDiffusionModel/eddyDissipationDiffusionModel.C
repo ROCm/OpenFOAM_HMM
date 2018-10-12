@@ -48,7 +48,7 @@ eddyDissipationDiffusionModel
         turb,
         combustionProperties
     ),
-    Cd_(readScalar(this->coeffs().lookup("Cd")))
+    Cd_(this->coeffs().getScalar("Cd"))
 {}
 
 

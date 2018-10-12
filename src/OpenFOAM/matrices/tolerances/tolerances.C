@@ -93,13 +93,13 @@ bool Foam::tolerances::relax(const word& name) const
 
 Foam::scalar Foam::tolerances::relaxationFactor(const word& name) const
 {
-    return readScalar(relaxationFactors_.lookup(name));
+    return relaxationFactors_.get<scalar>(name);
 }
 
 
 Foam::scalar Foam::tolerances::solverTolerance(const word& name) const
 {
-    return readScalar(solverTolerances_.lookup(name));
+    return solverTolerances_.get<scalar>(name);
 }
 
 
@@ -111,7 +111,7 @@ bool Foam::tolerances::solverRelativeTolerances() const
 
 Foam::scalar Foam::tolerances::solverRelativeTolerance(const word& name) const
 {
-    return readScalar(solverRelativeTolerances_.lookup(name));
+    return solverRelativeTolerances_.get<scalar>(name);
 }
 
 

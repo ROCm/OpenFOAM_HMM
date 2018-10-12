@@ -64,7 +64,7 @@ inline Foam::RBD::rigidBodyInertia::rigidBodyInertia
 
 inline Foam::RBD::rigidBodyInertia::rigidBodyInertia(const dictionary& dict)
 :
-    m_(readScalar(dict.lookup("mass"))),
+    m_(dict.get<scalar>("mass")),
     c_(dict.lookup("centreOfMass")),
     Ic_(dict.lookup("inertia"))
 {}

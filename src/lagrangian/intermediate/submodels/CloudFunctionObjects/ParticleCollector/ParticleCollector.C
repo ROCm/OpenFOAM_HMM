@@ -158,14 +158,15 @@ void Foam::ParticleCollector<CloudType>::initConcentricCircles()
     vector origin(this->coeffDict().lookup("origin"));
 
     this->coeffDict().readEntry("radius", radius_);
-    nSector_ = readLabel(this->coeffDict().lookup("nSector"));
+    this->coeffDict().readEntry("nSector", nSector_);
 
     label nS = nSector_;
 
     vector refDir;
     if (nSector_ > 1)
     {
-        refDir = this->coeffDict().lookup("refDir");
+        this->coeffDict().readEntry("refDir", refDir);
+
         refDir -= normal_[0]*(normal_[0] & refDir);
         refDir.normalise();
     }
@@ -543,7 +544,7 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     normal_(),
     negateParcelsOppositeNormal_
     (
-        readBool(this->coeffDict().lookup("negateParcelsOppositeNormal"))
+        this->coeffDict().getBool("negateParcelsOppositeNormal")
     ),
     surfaceFormat_(this->coeffDict().lookup("surfaceFormat")),
     resetOnWrite_(this->coeffDict().lookup("resetOnWrite")),

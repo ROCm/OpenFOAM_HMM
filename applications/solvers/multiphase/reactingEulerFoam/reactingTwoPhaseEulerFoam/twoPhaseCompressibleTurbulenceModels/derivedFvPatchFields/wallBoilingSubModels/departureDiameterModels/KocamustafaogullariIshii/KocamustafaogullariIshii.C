@@ -60,7 +60,7 @@ KocamustafaogullariIshii::KocamustafaogullariIshii
 )
 :
     departureDiameterModel(),
-    phi_(readScalar(dict.lookup("phi")))
+    phi_(dict.get<scalar>("phi"))
 {}
 
 

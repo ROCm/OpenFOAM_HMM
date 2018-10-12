@@ -40,7 +40,7 @@ Foam::specie::specie(const dictionary& dict)
 :
     name_(dict.dictName()),
     Y_(dict.subDict("specie").lookupOrDefault("massFraction", 1.0)),
-    molWeight_(readScalar(dict.subDict("specie").lookup("molWeight")))
+    molWeight_(dict.subDict("specie").get<scalar>("molWeight"))
 {}
 
 

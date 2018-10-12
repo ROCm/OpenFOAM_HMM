@@ -56,7 +56,7 @@ constantHeatTransfer::constantHeatTransfer
 )
 :
     heatTransferModel(typeName, film, dict),
-    c0_(readScalar(coeffDict_.lookup("c0")))
+    c0_(coeffDict_.get<scalar>("c0"))
 {}
 
 

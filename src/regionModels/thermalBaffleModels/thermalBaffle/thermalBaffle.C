@@ -164,7 +164,7 @@ thermalBaffle::thermalBaffle
 )
 :
     thermalBaffleModel(modelType, mesh, dict),
-    nNonOrthCorr_(readLabel(solution().lookup("nNonOrthCorr"))),
+    nNonOrthCorr_(solution().get<label>("nNonOrthCorr")),
     thermo_(solidThermo::New(regionMesh(), dict)),
     h_(thermo_->he()),
     qs_
@@ -214,7 +214,7 @@ thermalBaffle::thermalBaffle
 )
 :
     thermalBaffleModel(modelType, mesh),
-    nNonOrthCorr_(readLabel(solution().lookup("nNonOrthCorr"))),
+    nNonOrthCorr_(solution().get<label>("nNonOrthCorr")),
     thermo_(solidThermo::New(regionMesh())),
     h_(thermo_->he()),
     qs_

@@ -71,10 +71,10 @@ doubleSigmoid::doubleSigmoid
     (
         energyScalingFunctionProperties.subDict(typeName + "Coeffs")
     ),
-    shift1_(readScalar(doubleSigmoidCoeffs_.lookup("shift1"))),
-    scale1_(readScalar(doubleSigmoidCoeffs_.lookup("scale1"))),
-    shift2_(readScalar(doubleSigmoidCoeffs_.lookup("shift2"))),
-    scale2_(readScalar(doubleSigmoidCoeffs_.lookup("scale2")))
+    shift1_(doubleSigmoidCoeffs_.get<scalar>("shift1")),
+    scale1_(doubleSigmoidCoeffs_.get<scalar>("scale1")),
+    shift2_(doubleSigmoidCoeffs_.get<scalar>("shift2")),
+    scale2_(doubleSigmoidCoeffs_.get<scalar>("scale2"))
 {}
 
 

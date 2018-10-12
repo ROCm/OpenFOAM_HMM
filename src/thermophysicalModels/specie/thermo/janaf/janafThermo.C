@@ -60,9 +60,9 @@ template<class EquationOfState>
 Foam::janafThermo<EquationOfState>::janafThermo(const dictionary& dict)
 :
     EquationOfState(dict),
-    Tlow_(readScalar(dict.subDict("thermodynamics").lookup("Tlow"))),
-    Thigh_(readScalar(dict.subDict("thermodynamics").lookup("Thigh"))),
-    Tcommon_(readScalar(dict.subDict("thermodynamics").lookup("Tcommon"))),
+    Tlow_(dict.subDict("thermodynamics").get<scalar>("Tlow")),
+    Thigh_(dict.subDict("thermodynamics").get<scalar>("Thigh")),
+    Tcommon_(dict.subDict("thermodynamics").get<scalar>("Tcommon")),
     highCpCoeffs_(dict.subDict("thermodynamics").lookup("highCpCoeffs")),
     lowCpCoeffs_(dict.subDict("thermodynamics").lookup("lowCpCoeffs"))
 {

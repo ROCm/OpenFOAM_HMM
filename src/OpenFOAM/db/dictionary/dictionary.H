@@ -85,6 +85,7 @@ SeeAlso
 #ifndef dictionary_H
 #define dictionary_H
 
+#include <type_traits>
 #include "entry.H"
 #include "IDLList.H"
 #include "DLList.H"
@@ -93,7 +94,10 @@ SeeAlso
 #include "HashTable.H"
 #include "wordList.H"
 #include "className.H"
-#include <type_traits>
+
+// Some common data types
+#include "label.H"
+#include "scalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -450,7 +454,7 @@ public:
     virtual ~dictionary();
 
 
-    // Member functions
+    // Member Functions
 
     // Access
 
@@ -1146,6 +1150,30 @@ public:
 
         //- Write dictionary to Ostream
         friend Ostream& operator<<(Ostream& os, const dictionary& dict);
+
+
+    // Shortcuts - may be more useable in templated code
+
+        #undef defineDictionaryGetter
+        #define defineDictionaryGetter(Func,Type)                             \
+            /** Same as get\<Type\> */                                        \
+            Type Func                                                         \
+            (                                                                 \
+                const word& keyword,                                          \
+                bool recursive = false,                                       \
+                bool patternMatch = true                                      \
+            ) const                                                           \
+            {                                                                 \
+                return get<Type>(keyword, recursive, patternMatch);           \
+            }
+
+        defineDictionaryGetter(getBool, bool);
+        defineDictionaryGetter(getLabel, label);
+        defineDictionaryGetter(getScalar, scalar);
+        defineDictionaryGetter(getWord, word);
+        defineDictionaryGetter(getFileName, fileName);
+
+        #undef defineDictionaryGetter
 };
 
 

@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     // Create the spring model from dictionary
     rigidBodyMotion spring(springDict);
 
-    label nIter(readLabel(springDict.lookup("nIter")));
+    label nIter(springDict.get<label>("nIter"));
 
     Info<< spring << endl;
 

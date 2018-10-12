@@ -56,7 +56,7 @@ laminar::laminar
 )
 :
     filmTurbulenceModel(type(), film, dict),
-    Cf_(readScalar(coeffDict_.lookup("Cf")))
+    Cf_(coeffDict_.get<scalar>("Cf"))
 {}
 
 

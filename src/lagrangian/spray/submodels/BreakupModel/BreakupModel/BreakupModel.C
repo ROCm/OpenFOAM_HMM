@@ -81,7 +81,8 @@ Foam::BreakupModel<CloudType>::BreakupModel
         const dictionary coeffs(dict.subDict("TABCoeffs"));
         coeffs.readEntry("Comega", TABComega_);
         coeffs.readEntry("Cmu", TABCmu_);
-        scalar WeCrit(readScalar(coeffs.lookup("WeCrit")));
+
+        const scalar WeCrit(coeffs.get<scalar>("WeCrit"));
         TABtwoWeCrit_ = 2*WeCrit;
     }
 }

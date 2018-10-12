@@ -110,9 +110,9 @@ Foam::layerParameters::layerParameters
     minThickness_
     (
         boundaryMesh.size(),
-        readScalar(dict.lookup("minThickness"))
+        dict.get<scalar>("minThickness")
     ),
-    featureAngle_(readScalar(dict.lookup("featureAngle"))),
+    featureAngle_(dict.get<scalar>("featureAngle")),
     mergePatchFacesAngle_
     (
         dict.lookupOrDefault<scalar>
@@ -125,16 +125,16 @@ Foam::layerParameters::layerParameters
     (
         dict.lookupOrDefault("concaveAngle", defaultConcaveAngle)
     ),
-    nGrow_(readLabel(dict.lookup("nGrow"))),
+    nGrow_(dict.get<label>("nGrow")),
     maxFaceThicknessRatio_
     (
-        readScalar(dict.lookup("maxFaceThicknessRatio"))
+        dict.get<scalar>("maxFaceThicknessRatio")
     ),
     nBufferCellsNoExtrude_
     (
-        readLabel(dict.lookup("nBufferCellsNoExtrude"))
+        dict.get<label>("nBufferCellsNoExtrude")
     ),
-    nLayerIter_(readLabel(dict.lookup("nLayerIter"))),
+    nLayerIter_(dict.get<label>("nLayerIter")),
     nRelaxedIter_(labelMax),
     additionalReporting_(dict.lookupOrDefault("additionalReporting", false)),
     meshShrinker_
@@ -156,7 +156,7 @@ Foam::layerParameters::layerParameters
         firstLayerThickness_ = scalarField
         (
             boundaryMesh.size(),
-            readScalar(dict.lookup("firstLayerThickness"))
+            dict.get<scalar>("firstLayerThickness")
         );
         nSpec++;
     }
@@ -166,7 +166,7 @@ Foam::layerParameters::layerParameters
         finalLayerThickness_ = scalarField
         (
             boundaryMesh.size(),
-            readScalar(dict.lookup("finalLayerThickness"))
+            dict.get<scalar>("finalLayerThickness")
         );
         nSpec++;
     }
@@ -176,7 +176,7 @@ Foam::layerParameters::layerParameters
         thickness_ = scalarField
         (
             boundaryMesh.size(),
-            readScalar(dict.lookup("thickness"))
+            dict.get<scalar>("thickness")
         );
         nSpec++;
     }
@@ -186,7 +186,7 @@ Foam::layerParameters::layerParameters
         expansionRatio_ = scalarField
         (
             boundaryMesh.size(),
-            readScalar(dict.lookup("expansionRatio"))
+            dict.get<scalar>("expansionRatio")
         );
         nSpec++;
     }
@@ -283,7 +283,7 @@ Foam::layerParameters::layerParameters
                 for (const label patchi : patchIDs)
                 {
                     numLayers_[patchi] =
-                        readLabel(layerDict.lookup("nSurfaceLayers"));
+                        layerDict.get<label>("nSurfaceLayers");
 
                     switch (layerSpec_)
                     {

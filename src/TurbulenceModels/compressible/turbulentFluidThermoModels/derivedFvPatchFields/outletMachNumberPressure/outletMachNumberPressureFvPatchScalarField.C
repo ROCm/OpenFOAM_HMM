@@ -63,7 +63,7 @@ outletMachNumberPressureFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF, dict),
     M_(dict.lookupOrDefault<scalar>("M", 0.0)),
-    pBack_(readScalar(dict.lookup("pBack"))),
+    pBack_(dict.get<scalar>("pBack")),
     c1_(dict.lookupOrDefault<scalar>("c1", 0.0)),
     A1_(dict.lookupOrDefault<scalar>("A1", 0.0)),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),

@@ -77,8 +77,8 @@ lumpedMassWallTemperatureFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), dict),
-    Cp_(readScalar(dict.lookup("Cp"))),
-    mass_(readScalar(dict.lookup("mass"))),
+    Cp_(dict.get<scalar>("Cp")),
+    mass_(dict.get<scalar>("mass")),
     curTimeIndex_(-1)
 {
     refGrad() = 0.0;

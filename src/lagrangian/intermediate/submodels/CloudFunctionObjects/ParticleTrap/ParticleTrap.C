@@ -43,7 +43,7 @@ Foam::ParticleTrap<CloudType>::ParticleTrap
     ),
     alphaPtr_(nullptr),
     gradAlphaPtr_(nullptr),
-    threshold_(readScalar(this->coeffDict().lookup("threshold")))
+    threshold_(this->coeffDict().getScalar("threshold"))
 {}
 
 

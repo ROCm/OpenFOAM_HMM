@@ -61,8 +61,8 @@ phaseHydrostaticPressureFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     phaseFraction_(dict.lookupOrDefault<word>("phaseFraction", "alpha")),
-    rho_(readScalar(dict.lookup("rho"))),
-    pRefValue_(readScalar(dict.lookup("pRefValue"))),
+    rho_(dict.get<scalar>("rho")),
+    pRefValue_(dict.get<scalar>("pRefValue")),
     pRefPoint_(dict.lookup("pRefPoint"))
 {
     this->patchType() = dict.lookupOrDefault<word>("patchType", word::null);

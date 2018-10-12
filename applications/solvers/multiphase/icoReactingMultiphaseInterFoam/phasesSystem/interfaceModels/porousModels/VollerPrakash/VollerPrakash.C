@@ -53,8 +53,8 @@ Foam::porousModels::VollerPrakash::VollerPrakash
 )
 :
     porousModel(dict, mesh),
-    Cu_(readScalar(dict.lookup("Cu"))),
-    solidPhase_(dict.lookup("solidPhase"))
+    Cu_(dict.get<scalar>("Cu")),
+    solidPhase_(dict.get<word>("solidPhase"))
 {}
 
 

@@ -64,8 +64,7 @@ bool Foam::MultiInteraction<CloudType>::read(const dictionary& dict)
         }
     }
 
-    oneInteractionOnly_ = dict.get<bool>("oneInteractionOnly");
-
+    dict.readEntry("oneInteractionOnly", oneInteractionOnly_);
     if (oneInteractionOnly_)
     {
         Info<< "Stopping upon first model that interacts with particle."

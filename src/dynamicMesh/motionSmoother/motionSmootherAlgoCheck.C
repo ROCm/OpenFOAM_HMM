@@ -62,53 +62,53 @@ bool Foam::motionSmootherAlgo::checkMesh
 {
     const scalar maxNonOrtho
     (
-        readScalar(dict.lookup("maxNonOrtho", true))
+        dict.get<scalar>("maxNonOrtho", true)
     );
     const scalar minVol
     (
-        readScalar(dict.lookup("minVol", true))
+        dict.get<scalar>("minVol", true)
     );
     const scalar minTetQuality
     (
-        readScalar(dict.lookup("minTetQuality", true))
+        dict.get<scalar>("minTetQuality", true)
     );
     const scalar maxConcave
     (
-        readScalar(dict.lookup("maxConcave", true))
+        dict.get<scalar>("maxConcave", true)
     );
     const scalar minArea
     (
-        readScalar(dict.lookup("minArea", true))
+        dict.get<scalar>("minArea", true)
     );
     const scalar maxIntSkew
     (
-        readScalar(dict.lookup("maxInternalSkewness", true))
+        dict.get<scalar>("maxInternalSkewness", true)
     );
     const scalar maxBounSkew
     (
-        readScalar(dict.lookup("maxBoundarySkewness", true))
+        dict.get<scalar>("maxBoundarySkewness", true)
     );
     const scalar minWeight
     (
-        readScalar(dict.lookup("minFaceWeight", true))
+        dict.get<scalar>("minFaceWeight", true)
     );
     const scalar minVolRatio
     (
-        readScalar(dict.lookup("minVolRatio", true))
+        dict.get<scalar>("minVolRatio", true)
     );
     const scalar minTwist
     (
-        readScalar(dict.lookup("minTwist", true))
+        dict.get<scalar>("minTwist", true)
     );
     const scalar minTriangleTwist
     (
-        readScalar(dict.lookup("minTriangleTwist", true))
+        dict.get<scalar>("minTriangleTwist", true)
     );
     scalar minFaceFlatness = -1.0;
     dict.readIfPresent("minFaceFlatness", minFaceFlatness, true);
     const scalar minDet
     (
-        readScalar(dict.lookup("minDeterminant", true))
+        dict.get<scalar>("minDeterminant", true)
     );
     label nWrongFaces = 0;
 
@@ -467,53 +467,53 @@ bool Foam::motionSmootherAlgo::checkMesh
 {
     const scalar maxNonOrtho
     (
-        readScalar(dict.lookup("maxNonOrtho", true))
+        dict.get<scalar>("maxNonOrtho", true)
     );
     const scalar minVol
     (
-        readScalar(dict.lookup("minVol", true))
+        dict.get<scalar>("minVol", true)
     );
     const scalar minTetQuality
     (
-        readScalar(dict.lookup("minTetQuality", true))
+        dict.get<scalar>("minTetQuality", true)
     );
     const scalar maxConcave
     (
-        readScalar(dict.lookup("maxConcave", true))
+        dict.get<scalar>("maxConcave", true)
     );
     const scalar minArea
     (
-        readScalar(dict.lookup("minArea", true))
+        dict.get<scalar>("minArea", true)
     );
     const scalar maxIntSkew
     (
-        readScalar(dict.lookup("maxInternalSkewness", true))
+        dict.get<scalar>("maxInternalSkewness", true)
     );
     const scalar maxBounSkew
     (
-        readScalar(dict.lookup("maxBoundarySkewness", true))
+        dict.get<scalar>("maxBoundarySkewness", true)
     );
     const scalar minWeight
     (
-        readScalar(dict.lookup("minFaceWeight", true))
+        dict.get<scalar>("minFaceWeight", true)
     );
     const scalar minVolRatio
     (
-        readScalar(dict.lookup("minVolRatio", true))
+        dict.get<scalar>("minVolRatio", true)
     );
     const scalar minTwist
     (
-        readScalar(dict.lookup("minTwist", true))
+        dict.get<scalar>("minTwist", true)
     );
     const scalar minTriangleTwist
     (
-        readScalar(dict.lookup("minTriangleTwist", true))
+        dict.get<scalar>("minTriangleTwist", true)
     );
     scalar minFaceFlatness = -1.0;
     dict.readIfPresent("minFaceFlatness", minFaceFlatness, true);
     const scalar minDet
     (
-        readScalar(dict.lookup("minDeterminant", true))
+        dict.get<scalar>("minDeterminant", true)
     );
     label nWrongFaces = 0;
 

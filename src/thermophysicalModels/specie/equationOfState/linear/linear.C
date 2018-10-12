@@ -32,8 +32,8 @@ template<class Specie>
 Foam::linear<Specie>::linear(const dictionary& dict)
 :
     Specie(dict),
-    psi_(readScalar(dict.subDict("equationOfState").lookup("psi"))),
-    rho0_(readScalar(dict.subDict("equationOfState").lookup("rho0")))
+    psi_(dict.subDict("equationOfState").get<scalar>("psi")),
+    rho0_(dict.subDict("equationOfState").get<scalar>("rho0"))
 {}
 
 

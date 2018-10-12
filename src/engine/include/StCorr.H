@@ -18,12 +18,9 @@
                     // Assume it is part-spherical
                     scalar sphereFraction
                     (
-                        readScalar
+                        combustionProperties.get<scalar>
                         (
-                            combustionProperties.lookup
-                            (
-                                "ignitionSphereFraction"
-                            )
+                            "ignitionSphereFraction"
                         )
                     );
 
@@ -47,12 +44,9 @@
 
                     scalar circleFraction
                     (
-                        readScalar
+                        combustionProperties.get<scalar>
                         (
-                            combustionProperties.lookup
-                            (
-                                "ignitionCircleFraction"
-                            )
+                            "ignitionCircleFraction"
                         )
                     );
 

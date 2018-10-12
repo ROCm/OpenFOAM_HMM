@@ -45,10 +45,10 @@ Foam::ConeInjection<CloudType>::ConeInjection
     injectorCells_(positionAxis_.size()),
     injectorTetFaces_(positionAxis_.size()),
     injectorTetPts_(positionAxis_.size()),
-    duration_(readScalar(this->coeffDict().lookup("duration"))),
+    duration_(this->coeffDict().getScalar("duration")),
     parcelsPerInjector_
     (
-        readScalar(this->coeffDict().lookup("parcelsPerInjector"))
+        this->coeffDict().getScalar("parcelsPerInjector")
     ),
     flowRateProfile_
     (

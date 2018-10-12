@@ -129,7 +129,7 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
 )
 :
     CloudFunctionObject<CloudType>(dict, owner, modelName, typeName),
-    maxStoredParcels_(readScalar(this->coeffDict().lookup("maxStoredParcels"))),
+    maxStoredParcels_(this->coeffDict().getScalar("maxStoredParcels")),
     patchIDs_(),
     times_(),
     patchData_()

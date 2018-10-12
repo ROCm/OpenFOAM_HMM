@@ -54,7 +54,7 @@ void contactAngleForce::initialise()
     if (zeroForcePatches.size())
     {
         const polyBoundaryMesh& pbm = filmModel_.regionMesh().boundaryMesh();
-        scalar dLim = readScalar(coeffDict_.lookup("zeroForceDistance"));
+        const scalar dLim = coeffDict_.get<scalar>("zeroForceDistance");
 
         Info<< "        Assigning zero contact force within " << dLim
             << " of patches:" << endl;
@@ -99,7 +99,7 @@ contactAngleForce::contactAngleForce
 )
 :
     force(typeName, film, dict),
-    Ccf_(readScalar(coeffDict_.lookup("Ccf"))),
+    Ccf_(coeffDict_.get<scalar>("Ccf")),
     mask_
     (
         IOobject

@@ -25,8 +25,8 @@
 
     if (!local)
     {
-        const scalar T0 = readScalar(eosDict.lookup("T0"));
-        const scalar p0 = readScalar(eosDict.lookup("p0"));
+        const scalar T0 = eosDict.get<scalar>("T0");
+        const scalar p0 = eosDict.get<scalar>("p0");
 
         he = thermo.he(p, pow(p/p0, (gamma - scalar(1))/gamma)*T0);
     }

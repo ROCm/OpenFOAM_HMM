@@ -163,8 +163,8 @@ filmPyrolysisRadiativeCoupledMixedFvPatchScalarField
     TnbrName_(dict.lookup("Tnbr")),
     qrName_(dict.lookup("qr")),
     convectiveScaling_(dict.lookupOrDefault<scalar>("convectiveScaling", 1.0)),
-    filmDeltaDry_(readScalar(dict.lookup("filmDeltaDry"))),
-    filmDeltaWet_(readScalar(dict.lookup("filmDeltaWet")))
+    filmDeltaDry_(dict.get<scalar>("filmDeltaDry")),
+    filmDeltaWet_(dict.get<scalar>("filmDeltaWet"))
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))
     {

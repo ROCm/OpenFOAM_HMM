@@ -302,7 +302,7 @@ bool Foam::waveModel::readDict(const dictionary& overrideDict)
     readIfPresent("U", UName_);
     readIfPresent("alpha", alphaName_);
 
-    nPaddle_ = get<label>("nPaddle");
+    readEntry("nPaddle", nPaddle_);
     if (nPaddle_ < 1)
     {
         FatalIOErrorInFunction(*this)

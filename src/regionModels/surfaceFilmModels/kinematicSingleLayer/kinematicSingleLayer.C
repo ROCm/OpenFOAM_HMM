@@ -462,10 +462,10 @@ kinematicSingleLayer::kinematicSingleLayer
 
     momentumPredictor_(solution().subDict("PISO").lookup("momentumPredictor")),
     nOuterCorr_(solution().subDict("PISO").lookupOrDefault("nOuterCorr", 1)),
-    nCorr_(readLabel(solution().subDict("PISO").lookup("nCorr"))),
+    nCorr_(solution().subDict("PISO").get<label>("nCorr")),
     nNonOrthCorr_
     (
-        readLabel(solution().subDict("PISO").lookup("nNonOrthCorr"))
+        solution().subDict("PISO").get<label>("nNonOrthCorr")
     ),
 
     cumulativeContErr_(0.0),

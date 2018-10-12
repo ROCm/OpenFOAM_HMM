@@ -80,19 +80,16 @@ template<class Type>
 Foam::correlationFunction<Type>::correlationFunction
 (
     const polyMesh& mesh,
-    const dictionary& cfDict,
+    const dictionary& dict,
     const label tZeroBufferSize
 )
 :
     bufferedAccumulator<scalar>(),
-    mesh_(mesh)
+    mesh_(mesh),
+    duration_(dict.get<scalar>("duration")),
+    sampleInterval_(dict.get<scalar>("sampleInterval")),
+    averagingInterval_(dict.get<scalar>("averagingInterval"))
 {
-    duration_ = readScalar(cfDict.lookup("duration"));
-
-    sampleInterval_ = readScalar(cfDict.lookup("sampleInterval"));
-
-    averagingInterval_ = readScalar(cfDict.lookup("averagingInterval"));
-
     setTimesAndSizes(tZeroBufferSize);
 }
 

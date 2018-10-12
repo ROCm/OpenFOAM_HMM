@@ -58,7 +58,7 @@ Foam::laminarFlameSpeedModels::RaviPetersen::RaviPetersen
     EqRPoints_(coeffsDict_.lookup("EqRPoints")),
     alpha_(coeffsDict_.lookup("alpha")),
     beta_(coeffsDict_.lookup("beta")),
-    TRef_(readScalar(coeffsDict_.lookup("TRef")))
+    TRef_(coeffsDict_.get<scalar>("TRef"))
 {
     checkPointsMonotonicity("equivalenceRatio", EqRPoints_);
     checkPointsMonotonicity("pressure", pPoints_);

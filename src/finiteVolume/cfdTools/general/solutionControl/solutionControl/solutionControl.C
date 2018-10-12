@@ -67,7 +67,7 @@ void Foam::solutionControl::read(const bool absTolOnly)
 
             if (absTolOnly)
             {
-                fd.absTol = readScalar(residualDict.lookup(fName));
+                fd.absTol = residualDict.get<scalar>(fName);
                 fd.relTol = -1;
                 fd.initialResidual = -1;
             }
@@ -76,8 +76,8 @@ void Foam::solutionControl::read(const bool absTolOnly)
                 if (iter().isDict())
                 {
                     const dictionary& fieldDict(iter().dict());
-                    fd.absTol = readScalar(fieldDict.lookup("tolerance"));
-                    fd.relTol = readScalar(fieldDict.lookup("relTol"));
+                    fd.absTol = fieldDict.get<scalar>("tolerance");
+                    fd.relTol = fieldDict.get<scalar>("relTol");
                     fd.initialResidual = 0.0;
                 }
                 else
@@ -96,15 +96,15 @@ void Foam::solutionControl::read(const bool absTolOnly)
             fieldData& fd = data[fieldi];
             if (absTolOnly)
             {
-                fd.absTol = readScalar(residualDict.lookup(fName));
+                fd.absTol = residualDict.get<scalar>(fName);
             }
             else
             {
                 if (iter().isDict())
                 {
                     const dictionary& fieldDict(iter().dict());
-                    fd.absTol = readScalar(fieldDict.lookup("tolerance"));
-                    fd.relTol = readScalar(fieldDict.lookup("relTol"));
+                    fd.absTol = fieldDict.get<scalar>("tolerance");
+                    fd.relTol = fieldDict.get<scalar>("relTol");
                 }
                 else
                 {

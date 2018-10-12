@@ -52,8 +52,8 @@ atmBoundaryLayer::atmBoundaryLayer(const vectorField& p, const dictionary& dict)
     zDir_(dict.lookup("zDir")),
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
     Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
-    Uref_(readScalar(dict.lookup("Uref"))),
-    Zref_(readScalar(dict.lookup("Zref"))),
+    Uref_(dict.get<scalar>("Uref")),
+    Zref_(dict.get<scalar>("Zref")),
     z0_("z0", dict, p.size()),
     zGround_("zGround", dict, p.size()),
     Ustar_(p.size())

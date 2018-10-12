@@ -46,9 +46,9 @@ Foam::distributionModels::exponential::exponential
 )
 :
     distributionModel(typeName, dict, rndGen),
-    minValue_(readScalar(distributionModelDict_.lookup("minValue"))),
-    maxValue_(readScalar(distributionModelDict_.lookup("maxValue"))),
-    lambda_(readScalar(distributionModelDict_.lookup("lambda")))
+    minValue_(distributionModelDict_.get<scalar>("minValue")),
+    maxValue_(distributionModelDict_.get<scalar>("maxValue")),
+    lambda_(distributionModelDict_.get<scalar>("lambda"))
 {
     check();
 }

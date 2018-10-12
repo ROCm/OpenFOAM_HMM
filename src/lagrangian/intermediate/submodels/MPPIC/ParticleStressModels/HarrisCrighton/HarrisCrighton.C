@@ -52,9 +52,9 @@ Foam::ParticleStressModels::HarrisCrighton::HarrisCrighton
 )
 :
     ParticleStressModel(dict),
-    pSolid_(readScalar(dict.lookup("pSolid"))),
-    beta_(readScalar(dict.lookup("beta"))),
-    eps_(readScalar(dict.lookup("eps")))
+    pSolid_(dict.get<scalar>("pSolid")),
+    beta_(dict.get<scalar>("beta")),
+    eps_(dict.get<scalar>("eps"))
 {}
 
 

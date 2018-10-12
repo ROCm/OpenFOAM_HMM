@@ -146,12 +146,12 @@ Foam::polyPatch::polyPatch
         faceSubList
         (
             bm.mesh().faces(),
-            readLabel(dict.lookup("nFaces")),
-            readLabel(dict.lookup("startFace"))
+            dict.get<label>("nFaces"),
+            dict.get<label>("startFace")
         ),
         bm.mesh().points()
     ),
-    start_(readLabel(dict.lookup("startFace"))),
+    start_(dict.get<label>("startFace")),
     boundaryMesh_(bm),
     faceCellsPtr_(nullptr),
     mePtr_(nullptr)

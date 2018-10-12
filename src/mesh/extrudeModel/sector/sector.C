@@ -50,7 +50,7 @@ sector::sector(const dictionary& dict)
     axis_(coeffDict_.lookup("axis")),
     angle_
     (
-        degToRad(readScalar(coeffDict_.lookup("angle")))
+        degToRad(coeffDict_.get<scalar>("angle"))
     )
 {}
 

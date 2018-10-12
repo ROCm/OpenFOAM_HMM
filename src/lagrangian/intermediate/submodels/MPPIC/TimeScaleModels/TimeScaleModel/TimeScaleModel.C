@@ -41,8 +41,8 @@ Foam::TimeScaleModel::TimeScaleModel
     const dictionary& dict
 )
 :
-    alphaPacked_(readScalar(dict.lookup("alphaPacked"))),
-    e_(readScalar(dict.lookup("e")))
+    alphaPacked_(dict.get<scalar>("alphaPacked")),
+    e_(dict.get<scalar>("e"))
 {
 }
 

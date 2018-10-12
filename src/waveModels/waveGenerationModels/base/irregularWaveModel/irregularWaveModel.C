@@ -76,7 +76,7 @@ bool Foam::waveModels::irregularWaveModel::readDict
 {
     if (waveGenerationModel::readDict(overrideDict))
     {
-        rampTime_ = get<scalar>("rampTime");
+        readEntry("rampTime", rampTime_);
 
         return true;
     }

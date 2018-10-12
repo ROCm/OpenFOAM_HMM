@@ -238,9 +238,9 @@ nutURoughWallFunctionFvPatchScalarField::nutURoughWallFunctionFvPatchScalarField
 )
 :
     nutWallFunctionFvPatchScalarField(p, iF, dict),
-    roughnessHeight_(readScalar(dict.lookup("roughnessHeight"))),
-    roughnessConstant_(readScalar(dict.lookup("roughnessConstant"))),
-    roughnessFactor_(readScalar(dict.lookup("roughnessFactor")))
+    roughnessHeight_(dict.get<scalar>("roughnessHeight")),
+    roughnessConstant_(dict.get<scalar>("roughnessConstant")),
+    roughnessFactor_(dict.get<scalar>("roughnessFactor"))
 {}
 
 

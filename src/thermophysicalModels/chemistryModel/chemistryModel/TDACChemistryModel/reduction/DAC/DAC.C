@@ -203,7 +203,7 @@ Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::DAC
 
         forAll(fuelSpecies_, i)
         {
-            fuelSpeciesProp_[i] = readScalar(fuelDict.lookup(fuelSpecies_[i]));
+            fuelSpeciesProp_[i] = fuelDict.get<scalar>(fuelSpecies_[i]);
             for (label j=0; j<this->nSpecie_; j++)
             {
                 if (this->chemistry_.Y()[j].member() == fuelSpecies_[i])

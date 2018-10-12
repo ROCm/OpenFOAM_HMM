@@ -728,12 +728,12 @@ Foam::scalar Foam::motionSmootherAlgo::setErrorReduction
     const scalar errorReduction
 )
 {
-    scalar oldErrorReduction = readScalar(paramDict_.lookup("errorReduction"));
+    scalar old = paramDict_.get<scalar>("errorReduction");
 
     paramDict_.remove("errorReduction");
     paramDict_.add("errorReduction", errorReduction);
 
-    return oldErrorReduction;
+    return old;
 }
 
 
@@ -890,10 +890,8 @@ bool Foam::motionSmootherAlgo::scaleMesh
         }
     }
 
-    const scalar errorReduction =
-        readScalar(paramDict.lookup("errorReduction"));
-    const label nSmoothScale =
-        readLabel(paramDict.lookup("nSmoothScale"));
+    const scalar errorReduction = paramDict.get<scalar>("errorReduction");
+    const label nSmoothScale = paramDict.get<label>("nSmoothScale");
 
 
     // Note: displacement_ should already be synced already from setDisplacement

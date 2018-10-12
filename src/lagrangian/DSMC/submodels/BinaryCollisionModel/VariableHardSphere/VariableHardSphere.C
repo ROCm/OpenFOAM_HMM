@@ -38,7 +38,7 @@ Foam::VariableHardSphere<CloudType>::VariableHardSphere
 )
 :
     BinaryCollisionModel<CloudType>(dict, cloud, typeName),
-    Tref_(readScalar(this->coeffDict().lookup("Tref")))
+    Tref_(this->coeffDict().getScalar("Tref"))
 {}
 
 

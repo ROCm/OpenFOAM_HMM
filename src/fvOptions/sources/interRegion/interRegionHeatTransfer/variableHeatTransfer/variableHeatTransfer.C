@@ -65,11 +65,12 @@ Foam::fv::variableHeatTransfer::variableHeatTransfer
 {
     if (master_)
     {
-        a_ = coeffs_.get<scalar>("a");
-        b_ = coeffs_.get<scalar>("b");
-        c_ = coeffs_.get<scalar>("c");
-        ds_ = coeffs_.get<scalar>("ds");
-        Pr_ = coeffs_.get<scalar>("Pr");
+        coeffs_.readEntry("a", a_);
+        coeffs_.readEntry("b", b_);
+        coeffs_.readEntry("c", c_);
+        coeffs_.readEntry("ds", ds_);
+        coeffs_.readEntry("Pr", Pr_);
+
         AoV_.reset
         (
             new volScalarField

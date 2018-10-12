@@ -152,10 +152,7 @@ void Foam::potential::potential::readPotentialDict()
         )
     );
 
-    potentialEnergyLimit_ = readScalar
-    (
-        potentialDict.lookup("potentialEnergyLimit")
-    );
+    potentialDict.readEntry("potentialEnergyLimit", potentialEnergyLimit_);
 
     if (potentialDict.found("removalOrder"))
     {

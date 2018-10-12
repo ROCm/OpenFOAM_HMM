@@ -35,10 +35,10 @@ Foam::adiabaticPerfectFluid<Specie>::adiabaticPerfectFluid
 )
 :
     Specie(dict),
-    p0_(readScalar(dict.subDict("equationOfState").lookup("p0"))),
-    rho0_(readScalar(dict.subDict("equationOfState").lookup("rho0"))),
-    gamma_(readScalar(dict.subDict("equationOfState").lookup("gamma"))),
-    B_(readScalar(dict.subDict("equationOfState").lookup("B")))
+    p0_(dict.subDict("equationOfState").get<scalar>("p0")),
+    rho0_(dict.subDict("equationOfState").get<scalar>("rho0")),
+    gamma_(dict.subDict("equationOfState").get<scalar>("gamma")),
+    B_(dict.subDict("equationOfState").get<scalar>("B"))
 {}
 
 

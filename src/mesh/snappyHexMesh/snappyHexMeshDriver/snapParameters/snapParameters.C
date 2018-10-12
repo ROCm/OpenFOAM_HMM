@@ -30,11 +30,11 @@ License
 // Construct from dictionary
 Foam::snapParameters::snapParameters(const dictionary& dict)
 :
-    nSmoothPatch_(readLabel(dict.lookup("nSmoothPatch"))),
+    nSmoothPatch_(dict.get<label>("nSmoothPatch")),
     nSmoothInternal_(dict.lookupOrDefault("nSmoothInternal", 0)),
-    snapTol_(readScalar(dict.lookup("tolerance"))),
-    nSmoothDispl_(readLabel(dict.lookup("nSolveIter"))),
-    nSnap_(readLabel(dict.lookup("nRelaxIter"))),
+    snapTol_(dict.get<scalar>("tolerance")),
+    nSmoothDispl_(dict.get<label>("nSolveIter")),
+    nSnap_(dict.get<label>("nRelaxIter")),
     nFeatureSnap_(dict.lookupOrDefault("nFeatureSnapIter", -1)),
     explicitFeatureSnap_(dict.lookupOrDefault("explicitFeatureSnap", true)),
     implicitFeatureSnap_(dict.lookupOrDefault("implicitFeatureSnap", false)),

@@ -61,7 +61,7 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
     specieIndex_(label(0)),
     lookUpTablePtr_(),
     thermo_(mesh.lookupObject<fluidThermo>(basicThermo::dictName)),
-    EhrrCoeff_(readScalar(coeffsDict_.lookup("EhrrCoeff"))),
+    EhrrCoeff_(coeffsDict_.get<scalar>("EhrrCoeff")),
     Yj_(nSpecies_)
 {
     if (!isA<basicSpecieMixture>(thermo_))
