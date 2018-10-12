@@ -48,17 +48,18 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward declarations
 template<class Type, class GeoMesh> class DimensionedField;
 
-template<class Type, class GeoMesh> Ostream& operator<<
+template<class Type, class GeoMesh>
+Ostream& operator<<
 (
     Ostream& os,
     const DimensionedField<Type, GeoMesh>& df
 );
 
-template<class Type, class GeoMesh> Ostream& operator<<
+template<class Type, class GeoMesh>
+Ostream& operator<<
 (
     Ostream& os,
     const tmp<DimensionedField<Type, GeoMesh>>& tdf
@@ -152,6 +153,15 @@ public:
             List<Type>&& field
         );
 
+        //- Construct from components, copy or transfer tmp content
+        DimensionedField
+        (
+            const IOobject& io,
+            const Mesh& mesh,
+            const dimensionSet& dims,
+            const tmp<Field<Type>>& tfield
+        );
+
         //- Construct from components, setting the initial size and assigning
         //- the dimensions, but not initialising any field values.
         //  Used for temporary fields which are initialised after construction
@@ -192,25 +202,15 @@ public:
         );
 
         //- Copy construct
-        DimensionedField
-        (
-            const DimensionedField<Type, GeoMesh>& df
-        );
-
-        //- Copy construct or reuse (move) as specified.
-        DimensionedField
-        (
-            DimensionedField<Type, GeoMesh>& df,
-            bool reuse
-        );
+        DimensionedField(const DimensionedField<Type, GeoMesh>& df);
 
         //- Move construct
-        explicit DimensionedField
-        (
-            DimensionedField<Type, GeoMesh>&& df
-        );
+        DimensionedField(DimensionedField<Type, GeoMesh>&& df);
 
-        //- Construct as copy of tmp<DimensionedField> deleting argument
+        //- Copy construct or reuse (move) as specified.
+        DimensionedField(DimensionedField<Type, GeoMesh>& df, bool reuse);
+
+        //- Construct from tmp\<DimensionedField\> deleting argument
         #ifndef NoConstructFromTmp
         DimensionedField
         (
@@ -225,6 +225,13 @@ public:
             const DimensionedField<Type, GeoMesh>& df
         );
 
+        //- Move construct, resetting IO parameters
+        DimensionedField
+        (
+            const IOobject& io,
+            DimensionedField<Type, GeoMesh>&& df
+        );
+
         //- Copy or move construct, resetting IO parameters.
         DimensionedField
         (
@@ -233,11 +240,28 @@ public:
             bool reuse
         );
 
-        //- Copy construct, resetting name
+        //- Construct from tmp\<DimensionedField\> deleting argument,
+        //- resetting IO parameters.
+        #ifndef NoConstructFromTmp
+        DimensionedField
+        (
+            const IOobject& io,
+            const tmp<DimensionedField<Type, GeoMesh>>& tdf
+        );
+        #endif
+
+        //- Copy construct with a new name
         DimensionedField
         (
             const word& newName,
             const DimensionedField<Type, GeoMesh>& df
+        );
+
+        //- Move construct with a new name
+        DimensionedField
+        (
+            const word& newName,
+            DimensionedField<Type, GeoMesh>&& df
         );
 
         //- Copy or move construct, resetting name.
@@ -248,14 +272,7 @@ public:
             bool reuse
         );
 
-        //- Move construct with a new name
-        DimensionedField
-        (
-            const word& newName,
-            DimensionedField<Type, GeoMesh>&& df
-        );
-
-        //- Construct as copy resetting name
+        //- Construct with a new name from tmp\<DimensionedField\>
         #ifndef NoConstructFromTmp
         DimensionedField
         (

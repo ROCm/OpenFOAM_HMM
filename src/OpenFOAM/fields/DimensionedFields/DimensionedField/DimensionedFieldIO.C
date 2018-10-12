@@ -26,7 +26,6 @@ License
 #include "DimensionedField.H"
 #include "IOstreams.H"
 
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type, class GeoMesh>
@@ -81,7 +80,7 @@ Foam::DimensionedField<Type, GeoMesh>::DimensionedField
 )
 :
     regIOobject(io),
-    Field<Type>(0),
+    Field<Type>(),
     mesh_(mesh),
     dimensions_(dimless),
     oriented_()
@@ -100,7 +99,7 @@ Foam::DimensionedField<Type, GeoMesh>::DimensionedField
 )
 :
     regIOobject(io),
-    Field<Type>(0),
+    Field<Type>(),
     mesh_(mesh),
     dimensions_(dimless),
     oriented_()
