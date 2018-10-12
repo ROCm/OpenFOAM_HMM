@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -28,12 +28,15 @@ usage()
 usage: ${0##*/} [OPTION]
 
 options:
-  -git              use git to retrieve the tutorials
-  -root dir         specify root directory to run tests from
-  -default          sets up a default scheme on all schemes
-  -help             print the usage
+  -git          Use git to retrieve the tutorials
+  -no-git       Do not use git to retrieve the tutorials
+  -root dir     Specify root directory to run tests from
+  -default      Sets up a default scheme on all schemes
+  -help         Print the usage
 
-* quickly tests the tutorials and writes out the scheme/solver information
+Quickly tests the tutorials and writes out the scheme/solver information.
+The default is to detect and use 'git' if possible to obtain a fresh set
+of tutorial files. This can be overridden with -git or -no-git options.
 
 USAGE
     exit 1
@@ -56,9 +59,9 @@ die()
 
 ROOT="./"
 unset DEFAULT_SCHEMES
-unset useGit
+useGit=auto
 
-# parse options
+# Parse options
 while [ "$#" -gt 0 ]
 do
     case "$1" in
@@ -66,24 +69,27 @@ do
         usage
         ;;
     -r | -root)
-        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         ROOT="$2"
         shift
         ;;
     -git)
         useGit=true
         ;;
+    -no-git)
+        unset useGit
+        ;;
     -d | -default)
         DEFAULT_SCHEMES=true
         ;;
     *)
-        usage "unknown option/argument: '$1'"
+        die "Unknown option/argument: '$1'"
         ;;
     esac
     shift
 done
 
-# Set tutorial locations (as required)
+# Set FOAM_TUTORIALS directory location, as required.
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 
@@ -120,6 +126,7 @@ snGradSchemes { default corrected; }
 EOF
 }
 
+
 #
 # Location of the main controlDict
 #
@@ -138,7 +145,7 @@ do
     fi
 done
 
-[ -f "$MAIN_CONTROL_DICT" ] || usage "main controlDict not found"
+[ -f "$MAIN_CONTROL_DICT" ] || usage "Main controlDict not found"
 
 
 TUTORIALS_DIR=$ROOT
@@ -168,59 +175,85 @@ then
 fi
 
 # Remove old build/ directory
-buildDir="$WM_PROJECT_DIR/build/${WM_OPTIONS}/${TEST_RUN_DIR##*/}"
+buildDir="$WM_PROJECT_DIR/build/$WM_OPTIONS/${TEST_RUN_DIR##*/}"
 if [ -d "$buildDir" ]
 then
     echo "Removing old build directory: $buildDir" 1>&2
     rm -rf $buildDir
 fi
 
-echo "Modifying ${MAIN_CONTROL_DICT}" 1>&2
 if [ -e ${MAIN_CONTROL_DICT}.orig ]
 then
     die "File ${MAIN_CONTROL_DICT}.orig already exists" \
         "Did Alltest fail in some way and then run again?"
 fi
 
+
+unset gitbase
+
+if [ -n "$useGit" ]
+then
+    if git rev-parse --is-inside-work-tree > /dev/null 2>&1
+    then
+        gitbase="$(git rev-parse --show-toplevel 2>/dev/null)"
+    fi
+
+    case "$useGit" in
+    auto)
+        if [ -n "$gitbase" ]
+        then
+            echo "Detected git repository" 1>&2
+        else
+            echo "No git repository detected" 1>&2
+        fi
+        ;;
+
+    true)
+        [ -n "$gitbase" ] || die "Not in a git repository"
+        ;;
+    esac
+fi
+
+
+if [ -n "$gitbase" ]
+then
+    echo "Copying the tutorials from current git branch" 1>&2
+    mkdir -p ${TEST_RUN_DIR}
+    ( cd "$gitbase/tutorials" && git archive --format=tar HEAD . ) | \
+    ( cd "$TEST_RUN_DIR" && tar -xf - )
+else
+    echo "Copying the tutorials directory" 1>&2
+    cp -a "$TUTORIALS_DIR" "$TEST_RUN_DIR"
+fi
+
+echo 1>&2
+
+
 # Clean up on termination and on Ctrl-C
 trap 'mv ${MAIN_CONTROL_DICT}.orig ${MAIN_CONTROL_DICT} 2>/dev/null; exit 0' \
     EXIT TERM INT
-cp ${MAIN_CONTROL_DICT} ${MAIN_CONTROL_DICT}.orig
+cp -f "${MAIN_CONTROL_DICT}" "${MAIN_CONTROL_DICT}.orig"
+
+echo "Modifying ${MAIN_CONTROL_DICT}" 1>&2
 
 sed \
     -e s/"\(fvSchemes[ \t]*\)\([0-9]\);"/"\1 1;"/g \
     -e s/"\(solution[ \t]*\)\([0-9]\);"/"\1 1;"/g  \
-    ${MAIN_CONTROL_DICT}.orig > ${MAIN_CONTROL_DICT}
+    "${MAIN_CONTROL_DICT}.orig" > "${MAIN_CONTROL_DICT}"
 
-if [ -n "$useGit" ]
-then
-    echo "Copying the tutorials from current git branch" 1>&2
-    if  git rev-parse --is-inside-work-tree > /dev/null 2>&1 && \
-        base="$(git rev-parse --show-toplevel 2>/dev/null)"
-    then
-        mkdir -p ${TEST_RUN_DIR}
-        ( cd $base/tutorials && git archive --format=tar HEAD . ) | \
-        ( cd $TEST_RUN_DIR && tar -xf - )
-    else
-        die "Not in a git-repo"
-    fi
-else
-    echo "Copying the tutorials" 1>&2
-    cp -a ${TUTORIALS_DIR} ${TEST_RUN_DIR}
-fi
+cd "${TEST_RUN_DIR}" || exit 1
 
 echo "Modifying the controlDicts to run only one time step" 1>&2
-cd ${TEST_RUN_DIR} || exit 1
 
 for CD in $(find . -name "controlDict*" -type f)
 do
-    mv ${CD} ${CD}.orig
+    cp -f "${CD}" "${CD}.orig"
     sed \
         -e s/"\(startFrom[ \t]*\)\([a-zA-Z]*\);"/"\1 latestTime;"/g \
         -e s/"\(stopAt[ \t]*\)\([a-zA-Z]*\);"/"\1 nextWrite;"/g \
         -e s/"\(writeControl[ \t]*\)\([a-zA-Z]*\);"/"\1 timeStep;"/g \
         -e s/"\(writeInterval[ \t]*\)\([0-9a-zA-Z.-]*\);"/"\1 1;"/g \
-        ${CD}.orig > ${CD}
+        "${CD}.orig" > "${CD}"
 done
 
 if [ "$DEFAULT_SCHEMES" = true ]
@@ -230,10 +263,10 @@ then
     do
         for S in $FV_SCHEMES
         do
-            mv ${FV_SC} ${FV_SC}.orig
-            sed -e /"${S}"/,/$p/d ${FV_SC}.orig > ${FV_SC}
+            cp -f "${FV_SC}" "${FV_SC}.orig"
+            sed -e /"${S}"/,/$p/d "${FV_SC}.orig" > "${FV_SC}"
         done
-        setDefaultFvSchemes >> ${FV_SC}
+        setDefaultFvSchemes >> "${FV_SC}"
     done
 fi
 
