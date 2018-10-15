@@ -92,8 +92,16 @@ fileName home();
 //- Return home directory path name for a particular user
 fileName home(const std::string& userName);
 
-//- Return current working directory path name
+//- The physical or logical current working directory path name.
+//  The behaviour is controlled by the \c cwd optimisation Switch
+//  A value of 0 corresponds to the physical value, which is identical
+//  to what getcwd and pwd -P would deliver.
+//  A value of 1 corresponds to the logical value, which corresponds
+//  to the PWD environment value and to what pwd -L would deliver.
 fileName cwd();
+
+//- The physical or logical current working directory path name.
+fileName cwd(bool logical);
 
 //- Change current directory to the one specified and return true on success.
 //  Using an empty name is a no-op and always returns false.
