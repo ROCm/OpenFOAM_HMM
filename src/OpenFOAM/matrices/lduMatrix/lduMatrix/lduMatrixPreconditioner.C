@@ -43,8 +43,10 @@ Foam::word Foam::lduMatrix::preconditioner::getName
 {
     word name;
 
-    // handle primitive or dictionary entry
-    const entry& e = solverControls.lookupEntry("preconditioner", false, false);
+    // Handle primitive or dictionary entry
+    const entry& e =
+        solverControls.lookupEntry("preconditioner", keyType::LITERAL);
+
     if (e.isDict())
     {
         e.dict().readEntry("preconditioner", name);
@@ -67,8 +69,11 @@ Foam::lduMatrix::preconditioner::New
 {
     word name;
 
-    // handle primitive or dictionary entry
-    const entry& e = solverControls.lookupEntry("preconditioner", false, false);
+    // Handle primitive or dictionary entry
+
+    const entry& e =
+        solverControls.lookupEntry("preconditioner", keyType::LITERAL);
+
     if (e.isDict())
     {
         e.dict().readEntry("preconditioner", name);

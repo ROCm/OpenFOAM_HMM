@@ -44,50 +44,40 @@ Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
     // - necessary for compilation options, convenient for includes
     // and body.
 
-    const entry* codePtr = dict.lookupEntryPtr
-    (
-        "code",
-        false,
-        false
-    );
+    const entry* codePtr = dict.findEntry("code", keyType::LITERAL);
+
     if (codePtr)
     {
         code_ = stringOps::trim(codePtr->stream());
         stringOps::inplaceExpand(code_, dict);
     }
 
-    const entry* includePtr = dict.lookupEntryPtr
-    (
-        "codeInclude",
-        false,
-        false
-    );
+    const entry* includePtr = dict.findEntry("codeInclude", keyType::LITERAL);
+
     if (includePtr)
     {
         include_ = stringOps::trim(includePtr->stream());
         stringOps::inplaceExpand(include_, dict);
     }
 
-    const entry* optionsPtr = dict.lookupEntryPtr
-    (
-        "codeOptions",
-        false,
-        false
-    );
+    const entry* optionsPtr = dict.findEntry("codeOptions", keyType::LITERAL);
+
     if (optionsPtr)
     {
         options_ = stringOps::trim(optionsPtr->stream());
         stringOps::inplaceExpand(options_, dict);
     }
 
-    const entry* libsPtr = dict.lookupEntryPtr("codeLibs", false, false);
+    const entry* libsPtr = dict.findEntry("codeLibs", keyType::LITERAL);
+
     if (libsPtr)
     {
         libs_ = stringOps::trim(libsPtr->stream());
         stringOps::inplaceExpand(libs_, dict);
     }
 
-    const entry* localPtr = dict.lookupEntryPtr("localCode", false, false);
+    const entry* localPtr = dict.findEntry("localCode", keyType::LITERAL);
+
     if (localPtr)
     {
         localCode_ = stringOps::trim(localPtr->stream());

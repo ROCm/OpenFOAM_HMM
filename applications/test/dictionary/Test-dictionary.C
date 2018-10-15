@@ -82,8 +82,8 @@ int main(int argc, char *argv[])
             Info<< "dict1.toc(): " << dict1.name() << " " << dict1.toc()
                 << endl;
 
-            dictionary dict3(dict2.subDictPtr("boundaryField"));
-            dictionary dict4(dict2.subDictPtr("NONEXISTENT"));
+            dictionary dict3(dict2.findDict("boundaryField"));
+            dictionary dict4(dict2.findDict("NONEXISTENT"));
 
             Info<< "dictionary construct from pointer" << nl
                 << "ok = " << dict3.name() << " " << dict3.toc() << nl
@@ -105,23 +105,17 @@ int main(int argc, char *argv[])
             Info<< "Pattern find \"abc\" in top directory : "
                 << dict.lookup("abc") << endl;
             Info<< "Pattern find \"abc\" in sub directory : "
-                << dict.subDict("someDict").lookup("abc")
-                    << endl;
+                << dict.subDict("someDict").lookup("abc") << nl;
             Info<< "Recursive pattern find \"def\" in sub directory : "
-                << dict.subDict("someDict").lookup("def", true)
-                    << endl;
+                << dict.subDict("someDict").lookup("def", true) << nl;
             Info<< "Recursive pattern find \"foo\" in sub directory : "
-                << dict.subDict("someDict").lookup("foo", true)
-                    << endl;
+                << dict.subDict("someDict").lookup("foo", true) << nl;
             Info<< "Recursive pattern find \"fooz\" in sub directory : "
-                << dict.subDict("someDict").lookup("fooz", true)
-                    << endl;
+                << dict.subDict("someDict").lookup("fooz", true) << nl;
             Info<< "Recursive pattern find \"bar\" in sub directory : "
-                << dict.subDict("someDict").lookup("bar", true)
-                    << endl;
+                << dict.subDict("someDict").lookup("bar", true) << nl;
             Info<< "Recursive pattern find \"xxx\" in sub directory : "
-                << dict.subDict("someDict").lookup("xxx", true)
-                    << endl;
+                << dict.subDict("someDict").lookup("xxx", true) << nl;
         }
     }
     else

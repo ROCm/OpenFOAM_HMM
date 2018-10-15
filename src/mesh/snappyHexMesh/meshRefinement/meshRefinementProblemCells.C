@@ -1205,7 +1205,8 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
             const labelList allFaces(identity(mesh_.nFaces()));
             label nWrongFaces = 0;
 
-            //const scalar minV(motionDict.get<scalar>("minVol", true));
+            //const scalar minV
+            //(motionDict.get<scalar>("minVol", keyType::REGEX_RECURSIVE));
             //if (minV > -GREAT)
             //{
             //    polyMeshGeometry::checkFacePyramids

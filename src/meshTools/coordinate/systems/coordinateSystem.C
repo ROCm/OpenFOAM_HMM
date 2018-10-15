@@ -78,7 +78,7 @@ void Foam::coordinateSystem::assign(const dictionary& dict)
     const auto finder = dict.csearchCompat
     (
         "rotation", {{"coordinateRotation", -1806}},
-        false, false
+        keyType::LITERAL
     );
 
     if (finder.isDict())

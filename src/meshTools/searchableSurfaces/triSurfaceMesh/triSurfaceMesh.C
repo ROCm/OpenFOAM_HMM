@@ -100,7 +100,7 @@ Foam::fileName Foam::triSurfaceMesh::checkFile
 )
 {
     fileName fName;
-    if (dict.readIfPresent("file", fName, false, false))
+    if (dict.readIfPresent("file", fName, keyType::LITERAL))
     {
         fName = relativeFilePath(io, fName, isGlobal);
 
@@ -318,7 +318,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
     outsideVolType_(volumeType::UNKNOWN)
 {
     // Reading from supplied file name instead of objectPath/filePath
-    if (dict.readIfPresent("file", fName_, false, false))
+    if (dict.readIfPresent("file", fName_, keyType::LITERAL))
     {
         fName_ = relativeFilePath
         (
@@ -418,7 +418,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
     outsideVolType_(volumeType::UNKNOWN)
 {
     // Reading from supplied file name instead of objectPath/filePath
-    if (dict.readIfPresent("file", fName_, false, false))
+    if (dict.readIfPresent("file", fName_, keyType::LITERAL))
     {
         fName_ = relativeFilePath
         (

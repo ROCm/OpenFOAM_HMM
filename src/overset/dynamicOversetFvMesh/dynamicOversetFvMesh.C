@@ -306,11 +306,11 @@ bool Foam::dynamicOversetFvMesh::interpolateFields()
     // Use whatever the solver has set up as suppression list
     const dictionary* dictPtr
     (
-        this->schemesDict().subDictPtr("oversetInterpolationSuppressed")
+        this->schemesDict().findDict("oversetInterpolationSuppressed")
     );
     if (dictPtr)
     {
-        suppressed.insert(dictPtr->sortedToc());
+        suppressed.insert(dictPtr->toc());
     }
 
     interpolate<volScalarField>(suppressed);

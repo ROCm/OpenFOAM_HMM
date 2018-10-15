@@ -136,12 +136,12 @@ void Foam::oversetFvPatchField<Type>::initEvaluate
 
             const dictionary* dictPtr
             (
-                fvSchemes.subDictPtr("oversetInterpolationSuppressed")
+                fvSchemes.findDict("oversetInterpolationSuppressed")
             );
 
             if (dictPtr)
             {
-                suppressed.insert(dictPtr->sortedToc());
+                suppressed.insert(dictPtr->toc());
             }
 
             if (!suppressed.found(fldName))

@@ -134,13 +134,14 @@ void Foam::dictionary::checkITstream
 
 Foam::dictionary::dictionary()
 :
+    name_(),
     parent_(dictionary::null)
 {}
 
 
 Foam::dictionary::dictionary(const fileName& name)
 :
-    dictionaryName(name),
+    name_(name),
     parent_(dictionary::null)
 {}
 
@@ -151,8 +152,8 @@ Foam::dictionary::dictionary
     const dictionary& dict
 )
 :
-    dictionaryName(dict.name()),
     parent_type(dict, *this),
+    name_(dict.name()),
     parent_(parentDict)
 {
     forAllIter(parent_type, *this, iter)
@@ -173,8 +174,8 @@ Foam::dictionary::dictionary
     const dictionary& dict
 )
 :
-    dictionaryName(dict.name()),
     parent_type(dict, *this),
+    name_(dict.name()),
     parent_(dictionary::null)
 {
     forAllIter(parent_type, *this, iter)
@@ -190,16 +191,14 @@ Foam::dictionary::dictionary
 }
 
 
-Foam::dictionary::dictionary
-(
-    const dictionary* dictPtr
-)
+Foam::dictionary::dictionary(const dictionary* dict)
 :
+    name_(),
     parent_(dictionary::null)
 {
-    if (dictPtr)
+    if (dict)
     {
-        operator=(*dictPtr);
+        operator=(*dict);
     }
 }
 
@@ -210,6 +209,7 @@ Foam::dictionary::dictionary
     dictionary&& dict
 )
 :
+    name_(),
     parent_(parentDict)
 {
     transfer(dict);
@@ -222,6 +222,7 @@ Foam::dictionary::dictionary
     dictionary&& dict
 )
 :
+    name_(),
     parent_(dictionary::null)
 {
     transfer(dict);
@@ -310,44 +311,50 @@ Foam::tokenList Foam::dictionary::tokens() const
 bool Foam::dictionary::found
 (
     const word& keyword,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
-    return csearch(keyword, recursive, patternMatch).found();
+    return csearch(keyword, matchOpt).found();
 }
 
 
-const Foam::entry* Foam::dictionary::lookupEntryPtr
+Foam::entry* Foam::dictionary::findEntry
 (
     const word& keyword,
-    bool recursive,
-    bool patternMatch
-) const
-{
-    return csearch(keyword, recursive, patternMatch).ptr();
-}
-
-
-Foam::entry* Foam::dictionary::lookupEntryPtr
-(
-    const word& keyword,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 )
 {
-    return search(keyword, recursive, patternMatch).ptr();
+    return search(keyword, matchOpt).ptr();
+}
+
+
+const Foam::entry* Foam::dictionary::findEntry
+(
+    const word& keyword,
+    enum keyType::option matchOpt
+) const
+{
+    return csearch(keyword, matchOpt).ptr();
+}
+
+
+const Foam::entry* Foam::dictionary::findScoped
+(
+    const word& keyword,
+    enum keyType::option matchOpt
+) const
+{
+    return csearchScoped(keyword, matchOpt).ptr();
 }
 
 
 const Foam::entry& Foam::dictionary::lookupEntry
 (
     const word& keyword,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
-    const const_searcher finder(csearch(keyword, recursive, patternMatch));
+    const const_searcher finder(csearch(keyword, matchOpt));
 
     if (!finder.found())
     {
@@ -364,22 +371,10 @@ const Foam::entry& Foam::dictionary::lookupEntry
 Foam::ITstream& Foam::dictionary::lookup
 (
     const word& keyword,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
-    return lookupEntry(keyword, recursive, patternMatch).stream();
-}
-
-
-const Foam::entry* Foam::dictionary::lookupScopedEntryPtr
-(
-    const word& keyword,
-    bool recursive,
-    bool patternMatch
-) const
-{
-    return csearchScoped(keyword, recursive, patternMatch).ptr();
+    return lookupEntry(keyword, matchOpt).stream();
 }
 
 
@@ -394,7 +389,7 @@ bool Foam::dictionary::substituteKeyword(const word& keyword, bool mergeEntry)
     const word varName(keyword.substr(1), false);
 
     // Lookup the variable name in the given dictionary
-    const const_searcher finder(csearch(varName, true, true));
+    const const_searcher finder(csearch(varName, keyType::REGEX_RECURSIVE));
 
     // If defined insert its entries into this dictionary
     if (finder.found())
@@ -428,7 +423,7 @@ bool Foam::dictionary::substituteScopedKeyword
     const word varName(keyword.substr(1), false);
 
     // Lookup the variable name in the given dictionary
-    const const_searcher finder(csearchScoped(varName, true, true));
+    const auto finder(csearchScoped(varName, keyType::REGEX_RECURSIVE));
 
     // If defined insert its entries into this dictionary
     if (finder.found())
@@ -449,29 +444,35 @@ bool Foam::dictionary::substituteScopedKeyword
 
 bool Foam::dictionary::isDict(const word& keyword) const
 {
-    // Find non-recursive with patterns
-    return csearch(keyword, false, true).isDict();
+    // Allow patterns, non-recursive
+    return csearch(keyword, keyType::REGEX).isDict();
 }
 
 
-const Foam::dictionary* Foam::dictionary::subDictPtr(const word& keyword) const
+Foam::dictionary* Foam::dictionary::findDict
+(
+    const word& keyword,
+    enum keyType::option matchOpt
+)
 {
-    // Find non-recursive with patterns
-    return csearch(keyword, false, true).dictPtr();
+    return search(keyword, matchOpt).dictPtr();
 }
 
 
-Foam::dictionary* Foam::dictionary::subDictPtr(const word& keyword)
+const Foam::dictionary* Foam::dictionary::findDict
+(
+    const word& keyword,
+    enum keyType::option matchOpt
+) const
 {
-    // Find non-recursive with patterns
-    return search(keyword, false, true).dictPtr();
+    return csearch(keyword, matchOpt).dictPtr();
 }
 
 
 const Foam::dictionary& Foam::dictionary::subDict(const word& keyword) const
 {
-    // Find non-recursive with patterns
-    const const_searcher finder(csearch(keyword, false, true));
+    // Allow patterns, non-recursive
+    const const_searcher finder(csearch(keyword, keyType::REGEX));
 
     if (!finder.found())
     {
@@ -487,8 +488,8 @@ const Foam::dictionary& Foam::dictionary::subDict(const word& keyword) const
 
 Foam::dictionary& Foam::dictionary::subDict(const word& keyword)
 {
-    // Find non-recursive with patterns
-    searcher finder = search(keyword, false, true);
+    // Allow patterns, non-recursive
+    searcher finder(search(keyword, keyType::REGEX));
 
     if (!finder.found())
     {
@@ -508,8 +509,8 @@ Foam::dictionary Foam::dictionary::subOrEmptyDict
     const bool mandatory
 ) const
 {
-    // Find non-recursive with patterns
-    const const_searcher finder(csearch(keyword, false, true));
+    // Allow patterns, non-recursive
+    const const_searcher finder(csearch(keyword, keyType::REGEX));
 
     if (finder.isDict())
     {
@@ -543,7 +544,8 @@ const Foam::dictionary& Foam::dictionary::optionalSubDict
     const word& keyword
 ) const
 {
-    const const_searcher finder(csearch(keyword, false, true));
+    // Allow patterns, non-recursive
+    const const_searcher finder(csearch(keyword, keyType::REGEX));
 
     if (finder.isDict())
     {
@@ -565,15 +567,15 @@ const Foam::dictionary& Foam::dictionary::optionalSubDict
 
 Foam::wordList Foam::dictionary::toc() const
 {
-    wordList keys(size());
+    wordList list(size());
 
     label n = 0;
     forAllConstIters(*this, iter)
     {
-        keys[n++] = iter().keyword();
+        list[n++] = iter().keyword();
     }
 
-    return keys;
+    return list;
 }
 
 
@@ -585,19 +587,19 @@ Foam::wordList Foam::dictionary::sortedToc() const
 
 Foam::List<Foam::keyType> Foam::dictionary::keys(bool patterns) const
 {
-    List<keyType> keys(size());
+    List<keyType> list(size());
 
     label n = 0;
     forAllConstIters(*this, iter)
     {
         if (iter().keyword().isPattern() ? patterns : !patterns)
         {
-            keys[n++] = iter().keyword();
+            list[n++] = iter().keyword();
         }
     }
-    keys.setSize(n);
+    list.resize(n);
 
-    return keys;
+    return list;
 }
 
 
@@ -746,7 +748,7 @@ Foam::entry* Foam::dictionary::set(entry* entryPtr)
     }
 
     // Find non-recursive with patterns
-    searcher finder(search(entryPtr->keyword(), false, true));
+    searcher finder(search(entryPtr->keyword(), keyType::REGEX));
 
     // Clear dictionary so merge acts like overwrite
     if (finder.isDict())

@@ -837,7 +837,7 @@ void Foam::conformalVoronoiMesh::checkCellSizing()
         = dict.subDict("meshQualityControls");
 
     const scalar maxNonOrtho =
-        meshQualityDict.get<scalar>("maxNonOrtho", true);
+        meshQualityDict.get<scalar>("maxNonOrtho", keyType::REGEX_RECURSIVE);
 
     label nWrongFaces = 0;
 

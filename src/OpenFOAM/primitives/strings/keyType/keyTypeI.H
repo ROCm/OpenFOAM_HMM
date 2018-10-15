@@ -77,7 +77,7 @@ inline Foam::keyType::keyType(const char* s)
 {}
 
 
-inline Foam::keyType::keyType(const std::string& s, const bool isPattern)
+inline Foam::keyType::keyType(const std::string& s, bool isPattern)
 :
     word(s, false),
     isPattern_(isPattern)
@@ -107,7 +107,7 @@ inline Foam::keyType::keyType(string&& s)
 {}
 
 
-inline Foam::keyType::keyType(std::string&& s, const bool isPattern)
+inline Foam::keyType::keyType(std::string&& s, bool isPattern)
 :
     word(std::move(s), false),
     isPattern_(isPattern)

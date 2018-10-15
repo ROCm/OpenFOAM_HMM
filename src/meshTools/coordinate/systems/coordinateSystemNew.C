@@ -42,7 +42,7 @@ const Foam::dictionary* Foam::coordinateSystem::subDictCompat
     {
         // Non-recursive, no pattern matching in the search
         const auto finder =
-            dictPtr->csearch(coordinateSystem::typeName_(), false, false);
+            dictPtr->csearch(coordinateSystem::typeName_(), keyType::LITERAL);
 
         if (finder.isDict())
         {

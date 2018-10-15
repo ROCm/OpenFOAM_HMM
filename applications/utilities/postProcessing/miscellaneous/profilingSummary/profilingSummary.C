@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
 
                 // Assumed to be good if it has 'profiling' sub-dict
 
-                const dictionary* ptr = dict.subDictPtr(blockNameProfiling);
+                const dictionary* ptr = dict.findDict(blockNameProfiling);
                 if (ptr)
                 {
                     ++nDict;
@@ -295,13 +295,12 @@ int main(int argc, char *argv[])
 
                 for (const dictionary& procDict : profiles)
                 {
-                    const dictionary* inDictPtr =
-                        procDict.subDictPtr(level1Name);
+                    const dictionary* inDictPtr = procDict.findDict(level1Name);
 
                     if (inDictPtr && hasDictEntries)
                     {
-                        // descend to the next level as required
-                        inDictPtr = inDictPtr->subDictPtr(level2Name);
+                        // Descend to the next level as required
+                        inDictPtr = inDictPtr->findDict(level2Name);
                     }
 
                     if (!inDictPtr)
@@ -313,16 +312,13 @@ int main(int argc, char *argv[])
 
                     for (const word& tag : tags)
                     {
-                        const entry* eptr = inDictPtr->lookupEntryPtr
-                        (
-                            tag,
-                            false,
-                            false
-                        );
+                        scalar val;
 
-                        if (eptr)
+                        if
+                        (
+                            inDictPtr->readIfPresent(tag, val, keyType::LITERAL)
+                        )
                         {
-                            const scalar val = readScalar(eptr->stream());
                             stats(tag).append(val);
                         }
                     }
@@ -339,7 +335,7 @@ int main(int argc, char *argv[])
                 if (hasDictEntries)
                 {
                     outputDict.add(level2Name, level1Dict.subDict(level2Name));
-                    outDictPtr = outputDict.subDictPtr(level2Name);
+                    outDictPtr = outputDict.findDict(level2Name);
                 }
                 else
                 {

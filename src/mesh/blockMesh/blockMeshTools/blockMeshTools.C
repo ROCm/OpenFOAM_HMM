@@ -42,16 +42,13 @@ void Foam::blockMeshTools::read
     else if (t.isWord())
     {
         const word& varName = t.wordToken();
-        const entry* ePtr = dict.lookupScopedEntryPtr
-        (
-            varName,
-            true,
-            true
-        );
-        if (ePtr)
+        const entry* eptr =
+            dict.findScoped(varName, keyType::REGEX_RECURSIVE);
+
+        if (eptr)
         {
             // Read as label
-            val = Foam::readLabel(ePtr->stream());
+            val = Foam::readLabel(eptr->stream());
         }
         else
         {

@@ -121,7 +121,7 @@ void Foam::decompositionMethod::readConstraints()
     // Read any constraints
     wordList constraintTypes;
 
-    const dictionary* dictptr = decompositionDict_.subDictPtr("constraints");
+    const dictionary* dictptr = decompositionDict_.findDict("constraints");
 
     if (dictptr)
     {

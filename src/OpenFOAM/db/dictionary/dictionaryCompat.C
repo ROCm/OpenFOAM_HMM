@@ -49,11 +49,10 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchCompat
 (
     const word& keyword,
     std::initializer_list<std::pair<const char*,int>> compat,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
-    const_searcher finder(csearch(keyword, recursive, patternMatch));
+    const_searcher finder(csearch(keyword, matchOpt));
 
     if (finder.found())
     {
@@ -62,7 +61,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchCompat
 
     for (const std::pair<const char*,int>& iter : compat)
     {
-        finder = csearch(word::validate(iter.first), recursive, patternMatch);
+        finder = csearch(word::validate(iter.first), matchOpt);
 
         if (finder.found())
         {
@@ -99,23 +98,21 @@ bool Foam::dictionary::foundCompat
 (
     const word& keyword,
     std::initializer_list<std::pair<const char*,int>> compat,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
-    return csearchCompat(keyword, compat, recursive, patternMatch).found();
+    return csearchCompat(keyword, compat, matchOpt).found();
 }
 
 
-const Foam::entry* Foam::dictionary::lookupEntryPtrCompat
+const Foam::entry* Foam::dictionary::findCompat
 (
     const word& keyword,
     std::initializer_list<std::pair<const char*,int>> compat,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
-    return csearchCompat(keyword, compat, recursive, patternMatch).ptr();
+    return csearchCompat(keyword, compat, matchOpt).ptr();
 }
 
 
@@ -123,12 +120,10 @@ const Foam::entry& Foam::dictionary::lookupEntryCompat
 (
     const word& keyword,
     std::initializer_list<std::pair<const char*,int>> compat,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
-    const const_searcher
-        finder(csearchCompat(keyword, compat, recursive, patternMatch));
+    const const_searcher finder(csearchCompat(keyword, compat, matchOpt));
 
     if (!finder.found())
     {
@@ -146,12 +141,10 @@ Foam::ITstream& Foam::dictionary::lookupCompat
 (
     const word& keyword,
     std::initializer_list<std::pair<const char*,int>> compat,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
-    return
-        lookupEntryCompat(keyword, compat, recursive, patternMatch).stream();
+    return lookupEntryCompat(keyword, compat, matchOpt).stream();
 }
 
 

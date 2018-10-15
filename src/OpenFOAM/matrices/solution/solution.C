@@ -35,9 +35,9 @@ namespace Foam
 
 // List of sub-dictionaries to rewrite
 static const Foam::List<Foam::word> subDictNames
-{
+({
     "preconditioner", "smoother"
-};
+});
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -184,14 +184,13 @@ Foam::label Foam::solution::upgradeSolverDict
             // 1) primitiveEntry w/o settings,
             // 2) or a dictionaryEntry.
             // transform primitiveEntry with settings -> dictionaryEntry
-            forAll(subDictNames, dictI)
+            for (const word& dictName : subDictNames)
             {
-                const word& dictName = subDictNames[dictI];
-                entry* ePtr = subdict.lookupEntryPtr(dictName,false,false);
+                entry* eptr = subdict.findEntry(dictName, keyType::LITERAL);
 
-                if (ePtr && !ePtr->isDict())
+                if (eptr && !eptr->isDict())
                 {
-                    Istream& is = ePtr->stream();
+                    Istream& is = eptr->stream();
                     is >> name;
 
                     if (!is.eof())
@@ -234,10 +233,8 @@ bool Foam::solution::cache(const word& name) const
 
         return cache_.found(name);
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

@@ -61,8 +61,7 @@ bool Foam::functionEntries::removeEntry::execute
         if (key.isLiteral() && key.find('/') != string::npos)
         {
             // Remove scoped keyword, or keyword in the local scope
-            dictionary::searcher finder =
-                parentDict.searchScoped(key, false, false);
+            auto finder(parentDict.searchScoped(key, keyType::LITERAL));
 
             if (finder.found())
             {

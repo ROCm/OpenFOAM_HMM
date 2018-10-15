@@ -193,12 +193,7 @@ bool Foam::functionObjects::codedFunctionObject::read(const dictionary& dict)
 
     dict.readCompat<word>("name", {{"redirectType", 1706}}, name_);
 
-    const entry* dataPtr = dict.lookupEntryPtr
-    (
-        "codeData",
-        false,
-        false
-    );
+    const entry* dataPtr = dict.findEntry("codeData", keyType::LITERAL);
     if (dataPtr)
     {
         codeData_ = stringOps::trim(dataPtr->stream());
@@ -211,12 +206,7 @@ bool Foam::functionObjects::codedFunctionObject::read(const dictionary& dict)
         );
     }
 
-    const entry* readPtr = dict.lookupEntryPtr
-    (
-        "codeRead",
-        false,
-        false
-    );
+    const entry* readPtr = dict.findEntry("codeRead", keyType::LITERAL);
     if (readPtr)
     {
         codeRead_ = stringOps::trim(readPtr->stream());
@@ -229,12 +219,7 @@ bool Foam::functionObjects::codedFunctionObject::read(const dictionary& dict)
         );
     }
 
-    const entry* execPtr = dict.lookupEntryPtr
-    (
-        "codeExecute",
-        false,
-        false
-    );
+    const entry* execPtr = dict.findEntry("codeExecute", keyType::LITERAL);
     if (execPtr)
     {
         codeExecute_ = stringOps::trim(execPtr->stream());
@@ -247,12 +232,7 @@ bool Foam::functionObjects::codedFunctionObject::read(const dictionary& dict)
         );
     }
 
-    const entry* writePtr = dict.lookupEntryPtr
-    (
-        "codeWrite",
-        false,
-        false
-    );
+    const entry* writePtr = dict.findEntry("codeWrite", keyType::LITERAL);
     if (writePtr)
     {
         codeWrite_ = stringOps::trim(writePtr->stream());
@@ -265,12 +245,7 @@ bool Foam::functionObjects::codedFunctionObject::read(const dictionary& dict)
         );
     }
 
-    const entry* endPtr = dict.lookupEntryPtr
-    (
-        "codeEnd",
-        false,
-        false
-    );
+    const entry* endPtr = dict.findEntry("codeEnd", keyType::LITERAL);
     if (endPtr)
     {
         codeEnd_ = stringOps::trim(endPtr->stream());
@@ -283,7 +258,7 @@ bool Foam::functionObjects::codedFunctionObject::read(const dictionary& dict)
         );
     }
 
-    if(!dataPtr && !readPtr && !execPtr && !writePtr && !endPtr)
+    if (!dataPtr && !readPtr && !execPtr && !writePtr && !endPtr)
     {
         IOWarningInFunction
         (

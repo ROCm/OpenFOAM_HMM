@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,14 +96,14 @@ public:
         //  Note that 'REGEX' is implicit if 'ICASE' is specified alone.
         enum compOption
         {
-            LITERAL = 0, //!< Treat as a string literal
-            DETECT  = 1, //!< Detect if the string contains meta-characters
-            UNKNOWN = 1, //!< Unknown content.
-            REGEX   = 2, //!< Treat as regular expression
-            ICASE   = 4, //!< Ignore case in regular expression
-            NOCASE  = 4, //!< \deprecated Alias for ICASE (deprecated APR-2018)
+            LITERAL = 0, //!< String literal
+            REGEX   = 1, //!< Regular expression
+            ICASE   = 2, //!< Ignore case in regular expression
+            NOCASE  = 2, //!< \deprecated Alias for ICASE (deprecated APR-2018)
+            DETECT  = 4, //!< Detect if the string contains meta-characters
+            UNKNOWN = 4, //!< Unknown content.
+            REGEX_ICASE  = (REGEX|ICASE),   //!< Combined REGEX and ICASE
             DETECT_ICASE = (DETECT|ICASE),  //!< Combined DETECT and ICASE
-            REGEX_ICASE  = (REGEX|ICASE)    //!< Combined REGEX and ICASE
         };
 
 

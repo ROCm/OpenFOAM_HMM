@@ -43,8 +43,10 @@ Foam::lduMatrix::smoother::getName
 {
     word name;
 
-    // handle primitive or dictionary entry
-    const entry& e = solverControls.lookupEntry("smoother", false, false);
+    // Handle primitive or dictionary entry
+    const entry& e =
+        solverControls.lookupEntry("smoother", keyType::LITERAL);
+
     if (e.isDict())
     {
         e.dict().readEntry("smoother", name);
@@ -70,8 +72,10 @@ Foam::autoPtr<Foam::lduMatrix::smoother> Foam::lduMatrix::smoother::New
 {
     word name;
 
-    // handle primitive or dictionary entry
-    const entry& e = solverControls.lookupEntry("smoother", false, false);
+    // Handle primitive or dictionary entry
+    const entry& e =
+        solverControls.lookupEntry("smoother", keyType::LITERAL);
+
     if (e.isDict())
     {
         e.dict().readEntry("smoother", name);

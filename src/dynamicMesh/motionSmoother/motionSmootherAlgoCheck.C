@@ -62,53 +62,59 @@ bool Foam::motionSmootherAlgo::checkMesh
 {
     const scalar maxNonOrtho
     (
-        dict.get<scalar>("maxNonOrtho", true)
+        dict.get<scalar>("maxNonOrtho", keyType::REGEX_RECURSIVE)
     );
     const scalar minVol
     (
-        dict.get<scalar>("minVol", true)
+        dict.get<scalar>("minVol", keyType::REGEX_RECURSIVE)
     );
     const scalar minTetQuality
     (
-        dict.get<scalar>("minTetQuality", true)
+        dict.get<scalar>("minTetQuality", keyType::REGEX_RECURSIVE)
     );
     const scalar maxConcave
     (
-        dict.get<scalar>("maxConcave", true)
+        dict.get<scalar>("maxConcave", keyType::REGEX_RECURSIVE)
     );
     const scalar minArea
     (
-        dict.get<scalar>("minArea", true)
+        dict.get<scalar>("minArea", keyType::REGEX_RECURSIVE)
     );
     const scalar maxIntSkew
     (
-        dict.get<scalar>("maxInternalSkewness", true)
+        dict.get<scalar>("maxInternalSkewness", keyType::REGEX_RECURSIVE)
     );
     const scalar maxBounSkew
     (
-        dict.get<scalar>("maxBoundarySkewness", true)
+        dict.get<scalar>("maxBoundarySkewness", keyType::REGEX_RECURSIVE)
     );
     const scalar minWeight
     (
-        dict.get<scalar>("minFaceWeight", true)
+        dict.get<scalar>("minFaceWeight", keyType::REGEX_RECURSIVE)
     );
     const scalar minVolRatio
     (
-        dict.get<scalar>("minVolRatio", true)
+        dict.get<scalar>("minVolRatio", keyType::REGEX_RECURSIVE)
     );
     const scalar minTwist
     (
-        dict.get<scalar>("minTwist", true)
+        dict.get<scalar>("minTwist", keyType::REGEX_RECURSIVE)
     );
     const scalar minTriangleTwist
     (
-        dict.get<scalar>("minTriangleTwist", true)
+        dict.get<scalar>("minTriangleTwist", keyType::REGEX_RECURSIVE)
     );
-    scalar minFaceFlatness = -1.0;
-    dict.readIfPresent("minFaceFlatness", minFaceFlatness, true);
+
+    const scalar minFaceFlatness
+    (
+        dict.lookupOrDefault<scalar>
+        (
+            "minFaceFlatness", -1, keyType::REGEX_RECURSIVE
+        )
+    );
     const scalar minDet
     (
-        dict.get<scalar>("minDeterminant", true)
+        dict.get<scalar>("minDeterminant", keyType::REGEX_RECURSIVE)
     );
     label nWrongFaces = 0;
 
@@ -467,53 +473,58 @@ bool Foam::motionSmootherAlgo::checkMesh
 {
     const scalar maxNonOrtho
     (
-        dict.get<scalar>("maxNonOrtho", true)
+        dict.get<scalar>("maxNonOrtho", keyType::REGEX_RECURSIVE)
     );
     const scalar minVol
     (
-        dict.get<scalar>("minVol", true)
+        dict.get<scalar>("minVol", keyType::REGEX_RECURSIVE)
     );
     const scalar minTetQuality
     (
-        dict.get<scalar>("minTetQuality", true)
+        dict.get<scalar>("minTetQuality", keyType::REGEX_RECURSIVE)
     );
     const scalar maxConcave
     (
-        dict.get<scalar>("maxConcave", true)
+        dict.get<scalar>("maxConcave", keyType::REGEX_RECURSIVE)
     );
     const scalar minArea
     (
-        dict.get<scalar>("minArea", true)
+        dict.get<scalar>("minArea", keyType::REGEX_RECURSIVE)
     );
     const scalar maxIntSkew
     (
-        dict.get<scalar>("maxInternalSkewness", true)
+        dict.get<scalar>("maxInternalSkewness", keyType::REGEX_RECURSIVE)
     );
     const scalar maxBounSkew
     (
-        dict.get<scalar>("maxBoundarySkewness", true)
+        dict.get<scalar>("maxBoundarySkewness", keyType::REGEX_RECURSIVE)
     );
     const scalar minWeight
     (
-        dict.get<scalar>("minFaceWeight", true)
+        dict.get<scalar>("minFaceWeight", keyType::REGEX_RECURSIVE)
     );
     const scalar minVolRatio
     (
-        dict.get<scalar>("minVolRatio", true)
+        dict.get<scalar>("minVolRatio", keyType::REGEX_RECURSIVE)
     );
     const scalar minTwist
     (
-        dict.get<scalar>("minTwist", true)
+        dict.get<scalar>("minTwist", keyType::REGEX_RECURSIVE)
     );
     const scalar minTriangleTwist
     (
-        dict.get<scalar>("minTriangleTwist", true)
+        dict.get<scalar>("minTriangleTwist", keyType::REGEX_RECURSIVE)
     );
-    scalar minFaceFlatness = -1.0;
-    dict.readIfPresent("minFaceFlatness", minFaceFlatness, true);
+    const scalar minFaceFlatness
+    (
+        dict.lookupOrDefault<scalar>
+        (
+            "minFaceFlatness", -1, keyType::REGEX_RECURSIVE
+        )
+    );
     const scalar minDet
     (
-        dict.get<scalar>("minDeterminant", true)
+        dict.get<scalar>("minDeterminant", keyType::REGEX_RECURSIVE)
     );
     label nWrongFaces = 0;
 

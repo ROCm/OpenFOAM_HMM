@@ -57,7 +57,7 @@ Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
     }
     else
     {
-        Istream& is(dict.lookup(entryName, false));
+        Istream& is = dict.lookup(entryName); // non-recursive, allow patterns
 
         token firstToken(is);
         word Function1Type;

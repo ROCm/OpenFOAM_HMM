@@ -63,9 +63,13 @@ Foam::cellSizeFunction::cellSizeFunction
     defaultCellSize_(defaultCellSize),
     regionIndices_(regionIndices),
     sideMode_(),
-    priority_(cellSizeFunctionDict.get<label>("priority", true))
+    priority_
+    (
+        cellSizeFunctionDict.get<label>("priority", keyType::REGEX_RECURSIVE)
+    )
 {
-    const word mode = cellSizeFunctionDict.get<word>("mode", true);
+    const word mode =
+        cellSizeFunctionDict.get<word>("mode", keyType::REGEX_RECURSIVE);
 
     if (surface_.hasVolumeType())
     {
