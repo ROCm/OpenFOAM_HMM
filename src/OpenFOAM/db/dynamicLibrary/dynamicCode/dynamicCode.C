@@ -292,7 +292,7 @@ bool Foam::dynamicCode::writeDigest(const std::string& sha1) const
 
 Foam::dynamicCode::dynamicCode(const word& codeName, const word& codeDirName)
 :
-    codeRoot_(stringOps::expand("$FOAM_CASE")/topDirName),
+    codeRoot_(stringOps::expand("<case>")/topDirName),
     libSubDir_(stringOps::expand("platforms/$WM_OPTIONS/lib")),
     codeName_(codeName),
     codeDirName_(codeDirName)

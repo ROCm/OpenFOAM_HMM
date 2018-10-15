@@ -98,64 +98,54 @@ Foam::functionObject* Foam::functionObjectList::remove
 void Foam::functionObjectList::listDir
 (
     const fileName& dir,
-    wordHashSet& foMap
+    wordHashSet& available
 )
 {
     // Search specified directory for functionObject configuration files
+    for (const fileName& f : fileHandler().readDir(dir))
     {
-        fileNameList foFiles(fileHandler().readDir(dir));
-        for (const fileName& f : foFiles)
+        if (f.ext().empty())
         {
-            if (f.ext().empty())
-            {
-                foMap.insert(f);
-            }
+            available.insert(f);
         }
     }
 
     // Recurse into sub-directories
+    for (const fileName& d : fileHandler().readDir(dir, fileName::DIRECTORY))
     {
-        fileNameList foDirs(fileHandler().readDir(dir, fileName::DIRECTORY));
-        for (const fileName& d : foDirs)
-        {
-            listDir(dir/d, foMap);
-        }
+        listDir(dir/d, available);
     }
 }
 
 
 void Foam::functionObjectList::list()
 {
-    wordHashSet foMap;
+    wordHashSet available;
 
-    fileNameList etcDirs(findEtcDirs(functionObjectDictPath));
-
-    for (const fileName& d : etcDirs)
+    for (const fileName& d : findEtcDirs(functionObjectDictPath))
     {
-        listDir(d, foMap);
+        listDir(d, available);
     }
 
     Info<< nl
         << "Available configured functionObjects:"
-        << foMap.sortedToc()
+        << available.sortedToc()
         << nl;
 }
 
 
 Foam::fileName Foam::functionObjectList::findDict(const word& funcName)
 {
-    // First check if there is a functionObject dictionary file in the
-    // case system directory
-    fileName dictFile = stringOps::expand("$FOAM_CASE")/"system"/funcName;
+    // First check for functionObject dictionary file in globalCase system/
+
+    fileName dictFile = stringOps::expand("<system>")/funcName;
 
     if (isFile(dictFile))
     {
         return dictFile;
     }
 
-    fileNameList etcDirs(findEtcDirs(functionObjectDictPath));
-
-    for (const fileName& d : etcDirs)
+    for (const fileName& d : findEtcDirs(functionObjectDictPath))
     {
         dictFile = search(funcName, d);
         if (!dictFile.empty())

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -99,11 +99,12 @@ Foam::functionObjects::abort::abort
 :
     functionObject(name),
     time_(runTime),
-    abortFile_("$FOAM_CASE/" + name),
+    abortFile_(time_.globalPath()/name),
     action_(Time::stopAtControls::saNextWrite),
     triggered_(false)
 {
-    abortFile_.expand();
+    abortFile_.clean();
+
     read(dict);
 
     // Cleanup old files from previous runs
@@ -123,6 +124,12 @@ bool Foam::functionObjects::abort::read(const dictionary& dict)
     if (dict.readIfPresent("file", abortFile_))
     {
         abortFile_.expand();
+
+        if (!abortFile_.isAbsolute())
+        {
+            abortFile_ = time_.globalPath()/abortFile_;
+            abortFile_.clean();
+         }
     }
 
     const auto oldAction = action_;

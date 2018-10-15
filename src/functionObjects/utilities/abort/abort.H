@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ Group
     grpUtilitiesFunctionObjects
 
 Description
-    Watches for presence of the named file in the $FOAM_CASE directory
+    Watches for presence of the named file in the case directory
     and aborts the calculation if it is present.
 
     The presence of the abort file is only checked on the master process.
@@ -42,7 +42,7 @@ Description
     \table
         Property  | Description         | Required  | Default value
         type      | Type name: abort    | yes       |
-        file      | The abort filename  | no        | $FOAM_CASE/name
+        file      | The abort filename  | no        | \<case\>/name
         action    | Abort action        | no        | nextWrite
     \endtable
 

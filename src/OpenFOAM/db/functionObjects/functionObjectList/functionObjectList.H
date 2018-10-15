@@ -102,7 +102,7 @@ class functionObjectList
 
         //- Search the specified directory for functionObject
         //- configuration files, add to the given map and recurse
-        static void listDir(const fileName& dir, wordHashSet& foMap);
+        static void listDir(const fileName& dir, wordHashSet& available);
 
         //- No copy construct
         functionObjectList(const functionObjectList&) = delete;

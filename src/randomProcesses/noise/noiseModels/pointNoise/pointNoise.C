@@ -25,6 +25,7 @@ License
 
 #include "pointNoise.H"
 #include "noiseFFT.H"
+#include "stringOps.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -240,11 +241,13 @@ void pointNoise::calculate()
     {
         fileName fName = inputFileNames_[filei];
         fName.expand();
+
         if (!fName.isAbsolute())
         {
-            fName = "$FOAM_CASE"/fName;
-            fName.expand();
+            // ie, globalPath() / name
+            fName = stringOps::expand("<case>")/fName;
         }
+
         Function1Types::CSV<scalar> data("pressure", dict_, fName);
         processData(filei, data);
     }

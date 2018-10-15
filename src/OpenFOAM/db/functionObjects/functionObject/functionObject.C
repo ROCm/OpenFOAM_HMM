@@ -140,7 +140,7 @@ bool Foam::functionObject::read(const dictionary& dict)
 {
     if (!postProcess)
     {
-        log = dict.lookupOrDefault<Switch>("log", true);
+        log = dict.lookupOrDefault("log", true);
     }
 
     return true;
