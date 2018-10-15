@@ -47,10 +47,10 @@ export WM_PROJECT_VERSION=plus
 #    set one of the fallback values to an appropriate path.
 # --
 rc="${BASH_SOURCE:-${ZSH_NAME:+$0}}"
-[ -n "$rc" ] && FOAM_INST_DIR=$(\cd $(dirname $rc)/../.. && \pwd -L) || \
-FOAM_INST_DIR=$HOME/$WM_PROJECT
-# FOAM_INST_DIR=/opt/$WM_PROJECT
-# FOAM_INST_DIR=/usr/local/$WM_PROJECT
+[ -n "$rc" ] && FOAM_INST_DIR="$(\cd $(dirname $rc)/../.. && \pwd -L)" || \
+FOAM_INST_DIR="$HOME/$WM_PROJECT"
+# FOAM_INST_DIR="/opt/$WM_PROJECT"
+# FOAM_INST_DIR="/usr/local/$WM_PROJECT"
 #
 # END OF (NORMAL) USER EDITABLE PART
 ################################################################################
@@ -153,7 +153,7 @@ then
     unset FOAM_SETTINGS
 else
     export FOAM_SETTINGS
-    _foamEval $@
+    _foamEval "$@"
 fi
 
 # Clean standard environment variables (PATH, MANPATH, LD_LIBRARY_PATH)
@@ -170,7 +170,7 @@ _foamEtc -config  settings
 # Setup for third-party packages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 _foamEtc -config  mpi
-_foamEtc -config  paraview -- $@        # Pass through for evaluation
+_foamEtc -config  paraview -- "$@"  # Pass through for evaluation
 _foamEtc -config  vtk
 _foamEtc -config  ensight
 _foamEtc -config  gperftools

@@ -38,7 +38,7 @@ export FFTW_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$fftw_v
 
 # END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
-if [ "$FOAM_VERBOSE" -a "$PS1" ]
+if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
 then
     echo "Using fftw ($fftw_version)  ->  $FFTW_ARCH_PATH" 1>&2
 fi

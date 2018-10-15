@@ -92,7 +92,7 @@ unset MPI_ARCH_PATH
 unset MPI_BUFFER_SIZE
 
 # Undefine OPAL_PREFIX if set to one of the paths on foamOldDirs
-if [ -z "$($foamClean -env=OPAL_PREFIX "$foamOldDirs")" ]
+if [ -n "$foamClean" ] && [ -z "$($foamClean -env=OPAL_PREFIX $foamOldDirs)" ]
 then
     unset OPAL_PREFIX
 fi
@@ -108,7 +108,7 @@ unset PV_PLUGIN_PATH
 unset VTK_DIR
 
 # Undefine Qt5_DIR if set to one of the paths on foamOldDirs
-if [ -z "$($foamClean -env=Qt5_DIR "$foamOldDirs")" ]
+if [ -n "$foamClean" ] && [ -z "$($foamClean -env=Qt5_DIR $foamOldDirs)" ]
 then
     unset Qt5_DIR
 fi
@@ -137,9 +137,9 @@ unset SCOTCH_ARCH_PATH
 
 if [ -n "$foamClean" ]
 then
-    eval $($foamClean -sh-env=PATH "$foamOldDirs")
-    eval $($foamClean -sh-env=LD_LIBRARY_PATH "$foamOldDirs")
-    eval $($foamClean -sh-env=MANPATH "$foamOldDirs")
+    eval "$($foamClean -sh-env=PATH $foamOldDirs)"
+    eval "$($foamClean -sh-env=LD_LIBRARY_PATH $foamOldDirs)"
+    eval "$($foamClean -sh-env=MANPATH $foamOldDirs)"
 fi
 
 [ -n "$LD_LIBRARY_PATH" ] || unset LD_LIBRARY_PATH
@@ -189,7 +189,7 @@ unset -f foamPV     2>/dev/null
 foamOldDirs="$(complete 2>/dev/null | sed -ne 's/^.*-F _of_.* \(..*\)$/\1/p')"
 for cleaned in $foamOldDirs
 do
-    complete -r $cleaned 2>/dev/null
+    complete -r "$cleaned" 2>/dev/null
 done
 
 # Completion functions
