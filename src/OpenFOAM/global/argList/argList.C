@@ -735,10 +735,9 @@ void Foam::argList::setCasePaths()
             caseDir = cwd();
             options_.erase("case");
         }
-        else if (!caseDir.isAbsolute())
+        else
         {
-            caseDir = cwd()/caseDir;
-            caseDir.clean();
+            caseDir.toAbsolute();
         }
     }
     else
@@ -1126,7 +1125,7 @@ void Foam::argList::parse
                 source = options_["decomposeParDict"];
                 if (isDir(source))
                 {
-                    source = source/"decomposeParDict";
+                    source /= "decomposeParDict";
                     adjustOpt = true;
                 }
 

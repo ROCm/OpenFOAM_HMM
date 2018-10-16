@@ -209,15 +209,14 @@ Foam::fileName::Type Foam::fileName::type(const bool followLink) const
 
 Foam::fileName& Foam::fileName::toAbsolute()
 {
-    fileName& f = *this;
-
-    if (!f.isAbsolute())
+    if (!isAbsolute(*this))
     {
+        fileName& f = *this;
         f = cwd()/f;
         f.clean();
     }
 
-    return f;
+    return *this;
 }
 
 
@@ -482,9 +481,12 @@ Foam::fileName Foam::operator/(const string& a, const string& b)
 
 Foam::fileName Foam::search(const word& file, const fileName& directory)
 {
-    // Search the current directory for the file
-    fileNameList files(fileHandler().readDir(directory, fileName::FILE));
-    for (const fileName& item : files)
+    // Search current directory for the file
+    for
+    (
+        const fileName& item
+      : fileHandler().readDir(directory, fileName::FILE)
+    )
     {
         if (item == file)
         {
@@ -493,17 +495,20 @@ Foam::fileName Foam::search(const word& file, const fileName& directory)
     }
 
     // If not found search each of the sub-directories
-    fileNameList dirs(fileHandler().readDir(directory, fileName::DIRECTORY));
-    for (const fileName& item : dirs)
+    for
+    (
+        const fileName& item
+      : fileHandler().readDir(directory, fileName::DIRECTORY)
+    )
     {
         fileName path = search(file, directory/item);
-        if (path != fileName::null)
+        if (!path.empty())
         {
             return path;
         }
     }
 
-    return fileName::null;
+    return fileName();
 }
 
 

@@ -140,7 +140,7 @@ inline bool Foam::fileName::isAbsolute(const std::string& str)
 
 inline bool Foam::fileName::isAbsolute() const
 {
-    return !empty() && operator[](0) == '/';
+    return isAbsolute(*this);
 }
 
 
