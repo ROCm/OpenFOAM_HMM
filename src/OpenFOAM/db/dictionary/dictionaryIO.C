@@ -169,10 +169,8 @@ void Foam::dictionary::writeEntry(const keyType& kw, Ostream& os) const
 
 void Foam::dictionary::writeEntries(Ostream& os, const bool extraNewLine) const
 {
-    forAllConstIter(parent_type, *this, iter)
+    for (const entry& e : *this)
     {
-        const entry& e = *iter;
-
         // Write entry
         os  << e;
 
@@ -187,7 +185,7 @@ void Foam::dictionary::writeEntries(Ostream& os, const bool extraNewLine) const
         if (!os.good())
         {
             WarningInFunction
-                << "Can't write entry " << iter().keyword()
+                << "Can't write entry " << e.keyword()
                 << " for dictionary " << name()
                 << endl;
         }

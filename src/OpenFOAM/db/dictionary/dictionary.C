@@ -156,14 +156,14 @@ Foam::dictionary::dictionary
     name_(dict.name()),
     parent_(parentDict)
 {
-    forAllIter(parent_type, *this, iter)
+    for (entry& e : *this)
     {
-        hashedEntries_.insert(iter().keyword(), &iter());
+        hashedEntries_.insert(e.keyword(), &e);
 
-        if (iter().keyword().isPattern())
+        if (e.keyword().isPattern())
         {
-            patterns_.insert(&iter());
-            regexps_.insert(autoPtr<regExp>::New(iter().keyword()));
+            patterns_.insert(&e);
+            regexps_.insert(autoPtr<regExp>::New(e.keyword()));
         }
     }
 }
@@ -178,14 +178,14 @@ Foam::dictionary::dictionary
     name_(dict.name()),
     parent_(dictionary::null)
 {
-    forAllIter(parent_type, *this, iter)
+    for (entry& e : *this)
     {
-        hashedEntries_.insert(iter().keyword(), &iter());
+        hashedEntries_.insert(e.keyword(), &e);
 
-        if (iter().keyword().isPattern())
+        if (e.keyword().isPattern())
         {
-            patterns_.insert(&iter());
-            regexps_.insert(autoPtr<regExp>::New(iter().keyword()));
+            patterns_.insert(&e);
+            regexps_.insert(autoPtr<regExp>::New(e.keyword()));
         }
     }
 }
@@ -283,9 +283,9 @@ Foam::SHA1Digest Foam::dictionary::digest() const
     OSHA1stream os;
 
     // Process entries
-    forAllConstIter(parent_type, *this, iter)
+    for (const entry& e : *this)
     {
-        os << *iter;
+        os << e;
     }
 
     return os.digest();
@@ -298,9 +298,9 @@ Foam::tokenList Foam::dictionary::tokens() const
     OStringStream os;
 
     // Process entries
-    forAllConstIter(parent_type, *this, iter)
+    for (const entry& e : *this)
     {
-        os << *iter;
+        os << e;
     }
 
     // String re-parsed as a list of tokens
@@ -394,11 +394,9 @@ bool Foam::dictionary::substituteKeyword(const word& keyword, bool mergeEntry)
     // If defined insert its entries into this dictionary
     if (finder.found())
     {
-        const dictionary& addDict = finder.dict();
-
-        forAllConstIters(addDict, iter)
+        for (const entry& e : finder.dict())
         {
-            add(iter(), mergeEntry);
+            add(e, mergeEntry);
         }
 
         return true;
@@ -428,11 +426,9 @@ bool Foam::dictionary::substituteScopedKeyword
     // If defined insert its entries into this dictionary
     if (finder.found())
     {
-        const dictionary& addDict = finder.dict();
-
-        forAllConstIter(parent_type, addDict, iter)
+        for (const entry& e : finder.dict())
         {
-            add(iter(), mergeEntry);
+            add(e, mergeEntry);
         }
 
         return true;
@@ -570,9 +566,9 @@ Foam::wordList Foam::dictionary::toc() const
     wordList list(size());
 
     label n = 0;
-    forAllConstIters(*this, iter)
+    for (const entry& e : *this)
     {
-        list[n++] = iter().keyword();
+        list[n++] = e.keyword();
     }
 
     return list;
@@ -590,11 +586,11 @@ Foam::List<Foam::keyType> Foam::dictionary::keys(bool patterns) const
     List<keyType> list(size());
 
     label n = 0;
-    forAllConstIters(*this, iter)
+    for (const entry& e : *this)
     {
-        if (iter().keyword().isPattern() ? patterns : !patterns)
+        if (e.keyword().isPattern() ? patterns : !patterns)
         {
-            list[n++] = iter().keyword();
+            list[n++] = e.keyword();
         }
     }
     list.resize(n);
@@ -783,31 +779,31 @@ bool Foam::dictionary::merge(const dictionary& dict)
 
     bool changed = false;
 
-    forAllConstIters(dict, iter)
+    for (const entry& e : dict)
     {
-        auto fnd = hashedEntries_.find(iter().keyword());
+        auto fnd = hashedEntries_.find(e.keyword());
 
         if (fnd.found())
         {
             // Recursively merge sub-dictionaries
             // TODO: merge without copying
-            if (fnd()->isDict() && iter().isDict())
+            if (fnd()->isDict() && e.isDict())
             {
-                if (fnd()->dict().merge(iter().dict()))
+                if (fnd()->dict().merge(e.dict()))
                 {
                     changed = true;
                 }
             }
             else
             {
-                add(iter().clone(*this).ptr(), true);
+                add(e.clone(*this).ptr(), true);
                 changed = true;
             }
         }
         else
         {
             // Not found - just add
-            add(iter().clone(*this).ptr());
+            add(e.clone(*this).ptr());
             changed = true;
         }
     }
@@ -855,9 +851,9 @@ void Foam::dictionary::operator=(const dictionary& rhs)
     // Create clones of the entries in the given dictionary
     // resetting the parentDict to this dictionary
 
-    forAllConstIters(rhs, iter)
+    for (const entry& e : rhs)
     {
-        add(iter().clone(*this).ptr());
+        add(e.clone(*this).ptr());
     }
 }
 
@@ -872,9 +868,9 @@ void Foam::dictionary::operator+=(const dictionary& rhs)
             << abort(FatalIOError);
     }
 
-    forAllConstIters(rhs, iter)
+    for (const entry& e : rhs)
     {
-        add(iter().clone(*this).ptr());
+        add(e.clone(*this).ptr());
     }
 }
 
@@ -889,11 +885,11 @@ void Foam::dictionary::operator|=(const dictionary& rhs)
             << abort(FatalIOError);
     }
 
-    forAllConstIters(rhs, iter)
+    for (const entry& e : rhs)
     {
-        if (!found(iter().keyword()))
+        if (!found(e.keyword()))
         {
-            add(iter().clone(*this).ptr());
+            add(e.clone(*this).ptr());
         }
     }
 }
@@ -909,9 +905,9 @@ void Foam::dictionary::operator<<=(const dictionary& rhs)
             << abort(FatalIOError);
     }
 
-    forAllConstIters(rhs, iter)
+    for (const entry& e : rhs)
     {
-        set(iter().clone(*this).ptr());
+        set(e.clone(*this).ptr());
     }
 }
 
