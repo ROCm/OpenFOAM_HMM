@@ -27,6 +27,15 @@ Class
 Description
     Pair forces between particles colliding with a spring, slider, damper model
 
+    Reference:
+    \verbatim
+        "Lagrangian numerical simulation of plug flow of cohesionless
+         particles in a horizontal pipe"
+        Tsuji, Y., Tanaka, T., Ishida, T.,
+        Powder Technology
+        Volume 73, Issue 3, September 1992, pp. 239-250
+    \endverbatim
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef PairSpringSliderDashpot_H
