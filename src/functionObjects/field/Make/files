@@ -3,6 +3,7 @@ fieldAverage/fieldAverageItem/fieldAverageItem.C
 fieldAverage/fieldAverageItem/fieldAverageItemIO.C
 
 fieldCoordinateSystemTransform/fieldCoordinateSystemTransform.C
+fieldExtents/fieldExtents.C
 fieldMinMax/fieldMinMax.C
 
 fieldValues/fieldValue/fieldValue.C
