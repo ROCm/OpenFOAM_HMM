@@ -74,12 +74,14 @@ Foam::Istream& Foam::operator>>
 {
     is.check(FUNCTION_NAME);
 
-    const dictionaryEntry entry(dictionary::null, is);
+    const dictionaryEntry dictEntry(dictionary::null, is);
+    const dictionary& dict = dictEntry.dict();
 
-    pid.patchName_ = entry.keyword();
-    entry.readEntry("type", pid.interactionTypeName_);
-    pid.e_ = entry.lookupOrDefault<scalar>("e", 1.0);
-    pid.mu_ = entry.lookupOrDefault<scalar>("mu", 0.0);
+    pid.patchName_ = dictEntry.keyword();
+
+    dict.readEntry("type", pid.interactionTypeName_);
+    pid.e_ = dict.lookupOrDefault<scalar>("e", 1.0);
+    pid.mu_ = dict.lookupOrDefault<scalar>("mu", 0.0);
 
     return is;
 }

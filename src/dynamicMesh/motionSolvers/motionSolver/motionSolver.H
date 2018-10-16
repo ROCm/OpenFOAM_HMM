@@ -40,15 +40,13 @@ SourceFiles
 
 #include "Time.H"
 #include "polyMesh.H"
-#include "dictionaryEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward class declarations
-class polyMesh;
+// Forward declarations
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\

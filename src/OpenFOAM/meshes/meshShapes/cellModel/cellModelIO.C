@@ -30,9 +30,10 @@ License
 
 Foam::cellModel::cellModel(Istream& is)
 {
-    dictionaryEntry dict(dictionary::null, is);
+    const dictionaryEntry dictEntry(dictionary::null, is);
+    const dictionary& dict = dictEntry.dict();
 
-    name_ = dict.keyword();
+    name_ = dictEntry.keyword();
     dict.readEntry("index", index_);
     dict.readEntry("numberOfPoints", nPoints_);
     dict.readEntry("faces", faces_);

@@ -26,6 +26,7 @@ License
 #include "motionSolver.H"
 #include "Time.H"
 #include "polyMesh.H"
+#include "dictionaryEntry.H"
 #include "dlLibraryTable.H"
 #include "twoDPointCorrector.H"
 
@@ -172,7 +173,7 @@ Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::iNew::operator()
     Istream& is
 ) const
 {
-    dictionaryEntry dict(dictionary::null, is);
+    dictionaryEntry dictEntry(dictionary::null, is);
 
     return motionSolver::New
     (
@@ -181,11 +182,11 @@ Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::iNew::operator()
         (
             IOobject
             (
-                dict.name() + ":meshSolver",
+                dictEntry.name() + ":meshSolver",
                 mesh_.time().constant(),
                 mesh_
             ),
-            dict
+            dictEntry
         )
     );
 }
