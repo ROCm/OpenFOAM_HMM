@@ -36,9 +36,9 @@ Description
 #include "Time.H"
 #include "dynamicFvMesh.H"
 #include "pimpleControl.H"
-#include "vtkSurfaceWriter.H"
 #include "cyclicAMIPolyPatch.H"
 #include "PatchTools.H"
+#include "foamVtkSurfaceWriter.H"
 #include "functionObject.H"
 
 using namespace Foam;
@@ -53,11 +53,9 @@ void writeWeights
     const primitivePatch& patch,
     const fileName& directory,
     const fileName& prefix,
-    const word& timeName
+    const Time& runTime
 )
 {
-    vtkSurfaceWriter writer;
-
     // Collect geometry
     labelList pointToGlobal;
     labelList uniqueMeshPointLabels;
@@ -94,37 +92,36 @@ void writeWeights
         mergedWeights
     );
 
+    instant inst(runTime.value(), runTime.timeName());
+
     if (Pstream::master())
     {
-        writer.write
+        vtk::surfaceWriter writer
         (
-            directory,
-            prefix + "_" + timeName,
-            meshedSurfRef
-            (
-                mergedPoints,
-                mergedFaces
-            ),
-            "weightsSum",
-            mergedWeights,
-            false
+            mergedPoints,
+            mergedFaces,
+            (directory/prefix + "_" + inst.name()),
+            false // serial: master-only
         );
+
+        writer.setTime(inst);
+        writer.writeTimeValue();
+        writer.writeGeometry();
+
+        writer.beginCellData(1);
+        writer.write("weightsSum", mergedWeights);
     }
 }
 
 
 void writeWeights(const polyMesh& mesh)
 {
-    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-
-    const word tmName(mesh.time().timeName());
-
-    forAll(pbm, patchi)
+    for (const polyPatch& pp : mesh.boundaryMesh())
     {
-        if (isA<cyclicAMIPolyPatch>(pbm[patchi]))
+        if (isA<cyclicAMIPolyPatch>(pp))
         {
             const cyclicAMIPolyPatch& cpp =
-                refCast<const cyclicAMIPolyPatch>(pbm[patchi]);
+                refCast<const cyclicAMIPolyPatch>(pp);
 
             if (cpp.owner())
             {
@@ -142,7 +139,7 @@ void writeWeights(const polyMesh& mesh)
                     cpp.neighbPatch(),
                     functionObject::outputPrefix,
                     "tgt",
-                    tmName
+                    mesh.time()
                 );
                 writeWeights
                 (
@@ -151,7 +148,7 @@ void writeWeights(const polyMesh& mesh)
                     cpp,
                     functionObject::outputPrefix,
                     "src",
-                    tmName
+                    mesh.time()
                 );
             }
         }

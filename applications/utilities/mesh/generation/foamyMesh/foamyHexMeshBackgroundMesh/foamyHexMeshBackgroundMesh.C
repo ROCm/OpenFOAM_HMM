@@ -41,7 +41,7 @@ Description
 #include "cellShape.H"
 #include "DynamicField.H"
 #include "isoSurfaceCell.H"
-#include "vtkSurfaceWriter.H"
+#include "foamVtkSurfaceWriter.H"
 #include "syncTools.H"
 #include "decompositionModel.H"
 
@@ -739,14 +739,18 @@ int main(int argc, char *argv[])
         pointMergeMap
     );
 
-    vtkSurfaceWriter writer;
-    writer.write
-    (
-        runTime.path(),
-        "iso",
-        mergedPoints,
-        mergedFaces
-    );
+    if (Pstream::master())
+    {
+        vtk::surfaceWriter writer
+        (
+            mergedPoints,
+            mergedFaces,
+            (runTime.path() / "iso"),
+            false // serial only
+        );
+
+        writer.writeGeometry();
+    }
 
     Info<< "End\n" << endl;
 

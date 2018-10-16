@@ -193,7 +193,7 @@ Note
 #include "meshTools.H"
 #include "OBJstream.H"
 #include "triSurfaceMesh.H"
-#include "vtkSurfaceWriter.H"
+#include "foamVtkSurfaceWriter.H"
 #include "unitConversion.H"
 #include "plane.H"
 #include "point.H"
@@ -656,8 +656,55 @@ int main(int argc, char *argv[])
             bfeMesh.regIOobject::write();
         }
 
+
+        // Output information
+
+        const bool optCloseness =
+            surfaceDict.lookupOrDefault("closeness", false);
+
+        const bool optProximity =
+            surfaceDict.lookupOrDefault("featureProximity", false);
+
+        const bool optCurvature =
+            surfaceDict.lookupOrDefault("curvature", false);
+
+
+        // For VTK legacy format, we would need an a priori count of
+        // CellData and PointData fields.
+        // For convenience, we therefore only use the XML formats
+
+        autoPtr<vtk::surfaceWriter> vtkWriter;
+
+        if (optCloseness || optProximity || optCurvature)
+        {
+            if (writeVTK)
+            {
+                vtkWriter.reset
+                (
+                    new vtk::surfaceWriter
+                    (
+                        surf.points(),
+                        faces,
+                        (vtkOutputDir / outputName),
+                        false  // serial only
+                    )
+                );
+
+                vtkWriter->writeGeometry();
+
+                Info<< "Writing VTK to "
+                    << ((vtkOutputDir/outputName).ext(vtkWriter->ext()))
+                    .relative(runTime.globalPath()) << nl;
+            }
+        }
+        else
+        {
+            continue;  // Nothing to output
+        }
+
+
         // Option: "closeness"
-        if (surfaceDict.lookupOrDefault("closeness", false))
+        if (optCloseness)
         {
             Pair<tmp<scalarField>> tcloseness =
                 triSurfaceTools::writeCloseness
@@ -669,73 +716,20 @@ int main(int argc, char *argv[])
                     10   // externalAngleTolerance
                 );
 
-            if (writeVTK)
+            if (vtkWriter.valid())
             {
-                vtkSurfaceWriter().write
-                (
-                    vtkOutputDir,
-                    outputName,
-                    meshedSurfRef
-                    (
-                        surf.points(),
-                        faces
-                    ),
-                    "internalCloseness",                // fieldName
-                    tcloseness[0](),
-                    false,                              // isNodeValues
-                    true                                // verbose
-                );
-
-                vtkSurfaceWriter().write
-                (
-                    vtkOutputDir,
-                    outputName,
-                    meshedSurfRef
-                    (
-                        surf.points(),
-                        faces
-                    ),
-                    "externalCloseness",                // fieldName
-                    tcloseness[1](),
-                    false,                              // isNodeValues
-                    true                                // verbose
-                );
-            }
-        }
-
-        // Option: "curvature"
-        if (surfaceDict.lookupOrDefault("curvature", false))
-        {
-            tmp<scalarField> tcurvatureField =
-                triSurfaceTools::writeCurvature
-                (
-                    runTime,
-                    outputName,
-                    surf
-                );
-
-            if (writeVTK)
-            {
-                vtkSurfaceWriter().write
-                (
-                    vtkOutputDir,
-                    outputName,
-                    meshedSurfRef
-                    (
-                        surf.points(),
-                        faces
-                    ),
-                    "curvature",                        // fieldName
-                    tcurvatureField(),
-                    true,                               // isNodeValues
-                    true                                // verbose
-                );
+                vtkWriter->beginCellData();
+                vtkWriter->write("internalCloseness", tcloseness[0]());
+                vtkWriter->write("externalCloseness", tcloseness[1]());
             }
         }
 
         // Option: "featureProximity"
-        if (surfaceDict.lookupOrDefault("featureProximity", false))
+        if (optCloseness)
         {
+            const scalar maxProximity =
+                surfaceDict.lookupOrDefault<scalar>("maxFeatureProximity", 1);
+
             tmp<scalarField> tproximity =
                 edgeMeshTools::writeFeatureProximity
                 (
@@ -743,25 +737,31 @@ int main(int argc, char *argv[])
                     outputName,
                     feMesh,
                     surf,
-                    surfaceDict.get<scalar>("maxFeatureProximity")
+                    maxProximity
                 );
 
-            if (writeVTK)
+            if (vtkWriter.valid())
             {
-                vtkSurfaceWriter().write
+                vtkWriter->beginCellData();
+                vtkWriter->write("featureProximity", tproximity());
+            }
+        }
+
+        // Option: "curvature"
+        if (optCurvature)
+        {
+            tmp<scalarField> tcurvature =
+                triSurfaceTools::writeCurvature
                 (
-                    vtkOutputDir,
+                    runTime,
                     outputName,
-                    meshedSurfRef
-                    (
-                        surf.points(),
-                        faces
-                    ),
-                    "featureProximity",                 // fieldName
-                    tproximity(),
-                    false,                              // isNodeValues
-                    true                                // verbose
+                    surf
                 );
+
+            if (vtkWriter.valid())
+            {
+                vtkWriter->beginPointData();
+                vtkWriter->write("curvature", tcurvature());
             }
         }
 

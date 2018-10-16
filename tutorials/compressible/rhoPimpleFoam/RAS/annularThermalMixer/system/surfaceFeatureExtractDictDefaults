@@ -26,4 +26,13 @@ trimFeatures
 
 writeObj            yes;  // writes out .obj files to view features
 
+writeVTK            no;   // writes vtk files to view features
+
+// Output items
+/*
+closeness           yes;
+curvature           yes;
+featureProxmity     yes;
+*/
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

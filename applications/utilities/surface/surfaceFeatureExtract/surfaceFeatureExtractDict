@@ -34,7 +34,7 @@ surface1.stl
     // Tolerance for surface intersections
     // tolerance           1e-3;
 
-  // Output options:
+// Output options:
 
     // Write features to obj format for postprocessing
     writeObj            yes;
@@ -59,7 +59,7 @@ outputName1
     // Tolerance for surface intersections
     // tolerance           1e-3;
 
-  // Output options:
+// Output options:
 
     // Write features to OBJ format for postprocessing
     writeObj            yes;
@@ -117,7 +117,7 @@ surface2.nas
     // Tolerance for surface intersections
     // tolerance           1e-3;
 
-  // Output options:
+// Output options:
 
     // Output the closeness of surface elements to other surface elements.
     closeness           no;
@@ -128,7 +128,7 @@ surface2.nas
     // Output the proximity of feature points and edges to another
     featureProximity    no;
 
-    // The maximum search distance when checking feature proximity
+    // Maximum search distance when checking feature proximity (default: 1m)
     maxFeatureProximity 1;
 
     // Write features to OBJ format for postprocessing
