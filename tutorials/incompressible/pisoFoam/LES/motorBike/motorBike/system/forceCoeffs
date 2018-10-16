@@ -16,7 +16,7 @@ forces
     patches         ("motorBike.*");
     rho             rhoInf;      // Indicates incompressible
     log             true;
-    rhoInf          1;           // Redundant for incompressible
+    rhoInf          1;           // Required when rho = rhoInf
     liftDir         (0 0 1);
     dragDir         (1 0 0);
     CofR            (0.72 0 0);  // Axle midpoint on ground

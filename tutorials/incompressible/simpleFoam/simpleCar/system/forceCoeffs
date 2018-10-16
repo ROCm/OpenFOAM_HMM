@@ -18,14 +18,14 @@ forceCoeffs1
     U               U;
     rho             rhoInf;      // Indicates incompressible
     log             true;
-    rhoInf          1;           // Redundant for incompressible
+    rhoInf          1;           // Required when rho = rhoInf
     liftDir         (0 1 0);
     dragDir         (1 0 0);
     CofR            (3.5 0 0);  // Axle midpoint on ground
     pitchAxis       (0 0 1);
     magUInf         10;
-    lRef            4;        // Wheelbase length
-    Aref            1;        // Estimated
+    lRef            4;          // Wheelbase length
+    Aref            1;          // Estimated
     porosity        on;
 
     binData
