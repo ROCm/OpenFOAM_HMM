@@ -48,7 +48,8 @@ Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
 
     if (codePtr)
     {
-        code_ = stringOps::trim(codePtr->stream());
+        codePtr->readEntry(code_);
+        stringOps::inplaceTrim(code_);
         stringOps::inplaceExpand(code_, dict);
     }
 
@@ -56,7 +57,8 @@ Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
 
     if (includePtr)
     {
-        include_ = stringOps::trim(includePtr->stream());
+        includePtr->readEntry(include_);
+        stringOps::inplaceTrim(include_);
         stringOps::inplaceExpand(include_, dict);
     }
 
@@ -64,7 +66,8 @@ Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
 
     if (optionsPtr)
     {
-        options_ = stringOps::trim(optionsPtr->stream());
+        optionsPtr->readEntry(options_);
+        stringOps::inplaceTrim(options_);
         stringOps::inplaceExpand(options_, dict);
     }
 
@@ -72,7 +75,8 @@ Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
 
     if (libsPtr)
     {
-        libs_ = stringOps::trim(libsPtr->stream());
+        libsPtr->readEntry(libs_);
+        stringOps::inplaceTrim(libs_);
         stringOps::inplaceExpand(libs_, dict);
     }
 
@@ -80,7 +84,8 @@ Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
 
     if (localPtr)
     {
-        localCode_ = stringOps::trim(localPtr->stream());
+        localPtr->readEntry(localCode_);
+        stringOps::inplaceTrim(localCode_);
         stringOps::inplaceExpand(localCode_, dict);
     }
 

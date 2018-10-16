@@ -48,6 +48,102 @@ void entryInfo(entry* e)
 }
 
 
+// Try with readScalar
+scalar try_readScalar(const dictionary& dict, const word& k)
+{
+    scalar val(-GREAT);
+
+    const bool throwingIOError = FatalIOError.throwExceptions();
+    const bool throwingError = FatalError.throwExceptions();
+
+    try
+    {
+        val = readScalar(dict.lookup(k));
+        Info<< "readScalar(" << k << ") = " << val << nl;
+    }
+    catch (Foam::IOerror& err)
+    {
+        Info<< "readScalar(" << k << ") Caught FatalIOError "
+            << err << nl << endl;
+    }
+    catch (Foam::error& err)
+    {
+        Info<< "readScalar(" << k << ") Caught FatalError "
+            << err << nl << endl;
+    }
+    FatalError.throwExceptions(throwingError);
+    FatalIOError.throwExceptions(throwingIOError);
+
+    return val;
+}
+
+
+// Try with get<scalar>
+scalar try_getScalar(const dictionary& dict, const word& k)
+{
+    scalar val(-GREAT);
+
+    const bool throwingIOError = FatalIOError.throwExceptions();
+    const bool throwingError = FatalError.throwExceptions();
+
+    try
+    {
+        val = dict.get<scalar>(k);
+        Info<< "get<scalar>(" << k << ") = " << val << nl;
+    }
+    catch (Foam::IOerror& err)
+    {
+        Info<< "get<scalar>(" << k << ") Caught FatalIOError "
+            << err << nl << endl;
+    }
+    catch (Foam::error& err)
+    {
+        Info<< "get<scalar>(" << k << ") Caught FatalError "
+            << err << nl << endl;
+    }
+    FatalError.throwExceptions(throwingError);
+    FatalIOError.throwExceptions(throwingIOError);
+
+    return val;
+}
+
+
+// Try with *entry (from findEntry) and get<scalar>
+scalar try_getScalar(const entry* eptr, const word& k)
+{
+    scalar val(-GREAT);
+
+    if (!eptr)
+    {
+        Info<< "No entry" << k << nl;
+        return val;
+    }
+
+    const bool throwingIOError = FatalIOError.throwExceptions();
+    const bool throwingError = FatalError.throwExceptions();
+
+    try
+    {
+        val = eptr->get<scalar>();
+        Info<< "entry get<scalar>(" << k << ") = " << val << nl;
+    }
+    catch (Foam::IOerror& err)
+    {
+        Info<< "entry get<scalar>(" << k << ") Caught FatalIOError "
+            << err << nl << endl;
+    }
+    catch (Foam::error& err)
+    {
+        Info<< "entry get<scalar>(" << k << ") Caught FatalError "
+            << err << nl << endl;
+    }
+    FatalError.throwExceptions(throwingError);
+    FatalIOError.throwExceptions(throwingIOError);
+
+    return val;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
@@ -227,29 +323,9 @@ int main(int argc, char *argv[])
         {
             Info<< nl << "Test some bad input with readScalar()" << nl;
 
-            const bool throwingIOError = FatalIOError.throwExceptions();
-            const bool throwingError = FatalError.throwExceptions();
-
-            try
-            {
-                scalar val1 = readScalar(dict2.lookup("good"));
-                // scalar val2 = readScalar(dict2.lookup("bad"));
-                scalar val2 = -1;
-                scalar val3 = readScalar(dict2.lookup("empty"));
-
-                Info<< "got good=" << val1 << " bad=" << val2
-                    << " empty=" << val3 << nl;
-            }
-            catch (Foam::IOerror& err)
-            {
-                Info<< "Caught FatalIOError " << err << nl << endl;
-            }
-            catch (Foam::error& err)
-            {
-                Info<< "Caught FatalError " << err << nl << endl;
-            }
-            FatalError.throwExceptions(throwingError);
-            FatalIOError.throwExceptions(throwingIOError);
+            try_readScalar(dict2, "good");
+            // try_readScalar(dict2, "bad");
+            try_readScalar(dict2, "empty");
         }
 
 
@@ -257,29 +333,19 @@ int main(int argc, char *argv[])
         {
             Info<< nl << "Test some bad input with get<scalar>()" << nl;
 
-            const bool throwingIOError = FatalIOError.throwExceptions();
-            const bool throwingError = FatalError.throwExceptions();
+            try_getScalar(dict2, "good");
+            // try_getScalar(dict2, "bad");
+            try_getScalar(dict2, "empty");
+        }
 
-            try
-            {
-                scalar val1 = dict2.get<scalar>("good");
-                // scalar val2 = dict2.get<scalar>("bad");
-                scalar val2 = -1;
-                scalar val3 = dict2.get<scalar>("empty");
+        // With findEntry and get<scalar>
+        {
+            Info<< nl
+                << "Test some bad input with findEntry + get<scalar>()" << nl;
 
-                Info<< "got good=" << val1 << " bad=" << val2
-                    << " empty=" << val3 << nl;
-            }
-            catch (Foam::IOerror& err)
-            {
-                Info<< "Caught FatalIOError " << err << nl << endl;
-            }
-            catch (Foam::error& err)
-            {
-                Info<< "Caught FatalError " << err << nl << endl;
-            }
-            FatalError.throwExceptions(throwingError);
-            FatalIOError.throwExceptions(throwingIOError);
+            try_getScalar(dict2.findEntry("good"), "good");
+            // try_getScalar(dict2.findEntry("bad"), "bad");
+            try_getScalar(dict2.findEntry("empty"), "empty");
         }
     }
 

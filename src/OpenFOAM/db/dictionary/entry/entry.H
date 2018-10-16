@@ -107,6 +107,11 @@ private:
         //  \return True if it is a valid keyType.
         static bool getKeyword(keyType& keyword, Istream& is);
 
+        //- Check after reading if the input token stream has unconsumed
+        //- tokens remaining or if there were no tokens in the first place.
+        //  Emits FatalIOError
+        void checkITstream(const ITstream& is) const;
+
 
 public:
 
@@ -176,7 +181,7 @@ public:
     virtual ~entry() = default;
 
 
-    // Member functions
+    // Member Functions
 
         //- Return keyword
         const keyType& keyword() const
@@ -244,7 +249,31 @@ public:
         virtual void write(Ostream& os) const = 0;
 
 
-    // Member operators
+        //- Get a T from the stream,
+        //- FatalIOError if the number of tokens is incorrect.
+        template<class T>
+        T get() const
+        {
+            T val;
+            readEntry<T>(val);
+            return val;
+        }
+
+        //- Assign to T val,
+        //- FatalIOError if the number of tokens is incorrect.
+        //
+        //  \param val the value to read into
+        template<class T>
+        void readEntry(T& val) const
+        {
+            ITstream& is = this->stream();
+            is >> val;
+
+            checkITstream(is);
+        }
+
+
+    // Member Operators
 
         void operator=(const entry& e);
 
@@ -252,7 +281,7 @@ public:
         bool operator!=(const entry& e) const;
 
 
-    // Ostream operator
+    // Ostream Operator
 
         friend Ostream& operator<<(Ostream& os, const entry& e);
 };

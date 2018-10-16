@@ -50,17 +50,16 @@ bool checkDictionaryContent(const dictionary& dict1, const dictionary& dict2)
     }
 
 
-    forAllConstIter(dictionary, dict1, iter1)
+    for (const entry& entry1 : dict1)
     {
         const entry* eptr =
-            dict2.findEntry(iter1().keyword(), keyType::LITERAL);
+            dict2.findEntry(entry1.keyword(), keyType::LITERAL);
 
         if (!eptr)
         {
             return false;
         }
 
-        const entry& entry1 = iter1();
         const entry& entry2 = *eptr;
 
         bool ok = false;
