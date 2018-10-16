@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -190,6 +190,26 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
         {
             const solidThermo& thermo =
                 mesh.lookupObject<solidThermo>(basicThermo::dictName);
+
+            if (!thermo.isotropic())
+            {
+                word regionName = "";
+                if (mesh.name() != polyMesh::defaultRegion)
+                {
+                    regionName = " for region " + mesh.name();
+                }
+
+                const word& patchName = mesh.boundaryMesh()[patchi].name();
+
+                WarningInFunction
+                    << "Applying isotropic thermal conductivity assumption to "
+                    << "anisotropic model" << regionName << " at patch "
+                    << patchName << nl
+                    << "Consider using an isotropic conductivity model or "
+                    << "set 'kappaMethod' to "
+                    << KMethodTypeNames_[mtDirectionalSolidThermo]
+                    << nl << endl;
+            }
 
             return thermo.kappa(patchi);
             break;
