@@ -39,7 +39,7 @@ Description
         weight = f scheme1 + (1 - f) scheme2
     \f]
 
-    The factor is calculated based on five criteria:
+    The factor is calculated based on six criteria:
 
     1) mesh non-orthogonality field
     2) magnitude of cell centres gradient
@@ -58,7 +58,7 @@ Description
                     max
                     (
                         0.0,
-                        (non-orthogonality - maxNonOrthogonality)
+                        (nonOrthogonality - maxNonOrthogonality)
                        /(minNonOrthogonality - maxNonOrthogonality)
                     ),
                     1.0
