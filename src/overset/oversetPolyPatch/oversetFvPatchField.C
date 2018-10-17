@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -113,60 +113,27 @@ void Foam::oversetFvPatchField<Type>::initEvaluate
                     << fldName << endl;
             }
         }
-        else if
-        (
-           !fvSchemes.found("oversetInterpolation")
-         || (
-               fvSchemes.found("oversetInterpolationRequired")
-            == fvSchemes.found("oversetInterpolationSuppressed")
-            )
-        )
+        else if (!fvSchemes.found("oversetInterpolation"))
         {
             IOWarningInFunction(fvSchemes)
-                << "Missing required dictionary entries"
-                << " 'oversetInterpolation' and 'oversetInterpolationRequired'"
-                << " or 'oversetInterpolationSuppressed'"
+                << "Missing required dictionary entry"
+                << " 'oversetInterpolation'"
                 << ". Skipping overset interpolation for field "
                 << fldName << endl;
         }
-        else if (fvSchemes.found("oversetInterpolationSuppressed"))
+        else if (fvSchemes.found("oversetInterpolationRequired"))
         {
-             // Add the stencil suppression list
-            wordHashSet suppressed(Stencil::New(mesh).nonInterpolatedFields());
+            // Backwards compatibility mode: only interpolate what is
+            // explicitly mentioned
 
-            const dictionary* dictPtr
-            (
-                fvSchemes.findDict("oversetInterpolationSuppressed")
-            );
-
-            if (dictPtr)
+            if (fvSchemes.found("oversetInterpolationSuppressed"))
             {
-                suppressed.insert(dictPtr->toc());
+                FatalIOErrorInFunction(fvSchemes)
+                    << "Cannot have both dictionary entry"
+                    << " 'oversetInterpolationSuppresed' and "
+                    << " 'oversetInterpolationRequired' for field "
+                    << fldName << exit(FatalIOError);
             }
-
-            if (!suppressed.found(fldName))
-            {
-                if (debug)
-                {
-                    Info<< "Interpolating non-suppressed field " << fldName
-                        << endl;
-                }
-                mesh.interpolate
-                (
-                    const_cast<Field<Type>&>
-                    (
-                        this->primitiveField()
-                    )
-                );
-            }
-            else if (debug)
-            {
-                Info<< "Skipping suppressed overset interpolation for field "
-                    << fldName << endl;
-            }
-        }
-        else
-        {
             const dictionary& intDict = fvSchemes.subDict
             (
                 "oversetInterpolationRequired"
@@ -195,6 +162,49 @@ void Foam::oversetFvPatchField<Type>::initEvaluate
             {
                 Info<< "Skipping overset interpolation for field "
                     << fldName << endl;
+            }
+        }
+        else
+        {
+            const dictionary* dictPtr
+            (
+                fvSchemes.subDictPtr("oversetInterpolationSuppressed")
+            );
+
+            const wordHashSet& suppress =
+                Stencil::New(mesh).nonInterpolatedFields();
+
+            bool skipInterpolate = suppress.found(fldName);
+
+            if (dictPtr)
+            {
+                skipInterpolate =
+                    skipInterpolate
+                 || dictPtr->found(fldName);
+            }
+
+            if (skipInterpolate)
+            {
+                if (debug)
+                {
+                    Info<< "Skipping suppressed overset interpolation"
+                        << " for field " << fldName << endl;
+                }
+            }
+            else
+            {
+                if (debug)
+                {
+                    Info<< "Interpolating non-suppressed field " << fldName
+                        << endl;
+                }
+                mesh.interpolate
+                (
+                    const_cast<Field<Type>&>
+                    (
+                        this->primitiveField()
+                    )
+                );
             }
         }
     }
