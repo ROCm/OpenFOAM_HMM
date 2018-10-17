@@ -38,10 +38,16 @@ int Foam::functionObjects::ensightWrite::writeVolField
     // State: return 0 (not-processed), -1 (skip), +1 ok
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
-    const VolFieldType* fldPtr;
+    // Already done
+    if (state)
+    {
+        return state;
+    }
 
-    // Already done, or not available
-    if (state || !(fldPtr = lookupObjectPtr<VolFieldType>(inputName)))
+    const VolFieldType* fldPtr = findObject<VolFieldType>(inputName);
+
+    // Not available
+    if (!fldPtr)
     {
         return state;
     }

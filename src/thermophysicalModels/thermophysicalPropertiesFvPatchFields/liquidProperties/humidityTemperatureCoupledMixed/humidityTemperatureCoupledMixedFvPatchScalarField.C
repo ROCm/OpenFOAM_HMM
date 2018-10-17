@@ -93,33 +93,28 @@ Foam::humidityTemperatureCoupledMixedFvPatchScalarField::thicknessField
     const fvMesh& mesh
 )
 {
-    if (!mesh.foundObject<volScalarField>(fieldName))
+    volScalarField* ptr = mesh.getObjectPtr<volScalarField>(fieldName);
+
+    if (!ptr)
     {
-        tmp<volScalarField> tField
+        ptr = new volScalarField
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    fieldName,
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::NO_READ,
-                    IOobject::AUTO_WRITE
-                ),
+                fieldName,
+                mesh.time().timeName(),
                 mesh,
-                dimensionedScalar(dimLength, Zero)
-            )
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            dimensionedScalar(dimLength, Zero)
         );
 
-        tField.ptr()->store();
+        ptr->store();
     }
 
-    return
-        const_cast<volScalarField&>
-        (
-            mesh.lookupObject<volScalarField>(fieldName)
-        );
+    return *ptr;
 }
 
 

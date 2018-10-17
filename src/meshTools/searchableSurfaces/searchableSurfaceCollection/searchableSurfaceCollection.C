@@ -205,8 +205,8 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
             const word subGeomName(subDict.get<word>("surface"));
             //Pout<< "Trying to find " << subGeomName << endl;
 
-            const searchableSurface& s =
-                io.db().lookupObject<searchableSurface>(subGeomName);
+            searchableSurface& s =
+                io.db().lookupObjectRef<searchableSurface>(subGeomName);
 
             // I don't know yet how to handle the globalSize combined with
             // regionOffset. Would cause non-consecutive indices locally
@@ -218,7 +218,7 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
                     << exit(FatalError);
             }
 
-            subGeom_.set(surfI, &(const_cast<searchableSurface&>(s)));
+            subGeom_.set(surfI, &s);
 
             indexOffset_[surfI] = startIndex;
             startIndex += subGeom_[surfI].size();

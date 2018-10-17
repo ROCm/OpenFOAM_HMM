@@ -240,7 +240,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
 
         {
             const basicThermo* thermo =
-                nbrMesh.lookupObjectPtr<basicThermo>(basicThermo::dictName);
+                nbrMesh.findObject<basicThermo>(basicThermo::dictName);
 
             if (thermo)
             {
@@ -269,7 +269,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
         // Local inertia therm
         {
             const basicThermo* thermo =
-                mesh.lookupObjectPtr<basicThermo>(basicThermo::dictName);
+                mesh.findObject<basicThermo>(basicThermo::dictName);
 
             if (thermo)
             {

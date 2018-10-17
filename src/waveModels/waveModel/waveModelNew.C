@@ -87,15 +87,16 @@ Foam::tmp<Foam::waveModel> Foam::waveModel::lookupOrCreate
 {
     const word modelName = waveModel::modelName(patch.name());
 
-    if (!mesh.foundObject<waveModel>(modelName))
+    waveModel* modelPtr = mesh.getObjectPtr<waveModel>(modelName);
+
+    if (!modelPtr)
     {
-        autoPtr<waveModel> model(waveModel::New(waveDictName, mesh, patch));
-        waveModel* waveModelPtr = model.ptr();
-        waveModelPtr->store();
-        waveModelPtr->info(Info);
+        modelPtr = waveModel::New(waveDictName, mesh, patch).ptr();
+        modelPtr->store();
+        modelPtr->info(Info);
     }
 
-    return mesh.lookupObject<waveModel>(modelName);
+    return *modelPtr;
 }
 
 

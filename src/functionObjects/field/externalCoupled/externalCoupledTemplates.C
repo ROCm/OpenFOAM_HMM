@@ -82,8 +82,7 @@ bool Foam::functionObjects::externalCoupled::readData
     label nFound = 0;
     for (const fvMesh& mesh : meshes)
     {
-        const volFieldType* vfptr =
-            mesh.lookupObjectPtr<volFieldType>(fieldName);
+        const volFieldType* vfptr = mesh.findObject<volFieldType>(fieldName);
 
         if (!vfptr)
         {
@@ -358,8 +357,7 @@ bool Foam::functionObjects::externalCoupled::writeData
 
     for (const fvMesh& mesh : meshes)
     {
-        const volFieldType* vfptr =
-            mesh.lookupObjectPtr<volFieldType>(fieldName);
+        const volFieldType* vfptr = mesh.findObject<volFieldType>(fieldName);
 
         if (!vfptr)
         {

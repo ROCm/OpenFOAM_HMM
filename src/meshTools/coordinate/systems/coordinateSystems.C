@@ -240,8 +240,7 @@ const Foam::coordinateSystems& Foam::coordinateSystems::New
 {
     // Previously registered?
 
-    const coordinateSystems* ptr =
-        obr.lookupObjectPtr<coordinateSystems>(typeName);
+    const coordinateSystems* ptr = obr.findObject<coordinateSystems>(typeName);
 
     if (ptr)
     {

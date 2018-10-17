@@ -52,7 +52,7 @@ Foam::wordList Foam::functionObjects::vtkCloud::writeFields
 
     for (const word& fieldName : fieldNames)
     {
-        const auto* fldPtr = obrTmp.lookupObjectPtr<IOField<Type>>(fieldName);
+        const auto* fldPtr = obrTmp.findObject<IOField<Type>>(fieldName);
 
         if (Pstream::master())
         {

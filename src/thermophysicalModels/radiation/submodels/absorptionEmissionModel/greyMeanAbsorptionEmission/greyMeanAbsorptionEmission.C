@@ -118,58 +118,53 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
     // look-up table and save the corresponding indices of the look-up table
 
     label j = 0;
-    forAllConstIter(HashTable<label>, speciesNames_, iter)
+    forAllConstIters(speciesNames_, iter)
     {
+        const word& specieName = iter.key();
+        const label index = iter.object();
+
+        volScalarField* fldPtr = mesh.getObjectPtr<volScalarField>(specieName);
+
         if (!lookUpTablePtr_.empty())
         {
-            if (lookUpTablePtr_().found(iter.key()))
+            if (lookUpTablePtr_().found(specieName))
             {
-                label index = lookUpTablePtr_().findFieldIndex(iter.key());
+                const label fieldIndex =
+                    lookUpTablePtr_().findFieldIndex(specieName);
 
-                Info<< "specie: " << iter.key() << " found on look-up table "
-                    << " with index: " << index << endl;
+                Info<< "specie: " << specieName << " found on look-up table "
+                    << " with index: " << fieldIndex << endl;
 
-                specieIndex_[iter()] = index;
+                specieIndex_[index] = fieldIndex;
             }
-            else if (mesh.foundObject<volScalarField>(iter.key()))
+            else if (fldPtr)
             {
-                volScalarField& Y =
-                    const_cast<volScalarField&>
-                    (
-                        mesh.lookupObject<volScalarField>(iter.key())
-                    );
-                Yj_.set(j, &Y);
-                specieIndex_[iter()] = 0;
+                Yj_.set(j, fldPtr);
+                specieIndex_[index] = 0;
                 j++;
                 Info<< "specie: " << iter.key() << " is being solved" << endl;
             }
             else
             {
                 FatalErrorInFunction
-                    << "specie: " << iter.key()
+                    << "specie: " << specieName
                     << " is neither in look-up table: "
                     << lookUpTablePtr_().tableName()
                     << " nor is being solved" << nl
                     << exit(FatalError);
             }
         }
-        else if (mesh.foundObject<volScalarField>(iter.key()))
+        else if (fldPtr)
         {
-            volScalarField& Y =
-                const_cast<volScalarField&>
-                (
-                    mesh.lookupObject<volScalarField>(iter.key())
-                );
-
-            Yj_.set(j, &Y);
-            specieIndex_[iter()] = 0;
+            Yj_.set(j, fldPtr);
+            specieIndex_[index] = 0;
             j++;
         }
         else
         {
             FatalErrorInFunction
-                << " there is not lookup table and the specie" << nl
-                << iter.key() << nl
+                << "There is no lookup table and the specie" << nl
+                << specieName << nl
                 << " is not found " << nl
                 << exit(FatalError);
         }
@@ -292,10 +287,11 @@ Foam::radiation::greyMeanAbsorptionEmission::ECont(const label bandI) const
         )
     );
 
-    if (mesh_.foundObject<volScalarField>("Qdot"))
+    const volScalarField* QdotPtr = mesh_.findObject<volScalarField>("Qdot");
+
+    if (QdotPtr)
     {
-        const volScalarField& Qdot =
-            mesh_.lookupObject<volScalarField>("Qdot");
+        const volScalarField& Qdot = *QdotPtr;
 
         if (Qdot.dimensions() == dimEnergy/dimTime)
         {

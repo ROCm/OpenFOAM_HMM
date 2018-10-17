@@ -57,12 +57,8 @@ bool Foam::functionObjects::vorticity::calc()
             fvc::curl(lookupObject<volVectorField>(fieldName_))
         );
     }
-    else
-    {
-        return false;
-    }
 
-    return true;
+    return false;
 }
 
 

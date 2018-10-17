@@ -41,11 +41,11 @@ Foam::DispersionRASModel<CloudType>::kModel() const
             this->owner().U().group()
         );
 
-    if (obr.foundObject<turbulenceModel>(turbName))
+    const turbulenceModel* turb = obr.findObject<turbulenceModel>(turbName);
+
+    if (turb)
     {
-        const turbulenceModel& model =
-            obr.lookupObject<turbulenceModel>(turbName);
-        return model.k();
+        return turb->k();
     }
 
     FatalErrorInFunction
@@ -69,11 +69,11 @@ Foam::DispersionRASModel<CloudType>::epsilonModel() const
             this->owner().U().group()
         );
 
-    if (obr.foundObject<turbulenceModel>(turbName))
+    const turbulenceModel* turb = obr.findObject<turbulenceModel>(turbName);
+
+    if (turb)
     {
-        const turbulenceModel& model =
-            obr.lookupObject<turbulenceModel>(turbName);
-        return model.epsilon();
+        return turb->epsilon();
     }
 
     FatalErrorInFunction

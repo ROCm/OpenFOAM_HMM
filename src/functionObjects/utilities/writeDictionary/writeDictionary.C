@@ -160,10 +160,12 @@ bool Foam::functionObjects::writeDictionary::write()
     bool firstDict = true;
     forAll(dictNames_, i)
     {
-        if (obr_.foundObject<dictionary>(dictNames_[i]))
+        const dictionary* dictptr =
+            obr_.findObject<dictionary>(dictNames_[i]);
+
+        if (dictptr)
         {
-            const dictionary& dict =
-                obr_.lookupObject<dictionary>(dictNames_[i]);
+            const dictionary& dict = *dictptr;
 
             if (dict.digest() != digests_[i])
             {

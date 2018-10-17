@@ -66,7 +66,7 @@ Foam::functionObjects::setFlow::modeTypeNames
 void Foam::functionObjects::setFlow::setPhi(const volVectorField& U)
 {
     surfaceScalarField* phiptr =
-        mesh_.lookupObjectRefPtr<surfaceScalarField>(phiName_);
+        mesh_.getObjectPtr<surfaceScalarField>(phiName_);
 
     if (!phiptr)
     {
@@ -76,7 +76,7 @@ void Foam::functionObjects::setFlow::setPhi(const volVectorField& U)
     if (rhoName_ != "none")
     {
         const volScalarField* rhoptr =
-            mesh_.lookupObjectPtr<volScalarField>(rhoName_);
+            mesh_.findObject<volScalarField>(rhoName_);
 
         if (rhoptr)
         {
@@ -207,10 +207,11 @@ bool Foam::functionObjects::setFlow::read(const dictionary& dict)
 
 bool Foam::functionObjects::setFlow::execute()
 {
-    volVectorField* Uptr = mesh_.lookupObjectRefPtr<volVectorField>(UName_);
+    volVectorField* Uptr =
+        mesh_.getObjectPtr<volVectorField>(UName_);
 
     surfaceScalarField* phiptr =
-        mesh_.lookupObjectRefPtr<surfaceScalarField>(phiName_);
+        mesh_.getObjectPtr<surfaceScalarField>(phiName_);
 
     Log << nl << name() << ":" << nl;
 
@@ -431,13 +432,13 @@ bool Foam::functionObjects::setFlow::execute()
 
 bool Foam::functionObjects::setFlow::write()
 {
-    const auto& Uptr = mesh_.lookupObjectRefPtr<volVectorField>(UName_);
+    const auto* Uptr = mesh_.findObject<volVectorField>(UName_);
     if (Uptr)
     {
         Uptr->write();
     }
 
-    const auto& phiptr = mesh_.lookupObjectRefPtr<surfaceScalarField>(phiName_);
+    const auto* phiptr = mesh_.findObject<surfaceScalarField>(phiName_);
     if (phiptr)
     {
         phiptr->write();

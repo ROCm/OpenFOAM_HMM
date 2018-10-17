@@ -84,24 +84,13 @@ void Foam::refinementHistoryConstraint::add
     List<labelPair>& explicitConnections
 ) const
 {
-    autoPtr<const refinementHistory> storagePtr;
-    refinementHistory const* refPtr = nullptr;
+    const refinementHistory* refPtr =
+        mesh.findObject<refinementHistory>("refinementHistory");
 
-    if (mesh.foundObject<refinementHistory>("refinementHistory"))
+    autoPtr<const refinementHistory> storagePtr;
+
+    if (!refPtr)
     {
-        if (decompositionConstraint::debug)
-        {
-            Info<< type() << " : found refinementHistory" << endl;
-        }
-        refPtr = &mesh.lookupObject<refinementHistory>("refinementHistory");
-    }
-    else
-    {
-        if (decompositionConstraint::debug)
-        {
-            Info<< type() << " : reading refinementHistory from time "
-                << mesh.facesInstance() << endl;
-        }
         storagePtr.reset
         (
             new refinementHistory
@@ -118,6 +107,19 @@ void Foam::refinementHistoryConstraint::add
                 mesh.nCells()
             )
         );
+    }
+
+    if (decompositionConstraint::debug)
+    {
+        if (refPtr)
+        {
+            Info<< type() << " : found refinementHistory" << nl;
+        }
+        else
+        {
+            Info<< type() << " : reading refinementHistory from time "
+                << mesh.facesInstance() << nl;
+        }
     }
 
     const refinementHistory& history =
@@ -151,24 +153,13 @@ void Foam::refinementHistoryConstraint::apply
     labelList& decomposition
 ) const
 {
-    autoPtr<const refinementHistory> storagePtr;
-    refinementHistory const* refPtr = nullptr;
+    const refinementHistory* refPtr =
+        mesh.findObject<refinementHistory>("refinementHistory");
 
-    if (mesh.foundObject<refinementHistory>("refinementHistory"))
+    autoPtr<const refinementHistory> storagePtr;
+
+    if (!refPtr)
     {
-        //if (decompositionConstraint::debug)
-        //{
-        //    Info<< type() << " : found refinementHistory" << endl;
-        //}
-        refPtr = &mesh.lookupObject<refinementHistory>("refinementHistory");
-    }
-    else
-    {
-        //if (decompositionConstraint::debug)
-        //{
-        //    Info<< type() << " : reading refinementHistory from time "
-        //        << mesh.facesInstance() << endl;
-        //}
         storagePtr.reset
         (
             new refinementHistory

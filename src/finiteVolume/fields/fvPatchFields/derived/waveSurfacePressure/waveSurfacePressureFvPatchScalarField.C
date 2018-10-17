@@ -144,11 +144,7 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
     const scalar dt = db().time().deltaTValue();
 
     // retrieve non-const access to zeta field from the database
-    volVectorField& zeta =
-        const_cast<volVectorField&>
-        (
-            db().lookupObject<volVectorField>(zetaName_)
-        );
+    volVectorField& zeta = db().lookupObjectRef<volVectorField>(zetaName_);
     vectorField& zetap = zeta.boundaryFieldRef()[patchi];
 
     // lookup d/dt scheme from database for zeta

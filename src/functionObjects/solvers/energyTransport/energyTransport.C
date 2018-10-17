@@ -83,7 +83,7 @@ Foam::functionObjects::energyTransport::kappaEff() const
     {
         typedef incompressible::turbulenceModel turbType;
 
-        const turbType* turbPtr = lookupObjectPtr<turbType>
+        const turbType* turbPtr = findObject<turbType>
         (
             turbulenceModel::propertiesName
         );
@@ -305,7 +305,7 @@ Foam::functionObjects::energyTransport::energyTransport
             phases_.set
             (
                 i,
-                mesh_.lookupObjectRefPtr<volScalarField>(phaseNames_[i])
+                mesh_.getObjectPtr<volScalarField>(phaseNames_[i])
             );
         }
 

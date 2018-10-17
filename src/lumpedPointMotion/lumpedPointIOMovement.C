@@ -39,7 +39,7 @@ namespace Foam
 const Foam::lumpedPointIOMovement*
 Foam::lumpedPointIOMovement::lookupInRegistry(const objectRegistry& obr)
 {
-    return obr.lookupObjectPtr<lumpedPointIOMovement>
+    return obr.findObject<lumpedPointIOMovement>
     (
         lumpedPointMovement::canonicalName
     );

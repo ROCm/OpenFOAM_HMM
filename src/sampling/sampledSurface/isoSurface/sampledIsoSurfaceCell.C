@@ -64,7 +64,7 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
 
     // Use field from database, or try to read it in
 
-    const auto* cellFldPtr = fvm.lookupObjectPtr<volScalarField>(isoField_);
+    const auto* cellFldPtr = fvm.findObject<volScalarField>(isoField_);
 
     if (debug)
     {

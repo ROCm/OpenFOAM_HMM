@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,6 +94,35 @@ protected:
         template<class ObjectType>
         bool foundObject(const word& fieldName) const;
 
+        //- Return const pointer to the object (eg, a field) in the
+        //- (sub) objectRegistry.
+        //
+        //  \return nullptr if the object was not found or had incorrect type.
+        template<class ObjectType>
+        const ObjectType* cfindObject(const word& fieldName) const;
+
+        //- Return const pointer to the object (eg, a field) in the
+        //- (sub) objectRegistry.
+        //
+        //  \return nullptr if the object was not found or had incorrect type.
+        template<class ObjectType>
+        const ObjectType* findObject(const word& fieldName) const;
+
+        //- Return non-const pointer to the object of the given Type,
+        //- (sub) objectRegistry.
+        //
+        //  \return nullptr if the object was not found or had incorrect type.
+        template<class ObjectType>
+        ObjectType* findObject(const word& fieldName);
+
+        //- Return non-const pointer to the object of the given Type,
+        //- using a const-cast to have it behave like a mutable.
+        //  Exercise caution when using.
+        //
+        //  \return nullptr if the object was not found or had incorrect type.
+        template<class ObjectType>
+        ObjectType* getObjectPtr(const word& fieldName) const;
+
         //- Lookup and return object (eg, a field) from the (sub) objectRegistry
         template<class ObjectType>
         const ObjectType& lookupObject(const word& fieldName) const;
@@ -101,18 +130,6 @@ protected:
         //- Lookup and return object (eg, a field) from the (sub) objectRegistry
         template<class ObjectType>
         ObjectType& lookupObjectRef(const word& fieldName) const;
-
-        //- Lookup and return pointer to the object,
-        //  otherwise nullptr if the object was not found,
-        //  or had the incorrect type.
-        template<class ObjectType>
-        const ObjectType* lookupObjectPtr(const word& fieldName) const;
-
-        //- Lookup and return non-const pointer to the object,
-        //  otherwise nullptr if the object was not found,
-        //  or had the incorrect type.
-        template<class ObjectType>
-        ObjectType* lookupObjectRefPtr(const word& fieldName) const;
 
         //- Store the field in the (sub) objectRegistry under the given name
         //  Note: sets the fieldName to tfield().name() if not already set
@@ -177,6 +194,25 @@ public:
 
         //- Read optional controls
         virtual bool read(const dictionary& dict);
+
+
+    // Housekeeping
+
+        //- Same as findObject
+        //  \deprecated use findObject (OCT-2018)
+        template<class ObjectType>
+        const ObjectType* lookupObjectPtr(const word& fieldName) const
+        {
+            return this->cfindObject<ObjectType>(fieldName);
+        }
+
+        //- Same as getObjectPtr
+        //  \deprecated use getObjectPtr (OCT-2018)
+        template<class ObjectType>
+        ObjectType* lookupObjectRefPtr(const word& fieldName) const
+        {
+            return this->getObjectPtr<ObjectType>(fieldName);
+        }
 };
 
 

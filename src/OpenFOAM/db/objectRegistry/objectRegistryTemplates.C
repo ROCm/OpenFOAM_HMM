@@ -156,7 +156,7 @@ Foam::HashTable<const Type*> Foam::objectRegistry::lookupClass
 
     forAllConstIters(*this, iter)
     {
-        if (strict ? isType<Type>(*iter()) : isA<Type>(*iter()))
+        if (strict ? isType<Type>(*iter()) : bool(isA<Type>(*iter())))
         {
             objectsOfClass.insert
             (
@@ -180,7 +180,7 @@ Foam::HashTable<Type*> Foam::objectRegistry::lookupClass
 
     forAllIters(*this, iter)
     {
-        if (strict ? isType<Type>(*iter()) : isA<Type>(*iter()))
+        if (strict ? isType<Type>(*iter()) : bool(isA<Type>(*iter())))
         {
             objectsOfClass.insert
             (
@@ -201,14 +201,71 @@ bool Foam::objectRegistry::foundObject
     const bool recursive
 ) const
 {
-    const Type* ptr = this->lookupObjectPtr<Type>(name, recursive);
+    return this->cfindObject<Type>(name, recursive);
+}
 
-    if (ptr)
+
+template<class Type>
+const Type* Foam::objectRegistry::cfindObject
+(
+    const word& name,
+    const bool recursive
+) const
+{
+    const_iterator iter = cfind(name);
+
+    if (iter.found())
     {
-        return true;
+        const Type* ptr = dynamic_cast<const Type*>(iter());
+
+        if (ptr)
+        {
+            return ptr;
+        }
+    }
+    else if (recursive && this->parentNotTime())
+    {
+        return parent_.cfindObject<Type>(name, recursive);
     }
 
-    return false;
+    return nullptr;
+}
+
+
+template<class Type>
+const Type* Foam::objectRegistry::findObject
+(
+    const word& name,
+    const bool recursive
+) const
+{
+    return this->cfindObject<Type>(name, recursive);
+}
+
+
+template<class Type>
+Type* Foam::objectRegistry::findObject
+(
+    const word& name,
+    const bool recursive
+)
+{
+    const Type* ptr = this->cfindObject<Type>(name, recursive);
+
+    return const_cast<Type*>(ptr);
+}
+
+
+template<class Type>
+Type* Foam::objectRegistry::getObjectPtr
+(
+    const word& name,
+    const bool recursive
+) const
+{
+    const Type* ptr = this->cfindObject<Type>(name, recursive);
+
+    return const_cast<Type*>(ptr);
 }
 
 
@@ -219,7 +276,7 @@ const Type& Foam::objectRegistry::lookupObject
     const bool recursive
 ) const
 {
-    const_iterator iter = find(name);
+    const_iterator iter = cfind(name);
 
     if (iter.found())
     {
@@ -267,46 +324,6 @@ Type& Foam::objectRegistry::lookupObjectRef
     // The above will already fail if things didn't work
 
     return const_cast<Type&>(ref);
-}
-
-
-template<class Type>
-const Type* Foam::objectRegistry::lookupObjectPtr
-(
-    const word& name,
-    const bool recursive
-) const
-{
-    const_iterator iter = find(name);
-
-    if (iter.found())
-    {
-        const Type* ptr = dynamic_cast<const Type*>(iter());
-
-        if (ptr)
-        {
-            return ptr;
-        }
-    }
-    else if (recursive && this->parentNotTime())
-    {
-        return parent_.lookupObjectPtr<Type>(name, recursive);
-    }
-
-    return nullptr;
-}
-
-
-template<class Type>
-Type* Foam::objectRegistry::lookupObjectRefPtr
-(
-    const word& name,
-    const bool recursive
-) const
-{
-    const Type* ptr = this->lookupObjectPtr<Type>(name, recursive);
-
-    return const_cast<Type*>(ptr);
 }
 
 

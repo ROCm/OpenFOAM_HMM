@@ -40,7 +40,7 @@ bool Foam::discreteSurface::sampleType
     typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
     typedef IOField<Type> TmpFieldType;
 
-    const auto* volFldPtr = mesh().lookupObjectPtr<VolFieldType>(fieldName);
+    const auto* volFldPtr = mesh().findObject<VolFieldType>(fieldName);
 
     if (!volFldPtr)
     {
@@ -57,7 +57,7 @@ bool Foam::discreteSurface::sampleType
     {
         const surfMesh& surf = dynamicCast<const surfMesh>(obr);
 
-        SurfFieldType* ptr = surf.lookupObjectRefPtr<SurfFieldType>(fieldName);
+        SurfFieldType* ptr = surf.getObjectPtr<SurfFieldType>(fieldName);
         if (!ptr)
         {
             // Doesn't exist or the wrong type
@@ -83,7 +83,7 @@ bool Foam::discreteSurface::sampleType
     }
     else
     {
-        TmpFieldType* ptr = obr.lookupObjectRefPtr<TmpFieldType>(fieldName);
+        TmpFieldType* ptr = obr.getObjectPtr<TmpFieldType>(fieldName);
         if (!ptr)
         {
             // Doesn't exist or the wrong type
@@ -121,7 +121,7 @@ Foam::discreteSurface::sampleType
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
-    const auto* volFldPtr = mesh().lookupObjectPtr<VolFieldType>(fieldName);
+    const auto* volFldPtr = mesh().findObject<VolFieldType>(fieldName);
 
     if (volFldPtr)
     {

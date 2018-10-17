@@ -37,27 +37,19 @@ License
 const Foam::surfaceScalarField&
 Foam::pressurePIDControlInletVelocityFvPatchVectorField::facePressure() const
 {
-    const volScalarField& p(db().lookupObject<volScalarField>(pName_));
-
     const word pfName(pName_ + "f");
 
-    if (!db().foundObject<surfaceScalarField>(pfName))
-    {
-        surfaceScalarField* pfPtr
-        (
-            new surfaceScalarField(pfName, linearInterpolate(p))
-        );
+    const volScalarField& p = db().lookupObject<volScalarField>(pName_);
 
+    surfaceScalarField* pfPtr = db().getObjectPtr<surfaceScalarField>(pfName);
+
+    if (!pfPtr)
+    {
+        pfPtr = new surfaceScalarField(pfName, linearInterpolate(p));
         pfPtr->store();
     }
 
-    surfaceScalarField& pf
-    (
-        const_cast<surfaceScalarField&>
-        (
-            db().lookupObject<surfaceScalarField>(pfName)
-        )
-    );
+    surfaceScalarField& pf = *pfPtr;
 
     if (!pf.upToDate(p))
     {

@@ -147,7 +147,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
     for (auto fieldName : { "region", "STLSolidLabeling" })
     {
         const labelIOField* lptr =
-            reader.cellData().lookupObjectPtr<labelIOField>(fieldName);
+            reader.cellData().findObject<labelIOField>(fieldName);
 
         if (lptr)
         {
@@ -160,7 +160,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
         }
 
         const scalarIOField* sptr =
-            reader.cellData().lookupObjectPtr<scalarIOField>(fieldName);
+            reader.cellData().findObject<scalarIOField>(fieldName);
 
         if (sptr)
         {

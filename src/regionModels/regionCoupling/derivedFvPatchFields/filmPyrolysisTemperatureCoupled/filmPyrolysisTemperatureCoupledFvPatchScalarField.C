@@ -123,35 +123,37 @@ void Foam::filmPyrolysisTemperatureCoupledFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    typedef regionModels::surfaceFilmModels::surfaceFilmRegionModel
-        filmModelType;
+    // Film model
+    const auto* filmModelPtr = db().time().findObject
+        <regionModels::surfaceFilmModels::surfaceFilmRegionModel>
+        (filmRegionName_);
 
-    typedef regionModels::pyrolysisModels::pyrolysisModel pyrModelType;
+    // Pyrolysis model
+    const auto* pyrModelPtr = db().time().findObject
+        <regionModels::pyrolysisModels::pyrolysisModel>
+        (pyrolysisRegionName_);
+
+    if (!filmModelPtr || !pyrModelPtr)
+    {
+        // Do nothing on construction - film model doesn't exist yet
+        return;
+    }
+
+    const auto& filmModel = *filmModelPtr;
+    const auto& pyrModel = *pyrModelPtr;
+
 
     // Since we're inside initEvaluate/evaluate there might be processor
     // comms underway. Change the tag we use.
     int oldTag = UPstream::msgType();
     UPstream::msgType() = oldTag+1;
 
-    bool filmOk = db().time().foundObject<filmModelType>(filmRegionName_);
-
-
-    bool pyrOk = db().time().foundObject<pyrModelType>(pyrolysisRegionName_);
-
-    if (!filmOk || !pyrOk)
-    {
-        // Do nothing on construction - film model doesn't exist yet
-        return;
-    }
 
     scalarField& Tp = *this;
 
     const label patchi = patch().index();
 
-    // Retrieve film model
-    const filmModelType& filmModel =
-        db().time().lookupObject<filmModelType>(filmRegionName_);
-
+    // The film model
     const label filmPatchi = filmModel.regionPatchID(patchi);
 
     scalarField alphaFilm = filmModel.alpha().boundaryField()[filmPatchi];
@@ -160,10 +162,7 @@ void Foam::filmPyrolysisTemperatureCoupledFvPatchScalarField::updateCoeffs()
     scalarField TFilm = filmModel.Ts().boundaryField()[filmPatchi];
     filmModel.toPrimary(filmPatchi, TFilm);
 
-    // Retrieve pyrolysis model
-    const pyrModelType& pyrModel =
-        db().time().lookupObject<pyrModelType>(pyrolysisRegionName_);
-
+    // The pyrolysis model
     const label pyrPatchi = pyrModel.regionPatchID(patchi);
 
     scalarField TPyr = pyrModel.T().boundaryField()[pyrPatchi];

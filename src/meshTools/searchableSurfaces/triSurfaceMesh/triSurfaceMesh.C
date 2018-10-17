@@ -803,14 +803,15 @@ void Foam::triSurfaceMesh::getNormal
 
 void Foam::triSurfaceMesh::setField(const labelList& values)
 {
+    auto* fldPtr = getObjectPtr<triSurfaceLabelField>("values");
 
-    if (foundObject<triSurfaceLabelField>("values"))
+    if (fldPtr)
     {
-        lookupObjectRef<triSurfaceLabelField>("values").field() = values;
+        (*fldPtr).field() = values;
     }
     else
     {
-        auto fldPtr = autoPtr<triSurfaceLabelField>::New
+        fldPtr = new triSurfaceLabelField
         (
             IOobject
             (
@@ -827,7 +828,7 @@ void Foam::triSurfaceMesh::setField(const labelList& values)
         );
 
         // Store field on triMesh
-        fldPtr.ptr()->store();
+        fldPtr->store();
     }
 }
 
@@ -838,9 +839,11 @@ void Foam::triSurfaceMesh::getField
     labelList& values
 ) const
 {
-    if (foundObject<triSurfaceLabelField>("values"))
+    const auto* fldPtr = getObjectPtr<triSurfaceLabelField>("values");
+
+    if (fldPtr)
     {
-        const auto& fld = lookupObject<triSurfaceLabelField>("values");
+        const auto& fld = *fldPtr;
 
         values.setSize(info.size());
 

@@ -67,23 +67,19 @@ void Foam::energyRegionCoupledFvPatchScalarField::setMethod() const
     if (!nbrThermoPtr_)
     {
         nbrThermoPtr_ =
-        (
-            &regionCoupledPatch_.nbrMesh().lookupObject<basicThermo>
+            regionCoupledPatch_.nbrMesh().findObject<basicThermo>
             (
                 basicThermo::dictName
-            )
-        );
+            );
     }
 
     if (!thermoPtr_)
     {
         thermoPtr_ =
-        (
-            &this->db().lookupObject<basicThermo>
+            this->db().findObject<basicThermo>
             (
                 basicThermo::dictName
-            )
-        );
+            );
     }
 }
 

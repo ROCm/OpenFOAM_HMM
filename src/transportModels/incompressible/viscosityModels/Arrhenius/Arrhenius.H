@@ -113,12 +113,11 @@ public:
         {
             ViscousModel::correct();
 
-            const volScalarField* fieldPtr =
-                mesh_.lookupObjectPtr<volScalarField>(fieldName_);
+            const auto* fldPtr = mesh_.findObject<volScalarField>(fieldName_);
 
-            if (fieldPtr)
+            if (fldPtr)
             {
-                this->nu_ *= calcNu(*fieldPtr);
+                this->nu_ *= calcNu(*fldPtr);
             }
         }
 

@@ -37,7 +37,7 @@ bool Foam::functionObjects::fieldAverageItem::calculateMeanField
         return false;
     }
 
-    const Type* baseFieldPtr = obr.lookupObjectPtr<Type>(fieldName_);
+    const Type* baseFieldPtr = obr.findObject<Type>(fieldName_);
 
     if (!baseFieldPtr)
     {
@@ -122,7 +122,7 @@ bool Foam::functionObjects::fieldAverageItem::calculateMeanField
                     {
                         const word& fieldName = nameIter();
                         const scalar dt = timeIter();
-                        const Type* w = obr.lookupObjectPtr<Type>(fieldName);
+                        const Type* w = obr.findObject<Type>(fieldName);
 
                         meanField += dt*(*w);
 
@@ -173,7 +173,7 @@ bool Foam::functionObjects::fieldAverageItem::calculatePrime2MeanField
         return false;
     }
 
-    const Type1* baseFieldPtr = obr.lookupObjectPtr<Type1>(fieldName_);
+    const Type1* baseFieldPtr = obr.findObject<Type1>(fieldName_);
 
     if (!baseFieldPtr)
     {
@@ -258,7 +258,7 @@ bool Foam::functionObjects::fieldAverageItem::calculatePrime2MeanField
             {
                 const word& fieldName = nameIter();
                 const scalar dt = timeIter();
-                const Type1* w = obr.lookupObjectPtr<Type1>(fieldName);
+                const Type1* w = obr.findObject<Type1>(fieldName);
 
                 prime2MeanField += dt*(sqr((*w) - meanField));
 

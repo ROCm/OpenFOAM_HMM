@@ -448,11 +448,7 @@ void Foam::epsilonWallFunctionFvPatchScalarField::updateCoeffs()
 
     typedef DimensionedField<scalar, volMesh> FieldType;
 
-    FieldType& G =
-        const_cast<FieldType&>
-        (
-            db().lookupObject<FieldType>(turbModel.GName())
-        );
+    FieldType& G = db().lookupObjectRef<FieldType>(turbModel.GName());
 
     FieldType& epsilon = const_cast<FieldType&>(internalField());
 

@@ -808,7 +808,7 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
         // here since we've only got Time and not a mesh.
 
         const auto* dictPtr =
-            searchableSurface::time().lookupObjectPtr<IOdictionary>
+            searchableSurface::time().findObject<IOdictionary>
             (
                 // == decompositionModel::canonicalName
                 "decomposeParDict"
@@ -1914,13 +1914,11 @@ void Foam::distributedTriSurfaceMesh::getField
         return;
     }
 
-    if (foundObject<triSurfaceLabelField>("values"))
-    {
-        const triSurfaceLabelField& fld = lookupObject<triSurfaceLabelField>
-        (
-            "values"
-        );
+    const auto* fldPtr = findObject<triSurfaceLabelField>("values");
 
+    if (fldPtr)
+    {
+        const triSurfaceLabelField& fld = *fldPtr;
 
         // Get query data (= local index of triangle)
         // ~~~~~~~~~~~~~~

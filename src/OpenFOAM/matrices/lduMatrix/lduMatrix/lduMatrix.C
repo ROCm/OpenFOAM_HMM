@@ -338,12 +338,12 @@ void Foam::lduMatrix::setResidualField
     }
 
     IOField<scalar>* residualPtr =
-        lduMesh_.thisDb().lookupObjectRefPtr<IOField<scalar>>(lookupName);
+        lduMesh_.thisDb().getObjectPtr<IOField<scalar>>(lookupName);
 
     if (residualPtr)
     {
         const IOdictionary* dataPtr =
-            lduMesh_.thisDb().lookupObjectPtr<IOdictionary>("data");
+            lduMesh_.thisDb().findObject<IOdictionary>("data");
 
         if (dataPtr)
         {

@@ -165,7 +165,7 @@ void Foam::outletMachNumberPressureFvPatchScalarField::updateCoeffs()
     }
 
     const fluidThermo* thermoPtr =
-        db().lookupObjectPtr<fluidThermo>(basicThermo::dictName);
+        db().findObject<fluidThermo>(basicThermo::dictName);
 
     const volVectorField& U = db().lookupObject<volVectorField>(UName_);
 

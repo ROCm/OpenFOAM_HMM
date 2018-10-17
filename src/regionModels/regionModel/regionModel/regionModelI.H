@@ -60,14 +60,16 @@ inline const Foam::word& Foam::regionModels::regionModel::modelName() const
 
 inline const Foam::fvMesh& Foam::regionModels::regionModel::regionMesh() const
 {
-    if (time_.foundObject<fvMesh>(regionName_))
+    const fvMesh* regionPtr = time_.findObject<fvMesh>(regionName_);
+
+    if (regionPtr)
     {
-        return time_.lookupObject<fvMesh>(regionName_);
+        return *regionPtr;
     }
     else if (!regionMeshPtr_.valid())
     {
         FatalErrorInFunction
-         << "Region mesh not available" << abort(FatalError);
+            << "Region mesh not available" << abort(FatalError);
     }
 
     return *regionMeshPtr_;
@@ -76,17 +78,16 @@ inline const Foam::fvMesh& Foam::regionModels::regionModel::regionMesh() const
 
 inline Foam::fvMesh& Foam::regionModels::regionModel::regionMesh()
 {
-    if (time_.foundObject<fvMesh>(regionName_))
+    fvMesh* regionPtr = time_.getObjectPtr<fvMesh>(regionName_);
+
+    if (regionPtr)
     {
-        return const_cast<fvMesh&>
-        (
-            time_.lookupObject<fvMesh>(regionName_)
-        );
+        return *regionPtr;
     }
     else if (!regionMeshPtr_.valid())
     {
         FatalErrorInFunction
-         << "Region mesh not available" << abort(FatalError);
+            << "Region mesh not available" << abort(FatalError);
     }
 
     return *regionMeshPtr_;

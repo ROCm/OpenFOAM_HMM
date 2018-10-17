@@ -48,14 +48,14 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::calcUTau
     const scalarField& magGradU
 ) const
 {
-    tmp<scalarField> tuTau(new scalarField(patch().size(), 0.0));
+    tmp<scalarField> tuTau(new scalarField(patch().size(), Zero));
     scalarField& uTau = tuTau.ref();
 
-    typedef regionModels::surfaceFilmModels::surfaceFilmRegionModel modelType;
+    const auto* filmModelPtr = db().time().findObject
+        <regionModels::surfaceFilmModels::surfaceFilmRegionModel>
+        (filmRegionName_);
 
-    bool foundFilm = db().time().foundObject<modelType>(filmRegionName_);
-
-    if (!foundFilm)
+    if (!filmModelPtr)
     {
         // Do nothing on construction - film model doesn't exist yet
         return tuTau;
@@ -64,8 +64,7 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::calcUTau
     const label patchi = patch().index();
 
     // Retrieve phase change mass from surface film model
-    const modelType& filmModel =
-        db().time().lookupObject<modelType>(filmRegionName_);
+    const auto& filmModel = *filmModelPtr;
 
     const label filmPatchi = filmModel.regionPatchID(patchi);
 

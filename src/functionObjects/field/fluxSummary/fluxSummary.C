@@ -129,7 +129,7 @@ void Foam::functionObjects::fluxSummary::initialiseSurface
     DynamicList<boolList>& faceFlip
 ) const
 {
-    const surfMesh* sPtr = mesh_.lookupObjectPtr<surfMesh>(surfName);
+    const surfMesh* sPtr = mesh_.findObject<surfMesh>(surfName);
     if (!sPtr)
     {
         FatalErrorInFunction
@@ -154,7 +154,7 @@ void Foam::functionObjects::fluxSummary::initialiseSurfaceAndDirection
     DynamicList<boolList>& faceFlip
 ) const
 {
-    const surfMesh* sPtr = mesh_.lookupObjectPtr<surfMesh>(surfName);
+    const surfMesh* sPtr = mesh_.findObject<surfMesh>(surfName);
     if (!sPtr)
     {
         FatalErrorInFunction

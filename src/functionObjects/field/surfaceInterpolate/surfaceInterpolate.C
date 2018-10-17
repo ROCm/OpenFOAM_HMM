@@ -107,14 +107,12 @@ bool Foam::functionObjects::surfaceInterpolate::write()
     {
         const word& fieldName = fieldSet_[i].second();
 
-        if (mesh_.foundObject<regIOobject>(fieldName))
+        const regIOobject* ioptr = obr_.findObject<regIOobject>(fieldName);
+
+        if (ioptr)
         {
             Log << "        " << fieldName << nl;
-
-            const regIOobject& field =
-                obr_.lookupObject<regIOobject>(fieldName);
-
-            field.write();
+            ioptr->write();
         }
         else
         {

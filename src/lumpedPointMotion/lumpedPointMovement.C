@@ -495,7 +495,7 @@ bool Foam::lumpedPointMovement::forcesAndMoments
     // Calculated force per patch - cache
     PtrMap<vectorField> forceOnPatches;
 
-    const volScalarField* pPtr = pmesh.lookupObjectPtr<volScalarField>(pName);
+    const volScalarField* pPtr = pmesh.findObject<volScalarField>(pName);
 
     // fvMesh and has pressure field
     if (isA<fvMesh>(pmesh) && pPtr)

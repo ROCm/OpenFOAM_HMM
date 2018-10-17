@@ -52,27 +52,22 @@ void Foam::sampledIsoSurface::getIsoFields() const
     // Get volField
     // ~~~~~~~~~~~~
 
-    if (fvm.foundObject<volScalarField>(isoField_))
+    volFieldPtr_ = fvm.getObjectPtr<volScalarField>(isoField_);
+
+    if (volFieldPtr_)
     {
-        if (debug)
-        {
-            InfoInFunction
-                << "Lookup volField " << isoField_ << endl;
-        }
+        DebugInFunction
+            << "Lookup volField " << isoField_ << endl;
+
         storedVolFieldPtr_.clear();
-        volFieldPtr_ = &fvm.lookupObject<volScalarField>(isoField_);
     }
     else
     {
         // Bit of a hack. Read field and store.
 
-        if (debug)
-        {
-            InfoInFunction
-                << "Checking " << isoField_
-                << " for same time " << fvm.time().timeName()
-                << endl;
-        }
+        DebugInFunction
+            << "Checking " << isoField_
+            << " for same time " << fvm.time().timeName() << endl;
 
         if
         (
@@ -80,13 +75,9 @@ void Foam::sampledIsoSurface::getIsoFields() const
          || (fvm.time().timeName() != storedVolFieldPtr_().instance())
         )
         {
-            if (debug)
-            {
-                InfoInFunction
-                    << "Reading volField " << isoField_
-                    << " from time " << fvm.time().timeName()
-                    << endl;
-            }
+            DebugInFunction
+                << "Reading volField " << isoField_
+                << " from time " << fvm.time().timeName() << endl;
 
             IOobject vfHeader
             (
@@ -141,61 +132,45 @@ void Foam::sampledIsoSurface::getIsoFields() const
           + isoField_
           + ')';
 
-        if (fvm.foundObject<pointScalarField>(pointFldName))
-        {
-            if (debug)
-            {
-                InfoInFunction
-                    << "lookup pointField " << pointFldName << endl;
-            }
-            const pointScalarField& pfld = fvm.lookupObject<pointScalarField>
-            (
-                pointFldName
-            );
 
-            if (!pfld.upToDate(*volFieldPtr_))
+        pointFieldPtr_ = fvm.getObjectPtr<pointScalarField>(pointFldName);
+
+        if (pointFieldPtr_)
+        {
+            DebugInFunction
+                << "lookup pointField " << pointFldName << endl;
+
+            if (!pointFieldPtr_->upToDate(*volFieldPtr_))
             {
-                if (debug)
-                {
-                    InfoInFunction
-                        << "updating pointField "
-                        << pointFldName << endl;
-                }
+                DebugInFunction
+                    << "updating pointField " << pointFldName << endl;
+
                 // Update the interpolated value
                 volPointInterpolation::New(fvm).interpolate
                 (
                     *volFieldPtr_,
-                    const_cast<pointScalarField&>(pfld)
+                    const_cast<pointScalarField&>(*pointFieldPtr_)
                 );
             }
-
-            pointFieldPtr_ = &pfld;
         }
         else
         {
             // Not in registry. Interpolate.
 
-            if (debug)
-            {
-                InfoInFunction
-                    << "Checking pointField " << pointFldName
-                    << " for same time " << fvm.time().timeName()
-                    << endl;
-            }
+            DebugInFunction
+                << "creating pointField " << pointFldName << endl;
 
             // Interpolate without cache. Note that we're registering it
             // below so next time round it goes into the condition
             // above.
-            tmp<pointScalarField> tpfld
-            (
+            pointFieldPtr_ =
                 volPointInterpolation::New(fvm).interpolate
                 (
                     *volFieldPtr_,
                     pointFldName,
                     false
-                )
-            );
-            pointFieldPtr_ = tpfld.ptr();
+                ).ptr();
+
             const_cast<pointScalarField*>(pointFieldPtr_)->store();
         }
 
@@ -212,17 +187,13 @@ void Foam::sampledIsoSurface::getIsoFields() const
         }
 
 
-        if (debug)
-        {
-            InfoInFunction
-                << "volField " << volFieldPtr_->name()
-                << " min:" << min(*volFieldPtr_).value()
-                << " max:" << max(*volFieldPtr_).value() << endl;
-            InfoInFunction
-                << "pointField " << pointFieldPtr_->name()
-                << " min:" << gMin(pointFieldPtr_->primitiveField())
-                << " max:" << gMax(pointFieldPtr_->primitiveField()) << endl;
-        }
+        DebugInFunction
+            << "volField " << volFieldPtr_->name()
+            << " min:" << min(*volFieldPtr_).value()
+            << " max:" << max(*volFieldPtr_).value() << nl
+            << "pointField " << pointFieldPtr_->name()
+            << " min:" << gMin(pointFieldPtr_->primitiveField())
+            << " max:" << gMax(pointFieldPtr_->primitiveField()) << endl;
     }
     else
     {
@@ -231,24 +202,20 @@ void Foam::sampledIsoSurface::getIsoFields() const
 
         // Either lookup on the submesh or subset the whole-mesh volField
 
-        if (subFvm.foundObject<volScalarField>(isoField_))
+        volSubFieldPtr_ = subFvm.getObjectPtr<volScalarField>(isoField_);
+
+        if (volSubFieldPtr_)
         {
-            if (debug)
-            {
-                InfoInFunction
-                    << "Sub-mesh lookup volField "
-                    << isoField_ << endl;
-            }
+            DebugInFunction
+                << "Sub-mesh lookup volField " << isoField_ << endl;
+
             storedVolSubFieldPtr_.clear();
-            volSubFieldPtr_ = &subFvm.lookupObject<volScalarField>(isoField_);
         }
         else
         {
-            if (debug)
-            {
-                InfoInFunction
-                    << "Sub-setting volField " << isoField_ << endl;
-            }
+            DebugInFunction
+                << "Sub-setting volField " << isoField_ << endl;
+
             storedVolSubFieldPtr_.reset
             (
                 subMeshPtr_().interpolate
@@ -270,53 +237,40 @@ void Foam::sampledIsoSurface::getIsoFields() const
           + volSubFieldPtr_->name()
           + ')';
 
-        if (subFvm.foundObject<pointScalarField>(pointFldName))
-        {
-            if (debug)
-            {
-                InfoInFunction
-                    << "Sub-mesh lookup pointField " << pointFldName << endl;
-            }
-            const pointScalarField& pfld = subFvm.lookupObject<pointScalarField>
-            (
-                pointFldName
-            );
 
-            if (!pfld.upToDate(*volSubFieldPtr_))
+        pointFieldPtr_ = subFvm.getObjectPtr<pointScalarField>(pointFldName);
+
+        if (pointFieldPtr_)
+        {
+            DebugInFunction
+                << "Sub-mesh lookup pointField " << pointFldName << endl;
+
+            if (!pointFieldPtr_->upToDate(*volSubFieldPtr_))
             {
-                if (debug)
-                {
-                    Info<< "sampledIsoSurface::getIsoFields() :"
-                        << " updating submesh pointField "
-                        << pointFldName << endl;
-                }
+                DebugInFunction
+                    << "Updating submesh pointField " << pointFldName << endl;
+
                 // Update the interpolated value
                 volPointInterpolation::New(subFvm).interpolate
                 (
                     *volSubFieldPtr_,
-                    const_cast<pointScalarField&>(pfld)
+                    const_cast<pointScalarField&>(*pointFieldPtr_)
                 );
             }
-
-            pointFieldPtr_ = &pfld;
         }
         else
         {
-            if (debug)
-            {
-                InfoInFunction
-                    << "Interpolating submesh volField "
-                    << volSubFieldPtr_->name()
-                    << " to get submesh pointField " << pointFldName << endl;
-            }
-            tmp<pointScalarField> tpfld
-            (
+            DebugInFunction
+                << "Interpolating submesh volField "
+                << volSubFieldPtr_->name()
+                << " to get submesh pointField " << pointFldName << endl;
+
+            pointSubFieldPtr_ =
                 volPointInterpolation::New
                 (
                     subFvm
-                ).interpolate(*volSubFieldPtr_)
-            );
-            pointSubFieldPtr_ = tpfld.ptr();
+                ).interpolate(*volSubFieldPtr_).ptr();
+
             const_cast<pointScalarField*>(pointSubFieldPtr_)->store();
         }
 
@@ -333,19 +287,15 @@ void Foam::sampledIsoSurface::getIsoFields() const
         }
 
 
-        if (debug)
-        {
-            InfoInFunction
-                << "volSubField "
-                << volSubFieldPtr_->name()
-                << " min:" << min(*volSubFieldPtr_).value()
-                << " max:" << max(*volSubFieldPtr_).value() << endl;
-            InfoInFunction
-                << "pointSubField "
-                << pointSubFieldPtr_->name()
-                << " min:" << gMin(pointSubFieldPtr_->primitiveField())
-                << " max:" << gMax(pointSubFieldPtr_->primitiveField()) << endl;
-        }
+        DebugInFunction
+            << "volSubField "
+            << volSubFieldPtr_->name()
+            << " min:" << min(*volSubFieldPtr_).value()
+            << " max:" << max(*volSubFieldPtr_).value() << nl
+            << "pointSubField "
+            << pointSubFieldPtr_->name()
+            << " min:" << gMin(pointSubFieldPtr_->primitiveField())
+            << " max:" << gMax(pointSubFieldPtr_->primitiveField()) << endl;
     }
 }
 
