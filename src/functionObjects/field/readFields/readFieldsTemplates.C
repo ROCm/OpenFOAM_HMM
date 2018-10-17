@@ -47,13 +47,15 @@ bool Foam::functionObjects::readFields::loadField(const word& fieldName)
     }
     else if (foundObject<SurfaceFieldType>(fieldName))
     {
-        DebugInfo<< "readFields: " << SurfaceFieldType::typeName
+        DebugInfo
+            << "readFields: " << SurfaceFieldType::typeName
             << " " << fieldName << " already exists in database"
             << " already in database" << endl;
     }
     else if (foundObject<SurfFieldType>(fieldName))
     {
-        DebugInfo<< "readFields: " << SurfFieldType::typeName
+        DebugInfo
+            << "readFields: " << SurfFieldType::typeName
             << " " << fieldName << " already exists in database"
             << " already in database" << endl;
     }

@@ -13,7 +13,7 @@
     );
 
     const dictionary& rhoDict(mechanicalProperties.subDict("rho"));
-    word rhoType(rhoDict.lookup("type"));
+    word rhoType(rhoDict.get<word>("type"));
 
     autoPtr<volScalarField> rhoPtr;
 
@@ -28,7 +28,7 @@
 
     if (rhoType == "uniform")
     {
-        scalar rhoValue(readScalar(rhoDict.lookup("value")));
+        scalar rhoValue(rhoDict.get<scalar>("value"));
 
         rhoPtr.reset
         (
@@ -68,7 +68,7 @@
     volScalarField& rho = rhoPtr();
 
     const dictionary& EDict(mechanicalProperties.subDict("E"));
-    word EType(EDict.lookup("type"));
+    word EType(EDict.get<word>("type"));
 
     autoPtr<volScalarField> EPtr;
 
@@ -83,7 +83,7 @@
 
     if (EType == "uniform")
     {
-        scalar rhoEValue(readScalar(EDict.lookup("value")));
+        scalar rhoEValue(EDict.get<scalar>("value"));
 
         EPtr.reset
         (
@@ -134,11 +134,11 @@
     );
 
     const dictionary& nuDict(mechanicalProperties.subDict("nu"));
-    word nuType(nuDict.lookup("type"));
+    word nuType(nuDict.get<word>("type"));
 
     if (nuType == "uniform")
     {
-        scalar nuValue(readScalar(nuDict.lookup("value")));
+        scalar nuValue(nuDict.get<scalar>("value"));
         nuPtr.reset
         (
             new volScalarField

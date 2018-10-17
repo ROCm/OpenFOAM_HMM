@@ -182,8 +182,7 @@ bool Foam::dynamicMultiMotionSolverFvMesh::update()
 
     if (foundObject<volVectorField>("U"))
     {
-        const_cast<volVectorField&>(lookupObject<volVectorField>("U"))
-            .correctBoundaryConditions();
+        lookupObjectRef<volVectorField>("U").correctBoundaryConditions();
     }
     else if (!hasWarned)
     {

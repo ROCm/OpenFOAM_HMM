@@ -48,7 +48,7 @@ eddyDissipationModelBase<ReactionThermo, ThermoType>::eddyDissipationModelBase
         turb,
         combustionProperties
     ),
-    CEDC_(readScalar(this->coeffs().lookup("CEDC")))
+    CEDC_(this->coeffs().getScalar("CEDC"))
 {}
 
 

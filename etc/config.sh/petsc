@@ -31,7 +31,7 @@ export PETSC_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER$WM_PRE
 
 # END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
-if [ "$FOAM_VERBOSE" -a "$PS1" ]
+if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
 then
     echo "Using petsc ($petsc_version)  ->  $PETSC_ARCH_PATH" 1>&2
 fi

@@ -170,7 +170,7 @@ Foam::loopControl::loopControl
     loopControl(runTime, 0, dictName)
 {
     // The loop sub-dictionary
-    const dictionary* dictptr = algorithmDict.subDictPtr(dictName);
+    const dictionary* dictptr = algorithmDict.findDict(dictName);
 
     if (dictptr)
     {
@@ -192,13 +192,12 @@ Foam::loopControl::loopControl
     fvSolution fvsol(time_);
 
     // Eg, PIMPLE or SIMPLE from <system/fvSolution>
-    const dictionary* dictptr =
-        fvsol.solutionDict().subDictPtr(algorithmName);
+    const dictionary* dictptr = fvsol.solutionDict().findDict(algorithmName);
 
     if (dictptr)
     {
         // The loop sub-dictionary
-        dictptr = dictptr->subDictPtr(dictName);
+        dictptr = dictptr->findDict(dictName);
 
         if (dictptr)
         {

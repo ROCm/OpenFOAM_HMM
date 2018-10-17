@@ -34,18 +34,18 @@ License
 
 Foam::refinementParameters::refinementParameters(const dictionary& dict)
 :
-    maxGlobalCells_(readLabel(dict.lookup("maxGlobalCells"))),
-    maxLocalCells_(readLabel(dict.lookup("maxLocalCells"))),
-    minRefineCells_(readLabel(dict.lookup("minRefinementCells"))),
+    maxGlobalCells_(dict.get<label>("maxGlobalCells")),
+    maxLocalCells_(dict.get<label>("maxLocalCells")),
+    minRefineCells_(dict.get<label>("minRefinementCells")),
     planarAngle_
     (
         dict.lookupOrDefault
         (
             "planarAngle",
-            readScalar(dict.lookup("resolveFeatureAngle"))
+            dict.get<scalar>("resolveFeatureAngle")
         )
     ),
-    nBufferLayers_(readLabel(dict.lookup("nCellsBetweenLevels"))),
+    nBufferLayers_(dict.get<label>("nCellsBetweenLevels")),
     locationsOutsideMesh_
     (
         dict.lookupOrDefault
@@ -104,7 +104,7 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
     }
 
 
-    scalar featAngle(readScalar(dict.lookup("resolveFeatureAngle")));
+    const scalar featAngle(dict.get<scalar>("resolveFeatureAngle"));
 
     if (featAngle < 0 || featAngle > 180)
     {

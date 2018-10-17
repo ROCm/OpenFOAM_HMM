@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,212 +24,274 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cylindricalCS.H"
-
-#include "one.H"
-#include "mathematicalConstants.H"
 #include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace coordSystem
+{
+    defineTypeName(cylindrical);
+    addToRunTimeSelectionTable(coordinateSystem, cylindrical, dictionary);
+}
+}
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Issue warning if 'degrees' keyword was specified and true.
+// Compatibility change after 1806.
+
+static inline void warnCompatDegrees(const Foam::dictionary& dict)
+{
+    if (Pstream::parRun() ? Pstream::master() : true)
+    {
+        std::cerr
+            << "--> FOAM IOWarning :" << nl
+            << "    Found [v1806] 'degrees' keyword in dictionary \""
+            << dict.name().c_str() << "\"    Ignored, now radians only." << nl
+            << std::endl;
+    }
+}
+
+
+//- Convert from Cartesian (to Cylindrical)
+static inline vector fromCartesian(const vector& v)
+{
+    return vector(hypot(v.x(), v.y()), atan2(v.y(), v.x()), v.z());
+}
+
+
+//- Convert to Cartesian (from Cylindrical)
+static inline vector toCartesian(const vector& v)
+{
+    return vector(v.x()*cos(v.y()), v.x()*sin(v.y()), v.z());
+}
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::cylindricalCS::cylindricalCS(const bool inDegrees)
+Foam::coordSystem::cylindrical::cylindrical()
 :
-    coordinateSystem(),
-    inDegrees_(inDegrees)
+    coordinateSystem()
 {}
 
 
-Foam::cylindricalCS::cylindricalCS
-(
-    const coordinateSystem& cs,
-    const bool inDegrees
-)
+Foam::coordSystem::cylindrical::cylindrical(const coordinateSystem& csys)
 :
-    coordinateSystem(cs),
-    inDegrees_(inDegrees)
+    coordinateSystem(csys)
 {}
 
 
-Foam::cylindricalCS::cylindricalCS
-(
-    const word& name,
-    const coordinateSystem& cs,
-    const bool inDegrees
-)
+Foam::coordSystem::cylindrical::cylindrical(coordinateSystem&& csys)
 :
-    coordinateSystem(name, cs),
-    inDegrees_(inDegrees)
+    coordinateSystem(std::move(csys))
 {}
 
 
-Foam::cylindricalCS::cylindricalCS
+Foam::coordSystem::cylindrical::cylindrical(autoPtr<coordinateSystem>&& csys)
+:
+    coordinateSystem(std::move(csys))
+{}
+
+
+Foam::coordSystem::cylindrical::cylindrical
 (
-    const word& name,
     const point& origin,
-    const coordinateRotation& cr,
-    const bool inDegrees
+    const coordinateRotation& crot
 )
 :
-    coordinateSystem(name, origin, cr),
-    inDegrees_(inDegrees)
+    coordinateSystem(origin, crot)
 {}
 
 
-Foam::cylindricalCS::cylindricalCS
+Foam::coordSystem::cylindrical::cylindrical
+(
+    const point& origin,
+    const vector& axis,
+    const vector& dirn
+)
+:
+    coordinateSystem(origin, axis, dirn)
+{}
+
+
+Foam::coordSystem::cylindrical::cylindrical
 (
     const word& name,
     const point& origin,
     const vector& axis,
-    const vector& dirn,
-    const bool inDegrees
+    const vector& dirn
 )
 :
-    coordinateSystem(name, origin, axis, dirn),
-    inDegrees_(inDegrees)
+    coordinateSystem(name, origin, axis, dirn)
 {}
 
 
-Foam::cylindricalCS::cylindricalCS
+Foam::coordSystem::cylindrical::cylindrical
 (
     const word& name,
     const dictionary& dict
 )
 :
-    coordinateSystem(name, dict),
-    inDegrees_(dict.lookupOrDefault("degrees", true))
-{}
+    coordinateSystem(name, dict)
+{
+    if (dict.lookupOrDefault("degrees", false))
+    {
+        warnCompatDegrees(dict);
+    }
+}
 
 
-Foam::cylindricalCS::cylindricalCS
+Foam::coordSystem::cylindrical::cylindrical(const dictionary& dict)
+:
+    coordinateSystem(dict)
+{
+    if (dict.lookupOrDefault("degrees", false))
+    {
+        warnCompatDegrees(dict);
+    }
+}
+
+
+Foam::coordSystem::cylindrical::cylindrical
 (
-    const objectRegistry& obr,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& dictName
 )
 :
-    coordinateSystem(obr, dict),
-    inDegrees_(dict.lookupOrDefault("degrees", true))
-{}
+    coordinateSystem(dict, dictName)
+{
+    const dictionary* dictPtr =
+    (
+        dictName.size()
+      ? &(dict.subDict(dictName))
+      : &(dict)
+    );
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cylindricalCS::~cylindricalCS()
-{}
+    if (dictPtr->lookupOrDefault("degrees", false))
+    {
+        warnCompatDegrees(dict);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::cylindricalCS::inDegrees() const
+Foam::tensor Foam::coordSystem::cylindrical::R(const point& global) const
 {
-    return inDegrees_;
+    // Robuster version of coordinateRotations::axes::rotation()
+    // using an E3_E1 order and falling back to the top-level rotation
+    // tensor if the directional input is borderline.
+
+    tensor rotTensor(rot_);
+
+    const vector ax1 = rotTensor.col<2>(); // == e3 (already normalized)
+
+    vector ax2(global - origin_);
+
+    // Remove colinear component
+    ax2 -= ((ax1 & ax2) * ax1);
+
+    const scalar magAxis2(mag(ax2));
+
+    // Trap zero size and colinearity
+    if (magAxis2 < SMALL)
+    {
+        return rotTensor;
+    }
+
+    ax2 /= magAxis2;  // normalise
+
+    // Replace with updated local axes
+
+    rotTensor.col<0>(ax2);
+    rotTensor.col<1>(ax1^ax2);
+
+    return rotTensor;
 }
 
 
-bool& Foam::cylindricalCS::inDegrees()
-{
-    return inDegrees_;
-}
-
-
-Foam::vector Foam::cylindricalCS::localToGlobal
+Foam::vector Foam::coordSystem::cylindrical::localToGlobal
 (
     const vector& local,
     bool translate
 ) const
 {
-    scalar theta
-    (
-        local.y()*(inDegrees_ ? constant::mathematical::pi/180.0 : 1.0)
-    );
-
     return coordinateSystem::localToGlobal
     (
-        vector(local.x()*cos(theta), local.x()*sin(theta), local.z()),
+        toCartesian(local),
         translate
     );
 }
 
 
-Foam::tmp<Foam::vectorField> Foam::cylindricalCS::localToGlobal
+Foam::tmp<Foam::vectorField> Foam::coordSystem::cylindrical::localToGlobal
 (
     const vectorField& local,
     bool translate
 ) const
 {
-    scalarField theta
-    (
-        local.component(vector::Y)
-       *(inDegrees_ ? constant::mathematical::pi/180.0 : 1.0)
-    );
+    const label len = local.size();
 
+    auto tresult = tmp<vectorField>::New(len);
+    auto& result = tresult.ref();
 
-    vectorField lc(local.size());
-    lc.replace(vector::X, local.component(vector::X)*cos(theta));
-    lc.replace(vector::Y, local.component(vector::X)*sin(theta));
-    lc.replace(vector::Z, local.component(vector::Z));
+    for (label i=0; i<len; ++i)
+    {
+        result[i] =
+            coordinateSystem::localToGlobal
+            (
+                toCartesian(local[i]),
+                translate
+            );
+    }
 
-    return coordinateSystem::localToGlobal(lc, translate);
+    return tresult;
 }
 
 
-Foam::vector Foam::cylindricalCS::globalToLocal
+Foam::vector Foam::coordSystem::cylindrical::globalToLocal
 (
     const vector& global,
     bool translate
 ) const
 {
-    const vector lc
+    return fromCartesian
     (
         coordinateSystem::globalToLocal(global, translate)
-    );
-
-    return vector
-    (
-        sqrt(sqr(lc.x()) + sqr(lc.y())),
-        atan2
-        (
-            lc.y(),
-            lc.x()
-        )*(inDegrees_ ? 180.0/constant::mathematical::pi : 1.0),
-        lc.z()
     );
 }
 
 
-Foam::tmp<Foam::vectorField> Foam::cylindricalCS::globalToLocal
+Foam::tmp<Foam::vectorField> Foam::coordSystem::cylindrical::globalToLocal
 (
     const vectorField& global,
     bool translate
 ) const
 {
-    const vectorField lc
+    const label len = global.size();
+
+    tmp<vectorField> tresult
     (
         coordinateSystem::globalToLocal(global, translate)
     );
+    auto& result = tresult.ref();
 
-    tmp<vectorField> tresult(new vectorField(lc.size()));
-    vectorField& result = tresult.ref();
-
-    result.replace
-    (
-        vector::X,
-        sqrt(sqr(lc.component(vector::X)) + sqr(lc.component(vector::Y)))
-    );
-
-    result.replace
-    (
-        vector::Y,
-        atan2
-        (
-            lc.component(vector::Y),
-            lc.component(vector::X)
-        )*(inDegrees_ ? 180.0/constant::mathematical::pi : 1.0)
-    );
-
-    result.replace(vector::Z, lc.component(vector::Z));
+    for (label i=0; i<len; ++i)
+    {
+        result[i] = fromCartesian(result[i]);
+    }
 
     return tresult;
 }
+
 
 
 // ************************************************************************* //

@@ -168,8 +168,8 @@ Foam::layerAdditionRemoval::layerAdditionRemoval
 :
     polyMeshModifier(name, index, ptc, dict.get<bool>("active")),
     faceZoneID_(dict.lookup("faceZoneName"), ptc.mesh().faceZones()),
-    minLayerThickness_(readScalar(dict.lookup("minLayerThickness"))),
-    maxLayerThickness_(readScalar(dict.lookup("maxLayerThickness"))),
+    minLayerThickness_(dict.get<scalar>("minLayerThickness")),
+    maxLayerThickness_(dict.get<scalar>("maxLayerThickness")),
     thicknessFromVolume_(dict.lookupOrDefault("thicknessFromVolume", true)),
     oldLayerThickness_(readOldThickness(dict)),
     pointsPairingPtr_(nullptr),

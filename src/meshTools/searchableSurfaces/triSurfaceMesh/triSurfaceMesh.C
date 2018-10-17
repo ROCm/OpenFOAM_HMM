@@ -100,7 +100,7 @@ Foam::fileName Foam::triSurfaceMesh::checkFile
 )
 {
     fileName fName;
-    if (dict.readIfPresent("file", fName, false, false))
+    if (dict.readIfPresent("file", fName, keyType::LITERAL))
     {
         fName = relativeFilePath(io, fName, isGlobal);
 
@@ -318,7 +318,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
     outsideVolType_(volumeType::UNKNOWN)
 {
     // Reading from supplied file name instead of objectPath/filePath
-    if (dict.readIfPresent("file", fName_, false, false))
+    if (dict.readIfPresent("file", fName_, keyType::LITERAL))
     {
         fName_ = relativeFilePath
         (
@@ -418,7 +418,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
     outsideVolType_(volumeType::UNKNOWN)
 {
     // Reading from supplied file name instead of objectPath/filePath
-    if (dict.readIfPresent("file", fName_, false, false))
+    if (dict.readIfPresent("file", fName_, keyType::LITERAL))
     {
         fName_ = relativeFilePath
         (
@@ -803,14 +803,15 @@ void Foam::triSurfaceMesh::getNormal
 
 void Foam::triSurfaceMesh::setField(const labelList& values)
 {
+    auto* fldPtr = getObjectPtr<triSurfaceLabelField>("values");
 
-    if (foundObject<triSurfaceLabelField>("values"))
+    if (fldPtr)
     {
-        lookupObjectRef<triSurfaceLabelField>("values").field() = values;
+        (*fldPtr).field() = values;
     }
     else
     {
-        auto fldPtr = autoPtr<triSurfaceLabelField>::New
+        fldPtr = new triSurfaceLabelField
         (
             IOobject
             (
@@ -827,7 +828,7 @@ void Foam::triSurfaceMesh::setField(const labelList& values)
         );
 
         // Store field on triMesh
-        fldPtr.ptr()->store();
+        fldPtr->store();
     }
 }
 
@@ -838,9 +839,11 @@ void Foam::triSurfaceMesh::getField
     labelList& values
 ) const
 {
-    if (foundObject<triSurfaceLabelField>("values"))
+    const auto* fldPtr = getObjectPtr<triSurfaceLabelField>("values");
+
+    if (fldPtr)
     {
-        const auto& fld = lookupObject<triSurfaceLabelField>("values");
+        const auto& fld = *fldPtr;
 
         values.setSize(info.size());
 

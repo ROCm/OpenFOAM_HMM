@@ -32,8 +32,8 @@ template<class EquationOfState>
 Foam::eConstThermo<EquationOfState>::eConstThermo(const dictionary& dict)
 :
     EquationOfState(dict),
-    Cv_(readScalar(dict.subDict("thermodynamics").lookup("Cv"))),
-    Hf_(readScalar(dict.subDict("thermodynamics").lookup("Hf")))
+    Cv_(dict.subDict("thermodynamics").get<scalar>("Cv")),
+    Hf_(dict.subDict("thermodynamics").get<scalar>("Hf"))
 {}
 
 

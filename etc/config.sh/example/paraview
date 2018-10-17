@@ -27,6 +27,8 @@ pv=5.5.0
 pv=5.5.0-mpipy
 qt=qt-5.9.0
 
-eval $(foamEtcFile -sh -config -mode=o paraview -- ParaView_VERSION=$pv ParaView_QT=$qt)
+eval \
+    "$(foamEtcFile -sh -config -mode=o paraview -- \
+    ParaView_VERSION=$pv ParaView_QT=$qt)"
 
 #------------------------------------------------------------------------------

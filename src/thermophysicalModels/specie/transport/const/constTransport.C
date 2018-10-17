@@ -32,8 +32,8 @@ template<class Thermo>
 Foam::constTransport<Thermo>::constTransport(const dictionary& dict)
 :
     Thermo(dict),
-    mu_(readScalar(dict.subDict("transport").lookup("mu"))),
-    rPr_(1.0/readScalar(dict.subDict("transport").lookup("Pr")))
+    mu_(dict.subDict("transport").get<scalar>("mu")),
+    rPr_(1.0/dict.subDict("transport").get<scalar>("Pr"))
 {}
 
 

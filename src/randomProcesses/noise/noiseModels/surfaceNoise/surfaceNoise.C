@@ -28,6 +28,7 @@ License
 #include "surfaceWriter.H"
 #include "noiseFFT.H"
 #include "graph.H"
+#include "stringOps.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -464,10 +465,11 @@ void surfaceNoise::calculate()
 
         if (!fName.isAbsolute())
         {
-            fName = "$FOAM_CASE"/fName;
+            // ie, globalPath() / name
+            fName = stringOps::expand("<case>")/fName;
         }
 
-        initialise(fName.expand());
+        initialise(fName);
 
         // Container for pressure time history data per face
         List<scalarField> pData;

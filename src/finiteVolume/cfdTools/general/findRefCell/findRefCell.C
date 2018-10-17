@@ -47,7 +47,7 @@ bool Foam::setRefCell
         {
             if (Pstream::master())
             {
-                refCelli = readLabel(dict.lookup(refCellName));
+                dict.readEntry(refCellName, refCelli);
 
                 if (refCelli < 0 || refCelli >= field.mesh().nCells())
                 {
@@ -66,7 +66,7 @@ bool Foam::setRefCell
         }
         else if (dict.found(refPointName))
         {
-            point refPointi(dict.lookup(refPointName));
+            point refPointi(dict.get<point>(refPointName));
 
             // Try fast approximate search avoiding octree construction
             refCelli = field.mesh().findCell(refPointi, polyMesh::FACE_PLANES);
@@ -107,14 +107,12 @@ bool Foam::setRefCell
                 << " or " << refPointName << nl << exit(FatalIOError);
         }
 
-        refValue = readScalar(dict.lookup(refValueName));
+        dict.readEntry(refValueName, refValue);
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

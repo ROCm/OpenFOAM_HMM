@@ -99,7 +99,7 @@ void Foam::Time::readDict()
     // DebugSwitches
     if
     (
-        (localDict = controlDict_.subDictPtr("DebugSwitches")) != nullptr
+        (localDict = controlDict_.findDict("DebugSwitches")) != nullptr
      && localDict->size()
     )
     {
@@ -146,7 +146,7 @@ void Foam::Time::readDict()
     // InfoSwitches
     if
     (
-        (localDict = controlDict_.subDictPtr("InfoSwitches")) != nullptr
+        (localDict = controlDict_.findDict("InfoSwitches")) != nullptr
      && localDict->size()
     )
     {
@@ -192,7 +192,7 @@ void Foam::Time::readDict()
     // OptimisationSwitches
     if
     (
-        (localDict = controlDict_.subDictPtr("OptimisationSwitches")) != nullptr
+        (localDict = controlDict_.findDict("OptimisationSwitches")) != nullptr
      && localDict->size()
     )
     {
@@ -273,7 +273,7 @@ void Foam::Time::readDict()
     if
     (
 
-        (localDict = controlDict_.subDictPtr("DimensionedConstants")) != nullptr
+        (localDict = controlDict_.findDict("DimensionedConstants")) != nullptr
      && localDict->size()
     )
     {
@@ -310,7 +310,7 @@ void Foam::Time::readDict()
     // DimensionSets
     if
     (
-        (localDict = controlDict_.subDictPtr("DimensionSets")) != nullptr
+        (localDict = controlDict_.findDict("DimensionSets")) != nullptr
         && localDict->size()
     )
     {

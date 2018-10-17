@@ -31,128 +31,37 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(STARCDCoordinateRotation, 0);
-    addToRunTimeSelectionTable
-    (
-        coordinateRotation,
-        STARCDCoordinateRotation,
-        dictionary
-    );
-    addToRunTimeSelectionTable
-    (
-        coordinateRotation,
-        STARCDCoordinateRotation,
-        objectRegistry
-    );
-}
-
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-Foam::vector Foam::STARCDCoordinateRotation::transform(const vector& st) const
-{
-    return (R_ & st);
-}
-
-
-Foam::vector Foam::STARCDCoordinateRotation::invTransform
-(
-    const vector& st
-) const
-{
-    return (Rtr_ & st);
-}
-
-
-Foam::tmp<Foam::vectorField> Foam::STARCDCoordinateRotation::transform
-(
-    const vectorField& st
-) const
-{
-    NotImplemented;
-    return nullptr;
-}
-
-
-Foam::tmp<Foam::vectorField> Foam::STARCDCoordinateRotation::invTransform
-(
-    const vectorField& st
-) const
-{
-    NotImplemented;
-    return nullptr;
-}
-
-
-const Foam::tensorField& Foam::STARCDCoordinateRotation::Tr() const
-{
-    NotImplemented;
-    return NullObjectRef<tensorField>();
-}
-
-
-Foam::tmp<Foam::tensorField> Foam::STARCDCoordinateRotation::transformTensor
-(
-    const tensorField& st
-) const
-{
-    NotImplemented;
-    return nullptr;
-}
-
-
-Foam::tensor Foam::STARCDCoordinateRotation::transformTensor
-(
-    const tensor& st
-) const
-{
-    return (R_ & st & Rtr_);
-}
-
-
-Foam::tmp<Foam::tensorField> Foam::STARCDCoordinateRotation::transformTensor
-(
-    const tensorField& st,
-    const labelList& cellMap
-) const
-{
-    NotImplemented;
-    return nullptr;
-}
-
-
-Foam::tmp<Foam::symmTensorField> Foam::STARCDCoordinateRotation::
-transformVector
-(
-    const vectorField& st
-) const
-{
-    tmp<symmTensorField> tfld(new symmTensorField(st.size()));
-    symmTensorField& fld = tfld.ref();
-
-    forAll(fld, i)
+    namespace coordinateRotations
     {
-        fld[i] = transformPrincipal(R_, st[i]);
+        defineTypeName(starcd);
+
+        // Standard short name
+        addNamedToRunTimeSelectionTable
+        (
+            coordinateRotation,
+            starcd,
+            dictionary,
+            starcd
+        );
+
+        // Longer name - Compat 1806
+        addNamedToRunTimeSelectionTable
+        (
+            coordinateRotation,
+            starcd,
+            dictionary,
+            STARCDRotation
+        );
     }
-    return tfld;
-}
-
-
-Foam::symmTensor Foam::STARCDCoordinateRotation::transformVector
-(
-    const vector& st
-) const
-{
-    return transformPrincipal(R_, st);
 }
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::tensor Foam::STARCDCoordinateRotation::rotation
+Foam::tensor Foam::coordinateRotations::starcd::rotation
 (
     const vector& angles,
-    const bool degrees
+    bool degrees
 )
 {
     scalar z = angles.component(vector::X);    // 1. Rotate about Z
@@ -170,7 +79,6 @@ Foam::tensor Foam::STARCDCoordinateRotation::rotation
     const scalar cy = cos(y);  const scalar sy = sin(y);
     const scalar cz = cos(z);  const scalar sz = sin(z);
 
-
     return
         tensor
         (
@@ -183,72 +91,94 @@ Foam::tensor Foam::STARCDCoordinateRotation::rotation
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::STARCDCoordinateRotation::STARCDCoordinateRotation()
+Foam::coordinateRotations::starcd::starcd()
 :
-    R_(sphericalTensor::I),
-    Rtr_(sphericalTensor::I)
+    coordinateRotation(),
+    angles_(Zero),
+    degrees_(true)
 {}
 
 
-Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
-(
-    const STARCDCoordinateRotation& r
-)
+Foam::coordinateRotations::starcd::starcd(const starcd& crot)
 :
-    R_(r.R_),
-    Rtr_(r.Rtr_)
+    coordinateRotation(crot),
+    angles_(crot.angles_),
+    degrees_(crot.degrees_)
 {}
 
 
-Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
+Foam::coordinateRotations::starcd::starcd
 (
     const vector& rotZrotXrotY,
-    const bool degrees
+    bool degrees
 )
 :
-    R_(rotation(rotZrotXrotY, degrees)),
-    Rtr_(R_.T())
+    coordinateRotation(),
+    angles_(rotZrotXrotY),
+    degrees_(degrees)
 {}
 
 
-Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
+Foam::coordinateRotations::starcd::starcd
 (
-    const scalar rotZ,
-    const scalar rotX,
-    const scalar rotY,
-    const bool degrees
+    scalar rotZ,
+    scalar rotX,
+    scalar rotY,
+    bool degrees
 )
 :
-    R_(rotation(vector(rotZ, rotX, rotY), degrees)),
-    Rtr_(R_.T())
+    coordinateRotation(),
+    angles_(rotZ, rotX, rotY),
+    degrees_(degrees)
 {}
 
 
-Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
+Foam::coordinateRotations::starcd::starcd(const dictionary& dict)
+:
+    coordinateRotation(),
+    angles_(dict.getCompat<vector>("angles", {{"rotation", 1806}})),
+    degrees_(dict.lookupOrDefault("degrees", true))
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::coordinateRotations::starcd::clear()
+{
+    angles_ = Zero;
+    degrees_ = true;
+}
+
+
+Foam::tensor Foam::coordinateRotations::starcd::R() const
+{
+    return starcd::rotation(angles_, degrees_);
+}
+
+
+void Foam::coordinateRotations::starcd::write(Ostream& os) const
+{
+    os  << "starcd-angles(" << (degrees_ ? "deg" : "rad") << "): " << angles_;
+}
+
+
+void Foam::coordinateRotations::starcd::writeEntry
 (
-    const dictionary& dict
-)
-:
-    R_
-    (
-        rotation
-        (
-            dict.get<vector>("rotation"),
-            dict.lookupOrDefault("degrees", true)
-        )
-    ),
-    Rtr_(R_.T())
-{}
+    const word& keyword,
+    Ostream& os
+) const
+{
+    os.beginBlock(keyword);
 
+    os.writeEntry("type", type());
+    os.writeEntry("angles", angles_);
+    if (!degrees_)
+    {
+        os.writeEntry("degrees", "false");
+    }
 
-Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
-(
-    const dictionary& dict,
-    const objectRegistry&
-)
-:
-    STARCDCoordinateRotation(dict)
-{}
+    os.endBlock();
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

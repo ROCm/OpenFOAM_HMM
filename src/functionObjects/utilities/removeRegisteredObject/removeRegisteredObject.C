@@ -82,22 +82,18 @@ bool Foam::functionObjects::removeRegisteredObject::read(const dictionary& dict)
 
 bool Foam::functionObjects::removeRegisteredObject::execute()
 {
-    forAll(objectNames_, i)
+    for (const word& objName : objectNames_)
     {
-        if (foundObject<regIOobject>(objectNames_[i]))
+        regIOobject* ptr = getObjectPtr<regIOobject>(objName);
+
+        if (ptr && ptr->ownedByRegistry())
         {
-            const regIOobject& obj =
-                lookupObject<regIOobject>(objectNames_[i]);
+            Log << type() << " " << name() << " output:" << nl
+                << "    removing object " << ptr->name() << nl
+                << endl;
 
-            if (obj.ownedByRegistry())
-            {
-                Log << type() << " " << name() << " output:" << nl
-                    << "    removing object " << obj.name() << nl
-                    << endl;
-
-                const_cast<regIOobject&>(obj).release();
-                delete &obj;
-            }
+            ptr->release();
+            delete ptr;
         }
     }
 

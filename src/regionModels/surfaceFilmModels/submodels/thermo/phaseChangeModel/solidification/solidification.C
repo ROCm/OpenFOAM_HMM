@@ -56,7 +56,7 @@ solidification::solidification
 )
 :
     phaseChangeModel(typeName, film, dict),
-    T0_(readScalar(coeffDict_.lookup("T0"))),
+    T0_(coeffDict_.get<scalar>("T0")),
     maxSolidificationFrac_
     (
         coeffDict_.lookupOrDefault("maxSolidificationFrac", 0.2)

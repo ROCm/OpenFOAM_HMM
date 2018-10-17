@@ -208,11 +208,11 @@ Foam::pairPatchAgglomeration::pairPatchAgglomeration
     maxLevels_(50),
     nFacesInCoarsestLevel_
     (
-        readLabel(controlDict.lookup("nFacesInCoarsestLevel"))
+        controlDict.get<label>("nFacesInCoarsestLevel")
     ),
     nGlobalFacesInCoarsestLevel_(labelMax),
     //(
-    //    readLabel(controlDict.lookup("nGlobalFacesInCoarsestLevel"))
+    //    controlDict.get<label>("nGlobalFacesInCoarsestLevel")
     //),
     featureAngle_
     (

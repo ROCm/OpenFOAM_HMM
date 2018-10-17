@@ -35,9 +35,9 @@ namespace Foam
 
 // List of sub-dictionaries to rewrite
 static const Foam::List<Foam::word> subDictNames
-{
+({
     "preconditioner", "smoother"
-};
+});
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -74,7 +74,7 @@ void Foam::solution::read(const dictionary& dict)
             forAll(entryNames, i)
             {
                 const word& e = entryNames[i];
-                scalar value = readScalar(relaxDict.lookup(e));
+                scalar value = relaxDict.get<scalar>(e);
 
                 if (e.startsWith("p"))
                 {
@@ -184,14 +184,13 @@ Foam::label Foam::solution::upgradeSolverDict
             // 1) primitiveEntry w/o settings,
             // 2) or a dictionaryEntry.
             // transform primitiveEntry with settings -> dictionaryEntry
-            forAll(subDictNames, dictI)
+            for (const word& dictName : subDictNames)
             {
-                const word& dictName = subDictNames[dictI];
-                entry* ePtr = subdict.lookupEntryPtr(dictName,false,false);
+                entry* eptr = subdict.findEntry(dictName, keyType::LITERAL);
 
-                if (ePtr && !ePtr->isDict())
+                if (eptr && !eptr->isDict())
                 {
-                    Istream& is = ePtr->stream();
+                    Istream& is = eptr->stream();
                     is >> name;
 
                     if (!is.eof())
@@ -234,10 +233,8 @@ bool Foam::solution::cache(const word& name) const
 
         return cache_.found(name);
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -274,7 +271,7 @@ Foam::scalar Foam::solution::fieldRelaxationFactor(const word& name) const
 
     if (fieldRelaxDict_.found(name))
     {
-        return readScalar(fieldRelaxDict_.lookup(name));
+        return fieldRelaxDict_.get<scalar>(name);
     }
     else if (fieldRelaxDefault_ > SMALL)
     {
@@ -303,7 +300,7 @@ Foam::scalar Foam::solution::equationRelaxationFactor(const word& name) const
 
     if (eqnRelaxDict_.found(name))
     {
-        return readScalar(eqnRelaxDict_.lookup(name));
+        return eqnRelaxDict_.get<scalar>(name);
     }
     else if (eqnRelaxDefault_ > SMALL)
     {
@@ -327,12 +324,10 @@ const Foam::dictionary& Foam::solution::solutionDict() const
 {
     if (found("select"))
     {
-        return subDict(word(lookup("select")));
+        return subDict(get<word>("select"));
     }
-    else
-    {
-        return *this;
-    }
+
+    return *this;
 }
 
 
@@ -366,10 +361,8 @@ bool Foam::solution::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

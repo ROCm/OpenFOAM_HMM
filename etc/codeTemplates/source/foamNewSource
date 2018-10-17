@@ -96,7 +96,7 @@ else
 
     fileName="$className$Type"
 
-    echo "$Script: Creating new interface file $fileName"
+    echo "$Script: Creating new code file $fileName"
     if [ -e "$fileName" ]
     then
         echo "   Error: file exists"

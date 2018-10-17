@@ -75,8 +75,8 @@ Foam::variableHeightFlowRateFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    lowerBound_(readScalar(dict.lookup("lowerBound"))),
-    upperBound_(readScalar(dict.lookup("upperBound")))
+    lowerBound_(dict.get<scalar>("lowerBound")),
+    upperBound_(dict.get<scalar>("upperBound"))
 {
     patchType() = dict.lookupOrDefault<word>("patchType", word::null);
     this->refValue() = 0.0;

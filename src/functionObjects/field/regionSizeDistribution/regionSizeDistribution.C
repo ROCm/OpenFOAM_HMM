@@ -350,12 +350,19 @@ bool Foam::functionObjects::regionSizeDistribution::read(const dictionary& dict)
     const word format(dict.get<word>("setFormat"));
     formatterPtr_ = writer<scalar>::New(format);
 
-    if (dict.found("coordinateSystem"))
+    if (dict.found(coordinateSystem::typeName_()))
     {
-        coordSysPtr_.reset(new coordinateSystem(obr_, dict));
+        csysPtr_.reset
+        (
+            coordinateSystem::New(obr_, dict, coordinateSystem::typeName_())
+        );
 
         Info<< "Transforming all vectorFields with coordinate system "
-            << coordSysPtr_().name() << endl;
+            << csysPtr_->name() << endl;
+    }
+    else
+    {
+        csysPtr_.clear();
     }
 
     if (isoPlanes_)
@@ -897,14 +904,14 @@ bool Foam::functionObjects::regionSizeDistribution::write()
                     volVectorField
                 >(fldName).primitiveField();
 
-                if (coordSysPtr_.valid())
+                if (csysPtr_.valid())
                 {
                     Log << "Transforming vector field " << fldName
                         << " with coordinate system "
-                        << coordSysPtr_().name()
+                        << csysPtr_->name()
                         << endl;
 
-                    fld = coordSysPtr_().localVector(fld);
+                    fld = csysPtr_->localVector(fld);
                 }
 
 

@@ -241,7 +241,8 @@ bool Foam::entry::New
             const word varName = keyword.substr(1);
 
             // Lookup the variable name in the given dictionary
-            const auto finder = parentDict.csearchScoped(varName, true, true);
+            const auto finder =
+                parentDict.csearchScoped(varName, keyType::REGEX_RECURSIVE);
 
             if (finder.found())
             {
@@ -301,8 +302,8 @@ bool Foam::entry::New
         auto finder =
         (
             scoped
-          ? parentDict.searchScoped(keyword, false, false)
-          : parentDict.search(keyword, false, false)
+          ? parentDict.searchScoped(keyword, keyType::LITERAL)
+          : parentDict.search(keyword, keyType::LITERAL)
         );
 
         // How to manage duplicate entries
@@ -387,10 +388,7 @@ bool Foam::entry::New
             // Get or create the dictionary-path.
             // fileName::path == dictionary-path
             dictionary* subDictPtr =
-                parentDict.makeScopedDictPtr
-                (
-                    fileName::path(fullPath)
-                );
+                parentDict.makeScopedDict(fileName::path(fullPath));
 
             if (subDictPtr)
             {

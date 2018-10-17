@@ -27,7 +27,7 @@ License
 #include "dictionary.H"
 #include "polyMesh.H"
 #include "volFields.H"
-#include "coordinateSystem.H"
+#include "cartesianCS.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -117,9 +117,12 @@ Foam::sampledPlane::sampledPlane
 
     // Make plane relative to the coordinateSystem (Cartesian)
     // allow lookup from global coordinate systems
-    if (dict.found("coordinateSystem"))
+    if (dict.found(coordinateSystem::typeName_()))
     {
-        coordinateSystem cs(mesh, dict.subDict("coordinateSystem"));
+        coordSystem::cartesian cs
+        (
+            coordinateSystem::New(mesh, dict, coordinateSystem::typeName_())
+        );
         plane& pln = planeDesc();
 
         const point  orig = cs.globalPosition(pln.origin());

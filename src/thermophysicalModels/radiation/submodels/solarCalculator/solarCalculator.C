@@ -82,16 +82,17 @@ void Foam::solarCalculator::calculateBetaTetha()
         }
     }
 
-    scalar LSM = 15.0*(readScalar(dict_.lookup("localStandardMeridian")));
+    scalar LSM = 15.0*(dict_.get<scalar>("localStandardMeridian"));
 
-    scalar D = readScalar(dict_.lookup("startDay")) + runTime/86400.0;
+    scalar D = dict_.get<scalar>("startDay") + runTime/86400.0;
     scalar M = 6.24004 + 0.0172*D;
     scalar EOT = -7.659*sin(M) + 9.863*sin(2*M + 3.5932);
 
-    startTime_ = readScalar(dict_.lookup("startTime"));
+    dict_.readEntry("startTime", startTime_);
+
     scalar LST =  startTime_ + runTime/3600.0;
 
-    scalar LON = readScalar(dict_.lookup("longitude"));
+    scalar LON = dict_.get<scalar>("longitude");
 
     scalar AST = LST + EOT/60.0 + (LON - LSM)/15;
 
@@ -99,7 +100,7 @@ void Foam::solarCalculator::calculateBetaTetha()
 
     scalar H = degToRad(15*(AST - 12));
 
-    scalar L = degToRad(readScalar(dict_.lookup("latitude")));
+    scalar L = degToRad(dict_.get<scalar>("latitude"));
 
     scalar deltaRad = degToRad(delta);
     beta_ = max(asin(cos(L)*cos(deltaRad)*cos(H) + sin(L)*sin(deltaRad)), 1e-3);
@@ -144,7 +145,7 @@ void Foam::solarCalculator::calculateSunDirection()
     }
 
     // Transform to actual coordinate system
-    direction_ = coord_->R().transform(direction_);
+    direction_ = coord_->transform(direction_);
 
     if (debug)
     {
@@ -208,10 +209,10 @@ void Foam::solarCalculator::init()
                 skyCloudCoverFraction_
             );
 
-            A_ = dict_.get<scalar>("A");
-            B_ = dict_.get<scalar>("B");
+            dict_.readEntry("A", A_);
+            dict_.readEntry("B", B_);
 
-            if (!dict_.readIfPresent("beta",beta_))
+            if (!dict_.readIfPresent("beta", beta_))
             {
                 calculateBetaTetha();
             }
@@ -257,7 +258,7 @@ Foam::solarCalculator::solarCalculator
     skyCloudCoverFraction_(0.0),
     Setrn_(0.0),
     SunPrime_(0.0),
-    C_(readScalar(dict.lookup("C"))),
+    C_(dict.get<scalar>("C")),
     sunDirectionModel_
     (
         sunDirectionModelTypeNames_.lookup("sunDirectionModel", dict)

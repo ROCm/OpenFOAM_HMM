@@ -211,13 +211,9 @@ void uniformInterpolatedDisplacementPointPatchVectorField::updateCoeffs()
                 >(*fieldsCacheIter());
 
 
-                pointVectorField& d = const_cast<pointVectorField&>
-                (
-                    timeCache.lookupObject<pointVectorField>
-                    (
-                        fieldName_
-                    )
-                );
+                pointVectorField& d =
+                    timeCache.lookupObjectRef<pointVectorField>(fieldName_);
+
                 d.correctBoundaryConditions();
             }
         }

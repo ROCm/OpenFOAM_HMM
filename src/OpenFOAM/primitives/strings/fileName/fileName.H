@@ -157,7 +157,7 @@ public:
         );
 
         //- This is a specialized (possibly slower) version of compare()
-        //  that ignores duplicate or trailing slashes.
+        //- that ignores duplicate or trailing slashes.
         static bool equals(const std::string& s1, const std::string& s2);
 
 
@@ -229,14 +229,16 @@ public:
         //
         // Behaviour compared to /usr/bin/basename:
         // \verbatim
-        //    input           name()    basename
-        //    -----           ------    --------
-        //    "foo"           "foo"     "foo"
-        //    "/"             ""        "/"
-        //    "/foo"          "foo"     "foo"
-        //    "foo/bar"       "bar"     "bar"
-        //    "/foo/bar"      "bar"     "bar"
-        //    "/foo/bar/"     ""        "bar"
+        //    input           name()          basename
+        //    -----           ------          --------
+        //    ""              ""              ""
+        //    "abc"           "abc"           "abc"
+        //    "/"             ""              "/"
+        //    "/abc"          "abc"           "abc"
+        //    "abc/def"       "def"           "def"
+        //    "/abc/def"      "def"           "def"
+        //    "/abc/def/"     ""              "def"
+        //    "/abc/../def"   "def"           "def"
         // \endverbatim
         inline static std::string name(const std::string& str);
 
@@ -261,16 +263,18 @@ public:
         //- Return directory path name (part before last /)
         //  The result normally coresponds to a Foam::fileName
         //
-        //  Behaviour compared to /usr/bin/dirname:
-        //  \verbatim
+        // Behaviour compared to /usr/bin/dirname:
+        // \verbatim
         //    input           path()          dirname
         //    -----           ------          -------
-        //    "foo"           "."             "."
+        //    ""              "."             "."
+        //    "abc"           "."             "."
         //    "/"             "/"             "/"
-        //    "/foo"          "/"             "foo"
-        //    "foo/bar"       "foo"           "foo"
-        //    "/foo/bar"      "/foo"          "/foo"
-        //    "/foo/bar/"     "/foo/bar/"     "/foo"
+        //    "/abc"          "/"             "/"
+        //    "abc/def"       "abc"           "abc"
+        //    "/abc/def"      "/abc"          "/abc"
+        //    "/abc/def/"     "/abc/def"      "/abc"
+        //    "/abc/../def"   "/abc/.."       "/abc/.."
         // \endverbatim
         inline static std::string path(const std::string& str);
 
@@ -312,16 +316,18 @@ public:
 
         //- Return path components as wordList
         //
-        //  Behaviour:
-        //  \verbatim
-        //    Input           components()
-        //    -----           ------
-        //    "foo"           ("foo")
-        //    "/foo"          ("foo")
-        //    "foo/bar"       ("foo", "bar")
-        //    "/foo/bar"      ("foo", "bar")
-        //    "/foo/bar/"     ("foo", "bar")
-        //  \endverbatim
+        // Behaviour:
+        // \verbatim
+        //    input           components()
+        //    -----           ------------
+        //    ""              ()
+        //    "."             (".")
+        //    "abc"           ("abc")
+        //    "/abc"          ("abc")
+        //    "abc/def"       ("abc", "def")
+        //    "/abc/def"      ("abc", "def")
+        //    "/abc/def/"     ("abc", "def")
+        // \endverbatim
         wordList components(const char delimiter = '/') const;
 
         //- Return a single component of the path

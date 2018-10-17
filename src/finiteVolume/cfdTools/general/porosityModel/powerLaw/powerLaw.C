@@ -52,15 +52,9 @@ Foam::porosityModels::powerLaw::powerLaw
 )
 :
     porosityModel(name, modelType, mesh, dict, cellZoneName),
-    C0_(readScalar(coeffs_.lookup("C0"))),
-    C1_(readScalar(coeffs_.lookup("C1"))),
+    C0_(coeffs_.get<scalar>("C0")),
+    C1_(coeffs_.get<scalar>("C1")),
     rhoName_(coeffs_.lookupOrDefault<word>("rho", "rho"))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::porosityModels::powerLaw::~powerLaw()
 {}
 
 
@@ -100,7 +94,7 @@ void Foam::porosityModels::powerLaw::correct
 
     if (UEqn.dimensions() == dimForce)
     {
-        const volScalarField& rho = mesh_.lookupObject<volScalarField>
+        const auto& rho = mesh_.lookupObject<volScalarField>
         (
             IOobject::groupName(rhoName_, U.group())
         );
@@ -139,7 +133,7 @@ void Foam::porosityModels::powerLaw::correct
 
     if (UEqn.dimensions() == dimForce)
     {
-        const volScalarField& rho = mesh_.lookupObject<volScalarField>
+        const auto& rho = mesh_.lookupObject<volScalarField>
         (
             IOobject::groupName(rhoName_, U.group())
         );

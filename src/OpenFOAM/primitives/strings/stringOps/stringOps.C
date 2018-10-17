@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -437,7 +437,7 @@ Foam::string Foam::stringOps::getVariable
 {
     string value;
 
-    const entry* eptr = dict.lookupScopedEntryPtr(name, true, false);
+    const entry* eptr = dict.findScoped(name, keyType::LITERAL_RECURSIVE);
 
     if (eptr)
     {
@@ -720,20 +720,16 @@ void Foam::stringOps::inplaceExpand
                         varBeg + 1 + delim,
                         varEnd - varBeg - 2*delim
                     ),
-                    false
+                    false   // Already validated
                 );
 
 
                 // Lookup in the dictionary without wildcards.
                 // See note in primitiveEntry
-                const entry* eptr = dict.lookupScopedEntryPtr
-                (
-                    varName,
-                    true,
-                    false
-                );
+                const entry* eptr =
+                    dict.findScoped(varName, keyType::LITERAL_RECURSIVE);
 
-                // if defined - copy its entries
+                // Copy its entries if defined
                 if (eptr)
                 {
                     OStringStream buf;

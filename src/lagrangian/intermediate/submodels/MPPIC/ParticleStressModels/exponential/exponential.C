@@ -52,9 +52,9 @@ Foam::ParticleStressModels::exponential::exponential
 )
 :
     ParticleStressModel(dict),
-    preExp_(readScalar(dict.lookup("preExp"))),
-    expMax_(readScalar(dict.lookup("expMax"))),
-    g0_(readScalar(dict.lookup("g0")))
+    preExp_(dict.get<scalar>("preExp")),
+    expMax_(dict.get<scalar>("expMax")),
+    g0_(dict.get<scalar>("g0"))
 {}
 
 

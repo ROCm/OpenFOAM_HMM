@@ -57,9 +57,9 @@ Foam::RASModels::phasePressureModel::phasePressureModel
 
     phase_(phase),
 
-    alphaMax_(readScalar(coeffDict_.lookup("alphaMax"))),
-    preAlphaExp_(readScalar(coeffDict_.lookup("preAlphaExp"))),
-    expMax_(readScalar(coeffDict_.lookup("expMax"))),
+    alphaMax_(coeffDict_.get<scalar>("alphaMax")),
+    preAlphaExp_(coeffDict_.get<scalar>("preAlphaExp")),
+    expMax_(coeffDict_.get<scalar>("expMax")),
     g0_
     (
         "g0",

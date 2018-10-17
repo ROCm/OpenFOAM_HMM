@@ -578,13 +578,11 @@ Foam::shellSurfaces::shellSurfaces
 
     // Count number of shells.
     label shellI = 0;
-    forAll(allGeometry.names(), geomI)
+    for (const word& geomName : allGeometry_.names())
     {
-        const word& geomName = allGeometry_.names()[geomI];
-
         if (shellsDict.found(geomName))
         {
-            shellI++;
+            ++shellI;
         }
     }
 
@@ -615,12 +613,12 @@ Foam::shellSurfaces::shellSurfaces
     {
         const word& geomName = allGeometry_.names()[geomI];
 
-        const entry* ePtr = shellsDict.lookupEntryPtr(geomName, false, true);
+        const entry* eptr = shellsDict.findEntry(geomName, keyType::LITERAL);
 
-        if (ePtr)
+        if (eptr)
         {
-            const dictionary& dict = ePtr->dict();
-            unmatchedKeys.erase(ePtr->keyword());
+            const dictionary& dict = eptr->dict();
+            unmatchedKeys.erase(eptr->keyword());
 
             shells_[shellI] = geomI;
             modes_[shellI] = refineModeNames_.lookup("mode", dict);
@@ -637,12 +635,9 @@ Foam::shellSurfaces::shellSurfaces
                 labelPair(labelMax, labelMin),
                 labelVector::zero
             );
-            const entry* levelPtr = dict.lookupEntryPtr
-            (
-                "levelIncrement",
-                false,
-                true
-            );
+            const entry* levelPtr =
+                dict.findEntry("levelIncrement", keyType::REGEX);
+
             if (levelPtr)
             {
                 // Do reading ourselves since using labelPair would require

@@ -49,7 +49,7 @@ export CGAL_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cgal_v
 
 # END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
-if [ "$FOAM_VERBOSE" -a "$PS1" ]
+if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
 then
     echo "Using boost ($boost_version)  ->  $BOOST_ARCH_PATH" 1>&2
     echo "Using CGAL ($cgal_version)  ->  $CGAL_ARCH_PATH" 1>&2

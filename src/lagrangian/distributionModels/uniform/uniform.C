@@ -46,8 +46,8 @@ Foam::distributionModels::uniform::uniform
 )
 :
     distributionModel(typeName, dict, rndGen),
-    minValue_(readScalar(distributionModelDict_.lookup("minValue"))),
-    maxValue_(readScalar(distributionModelDict_.lookup("maxValue")))
+    minValue_(distributionModelDict_.get<scalar>("minValue")),
+    maxValue_(distributionModelDict_.get<scalar>("maxValue"))
 {
     check();
 }

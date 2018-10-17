@@ -48,7 +48,7 @@ void kEpsilonLopesdaCosta<BasicTurbulenceModel>::setPorosityCoefficient
     {
         const labelList& cellZoneIDs = pm.cellZoneIDs();
 
-        const scalar Cpm = readScalar(pm.dict().lookup(C.name()));
+        const scalar Cpm = pm.dict().get<scalar>(C.name());
 
         for (const label zonei : cellZoneIDs)
         {
@@ -75,7 +75,7 @@ void kEpsilonLopesdaCosta<BasicTurbulenceModel>::setCdSigma
         const labelList& cellZoneIDs = pm.cellZoneIDs();
         const scalarField& Sigma = pm.Sigma();
 
-        const scalar Cpm = readScalar(pm.dict().lookup(C.name()));
+        const scalar Cpm = pm.dict().get<scalar>(C.name());
 
         for (const label zonei : cellZoneIDs)
         {

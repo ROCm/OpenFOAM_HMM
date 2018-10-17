@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     // Create the pendulumAndSpring model from dictionary
     rigidBodyMotion pendulumAndSpring(runTime, pendulumAndSpringDict);
 
-    label nIter(readLabel(pendulumAndSpringDict.lookup("nIter")));
+    label nIter(pendulumAndSpringDict.get<label>("nIter"));
 
     Info<< pendulumAndSpring << endl;
     Info<< "// Joint state " << endl;

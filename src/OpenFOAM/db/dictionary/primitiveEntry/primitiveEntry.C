@@ -78,7 +78,8 @@ bool Foam::primitiveEntry::expandVariable
     // The $internalField would be matched by the ".*" !!!
 
     // Recursive, non-patterns
-    const entry* eptr = dict.lookupScopedEntryPtr(varName, true, false);
+    const entry* eptr = dict.findScoped(varName, keyType::LITERAL_RECURSIVE);
+
     if (!eptr)
     {
         // Not found - revert to environment variable

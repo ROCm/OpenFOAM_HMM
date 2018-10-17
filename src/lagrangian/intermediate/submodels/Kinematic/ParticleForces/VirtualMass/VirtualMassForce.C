@@ -37,7 +37,7 @@ Foam::VirtualMassForce<CloudType>::VirtualMassForce
 )
 :
     PressureGradientForce<CloudType>(owner, mesh, dict, forceType),
-    Cvm_(readScalar(this->coeffs().lookup("Cvm")))
+    Cvm_(this->coeffs().getScalar("Cvm"))
 {}
 
 

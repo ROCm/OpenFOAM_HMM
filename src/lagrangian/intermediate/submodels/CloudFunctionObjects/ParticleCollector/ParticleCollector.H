@@ -160,8 +160,8 @@ private:
             //- List of radii
             List<scalar> radius_;
 
-            //- Cylindrical co-ordinate system
-            cylindricalCS coordSys_;
+            //- Cylindrical coordinate system
+            coordSystem::cylindrical coordSys_;
 
 
         //- Face areas

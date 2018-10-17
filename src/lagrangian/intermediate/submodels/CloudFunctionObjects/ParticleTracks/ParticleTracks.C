@@ -63,8 +63,8 @@ Foam::ParticleTracks<CloudType>::ParticleTracks
 )
 :
     CloudFunctionObject<CloudType>(dict, owner, modelName, typeName),
-    trackInterval_(readLabel(this->coeffDict().lookup("trackInterval"))),
-    maxSamples_(readLabel(this->coeffDict().lookup("maxSamples"))),
+    trackInterval_(this->coeffDict().getLabel("trackInterval")),
+    maxSamples_(this->coeffDict().getLabel("maxSamples")),
     resetOnWrite_(this->coeffDict().lookup("resetOnWrite")),
     faceHitCounter_(),
     cloudPtr_(nullptr)

@@ -55,14 +55,14 @@ static inline void writeEntryIfPresent
 )
 {
     // non-recursive like dictionary::found, but no pattern-match either
-    const entry* ptr = dict.lookupEntryPtr(key, false, false);
+    const entry* eptr = dict.findEntry(key, keyType::LITERAL);
 
-    if (ptr)
+    if (eptr)
     {
         os.writeKeyword(key)
             << token::HASH << token::BEGIN_BLOCK;
 
-        os.writeQuoted(string(ptr->stream()), false)
+        os.writeQuoted(string(eptr->stream()), false)
             << token::HASH << token::END_BLOCK
             << token::END_STATEMENT << nl;
     }

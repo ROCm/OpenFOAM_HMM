@@ -29,13 +29,13 @@ License
 #include "slidingInterface.H"
 #include "addToRunTimeSelectionTable.H"
 #include "mapPolyMesh.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeNameAndDebug(mixerFvMesh, 0);
-
     addToRunTimeSelectionTable(topoChangerFvMesh, mixerFvMesh, IOobject);
 }
 
@@ -110,7 +110,7 @@ void Foam::mixerFvMesh::addZonesAndModifiers()
     regionSplit rs(*this);
 
     // Get the region of the cell containing the origin.
-    const label originRegion = rs[findNearestCell(cs().origin())];
+    const label originRegion = rs[findNearestCell(csys_.origin())];
 
     labelList movingCells(nCells());
     label nMovingCells = 0;
@@ -207,8 +207,7 @@ void Foam::mixerFvMesh::calcMovingMasks() const
 
     const word innerSliderZoneName
     (
-        word(motionDict_.subDict("slider").lookup("inside"))
-      + "Zone"
+        motionDict_.subDict("slider").get<word>("inside") + "Zone"
     );
 
     const labelList& innerSliderAddr = faceZones()[innerSliderZoneName];
@@ -225,8 +224,7 @@ void Foam::mixerFvMesh::calcMovingMasks() const
 
     const word outerSliderZoneName
     (
-        word(motionDict_.subDict("slider").lookup("outside"))
-      + "Zone"
+        motionDict_.subDict("slider").get<word>("outside") + "Zone"
     );
 
     const labelList& outerSliderAddr = faceZones()[outerSliderZoneName];
@@ -245,7 +243,6 @@ void Foam::mixerFvMesh::calcMovingMasks() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::mixerFvMesh::mixerFvMesh
 (
     const IOobject& io
@@ -267,22 +264,26 @@ Foam::mixerFvMesh::mixerFvMesh
             )
         ).optionalSubDict(typeName + "Coeffs")
     ),
-    csPtr_
-    (
-        coordinateSystem::New
-        (
-            "coordinateSystem",
-            motionDict_.subDict("coordinateSystem")
-        )
-    ),
-    rpm_(readScalar(motionDict_.lookup("rpm"))),
+    csys_(),
+    rpm_(motionDict_.get<scalar>("rpm")),
     movingPointsMaskPtr_(nullptr)
 {
+    if (motionDict_.found(coordinateSystem::typeName_()))
+    {
+        // New() for access to indirect (global) coordSystem.
+        static_cast<coordinateSystem&>(csys_) =
+            *coordinateSystem::New(*this, motionDict_);
+    }
+    else
+    {
+        csys_ = coordSystem::cylindrical(motionDict_);
+    }
+
     addZonesAndModifiers();
 
     Info<< "Mixer mesh:" << nl
-        << "    origin: " << cs().origin() << nl
-        << "    axis: " << cs().axis() << nl
+        << "    origin: " << csys_.origin() << nl
+        << "    axis: " << csys_.e3() << nl
         << "    rpm: " << rpm_ << endl;
 }
 
@@ -293,6 +294,7 @@ Foam::mixerFvMesh::~mixerFvMesh()
 {
     deleteDemandDrivenData(movingPointsMaskPtr_);
 }
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -310,13 +312,15 @@ const Foam::scalarField& Foam::mixerFvMesh::movingPointsMask() const
 
 bool Foam::mixerFvMesh::update()
 {
-    // Rotational speed needs to be converted from rpm
+    // The tangential sweep (radians)
+    const vector theta(0, rpmToRads(rpm_)*time().deltaTValue(), 0);
+
     movePoints
     (
-        csPtr_->globalPosition
+        csys_.globalPosition
         (
-            csPtr_->localPosition(points())
-          + vector(0, rpm_*360.0*time().deltaTValue()/60.0, 0)
+            csys_.localPosition(points())
+          + theta
             *movingPointsMask()
         )
     );
@@ -336,10 +340,10 @@ bool Foam::mixerFvMesh::update()
 
     movePoints
     (
-        csPtr_->globalPosition
+        csys_.globalPosition
         (
-            csPtr_->localPosition(oldPoints())
-          + vector(0, rpm_*360.0*time().deltaTValue()/60.0, 0)
+            csys_.localPosition(oldPoints())
+          + theta
             *movingPointsMask()
         )
     );

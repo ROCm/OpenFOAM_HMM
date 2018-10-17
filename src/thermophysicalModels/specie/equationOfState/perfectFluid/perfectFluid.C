@@ -32,8 +32,8 @@ template<class Specie>
 Foam::perfectFluid<Specie>::perfectFluid(const dictionary& dict)
 :
     Specie(dict),
-    R_(readScalar(dict.subDict("equationOfState").lookup("R"))),
-    rho0_(readScalar(dict.subDict("equationOfState").lookup("rho0")))
+    R_(dict.subDict("equationOfState").get<scalar>("R")),
+    rho0_(dict.subDict("equationOfState").get<scalar>("rho0"))
 {}
 
 

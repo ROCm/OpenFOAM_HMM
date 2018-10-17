@@ -57,7 +57,7 @@ Foam::XiModels::transport::transport
 )
 :
     XiModel(XiProperties, thermo, turbulence, Su, rho, b, phi),
-    XiShapeCoef(readScalar(XiModelCoeffs_.lookup("XiShapeCoef"))),
+    XiShapeCoef(XiModelCoeffs_.get<scalar>("XiShapeCoef")),
     XiEqModel_(XiEqModel::New(XiProperties, thermo, turbulence, Su)),
     XiGModel_(XiGModel::New(XiProperties, thermo, turbulence, Su))
 {}

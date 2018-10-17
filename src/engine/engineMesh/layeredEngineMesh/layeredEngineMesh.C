@@ -86,8 +86,7 @@ void Foam::layeredEngineMesh::move()
     if (engineDB_.foundObject<surfaceScalarField>("phi"))
     {
         surfaceScalarField& phi =
-            const_cast<surfaceScalarField&>
-            (engineDB_.lookupObject<surfaceScalarField>("phi"));
+            engineDB_.lookupObjectRef<surfaceScalarField>("phi");
 
         const volScalarField& rho =
             engineDB_.lookupObject<volScalarField>("rho");

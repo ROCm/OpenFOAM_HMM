@@ -429,8 +429,8 @@ thermoSingleLayer::thermoSingleLayer
         zeroGradientFvPatchScalarField::typeName
     ),
 
-    deltaWet_(readScalar(coeffs_.lookup("deltaWet"))),
-    hydrophilic_(readBool(coeffs_.lookup("hydrophilic"))),
+    deltaWet_(coeffs_.get<scalar>("deltaWet")),
+    hydrophilic_(coeffs_.get<bool>("hydrophilic")),
     hydrophilicDryScale_(0.0),
     hydrophilicWetScale_(0.0),
 

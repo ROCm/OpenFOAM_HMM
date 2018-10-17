@@ -33,31 +33,26 @@ Foam::dictionary::dictionary
 (
     const fileName& name,
     const dictionary& parentDict,
-    Istream& is
+    Istream& is,
+    bool keepHeader
 )
 :
-    dictionaryName(parentDict.name() + '.' + name),
+    name_(parentDict.name() + '.' + name),
     parent_(parentDict)
 {
-    read(is);
+    read(is, keepHeader);
 }
 
 
 Foam::dictionary::dictionary(Istream& is)
 :
-    dictionaryName(is.name()),
-    parent_(dictionary::null)
-{
-    // Reset input mode as this is a "top-level" dictionary
-    entry::resetInputMode();
-
-    read(is);
-}
+    dictionary(is, false)
+{}
 
 
 Foam::dictionary::dictionary(Istream& is, bool keepHeader)
 :
-    dictionaryName(is.name()),
+    name_(is.name()),
     parent_(dictionary::null)
 {
     // Reset input mode as this is a "top-level" dictionary
@@ -174,10 +169,8 @@ void Foam::dictionary::writeEntry(const keyType& kw, Ostream& os) const
 
 void Foam::dictionary::writeEntries(Ostream& os, const bool extraNewLine) const
 {
-    forAllConstIter(parent_type, *this, iter)
+    for (const entry& e : *this)
     {
-        const entry& e = *iter;
-
         // Write entry
         os  << e;
 
@@ -192,7 +185,7 @@ void Foam::dictionary::writeEntries(Ostream& os, const bool extraNewLine) const
         if (!os.good())
         {
             WarningInFunction
-                << "Can't write entry " << iter().keyword()
+                << "Can't write entry " << e.keyword()
                 << " for dictionary " << name()
                 << endl;
         }

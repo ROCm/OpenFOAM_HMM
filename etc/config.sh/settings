@@ -273,7 +273,7 @@ GCC_NOT_FOUND
 
     _foamAddLibAuto $mpcDir
 
-    if [ "$FOAM_VERBOSE" -a "$PS1" ]
+    if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
     then
         echo "Using ThirdParty compiler"
         echo "    ${gccDir##*/}  (${gmpDir##*/}  $${mpfrDir##*/}  ${mpcDir##*/})"
@@ -299,7 +299,7 @@ CLANG_NOT_FOUND
     _foamAddPath    $clangDir/bin
     _foamAddLib     $clangDir/lib  # For things like libomp (openmp) etc
 
-    if [ "$FOAM_VERBOSE" -a "$PS1" ]
+    if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
     then
         echo "Using ThirdParty compiler"
         echo "    ${clangDir##*/}"

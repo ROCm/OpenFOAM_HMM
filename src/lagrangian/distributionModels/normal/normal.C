@@ -47,10 +47,10 @@ Foam::distributionModels::normal::normal
 )
 :
     distributionModel(typeName, dict, rndGen),
-    minValue_(readScalar(distributionModelDict_.lookup("minValue"))),
-    maxValue_(readScalar(distributionModelDict_.lookup("maxValue"))),
-    expectation_(readScalar(distributionModelDict_.lookup("expectation"))),
-    variance_(readScalar(distributionModelDict_.lookup("variance"))),
+    minValue_(distributionModelDict_.get<scalar>("minValue")),
+    maxValue_(distributionModelDict_.get<scalar>("maxValue")),
+    expectation_(distributionModelDict_.get<scalar>("expectation")),
+    variance_(distributionModelDict_.get<scalar>("variance")),
     a_(0.147)
 {
     if (minValue_ < 0)

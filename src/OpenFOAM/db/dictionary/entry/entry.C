@@ -26,6 +26,7 @@ License
 #include "entry.H"
 #include "dictionary.H"
 #include "StringStream.H"
+#include "JobInfo.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -43,6 +44,88 @@ Foam::entry::inputMode Foam::entry::globalInputMode = inputMode::MERGE;
 void Foam::entry::resetInputMode()
 {
     globalInputMode = inputMode::MERGE;
+}
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::entry::checkITstream(const ITstream& is) const
+{
+    const word& keyword = keyword_;
+
+    if (is.nRemainingTokens())
+    {
+        const label remaining = is.nRemainingTokens();
+
+        // Similar to SafeFatalIOError
+        if (JobInfo::constructed)
+        {
+            OSstream& err =
+                FatalIOError
+                (
+                    "",                 // functionName
+                    "",                 // sourceFileName
+                    0,                  // sourceFileLineNumber
+                    this->name(),       // ioFileName
+                    is.lineNumber()     // ioStartLineNumber
+                );
+
+            err << "'" << keyword << "' has "
+                << remaining << " excess tokens in stream" << nl << nl
+                << "    ";
+            is.writeList(err, 0);
+
+            err << exit(FatalIOError);
+        }
+        else
+        {
+            std::cerr
+                << nl
+                << "--> FOAM FATAL IO ERROR:" << nl;
+
+            std::cerr
+                << "'" << keyword << "' has "
+                << remaining << " excess tokens in stream" << nl << nl;
+
+            std::cerr
+                << "file: " << this->name()
+                << " at line " << is.lineNumber() << '.' << nl
+                << std::endl;
+
+            ::exit(1);
+        }
+    }
+    else if (!is.size())
+    {
+        // Similar to SafeFatalIOError
+        if (JobInfo::constructed)
+        {
+            FatalIOError
+            (
+                "",                 // functionName
+                "",                 // sourceFileName
+                0,                  // sourceFileLineNumber
+                this->name(),       // ioFileName
+                is.lineNumber()     // ioStartLineNumber
+            )
+                << "'" << keyword << "' had no tokens in stream" << nl << nl
+                << exit(FatalIOError);
+        }
+        else
+        {
+            std::cerr
+                << nl
+                << "--> FOAM FATAL IO ERROR:" << nl
+                << "'" << keyword << "' had no tokens in stream" << nl << nl;
+
+            std::cerr
+                << "file: " << this->name()
+                << " at line " << is.lineNumber() << '.' << nl
+                << std::endl;
+
+            ::exit(1);
+        }
+    }
 }
 
 

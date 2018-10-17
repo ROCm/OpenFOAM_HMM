@@ -155,13 +155,10 @@ Foam::threePhaseInterfaceProperties::threePhaseInterfaceProperties
     mixture_(mixture),
     cAlpha_
     (
-        readScalar
+        mixture.U().mesh().solverDict
         (
-            mixture.U().mesh().solverDict
-            (
-                mixture_.alpha1().name()
-            ).lookup("cAlpha")
-        )
+            mixture_.alpha1().name()
+        ).get<scalar>("cAlpha")
     ),
     sigma12_("sigma12", dimensionSet(1, 0, -2, 0, 0), mixture),
     sigma13_("sigma13", dimensionSet(1, 0, -2, 0, 0), mixture),

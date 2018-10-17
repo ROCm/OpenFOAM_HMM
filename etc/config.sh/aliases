@@ -58,10 +58,10 @@ alias uutil='cd $WM_PROJECT_USER_DIR/applications/utilities'
 unset -f wmRefresh 2>/dev/null
 wmRefresh()
 {
-    local projectDir=$WM_PROJECT_DIR
-    local foamSettings=$FOAM_SETTINGS
+    local projectDir="$WM_PROJECT_DIR"
+    local foamSettings="$FOAM_SETTINGS"
     wmUnset
-    . $projectDir/etc/bashrc $foamSettings
+    . "$projectDir/etc/bashrc" "$foamSettings"
 }
 
 
@@ -73,13 +73,13 @@ foamVersion()
     if [ "$#" -gt 0 ]
     then
         local dir="${WM_PROJECT_DIR%/*}"    # Parent directory
-        local ver=$1
+        local ver="$1"
         shift
 
         if [ -f "$dir/OpenFOAM-$ver/etc/bashrc" ]
         then
             wmUnset
-            . $dir/OpenFOAM-$ver/etc/bashrc
+            . "$dir/OpenFOAM-$ver/etc/bashrc"
             foam
             echo "Changed to OpenFOAM-$WM_PROJECT_VERSION" 1>&2
         else
@@ -104,7 +104,7 @@ foamVersion()
 unset -f foamPV 2>/dev/null
 foamPV()
 {
-    . $WM_PROJECT_DIR/etc/config.sh/paraview "${@+ParaView_VERSION=$@}"
+    . "$WM_PROJECT_DIR/etc/config.sh/paraview" "${@+ParaView_VERSION=$@}"
     local pvdir="${ParaView_DIR##*/}"
     echo "${pvdir:-ParaView_DIR not set}" 1>&2
 }
@@ -117,13 +117,13 @@ foamPwd()
 {
     if [ -d "$WM_PROJECT_DIR" ]
     then
-        echo $PWD | sed \
+        echo "$PWD" | sed \
         -e "s#^${FOAM_RUN}#\$FOAM_RUN#;" \
         -e "s#^${WM_PROJECT_DIR}#\$WM_PROJECT_DIR#;" \
         -e "s#^${WM_PROJECT_USER_DIR}#\$WM_PROJECT_USER_DIR#;" \
         -e "s#^${HOME}#\$HOME#";
     else
-        echo $PWD | sed -e "s#^${HOME}#\$HOME#;"
+        echo "$PWD" | sed -e "s#^${HOME}#\$HOME#;"
     fi
 }
 

@@ -279,8 +279,8 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
         mesh_,
         dimensionedScalar(dimless/dimLength, Zero)
     ),
-    nTheta_(readLabel(coeffs_.lookup("nTheta"))),
-    nPhi_(readLabel(coeffs_.lookup("nPhi"))),
+    nTheta_(coeffs_.get<label>("nTheta")),
+    nPhi_(coeffs_.get<label>("nPhi")),
     nRay_(0),
     nLambda_(absorptionEmission_->nBands()),
     aLambda_(nLambda_),
@@ -375,8 +375,8 @@ Foam::radiation::fvDOM::fvDOM
         mesh_,
         dimensionedScalar(dimless/dimLength, Zero)
     ),
-    nTheta_(readLabel(coeffs_.lookup("nTheta"))),
-    nPhi_(readLabel(coeffs_.lookup("nPhi"))),
+    nTheta_(coeffs_.get<label>("nTheta")),
+    nPhi_(coeffs_.get<label>("nPhi")),
     nRay_(0),
     nLambda_(absorptionEmission_->nBands()),
     aLambda_(nLambda_),

@@ -371,7 +371,7 @@ void Foam::ccm::writer::writeSolution
 
             if (io.typeHeaderOk<IOdictionary>(true))
             {
-                timeIndex = IOdictionary(io).get<label>("index");
+                IOdictionary(io).readEntry("index", timeIndex);
             }
         }
 

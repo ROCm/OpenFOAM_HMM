@@ -62,8 +62,8 @@ Foam::rigidBodyMeshMotion::bodyMesh::bodyMesh
     bodyID_(bodyID),
     patches_(dict.lookup("patches")),
     patchSet_(mesh.boundaryMesh().patchSet(patches_)),
-    di_(readScalar(dict.lookup("innerDistance"))),
-    do_(readScalar(dict.lookup("outerDistance"))),
+    di_(dict.get<scalar>("innerDistance")),
+    do_(dict.get<scalar>("outerDistance")),
     weight_
     (
         IOobject
@@ -248,7 +248,7 @@ void Foam::rigidBodyMeshMotion::solve()
 
     if (test_)
     {
-        label nIter(readLabel(coeffDict().lookup("nIter")));
+        const label nIter(coeffDict().get<label>("nIter"));
 
         for (label i=0; i<nIter; i++)
         {
@@ -263,7 +263,7 @@ void Foam::rigidBodyMeshMotion::solve()
     }
     else
     {
-        label nIter(coeffDict().lookupOrDefault("nIter", 1));
+        const label nIter(coeffDict().lookupOrDefault("nIter", 1));
 
         for (label i=0; i<nIter; i++)
         {

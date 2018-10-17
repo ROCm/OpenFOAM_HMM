@@ -39,7 +39,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// template specialisation for pTraits<Scalar>
+// Template specialisation for pTraits<Scalar>
 template<>
 class pTraits<Scalar>
 {
@@ -401,6 +401,74 @@ inline Scalar stabilise(const Scalar s, const Scalar tol)
         return s - tol;
     }
 }
+
+
+// Specializations
+
+// Default definition in ops.H
+template<class T> struct compareOp;
+
+//- Compare scalar values
+template<>
+struct compareOp<Scalar>
+{
+    const Scalar tolerance;
+
+    //- Construct with specified tolerance (non-negative value)
+    compareOp(Scalar tol = ScalarVSMALL)
+    :
+        tolerance(tol)
+    {}
+
+    Scalar operator()(const Scalar& a, const Scalar& b) const
+    {
+        return (mag(a - b) <= tolerance) ? 0 : (a - b);
+    }
+};
+
+
+// Default definition in ops.H
+template<class T> struct equalOp;
+
+//- Compare scalar values for equality
+template<>
+struct equalOp<Scalar>
+{
+    const Scalar tolerance;
+
+    //- Construct with specified tolerance (non-negative value)
+    equalOp(Scalar tol = ScalarVSMALL)
+    :
+        tolerance(tol)
+    {}
+
+    bool operator()(const Scalar& a, const Scalar& b) const
+    {
+        return Foam::mag(a - b) <= tolerance;
+    }
+};
+
+
+// Default definition in ops.H
+template<class T> struct notEqualOp;
+
+//- Compare scalar values for inequality
+template<>
+struct notEqualOp<Scalar>
+{
+    const Scalar tolerance;
+
+    //- Construct with specified tolerance (non-negative value)
+    notEqualOp(Scalar tol = ScalarVSMALL)
+    :
+        tolerance(tol)
+    {}
+
+    bool operator()(const Scalar& a, const Scalar& b) const
+    {
+        return Foam::mag(a - b) > tolerance;
+    }
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

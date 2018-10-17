@@ -58,8 +58,8 @@ exponentialRepulsion::exponentialRepulsion
     (
         exponentialRepulsion.subDict(typeName + "Coeffs")
     ),
-    rm_(readScalar(exponentialRepulsionCoeffs_.lookup("rm"))),
-    epsilon_(readScalar(exponentialRepulsionCoeffs_.lookup("epsilon")))
+    rm_(exponentialRepulsionCoeffs_.get<scalar>("rm")),
+    epsilon_(exponentialRepulsionCoeffs_.get<scalar>("epsilon"))
 {
     setLookupTables();
 }

@@ -80,11 +80,11 @@ bool Foam::simplifiedMeshes::columnFvMeshInfo::setPatchEntries
 
         for (const entry& e : allPatchEntries)
         {
-            const word type(e.dict().lookup("type"));
+            const word type(e.dict().get<word>("type"));
 
             if (!constraintPatches.found(type))
             {
-                if (readLabel(e.dict().lookup("nFaces")))
+                if (e.dict().get<label>("nFaces"))
                 {
                     ++nPatchWithFace_;
                 }
@@ -131,7 +131,7 @@ bool Foam::simplifiedMeshes::columnFvMeshInfo::setPatchEntries
 
         for (const entry& e : boundaryFieldDict)
         {
-            const word type(e.dict().lookup("type"));
+            const word type(e.dict().get<word>("type"));
 
             if (simplifiedFvMesh::fvPatchFieldExists(type))
             {
@@ -333,7 +333,7 @@ void Foam::simplifiedMeshes::columnFvMeshInfo::addLocalPatches
 
         DebugPout << "Setting " << patchName << endl;
 
-        label nFaces0 = readLabel(patchDict.lookup("nFaces"));
+        label nFaces0 = patchDict.get<label>("nFaces");
 
         if (nFaces0)
         {

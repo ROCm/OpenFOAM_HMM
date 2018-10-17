@@ -37,7 +37,7 @@ then
     foamOldDirs="$(complete 2>/dev/null | sed -ne 's/^.*-F _of_.* \(..*\)$/\1/p')"
     for cleaned in $foamOldDirs
     do
-        complete -r $cleaned 2>/dev/null
+        complete -r "$cleaned" 2>/dev/null
     done
 fi
 

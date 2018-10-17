@@ -57,9 +57,9 @@ Foam::vector Foam::targetCoeffTrim::calcCoeffs
     const List<point>& x = rotor_.x();
 
     const vector& origin = rotor_.coordSys().origin();
-    const vector& rollAxis = rotor_.coordSys().R().e1();
-    const vector& pitchAxis = rotor_.coordSys().R().e2();
-    const vector& yawAxis = rotor_.coordSys().R().e3();
+    const vector& rollAxis = rotor_.coordSys().e1();
+    const vector& pitchAxis = rotor_.coordSys().e2();
+    const vector& yawAxis = rotor_.coordSys().e3();
 
     scalar coeff1 = alpha_*sqr(rotor_.omega())*mathematical::pi;
 
@@ -225,9 +225,9 @@ void Foam::targetCoeffTrim::read(const dictionary& dict)
         ext = "Coeff";
     }
 
-    target_[0] = targetDict.get<scalar>("thrust" + ext);
-    target_[1] = targetDict.get<scalar>("pitch" + ext);
-    target_[2] = targetDict.get<scalar>("roll" + ext);
+    targetDict.readEntry("thrust" + ext, target_[0]);
+    targetDict.readEntry("pitch" + ext, target_[1]);
+    targetDict.readEntry("roll" + ext, target_[2]);
 
     const dictionary& pitchAngleDict(coeffs_.subDict("pitchAngles"));
     theta_[0] = degToRad(pitchAngleDict.get<scalar>("theta0Ini"));
@@ -245,7 +245,7 @@ void Foam::targetCoeffTrim::read(const dictionary& dict)
         dTheta_ = degToRad(dTheta_);
     }
 
-    alpha_ = coeffs_.get<scalar>("alpha");
+    coeffs_.readEntry("alpha", alpha_);
 }
 
 

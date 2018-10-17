@@ -55,16 +55,11 @@ Foam::solidProperties::solidProperties
 
 Foam::solidProperties::solidProperties(const dictionary& dict)
 :
-    rho_(readScalar(dict.lookup("rho"))),
-    Cp_(readScalar(dict.lookup("Cp"))),
-    kappa_
-    (
-        dict.found("K")
-      ? readScalar(dict.lookup("K"))
-      : readScalar(dict.lookup("kappa"))
-    ),
-    Hf_(readScalar(dict.lookup("Hf"))),
-    emissivity_(readScalar(dict.lookup("emissivity")))
+    rho_(dict.get<scalar>("rho")),
+    Cp_(dict.get<scalar>("Cp")),
+    kappa_(dict.getCompat<scalar>("kappa", {{"K", 1612}})),
+    Hf_(dict.get<scalar>("Hf")),
+    emissivity_(dict.get<scalar>("emissivity"))
 {}
 
 
@@ -74,8 +69,7 @@ void Foam::solidProperties::readIfPresent(const dictionary& dict)
 {
     dict.readIfPresent("rho", rho_);
     dict.readIfPresent("Cp", Cp_);
-    dict.readIfPresent("K", kappa_);
-    dict.readIfPresent("kappa", kappa_);
+    dict.readIfPresentCompat("kappa", {{"K", 1612}}, kappa_);
     dict.readIfPresent("Hf_", Hf_);
     dict.readIfPresent("emissivity", emissivity_);
 }

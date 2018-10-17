@@ -415,7 +415,7 @@ void Foam::functionObjects::externalCoupled::initCoupling()
         UPtrList<const fvMesh> meshes(regionNames.size());
         forAll(regionNames, regi)
         {
-            meshes.set(regi, time_.lookupObjectPtr<fvMesh>(regionNames[regi]));
+            meshes.set(regi, time_.findObject<fvMesh>(regionNames[regi]));
         }
 
         const labelList& groups = regionToGroups_[compName];
@@ -692,7 +692,7 @@ void Foam::functionObjects::externalCoupled::readDataMaster()
         UPtrList<const fvMesh> meshes(regionNames.size());
         forAll(regionNames, regi)
         {
-            meshes.set(regi, time_.lookupObjectPtr<fvMesh>(regionNames[regi]));
+            meshes.set(regi, time_.findObject<fvMesh>(regionNames[regi]));
         }
 
         const labelList& groups = regionToGroups_[compName];
@@ -736,7 +736,7 @@ void Foam::functionObjects::externalCoupled::writeDataMaster() const
         UPtrList<const fvMesh> meshes(regionNames.size());
         forAll(regionNames, regi)
         {
-            meshes.set(regi, time_.lookupObjectPtr<fvMesh>(regionNames[regi]));
+            meshes.set(regi, time_.findObject<fvMesh>(regionNames[regi]));
         }
 
         const labelList& groups = regionToGroups_[compName];

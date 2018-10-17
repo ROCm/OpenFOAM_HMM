@@ -62,7 +62,7 @@ bool Foam::SRF::rpm::read()
 {
     if (SRFModel::read())
     {
-        rpm_ = SRFModelCoeffs_.get<scalar>("rpm");
+        SRFModelCoeffs_.readEntry("rpm", rpm_);
 
         omega_.value() = axis_*rpmToRads(rpm_);
 

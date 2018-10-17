@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  plus  s                               |
+|  \\    /   O peration     | Version:  v1806                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -10,40 +10,50 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
-    object      controlDict;
+    object      testCsys1;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     snappyHexMesh;
+// This dictionary only works in combination with constant/coordinateSystems
 
-startFrom       startTime;
+mycs1
+{
+    type   indirect;
+    name   cs1;
+}
 
-startTime       0;
+mycs2
+{
+    type   indirect;
+    name   cs2;
+}
 
-stopAt          endTime;
+mycs3
+{
+    type   indirect;
+    name   cs3;
+}
 
-endTime         2000;
-
-deltaT          1;
-
-writeControl    timeStep;
-
-writeInterval   100;
-
-purgeWrite      0;
-
-writeFormat     binary;
-
-writePrecision  6;
-
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable true;
+mycyl
+{
+    type   indirect;
+    name   cyl;
+}
 
 
-// ************************************************************************* //
+mycy2
+{
+    coordinateSystem
+    {
+        type   indirect;
+        name   cyl;
+    }
+}
+
+mycy3
+{
+    coordinateSystem cyl;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

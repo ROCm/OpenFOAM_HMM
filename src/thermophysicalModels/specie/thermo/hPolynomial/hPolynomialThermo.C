@@ -35,8 +35,8 @@ Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
 )
 :
     EquationOfState(dict),
-    Hf_(readScalar(dict.subDict("thermodynamics").lookup("Hf"))),
-    Sf_(readScalar(dict.subDict("thermodynamics").lookup("Sf"))),
+    Hf_(dict.subDict("thermodynamics").get<scalar>("Hf")),
+    Sf_(dict.subDict("thermodynamics").get<scalar>("Sf")),
     CpCoeffs_
     (
         dict.subDict("thermodynamics").lookup

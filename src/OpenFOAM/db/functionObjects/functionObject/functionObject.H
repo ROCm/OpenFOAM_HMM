@@ -34,8 +34,8 @@ Description
 
     \section secFunctionObjects Using function objects
 
-    FunctionObjects are selected by additional entries in the
-    $FOAM_CASE/system/controlDict dictionary.  Each object is listed in the \c
+    FunctionObjects are selected by additional entries in the global case
+    system/controlDict dictionary.  Each object is listed in the \c
     functions sub-dictionary, e.g. to select the \c functionObjectType
     functionObject the following entry would be specified:
 
@@ -59,7 +59,7 @@ Description
 
     Where:
     \table
-        Property | Description                       | Required | Default value
+        Property | Description                           | Required | Default
         type     | Type of function object               | yes      |
         libs     | Libraries containing implementation   | yes      |
         region   | Name of region for multi-region cases | no       |
@@ -120,7 +120,6 @@ SourceFiles
 
 #include "typeInfo.H"
 #include "autoPtr.H"
-#include "Switch.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -176,7 +175,7 @@ public:
     static word outputPrefix;
 
     //- Switch write log to Info
-    Switch log;
+    bool log;
 
 
     // Declare run-time constructor selection tables

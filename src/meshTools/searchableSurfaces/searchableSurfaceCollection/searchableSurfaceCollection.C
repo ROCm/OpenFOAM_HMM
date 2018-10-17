@@ -199,17 +199,14 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
             transform_.set
             (
                 surfI,
-                coordinateSystem::New
-                (
-                    subDict.subDict("transform")
-                )
+                new coordSystem::cartesian(subDict, "transform")
             );
 
             const word subGeomName(subDict.get<word>("surface"));
             //Pout<< "Trying to find " << subGeomName << endl;
 
-            const searchableSurface& s =
-                io.db().lookupObject<searchableSurface>(subGeomName);
+            searchableSurface& s =
+                io.db().lookupObjectRef<searchableSurface>(subGeomName);
 
             // I don't know yet how to handle the globalSize combined with
             // regionOffset. Would cause non-consecutive indices locally
@@ -221,7 +218,7 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
                     << exit(FatalError);
             }
 
-            subGeom_.set(surfI, &(const_cast<searchableSurface&>(s)));
+            subGeom_.set(surfI, &s);
 
             indexOffset_[surfI] = startIndex;
             startIndex += subGeom_[surfI].size();
@@ -229,7 +226,7 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
             Info<< "    instance : " << instance_[surfI] << endl;
             Info<< "    surface  : " << s.name() << endl;
             Info<< "    scale    : " << scale_[surfI] << endl;
-            Info<< "    coordsys : " << transform_[surfI] << endl;
+            Info<< "    transform: " << transform_[surfI] << endl;
 
             surfI++;
         }
@@ -715,10 +712,7 @@ void Foam::searchableSurfaceCollection::distribute
         // pointField bbPoints =
         // cmptDivide
         // (
-        //     transform_[surfI].localPosition
-        //     (
-        //         bbs[i].points()
-        //     ),
+        //     transform_[surfI].localPosition(bbs[i].points()),
         //     scale_[surfI]
         // );
         // treeBoundBox newBb(bbPoints);

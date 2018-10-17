@@ -61,7 +61,7 @@ bool Foam::sampledThresholdCellFaces::updateGeometry() const
 
     // Use volField from database, or try to read it in
 
-    const auto* cellFldPtr = fvm.lookupObjectPtr<volScalarField>(fieldName_);
+    const auto* cellFldPtr = fvm.findObject<volScalarField>(fieldName_);
 
     if (debug)
     {

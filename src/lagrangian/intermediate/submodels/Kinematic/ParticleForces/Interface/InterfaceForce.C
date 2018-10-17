@@ -38,7 +38,7 @@ Foam::InterfaceForce<CloudType>::InterfaceForce
 :
     ParticleForce<CloudType>(owner, mesh, dict, typeName, true),
     alphaName_(this->coeffs().lookup("alpha")),
-    C_(readScalar(this->coeffs().lookup("C"))),
+    C_(this->coeffs().getScalar("C")),
     gradInterForceInterpPtr_(nullptr)
 {}
 
@@ -101,10 +101,10 @@ void Foam::InterfaceForce<CloudType>::cacheFields(const bool store)
 
         if (fieldExists)
         {
-            const volVectorField& gradInterForce = this->mesh().template
-                lookupObject<volVectorField>(fName);
+            volVectorField& gradInterForce =
+                this->mesh().template lookupObjectRef<volVectorField>(fName);
 
-            const_cast<volVectorField&>(gradInterForce).checkOut();
+            gradInterForce.checkOut();
         }
     }
 }

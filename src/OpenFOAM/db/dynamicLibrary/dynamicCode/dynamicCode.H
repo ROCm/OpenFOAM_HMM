@@ -197,7 +197,7 @@ public:
         }
 
         //- Root for dynamic code compilation
-        //  Expanded from \$FOAM_CASE/dynamicCode
+        //  Expanded from \<case\>/dynamicCode
         const fileName& codeRoot() const
         {
             return codeRoot_;
@@ -228,12 +228,12 @@ public:
             #endif
         }
 
-        //- Path for specified code name relative to \$FOAM_CASE
+        //- Path for specified code name relative to \<case\>
         //  Corresponds to topDirName/codeDirName()
         fileName codeRelPath() const;
 
 
-        //- Library path for specified code name relative to \$FOAM_CASE
+        //- Library path for specified code name relative to \<case\>
         //  Corresponds to
         //  dynamicCode/codeDirName()/libSubDir()/lib\<codeName\>.so
         fileName libRelPath() const;

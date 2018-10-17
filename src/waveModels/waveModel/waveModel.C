@@ -53,7 +53,7 @@ Foam::word Foam::waveModel::modelName(const word& patchName)
 
 void Foam::waveModel::initialiseGeometry()
 {
-    // Determine local patch co-ordinate system given by:
+    // Determine local patch coordinate system given by:
     // - X: streamwise: patch normal
     // - Y: spanwise: Z^X
     // - Z: up: (negative) gravity direction
@@ -302,7 +302,7 @@ bool Foam::waveModel::readDict(const dictionary& overrideDict)
     readIfPresent("U", UName_);
     readIfPresent("alpha", alphaName_);
 
-    nPaddle_ = get<label>("nPaddle");
+    readEntry("nPaddle", nPaddle_);
     if (nPaddle_ < 1)
     {
         FatalIOErrorInFunction(*this)
@@ -396,7 +396,7 @@ void Foam::waveModel::correct(const scalar t)
             }
         }
 
-        // Transform velocity into global co-ordinate system
+        // Transform velocity into global coordinate system
         U_ = Rlg_ & U_;
 
         currTimeIndex_ = mesh_.time().timeIndex();

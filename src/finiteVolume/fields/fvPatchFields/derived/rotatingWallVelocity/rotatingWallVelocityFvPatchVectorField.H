@@ -33,7 +33,7 @@ Description
 Usage
     \table
         Property     | Description             | Required    | Default value
-        origin       | origin of rotation in Cartesian co-ordinates | yes|
+        origin       | origin of rotation in Cartesian coordinates | yes|
         axis         | axis of rotation        | yes         |
         omega        | angular velocty of the frame [rad/s] | yes    |
     \endtable

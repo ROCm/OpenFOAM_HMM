@@ -103,10 +103,11 @@ Foam::fv::gradScheme<Type>::grad
         }
 
         solution::cachePrintMessage("Retrieving", name, vsf);
-        GradFieldType& gGrad = const_cast<GradFieldType&>
-        (
-            mesh().objectRegistry::template lookupObject<GradFieldType>(name)
-        );
+        GradFieldType& gGrad =
+            mesh().objectRegistry::template lookupObjectRef<GradFieldType>
+            (
+                name
+            );
 
         if (gGrad.upToDate(vsf))
         {
@@ -123,13 +124,11 @@ Foam::fv::gradScheme<Type>::grad
 
             solution::cachePrintMessage("Storing", name, vsf);
             regIOobject::store(tgGrad.ptr());
-            GradFieldType& gGrad = const_cast<GradFieldType&>
-            (
-                mesh().objectRegistry::template lookupObject<GradFieldType>
+            GradFieldType& gGrad =
+                mesh().objectRegistry::template lookupObjectRef<GradFieldType>
                 (
                     name
-                )
-            );
+                );
 
             return gGrad;
         }
@@ -138,13 +137,11 @@ Foam::fv::gradScheme<Type>::grad
     {
         if (mesh().objectRegistry::template foundObject<GradFieldType>(name))
         {
-            GradFieldType& gGrad = const_cast<GradFieldType&>
-            (
-                mesh().objectRegistry::template lookupObject<GradFieldType>
+            GradFieldType& gGrad =
+                mesh().objectRegistry::template lookupObjectRef<GradFieldType>
                 (
                     name
-                )
-            );
+                );
 
             if (gGrad.ownedByRegistry())
             {

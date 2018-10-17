@@ -46,7 +46,7 @@ namespace CorrectionLimitingMethods
 Foam::CorrectionLimitingMethods::absolute::absolute(const dictionary& dict)
 :
     CorrectionLimitingMethod(dict),
-    e_(readScalar(dict.lookup("e")))
+    e_(dict.get<scalar>("e"))
 {}
 
 

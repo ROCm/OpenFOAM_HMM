@@ -138,51 +138,51 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         //- Inherit read from ITstream
         using ITstream::read;
 
         //- Return the dictionary name
-        const fileName& name() const
+        virtual const fileName& name() const
         {
             return ITstream::name();
         }
 
         //- Return the dictionary name
-        fileName& name()
+        virtual fileName& name()
         {
             return ITstream::name();
         }
 
         //- Return line number of first token in dictionary
-        label startLineNumber() const;
+        virtual label startLineNumber() const;
 
         //- Return line number of last token in dictionary
-        label endLineNumber() const;
+        virtual label endLineNumber() const;
 
-        //- Return true because this entry is a stream
-        bool isStream() const
+        //- Return true - this entry is a stream
+        virtual bool isStream() const
         {
             return true;
         }
 
         //- Return token stream for this primitive entry
-        ITstream& stream() const;
+        virtual ITstream& stream() const;
 
         //- This entry is not a dictionary,
         //  calling this function generates a FatalError
-        const dictionary& dict() const;
+        virtual const dictionary& dict() const;
 
         //- This entry is not a dictionary,
         //  calling this function generates a FatalError
-        dictionary& dict();
+        virtual dictionary& dict();
 
         //- Read tokens from the given stream
         virtual bool read(const dictionary& dict, Istream& is);
 
         //- Write
-        void write(Ostream& os) const;
+        virtual void write(Ostream& os) const;
 
         //- Write, optionally with contents only (no keyword, etc)
         void write(Ostream& os, const bool contentsOnly) const;

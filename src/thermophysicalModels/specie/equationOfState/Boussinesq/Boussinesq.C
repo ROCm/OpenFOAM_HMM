@@ -35,9 +35,9 @@ Foam::Boussinesq<Specie>::Boussinesq
 )
 :
     Specie(dict),
-    rho0_(readScalar(dict.subDict("equationOfState").lookup("rho0"))),
-    T0_(readScalar(dict.subDict("equationOfState").lookup("T0"))),
-    beta_(readScalar(dict.subDict("equationOfState").lookup("beta")))
+    rho0_(dict.subDict("equationOfState").get<scalar>("rho0")),
+    T0_(dict.subDict("equationOfState").get<scalar>("T0")),
+    beta_(dict.subDict("equationOfState").get<scalar>("beta"))
 {}
 
 

@@ -72,7 +72,7 @@ Foam::label Foam::metisDecomp::decomposeSerial
     word method("recursive");
 
     const dictionary* coeffsDictPtr =
-        decompositionDict_.subDictPtr("metisCoeffs");
+        decompositionDict_.findDict("metisCoeffs");
 
     label numCells = xadj.size()-1;
 

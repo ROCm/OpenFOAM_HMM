@@ -171,13 +171,7 @@ Foam::LimitedScheme<Type, Limiter, LimitFunc>::limiter
         }
 
         surfaceScalarField& limiterField =
-            const_cast<surfaceScalarField&>
-            (
-                mesh.lookupObject<surfaceScalarField>
-                (
-                    limiterFieldName
-                )
-            );
+            mesh.lookupObjectRef<surfaceScalarField>(limiterFieldName);
 
         calcLimiter(phi, limiterField);
 

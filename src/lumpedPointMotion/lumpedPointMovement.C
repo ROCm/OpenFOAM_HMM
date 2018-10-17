@@ -300,7 +300,7 @@ void Foam::lumpedPointMovement::readDict(const dictionary& dict)
 
     const dictionary* scaleDict = nullptr;
 
-    if ((scaleDict = commDict.subDictPtr("scaleInput")))
+    if ((scaleDict = commDict.findDict("scaleInput")))
     {
         for (int i=0; i < scaleInput_.size(); ++i)
         {
@@ -318,7 +318,7 @@ void Foam::lumpedPointMovement::readDict(const dictionary& dict)
         }
     }
 
-    if ((scaleDict = commDict.subDictPtr("scaleOutput")))
+    if ((scaleDict = commDict.findDict("scaleOutput")))
     {
         for (int i=0; i < scaleOutput_.size(); ++i)
         {
@@ -495,7 +495,7 @@ bool Foam::lumpedPointMovement::forcesAndMoments
     // Calculated force per patch - cache
     PtrMap<vectorField> forceOnPatches;
 
-    const volScalarField* pPtr = pmesh.lookupObjectPtr<volScalarField>(pName);
+    const volScalarField* pPtr = pmesh.findObject<volScalarField>(pName);
 
     // fvMesh and has pressure field
     if (isA<fvMesh>(pmesh) && pPtr)

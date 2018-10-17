@@ -35,8 +35,8 @@ Foam::BlobsSheetAtomization<CloudType>::BlobsSheetAtomization
 )
 :
     AtomizationModel<CloudType>(dict, owner, typeName),
-    B_(readScalar(this->coeffDict().lookup("B"))),
-    angle_(readScalar(this->coeffDict().lookup("angle")))
+    B_(this->coeffDict().getScalar("B")),
+    angle_(this->coeffDict().getScalar("angle"))
 {}
 
 

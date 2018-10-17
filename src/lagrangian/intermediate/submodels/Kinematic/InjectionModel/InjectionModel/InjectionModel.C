@@ -307,8 +307,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
     timeStep0_(this->template getModelProperty<scalar>("timeStep0")),
     minParticlesPerParcel_
     (
-        this->coeffDict().template
-            lookupOrDefault<scalar>("minParticlesPerParcel", 1)
+        this->coeffDict().lookupOrDefault("minParticlesPerParcel", scalar(1))
     ),
     delayedVolume_(0.0),
     injectorID_(this->coeffDict().lookupOrDefault("injectorID", -1))
@@ -354,12 +353,11 @@ Foam::InjectionModel<CloudType>::InjectionModel
     else if (parcelBasisType == "fixed")
     {
         parcelBasis_ = pbFixed;
+        this->coeffDict().readEntry("nParticle", nParticleFixed_);
 
         Info<< "    Choosing nParticle to be a fixed value, massTotal "
             << "variable now does not determine anything."
             << endl;
-
-        nParticleFixed_ = readScalar(this->coeffDict().lookup("nParticle"));
     }
     else
     {

@@ -51,9 +51,9 @@ Foam::kinematicParcelInjectionData::kinematicParcelInjectionData
 :
     x_(dict.lookup("x")),
     U_(dict.lookup("U")),
-    d_(readScalar(dict.lookup("d"))),
-    rho_(readScalar(dict.lookup("rho"))),
-    mDot_(readScalar(dict.lookup("mDot")))
+    d_(dict.get<scalar>("d")),
+    rho_(dict.get<scalar>("rho")),
+    mDot_(dict.get<scalar>("mDot"))
 {}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

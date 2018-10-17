@@ -34,7 +34,7 @@ License
 #include "processorFaPatch.H"
 #include "wedgeFaPatch.H"
 #include "PstreamCombineReduceOps.H"
-#include "coordinateSystem.H"
+#include "cartesianCS.H"
 #include "scalarMatrices.H"
 #include "processorFaPatchFields.H"
 #include "emptyFaPatchFields.H"
@@ -1271,7 +1271,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
             curPoints = pointSet.toc();
         }
 
-        vectorField allPoints(curPoints.size());
+        pointField allPoints(curPoints.size());
         scalarField W(curPoints.size(), 1.0);
         for (label i=0; i<curPoints.size(); ++i)
         {
@@ -1280,17 +1280,16 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
         }
 
         // Transform points
-        const vector& origin = points[curPoint];
-        const vector axis = normalised(result[curPoint]);
-        vector dir(allPoints[0] - points[curPoint]);
-        dir -= axis*(axis&dir);
-        dir.normalise();
+        coordSystem::cartesian cs
+        (
+            points[curPoint],   // origin
+            result[curPoint],   // axis [e3] (normalized by constructor)
+            allPoints[0] - points[curPoint] // direction [e1]
+        );
 
-        coordinateSystem cs("cs", origin, axis, dir);
-
-        forAll(allPoints, pI)
+        for (point& p : allPoints)
         {
-            allPoints[pI] = cs.localPosition(allPoints[pI]);
+            p = cs.localPosition(p);
         }
 
         scalarRectangularMatrix M

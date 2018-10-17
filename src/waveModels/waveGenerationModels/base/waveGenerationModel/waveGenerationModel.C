@@ -88,7 +88,7 @@ bool Foam::waveModels::waveGenerationModel::readDict
 {
     if (waveModel::readDict(overrideDict))
     {
-        activeAbsorption_ = get<bool>("activeAbsorption");
+        readEntry("activeAbsorption", activeAbsorption_);
 
         return true;
     }

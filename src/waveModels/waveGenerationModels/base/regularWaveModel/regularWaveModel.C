@@ -95,7 +95,8 @@ bool Foam::waveModels::regularWaveModel::readDict
         waveHeight_ = readWaveHeight();
         waveAngle_ = readWaveAngle();
 
-        wavePeriod_ = get<scalar>("wavePeriod");
+        readEntry("wavePeriod", wavePeriod_);
+
         if (wavePeriod_ < 0)
         {
             FatalIOErrorInFunction(*this)

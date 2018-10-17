@@ -32,8 +32,38 @@ Description
 #include "label.H"
 #include "scalar.H"
 #include "List.H"
+#include "ops.H"
+#include <functional>
 
 using namespace Foam;
+
+// Test for special comparison operation using compareOp
+// Normal sort on label, reverse sort on scalar
+struct special1
+{
+    typedef Tuple2<label, scalar> type;
+
+    bool operator()(const type& a, const type& b) const
+    {
+        int val = compareOp<label>()(a.first(), b.first());
+        return (val == 0) ? (b.second() < a.second()) : (val < 0);
+    }
+};
+
+
+// Test for special comparison operation using compareOp
+// Normal sort on scalar, reverse sort on label
+struct special2
+{
+    typedef Tuple2<label, scalar> type;
+
+    bool operator()(const type& a, const type& b) const
+    {
+        scalar val = compareOp<scalar>()(a.second(), b.second());
+        return (val == 0) ? (b.first() < a.first()) : (val < 0);
+    }
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
@@ -46,19 +76,39 @@ int main()
 
     Info<< "tuple: "
         << t2 << " "
-        << t2.first() << " " << t2.second() << endl;
+        << t2.first() << " " << t2.second() << nl;
 
-    List<indexedScalar> list1(10);
-    forAll(list1, i)
+    // As list. Generated so that we have duplicate indices
+    List<indexedScalar> list1(3*4);
+    for (label i = 0; i < 4; ++i)
     {
-        list1[i] = indexedScalar(-i, i*i);
+        const label j = (i+1);
+        const label idx = ((i % 2) ? -1 : 1) * (j);
+
+        list1[i]   = indexedScalar(idx, (j*j));
+        list1[i+4] = indexedScalar(idx, 2*j);    // duplicate index
+        list1[i+8] = indexedScalar(idx+12, 2*j); // duplicate value
     }
 
-    sort(list1);
+    Info<< "Unsorted tuples:" << nl << list1 << nl;
 
-    Info<< "tuples:" << nl
-        << list1
-        << endl;
+    Foam::sort(list1, std::less<indexedScalar>());
+
+    Info<< "sorted tuples:" << nl << list1 << nl;
+
+    Foam::sort(list1, std::greater<indexedScalar>());
+
+    Info<< "reverse sorted tuples:" << nl << list1 << nl;
+
+    Foam::sort(list1, special1());
+
+    Info<< "special sorted tuples - sort on index, reverse on value:"
+        << nl << list1 << nl;
+
+    Foam::sort(list1, special2());
+
+    Info<< "special sorted tuples - sort on value, reverse on index:"
+        << nl << list1 << nl;
 
     Info<< "End\n" << endl;
 

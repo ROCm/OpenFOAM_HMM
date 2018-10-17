@@ -125,7 +125,7 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
     {
         const word& geomName = allGeometry.names()[geomi];
 
-        const entry* ePtr = surfacesDict.lookupEntryPtr(geomName, false, true);
+        const entry* ePtr = surfacesDict.findEntry(geomName, keyType::REGEX);
 
         if (ePtr)
         {

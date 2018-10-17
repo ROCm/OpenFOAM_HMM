@@ -184,7 +184,8 @@ Foam::refinementSurfaces::refinementSurfaces
     {
         const word& geomName = allGeometry_.names()[geomI];
 
-        const entry* ePtr = surfacesDict.lookupEntryPtr(geomName, false, true);
+        const entry* ePtr =
+            surfacesDict.findEntry(geomName, keyType::LITERAL);
 
         if (ePtr)
         {
@@ -351,10 +352,7 @@ Foam::refinementSurfaces::refinementSurfaces
                             regionAngle[surfI].insert
                             (
                                 regionI,
-                                readScalar
-                                (
-                                    regionDict.lookup("perpendicularAngle")
-                                )
+                                regionDict.get<scalar>("perpendicularAngle")
                             );
                         }
 

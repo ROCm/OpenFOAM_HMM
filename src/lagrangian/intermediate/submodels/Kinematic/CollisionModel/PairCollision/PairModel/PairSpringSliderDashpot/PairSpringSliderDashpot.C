@@ -89,24 +89,24 @@ Foam::PairSpringSliderDashpot<CloudType>::PairSpringSliderDashpot
     PairModel<CloudType>(dict, cloud, typeName),
     Estar_(),
     Gstar_(),
-    alpha_(readScalar(this->coeffDict().lookup("alpha"))),
-    b_(readScalar(this->coeffDict().lookup("b"))),
-    mu_(readScalar(this->coeffDict().lookup("mu"))),
+    alpha_(this->coeffDict().getScalar("alpha")),
+    b_(this->coeffDict().getScalar("b")),
+    mu_(this->coeffDict().getScalar("mu")),
     cohesionEnergyDensity_
     (
-        readScalar(this->coeffDict().lookup("cohesionEnergyDensity"))
+        this->coeffDict().getScalar("cohesionEnergyDensity")
     ),
     cohesion_(false),
     collisionResolutionSteps_
     (
-        readScalar(this->coeffDict().lookup("collisionResolutionSteps"))
+        this->coeffDict().getScalar("collisionResolutionSteps")
     ),
     volumeFactor_(1.0),
     useEquivalentSize_(Switch(this->coeffDict().lookup("useEquivalentSize")))
 {
     if (useEquivalentSize_)
     {
-        volumeFactor_ = readScalar(this->coeffDict().lookup("volumeFactor"));
+        this->coeffDict().readEntry("volumeFactor", volumeFactor_);
     }
 
     scalar nu = this->owner().constProps().poissonsRatio();

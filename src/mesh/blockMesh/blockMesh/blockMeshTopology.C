@@ -350,7 +350,7 @@ Foam::autoPtr<Foam::polyMesh> Foam::blockMesh::createTopology
     // Read the names/types for the unassigned patch faces
     // this is a bit heavy handed (and ugly), but there is currently
     // no easy way to rename polyMesh patches subsequently
-    if (const dictionary* dictPtr = meshDescription.subDictPtr("defaultPatch"))
+    if (const dictionary* dictPtr = meshDescription.findDict("defaultPatch"))
     {
         dictPtr->readIfPresent("name", defaultPatchName);
         dictPtr->readIfPresent("type", defaultPatchType);

@@ -180,11 +180,11 @@ public:
             (
                 const BoundaryMesh& bmesh,
                 const Internal& field,
-                const dictionary&
+                const dictionary& dict
             );
 
 
-        // Member functions
+        // Member Functions
 
             //- Read the boundary field
             void readField
@@ -344,6 +344,26 @@ public:
             const PtrList<PatchField<Type>>& ptfl
         );
 
+        //- Copy construct from internal field, with specified patch type
+        GeometricField
+        (
+            const IOobject& io,
+            const Mesh& mesh,
+            const dimensionSet& ds,
+            const Field<Type>& iField,
+            const word& patchFieldType = PatchField<Type>::calculatedType()
+        );
+
+        //- Move construct from internal field, with specified patch type
+        GeometricField
+        (
+            const IOobject& io,
+            const Mesh& mesh,
+            const dimensionSet& ds,
+            Field<Type>&& iField,
+            const word& patchFieldType = PatchField<Type>::calculatedType()
+        );
+
         //- Copy construct from components
         GeometricField
         (
@@ -351,26 +371,6 @@ public:
             const Mesh& mesh,
             const dimensionSet& ds,
             const Field<Type>& iField,
-            const PtrList<PatchField<Type>>& ptfl
-        );
-
-        //- Construct from components, moving initial internal field
-        GeometricField
-        (
-            const IOobject& io,
-            const Mesh& mesh,
-            const dimensionSet& ds,
-            Field<Type>&& iField,
-            const PtrList<PatchField<Type>>& ptfl
-        );
-
-        //- Construct from components, moving initial internal field
-        GeometricField
-        (
-            const IOobject& io,
-            const Mesh& mesh,
-            const dimensionSet& ds,
-            List<Type>&& iField,
             const PtrList<PatchField<Type>>& ptfl
         );
 
@@ -396,7 +396,7 @@ public:
             const GeometricField<Type, PatchField, GeoMesh>& gf
         );
 
-        //- Construct as copy of tmp<GeometricField> deleting argument
+        //- Construct from tmp\<GeometricField\> deleting argument
         #ifndef NoConstructFromTmp
         GeometricField
         (
@@ -420,14 +420,14 @@ public:
         );
         #endif
 
-        //- Construct as copy resetting name
+        //- Copy construct with a new name
         GeometricField
         (
             const word& newName,
             const GeometricField<Type, PatchField, GeoMesh>& gf
         );
 
-        //- Construct as copy resetting name
+        //- Construct with a new name from tmp\<GeometricField\>
         #ifndef NoConstructFromTmp
         GeometricField
         (

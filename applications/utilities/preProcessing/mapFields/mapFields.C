@@ -396,7 +396,7 @@ int main(int argc, char *argv[])
             (
                 Time::controlDictName,
                 rootDirSource,
-                caseDirSource/fileName(word("processor") + name(proci))
+                caseDirSource/("processor" + Foam::name(proci))
             );
 
             #include "setTimeIndex.H"
@@ -471,7 +471,7 @@ int main(int argc, char *argv[])
             (
                 Time::controlDictName,
                 rootDirTarget,
-                caseDirTarget/fileName(word("processor") + name(proci))
+                caseDirTarget/("processor" + Foam::name(proci))
             );
 
             fvMesh meshTarget
@@ -536,7 +536,7 @@ int main(int argc, char *argv[])
             (
                 Time::controlDictName,
                 rootDirSource,
-                caseDirSource/fileName(word("processor") + name(procISource))
+                caseDirSource/("processor" + Foam::name(procISource))
             );
 
             #include "setTimeIndex.H"
@@ -572,8 +572,7 @@ int main(int argc, char *argv[])
                     (
                         Time::controlDictName,
                         rootDirTarget,
-                        caseDirTarget/fileName(word("processor")
-                      + name(procITarget))
+                        caseDirTarget/("processor" + Foam::name(procITarget))
                     );
 
                     fvMesh meshTarget

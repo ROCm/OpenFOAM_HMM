@@ -53,7 +53,7 @@ Foam::radiation::FresnelLaser::FresnelLaser
 )
 :
     reflectionModel(dict, mesh),
-    epsilon_(readScalar(dict.lookup("epsilon")))
+    epsilon_(dict.get<scalar>("epsilon"))
 {}
 
 

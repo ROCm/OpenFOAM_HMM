@@ -116,10 +116,10 @@ void Foam::LiftForce<CloudType>::cacheFields(const bool store)
 
         if (fieldExists)
         {
-            const volVectorField& curlUc = this->mesh().template
-                lookupObject<volVectorField>(fName);
+            volVectorField& curlUc =
+                this->mesh().template lookupObjectRef<volVectorField>(fName);
 
-            const_cast<volVectorField&>(curlUc).checkOut();
+            curlUc.checkOut();
         }
     }
 }

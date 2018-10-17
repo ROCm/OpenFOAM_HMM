@@ -78,7 +78,7 @@ Foam::FreeStream<CloudType>::FreeStream
         particleFluxAccumulators_[p] = List<Field<scalar>>
         (
             molecules.size(),
-            Field<scalar>(patch.size(), 0.0)
+            Field<scalar>(patch.size(), Zero)
         );
     }
 
@@ -88,10 +88,7 @@ Foam::FreeStream<CloudType>::FreeStream
 
     forAll(molecules, i)
     {
-        numberDensities_[i] = readScalar
-        (
-            numberDensitiesDict.lookup(molecules[i])
-        );
+        numberDensities_[i] = numberDensitiesDict.get<scalar>(molecules[i]);
 
         moleculeTypeIds_[i] = cloud.typeIdList().find(molecules[i]);
 

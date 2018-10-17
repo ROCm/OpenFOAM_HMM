@@ -100,18 +100,15 @@ Foam::regionCoupledBaseGAMGInterface::regionCoupledBaseGAMGInterface
         const polyMesh& nbrMesh =
             fineRegionCoupledLduInterface_.nbrMesh();
 
-        if
-        (
-            nbrMesh.foundObject<GAMGAgglomeration>(GAMGAgglomeration::typeName)
-        )
-        {
-            const GAMGAgglomeration& nbrAgg = nbrMesh.thisDb().lookupObject
-            <
-                GAMGAgglomeration
-            >
+        const GAMGAgglomeration* nbrAggPtr = nbrMesh.thisDb().findObject
+            <GAMGAgglomeration>
             (
                 GAMGAgglomeration::typeName
             );
+
+        if (nbrAggPtr)
+        {
+            const GAMGAgglomeration& nbrAgg = *nbrAggPtr;
 
             label nbrLevel(-1);
             if (nbrAgg.size() > fineLevelIndex)

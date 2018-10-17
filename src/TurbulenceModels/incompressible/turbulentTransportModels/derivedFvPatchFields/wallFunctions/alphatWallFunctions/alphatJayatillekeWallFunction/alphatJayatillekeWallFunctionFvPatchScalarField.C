@@ -175,7 +175,7 @@ alphatJayatillekeWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
-    Prt_(readScalar(dict.lookup("Prt"))), // force read to avoid ambiguity
+    Prt_(dict.get<scalar>("Prt")), // force read to avoid ambiguity
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
     E_(dict.lookupOrDefault<scalar>("E", 9.8))
 {

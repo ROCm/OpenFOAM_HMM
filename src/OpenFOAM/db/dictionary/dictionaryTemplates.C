@@ -53,12 +53,11 @@ template<class T>
 T Foam::dictionary::get
 (
     const word& keyword,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
     T val;
-    readEntry<T>(keyword, val, recursive, patternMatch);
+    readEntry<T>(keyword, val, matchOpt);
     return val;
 }
 
@@ -68,12 +67,11 @@ T Foam::dictionary::getCompat
 (
     const word& keyword,
     std::initializer_list<std::pair<const char*,int>> compat,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
     T val;
-    readCompat<T>(keyword, compat, val, recursive, patternMatch);
+    readCompat<T>(keyword, compat, val, matchOpt);
     return val;
 }
 
@@ -84,13 +82,11 @@ bool Foam::dictionary::readCompat
     const word& keyword,
     std::initializer_list<std::pair<const char*,int>> compat,
     T& val,
-    bool recursive,
-    bool patternMatch,
+    enum keyType::option matchOpt,
     bool mandatory
 ) const
 {
-    const const_searcher
-        finder(csearchCompat(keyword, compat, recursive, patternMatch));
+    const const_searcher finder(csearchCompat(keyword, compat, matchOpt));
 
     if (finder.found())
     {
@@ -113,29 +109,15 @@ bool Foam::dictionary::readCompat
 }
 
 
-// older name
-template<class T>
-T Foam::dictionary::lookupType
-(
-    const word& keyword,
-    bool recursive,
-    bool patternMatch
-) const
-{
-    return get<T>(keyword, recursive, patternMatch);
-}
-
-
 template<class T>
 T Foam::dictionary::lookupOrDefault
 (
     const word& keyword,
     const T& deflt,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
-    const const_searcher finder(csearch(keyword, recursive, patternMatch));
+    const const_searcher finder(csearch(keyword, matchOpt));
 
     if (finder.found())
     {
@@ -165,11 +147,10 @@ T Foam::dictionary::lookupOrAddDefault
 (
     const word& keyword,
     const T& deflt,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 )
 {
-    const const_searcher finder(csearch(keyword, recursive, patternMatch));
+    const const_searcher finder(csearch(keyword, matchOpt));
 
     if (finder.found())
     {
@@ -200,12 +181,11 @@ bool Foam::dictionary::readEntry
 (
     const word& keyword,
     T& val,
-    bool recursive,
-    bool patternMatch,
+    enum keyType::option matchOpt,
     bool mandatory
 ) const
 {
-    const const_searcher finder(csearch(keyword, recursive, patternMatch));
+    const const_searcher finder(csearch(keyword, matchOpt));
 
     if (finder.found())
     {
@@ -233,12 +213,11 @@ bool Foam::dictionary::readIfPresent
 (
     const word& keyword,
     T& val,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
     // Read is non-mandatory
-    return readEntry<T>(keyword, val, recursive, patternMatch, false);
+    return readEntry<T>(keyword, val, matchOpt, false);
 }
 
 
@@ -248,12 +227,10 @@ T Foam::dictionary::lookupOrDefaultCompat
     const word& keyword,
     std::initializer_list<std::pair<const char*,int>> compat,
     const T& deflt,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
-    const const_searcher
-        finder(csearchCompat(keyword, compat, recursive, patternMatch));
+    const const_searcher finder(csearchCompat(keyword, compat, matchOpt));
 
     if (finder.found())
     {
@@ -284,12 +261,11 @@ bool Foam::dictionary::readIfPresentCompat
     const word& keyword,
     std::initializer_list<std::pair<const char*,int>> compat,
     T& val,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
     // Read is non-mandatory
-    return readCompat<T>(keyword, compat, val, recursive, patternMatch, false);
+    return readCompat<T>(keyword, compat, val, matchOpt, false);
 }
 
 

@@ -47,6 +47,38 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+unsigned testClean(std::initializer_list<Pair<std::string>> tests)
+{
+    unsigned nFail = 0;
+
+    for (const Pair<std::string>& test : tests)
+    {
+        const std::string& input = test.first();
+        const std::string& expected = test.second();
+
+        fileName cleaned(test.first());
+        cleaned.clean();
+
+        if (cleaned == expected)
+        {
+            Info<< "(pass)"
+                << "  clean " << input << " -> " << cleaned << nl;
+        }
+        else
+        {
+            Info<< "(fail)"
+                << "  clean " << input << " -> " << cleaned
+                << "  expected=" << expected
+                << nl;
+
+            ++nFail;
+        }
+    }
+
+    return nFail;
+}
+
+
 unsigned testStrip
 (
     const bool doClean,
@@ -184,6 +216,16 @@ unsigned testRelative(std::initializer_list<Pair<std::string>> tests)
 }
 
 
+void testDirname(const fileName& input)
+{
+    Info<< "input:" << input
+        << "   path:" << input.path()
+        << "   name:\"" << input.name() << '"'
+        << "   ext:\"" << input.ext()  << '"'
+        << "   components: " << flatOutput(input.components()) << nl;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
@@ -196,6 +238,8 @@ int main(int argc, char *argv[])
     argList::addBoolOption("relative", "test relative operations");
     argList::addBoolOption("system", "test filesystem operations");
     argList::addBoolOption("default", "reinstate default tests");
+    argList::addBoolOption("clean", "clean()");
+    argList::addBoolOption("dirname", "basename/dirname tables");
     argList::addNote("runs default tests or specified ones only");
 
     #include "setRootCase.H"
@@ -252,6 +296,20 @@ int main(int argc, char *argv[])
             file1
         };
         Info<< "All ==> " << file4 << nl;
+    }
+
+    if (args.found("dirname"))
+    {
+        testDirname("");
+        testDirname(".");
+        testDirname("abc");
+        testDirname("/");
+        testDirname("/abc");
+        testDirname("abc/def");
+        testDirname("/abc/def");
+        testDirname("/abc/def/");
+        testDirname("/abc///def///");
+        testDirname("/abc/../def");
     }
 
 
@@ -378,6 +436,35 @@ int main(int argc, char *argv[])
         Info<<"add extension: " << input0.ext("abc")
             << " <-- No check for repeated dots (user error!)" << nl;
         Info<< nl;
+    }
+
+
+    if (args.found("clean"))
+    {
+        Info<< nl << "Test fileName::clean()" << nl << nl;
+
+        unsigned nFail = testClean
+        ({
+            { "/", "/" },
+            { "/abc/", "/abc" },
+            { "/abc////def", "/abc/def" },
+            { "/abc/def/./ghi/.", "/abc/def/ghi" },
+            { "abc/def/./",   "abc/def" },
+            { "./abc/", "./abc" },
+            { "/abc/def/../ghi/jkl/nmo/..", "/abc/ghi/jkl" },
+            { "abc/../def/ghi/../jkl", "abc/../def/jkl" },
+        });
+
+        Info<< nl;
+        if (nFail)
+        {
+            Info<< "failed " << nFail;
+        }
+        else
+        {
+            Info<< "passed all";
+        }
+        Info<< " fileName::clean tests" << nl;
     }
 
 
@@ -677,9 +764,27 @@ int main(int argc, char *argv[])
         << " controlDict => " << findEtcFile("controlDict") << nl
         << " badName => " << findEtcFile("badName") << endl;
 
-    Info<< "This should emit a fatal error:" << endl;
-    Info<< " badName(die) => " << findEtcFile("badName", true) << nl
-        << endl;
+    {
+
+        Info<< nl << "Expect a FatalError for findEtcFile() with a bad name:"
+            << nl;
+
+        const bool throwingError = FatalError.throwExceptions();
+
+        try
+        {
+            Info<< " badName(die) => " << flush
+                << findEtcFile("<very-badName>", true) << nl
+                << endl;
+        }
+        catch (Foam::error& err)
+        {
+            Info<< nl << "findEtcFile() Caught FatalError "
+                << err << nl << endl;
+        }
+        FatalError.throwExceptions(throwingError);
+    }
+
 
     Info<< "\nEnd\n" << endl;
     return 0;

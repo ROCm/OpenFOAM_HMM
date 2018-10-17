@@ -180,6 +180,10 @@ template<class T>
 inline T* Foam::UPtrList<T>::set(const label i, T* ptr)
 {
     T* old = ptrs_[i];
+    if (old == ptr)
+    {
+        return nullptr;  // Content did not change
+    }
     ptrs_[i] = ptr;
     return old;
 }

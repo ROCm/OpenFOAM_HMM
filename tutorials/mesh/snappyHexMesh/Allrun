@@ -5,6 +5,7 @@ cd ${0%/*} || exit 1    # Run from this directory
 ( cd addLayersToFaceZone && ./Allrun )
 ( cd gap_detection && ./Allrun )
 ( cd aerofoilNACA0012_directionalRefinement && ./Allrun )
+( cd iglooWithFridgesDirectionalRefinement && ./Allrun )
 
 exit 0
 

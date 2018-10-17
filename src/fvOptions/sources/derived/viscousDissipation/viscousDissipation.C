@@ -106,7 +106,7 @@ Foam::fv::viscousDissipation::viscousDissipation
     )
 {
     const basicThermo* thermoPtr =
-        mesh_.lookupObjectPtr<basicThermo>(basicThermo::dictName);
+        mesh_.findObject<basicThermo>(basicThermo::dictName);
 
     if (thermoPtr)
     {
@@ -136,7 +136,7 @@ Foam::fv::viscousDissipation::devRhoReff() const
     // Incompressible
     {
         const auto* turbPtr =
-            mesh_.lookupObjectPtr<incompressible::turbulenceModel>
+            mesh_.findObject<incompressible::turbulenceModel>
             (
                 turbulenceModel::propertiesName
             );
@@ -150,7 +150,7 @@ Foam::fv::viscousDissipation::devRhoReff() const
     // Compressible
     {
         const auto* turbPtr =
-            mesh_.lookupObjectPtr<compressible::turbulenceModel>
+            mesh_.findObject<compressible::turbulenceModel>
             (
                 turbulenceModel::propertiesName
             );
@@ -196,8 +196,7 @@ void Foam::fv::viscousDissipation::addSup
     );
 
     // Cached?
-    const GradFieldType* gradUPtr =
-        mesh_.lookupObjectPtr<GradFieldType>(gradUName);
+    const GradFieldType* gradUPtr = mesh_.findObject<GradFieldType>(gradUName);
 
     if (gradUPtr)
     {

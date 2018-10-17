@@ -367,8 +367,7 @@ Foam::fileOperations::masterUncollatedFileOperation::localObjectPath
             // Uncollated type, e.g. processor1
             const word procName
             (
-                "processor"
-               +Foam::name(Pstream::myProcNo(Pstream::worldComm))
+                "processor" + Foam::name(Pstream::myProcNo(Pstream::worldComm))
             );
             return
                 processorsPath

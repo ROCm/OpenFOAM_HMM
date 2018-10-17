@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 #include "DarcyForchheimer.H"
 #include "geometricOneField.H"
 #include "fvMatrices.H"
+#include "pointIndList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -67,68 +68,49 @@ Foam::porosityModels::DarcyForchheimer::DarcyForchheimer
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::porosityModels::DarcyForchheimer::~DarcyForchheimer()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::porosityModels::DarcyForchheimer::calcTransformModelData()
 {
-    if (coordSys_.R().uniform())
+    // The Darcy coefficient as a tensor
+    tensor darcyCoeff(Zero);
+    darcyCoeff.xx() = dXYZ_.value().x();
+    darcyCoeff.yy() = dXYZ_.value().y();
+    darcyCoeff.zz() = dXYZ_.value().z();
+
+    // The Forchheimer coefficient as a tensor
+    // - the leading 0.5 is from 1/2*rho
+    tensor forchCoeff(Zero);
+    forchCoeff.xx() = 0.5*fXYZ_.value().x();
+    forchCoeff.yy() = 0.5*fXYZ_.value().y();
+    forchCoeff.zz() = 0.5*fXYZ_.value().z();
+
+    if (csys().uniform())
     {
-        forAll(cellZoneIDs_, zoneI)
+        forAll(cellZoneIDs_, zonei)
         {
-            D_[zoneI].setSize(1);
-            F_[zoneI].setSize(1);
+            D_[zonei].resize(1);
+            F_[zonei].resize(1);
 
-            D_[zoneI][0] = Zero;
-            D_[zoneI][0].xx() = dXYZ_.value().x();
-            D_[zoneI][0].yy() = dXYZ_.value().y();
-            D_[zoneI][0].zz() = dXYZ_.value().z();
-
-            D_[zoneI][0] = coordSys_.R().transformTensor(D_[zoneI][0]);
-
-            // leading 0.5 is from 1/2*rho
-            F_[zoneI][0] = Zero;
-            F_[zoneI][0].xx() = 0.5*fXYZ_.value().x();
-            F_[zoneI][0].yy() = 0.5*fXYZ_.value().y();
-            F_[zoneI][0].zz() = 0.5*fXYZ_.value().z();
-
-            F_[zoneI][0] = coordSys_.R().transformTensor(F_[zoneI][0]);
+            D_[zonei] = csys().transform(darcyCoeff);
+            F_[zonei] = csys().transform(forchCoeff);
         }
     }
     else
     {
-        forAll(cellZoneIDs_, zoneI)
+        forAll(cellZoneIDs_, zonei)
         {
-            const labelList& cells = mesh_.cellZones()[cellZoneIDs_[zoneI]];
+            const pointUIndList cc
+            (
+                mesh_.cellCentres(),
+                mesh_.cellZones()[cellZoneIDs_[zonei]]
+            );
 
-            D_[zoneI].setSize(cells.size());
-            F_[zoneI].setSize(cells.size());
-
-            forAll(cells, i)
-            {
-                D_[zoneI][i] = Zero;
-                D_[zoneI][i].xx() = dXYZ_.value().x();
-                D_[zoneI][i].yy() = dXYZ_.value().y();
-                D_[zoneI][i].zz() = dXYZ_.value().z();
-
-                // leading 0.5 is from 1/2*rho
-                F_[zoneI][i] = Zero;
-                F_[zoneI][i].xx() = 0.5*fXYZ_.value().x();
-                F_[zoneI][i].yy() = 0.5*fXYZ_.value().y();
-                F_[zoneI][i].zz() = 0.5*fXYZ_.value().z();
-            }
-
-            const coordinateRotation& R = coordSys_.R(mesh_, cells);
-
-            D_[zoneI] = R.transformTensor(D_[zoneI], cells);
-            F_[zoneI] = R.transformTensor(F_[zoneI], cells);
+            D_[zonei] = csys().transform(cc, darcyCoeff);
+            F_[zonei] = csys().transform(cc, forchCoeff);
         }
     }
+
 
     if (debug && mesh_.time().writeTime())
     {
@@ -159,8 +141,22 @@ void Foam::porosityModels::DarcyForchheimer::calcTransformModelData()
             dimensionedTensor(fXYZ_.dimensions(), Zero)
         );
 
-        UIndirectList<tensor>(Dout, mesh_.cellZones()[cellZoneIDs_[0]]) = D_[0];
-        UIndirectList<tensor>(Fout, mesh_.cellZones()[cellZoneIDs_[0]]) = F_[0];
+
+        forAll(cellZoneIDs_, zonei)
+        {
+            const labelList& cells = mesh_.cellZones()[cellZoneIDs_[zonei]];
+
+            if (csys().uniform())
+            {
+                UIndirectList<tensor>(Dout, cells) = D_[zonei].first();
+                UIndirectList<tensor>(Fout, cells) = F_[zonei].first();
+            }
+            else
+            {
+                UIndirectList<tensor>(Dout, cells) = D_[zonei];
+                UIndirectList<tensor>(Fout, cells) = F_[zonei];
+            }
+        }
 
         Dout.write();
         Fout.write();
@@ -176,7 +172,7 @@ void Foam::porosityModels::DarcyForchheimer::calcForce
     vectorField& force
 ) const
 {
-    scalarField Udiag(U.size(), 0.0);
+    scalarField Udiag(U.size(), Zero);
     vectorField Usource(U.size(), Zero);
     const scalarField& V = mesh_.V();
 
@@ -202,19 +198,17 @@ void Foam::porosityModels::DarcyForchheimer::correct
 
     if (UEqn.dimensions() == dimForce)
     {
-        const volScalarField& rho = mesh_.lookupObject<volScalarField>(rhoName);
+        const auto& rho = mesh_.lookupObject<volScalarField>(rhoName);
 
         if (mesh_.foundObject<volScalarField>(muName))
         {
-            const volScalarField& mu =
-                mesh_.lookupObject<volScalarField>(muName);
+            const auto& mu = mesh_.lookupObject<volScalarField>(muName);
 
             apply(Udiag, Usource, V, rho, mu, U);
         }
         else
         {
-            const volScalarField& nu =
-                mesh_.lookupObject<volScalarField>(nuName);
+            const auto& nu = mesh_.lookupObject<volScalarField>(nuName);
 
             apply(Udiag, Usource, V, rho, rho*nu, U);
         }
@@ -223,17 +217,14 @@ void Foam::porosityModels::DarcyForchheimer::correct
     {
         if (mesh_.foundObject<volScalarField>(nuName))
         {
-            const volScalarField& nu =
-                mesh_.lookupObject<volScalarField>(nuName);
+            const auto& nu = mesh_.lookupObject<volScalarField>(nuName);
 
             apply(Udiag, Usource, V, geometricOneField(), nu, U);
         }
         else
         {
-            const volScalarField& rho =
-                mesh_.lookupObject<volScalarField>(rhoName);
-            const volScalarField& mu =
-                mesh_.lookupObject<volScalarField>(muName);
+            const auto& rho = mesh_.lookupObject<volScalarField>(rhoName);
+            const auto& mu = mesh_.lookupObject<volScalarField>(muName);
 
             apply(Udiag, Usource, V, geometricOneField(), mu/rho, U);
         }
@@ -271,8 +262,8 @@ void Foam::porosityModels::DarcyForchheimer::correct
 
     if (UEqn.dimensions() == dimForce)
     {
-        const volScalarField& rho = mesh_.lookupObject<volScalarField>(rhoName);
-        const volScalarField& mu = mesh_.lookupObject<volScalarField>(muName);
+        const auto& rho = mesh_.lookupObject<volScalarField>(rhoName);
+        const auto& mu = mesh_.lookupObject<volScalarField>(muName);
 
         apply(AU, rho, mu, U);
     }
@@ -280,17 +271,14 @@ void Foam::porosityModels::DarcyForchheimer::correct
     {
         if (mesh_.foundObject<volScalarField>(nuName))
         {
-            const volScalarField& nu =
-                mesh_.lookupObject<volScalarField>(nuName);
+            const auto& nu = mesh_.lookupObject<volScalarField>(nuName);
 
             apply(AU, geometricOneField(), nu, U);
         }
         else
         {
-            const volScalarField& rho =
-                mesh_.lookupObject<volScalarField>(rhoName);
-            const volScalarField& mu =
-                mesh_.lookupObject<volScalarField>(muName);
+            const auto& rho = mesh_.lookupObject<volScalarField>(rhoName);
+            const auto& mu = mesh_.lookupObject<volScalarField>(muName);
 
             apply(AU, geometricOneField(), mu/rho, U);
         }

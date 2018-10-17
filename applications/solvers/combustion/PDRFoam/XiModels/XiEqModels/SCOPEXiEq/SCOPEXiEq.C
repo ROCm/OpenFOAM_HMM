@@ -49,15 +49,12 @@ Foam::XiEqModels::SCOPEXiEq::SCOPEXiEq
 )
 :
     XiEqModel(XiEqProperties, thermo, turbulence, Su),
-    XiEqCoef_(readScalar(XiEqModelCoeffs_.lookup("XiEqCoef"))),
-    XiEqExp_(readScalar(XiEqModelCoeffs_.lookup("XiEqExp"))),
-    lCoef_(readScalar(XiEqModelCoeffs_.lookup("lCoef"))),
+    XiEqCoef_(XiEqModelCoeffs_.get<scalar>("XiEqCoef")),
+    XiEqExp_(XiEqModelCoeffs_.get<scalar>("XiEqExp")),
+    lCoef_(XiEqModelCoeffs_.get<scalar>("lCoef")),
     SuMin_(0.01*Su.average()),
-    uPrimeCoef_(readScalar(XiEqModelCoeffs_.lookup("uPrimeCoef"))),
-    subGridSchelkin_
-    (
-        readBool(XiEqModelCoeffs_.lookup("subGridSchelkin"))
-    ),
+    uPrimeCoef_(XiEqModelCoeffs_.get<scalar>("uPrimeCoef")),
+    subGridSchelkin_(XiEqModelCoeffs_.get<bool>("subGridSchelkin")),
     MaModel
     (
         Su.mesh().lookupObject<IOdictionary>("combustionProperties"),

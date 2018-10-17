@@ -30,11 +30,67 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
-#include "coordinateSystem.H"
+#include "Time.H"
+#include "coordinateSystems.H"
+#include "identityRotation.H"
+#include "indirectCS.H"
 #include "Fstream.H"
 #include "IOstreams.H"
+#include "transform.H"
 
 using namespace Foam;
+
+
+template<class T>
+void testTransform(const coordinateSystem& cs, const point& p, const T& val)
+{
+    Info<< "    " << pTraits<T>::typeName << ": " << val
+        << " transform: " << cs.transform(p, val)
+        << " invTransform: " << cs.invTransform(p, val) << nl;
+
+    // Info<< " both: " << cs.invTransform(p, cs.transform(p, val)) << nl;
+}
+
+
+void basicTests(const coordinateSystem& cs)
+{
+    cs.writeEntry(cs.name(), Info);
+
+    if (isA<coordSystem::indirect>(cs))
+    {
+        Info<< "indirect from:" << nl;
+        dynamicCast<const coordSystem::indirect>(cs).cs()
+            .writeEntry(cs.name(), Info);
+    }
+
+
+    Info<< "rotation: " << cs.R() << nl;
+
+    List<point> testPoints
+    ({
+        {1,0,0}, {0,1,0}, {0,0,1}, {1,1,1},
+    });
+
+
+    for (const point& p : testPoints)
+    {
+        Info<< nl
+            << "  test point: " << p
+            << " = local point " << cs.transformPoint(p)
+            << " = local coord " << cs.localPosition(p) << nl;
+
+        const vector v1(1, 1, 1);
+        const tensor t1(tensor::I);
+        const tensor t2(1, 2, 3, 4, 5, 6, 7, 8, 9);
+
+        testTransform(cs, p, v1);
+        testTransform(cs, p, t1);
+        testTransform(cs, p, t2);
+    }
+
+    Info<< nl;
+}
+
 
 void doTest(const dictionary& dict)
 {
@@ -43,18 +99,42 @@ void doTest(const dictionary& dict)
     // Could fail?
     const bool throwingIOError = FatalIOError.throwExceptions();
     const bool throwingError = FatalError.throwExceptions();
+
     try
     {
-        coordinateSystem cs1(dict.dictName(), dict);
+        auto cs1ptr = coordinateSystem::New(dict, "");
+        coordinateSystem& cs1 = *cs1ptr;
+        cs1.rename(dict.dictName());
 
-        coordinateSystem cs2;
+        basicTests(cs1);
+    }
+    catch (Foam::IOerror& err)
+    {
+        Info<< "Caught FatalIOError " << err << nl << endl;
+    }
+    catch (Foam::error& err)
+    {
+        Info<< "Caught FatalError " << err << nl << endl;
+    }
+    FatalError.throwExceptions(throwingError);
+    FatalIOError.throwExceptions(throwingIOError);
+}
 
-        // Move assign
-        cs2 = std::move(cs1);
 
-        // Info<<cs2 << nl;
-        cs2.writeDict(Info, true);
-        Info<< nl;
+void doTest(const objectRegistry& obr, const dictionary& dict)
+{
+    Info<< dict.dictName() << dict << nl;
+
+    // Could fail?
+    const bool throwingIOError = FatalIOError.throwExceptions();
+    const bool throwingError = FatalError.throwExceptions();
+
+    try
+    {
+        auto cs1ptr = coordinateSystem::New(obr, dict, word::null);
+        coordinateSystem& cs1 = *cs1ptr;
+
+        basicTests(cs1);
     }
     catch (Foam::IOerror& err)
     {
@@ -78,7 +158,40 @@ int main(int argc, char *argv[])
     argList::addArgument("dict .. dictN");
     argList args(argc, argv, false, true);
 
-    if (args.size() <= 1)
+    if (args.found("case"))
+    {
+        Info<<"using case for tests" << nl;
+
+        #include "createTime.H"
+
+        const coordinateSystems& systems = coordinateSystems::New(runTime);
+
+        Info<< systems.size() << " global systems" << nl;
+
+        for (const coordinateSystem& cs : systems)
+        {
+            basicTests(cs);
+        }
+
+        // systems.write();
+
+        for (label argi=1; argi < args.size(); ++argi)
+        {
+            const string& dictFile = args[argi];
+            IFstream is(dictFile);
+
+            dictionary inputDict(is);
+
+            forAllConstIters(inputDict, iter)
+            {
+                if (iter().isDict())
+                {
+                    doTest(runTime, iter().dict());
+                }
+            }
+        }
+    }
+    else if (args.size() <= 1)
     {
         Info<<"no coordinateSystem dictionaries to expand" << nl;
     }

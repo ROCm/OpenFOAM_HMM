@@ -235,10 +235,9 @@ bool merge
     // Save current (non-wildcard) keys before adding items.
     wordHashSet thisKeysSet;
     {
-        List<keyType> keys = thisDict.keys(false);
-        forAll(keys, i)
+        for (const word& k : thisDict.keys(false))
         {
-            thisKeysSet.insert(keys[i]);
+            thisKeysSet.insert(k);
         }
     }
 
@@ -261,25 +260,20 @@ bool merge
         }
         else if (literalRE || !(key.isPattern() || shortcuts.found(key)))
         {
-            entry* entryPtr = thisDict.lookupEntryPtr
-            (
-                key,
-                false,              // recursive
-                false               // patternMatch
-            );
+            entry* eptr = thisDict.findEntry(key, keyType::LITERAL);
 
-            if (entryPtr)
+            if (eptr)
             {
                 // Mark thisDict entry as having been match for wildcard
                 // handling later on.
-                thisKeysSet.erase(entryPtr->keyword());
+                thisKeysSet.erase(eptr->keyword());
 
                 if
                 (
                     addEntry
                     (
                         thisDict,
-                       *entryPtr,
+                       *eptr,
                         mergeIter(),
                         literalRE,
                         shortcuts
@@ -310,7 +304,7 @@ bool merge
 
     // Pass 2. Wildcard or shortcut matches (if any) on any non-match keys.
 
-    if (!literalRE && thisKeysSet.size() > 0)
+    if (!literalRE && thisKeysSet.size())
     {
         // Pick up remaining dictionary entries
         wordList thisKeys(thisKeysSet.toc());
@@ -336,10 +330,10 @@ bool merge
                 );
 
                 // Remove all matches
-                forAll(matches, i)
+                for (const label matchi : matches)
                 {
-                    const word& thisKey = thisKeys[matches[i]];
-                    thisKeysSet.erase(thisKey);
+                    const word& k = thisKeys[matchi];
+                    thisKeysSet.erase(k);
                 }
                 changed = true;
             }
@@ -358,21 +352,18 @@ bool merge
                 );
 
                 // Add all matches
-                forAll(matches, i)
+                for (const label matchi : matches)
                 {
-                    const word& thisKey = thisKeys[matches[i]];
+                    const word& k = thisKeys[matchi];
 
-                    entry& thisEntry = const_cast<entry&>
-                    (
-                        thisDict.lookupEntry(thisKey, false, false)
-                    );
+                    entry* eptr = thisDict.findEntry(k, keyType::LITERAL);
 
                     if
                     (
                         addEntry
                         (
                             thisDict,
-                            thisEntry,
+                           *eptr,
                             mergeIter(),
                             literalRE,
                             HashTable<wordList>(0)    // no shortcuts
@@ -627,8 +618,7 @@ int main(int argc, char *argv[])
                         fieldDict.lookupEntry
                         (
                             doneKeys[i],
-                            false,
-                            true
+                            keyType::REGEX
                         ).clone()
                     );
                     fieldDict.remove(doneKeys[i]);

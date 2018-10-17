@@ -57,7 +57,7 @@ Foam::basicChemistryModel::basicChemistryModel(basicThermo& thermo)
     ),
     mesh_(thermo.p().mesh()),
     chemistry_(lookup("chemistry")),
-    deltaTChemIni_(readScalar(lookup("initialChemicalTimeStep"))),
+    deltaTChemIni_(get<scalar>("initialChemicalTimeStep")),
     deltaTChemMax_(lookupOrDefault("maxChemicalTimeStep", GREAT)),
     deltaTChem_
     (

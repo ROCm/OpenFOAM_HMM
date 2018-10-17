@@ -72,7 +72,7 @@ Foam::outletPhaseMeanVelocityFvPatchVectorField
 )
 :
     mixedFvPatchField<vector>(p, iF),
-    Umean_(readScalar(dict.lookup("Umean"))),
+    Umean_(dict.get<scalar>("Umean")),
     alphaName_(dict.lookup("alpha"))
 {
     patchType() = dict.lookupOrDefault<word>("patchType", word::null);

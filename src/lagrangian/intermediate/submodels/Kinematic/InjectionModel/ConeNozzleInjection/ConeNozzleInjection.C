@@ -132,19 +132,16 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
         injectionMethodNames.lookup("injectionMethod", this->coeffDict())
     ),
     flowType_(flowTypeNames.lookup("flowType", this->coeffDict())),
-    outerDiameter_(readScalar(this->coeffDict().lookup("outerDiameter"))),
-    innerDiameter_(readScalar(this->coeffDict().lookup("innerDiameter"))),
-    duration_(readScalar(this->coeffDict().lookup("duration"))),
+    outerDiameter_(this->coeffDict().getScalar("outerDiameter")),
+    innerDiameter_(this->coeffDict().getScalar("innerDiameter")),
+    duration_(this->coeffDict().getScalar("duration")),
     positionVsTime_(owner.db().time(), "position"),
     position_(vector::zero),
     injectorCell_(-1),
     tetFacei_(-1),
     tetPti_(-1),
     direction_(this->coeffDict().lookup("direction")),
-    parcelsPerSecond_
-    (
-        readScalar(this->coeffDict().lookup("parcelsPerSecond"))
-    ),
+    parcelsPerSecond_(this->coeffDict().getScalar("parcelsPerSecond")),
     flowRateProfile_
     (
         TimeFunction1<scalar>

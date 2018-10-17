@@ -51,6 +51,7 @@ License
 
 bool Foam::argList::argsMandatory_ = true;
 bool Foam::argList::checkProcessorDirectories_ = true;
+
 Foam::SLList<Foam::string>    Foam::argList::validArgs;
 Foam::HashSet<Foam::string>   Foam::argList::advancedOptions;
 Foam::HashTable<Foam::string> Foam::argList::validOptions;
@@ -59,9 +60,10 @@ Foam::HashTable<Foam::string> Foam::argList::optionUsage;
 Foam::HashTable<std::pair<Foam::word,int>> Foam::argList::validOptionsCompat;
 Foam::HashTable<std::pair<bool,int>> Foam::argList::ignoreOptionsCompat;
 Foam::SLList<Foam::string>    Foam::argList::notes;
-Foam::string::size_type Foam::argList::usageMin = 20;
-Foam::string::size_type Foam::argList::usageMax = 80;
 Foam::word Foam::argList::postProcessOptionName("postProcess");
+
+std::string::size_type Foam::argList::usageMin = 20;
+std::string::size_type Foam::argList::usageMax = 80;
 
 Foam::argList::initValidTables::initValidTables()
 {
@@ -256,7 +258,7 @@ void Foam::argList::addBoolOption
 (
     const word& optName,
     const string& usage,
-    const bool advanced
+    bool advanced
 )
 {
     addOption(optName, "", usage, advanced);
@@ -268,7 +270,7 @@ void Foam::argList::addOption
     const word& optName,
     const string& param,
     const string& usage,
-    const bool advanced
+    bool advanced
 )
 {
     validOptions.set(optName, param);
@@ -279,6 +281,19 @@ void Foam::argList::addOption
     if (advanced)
     {
         advancedOptions.set(optName);
+    }
+}
+
+
+void Foam::argList::setAdvanced(const word& optName, bool advanced)
+{
+    if (advanced && validOptions.found(optName))
+    {
+        advancedOptions.set(optName);
+    }
+    else
+    {
+        advancedOptions.erase(optName);
     }
 }
 
@@ -300,7 +315,7 @@ void Foam::argList::addOptionCompat
 void Foam::argList::ignoreOptionCompat
 (
     std::pair<const char*,int> compat,
-    const bool expectArg
+    bool expectArg
 )
 {
     ignoreOptionsCompat.insert
@@ -417,100 +432,107 @@ void Foam::argList::noCheckProcessorDirectories()
 
 void Foam::argList::printOptionUsage
 (
-    const label location,
+    std::string::size_type start,
     const string& str
 )
 {
-    const string::size_type textWidth = usageMax - usageMin;
-    const string::size_type strLen = str.size();
+    const auto strLen = str.length();
 
-    if (strLen)
+    if (!strLen)
     {
-        // Minimum of 2 spaces between option and usage:
-        if (string::size_type(location) + 2 <= usageMin)
+        Info<< nl;
+        return;
+    }
+
+    // Indent the first line. Min 2 spaces between option and usage
+    if (start + 2 > usageMin)
+    {
+        Info<< nl;
+        start = 0;
+    }
+    while (start < usageMin)
+    {
+        Info<<' ';
+        ++start;
+    }
+
+    const std::string::size_type textWidth = (usageMax - usageMin);
+
+    // Output with text wrapping
+    for (std::string::size_type pos = 0;  pos < strLen; /*ni*/)
+    {
+        // Potential end point and next point
+        std::string::size_type end  = pos + textWidth - 1;
+        std::string::size_type eol  = str.find('\n', pos);
+        std::string::size_type next = string::npos;
+
+        if (end >= strLen)
         {
-            for (string::size_type i = location; i < usageMin; ++i)
+            // No more wrapping needed
+            end = strLen;
+
+            if (std::string::npos != eol && eol <= end)
             {
-                Info<<' ';
+                end = eol;
+                next = str.find_first_not_of(" \t\n", end); // Next non-space
             }
+        }
+        else if (std::string::npos != eol && eol <= end)
+        {
+            // Embedded '\n' char
+            end = eol;
+            next = str.find_first_not_of(" \t\n", end);     // Next non-space
+        }
+        else if (isspace(str[end]))
+        {
+            // Ended on a space - can use this directly
+            next = str.find_first_not_of(" \t\n", end);     // Next non-space
+        }
+        else if (isspace(str[end+1]))
+        {
+            // The next one is a space - so we are okay
+            ++end;  // Otherwise the length is wrong
+            next = str.find_first_not_of(" \t\n", end);     // Next non-space
         }
         else
         {
-            // or start a new line
+            // Line break will be mid-word
+            auto prev = str.find_last_of(" \t\n", end);     // Prev word break
+
+            if (std::string::npos != prev && prev > pos)
+            {
+                end = prev;
+                next = prev + 1;  // Continue from here
+            }
+        }
+
+        // The next position to continue from
+        if (std::string::npos == next)
+        {
+            next = end + 1;
+        }
+
+        // Has a length
+        if (end > pos)
+        {
+            // Indent following lines. The first one was already done.
+            if (pos)
+            {
+                for (std::string::size_type i = 0; i < usageMin; ++i)
+                {
+                    Info<<' ';
+                }
+            }
+
+            while (pos < end)
+            {
+                Info<< str[pos];
+                ++pos;
+            }
             Info<< nl;
-            for (string::size_type i = 0; i < usageMin; ++i)
-            {
-                Info<<' ';
-            }
         }
 
-        // Text wrap
-        string::size_type pos = 0;
-        while (pos != string::npos && pos + textWidth < strLen)
-        {
-            // Potential end point and next point
-            string::size_type curr = pos + textWidth - 1;
-            string::size_type next = string::npos;
-
-            if (isspace(str[curr]))
-            {
-                // We were lucky: ended on a space
-                next = str.find_first_not_of(" \t\n", curr);
-            }
-            else if (isspace(str[curr+1]))
-            {
-                // The next one is a space - so we are okay
-                ++curr;  // otherwise the length is wrong
-                next = str.find_first_not_of(" \t\n", curr);
-            }
-            else
-            {
-                // Search for end of a previous word break
-                string::size_type prev = str.find_last_of(" \t\n", curr);
-
-                // Reposition to the end of previous word if possible
-                if (prev != string::npos && prev > pos)
-                {
-                    curr = prev;
-                }
-            }
-
-            if (next == string::npos)
-            {
-                next = curr + 1;
-            }
-
-            // Indent following lines (not the first one)
-            if (pos)
-            {
-                for (string::size_type i = 0; i < usageMin; ++i)
-                {
-                    Info<<' ';
-                }
-            }
-
-            Info<< str.substr(pos, (curr - pos)).c_str() << nl;
-            pos = next;
-        }
-
-        // Output the remainder of the string
-        if (pos != string::npos)
-        {
-            // Indent following lines (not the first one)
-            if (pos)
-            {
-                for (string::size_type i = 0; i < usageMin; ++i)
-                {
-                    Info<<' ';
-                }
-            }
-
-            Info<< str.substr(pos).c_str() << nl;
-        }
-    }
-    else
-    {
-        Info<< nl;
+        pos = next;
     }
 }
 
@@ -684,72 +706,58 @@ bool Foam::argList::regroupArgv(int& argc, char**& argv)
     args_.resize(nArgs);
 
     std::string::size_type len = (nArgs-1); // Spaces between args
-    forAll(args_, argi)
+    for (const auto& s : args_)
     {
-        len += args_[argi].size();
+        len += s.length();
     }
 
     // Length needed for regrouped command-line
-    argListStr_.reserve(len);
+    commandLine_.reserve(len);
 
     return nArgs < argc;
 }
 
 
-void Foam::argList::getRootCase()
+void Foam::argList::setCasePaths()
 {
-    fileName casePath;
+    fileName caseDir;
 
-    // [-case dir] specified
-    const auto optIter = options_.cfind("case");
+    const auto optIter = options_.cfind("case");  // [-case dir] specified?
 
     if (optIter.found())
     {
-        casePath = optIter.object();
-        casePath.clean();
+        caseDir = optIter.object();
+        caseDir.clean();
 
-        if (casePath.empty() || casePath == ".")
+        if (caseDir.empty() || caseDir == ".")
         {
-            // Handle degenerate form and '-case .' like no -case specified
-            casePath = cwd();
+            // Treat "", "." and "./" as if -case was not specified
+            caseDir = cwd();
             options_.erase("case");
         }
-        else if (!casePath.isAbsolute() && casePath.name() == "..")
+        else
         {
-            // Avoid relative cases ending in '..' - makes for very ugly names
-            casePath = cwd()/casePath;
-            casePath.clean();
+            caseDir.toAbsolute();
         }
     }
     else
     {
         // Nothing specified, use the current dir
-        casePath = cwd();
+        caseDir = cwd();
     }
 
-    rootPath_   = casePath.path();
-    globalCase_ = casePath.name();
-    case_       = globalCase_;
+    // The caseDir is a cleaned, absolute path
 
-    // The name of the executable, unless already present in the environment
+    rootPath_   = caseDir.path();
+    globalCase_ = caseDir.name();
+    case_       = globalCase_;  // The (processor) local case name
+
+    // Global case (directory) and case-name as environment variables
+    setEnv("FOAM_CASE", caseDir, true);
+    setEnv("FOAM_CASENAME", globalCase_, true);
+
+    // Executable name, unless already present in the environment
     setEnv("FOAM_EXECUTABLE", executable_, false);
-
-    // Set the case and case-name as an environment variable
-    if (rootPath_.isAbsolute())
-    {
-        // Absolute path - use as-is
-        setEnv("FOAM_CASE", rootPath_/globalCase_, true);
-        setEnv("FOAM_CASENAME", globalCase_, true);
-    }
-    else
-    {
-        // Qualify relative path
-        casePath = cwd()/rootPath_/globalCase_;
-        casePath.clean();
-
-        setEnv("FOAM_CASE", casePath, true);
-        setEnv("FOAM_CASENAME", casePath.name(), true);
-    }
 }
 
 
@@ -761,12 +769,11 @@ Foam::argList::argList
     char**& argv,
     bool checkArgs,
     bool checkOpts,
-    const bool initialise
+    bool initialise
 )
 :
     args_(argc),
-    options_(argc),
-    distributed_(false)
+    options_(argc)
 {
     // Check for -fileHandler, which requires an argument.
     word handlerType(getEnv("FOAM_FILEHANDLER"));
@@ -815,7 +822,7 @@ Foam::argList::argList
 
     // Convert argv -> args_ and capture ( ... ) lists
     regroupArgv(argc, argv);
-    argListStr_ += args_[0];
+    commandLine_ += args_[0];
 
     // Set executable name immediately - useful when emitting errors.
     executable_ = fileName(args_[0]).name();
@@ -824,8 +831,8 @@ Foam::argList::argList
     int nArgs = 1;
     for (int argi = 1; argi < args_.size(); ++argi)
     {
-        argListStr_ += ' ';
-        argListStr_ += args_[argi];
+        commandLine_ += ' ';
+        commandLine_ += args_[argi];
 
         if (args_[argi][0] == '-')
         {
@@ -859,8 +866,8 @@ Foam::argList::argList
                     Pstream::exit(1); // works for serial and parallel
                 }
 
-                argListStr_ += ' ';
-                argListStr_ += args_[argi];
+                commandLine_ += ' ';
+                commandLine_ += args_[argi];
                 // Handle duplicates by taking the last -option specified
                 options_.set(optName, args_[argi]);
             }
@@ -904,7 +911,7 @@ Foam::argList::argList
     rootPath_(args.rootPath_),
     globalCase_(args.globalCase_),
     case_(args.case_),
-    argListStr_(args.argListStr_)
+    commandLine_(args.commandLine_)
 {
     parse(checkArgs, checkOpts, initialise);
 }
@@ -991,7 +998,7 @@ void Foam::argList::parse
                 #endif
                 << nl
                 << "Arch   : " << Foam::FOAMbuildArch << nl
-                << "Exec   : " << argListStr_.c_str() << nl
+                << "Exec   : " << commandLine_.c_str() << nl
                 << "Date   : " << dateString.c_str() << nl
                 << "Time   : " << timeString.c_str() << nl
                 << "Host   : " << hostName().c_str() << nl
@@ -1003,7 +1010,7 @@ void Foam::argList::parse
         jobInfo.add("userName", userName());
         jobInfo.add("foamVersion", word(Foam::FOAMversion));
         jobInfo.add("code", executable_);
-        jobInfo.add("argList", argListStr_);
+        jobInfo.add("argList", commandLine_);
         jobInfo.add("currentDir", cwd());
         jobInfo.add("PPID", ppid());
         jobInfo.add("PGID", pgid());
@@ -1106,7 +1113,7 @@ void Foam::argList::parse
         if (Pstream::master())
         {
             // Establish rootPath_/globalCase_/case_ for master
-            getRootCase();
+            setCasePaths();
 
             // Establish location of decomposeParDict, allow override with
             // the -decomposeParDict option.
@@ -1118,7 +1125,7 @@ void Foam::argList::parse
                 source = options_["decomposeParDict"];
                 if (isDir(source))
                 {
-                    source = source/"decomposeParDict";
+                    source /= "decomposeParDict";
                     adjustOpt = true;
                 }
 
@@ -1141,7 +1148,7 @@ void Foam::argList::parse
             label dictNProcs = -1;
             if (this->readListIfPresent("roots", roots))
             {
-                distributed_ = true;
+                parRunControl_.distributed(true);
                 source = "-roots";
                 if (roots.size() != 1)
                 {
@@ -1209,11 +1216,11 @@ void Foam::argList::parse
 
                 dictionary decompDict(decompDictStream);
 
-                dictNProcs = decompDict.get<label>("numberOfSubdomains");
+                decompDict.readEntry("numberOfSubdomains", dictNProcs);
 
                 if (decompDict.lookupOrDefault("distributed", false))
                 {
-                    distributed_ = true;
+                    parRunControl_.distributed(true);
                     decompDict.readEntry("roots", roots);
                 }
             }
@@ -1266,9 +1273,9 @@ void Foam::argList::parse
                         << exit(FatalError);
                 }
 
-                forAll(roots, i)
+                for (fileName& dir : roots)
                 {
-                    roots[i].expand();
+                    dir.expand();
                 }
 
                 // Distribute the master's argument list (with new root)
@@ -1308,8 +1315,8 @@ void Foam::argList::parse
                     (
                         isDir
                         (
-                            rootPath_/globalCase_/"processor"
-                          + name(++nProcDirs)
+                            rootPath_/globalCase_
+                          / ("processor" + Foam::name(++nProcDirs))
                         )
                     )
                     {}
@@ -1341,26 +1348,31 @@ void Foam::argList::parse
         else
         {
             // Collect the master's argument list
+            label nroots;
+
             IPstream fromMaster
             (
                 Pstream::commsTypes::scheduled,
                 Pstream::masterNo()
             );
-            fromMaster >> args_ >> options_ >> distributed_;
+            fromMaster >> args_ >> options_ >> nroots;
+
+            parRunControl_.distributed(nroots);
 
             // Establish rootPath_/globalCase_/case_ for slave
-            getRootCase();
+            setCasePaths();
         }
 
         nProcs = Pstream::nProcs();
-        case_ = globalCase_/(word("processor") + name(Pstream::myProcNo()));
+        case_ = globalCase_/("processor" + Foam::name(Pstream::myProcNo()));
     }
     else
     {
         // Establish rootPath_/globalCase_/case_
-        getRootCase();
-        case_ = globalCase_;
+        setCasePaths();
+        case_ = globalCase_;   // Redundant, but extra safety?
     }
+
 
     // Keep or discard slave and root information for reporting:
     if (Pstream::master() && parRunControl_.parRun())
@@ -1618,7 +1630,9 @@ void Foam::argList::printUsage(bool full) const
         }
 
         Info<< "  -" << optName;
-        label len = optName.size() + 3;  // Length includes leading '  -'
+
+        // Length includes leading '  -'
+        label len = optName.size() + 3;
 
         const auto optIter = validOptions.cfind(optName);
         if (optIter().size())

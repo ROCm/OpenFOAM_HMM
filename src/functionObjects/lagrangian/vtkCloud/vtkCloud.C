@@ -106,7 +106,7 @@ bool Foam::functionObjects::vtkCloud::writeCloud
     const word& cloudName
 )
 {
-    const auto* objPtr = mesh_.lookupObjectPtr<cloud>(cloudName);
+    const auto* objPtr = mesh_.findObject<cloud>(cloudName);
     if (!objPtr)
     {
         return false;
@@ -127,7 +127,7 @@ bool Foam::functionObjects::vtkCloud::writeCloud
 
     objPtr->writeObjects(obrTmp);
 
-    const auto* pointsPtr = obrTmp.lookupObjectPtr<vectorField>("position");
+    const auto* pointsPtr = obrTmp.findObject<vectorField>("position");
 
     if (!pointsPtr)
     {

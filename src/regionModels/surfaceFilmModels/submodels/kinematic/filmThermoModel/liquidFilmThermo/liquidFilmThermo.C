@@ -78,19 +78,23 @@ void liquidFilmThermo::initLiquid(const dictionary& dict)
 
     dict.readEntry("liquid", name_);
 
-    if (filmModel_.primaryMesh().foundObject<SLGThermo>("SLGThermo"))
+    const SLGThermo* thermoPtr =
+        filmModel_.primaryMesh().findObject<SLGThermo>("SLGThermo");
+
+    if (thermoPtr)
     {
-        // retrieve from film thermo
+        // Retrieve from film thermo
         ownLiquid_ = false;
 
-        const SLGThermo& thermo =
-            filmModel_.primaryMesh().lookupObject<SLGThermo>("SLGThermo");
-        label id = thermo.liquidId(name_);
+        const SLGThermo& thermo = *thermoPtr;
+
+        const label id = thermo.liquidId(name_);
+
         liquidPtr_ = &thermo.liquids().properties()[id];
     }
     else
     {
-        // new liquid create
+        // New liquid create
         ownLiquid_ = true;
 
         liquidPtr_ =
@@ -111,7 +115,7 @@ liquidFilmThermo::liquidFilmThermo
     name_("unknown_liquid"),
     liquidPtr_(nullptr),
     ownLiquid_(false),
-    useReferenceValues_(readBool(coeffDict_.lookup("useReferenceValues"))),
+    useReferenceValues_(coeffDict_.get<bool>("useReferenceValues")),
     pRef_(0.0),
     TRef_(0.0)
 {

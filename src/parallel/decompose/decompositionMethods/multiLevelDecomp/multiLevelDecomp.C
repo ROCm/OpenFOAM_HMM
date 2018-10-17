@@ -68,9 +68,9 @@ void Foam::multiLevelDecomp::createMethodsDict()
     if
     (
         // non-recursive, no patterns
-        coeffsDict_.readIfPresent("method", defaultMethod, false, false)
+        coeffsDict_.readIfPresent("method", defaultMethod, keyType::LITERAL)
         // non-recursive, no patterns
-     && coeffsDict_.readIfPresent("domains", domains, false, false)
+     && coeffsDict_.readIfPresent("domains", domains, keyType::LITERAL)
     )
     {
         // Short-cut version specified by method, domains only
@@ -169,14 +169,14 @@ void Foam::multiLevelDecomp::createMethodsDict()
             (
                 iter().isDict()
                 // non-recursive, no patterns
-             && iter().dict().found("numberOfSubdomains", false, false)
+             && iter().dict().found("numberOfSubdomains", keyType::LITERAL)
             )
             {
                 // No method specified? can use a default method?
 
                 const bool addDefaultMethod
                 (
-                    !(iter().dict().found("method", false, false))
+                    !(iter().dict().found("method", keyType::LITERAL))
                  && !defaultMethod.empty()
                 );
 

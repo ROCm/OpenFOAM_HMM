@@ -91,15 +91,9 @@ Usage
 
         coordinateSystem
         {
-            type        cartesian;
-            origin      (0 0 0);
-
-            coordinateRotation
-            {
-                type        axesRotation;
-                e1          (1 0 0);
-                e3          (0 0 1);
-            }
+            origin  (0 0 0);
+            e1      (1 0 0);
+            e3      (0 0 1);
         }
 
         // Optionally specify sigma as a function of temperature
@@ -179,8 +173,8 @@ class jouleHeatingSource
         //- Electrical conductivity as a vector function of temperature
         autoPtr<Function1<vector>> vectorSigmaVsTPtr_;
 
-        //- Co-ordinate system - used for vectorial electrical conductivity
-        autoPtr<coordinateSystem> coordSysPtr_;
+        //- Coordinate system - used for vectorial electrical conductivity
+        autoPtr<coordinateSystem> csysPtr_;
 
         //- Current time index (used for updating)
         label curTimeIndex_;
@@ -194,9 +188,8 @@ class jouleHeatingSource
         //- No copy assignment
         void operator=(const jouleHeatingSource&) = delete;
 
-        //- Return the co-ordinate system for anisotropic electrical
-        //  conductivity
-        const coordinateSystem& coordSys() const;
+        //- The coordinate system for anisotropic electrical conductivity
+        const coordinateSystem& csys() const;
 
         //- Transform the anisotropic electrical conductivity into global system
         tmp<volSymmTensorField> transformSigma

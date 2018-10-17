@@ -103,12 +103,10 @@ bool Foam::functionObjects::turbulenceFields::compressible()
     {
         return false;
     }
-    else
-    {
-        FatalErrorInFunction
-            << "Turbulence model not found in database, deactivating"
-            << exit(FatalError);
-    }
+
+    FatalErrorInFunction
+        << "Turbulence model not found in database, deactivating"
+        << exit(FatalError);
 
     return false;
 }

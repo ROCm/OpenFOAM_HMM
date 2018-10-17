@@ -369,7 +369,7 @@ void Foam::blockDescriptor::write
     const dictionary& d
 )
 {
-    const dictionary* varDictPtr = d.subDictPtr("namedBlocks");
+    const dictionary* varDictPtr = d.findDict("namedBlocks");
     if (varDictPtr)
     {
         blockMeshTools::write(os, val, *varDictPtr);

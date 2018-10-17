@@ -68,10 +68,7 @@ Foam::decompositionConstraint::New
             << exit(FatalIOError);
     }
 
-    return autoPtr<decompositionConstraint>
-    (
-        cstrIter()(dict, modelType)
-    );
+    return autoPtr<decompositionConstraint>(cstrIter()(dict, modelType));
 }
 
 

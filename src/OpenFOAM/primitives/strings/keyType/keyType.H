@@ -82,6 +82,20 @@ public:
         static const keyType null;
 
 
+    // Public data types
+
+        //- Enumeration for search/match modes as bitmask
+        //  eg, (keyType::REGEX | keyType::RECURSIVE)
+        enum option
+        {
+            LITERAL = 0,        //!< String literal
+            REGEX   = 1,        //!< Regular expression
+            RECURSIVE = 0x10,   //!< Recursive search (eg, in dictionary)
+            LITERAL_RECURSIVE = (LITERAL | RECURSIVE),
+            REGEX_RECURSIVE   = (REGEX | RECURSIVE)
+        };
+
+
     // Constructors
 
         //- Construct null
@@ -100,19 +114,19 @@ public:
         inline keyType(const char* s);
 
         //- Copy construct from std::string with specified treatment
-        inline keyType(const std::string& s, const bool isPattern);
+        inline keyType(const std::string& s, bool isPattern);
 
         //- Move construct, retaining type (literal or regex)
         inline keyType(keyType&& s);
 
-        //- Move construct from word. Not treated as a regular expression
+        //- Move construct from word, treat as literal.
         inline keyType(word&& s);
 
-        //- Move construct from string. Treat as regular expression.
+        //- Move construct from string, treat as regular expression.
         inline keyType(string&& s);
 
         //- Move construct from std::string with specified treatment
-        inline keyType(std::string&& s, const bool isPattern);
+        inline keyType(std::string&& s, bool isPattern);
 
         //- Construct from Istream
         //  Treat as regular expression if surrounded by quotation marks.

@@ -55,8 +55,8 @@ lennardJones::lennardJones
 :
     pairPotential(name, pairPotentialProperties),
     lennardJonesCoeffs_(pairPotentialProperties.subDict(typeName + "Coeffs")),
-    sigma_(readScalar(lennardJonesCoeffs_.lookup("sigma"))),
-    epsilon_(readScalar(lennardJonesCoeffs_.lookup("epsilon")))
+    sigma_(lennardJonesCoeffs_.get<scalar>("sigma")),
+    epsilon_(lennardJonesCoeffs_.get<scalar>("epsilon"))
 {
     setLookupTables();
 }

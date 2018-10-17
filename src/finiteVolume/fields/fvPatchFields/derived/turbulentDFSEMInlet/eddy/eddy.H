@@ -42,19 +42,18 @@ SourceFiles
 #include "point.H"
 #include "tensor.H"
 #include "Random.H"
-#include "coordinateSystem.H"
+#include "boundBox.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
+class eddy;
 class Istream;
 class Ostream;
 
-// Forward declaration of friend functions and operators
-class eddy;
 bool operator==(const eddy& a, const eddy& b);
 bool operator!=(const eddy& a, const eddy& b);
 Istream& operator>>(Istream& is, eddy& e);
@@ -87,7 +86,7 @@ class eddy
         //- Time-averaged intensity
         vector alpha_;
 
-        //- Co-ordinate system transformation from local to global axes
+        //- Coordinate system transformation from local to global axes
         //  X-direction aligned with max stress eigenvalue
         tensor Rpg_;
 
@@ -161,7 +160,7 @@ public:
             //- Return the time-averaged intensity
             inline const vector& alpha() const;
 
-            //- Return the co-ordinate system transformation from local
+            //- Return the coordinate system transformation from local
             //  principal to global axes
             inline const tensor& Rpg() const;
 

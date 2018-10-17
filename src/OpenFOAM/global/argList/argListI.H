@@ -51,15 +51,15 @@ inline const Foam::word& Foam::argList::executable() const
 }
 
 
-inline const Foam::fileName& Foam::argList::rootPath() const
+inline const Foam::string& Foam::argList::commandLine() const
 {
-    return rootPath_;
+    return commandLine_;
 }
 
 
-inline bool Foam::argList::distributed() const
+inline const Foam::fileName& Foam::argList::rootPath() const
 {
-    return distributed_;
+    return rootPath_;
 }
 
 
@@ -75,12 +75,6 @@ inline const Foam::fileName& Foam::argList::globalCaseName() const
 }
 
 
-inline const Foam::ParRunControl& Foam::argList::parRunControl() const
-{
-    return parRunControl_;
-}
-
-
 inline Foam::fileName Foam::argList::path() const
 {
     return rootPath()/caseName();
@@ -90,6 +84,18 @@ inline Foam::fileName Foam::argList::path() const
 inline Foam::fileName Foam::argList::globalPath() const
 {
     return rootPath()/globalCaseName();
+}
+
+
+inline bool Foam::argList::distributed() const
+{
+    return parRunControl_.distributed();
+}
+
+
+inline const Foam::ParRunControl& Foam::argList::parRunControl() const
+{
+    return parRunControl_;
 }
 
 

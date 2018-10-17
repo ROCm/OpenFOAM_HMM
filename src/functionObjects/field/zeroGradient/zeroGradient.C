@@ -176,16 +176,15 @@ bool Foam::functionObjects::zeroGradient::write()
     }
 
     // Consistent output order
-    const wordList outputList = results_.sortedToc();
-    for (const word& fieldName : outputList)
+    for (const word& fieldName : results_.sortedToc())
     {
-        if (foundObject<regIOobject>(fieldName))
-        {
-            const regIOobject& io = lookupObject<regIOobject>(fieldName);
+        const regIOobject* ioptr = findObject<regIOobject>(fieldName);
 
+        if (ioptr)
+        {
             Log << "    " << fieldName << endl;
 
-            io.write();
+            ioptr->write();
         }
     }
 

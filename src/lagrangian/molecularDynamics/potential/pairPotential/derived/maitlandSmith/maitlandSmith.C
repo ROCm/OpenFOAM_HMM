@@ -55,10 +55,10 @@ maitlandSmith::maitlandSmith
 :
     pairPotential(name, maitlandSmith),
     maitlandSmithCoeffs_(maitlandSmith.subDict(typeName + "Coeffs")),
-    m_(readScalar(maitlandSmithCoeffs_.lookup("m"))),
-    gamma_(readScalar(maitlandSmithCoeffs_.lookup("gamma"))),
-    rm_(readScalar(maitlandSmithCoeffs_.lookup("rm"))),
-    epsilon_(readScalar(maitlandSmithCoeffs_.lookup("epsilon")))
+    m_(maitlandSmithCoeffs_.get<scalar>("m")),
+    gamma_(maitlandSmithCoeffs_.get<scalar>("gamma")),
+    rm_(maitlandSmithCoeffs_.get<scalar>("rm")),
+    epsilon_(maitlandSmithCoeffs_.get<scalar>("epsilon"))
 {
     setLookupTables();
 }

@@ -26,7 +26,7 @@ License
 #include "lumpedPointState.H"
 #include "OFstream.H"
 #include "axesRotation.H"
-
+#include "coordinateSystem.H"
 #include "foamVtkOutput.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -183,14 +183,17 @@ void Foam::lumpedPointState::writeVTP
     }
 
     // Standard corners in local axis
-    const axesRotation cornerTransform(axis);
-
     FixedList<point, 4> corners;
-    forAll(standardCorners, corni)
-    {
-        corners[corni] = cornerTransform.transform(standardCorners[corni]);
-    }
 
+    {
+        coordinateRotations::axes orient(axis);
+        coordinateSystem cornerTransform(orient);
+
+        forAll(standardCorners, corni)
+        {
+            corners[corni] = cornerTransform.transform(standardCorners[corni]);
+        }
+    }
 
     //
     // Planes to visualize location/rotation

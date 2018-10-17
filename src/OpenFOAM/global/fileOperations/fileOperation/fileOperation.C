@@ -50,8 +50,7 @@ namespace Foam
             "fileHandler",
             //Foam::fileOperations::uncollatedFileOperation::typeName,
             "uncollated",
-            false,
-            false
+            keyType::LITERAL
         )
     );
 }

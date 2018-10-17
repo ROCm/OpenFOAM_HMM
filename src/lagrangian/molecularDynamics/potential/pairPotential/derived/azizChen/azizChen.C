@@ -55,15 +55,15 @@ azizChen::azizChen
 :
     pairPotential(name, azizChen),
     azizChenCoeffs_(azizChen.subDict(typeName + "Coeffs")),
-    epsilon_(readScalar(azizChenCoeffs_.lookup("epsilon"))),
-    rm_(readScalar(azizChenCoeffs_.lookup("rm"))),
-    A_(readScalar(azizChenCoeffs_.lookup("A"))),
-    alpha_(readScalar(azizChenCoeffs_.lookup("alpha"))),
-    C6_(readScalar(azizChenCoeffs_.lookup("C6"))),
-    C8_(readScalar(azizChenCoeffs_.lookup("C8"))),
-    C10_(readScalar(azizChenCoeffs_.lookup("C10"))),
-    D_(readScalar(azizChenCoeffs_.lookup("D"))),
-    gamma_(readScalar(azizChenCoeffs_.lookup("gamma")))
+    epsilon_(azizChenCoeffs_.get<scalar>("epsilon")),
+    rm_(azizChenCoeffs_.get<scalar>("rm")),
+    A_(azizChenCoeffs_.get<scalar>("A")),
+    alpha_(azizChenCoeffs_.get<scalar>("alpha")),
+    C6_(azizChenCoeffs_.get<scalar>("C6")),
+    C8_(azizChenCoeffs_.get<scalar>("C8")),
+    C10_(azizChenCoeffs_.get<scalar>("C10")),
+    D_(azizChenCoeffs_.get<scalar>("D")),
+    gamma_(azizChenCoeffs_.get<scalar>("gamma"))
 {
     setLookupTables();
 }

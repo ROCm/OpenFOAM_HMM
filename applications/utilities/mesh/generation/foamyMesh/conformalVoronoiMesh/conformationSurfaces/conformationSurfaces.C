@@ -339,7 +339,7 @@ Foam::conformationSurfaces::conformationSurfaces
     {
         const word& geomName = allGeometry_.names()[geomI];
 
-        const entry* ePtr = surfacesDict.lookupEntryPtr(geomName, false, true);
+        const entry* ePtr = surfacesDict.findEntry(geomName, keyType::REGEX);
 
         if (ePtr)
         {

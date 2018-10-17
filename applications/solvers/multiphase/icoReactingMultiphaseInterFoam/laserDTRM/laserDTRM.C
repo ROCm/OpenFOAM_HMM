@@ -198,7 +198,7 @@ void Foam::radiation::laserDTRM::initialise()
     {
         case pdGaussian:
         {
-            sigma_ = readScalar(lookup("sigma"));
+            sigma_ = get<scalar>("sigma");
             break;
         }
         case pdManual:
@@ -325,8 +325,8 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
     mode_(powerDistNames_.lookup("mode", *this)),
     DTRMCloud_(mesh_, "DTRMCloud", IDLList<DTRMParticle>()),
     nParticles_(0),
-    ndTheta_(readLabel(lookup("nTheta"))),
-    ndr_(readLabel(lookup("nr"))),
+    ndTheta_(get<label>("nTheta")),
+    ndr_(get<label>("nr")),
     maxTrackLength_(mesh_.bounds().mag()),
 
     focalLaserPosition_
@@ -339,7 +339,7 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
         Function1<vector>::New("laserDirection", *this)
     ),
 
-    focalLaserRadius_(readScalar(lookup("focalLaserRadius"))),
+    focalLaserRadius_(get<scalar>("focalLaserRadius")),
     qualityBeamLaser_
     (
         lookupOrDefault<scalar>("qualityBeamLaser", 0.0)
@@ -435,8 +435,8 @@ Foam::radiation::laserDTRM::laserDTRM
     mode_(powerDistNames_.lookup("mode", *this)),
     DTRMCloud_(mesh_, "DTRMCloud", IDLList<DTRMParticle>()),
     nParticles_(0),
-    ndTheta_(readLabel(lookup("nTheta"))),
-    ndr_(readLabel(lookup("nr"))),
+    ndTheta_(get<label>("nTheta")),
+    ndr_(get<label>("nr")),
     maxTrackLength_(mesh_.bounds().mag()),
 
     focalLaserPosition_
@@ -448,7 +448,7 @@ Foam::radiation::laserDTRM::laserDTRM
         Function1<vector>::New("laserDirection", *this)
     ),
 
-    focalLaserRadius_(readScalar(lookup("focalLaserRadius"))),
+    focalLaserRadius_(get<scalar>("focalLaserRadius")),
     qualityBeamLaser_
     (
         lookupOrDefault<scalar>("qualityBeamLaser", 0.0)

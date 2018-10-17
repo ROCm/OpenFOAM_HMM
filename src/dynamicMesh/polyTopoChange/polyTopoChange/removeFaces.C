@@ -910,7 +910,7 @@ void Foam::removeFaces::setRefinement
         {
             if (nFacesPerEdge[edgeI] == 2)
             {
-                // See if they are two boundary faces
+                // Get the two face labels
                 label f0 = -1;
                 label f1 = -1;
 
@@ -920,7 +920,7 @@ void Foam::removeFaces::setRefinement
                 {
                     label facei = eFaces[i];
 
-                    if (!removedFace[facei] && !mesh_.isInternalFace(facei))
+                    if (!removedFace[facei])
                     {
                         if (f0 == -1)
                         {
@@ -934,7 +934,7 @@ void Foam::removeFaces::setRefinement
                     }
                 }
 
-                if (f0 != -1 && f1 != -1)
+                if (!mesh_.isInternalFace(f0) && !mesh_.isInternalFace(f1))
                 {
                     // Edge has two boundary faces remaining.
                     // See if should be merged.
@@ -979,7 +979,7 @@ void Foam::removeFaces::setRefinement
                         }
                     }
                 }
-                else if (f0 != -1 || f1 != -1)
+                else if (mesh_.isInternalFace(f0) != mesh_.isInternalFace(f1))
                 {
                     const edge& e = mesh_.edges()[edgeI];
 
@@ -1000,7 +1000,27 @@ void Foam::removeFaces::setRefinement
                 else
                 {
                     // Both kept faces are internal. Mark edge for preserving
-                    nFacesPerEdge[edgeI] = 3;
+                    // if inbetween different cells. If inbetween same cell
+                    // pair we probably want to merge them to
+                    //  - avoid upper-triangular ordering problems
+                    //  - allow hex unrefinement (expects single face inbetween
+                    //    cells)
+
+                    const edge ownEdge
+                    (
+                        cellRegion[mesh_.faceOwner()[f0]],
+                        cellRegion[mesh_.faceNeighbour()[f0]]
+                    );
+                    const edge neiEdge
+                    (
+                        cellRegion[mesh_.faceOwner()[f1]],
+                        cellRegion[mesh_.faceNeighbour()[f1]]
+                    );
+
+                    if (ownEdge != neiEdge)
+                    {
+                        nFacesPerEdge[edgeI] = 3;
+                    }
                 }
             }
         }

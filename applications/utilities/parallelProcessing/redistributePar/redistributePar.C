@@ -336,8 +336,7 @@ void determineDecomposition
     {
         Info<< "Setting caseName to " << baseRunTime.caseName()
             << " to read decomposeParDict" << endl;
-        const_cast<Time&>(mesh.time()).TimePaths::caseName() =
-            baseRunTime.caseName();
+        const_cast<Time&>(mesh.time()).caseName() = baseRunTime.caseName();
     }
 
     scalarField cellWeights;
@@ -366,8 +365,7 @@ void determineDecomposition
     if (Pstream::master() && decompose)
     {
         Info<< "Restoring caseName to " << proc0CaseName << endl;
-        const_cast<Time&>(mesh.time()).TimePaths::caseName() =
-            proc0CaseName;
+        const_cast<Time&>(mesh.time()).caseName() = proc0CaseName;
     }
 
     // Dump decomposition to volScalarField
@@ -383,10 +381,10 @@ void determineDecomposition
 
                 Time& tm = const_cast<Time&>(mesh.time());
 
-                tm.TimePaths::caseName() = baseRunTime.caseName();
+                tm.caseName() = baseRunTime.caseName();
                 writeDecomposition("cellDist", mesh, decomp);
                 Info<< "Restoring caseName to " << proc0CaseName << endl;
-                tm.TimePaths::caseName() = proc0CaseName;
+                tm.caseName() = proc0CaseName;
             }
         }
         else
@@ -908,12 +906,12 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         // Get original objects (before incrementing time!)
         if (Pstream::master() && decompose)
         {
-            runTime.TimePaths::caseName() = baseRunTime.caseName();
+            runTime.caseName() = baseRunTime.caseName();
         }
         IOobjectList objects(mesh, runTime.timeName());
         if (Pstream::master() && decompose)
         {
-            runTime.TimePaths::caseName() = proc0CaseName;
+            runTime.caseName() = proc0CaseName;
         }
 
         Info<< "From time " << runTime.timeName()
@@ -932,7 +930,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
         if (Pstream::master() && decompose)
         {
-            runTime.TimePaths::caseName() = baseRunTime.caseName();
+            runTime.caseName() = baseRunTime.caseName();
         }
         readFields
         (
@@ -1112,7 +1110,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
         if (Pstream::master() && decompose)
         {
-            runTime.TimePaths::caseName() = proc0CaseName;
+            runTime.caseName() = proc0CaseName;
         }
     }
 
@@ -1192,7 +1190,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         {
             Info<< "Setting caseName to " << baseRunTime.caseName()
                 << " to write reconstructed mesh and fields." << endl;
-            runTime.TimePaths::caseName() = baseRunTime.caseName();
+            runTime.caseName() = baseRunTime.caseName();
 
             mesh.write();
             topoSet::removeFiles(mesh);
@@ -1212,7 +1210,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
             // Now we've written all. Reset caseName on master
             Info<< "Restoring caseName to " << proc0CaseName << endl;
-            runTime.TimePaths::caseName() = proc0CaseName;
+            runTime.caseName() = proc0CaseName;
         }
     }
     else
@@ -1258,7 +1256,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         // Read refinement data
         if (Pstream::master() && decompose)
         {
-            runTime.TimePaths::caseName() = baseRunTime.caseName();
+            runTime.caseName() = baseRunTime.caseName();
         }
         IOobject io
         (
@@ -1274,7 +1272,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         hexRef8Data refData(io);
         if (Pstream::master() && decompose)
         {
-            runTime.TimePaths::caseName() = proc0CaseName;
+            runTime.caseName() = proc0CaseName;
         }
 
         // Make sure all processors have valid data (since only some will
@@ -1294,13 +1292,13 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             {
                 Info<< "Setting caseName to " << baseRunTime.caseName()
                     << " to write reconstructed refinement data." << endl;
-                runTime.TimePaths::caseName() = baseRunTime.caseName();
+                runTime.caseName() = baseRunTime.caseName();
 
                 refData.write();
 
                 // Now we've written all. Reset caseName on master
                 Info<< "Restoring caseName to " << proc0CaseName << endl;
-                runTime.TimePaths::caseName() = proc0CaseName;
+                runTime.caseName() = proc0CaseName;
             }
         }
         else
@@ -1314,7 +1312,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     //    // Read sets
     //    if (Pstream::master() && decompose)
     //    {
-    //        runTime.TimePaths::caseName() = baseRunTime.caseName();
+    //        runTime.caseName() = baseRunTime.caseName();
     //    }
     //    IOobjectList objects(mesh, mesh.facesInstance(), "polyMesh/sets");
     //
@@ -1323,7 +1321,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     //
     //    if (Pstream::master() && decompose)
     //    {
-    //        runTime.TimePaths::caseName() = proc0CaseName;
+    //        runTime.caseName() = proc0CaseName;
     //    }
     //
     //    forAll(cellSets, i)
@@ -1337,7 +1335,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     //        {
     //            Info<< "Setting caseName to " << baseRunTime.caseName()
     //                << " to write reconstructed refinement data." << endl;
-    //            runTime.TimePaths::caseName() = baseRunTime.caseName();
+    //            runTime.caseName() = baseRunTime.caseName();
     //
     //            forAll(cellSets, i)
     //            {
@@ -1346,7 +1344,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     //
     //            // Now we've written all. Reset caseName on master
     //            Info<< "Restoring caseName to " << proc0CaseName << endl;
-    //            runTime.TimePaths::caseName() = proc0CaseName;
+    //            runTime.caseName() = proc0CaseName;
     //        }
     //    }
     //    else
@@ -2931,7 +2929,7 @@ int main(int argc, char *argv[])
                 {
                     Info<< "Setting caseName to " << baseRunTime.caseName()
                         << " to find undecomposed mesh" << endl;
-                    runTime.TimePaths::caseName() = baseRunTime.caseName();
+                    runTime.caseName() = baseRunTime.caseName();
                 }
 
                 masterInstDir = runTime.findInstance
@@ -2944,7 +2942,7 @@ int main(int argc, char *argv[])
                 if (decompose)
                 {
                     Info<< "Restoring caseName to " << proc0CaseName << endl;
-                    runTime.TimePaths::caseName() = proc0CaseName;
+                    runTime.caseName() = proc0CaseName;
                 }
             }
             Pstream::scatter(masterInstDir);
@@ -2970,7 +2968,7 @@ int main(int argc, char *argv[])
             {
                 Info<< "Setting caseName to " << baseRunTime.caseName()
                     << " to read undecomposed mesh" << endl;
-                runTime.TimePaths::caseName() = baseRunTime.caseName();
+                runTime.caseName() = baseRunTime.caseName();
             }
 
             autoPtr<fvMesh> meshPtr = loadOrCreateMesh
@@ -2987,7 +2985,7 @@ int main(int argc, char *argv[])
             if (Pstream::master() && decompose)
             {
                 Info<< "Restoring caseName to " << proc0CaseName << endl;
-                runTime.TimePaths::caseName() = proc0CaseName;
+                runTime.caseName() = proc0CaseName;
             }
 
             fvMesh& mesh = meshPtr();
@@ -3046,7 +3044,7 @@ int main(int argc, char *argv[])
             // Detect lagrangian fields
             if (Pstream::master() && decompose)
             {
-                runTime.TimePaths::caseName() = baseRunTime.caseName();
+                runTime.caseName() = baseRunTime.caseName();
             }
             parLagrangianRedistributor::findClouds
             (
@@ -3069,7 +3067,7 @@ int main(int argc, char *argv[])
             );
             if (Pstream::master() && decompose)
             {
-                runTime.TimePaths::caseName() = proc0CaseName;
+                runTime.caseName() = proc0CaseName;
             }
 
 

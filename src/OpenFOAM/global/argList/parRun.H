@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2018 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,18 +49,22 @@ namespace Foam
 
 class ParRunControl
 {
-    bool RunPar;
+    bool parallel_;
+    bool distributed_;
 
 public:
 
+    //- Construct null
     ParRunControl()
     :
-        RunPar(false)
+        parallel_(false),
+        distributed_(false)
     {}
 
+    //- Destructor, triggers Pstream::exit
     ~ParRunControl()
     {
-        if (RunPar)
+        if (parallel_)
         {
             Info<< "Finalising parallel run" << endl;
         }
@@ -69,10 +73,11 @@ public:
         Pstream::exit(0);
     }
 
+
     //- Initialize Pstream for a parallel run
-    void runPar(int& argc, char**& argv, const bool needsThread)
+    void runPar(int& argc, char**& argv, bool needsThread)
     {
-        RunPar = true;
+        parallel_ = true;
 
         if (!Pstream::init(argc, argv, needsThread))
         {
@@ -81,11 +86,22 @@ public:
         }
     }
 
-
-    //- Is this a parallel run?
+    //- True if this is parallel run.
     bool parRun() const
     {
-        return RunPar;
+        return parallel_;
+    }
+
+    //- True if this is a parallel run and uses distributed roots.
+    bool distributed() const
+    {
+        return parallel_ && distributed_;
+    }
+
+    //- Set use of distributed roots.
+    void distributed(bool on)
+    {
+        distributed_ = (parallel_ ? on : false);
     }
 };
 

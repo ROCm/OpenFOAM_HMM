@@ -64,15 +64,15 @@ class arcEdge
         //- The arc radius
         scalar radius_;
 
-        //- The local cylindrical coordinate system (degrees)
-        cylindricalCS cs_;
+        //- The local cylindrical coordinate system
+        coordSystem::cylindrical cs_;
 
 
     // Private Member Functions
 
         //- Calculate the angle, radius and axis
-        //  \return the coordinate system
-        cylindricalCS calcAngle();
+        //  \return the cylindrical coordinate system
+        coordSystem::cylindrical calcAngle();
 
         //- No copy construct
         arcEdge(const arcEdge&) = delete;

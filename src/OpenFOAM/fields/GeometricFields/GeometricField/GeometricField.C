@@ -311,17 +311,17 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const Mesh& mesh,
     const dimensionSet& ds,
     const Field<Type>& iField,
-    const PtrList<PatchField<Type>>& ptfl
+    const word& patchFieldType
 )
 :
     Internal(io, mesh, ds, iField),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
-    boundaryField_(mesh.boundary(), *this, ptfl)
+    boundaryField_(mesh.boundary(), *this, patchFieldType)
 {
     DebugInFunction
-        << "Copy construct from components" << nl << this->info() << endl;
+        << "Copy construct from internal field" << nl << this->info() << endl;
 
     readIfPresent();
 }
@@ -334,17 +334,17 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const Mesh& mesh,
     const dimensionSet& ds,
     Field<Type>&& iField,
-    const PtrList<PatchField<Type>>& ptfl
+    const word& patchFieldType
 )
 :
     Internal(io, mesh, ds, std::move(iField)),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
-    boundaryField_(mesh.boundary(), *this, ptfl)
+    boundaryField_(mesh.boundary(), *this, patchFieldType)
 {
     DebugInFunction
-        << "Move construct from components" << nl << this->info() << endl;
+        << "Move construct from internal field" << nl << this->info() << endl;
 
     readIfPresent();
 }
@@ -356,18 +356,18 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const IOobject& io,
     const Mesh& mesh,
     const dimensionSet& ds,
-    List<Type>&& iField,
+    const Field<Type>& iField,
     const PtrList<PatchField<Type>>& ptfl
 )
 :
-    Internal(io, mesh, ds, std::move(iField)),
+    Internal(io, mesh, ds, iField),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
     boundaryField_(mesh.boundary(), *this, ptfl)
 {
     DebugInFunction
-        << "Move construct from components" << nl << this->info() << endl;
+        << "Copy construct from components" << nl << this->info() << endl;
 
     readIfPresent();
 }

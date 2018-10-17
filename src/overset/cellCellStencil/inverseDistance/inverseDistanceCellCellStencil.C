@@ -1500,7 +1500,7 @@ void Foam::cellCellStencils::inverseDistance::createStencil
 
     while (true)
     {
-        pointField samples(cellInterpolationMap_.constructSize(), greatPoint);
+        pointField samples(cellInterpolationMap().constructSize(), greatPoint);
 
         // Fill remote slots (override old content). We'll find out later
         // on which one has won and mark this one in doneAcceptor.
@@ -1544,9 +1544,9 @@ void Foam::cellCellStencils::inverseDistance::createStencil
             Pstream::commsTypes::nonBlocking,
             List<labelPair>(),
             mesh_.nCells(),
-            cellInterpolationMap_.constructMap(),
+            cellInterpolationMap().constructMap(),
             false,
-            cellInterpolationMap_.subMap(),
+            cellInterpolationMap().subMap(),
             false,
             samples,
             minMagSqrEqOp<point>(),
@@ -1597,9 +1597,9 @@ void Foam::cellCellStencils::inverseDistance::createStencil
         // Transfer the information back to the acceptor:
         // - donorCellCells : stencil (with first element the original donor)
         // - donorWeights : weights for donorCellCells
-        cellInterpolationMap_.distribute(donorCellCells);
-        cellInterpolationMap_.distribute(donorWeights);
-        cellInterpolationMap_.distribute(samples);
+        cellInterpolationMap().distribute(donorCellCells);
+        cellInterpolationMap().distribute(donorWeights);
+        cellInterpolationMap().distribute(samples);
 
         // Check which acceptor has won and transfer
         forAll(interpolationCells_, i)
@@ -1635,8 +1635,15 @@ void Foam::cellCellStencils::inverseDistance::createStencil
 
     // Re-do the mapDistribute
     List<Map<label>> compactMap;
-    mapDistribute map(globalCells, cellStencil_, compactMap);
-    cellInterpolationMap_.transfer(map);
+    cellInterpolationMap_.reset
+    (
+        new mapDistribute
+        (
+            globalCells,
+            cellStencil_,
+            compactMap
+        )
+    );
 }
 
 
@@ -1982,6 +1989,12 @@ bool Foam::cellCellStencils::inverseDistance::update()
         }
     }
 
+    if (debug)
+    {
+        tmp<volScalarField> tfld(createField("allCellTypes", allCellTypes));
+        //tfld.ref().correctBoundaryConditions();
+        tfld().write();
+    }
 
     // Use the patch types and weights to decide what to do
     forAll(allPatchTypes, cellI)
@@ -2017,14 +2030,54 @@ bool Foam::cellCellStencils::inverseDistance::update()
         }
     }
 
+    if (debug)
+    {
+        tmp<volScalarField> tfld
+        (
+            createField("allCellTypes_patch", allCellTypes)
+        );
+        //tfld.ref().correctBoundaryConditions();
+        tfld().write();
+    }
 
     // Mark unreachable bits
     findHoles(globalCells, mesh_, zoneID, allStencil, allCellTypes);
+
+    if (debug)
+    {
+        tmp<volScalarField> tfld
+        (
+            createField("allCellTypes_hole", allCellTypes)
+        );
+        //tfld.ref().correctBoundaryConditions();
+        tfld().write();
+    }
+    if (debug)
+    {
+        labelList stencilSize(mesh_.nCells());
+        forAll(allStencil, celli)
+        {
+            stencilSize[celli] = allStencil[celli].size();
+        }
+        tmp<volScalarField> tfld(createField("allStencil_hole", stencilSize));
+        //tfld.ref().correctBoundaryConditions();
+        tfld().write();
+    }
 
 
     // Add buffer interpolation layer(s) around holes
     scalarField allWeight(mesh_.nCells(), 0.0);
     walkFront(layerRelax, allStencil, allCellTypes, allWeight);
+
+    if (debug)
+    {
+        tmp<volScalarField> tfld
+        (
+            createField("allCellTypes_front", allCellTypes)
+        );
+        //tfld.ref().correctBoundaryConditions();
+        tfld().write();
+    }
 
 
     // Check previous iteration cellTypes_ for any hole->calculated changes
@@ -2092,9 +2145,10 @@ bool Foam::cellCellStencils::inverseDistance::update()
     interpolationCells_.transfer(interpolationCells);
 
     List<Map<label>> compactMap;
-    mapDistribute map(globalCells, cellStencil_, compactMap);
-    cellInterpolationMap_.transfer(map);
-
+    cellInterpolationMap_.reset
+    (
+        new mapDistribute(globalCells, cellStencil_, compactMap)
+    );
     cellInterpolationWeight_.transfer(allWeight);
     cellInterpolationWeight_.correctBoundaryConditions();
 
@@ -2110,7 +2164,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
         Pout<< type() << " : dumping injectionStencil to "
             << str.name() << endl;
         pointField cc(mesh_.cellCentres());
-        cellInterpolationMap_.distribute(cc);
+        cellInterpolationMap().distribute(cc);
 
         forAll(cellStencil_, celli)
         {
@@ -2140,21 +2194,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
 
         // Dump max weight
         {
-            volScalarField maxMagWeight
-            (
-                IOobject
-                (
-                    "maxMagWeight",
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                mesh_,
-                dimensionedScalar(dimless, Zero),
-                zeroGradientFvPatchScalarField::typeName
-            );
+            scalarField maxMagWeight(mesh_.nCells(), 0.0);
             forAll(cellStencil_, celli)
             {
                 const scalarList& wghts = cellInterpolationWeights_[celli];
@@ -2180,36 +2220,17 @@ bool Foam::cellCellStencils::inverseDistance::update()
                         << endl;
                 }
             }
-            maxMagWeight.correctBoundaryConditions();
-            maxMagWeight.write();
+            tmp<volScalarField> tfld(createField("maxMagWeight", maxMagWeight));
+            tfld.ref().correctBoundaryConditions();
+            tfld().write();
         }
 
         // Dump cell types
         {
-            volScalarField volTypes
-            (
-                IOobject
-                (
-                    "cellTypes",
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                mesh_,
-                dimensionedScalar(dimless, Zero),
-                zeroGradientFvPatchScalarField::typeName
-            );
-
-            forAll(volTypes.internalField(), cellI)
-            {
-                volTypes[cellI] = cellTypes_[cellI];
-            }
-            volTypes.correctBoundaryConditions();
-            volTypes.write();
+            tmp<volScalarField> tfld(createField("cellTypes", cellTypes_));
+            tfld.ref().correctBoundaryConditions();
+            tfld().write();
         }
-
 
 
         // Dump stencil
@@ -2217,7 +2238,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
         OBJstream str(mesh_.time().timePath()/"stencil.obj");
         Pout<< type() << " : dumping to " << str.name() << endl;
         pointField cc(mesh_.cellCentres());
-        cellInterpolationMap_.distribute(cc);
+        cellInterpolationMap().distribute(cc);
 
         forAll(cellStencil_, celli)
         {

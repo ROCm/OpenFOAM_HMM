@@ -87,7 +87,7 @@ Foam::functionObjects::valueAverage::valueAverage
             if (dict.found(fieldName))
             {
                 const dictionary& valueDict = dict.subDict(fieldName);
-                totalTime_[fieldi] = valueDict.get<scalar>("totalTime");
+                valueDict.readEntry("totalTime", totalTime_[fieldi]);
             }
         }
     }

@@ -129,7 +129,7 @@ class argList
         static bool checkProcessorDirectories_;
 
         //- Switch on/off parallel mode.
-        //  Must be first to be constructed so destructor is done last.
+        //  Construct first so destructor is done last.
         ParRunControl parRunControl_;
 
         //- The arguments after removing known options
@@ -140,10 +140,11 @@ class argList
 
         word executable_;
         fileName rootPath_;
-        bool distributed_;
         fileName globalCase_;
         fileName case_;
-        string argListStr_;
+
+        //- The command line options and arguments concatenated as a string
+        string commandLine_;
 
 
     // Private Member Functions
@@ -157,7 +158,7 @@ class argList
         //- Helper function for printUsage
         static void printOptionUsage
         (
-            const label location,
+            std::string::size_type start,
             const string& str
         );
 
@@ -176,14 +177,14 @@ class argList
         template<class T>
         static inline void readList(ITstream& is, List<T>& list);
 
-        //- Get rootPath_ / globalCase_ from one of the following forms
+        //- Set rootPath_, globalCase_, case_ from one of the following forms
         //   * [-case dir]
         //   * cwd
         //
         // Also export FOAM_CASE and FOAM_CASENAME environment variables
         // so they can be used immediately (eg, in decomposeParDict), as well
         // as the FOAM_EXECUTABLE environment.
-        void getRootCase();
+        void setCasePaths();
 
         //- Transcribe argv into internal args_.
         //  Transform sequences with "(" ... ")" into string lists
@@ -222,19 +223,17 @@ public:
         static SLList<string> notes;
 
         //- Min offset for displaying usage (default: 20)
-        static string::size_type usageMin;
+        static std::string::size_type usageMin;
 
         //- Max screen width for displaying usage (default: 80)
-        static string::size_type usageMax;
+        static std::string::size_type usageMax;
 
         //- Standard name for the post-processing option
         static word postProcessOptionName;
 
         //! \cond internalClass
-        class initValidTables
+        struct initValidTables
         {
-        public:
-
             initValidTables();
         };
         //! \endcond
@@ -274,12 +273,7 @@ public:
 
         //- Scan for -help, -doc options etc prior to checking the validity
         //- of other args/opts and finally initialising.
-        void parse
-        (
-            bool checkArgs,
-            bool checkOpts,
-            bool initialise
-        );
+        void parse(bool checkArgs, bool checkOpts, bool initialise);
 
 
     // Access
@@ -287,12 +281,11 @@ public:
         //- Name of executable without the path
         inline const word& executable() const;
 
+        //- The command line options and arguments concatenated as a string
+        inline const string& commandLine() const;
+
         //- Return root path
         inline const fileName& rootPath() const;
-
-        //- Return distributed flag
-        //- (i.e. are rootPaths different on different machines)
-        inline bool distributed() const;
 
         //- Return case name (parallel run) or global case (serial run)
         inline const fileName& caseName() const;
@@ -300,14 +293,20 @@ public:
         //- Return global case name
         inline const fileName& globalCaseName() const;
 
-        //- Return parRunControl
-        inline const ParRunControl& parRunControl() const;
-
-        //- Return the path to the caseName
+        //- Return the full path to the (processor local) case
+        //  \note This is guaranteed to be an absolute path
         inline fileName path() const;
 
-        //- Return the path to the globalCaseName
+        //- Return the full path to the global case
+        //  \note This is guaranteed to be an absolute path
         inline fileName globalPath() const;
+
+        //- Return distributed flag
+        //- (i.e. are rootPaths different on different machines)
+        inline bool distributed() const;
+
+        //- Return the ParRunControl
+        inline const ParRunControl& parRunControl() const;
 
         //- Return the number of arguments
         inline label size() const;
@@ -398,7 +397,7 @@ public:
         (
             const word& optName,
             const string& usage = "",
-            const bool advanced = false
+            bool advanced = false
         );
 
         //- Add an option to validOptions with usage information
@@ -408,8 +407,11 @@ public:
             const word& optName,
             const string& param = "",
             const string& usage = "",
-            const bool advanced = false
+            bool advanced = false
         );
+
+        //- Set an existing option as being 'advanced' or normal
+        static void setAdvanced(const word& optName, bool advanced = true);
 
         //- Specify an alias for the option name.
         //
@@ -434,7 +436,7 @@ public:
         static void ignoreOptionCompat
         (
             std::pair<const char*,int> compat,
-            const bool expectArg
+            bool expectArg
         );
 
         //- Add option usage information to optionUsage

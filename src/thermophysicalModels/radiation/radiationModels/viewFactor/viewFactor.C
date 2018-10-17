@@ -155,8 +155,7 @@ void Foam::radiation::viewFactor::initialise()
         }
 
 
-        bool smoothing = readBool(coeffs_.lookup("smoothing"));
-        if (smoothing)
+        if (coeffs_.get<bool>("smoothing"))
         {
             if (debug)
             {
@@ -180,7 +179,7 @@ void Foam::radiation::viewFactor::initialise()
             }
         }
 
-        constEmissivity_ = readBool(coeffs_.lookup("constantEmissivity"));
+        coeffs_.readEntry("constantEmissivity", constEmissivity_);
         if (constEmissivity_)
         {
             CLU_.reset

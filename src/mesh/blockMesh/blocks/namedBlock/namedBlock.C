@@ -54,10 +54,10 @@ Foam::blocks::namedBlock::namedBlock
     block(dict, index, vertices, edges, faces, is)
 {
     dictionary& d = const_cast<dictionary&>(dict);
-    dictionary* varDictPtr = d.subDictPtr("namedBlocks");
+    dictionary* varDictPtr = d.findDict("namedBlocks");
     if (varDictPtr)
     {
-        const_cast<dictionary&>(*varDictPtr).add(*this, index);
+        varDictPtr->add(*this, index);
     }
     else
     {

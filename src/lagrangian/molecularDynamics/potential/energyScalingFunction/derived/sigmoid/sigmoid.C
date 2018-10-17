@@ -72,8 +72,8 @@ sigmoid::sigmoid
     (
         energyScalingFunctionProperties.subDict(typeName + "Coeffs")
     ),
-    shift_(readScalar(sigmoidCoeffs_.lookup("shift"))),
-    scale_(readScalar(sigmoidCoeffs_.lookup("scale")))
+    shift_(sigmoidCoeffs_.get<scalar>("shift")),
+    scale_(sigmoidCoeffs_.get<scalar>("scale"))
 {}
 
 

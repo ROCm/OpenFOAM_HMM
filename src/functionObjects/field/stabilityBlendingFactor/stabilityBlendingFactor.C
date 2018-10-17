@@ -102,8 +102,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::calc()
 
 bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
 {
-    const IOField<scalar>* residualPtr =
-        mesh_.lookupObjectPtr<IOField<scalar>>(residualName_);
+    const auto* residualPtr = mesh_.findObject<IOField<scalar>>(residualName_);
 
     if (residuals_)
     {
@@ -164,7 +163,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
     }
 
     const volScalarField* nonOrthPtr =
-        mesh_.lookupObjectPtr<volScalarField>(nonOrthogonalityName_);
+        mesh_.findObject<volScalarField>(nonOrthogonalityName_);
 
     if (nonOrthogonality_)
     {
@@ -200,7 +199,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
     }
 
     const volScalarField* skewnessPtr =
-        mesh_.lookupObjectPtr<volScalarField>(skewnessName_);
+        mesh_.findObject<volScalarField>(skewnessName_);
 
     if (skewness_)
     {
@@ -235,7 +234,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
     }
 
     const volScalarField* faceWeightsPtr =
-        mesh_.lookupObjectPtr<volScalarField>(faceWeightName_);
+        mesh_.findObject<volScalarField>(faceWeightName_);
 
     if (faceWeight_)
     {
@@ -342,7 +341,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
 
 
     const volVectorField* UNamePtr =
-        mesh_.lookupObjectPtr<volVectorField>(UName_);
+        mesh_.findObject<volVectorField>(UName_);
 
     if (Co_)
     {
@@ -520,7 +519,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
     store(resultName_, faceBlendedPtr);
 
     const volScalarField* nonOrthPtr =
-        mesh_.lookupObjectPtr<volScalarField>(nonOrthogonalityName_);
+        mesh_.findObject<volScalarField>(nonOrthogonalityName_);
 
     if (nonOrthogonality_)
     {
@@ -552,7 +551,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
 
 
     const volScalarField* faceWeightsPtr =
-        mesh_.lookupObjectPtr<volScalarField>(faceWeightName_);
+        mesh_.findObject<volScalarField>(faceWeightName_);
 
     if (faceWeight_)
     {
@@ -583,7 +582,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
     }
 
     const volScalarField* skewnessPtr =
-        mesh_.lookupObjectPtr<volScalarField>(skewnessName_);
+        mesh_.findObject<volScalarField>(skewnessName_);
 
     if (skewness_)
     {

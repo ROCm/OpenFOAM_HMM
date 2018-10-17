@@ -79,6 +79,7 @@ public:
         UNDEFINED = 0,    //!< An undefined token-type
 
         // Fundamental types
+        BOOL,             //!< boolean type
         FLAG,             //!< stream flag (1-byte bitmask)
         PUNCTUATION,      //!< single character punctuation
         LABEL,            //!< label (integer) type
@@ -92,7 +93,7 @@ public:
                           //!< dictionary \c $variable expansion
         VERBATIMSTRING,   //!< Contents are a Foam::string representing verbatim
                           //!< content
-        COMPOUND,         //!< Compound type such as List\<label\> etc.
+        COMPOUND,         //!< Compound type such as \c List\<label\> etc.
 
         ERROR             //!< A token error encountered
     };
@@ -115,20 +116,22 @@ public:
         TAB            = '\t',
         NL             = '\n',
 
-        END_STATEMENT  = ';', //!< End entry [#isseparator]
-        BEGIN_LIST     = '(', //!< Begin list [#isseparator]
-        END_LIST       = ')', //!< End list [#isseparator]
-        BEGIN_SQR      = '[', //!< Begin dimensions [#isseparator]
-        END_SQR        = ']', //!< End dimensions [#isseparator]
-        BEGIN_BLOCK    = '{', //!< Begin block [#isseparator]
-        END_BLOCK      = '}', //!< End block [#isseparator]
-        COLON          = ':', //!< Colon [#isseparator]
-        COMMA          = ',', //!< Comma [#isseparator]
+        END_STATEMENT  = ';',   //!< End entry [#isseparator]
+        BEGIN_LIST     = '(',   //!< Begin list [#isseparator]
+        END_LIST       = ')',   //!< End list [#isseparator]
+        BEGIN_SQR      = '[',   //!< Begin dimensions [#isseparator]
+        END_SQR        = ']',   //!< End dimensions [#isseparator]
+        BEGIN_BLOCK    = '{',   //!< Begin block [#isseparator]
+        END_BLOCK      = '}',   //!< End block [#isseparator]
+        COLON          = ':',   //!< Colon [#isseparator]
+        COMMA          = ',',   //!< Comma [#isseparator]
         HASH           = '#',
         ATSYM          = '@',
+        SQUOTE         = '\'',  //!< Single quote
+        DQUOTE         = '"',   //!< Double quote
 
-        BEGIN_STRING   = '"',
-        END_STRING     = BEGIN_STRING,
+        BEGIN_STRING   = DQUOTE, //!< Double quote for begin string
+        END_STRING     = DQUOTE, //!< Double quote for end string
 
         ASSIGN         = '=', //!< Assignment/equals [#isseparator]
         ADD            = '+', //!< Addition [#isseparator]
@@ -358,6 +361,9 @@ public:
 
     // Static Member Functions
 
+        //- Create a bool token.
+        inline static token boolean(bool on);
+
         //- Create a token with stream flags, no sanity check
         //
         //  \param bitmask the flags to set
@@ -406,6 +412,9 @@ public:
         //- True if token is ERROR
         inline bool error() const;
 
+        //- True if token is BOOL
+        inline bool isBool() const;
+
         //- True if token is FLAG
         inline bool isFlag() const;
 
@@ -445,7 +454,11 @@ public:
 
     // Access
 
-        //- Return flag bitmask
+        //- Return boolean token value.
+        //  Report FatalIOError and return false if token is not BOOL
+        inline bool boolToken() const;
+
+        //- Return flag bitmask value.
         //  Report FatalIOError and return NO_FLAG if token is not FLAG
         inline int flagToken() const;
 

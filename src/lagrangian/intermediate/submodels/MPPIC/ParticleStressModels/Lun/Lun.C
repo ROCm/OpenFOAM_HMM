@@ -52,8 +52,8 @@ Foam::ParticleStressModels::Lun::Lun
 )
 :
     ParticleStressModel(dict),
-    e_(readScalar(dict.lookup("e"))),
-    eps_(readScalar(dict.lookup("eps")))
+    e_(dict.get<scalar>("e")),
+    eps_(dict.get<scalar>("eps"))
 {}
 
 

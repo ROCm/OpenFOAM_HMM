@@ -79,7 +79,7 @@ Foam::fv::solidificationMeltingSource::Cp() const
         {
             if (CpName_ == "CpRef")
             {
-                scalar CpRef = coeffs_.get<scalar>("CpRef");
+                const scalar CpRef = coeffs_.get<scalar>("CpRef");
 
                 return tmp<volScalarField>::New
                 (

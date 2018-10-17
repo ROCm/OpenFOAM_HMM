@@ -65,8 +65,6 @@ protected:
         //  lduAddressing (true)
         mutable bool active_;
 
-        mutable bool stencilIsUpToDate_;
-
         //- Extended addressing (extended with local interpolation stencils)
         mutable autoPtr<fvMeshPrimitiveLduAddressing> lduPtr_;
 

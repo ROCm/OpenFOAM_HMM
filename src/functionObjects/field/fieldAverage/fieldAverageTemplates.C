@@ -119,7 +119,7 @@ void Foam::functionObjects::fieldAverage::restoreWindowFieldsType
 
     const word& fieldName = item.fieldName();
 
-    const Type* fieldPtr = lookupObjectPtr<Type>(fieldName);
+    const Type* fieldPtr = findObject<Type>(fieldName);
 
     if (!fieldPtr)
     {

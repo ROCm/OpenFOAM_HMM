@@ -25,6 +25,7 @@ License
 
 #include "noiseModel.H"
 #include "functionObject.H"
+#include "stringOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -140,17 +141,15 @@ Foam::label Foam::noiseModel::findStartTimeIndex
 
 Foam::fileName Foam::noiseModel::baseFileDir(const label dataseti) const
 {
-    fileName baseDir("$FOAM_CASE");
-    word datasetName("input" + Foam::name(dataseti));
-    baseDir =
-        baseDir.expand()
-       /functionObject::outputPrefix
-       /"noise"
-       /outputPrefix_
-       /type()
-       /datasetName;
-
-    return baseDir;
+    return
+    (
+        stringOps::expand("<case>")    // ie, globalPath()
+      / functionObject::outputPrefix
+      / "noise"
+      / outputPrefix_
+      / type()
+      / ("input" + Foam::name(dataseti))
+    );
 }
 
 

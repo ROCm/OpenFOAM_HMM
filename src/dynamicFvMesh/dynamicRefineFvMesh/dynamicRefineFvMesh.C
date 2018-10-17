@@ -192,10 +192,8 @@ void Foam::dynamicRefineFvMesh::readDict()
         ).optionalSubDict(typeName + "Coeffs")
     );
 
-    List<Pair<word>> fluxVelocities = List<Pair<word>>
-    (
-        refineDict.lookup("correctFluxes")
-    );
+    auto fluxVelocities = refineDict.get<List<Pair<word>>>("correctFluxes");
+
     // Rework into hashtable.
     correctFluxes_.resize(fluxVelocities.size());
     forAll(fluxVelocities, i)
@@ -203,7 +201,7 @@ void Foam::dynamicRefineFvMesh::readDict()
         correctFluxes_.insert(fluxVelocities[i][0], fluxVelocities[i][1]);
     }
 
-    dumpLevel_ = refineDict.get<bool>("dumpLevel");
+    refineDict.readEntry("dumpLevel", dumpLevel_);
 }
 
 
@@ -1209,7 +1207,7 @@ bool Foam::dynamicRefineFvMesh::update()
         ).optionalSubDict(typeName + "Coeffs")
     );
 
-    label refineInterval = readLabel(refineDict.lookup("refineInterval"));
+    label refineInterval = refineDict.get<label>("refineInterval");
 
     bool hasChanged = false;
 
@@ -1236,7 +1234,7 @@ bool Foam::dynamicRefineFvMesh::update()
 
     if (time().timeIndex() > 0 && time().timeIndex() % refineInterval == 0)
     {
-        label maxCells = readLabel(refineDict.lookup("maxCells"));
+        label maxCells = refineDict.get<label>("maxCells");
 
         if (maxCells <= 0)
         {
@@ -1247,7 +1245,7 @@ bool Foam::dynamicRefineFvMesh::update()
                 << exit(FatalError);
         }
 
-        label maxRefinement = readLabel(refineDict.lookup("maxRefinement"));
+        label maxRefinement = refineDict.get<label>("maxRefinement");
 
         if (maxRefinement <= 0)
         {
@@ -1258,21 +1256,23 @@ bool Foam::dynamicRefineFvMesh::update()
                 << exit(FatalError);
         }
 
-        const word fieldName(refineDict.lookup("field"));
+        const word fieldName(refineDict.get<word>("field"));
 
         const volScalarField& vFld = lookupObject<volScalarField>(fieldName);
 
         const scalar lowerRefineLevel =
-            readScalar(refineDict.lookup("lowerRefineLevel"));
+            refineDict.get<scalar>("lowerRefineLevel");
         const scalar upperRefineLevel =
-            readScalar(refineDict.lookup("upperRefineLevel"));
+            refineDict.get<scalar>("upperRefineLevel");
+
         const scalar unrefineLevel = refineDict.lookupOrDefault<scalar>
         (
             "unrefineLevel",
             GREAT
         );
+
         const label nBufferLayers =
-            readLabel(refineDict.lookup("nBufferLayers"));
+            refineDict.get<label>("nBufferLayers");
 
         // Cells marked for refinement or otherwise protected from unrefinement.
         bitSet refineCell(nCells());

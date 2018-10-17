@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,21 +32,21 @@ Description
     skin-friction forces over a given list of patches, and the resistance
     from porous zones.
 
-    Forces and moments are calculated, with optional co-ordinate system and
+    Forces and moments are calculated, with optional coordinate system and
     writing of binned data, where force and moment contributions are collected
     into a user-defined number of bins that span the input geometries for a
     user-defined direction vector.
 
     Data is written into multiple files in the
     postProcessing/\<functionObjectName\> directory:
-    - force.dat          : forces in global Cartesian co-ordinate system
-    - moment.dat         : moments in global Cartesian co-ordinate system
-    - forceBin.dat       : force bins in global Cartesian co-ordinate system
-    - momentBin.dat      : moment bins in global Cartesian co-ordinate system
-    - localForce.dat     : forces in local co-ordinate system
-    - localMoment.dat    : moments in local co-ordinate system
-    - localForceBin.dat  : force bins in local co-ordinate system
-    - localMomentBin.dat : moment bins in local co-ordinate system
+    - force.dat          : forces in global Cartesian coordinate system
+    - moment.dat         : moments in global Cartesian coordinate system
+    - forceBin.dat       : force bins in global Cartesian coordinate system
+    - momentBin.dat      : moment bins in global Cartesian coordinate system
+    - localForce.dat     : forces in local Cartesian coordinate system
+    - localMoment.dat    : moments in local Cartesian coordinate system
+    - localForceBin.dat  : force bins in local Cartesian coordinate system
+    - localMomentBin.dat : moment bins in local Cartesian coordinate system
 
 Usage
     Example of function object specification:
@@ -108,12 +108,18 @@ Note
     \endverbatim
     or
     \verbatim
+        origin  (0 0 0);
+        e1      (0 1 0);
+        e3      (0 0 1);
+    \endverbatim
+    or
+    \verbatim
         coordinateSystem
         {
             origin  (0 0 0);
-            coordinateRotation
+            rotation
             {
-                type    axesRotation;
+                type    axes;
                 e3      (0 0 1);
                 e1      (1 0 0);
             }
@@ -136,7 +142,7 @@ SourceFiles
 
 #include "fvMeshFunctionObject.H"
 #include "writeFile.H"
-#include "coordinateSystem.H"
+#include "cartesianCS.H"
 #include "volFieldsFwd.H"
 #include "HashSet.H"
 #include "Tuple2.H"
@@ -224,9 +230,9 @@ protected:
             scalar pRef_;
 
             //- Coordinate system used when evaluting forces/moments
-            coordinateSystem coordSys_;
+            coordSystem::cartesian coordSys_;
 
-            //- Flag to indicate whether we are using a local co-ordinate sys
+            //- Flag to indicate whether we are using a local coordinates
             bool localSystem_;
 
             //- Flag to include porosity effects

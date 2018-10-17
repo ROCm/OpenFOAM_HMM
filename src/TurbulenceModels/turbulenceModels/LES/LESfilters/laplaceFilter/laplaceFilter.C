@@ -66,7 +66,7 @@ Foam::laplaceFilter::laplaceFilter(const fvMesh& mesh, const dictionary& bd)
     LESfilter(mesh),
     widthCoeff_
     (
-        readScalar(bd.optionalSubDict(type() + "Coeffs").lookup("widthCoeff"))
+        bd.optionalSubDict(type() + "Coeffs").get<scalar>("widthCoeff")
     ),
     coeff_
     (

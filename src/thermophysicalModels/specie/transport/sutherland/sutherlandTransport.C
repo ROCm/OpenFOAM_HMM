@@ -35,7 +35,7 @@ Foam::scalar Foam::sutherlandTransport<Thermo>::readCoeff
     const dictionary& dict
 )
 {
-    return readScalar(dict.subDict("transport").lookup(coeffName));
+    return dict.subDict("transport").get<scalar>(coeffName);
 }
 
 

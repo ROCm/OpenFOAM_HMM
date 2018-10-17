@@ -204,23 +204,6 @@ Foam::Tensor2D<Cmpt>::inner(const Tensor2D<Cmpt>& t2) const
 
 template<class Cmpt>
 inline Foam::Tensor2D<Cmpt>
-Foam::Tensor2D<Cmpt>::innerT(const Tensor2D<Cmpt>& t2) const
-{
-    const Tensor2D<Cmpt>& t1 = *this;
-
-    return Tensor2D<Cmpt>
-    (
-        t1.xx()*t2.xx() + t1.xy()*t2.xy(),
-        t1.xx()*t2.yx() + t1.xy()*t2.yy(),
-
-        t1.yx()*t2.xx() + t1.yy()*t2.xy(),
-        t1.yx()*t2.yx() + t1.yy()*t2.yy()
-    );
-}
-
-
-template<class Cmpt>
-inline Foam::Tensor2D<Cmpt>
 Foam::Tensor2D<Cmpt>::schur(const Tensor2D<Cmpt>& t2) const
 {
     const Tensor2D<Cmpt>& t1 = *this;

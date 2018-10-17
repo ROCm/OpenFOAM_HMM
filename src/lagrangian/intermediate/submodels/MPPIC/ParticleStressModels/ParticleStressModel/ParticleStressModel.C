@@ -41,9 +41,8 @@ Foam::ParticleStressModel::ParticleStressModel
     const dictionary& dict
 )
 :
-    alphaPacked_(readScalar(dict.lookup("alphaPacked")))
-{
-}
+    alphaPacked_(dict.get<scalar>("alphaPacked"))
+{}
 
 
 Foam::ParticleStressModel::ParticleStressModel
@@ -52,8 +51,7 @@ Foam::ParticleStressModel::ParticleStressModel
 )
 :
     alphaPacked_(cm.alphaPacked_)
-{
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //

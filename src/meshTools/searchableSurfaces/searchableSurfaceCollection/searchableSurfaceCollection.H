@@ -45,7 +45,7 @@ SourceFiles
 
 #include "searchableSurface.H"
 #include "treeBoundBox.H"
-#include "coordinateSystem.H"
+#include "cartesianCS.H"
 #include "UPtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -71,8 +71,8 @@ class searchableSurfaceCollection
             //- Scaling vector
             vectorField scale_;
 
-            //- transformation
-            PtrList<coordinateSystem> transform_;
+            //- Coordinate transformation
+            PtrList<coordSystem::cartesian> transform_;
 
             UPtrList<searchableSurface> subGeom_;
 
@@ -159,13 +159,13 @@ public:
         }
 
         //- Coordinate system per subsurface
-        const PtrList<coordinateSystem>& transform() const
+        const PtrList<coordSystem::cartesian>& transform() const
         {
             return transform_;
         }
 
         //- Coordinate system per subsurface
-        PtrList<coordinateSystem>& transform()
+        PtrList<coordSystem::cartesian>& transform()
         {
             return transform_;
         }

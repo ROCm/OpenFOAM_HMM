@@ -66,7 +66,7 @@ class dynamicCodeContext
         //- Optional "codeOptions" entry
         string options_;
 
-        //- Optional "codeLib" entry
+        //- Optional "codeLibs" entry
         string libs_;
 
         //- Calculated SHA1Digest

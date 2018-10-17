@@ -231,8 +231,9 @@ public:
     // Lookup
 
         //- Lookup and return a const sub-objectRegistry.
-        //  Optionally create it if it does not exist.
-        //  If recursive, search parent registries.
+        //
+        //  \param forceCreate create it if it does not exist.
+        //  \param recursive search parent registries.
         const objectRegistry& subRegistry
         (
             const word& name,
@@ -250,7 +251,8 @@ public:
         HashTable<Type*> lookupClass(const bool strict = false);
 
         //- Is the named Type found?
-        //  If recursive, search parent registries.
+        //
+        //  \param recursive search parent registries
         template<class Type>
         bool foundObject
         (
@@ -258,8 +260,60 @@ public:
             const bool recursive = false
         ) const;
 
-        //- Lookup and return the object of the given Type.
-        //  If recursive, search parent registries.
+        //- Find const pointer to the object of the given Type.
+        //
+        //  \param recursive search parent registries
+        //
+        //  \return nullptr if the object was not found or had incorrect type.
+        template<class Type>
+        const Type* cfindObject
+        (
+            const word& name,
+            const bool recursive = false
+        ) const;
+
+        //- Return const pointer to the object of the given Type.
+        //
+        //  \param recursive search parent registries
+        //
+        //  \return nullptr if the object was not found or had incorrect type.
+        template<class Type>
+        const Type* findObject
+        (
+            const word& name,
+            const bool recursive = false
+        ) const;
+
+        //- Return non-const pointer to the object of the given Type.
+        //
+        //  \param recursive search parent registries
+        //
+        //  \return nullptr if the object was not found or had incorrect type.
+        template<class Type>
+        Type* findObject
+        (
+            const word& name,
+            const bool recursive = false
+        );
+
+        //- Return non-const pointer to the object of the given Type,
+        //- using a const-cast to have it behave like a mutable.
+        //  Exercise caution when using.
+        //
+        //  \param recursive search parent registries.
+        //
+        //  \return nullptr if the object was not found or had incorrect type.
+        template<class Type>
+        Type* getObjectPtr
+        (
+            const word& name,
+            const bool recursive = false
+        ) const;
+
+        //- Lookup and return const reference to the object
+        //- of the given Type. Fatal if not found or the wrong type.
+        //
+        //  \param recursive search parent registries.
         template<class Type>
         const Type& lookupObject
         (
@@ -267,34 +321,12 @@ public:
             const bool recursive = false
         ) const;
 
-        //- Lookup and return the object of the given Type.
-        //  If recursive, search parent registries.
+        //- Lookup and return non-const reference to the object
+        //- of the given Type. Fatal if not found or the wrong type.
+        //
+        //  \param recursive search parent registries.
         template<class Type>
         Type& lookupObjectRef
-        (
-            const word& name,
-            const bool recursive = false
-        ) const;
-
-        //- Lookup and return pointer to the object of the given Type,
-        //  otherwise nullptr if the object was not found,
-        //  or had the incorrect type.
-        //  If recursive, search parent registries.
-        template<class Type>
-        const Type* lookupObjectPtr
-        (
-            const word& name,
-            const bool recursive = false
-        ) const;
-
-
-        //- Lookup and return non-const pointer to the object
-        //  of the given Type,
-        //  otherwise nullptr if the object was not found,
-        //  or had the incorrect type.
-        //  If recursive, search parent registries.
-        template<class Type>
-        Type* lookupObjectRefPtr
         (
             const word& name,
             const bool recursive = false
@@ -349,6 +381,34 @@ public:
             IOstream::compressionType cmp,
             const bool valid
         ) const;
+
+
+    // Housekeeping
+
+        //- Same as findObject
+        //  \deprecated use findObject (OCT-2018)
+        template<class Type>
+        const Type* lookupObjectPtr
+        (
+            const word& name,
+            bool recursive = false
+        ) const
+        {
+            return this->cfindObject<Type>(name, recursive);
+        }
+
+        //- Same as getObjectPtr
+        //
+        //  \deprecated use getObjectPtr (OCT-2018)
+        template<class Type>
+        Type* lookupObjectRefPtr
+        (
+            const word& name,
+            bool recursive = false
+        ) const
+        {
+            return this->getObjectPtr<Type>(name, recursive);
+        }
 };
 
 

@@ -45,7 +45,7 @@ addToRunTimeSelectionTable(extrudeModel, linearNormal, dictionary);
 linearNormal::linearNormal(const dictionary& dict)
 :
     extrudeModel(typeName, dict),
-    thickness_(readScalar(coeffDict_.lookup("thickness"))),
+    thickness_(coeffDict_.get<scalar>("thickness")),
     firstCellThickness_(0),
     layerPoints_(nLayers_)
 {

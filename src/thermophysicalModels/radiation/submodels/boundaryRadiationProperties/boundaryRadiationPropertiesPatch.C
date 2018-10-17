@@ -173,41 +173,30 @@ Foam::radiation::boundaryRadiationPropertiesPatch::emissivity
 
             mpp.distribute(emissivity);
 
-            const tmp<scalarField> te(new scalarField(emissivity));
-
-            return te;
-
+            return tmp<scalarField>::New(std::move(emissivity));
         }
         break;
 
         case LOOKUP:
         {
-            tmp<scalarField> e
+            return tmp<scalarField>::New
             (
-                new scalarField
-                (
-                    patch_.size(),
-                    readScalar(dict_.lookup("emissivity"))
-                )
+                patch_.size(),
+                dict_.get<scalar>("emissivity")
             );
-
-            return e;
         }
+        break;
 
         case MODEL:
         {
             const label index = patch_.index();
 
-            tmp<scalarField> e
+            return tmp<scalarField>::New
             (
-                 new scalarField
-                 (
-                     absorptionEmission_->e(bandI)().boundaryField()[index]
-                 )
+                absorptionEmission_->e(bandI)().boundaryField()[index]
             );
-
-            return e;
         }
+        break;
 
         default:
         {
@@ -254,9 +243,7 @@ Foam::radiation::boundaryRadiationPropertiesPatch::absorptivity
 
             mpp.distribute(absorp);
 
-            const tmp<scalarField> ta(new scalarField(absorp));
-
-            return ta;
+            return tmp<scalarField>::New(std::move(absorp));
 
         }
         break;
@@ -264,29 +251,23 @@ Foam::radiation::boundaryRadiationPropertiesPatch::absorptivity
         case MODEL:
         {
             const label index = patch_.index();
-            tmp<scalarField> a
+
+            return tmp<scalarField>::New
             (
-                 new scalarField
-                 (
-                     absorptionEmission_->a(bandI)().boundaryField()[index]
-                 )
+                absorptionEmission_->a(bandI)().boundaryField()[index]
             );
-            return a;
         }
+        break;
 
         case LOOKUP:
         {
-            tmp<scalarField> a
+            return tmp<scalarField>::New
             (
-                new scalarField
-                (
-                    patch_.size(),
-                    readScalar(dict_.lookup("absorptivity"))
-                )
+                patch_.size(),
+                dict_.get<scalar>("absorptivity")
             );
-
-            return a;
         }
+        break;
 
         default:
         {
@@ -334,9 +315,7 @@ Foam::radiation::boundaryRadiationPropertiesPatch::transmissivity
 
             mpp.distribute(trans);
 
-            const tmp<scalarField> tt(new scalarField(trans));
-
-            return tt;
+            return tmp<scalarField>::New(std::move(trans));
 
         }
         break;
@@ -344,28 +323,20 @@ Foam::radiation::boundaryRadiationPropertiesPatch::transmissivity
         case MODEL:
         {
             const label index = patch_.index();
-            tmp<scalarField> tau
+
+            return tmp<scalarField>::New
             (
-                 new scalarField
-                 (
-                     transmissivity_->tauEff(bandI)().boundaryField()[index]
-                 )
+                transmissivity_->tauEff(bandI)().boundaryField()[index]
             );
-            return tau;
         }
 
         case LOOKUP:
         {
-            tmp<scalarField> tau
+            return tmp<scalarField>::New
             (
-                new scalarField
-                (
-                    patch_.size(),
-                    readScalar(dict_.lookup("transmissivity"))
-                )
+                patch_.size(),
+                dict_.get<scalar>("transmissivity")
             );
-
-            return tau;
         }
 
         default:
@@ -407,7 +378,7 @@ void Foam::radiation::boundaryRadiationPropertiesPatch::write
     {
         case MODEL:
         {
-            word modelType(dict_.lookup("absorptionEmissionModel"));
+            word modelType(dict_.get<word>("absorptionEmissionModel"));
 
             os.writeEntry("absorptionEmissionModel", modelType);
 
@@ -416,7 +387,7 @@ void Foam::radiation::boundaryRadiationPropertiesPatch::write
 
             dict_.subDict(modelCoeffs).write(os);
 
-            modelType = word(dict_.lookup("transmissivityModel"));
+            modelType = dict_.get<word>("transmissivityModel");
 
             os.writeEntry("transmissivityModel", modelType);
 

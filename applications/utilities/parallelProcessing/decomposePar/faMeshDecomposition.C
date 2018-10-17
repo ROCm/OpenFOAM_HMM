@@ -50,7 +50,7 @@ void Foam::faMeshDecomposition::distributeFaces()
         (
             Time::controlDictName,
             time().rootPath(),
-            time().caseName()/fileName(word("processor") + Foam::name(procI))
+            time().caseName()/("processor" + Foam::name(procI))
         );
 
         fvMesh procMesh
@@ -250,7 +250,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
         (
             Time::controlDictName,
             time().rootPath(),
-            time().caseName()/fileName(word("processor") + Foam::name(procI))
+            time().caseName()/("processor" + Foam::name(procI))
         );
 
         fvMesh procFvMesh
@@ -1059,8 +1059,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
     {
         fileName processorCasePath
         (
-            time().caseName()/fileName(word("processor")
-          + Foam::name(procI))
+            time().caseName()/("processor" + Foam::name(procI))
         );
 
         // create a database
@@ -1179,7 +1178,7 @@ bool Foam::faMeshDecomposition::writeDecomposition()
 
         fileName processorCasePath
         (
-            time().caseName()/fileName(word("processor") + Foam::name(procI))
+            time().caseName()/("processor" + Foam::name(procI))
         );
 
         // create a database

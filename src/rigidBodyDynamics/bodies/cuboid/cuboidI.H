@@ -67,10 +67,10 @@ inline Foam::RBD::cuboid::cuboid
 )
 :
     rigidBody(name, rigidBodyInertia()),
-    L_(dict.lookup("L"))
+    L_(dict.get<vector>("L"))
 {
-    const scalar m(readScalar(dict.lookup("mass")));
-    const vector c(dict.lookup("centreOfMass"));
+    const scalar m(dict.get<scalar>("mass"));
+    const vector c(dict.get<vector>("centreOfMass"));
     rigidBodyInertia::operator=(rigidBodyInertia(m, c, I(m, L_)));
 }
 

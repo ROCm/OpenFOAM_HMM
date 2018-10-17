@@ -36,16 +36,12 @@ readField
     const dictionary& dict
 )
 {
+    DebugInFunction << nl;
+
     // Clear the boundary field if already initialised
     this->clear();
 
     this->setSize(bmesh_.size());
-
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
-
 
     label nUnset = this->size();
 
@@ -217,10 +213,7 @@ Boundary
     FieldField<PatchField, Type>(bmesh.size()),
     bmesh_(bmesh)
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << nl;
 
     forAll(bmesh_, patchi)
     {
@@ -251,10 +244,7 @@ Boundary
     FieldField<PatchField, Type>(bmesh.size()),
     bmesh_(bmesh)
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << nl;
 
     if
     (
@@ -318,10 +308,7 @@ Boundary
     FieldField<PatchField, Type>(bmesh.size()),
     bmesh_(bmesh)
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << nl;
 
     forAll(bmesh_, patchi)
     {
@@ -342,10 +329,7 @@ Boundary
     FieldField<PatchField, Type>(btf.size()),
     bmesh_(btf.bmesh_)
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << nl;
 
     forAll(bmesh_, patchi)
     {
@@ -365,10 +349,7 @@ Boundary
     FieldField<PatchField, Type>(btf),
     bmesh_(btf.bmesh_)
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << nl;
 }
 
 
@@ -394,10 +375,7 @@ template<class Type, template<class> class PatchField, class GeoMesh>
 void Foam::GeometricField<Type, PatchField, GeoMesh>::Boundary::
 updateCoeffs()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << nl;
 
     forAll(*this, patchi)
     {
@@ -410,10 +388,7 @@ template<class Type, template<class> class PatchField, class GeoMesh>
 void Foam::GeometricField<Type, PatchField, GeoMesh>::Boundary::
 evaluate()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << nl;
 
     if
     (
@@ -479,14 +454,14 @@ types() const
 {
     const FieldField<PatchField, Type>& pff = *this;
 
-    wordList Types(pff.size());
+    wordList list(pff.size());
 
     forAll(pff, patchi)
     {
-        Types[patchi] = pff[patchi].type();
+        list[patchi] = pff[patchi].type();
     }
 
-    return Types;
+    return list;
 }
 
 

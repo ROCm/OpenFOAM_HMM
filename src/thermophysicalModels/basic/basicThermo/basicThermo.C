@@ -130,37 +130,31 @@ Foam::volScalarField& Foam::basicThermo::lookupOrConstruct
     bool& isOwner
 )
 {
-    const volScalarField* p =
-        mesh.objectRegistry::lookupObjectPtr<volScalarField>(name);
+    volScalarField* ptr =
+        mesh.objectRegistry::getObjectPtr<volScalarField>(name);
 
-    isOwner = !p;
+    isOwner = !ptr;
 
-    if (!p)
+    if (!ptr)
     {
-        volScalarField* fPtr
+        ptr = new volScalarField
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    name,
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::MUST_READ,
-                    IOobject::AUTO_WRITE
-                ),
-                mesh
-            )
+                name,
+                mesh.time().timeName(),
+                mesh,
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh
         );
 
         // Transfer ownership of this object to the objectRegistry
-        fPtr->store(fPtr);
-        return *fPtr;
+        ptr->store(ptr);
     }
-    else
-    {
-        return const_cast<volScalarField&>(*p);
-    }
+
+    return *ptr;
 }
 
 
@@ -341,30 +335,25 @@ const Foam::basicThermo& Foam::basicThermo::lookupThermo
     const fvPatchScalarField& pf
 )
 {
-    if (pf.db().foundObject<basicThermo>(dictName))
-    {
-        return pf.db().lookupObject<basicThermo>(dictName);
-    }
-    else
-    {
-        HashTable<const basicThermo*> thermos =
-            pf.db().lookupClass<basicThermo>();
+    const basicThermo* thermo = pf.db().findObject<basicThermo>(dictName);
 
-        for
+    if (thermo)
+    {
+        return *thermo;
+    }
+
+    HashTable<const basicThermo*> thermos =
+        pf.db().lookupClass<basicThermo>();
+
+    forAllConstIters(thermos, iter)
+    {
+        if
         (
-            HashTable<const basicThermo*>::iterator iter = thermos.begin();
-            iter != thermos.end();
-            ++iter
+            &(iter()->he().internalField())
+         == &(pf.internalField())
         )
         {
-            if
-            (
-                &(iter()->he().internalField())
-              == &(pf.internalField())
-            )
-            {
-                return *iter();
-            }
+            return *iter();
         }
     }
 

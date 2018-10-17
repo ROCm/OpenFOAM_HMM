@@ -506,29 +506,6 @@ Foam::Tensor<Cmpt>::inner(const Tensor<Cmpt>& t2) const
 
 template<class Cmpt>
 inline Foam::Tensor<Cmpt>
-Foam::Tensor<Cmpt>::innerT(const Tensor<Cmpt>& t2) const
-{
-    const Tensor<Cmpt>& t1 = *this;
-
-    return Tensor<Cmpt>
-    (
-        t1.xx()*t2.xx() + t1.xy()*t2.xy() + t1.xz()*t2.xz(),
-        t1.xx()*t2.yx() + t1.xy()*t2.yy() + t1.xz()*t2.yz(),
-        t1.xx()*t2.zx() + t1.xy()*t2.zy() + t1.xz()*t2.zz(),
-
-        t1.yx()*t2.xx() + t1.yy()*t2.xy() + t1.yz()*t2.xz(),
-        t1.yx()*t2.yx() + t1.yy()*t2.yy() + t1.yz()*t2.yz(),
-        t1.yx()*t2.zx() + t1.yy()*t2.zy() + t1.yz()*t2.zz(),
-
-        t1.zx()*t2.xx() + t1.zy()*t2.xy() + t1.zz()*t2.xz(),
-        t1.zx()*t2.yx() + t1.zy()*t2.yy() + t1.zz()*t2.yz(),
-        t1.zx()*t2.zx() + t1.zy()*t2.zy() + t1.zz()*t2.zz()
-    );
-}
-
-
-template<class Cmpt>
-inline Foam::Tensor<Cmpt>
 Foam::Tensor<Cmpt>::schur(const Tensor<Cmpt>& t2) const
 {
     const Tensor<Cmpt>& t1 = *this;

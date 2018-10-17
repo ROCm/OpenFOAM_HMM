@@ -39,8 +39,6 @@ SourceFiles
 
 #include "rhoThermo.H"
 #include "volFields.H"
-#include "dictionaryEntry.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

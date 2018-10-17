@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     // Create the sphericalJoint model from dictionary
     rigidBodyMotion sphericalJoint(runTime, sphericalJointDict);
 
-    label nIter(readLabel(sphericalJointDict.lookup("nIter")));
+    label nIter(sphericalJointDict.get<label>("nIter"));
 
     Info<< sphericalJoint << endl;
 
