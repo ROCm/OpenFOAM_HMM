@@ -107,7 +107,6 @@ fvOptions.correct(U);
     Uf += n*(phi/mesh.magSf() - (n & Uf));
 }
 
-
 // Make the fluxes relative to the mesh motion
 fvc::makeRelative(phi, U);
 

@@ -150,23 +150,47 @@ int main(int argc, char *argv[])
                     // Update cellMask field for blocking out hole cells
                     #include "setCellMask.H"
                     #include "setInterpolatedCells.H"
-                }
 
-                if ((mesh.changing() && correctPhi) || mesh.topoChanging())
-                {
-                    // Calculate absolute flux from the mapped surface velocity
-                    // Note: temporary fix until mapped Uf is assessed
-                    Uf = fvc::interpolate(U);
+                    const surfaceScalarField faceMaskOld
+                    (
+                        localMin<scalar>(mesh).interpolate(cellMask.oldTime())
+                    );
 
-                    // Calculate absolute flux from the mapped surface velocity
+                    // Zero Uf on old faceMask (H-I)
+                    Uf *= faceMaskOld;
+
+                    const surfaceVectorField Uint(fvc::interpolate(U));
+                    // Update Uf and phi on new C-I faces
+                    Uf += (1-faceMaskOld)*Uint;
+
+                    // Update Uf boundary
+                    forAll(Uf.boundaryField(), patchI)
+                    {
+                        Uf.boundaryFieldRef()[patchI] =
+                            Uint.boundaryField()[patchI];
+                    }
+
                     phi = mesh.Sf() & Uf;
 
-                    #include "correctPhi.H"
+                    // Correct phi on individual regions
+                    if (correctPhi)
+                    {
+                         #include "correctPhi.H"
+                    }
+
+                    mixture.correct();
+
+                    // Zero phi on current H-I
+                    const surfaceScalarField faceMask
+                    (
+                        localMin<scalar>(mesh).interpolate(cellMask)
+                    );
+                    phi *= faceMask;
+                    U   *= cellMask;
 
                     // Make the flux relative to the mesh motion
                     fvc::makeRelative(phi, U);
 
-                    mixture.correct();
                 }
 
                 if (mesh.changing() && checkMeshCourantNo)
@@ -175,8 +199,15 @@ int main(int argc, char *argv[])
                 }
             }
 
+
             #include "alphaControls.H"
             #include "alphaEqnSubCycle.H"
+
+            const surfaceScalarField faceMask
+            (
+                localMin<scalar>(mesh).interpolate(cellMask)
+            );
+            rhoPhi *= faceMask;
 
             mixture.correct();
 

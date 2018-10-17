@@ -26,7 +26,7 @@ gradSchemes
 
 divSchemes
 {
-    div(rhoPhi,U)   Gauss limitedLinearV 1;
+    div(rhoPhi,U)   Gauss upwind;
     div(U)          Gauss linear;
     div(phi,alpha)  Gauss vanLeer;
     div(phirb,alpha) Gauss linear;
@@ -54,12 +54,13 @@ snGradSchemes
 
 oversetInterpolation
 {
-    method          inverseDistance;
+    method          cellVolumeWeight;
 }
 
-oversetInterpolationRequired
+oversetInterpolationSuppressed
 {
-    alpha.water;
+    grad(p_rgh);
+    surfaceIntegrate(phiHbyA);
 }
 
 fluxRequired

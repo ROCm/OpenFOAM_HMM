@@ -977,6 +977,40 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
     walkFront(layerRelax, allCellTypes, allWeight);
 
 
+    // Check previous iteration cellTypes_ for any hole->calculated changes
+    {
+        label nCalculated = 0;
+
+        forAll(cellTypes_, celli)
+        {
+            if (allCellTypes[celli] == CALCULATED && cellTypes_[celli] == HOLE)
+            {
+                if (allStencil[celli].size() == 0)
+                {
+                    FatalErrorInFunction
+                        << "Cell:" << celli
+                        << " at:" << mesh_.cellCentres()[celli]
+                        << " zone:" << zoneID[celli]
+                        << " changed from hole to calculated"
+                        << " but there is no donor"
+                        << exit(FatalError);
+                }
+                else
+                {
+                    allCellTypes[celli] = INTERPOLATED;
+                    nCalculated++;
+                }
+            }
+        }
+
+        if (debug)
+        {
+            Pout<< "Detected " << nCalculated << " cells changing from hole"
+                << " to calculated. Changed these to interpolated"
+                << endl;
+        }
+    }
+
     // Normalise weights, Clear storage
     forAll(allCellTypes, cellI)
     {
@@ -1060,39 +1094,39 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
     }
 
 
-    // Check previous iteration cellTypes_ for any hole->calculated changes
-    {
-        label nCalculated = 0;
-
-        forAll(cellTypes_, celli)
-        {
-            if (allCellTypes[celli] == CALCULATED && cellTypes_[celli] == HOLE)
-            {
-                if (allStencil[celli].size() == 0)
-                {
-                    FatalErrorInFunction
-                        << "Cell:" << celli
-                        << " at:" << mesh_.cellCentres()[celli]
-                        << " zone:" << zoneID[celli]
-                        << " changed from hole to calculated"
-                        << " but there is no donor"
-                        << exit(FatalError);
-                }
-                else
-                {
-                    allCellTypes[celli] = INTERPOLATED;
-                    nCalculated++;
-                }
-            }
-        }
-
-        if (debug)
-        {
-            Pout<< "Detected " << nCalculated << " cells changing from hole"
-                << " to calculated. Changed these to interpolated"
-                << endl;
-        }
-    }
+//     // Check previous iteration cellTypes_ for any hole->calculated changes
+//     {
+//         label nCalculated = 0;
+//
+//         forAll(cellTypes_, celli)
+//         {
+//             if (allCellTypes[celli] == CALCULATED && cellTypes_[celli] == HOLE)
+//             {
+//                 if (allStencil[celli].size() == 0)
+//                 {
+//                     FatalErrorInFunction
+//                         << "Cell:" << celli
+//                         << " at:" << mesh_.cellCentres()[celli]
+//                         << " zone:" << zoneID[celli]
+//                         << " changed from hole to calculated"
+//                         << " but there is no donor"
+//                         << exit(FatalError);
+//                 }
+//                 else
+//                 {
+//                     allCellTypes[celli] = INTERPOLATED;
+//                     nCalculated++;
+//                 }
+//             }
+//         }
+//
+//         if (debug)
+//         {
+//             Pout<< "Detected " << nCalculated << " cells changing from hole"
+//                 << " to calculated. Changed these to interpolated"
+//                 << endl;
+//         }
+//     }
 
 
     cellTypes_.transfer(allCellTypes);

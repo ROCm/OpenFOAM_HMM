@@ -82,9 +82,8 @@ PIMPLE
     nCorrectors         2;
     nNonOrthogonalCorrectors 0;
 
-    ddtCorr                     yes;
+    ddtCorr                    yes;
     correctPhi                 no;
-    massFluxInterpolation      no;
 
     moveMeshOuterCorrectors no;
     turbOnFinalIterOnly no;
@@ -104,8 +103,6 @@ relaxationFactors
 }
 
 cache
-{
-        grad(U);
-}
+{}
 
 // ************************************************************************* //

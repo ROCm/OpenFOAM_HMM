@@ -38,10 +38,11 @@ Description
 
 #include "fvCFD.H"
 #include "dynamicFvMesh.H"
-#include "psiThermo.H"
+#include "fluidThermo.H"
 #include "turbulentFluidThermoModel.H"
 #include "bound.H"
 #include "pimpleControl.H"
+#include "pressureControl.H"
 #include "CorrectPhi.H"
 #include "fvOptions.H"
 #include "localEulerDdtScheme.H"
@@ -56,13 +57,13 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
-    #include "createControl.H"
+    #include "createDyMControls.H"
     #include "createRDeltaT.H"
     #include "initContinuityErrs.H"
     #include "createFields.H"
     #include "createMRF.H"
     #include "createFvOptions.H"
-    #include "createRhoUf.H"
+    #include "createRhoUfIfPresent.H"
     #include "createControls.H"
 
     turbulence->validate();
@@ -80,66 +81,107 @@ int main(int argc, char *argv[])
     while (runTime.run())
     {
         #include "readControls.H"
+        #include "readDyMControls.H"
 
+
+        // Store divrhoU from the previous mesh so that it can be mapped
+        // and used in correctPhi to ensure the corrected phi has the
+        // same divergence
+        autoPtr<volScalarField> divrhoU;
+        if (correctPhi)
         {
-            // Store divrhoU from the previous mesh so that it can be mapped
-            // and used in correctPhi to ensure the corrected phi has the
-            // same divergence
-            volScalarField divrhoU
+            divrhoU.reset
             (
-                "divrhoU",
-                fvc::div(fvc::absolute(phi, rho, U))
+                new volScalarField
+                (
+                    "divrhoU",
+                    fvc::div(fvc::absolute(phi, rho, U))
+                )
             );
-
-            if (LTS)
-            {
-                #include "setRDeltaT.H"
-            }
-            else
-            {
-                #include "compressibleCourantNo.H"
-                #include "setDeltaT.H"
-            }
-
-            ++runTime;
-
-            Info<< "Time = " << runTime.timeName() << nl << endl;
-
-            // Store momentum to set rhoUf for introduced faces.
-            volVectorField rhoU("rhoU", rho*U);
-
-            // Do any mesh changes
-            mesh.update();
-
-            if (mesh.changing())
-            {
-                #include "setCellMask.H"
-            }
-
-            if (mesh.changing() && correctPhi)
-            {
-                // Calculate absolute flux from the mapped surface velocity
-                phi = mesh.Sf() & rhoUf;
-
-                #include "correctPhi.H"
-
-                // Make the fluxes relative to the mesh-motion
-                fvc::makeRelative(phi, rho, U);
-            }
         }
 
-        if (mesh.changing() && checkMeshCourantNo)
+        if (LTS)
         {
-            #include "meshCourantNo.H"
+            #include "setRDeltaT.H"
+        }
+        else
+        {
+            #include "compressibleCourantNo.H"
+            #include "setDeltaT.H"
         }
 
-        #include "rhoEqn.H"
-        Info<< "rhoEqn max/min : " << max(rho).value()
-            << " " << min(rho).value() << endl;
+        ++runTime;
+
+        Info<< "Time = " << runTime.timeName() << nl << endl;
 
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
+            if (pimple.firstIter() || moveMeshOuterCorrectors)
+            {
+
+                // Do any mesh changes
+                mesh.update();
+
+                if (mesh.changing())
+                {
+                    MRF.update();
+
+                    #include "setCellMask.H"
+
+                    const surfaceScalarField faceMaskOld
+                    (
+                        localMin<scalar>(mesh).interpolate(cellMask.oldTime())
+                    );
+
+                    // Zero Uf on old faceMask (H-I)
+                    rhoUf() *= faceMaskOld;
+
+                    surfaceVectorField rhoUfint(fvc::interpolate(rho*U));
+
+                    // Update Uf and phi on new C-I faces
+                    rhoUf() += (1-faceMaskOld)*rhoUfint;
+
+                    // Update Uf boundary
+                    forAll(rhoUf().boundaryField(), patchI)
+                    {
+                        rhoUf().boundaryFieldRef()[patchI] =
+                            rhoUfint.boundaryField()[patchI];
+                    }
+
+                    // Calculate absolute flux from the mapped surface velocity
+                    phi = mesh.Sf() & rhoUf();
+
+                    if (correctPhi)
+                    {
+                        #include "correctPhi.H"
+                    }
+
+                    // Zero phi on current H-I
+                    const surfaceScalarField faceMask
+                    (
+                        localMin<scalar>(mesh).interpolate(cellMask)
+                    );
+
+                    phi *= faceMask;
+                    U   *= cellMask;
+
+                     // Make the fluxes relative to the mesh-motion
+                    fvc::makeRelative(phi, rho, U);
+
+                }
+
+                if (checkMeshCourantNo)
+                {
+                    #include "meshCourantNo.H"
+                }
+            }
+
+            if (pimple.firstIter() && !pimple.SIMPLErho())
+            {
+                #include "rhoEqn.H"
+            }
+
             #include "UEqn.H"
             #include "EEqn.H"
 
@@ -154,6 +196,8 @@ int main(int argc, char *argv[])
                 turbulence->correct();
             }
         }
+
+        rho = thermo.rho();
 
         runTime.write();
 

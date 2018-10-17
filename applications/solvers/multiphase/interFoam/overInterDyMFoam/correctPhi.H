@@ -132,10 +132,4 @@
             phi -= pcorrEqn.flux();
         }
     }
-
-    //if (runTime.writeTime())
-    //{
-    //    volScalarField("contPhiPcorr", fvc::div(phi)).write();
-    //    pcorr.write();
-    //}
 }

@@ -335,10 +335,9 @@ void Foam::dynamicOversetFvMesh::addInterpolation(fvMatrix<Type>& m) const
                 lower[facei] = 0.0;
             }
 
-            // For safety we make zero the HOLES
             const scalar normalisation = V()[celli];
             diag[celli] = normalisation;
-            source[celli] = pTraits<Type>::zero;//normalisation*m.psi()[celli];
+            source[celli] = normalisation*m.psi()[celli];
         }
     }
 

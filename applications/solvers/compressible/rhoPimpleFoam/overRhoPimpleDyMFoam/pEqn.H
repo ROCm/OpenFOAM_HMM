@@ -1,80 +1,93 @@
-rho = thermo.rho();
-rho = max(rho, rhoMin);
-rho = min(rho, rhoMax);
-rho.relax();
+if (!pimple.SIMPLErho())
+{
+    rho = thermo.rho();
+}
+// Thermodynamic density needs to be updated by psi*d(p) after the
+// pressure solution
+const volScalarField psip0(psi*p);
 
-surfaceScalarField faceMask(localMin<scalar>(mesh).interpolate(cellMask));
+volScalarField rAU("rAU", 1.0/UEqn.A());
+mesh.interpolate(rAU);
 
-volScalarField rAU(1.0/UEqn.A());
-surfaceScalarField rhorAUf("rhorAUf", faceMask*fvc::interpolate(rho*rAU));
+surfaceScalarField rhorAUf("rhorAUf", fvc::interpolate(rho*rAU));
 volVectorField HbyA("HbyA", U);
-HbyA = constrainHbyA(cellMask*rAU*UEqn.H(), U, p);
+
+HbyA = constrainHbyA(rAU*UEqn.H(), U, p);
 
 if (pimple.nCorrPISO() <= 1)
 {
     tUEqn.clear();
 }
 
+surfaceScalarField phiHbyA
+(
+    "phiHbyA",
+    fvc::interpolate(rho)*fvc::flux(HbyA)
+);
+
+if (ddtCorr)
+{
+    surfaceScalarField faceMaskOld
+    (
+        localMin<scalar>(mesh).interpolate(cellMask.oldTime())
+    );
+
+    phiHbyA +=
+        faceMaskOld*MRF.zeroFilter(rhorAUf*fvc::ddtCorr(rho, U, phi, rhoUf));
+}
+
+fvc::makeRelative(phiHbyA, rho, U);
+MRF.makeRelative(fvc::interpolate(rho), phiHbyA);
+
+// Update the pressure BCs to ensure flux consistency
+constrainPressure(p, rho, U, phiHbyA, rhorAUf, MRF);
+
 if (pimple.transonic())
 {
     surfaceScalarField phid
     (
         "phid",
-        fvc::interpolate(psi)
-       *(
-            fvc::flux(HbyA)
-          + rhorAUf*fvc::ddtCorr(rho, U, rhoUf)/fvc::interpolate(rho)
-        )
+       (fvc::interpolate(psi)/fvc::interpolate(rho))*phiHbyA
     );
 
-    fvc::makeRelative(phid, psi, U);
-    MRF.makeRelative(fvc::interpolate(psi), phid);
+    phiHbyA -= fvc::interpolate(psi*p)*phiHbyA/fvc::interpolate(rho);
+
+    fvScalarMatrix pDDtEqn
+    (
+        fvc::ddt(rho) + psi*correction(fvm::ddt(p))
+      + fvc::div(phiHbyA) + fvm::div(phid, p)
+     ==
+        fvOptions(psi, p, rho.name())
+    );
 
     while (pimple.correctNonOrthogonal())
     {
-        fvScalarMatrix pEqn
-        (
-            fvm::ddt(psi, p)
-          + fvm::div(phid, p)
-          - fvm::laplacian(rhorAUf, p)
-         ==
-            fvOptions(psi, p, rho.name())
-        );
+        fvScalarMatrix pEqn(pDDtEqn - fvm::laplacian(rhorAUf, p));
+
+        // Relax the pressure equation to ensure diagonal-dominance
+        pEqn.relax();
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
         if (pimple.finalNonOrthogonalIter())
         {
-            phi == pEqn.flux();
+            phi = phiHbyA + pEqn.flux();
         }
     }
 }
 else
 {
-    surfaceScalarField phiHbyA
+    fvScalarMatrix pDDtEqn
     (
-        "phiHbyA",
-        fvc::flux(rho*HbyA)
-      + rhorAUf*fvc::ddtCorr(rho, U, rhoUf)
+        fvc::ddt(rho) + psi*correction(fvm::ddt(p))
+      + fvc::div(phiHbyA)
+     ==
+        fvOptions(psi, p, rho.name())
     );
-
-    fvc::makeRelative(phiHbyA, rho, U);
-    MRF.makeRelative(fvc::interpolate(rho), phiHbyA);
-
-    // Update the pressure BCs to ensure flux consistency
-    constrainPressure(p, rho, U, phiHbyA, rhorAUf, MRF);
 
     while (pimple.correctNonOrthogonal())
     {
-        // Pressure corrector
-        fvScalarMatrix pEqn
-        (
-            fvm::ddt(psi, p)
-          + fvc::div(phiHbyA)
-          - fvm::laplacian(rhorAUf, p)
-         ==
-            fvOptions(psi, p, rho.name())
-        );
+        fvScalarMatrix pEqn(pDDtEqn - fvm::laplacian(rhorAUf, p));
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
@@ -91,25 +104,24 @@ else
 // Explicitly relax pressure for momentum corrector
 p.relax();
 
-// Recalculate density from the relaxed pressure
-rho = thermo.rho();
-rho = max(rho, rhoMin);
-rho = min(rho, rhoMax);
-rho.relax();
-Info<< "rho max/min : " << max(rho).value()
-    << " " << min(rho).value() << endl;
-
 volVectorField gradP(fvc::grad(p));
 //mesh.interpolate(gradP);
-U = HbyA - rAU*cellMask*gradP;
+U = cellMask*(HbyA - rAU*gradP);
 U.correctBoundaryConditions();
 fvOptions.correct(U);
 K = 0.5*magSqr(U);
 
+if (pressureControl.limit(p))
 {
-    rhoUf = fvc::interpolate(rho*U);
-    surfaceVectorField n(mesh.Sf()/mesh.magSf());
-    rhoUf += n*(fvc::absolute(phi, rho, U)/mesh.magSf() - (n & rhoUf));
+    p.correctBoundaryConditions();
+}
+
+thermo.correctRho(psi*p - psip0, rhoMin, rhoMax) ;
+rho = thermo.rho();
+
+{
+    // Correct rhoUf if the mesh is moving
+    fvc::correctRhoUf(rhoUf, rho, U, phi);
 }
 
 if (thermo.dpdt())
@@ -121,3 +133,9 @@ if (thermo.dpdt())
         dpdt -= fvc::div(fvc::meshPhi(rho, U), p);
     }
 }
+
+surfaceScalarField faceMask
+(
+    localMin<scalar>(mesh).interpolate(cellMask)
+);
+phi *= faceMask;
