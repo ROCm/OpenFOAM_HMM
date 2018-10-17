@@ -25,12 +25,9 @@ InNamespace
     Foam
 
 Description
-    Various binary and unary operations, which can be used for example,
-    for parallel combine-reduce operations.
-
-    The information from all nodes is collected on the master node,
-    combined using the given combination function and the result is
-    broadcast to all nodes
+    Various function objects for unary and binary operations.
+    Can be used for parallel combine-reduce operations or other places
+    requiring a function object.
 
 \*---------------------------------------------------------------------------*/
 
@@ -79,10 +76,10 @@ EqOp(eqMag, x = mag(y))
 EqOp(plusEqMagSqr, x += magSqr(y))
 EqOp(maxEq, x = max(x, y))
 EqOp(minEq, x = min(x, y))
-EqOp(minMagSqrEq, x = (magSqr(x)<=magSqr(y) ? x : y))
-EqOp(maxMagSqrEq, x = (magSqr(x)>=magSqr(y) ? x : y))
+EqOp(minMagSqrEq, x = (magSqr(x) <= magSqr(y) ? x : y))
+EqOp(maxMagSqrEq, x = (magSqr(x) >= magSqr(y) ? x : y))
 EqOp(andEq, x = (x && y))
-EqOp(orEq, x  = (x || y))
+EqOp(orEq,  x = (x || y))
 
 EqOp(eqMinus, x = -y)
 
@@ -134,9 +131,32 @@ EqOp(nopEq, (void)x)
     };
 
 
-// ...
+// Operations taking two parameters (unaltered), returning bool
 
-#define weightedOp(opName, op)                                                 \
+#define BoolOp(opName, op)                                                     \
+                                                                               \
+    template<class T1, class T2>                                               \
+    struct opName##Op2                                                         \
+    {                                                                          \
+        bool operator()(const T1& x, const T2& y) const WARNRETURN             \
+        {                                                                      \
+            return op;                                                         \
+        }                                                                      \
+    };                                                                         \
+                                                                               \
+    template<class T>                                                          \
+    struct opName##Op                                                          \
+    {                                                                          \
+        bool operator()(const T& x, const T& y) const WARNRETURN               \
+        {                                                                      \
+            return op;                                                         \
+        }                                                                      \
+    };
+
+
+// Weighting operations
+
+#define WeightedOp(opName, op)                                                 \
                                                                                \
     template<class T, class CombineOp>                                         \
     class opName##WeightedOp                                                   \
@@ -178,18 +198,21 @@ Op(min, min(x, y))
 Op(minMagSqr, (magSqr(x)<=magSqr(y) ? x : y))
 Op(maxMagSqr, (magSqr(x)>=magSqr(y) ? x : y))
 Op(minMod, minMod(x, y))
-Op(and, x && y)
-Op(or, x || y)
-Op(eqEq, x == y)
-Op(less, x < y)
-Op(lessEq, x <= y)
-Op(greater, x > y)
-Op(greaterEq, x >= y)
 
-weightedOp(multiply, (weight*y))
+BoolOp(and, x && y)
+BoolOp(or, x || y)
+BoolOp(equal, x == y)
+BoolOp(notEqual, x != y)
+BoolOp(less, x < y)
+BoolOp(lessEq, x <= y)
+BoolOp(greater, x > y)
+BoolOp(greaterEq, x >= y)
+
+WeightedOp(multiply, (weight*y))
 
 #undef Op
-#undef weightedOp
+#undef BoolOp
+#undef WeightedOp
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
