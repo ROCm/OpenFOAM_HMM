@@ -216,6 +216,21 @@ WeightedOp(multiply, (weight*y))
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+//- Three-way comparison operation of two parameters,
+//  similar to the \c <=> operator in C++20.
+//
+//  \return a negative value for less, a positive value for greater,
+//      and zero for equal value.
+template<class T>
+struct compareOp
+{
+    int operator()(const T& a, const T& b) const WARNRETURN
+    {
+        return (a < b) ? -1 : (b < a) ? 1 : 0;
+    }
+};
+
+
 //- General get operation to extract the 'name' from an object as a word.
 //  The default implementation uses the 'name()' method commonly used within
 //  OpenFOAM.

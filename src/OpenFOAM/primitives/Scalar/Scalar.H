@@ -406,6 +406,28 @@ inline Scalar stabilise(const Scalar s, const Scalar tol)
 // Specializations
 
 // Default definition in ops.H
+template<class T> struct compareOp;
+
+//- Compare scalar values
+template<>
+struct compareOp<Scalar>
+{
+    const Scalar tolerance;
+
+    //- Construct with specified tolerance (non-negative value)
+    compareOp(Scalar tol = ScalarVSMALL)
+    :
+        tolerance(tol)
+    {}
+
+    Scalar operator()(const Scalar& a, const Scalar& b) const
+    {
+        return (mag(a - b) <= tolerance) ? 0 : (a - b);
+    }
+};
+
+
+// Default definition in ops.H
 template<class T> struct equalOp;
 
 //- Compare scalar values for equality
