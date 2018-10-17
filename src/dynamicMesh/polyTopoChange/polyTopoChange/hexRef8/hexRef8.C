@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -5572,9 +5572,27 @@ void Foam::hexRef8::setUnrefinement
 
         if (facesToRemove.size() != splitFaces.size())
         {
+            // Dump current mesh
+            {
+                const_cast<polyMesh&>(mesh_).setInstance
+                (
+                    mesh_.time().timeName()
+                );
+                mesh_.write();
+                pointSet pSet(mesh_, "splitPoints", splitPointLabels);
+                pSet.write();
+                faceSet fSet(mesh_, "splitFaces", splitFaces);
+                fSet.write();
+                faceSet removeSet(mesh_, "facesToRemove", facesToRemove);
+                removeSet.write();
+            }
+
             FatalErrorInFunction
                 << "Ininitial set of split points to unrefine does not"
                 << " seem to be consistent or not mid points of refined cells"
+                << " splitPoints:" << splitPointLabels.size()
+                << " splitFaces:" << splitFaces.size()
+                << " facesToRemove:" << facesToRemove.size()
                 << abort(FatalError);
         }
     }
