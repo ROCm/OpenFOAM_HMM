@@ -70,7 +70,7 @@ InfoSwitches
 OptimisationSwitches
 {
     // Use physical (0) or logical (1) value for the cwd.
-    cwd     0;
+    cwd     1;
 
     // On NFS mounted file system: maximum wait for files to appear/get
     // updated. Set to 0 on distributed case.
