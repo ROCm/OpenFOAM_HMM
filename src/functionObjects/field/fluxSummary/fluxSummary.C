@@ -59,13 +59,13 @@ const Foam::Enum
     Foam::functionObjects::fluxSummary::modeType
 >
 Foam::functionObjects::fluxSummary::modeTypeNames_
-{
+({
     { modeType::mdFaceZone , "faceZone" },
     { modeType::mdFaceZoneAndDirection, "faceZoneAndDirection" },
     { modeType::mdCellZoneAndDirection, "cellZoneAndDirection" },
     { modeType::mdSurface, "surface" },
     { modeType::mdSurfaceAndDirection, "surfaceAndDirection" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -817,7 +817,7 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
     fvMeshFunctionObject::read(dict);
     writeFile::read(dict);
 
-    mode_ = modeTypeNames_.lookup("mode", dict);
+    mode_ = modeTypeNames_.get("mode", dict);
     phiName_ = dict.lookupOrDefault<word>("phi", "phi");
     scaleFactor_ = dict.lookupOrDefault<scalar>("scaleFactor", 1.0);
     tolerance_   = dict.lookupOrDefault<scalar>("tolerance", 0.8);

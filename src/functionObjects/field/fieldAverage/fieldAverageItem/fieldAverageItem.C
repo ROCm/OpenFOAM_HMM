@@ -44,10 +44,10 @@ const Foam::Enum
     Foam::functionObjects::fieldAverageItem::baseType
 >
 Foam::functionObjects::fieldAverageItem::baseTypeNames_
-{
+({
     { baseType::ITER, "iteration" },
     { baseType::TIME, "time" },
-};
+});
 
 
 const Foam::Enum
@@ -55,11 +55,11 @@ const Foam::Enum
     Foam::functionObjects::fieldAverageItem::windowType
 >
 Foam::functionObjects::fieldAverageItem::windowTypeNames_
-{
+({
     { windowType::NONE, "none" },
     { windowType::APPROXIMATE, "approximate" },
     { windowType::EXACT, "exact" },
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

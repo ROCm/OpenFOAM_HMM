@@ -112,7 +112,7 @@ Foam::Switch Foam::Switch::lookupOrAddToDict
 (
     const word& name,
     dictionary& dict,
-    const Switch& defaultValue
+    const Switch defaultValue
 )
 {
     return dict.lookupOrAddDefault<Switch>(name, defaultValue);

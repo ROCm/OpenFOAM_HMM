@@ -50,10 +50,10 @@ const Foam::Enum
     Foam::fv::fixedTemperatureConstraint::temperatureMode
 >
 Foam::fv::fixedTemperatureConstraint::temperatureModeNames_
-{
+({
     { temperatureMode::tmUniform, "uniform" },
     { temperatureMode::tmLookup, "lookup" },
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -67,7 +67,7 @@ Foam::fv::fixedTemperatureConstraint::fixedTemperatureConstraint
 )
 :
     cellSetOption(name, modelType, dict, mesh),
-    mode_(temperatureModeNames_.lookup("mode", coeffs_)),
+    mode_(temperatureModeNames_.get("mode", coeffs_)),
     Tuniform_(nullptr),
     TName_("T")
 {

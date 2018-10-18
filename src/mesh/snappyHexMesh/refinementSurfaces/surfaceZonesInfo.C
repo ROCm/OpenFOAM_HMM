@@ -36,12 +36,12 @@ const Foam::Enum
     Foam::surfaceZonesInfo::areaSelectionAlgo
 >
 Foam::surfaceZonesInfo::areaSelectionAlgoNames
-{
+({
     { areaSelectionAlgo::INSIDE, "inside" },
     { areaSelectionAlgo::OUTSIDE, "outside" },
     { areaSelectionAlgo::INSIDEPOINT, "insidePoint" },
     { areaSelectionAlgo::NONE, "none" },
-};
+});
 
 
 const Foam::Enum
@@ -49,11 +49,11 @@ const Foam::Enum
     Foam::surfaceZonesInfo::faceZoneType
 >
 Foam::surfaceZonesInfo::faceZoneTypeNames
-{
+({
     { faceZoneType::INTERNAL, "internal" },
     { faceZoneType::BAFFLE, "baffle" },
     { faceZoneType::BOUNDARY, "boundary" },
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

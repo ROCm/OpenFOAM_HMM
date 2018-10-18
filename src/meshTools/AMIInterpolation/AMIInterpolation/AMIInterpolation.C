@@ -39,12 +39,12 @@ const Foam::Enum
     interpolationMethod
 >
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolationMethodNames_
-{
+({
     { interpolationMethod::imDirect, "directAMI" },
     { interpolationMethod::imMapNearest, "mapNearestAMI" },
     { interpolationMethod::imFaceAreaWeight, "faceAreaWeightAMI" },
     { interpolationMethod::imPartialFaceAreaWeight, "partialFaceAreaWeightAMI" }
-};
+});
 
 template<class SourcePatch, class TargetPatch>
 bool Foam::AMIInterpolation<SourcePatch, TargetPatch>::cacheIntersections_ =

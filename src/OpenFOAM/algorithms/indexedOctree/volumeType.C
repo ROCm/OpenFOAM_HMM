@@ -30,15 +30,15 @@ License
 
 const Foam::Enum
 <
-    Foam::volumeType
+    Foam::volumeType::type
 >
 Foam::volumeType::names
-{
-    { type::UNKNOWN, "unknown" },
-    { type::INSIDE, "inside" },
-    { type::OUTSIDE, "outside" },
-    { type::MIXED, "mixed" },
-};
+({
+    { volumeType::type::UNKNOWN, "unknown" },
+    { volumeType::type::INSIDE, "inside" },
+    { volumeType::type::OUTSIDE, "outside" },
+    { volumeType::type::MIXED, "mixed" },
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

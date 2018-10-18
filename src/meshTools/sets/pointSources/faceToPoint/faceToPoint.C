@@ -49,9 +49,9 @@ const Foam::Enum
     Foam::faceToPoint::faceAction
 >
 Foam::faceToPoint::faceActionNames_
-{
+({
     { faceAction::ALL, "all" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -98,7 +98,7 @@ Foam::faceToPoint::faceToPoint
 :
     topoSetSource(mesh),
     setName_(dict.get<word>("set")),
-    option_(faceActionNames_.lookup("option", dict))
+    option_(faceActionNames_.get("option", dict))
 {}
 
 

@@ -50,10 +50,10 @@ const Foam::Enum
 >
 Foam::compressible::
 alphatWallBoilingWallFunctionFvPatchScalarField::phaseTypeNames_
-{
+({
     { phaseType::vaporPhase, "vapor" },
     { phaseType::liquidPhase, "liquid" },
-};
+});
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -102,7 +102,7 @@ alphatWallBoilingWallFunctionFvPatchScalarField
 )
 :
     alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField(p, iF, dict),
-    phaseType_(phaseTypeNames_.lookup("phaseType", dict)),
+    phaseType_(phaseTypeNames_.get("phaseType", dict)),
     relax_(dict.lookupOrDefault<scalar>("relax", 0.5)),
     AbyV_(p.size(), 0),
     alphatConv_(p.size(), 0),

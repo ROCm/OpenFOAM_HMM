@@ -1534,7 +1534,7 @@ int main(int argc, char *argv[])
 
 
     mappedPatchBase::sampleMode sampleMode =
-        mappedPatchBase::sampleModeNames_.lookup("sampleMode", dict);
+        mappedPatchBase::sampleModeNames_.get("sampleMode", dict);
 
     const bool oneD(dict.get<bool>("oneD"));
     bool oneDNonManifoldEdges(false);

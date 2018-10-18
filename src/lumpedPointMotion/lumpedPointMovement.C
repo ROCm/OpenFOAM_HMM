@@ -42,10 +42,10 @@ const Foam::Enum
     Foam::lumpedPointMovement::outputFormatType
 >
 Foam::lumpedPointMovement::formatNames
-{
+({
     { outputFormatType::PLAIN, "plain" },
-    { outputFormatType::DICTIONARY, "dictionary" }
-};
+    { outputFormatType::DICTIONARY, "dictionary" },
+});
 
 
 const Foam::Enum
@@ -53,11 +53,11 @@ const Foam::Enum
     Foam::lumpedPointMovement::scalingType
 >
 Foam::lumpedPointMovement::scalingNames
-{
+({
     { scalingType::LENGTH, "length" },
     { scalingType::FORCE, "force" },
-    { scalingType::MOMENT, "moment" }
-};
+    { scalingType::MOMENT, "moment" },
+});
 
 
 const Foam::word
@@ -283,17 +283,11 @@ void Foam::lumpedPointMovement::readDict(const dictionary& dict)
     commDict.readEntry("outputName", outputName_);
     commDict.readIfPresent("logName", logName_);
 
-    inputFormat_ = lumpedPointState::formatNames.lookup
-    (
-        "inputFormat",
-        commDict
-    );
+    inputFormat_ =
+        lumpedPointState::formatNames.get("inputFormat", commDict);
 
-    outputFormat_ = lumpedPointMovement::formatNames.lookup
-    (
-        "outputFormat",
-        commDict
-    );
+    outputFormat_ =
+        lumpedPointMovement::formatNames.get("outputFormat", commDict);
 
     scaleInput_  = -1;
     scaleOutput_ = -1;

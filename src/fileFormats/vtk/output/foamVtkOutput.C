@@ -42,10 +42,10 @@ const Foam::Enum
     Foam::vtk::fileTag
 >
 Foam::vtk::legacy::contentNames
-{
+({
     { vtk::fileTag::POLY_DATA, "POLYDATA" },
     { vtk::fileTag::UNSTRUCTURED_GRID, "UNSTRUCTURED_GRID" },
-};
+});
 
 
 const Foam::Enum
@@ -53,10 +53,10 @@ const Foam::Enum
     Foam::vtk::fileTag
 >
 Foam::vtk::legacy::dataTypeNames
-{
+({
     { vtk::fileTag::CELL_DATA, "CELL_DATA" },
     { vtk::fileTag::POINT_DATA, "POINT_DATA" }
-};
+});
 
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //

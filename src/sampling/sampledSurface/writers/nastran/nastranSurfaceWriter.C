@@ -45,10 +45,10 @@ const Foam::Enum
     Foam::nastranSurfaceWriter::loadFormat
 >
 Foam::nastranSurfaceWriter::loadFormatNames_
-{
+({
     { loadFormat::PLOAD2, "PLOAD2" },
     { loadFormat::PLOAD4, "PLOAD4" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

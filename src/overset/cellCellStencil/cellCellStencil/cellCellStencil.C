@@ -42,11 +42,11 @@ const Foam::Enum
     Foam::cellCellStencil::cellType
 >
 Foam::cellCellStencil::cellTypeNames_
-{
+({
     { cellType::CALCULATED, "calculated" },
     { cellType::INTERPOLATED, "interpolated" },
     { cellType::HOLE, "hole" },
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

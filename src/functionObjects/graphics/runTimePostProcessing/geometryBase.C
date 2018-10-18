@@ -37,11 +37,11 @@ const Foam::Enum
     Foam::functionObjects::runTimePostPro::geometryBase::renderModeType
 >
 Foam::functionObjects::runTimePostPro::geometryBase::renderModeTypeNames
-{
+({
     { renderModeType::rmFlat, "flat" },
     { renderModeType::rmGouraud, "gouraud" },
     { renderModeType::rmPhong, "phong" },
-};
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -87,15 +87,13 @@ Foam::functionObjects::runTimePostPro::geometryBase::geometryBase
     parent_(parent),
     name_(dict.dictName()),
     visible_(dict.get<bool>("visible")),
-    renderMode_(rmGouraud),
+    renderMode_
+    (
+        renderModeTypeNames.lookupOrDefault("renderMode", dict, rmGouraud)
+    ),
     opacity_(nullptr),
     colours_(colours)
 {
-    if (dict.found("renderMode"))
-    {
-        renderMode_ = renderModeTypeNames.lookup("renderMode", dict);
-    }
-
     if (dict.found("opacity"))
     {
         opacity_.reset(Function1<scalar>::New("opacity", dict).ptr());

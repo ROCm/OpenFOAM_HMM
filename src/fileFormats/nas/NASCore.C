@@ -35,11 +35,11 @@ const Foam::Enum
     Foam::fileFormats::NASCore::fieldFormat
 >
 Foam::fileFormats::NASCore::fieldFormatNames
-{
+({
     { fieldFormat::SHORT, "short" },
     { fieldFormat::LONG,  "long" },
     { fieldFormat::FREE,  "free" },
-};
+});
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //

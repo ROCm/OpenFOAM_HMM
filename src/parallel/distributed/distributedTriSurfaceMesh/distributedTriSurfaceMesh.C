@@ -59,11 +59,11 @@ const Foam::Enum
     Foam::distributedTriSurfaceMesh::distributionType
 >
 Foam::distributedTriSurfaceMesh::distributionTypeNames_
-{
+({
     { distributionType::FOLLOW, "follow" },
     { distributionType::INDEPENDENT, "independent" },
     { distributionType::FROZEN, "frozen" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -79,7 +79,7 @@ bool Foam::distributedTriSurfaceMesh::read()
     Pstream::scatterList(procBb_);
 
     // Distribution type
-    distType_ = distributionTypeNames_.lookup("distributionType", dict_);
+    distType_ = distributionTypeNames_.get("distributionType", dict_);
 
     // Merge distance
     dict_.readEntry("mergeDistance", mergeDist_);

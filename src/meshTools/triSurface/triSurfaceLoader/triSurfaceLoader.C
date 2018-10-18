@@ -35,12 +35,12 @@ const Foam::Enum
     Foam::triSurfaceLoader::loadingOption
 >
 Foam::triSurfaceLoader::loadingOptionNames
-{
+({
     { loadingOption::SINGLE_REGION, "single" },
     { loadingOption::FILE_REGION, "file" },
     { loadingOption::OFFSET_REGION, "offset" },
-    { loadingOption::MERGE_REGION, "merge" }
-};
+    { loadingOption::MERGE_REGION, "merge" },
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

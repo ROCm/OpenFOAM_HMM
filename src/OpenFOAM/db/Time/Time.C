@@ -46,14 +46,14 @@ const Foam::Enum
     Foam::Time::stopAtControls
 >
 Foam::Time::stopAtControlNames
-{
+({
     { stopAtControls::saEndTime, "endTime" },
     { stopAtControls::saNoWriteNow, "noWriteNow" },
     { stopAtControls::saWriteNow, "writeNow" },
     { stopAtControls::saNextWrite, "nextWrite" },
     // NOTE: stopAtControls::saUnknown is left untabulated here so that it can
     // be used as fallback value to flag unknown settings
-};
+});
 
 
 const Foam::Enum
@@ -61,13 +61,13 @@ const Foam::Enum
     Foam::Time::writeControls
 >
 Foam::Time::writeControlNames
-{
+({
     { writeControls::wcTimeStep, "timeStep" },
     { writeControls::wcRunTime, "runTime" },
     { writeControls::wcAdjustableRunTime, "adjustableRunTime" },
     { writeControls::wcClockTime, "clockTime" },
     { writeControls::wcCpuTime, "cpuTime" },
-};
+});
 
 
 Foam::Time::fmtflags Foam::Time::format_(Foam::Time::general);

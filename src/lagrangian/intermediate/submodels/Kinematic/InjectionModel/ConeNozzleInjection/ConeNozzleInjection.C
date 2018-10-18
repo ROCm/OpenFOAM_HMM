@@ -37,11 +37,11 @@ const Foam::Enum
     typename Foam::ConeNozzleInjection<CloudType>::injectionMethod
 >
 Foam::ConeNozzleInjection<CloudType>::injectionMethodNames
-{
+({
     { injectionMethod::imPoint, "point" },
     { injectionMethod::imDisc, "disc" },
-    { injectionMethod::imMovingPoint, "movingPoint" }
-};
+    { injectionMethod::imMovingPoint, "movingPoint" },
+});
 
 template<class CloudType>
 const Foam::Enum
@@ -49,11 +49,11 @@ const Foam::Enum
     typename Foam::ConeNozzleInjection<CloudType>::flowType
 >
 Foam::ConeNozzleInjection<CloudType>::flowTypeNames
-{
+({
     { flowType::ftConstantVelocity, "constantVelocity" },
     { flowType::ftPressureDrivenVelocity, "pressureDrivenVelocity" },
-    { flowType::ftFlowRateAndDischarge, "flowRateAndDischarge" }
-};
+    { flowType::ftFlowRateAndDischarge, "flowRateAndDischarge" },
+});
 
 
 // * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * * //
@@ -129,9 +129,9 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     InjectionModel<CloudType>(dict, owner, modelName, typeName),
     injectionMethod_
     (
-        injectionMethodNames.lookup("injectionMethod", this->coeffDict())
+        injectionMethodNames.get("injectionMethod", this->coeffDict())
     ),
-    flowType_(flowTypeNames.lookup("flowType", this->coeffDict())),
+    flowType_(flowTypeNames.get("flowType", this->coeffDict())),
     outerDiameter_(this->coeffDict().getScalar("outerDiameter")),
     innerDiameter_(this->coeffDict().getScalar("innerDiameter")),
     duration_(this->coeffDict().getScalar("duration")),

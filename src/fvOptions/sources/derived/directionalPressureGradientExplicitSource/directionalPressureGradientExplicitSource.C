@@ -62,11 +62,11 @@ const Foam::Enum
     Foam::fv::directionalPressureGradientExplicitSource::pressureDropModel
 >
 Foam::fv::directionalPressureGradientExplicitSource::pressureDropModelNames_
-{
+({
     { pressureDropModel::pVolumetricFlowRateTable, "volumetricFlowRateTable" },
     { pressureDropModel::pConstant, "constant" },
     { pressureDropModel::pDarcyForchheimer, "DarcyForchheimer" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -166,7 +166,7 @@ directionalPressureGradientExplicitSource
 )
 :
     cellSetOption(sourceName, modelType, dict, mesh),
-    model_(pressureDropModelNames_.lookup("model", coeffs_)),
+    model_(pressureDropModelNames_.get("model", coeffs_)),
     gradP0_(cells_.size(), Zero),
     dGradP_(cells_.size(), Zero),
     gradPporous_(cells_.size(), Zero),

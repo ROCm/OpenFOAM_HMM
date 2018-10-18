@@ -53,10 +53,10 @@ const Foam::Enum
     Foam::slidingInterface::typeOfMatch
 >
 Foam::slidingInterface::typeOfMatchNames
-{
+({
     { typeOfMatch::INTEGRAL, "integral" },
     { typeOfMatch::PARTIAL, "partial" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -241,12 +241,12 @@ Foam::slidingInterface::slidingInterface
         dict.lookup("slavePatchName"),
         mme.mesh().boundaryMesh()
     ),
-    matchType_(typeOfMatchNames.lookup("typeOfMatch", dict)),
+    matchType_(typeOfMatchNames.get("typeOfMatch", dict)),
     coupleDecouple_(dict.lookup("coupleDecouple")),
     attached_(dict.lookup("attached")),
     projectionAlgo_
     (
-        intersection::algorithmNames_.read(dict.lookup("projection"))
+        intersection::algorithmNames_.get("projection", dict)
     ),
     trigger_(false),
     cutFaceMasterPtr_(nullptr),

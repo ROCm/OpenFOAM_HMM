@@ -51,12 +51,12 @@ const Foam::Enum
     Foam::faceToCell::faceAction
 >
 Foam::faceToCell::faceActionNames_
-{
+({
     { faceAction::ANY, "any" },
     { faceAction::ALL, "all" },
     { faceAction::OWNER, "owner" },
     { faceAction::NEIGHBOUR, "neighbour" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -147,7 +147,7 @@ Foam::faceToCell::faceToCell
 :
     topoSetSource(mesh),
     setName_(dict.get<word>("set")),
-    option_(faceActionNames_.lookup("option", dict))
+    option_(faceActionNames_.get("option", dict))
 {}
 
 

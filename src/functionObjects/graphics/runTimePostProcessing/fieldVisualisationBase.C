@@ -52,22 +52,22 @@ const Foam::Enum
     Foam::functionObjects::fieldVisualisationBase::colourByType
 >
 Foam::functionObjects::fieldVisualisationBase::colourByTypeNames
-{
+({
     { colourByType::cbColour, "colour" },
     { colourByType::cbField, "field" },
-};
+});
 
 const Foam::Enum
 <
     Foam::functionObjects::fieldVisualisationBase::colourMapType
 >
 Foam::functionObjects::fieldVisualisationBase::colourMapTypeNames
-{
+({
     { colourMapType::cmRainbow, "rainbow" },
     { colourMapType::cmBlueWhiteRed, "blueWhiteRed" },
     { colourMapType::cmFire, "fire" },
     { colourMapType::cmGreyscale, "greyscale" },
-};
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -489,7 +489,7 @@ Foam::functionObjects::fieldVisualisationBase::fieldVisualisationBase
     colourMap_(cmRainbow),
     range_()
 {
-    colourBy_ = colourByTypeNames.lookup("colourBy", dict);
+    colourByTypeNames.readEntry("colourBy", dict, colourBy_);
 
     switch (colourBy_)
     {
@@ -502,10 +502,7 @@ Foam::functionObjects::fieldVisualisationBase::fieldVisualisationBase
         {
             dict.readEntry("range", range_);
 
-            if (dict.found("colourMap"))
-            {
-                colourMap_ = colourMapTypeNames.lookup("colourMap", dict);
-            }
+            colourMapTypeNames.readIfPresent("colourMap", dict, colourMap_);
 
             const dictionary& sbarDict = dict.subDict("scalarBar");
             sbarDict.readEntry("visible", scalarBar_.visible_);

@@ -71,13 +71,13 @@ const Foam::Enum
     Foam::meshRefinement::debugType
 >
 Foam::meshRefinement::debugTypeNames
-{
+({
     { debugType::MESH, "mesh" },
     { debugType::OBJINTERSECTIONS, "intersections" },
     { debugType::FEATURESEEDS, "featureSeeds" },
     { debugType::ATTRACTION, "attraction" },
     { debugType::LAYERINFO, "layerInfo" },
-};
+});
 
 
 //const Foam::Enum
@@ -85,9 +85,9 @@ Foam::meshRefinement::debugTypeNames
 //    Foam::meshRefinement::outputType
 //>
 //Foam::meshRefinement::outputTypeNames
-//{
+//({
 //    { outputType::OUTPUTLAYERINFO, "layerInfo" }
-//};
+//});
 
 
 const Foam::Enum
@@ -95,13 +95,13 @@ const Foam::Enum
     Foam::meshRefinement::writeType
 >
 Foam::meshRefinement::writeTypeNames
-{
+({
     { writeType::WRITEMESH, "mesh" },
     { writeType::NOWRITEREFINEMENT, "noRefinement" },
     { writeType::WRITELEVELS, "scalarLevels" },
     { writeType::WRITELAYERSETS, "layerSets" },
     { writeType::WRITELAYERFIELDS, "layerFields" },
-};
+});
 
 
 Foam::meshRefinement::writeType Foam::meshRefinement::writeLevel_;

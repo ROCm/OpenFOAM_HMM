@@ -49,13 +49,13 @@ const Foam::Enum
     Foam::conformalVoronoiMesh::dualMeshPointType
 >
 Foam::conformalVoronoiMesh::dualMeshPointTypeNames_
-{
+({
     { dualMeshPointType::internal, "internal" },
     { dualMeshPointType::surface, "surface" },
     { dualMeshPointType::featureEdge, "featureEdge" },
     { dualMeshPointType::featurePoint, "featurePoint" },
     { dualMeshPointType::constrained, "constrained" },
-};
+});
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //

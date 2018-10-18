@@ -38,10 +38,10 @@ const Foam::Enum
     Foam::lumpedPointState::inputFormatType
 >
 Foam::lumpedPointState::formatNames
-{
+({
     { inputFormatType::PLAIN, "plain" },
-    { inputFormatType::DICTIONARY, "dictionary" }
-};
+    { inputFormatType::DICTIONARY, "dictionary" },
+});
 
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //

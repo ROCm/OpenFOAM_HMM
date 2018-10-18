@@ -46,11 +46,11 @@ const Foam::Enum
     Foam::surfaceIntersection::intersectionType
 >
 Foam::surfaceIntersection::selfIntersectionNames
-{
+({
     { intersectionType::SELF, "self" },
     { intersectionType::SELF_REGION, "region" },
     { intersectionType::NONE, "none" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

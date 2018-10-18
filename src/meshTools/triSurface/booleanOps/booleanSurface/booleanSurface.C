@@ -43,12 +43,12 @@ const Foam::Enum
     Foam::booleanSurface::booleanOpType
 >
 Foam::booleanSurface::booleanOpTypeNames
-{
+({
     { booleanOpType::UNION, "union" },
     { booleanOpType::INTERSECTION, "intersection" },
     { booleanOpType::DIFFERENCE, "difference" },
     { booleanOpType::ALL, "all" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

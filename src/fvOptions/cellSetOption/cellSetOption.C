@@ -42,12 +42,12 @@ const Foam::Enum
     Foam::fv::cellSetOption::selectionModeType
 >
 Foam::fv::cellSetOption::selectionModeTypeNames_
-{
+({
     { selectionModeType::smPoints, "points" },
     { selectionModeType::smCellSet, "cellSet" },
     { selectionModeType::smCellZone, "cellZone" },
     { selectionModeType::smAll, "all" },
-};
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -204,10 +204,7 @@ Foam::fv::cellSetOption::cellSetOption
     option(name, modelType, dict, mesh),
     timeStart_(-1.0),
     duration_(0.0),
-    selectionMode_
-    (
-        selectionModeTypeNames_.lookup("selectionMode", coeffs_)
-    ),
+    selectionMode_(selectionModeTypeNames_.get("selectionMode", coeffs_)),
     cellSetName_("none"),
     V_(0.0)
 {

@@ -53,11 +53,11 @@ const Foam::Enum
     Foam::pointToFace::pointAction
 >
 Foam::pointToFace::pointActionNames_
-{
+({
     { pointAction::ANY, "any" },
     { pointAction::ALL, "all" },
     { pointAction::EDGE, "edge" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -161,7 +161,7 @@ Foam::pointToFace::pointToFace
 :
     topoSetSource(mesh),
     setName_(dict.get<word>("set")),
-    option_(pointActionNames_.lookup("option", dict))
+    option_(pointActionNames_.get("option", dict))
 {}
 
 

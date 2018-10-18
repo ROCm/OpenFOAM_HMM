@@ -38,7 +38,7 @@ const Foam::Enum
     Foam::humidityTemperatureCoupledMixedFvPatchScalarField::massTransferMode
 >
 Foam::humidityTemperatureCoupledMixedFvPatchScalarField::massModeTypeNames_
-{
+({
     { massTransferMode::mtConstantMass, "constantMass" },
     { massTransferMode::mtCondensation, "condensation" },
     { massTransferMode::mtEvaporation, "evaporation" },
@@ -46,7 +46,7 @@ Foam::humidityTemperatureCoupledMixedFvPatchScalarField::massModeTypeNames_
         massTransferMode::mtCondensationAndEvaporation,
         "condensationAndEvaporation"
     },
-};
+});
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -240,9 +240,8 @@ humidityTemperatureCoupledMixedFvPatchScalarField
 
     fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
 
-    if (dict.found("mode"))
+    if (massModeTypeNames_.readIfPresent("mode", dict, mode_))
     {
-        mode_ = massModeTypeNames_.lookup("mode", dict);
         fluid_ = true;
     }
 

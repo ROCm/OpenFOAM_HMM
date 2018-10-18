@@ -38,11 +38,11 @@ const Foam::Enum
     Foam::externalWallHeatFluxTemperatureFvPatchScalarField::operationMode
 >
 Foam::externalWallHeatFluxTemperatureFvPatchScalarField::operationModeNames
-{
+({
     { operationMode::fixedPower, "power" },
     { operationMode::fixedHeatFlux, "flux" },
     { operationMode::fixedHeatTransferCoeff, "coefficient" },
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -84,7 +84,7 @@ externalWallHeatFluxTemperatureFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), dict),
-    mode_(operationModeNames.lookup("mode", dict)),
+    mode_(operationModeNames.get("mode", dict)),
     Q_(0),
     q_(),
     h_(),

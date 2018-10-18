@@ -50,9 +50,9 @@ const Foam::Enum
     Foam::cellToPoint::cellAction
 >
 Foam::cellToPoint::cellActionNames_
-{
+({
     { cellAction::ALL, "all" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -104,7 +104,7 @@ Foam::cellToPoint::cellToPoint
 :
     topoSetSource(mesh),
     setName_(dict.get<word>("set")),
-    option_(cellActionNames_.lookup("option", dict))
+    option_(cellActionNames_.get("option", dict))
 {}
 
 

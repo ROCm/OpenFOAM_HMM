@@ -26,114 +26,24 @@ License
 #include "Enum.H"
 #include "dictionary.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-template<class EnumType>
-Foam::label Foam::Enum<EnumType>::getIndex(const word& enumName) const
-{
-    const label n = size();
-    for (label idx=0; idx < n; ++idx)
-    {
-        if (names_[idx] == enumName)
-        {
-            return idx;
-        }
-    }
-
-    return -1;
-}
-
-
-template<class EnumType>
-Foam::label Foam::Enum<EnumType>::getIndex(const EnumType e) const
-{
-    const int val = int(e);
-
-    const label n = size();
-    for (label idx=0; idx < n; ++idx)
-    {
-        if (values_[idx] == val)
-        {
-            return idx;
-        }
-    }
-
-    return -1;
-}
-
-
-template<class EnumType>
-EnumType Foam::Enum<EnumType>::getEnum(const word& enumName) const
-{
-    const label idx = getIndex(enumName);
-
-    if (idx < 0)
-    {
-        FatalErrorInFunction
-            << enumName << " is not in enumeration: "
-            << names_ << exit(FatalError);
-    }
-
-    return EnumType(values_[idx]);
-}
-
-
-template<class EnumType>
-const Foam::word& Foam::Enum<EnumType>::getName(const EnumType e) const
-{
-    const label idx = getIndex(e);
-
-    if (idx < 0)
-    {
-        return word::null;
-    }
-
-    return names_[idx];
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class EnumType>
 Foam::Enum<EnumType>::Enum
 (
-    std::initializer_list<std::pair<EnumType, word>> lst
+    std::initializer_list<std::pair<EnumType, const char*>> list
 )
 :
-    names_(lst.size()),
-    values_(lst.size())
+    keys_(list.size()),
+    vals_(list.size())
 {
-    int idx = 0;
-    for (const auto& pair : lst)
+    label i = 0;
+    for (const auto& pair : list)
     {
-        names_[idx]  = pair.second;
-        values_[idx] = int(pair.first);
+        keys_[i] = pair.second;
+        vals_[i] = int(pair.first);
 
-        ++idx;
-    }
-}
-
-
-template<class EnumType>
-Foam::Enum<EnumType>::Enum
-(
-    const EnumType start,
-    std::initializer_list<word> lst
-)
-:
-    names_(lst.size()),
-    values_(lst.size())
-{
-    int val = int(start);
-
-    int idx = 0;
-    for (const auto& key : lst)
-    {
-        names_[idx]  = key;
-        values_[idx] = val;
-
-        ++val;
-        ++idx;
+        ++i;
     }
 }
 
@@ -143,10 +53,27 @@ Foam::Enum<EnumType>::Enum
 template<class EnumType>
 Foam::List<Foam::word> Foam::Enum<EnumType>::sortedToc() const
 {
-    wordList lst(names_);
-    Foam::sort(lst);
+    List<word> list(keys_);
 
-    return lst;
+    Foam::sort(list);
+
+    return list;
+}
+
+
+template<class EnumType>
+EnumType Foam::Enum<EnumType>::get(const word& enumName) const
+{
+    const label idx = find(enumName);
+
+    if (idx < 0)
+    {
+        FatalErrorInFunction
+            << enumName << " is not in enumeration: " << *this << nl
+            << exit(FatalError);
+    }
+
+    return EnumType(vals_[idx]);
 }
 
 
@@ -154,28 +81,17 @@ template<class EnumType>
 EnumType Foam::Enum<EnumType>::read(Istream& is) const
 {
     const word enumName(is);
-    const label idx = getIndex(enumName);
+
+    const label idx = find(enumName);
 
     if (idx < 0)
     {
         FatalIOErrorInFunction(is)
-            << enumName << " is not in enumeration: "
-            << names_ << nl
+            << enumName << " is not in enumeration: " << *this << nl
             << exit(FatalIOError);
     }
 
-    return EnumType(values_[idx]);
-}
-
-
-template<class EnumType>
-void Foam::Enum<EnumType>::write(const EnumType e, Ostream& os) const
-{
-    const label idx = getIndex(e);
-    if (idx >= 0)
-    {
-        os << names_[idx];
-    }
+    return EnumType(vals_[idx]);
 }
 
 
@@ -186,29 +102,18 @@ EnumType Foam::Enum<EnumType>::get
     const dictionary& dict
 ) const
 {
-    const word enumName(dict.get<word>(key));
-    const label idx = getIndex(enumName);
+    const word enumName(dict.get<word>(key, keyType::LITERAL));
+
+    const label idx = find(enumName);
 
     if (idx < 0)
     {
         FatalIOErrorInFunction(dict)
-            << enumName << " is not in enumeration: "
-            << names_ << nl
+            << enumName << " is not in enumeration: " << *this << nl
             << exit(FatalIOError);
     }
 
-    return EnumType(values_[idx]);
-}
-
-
-template<class EnumType>
-EnumType Foam::Enum<EnumType>::lookup
-(
-    const word& key,
-    const dictionary& dict
-) const
-{
-    return this->get(key, dict);
+    return EnumType(vals_[idx]);
 }
 
 
@@ -217,55 +122,96 @@ EnumType Foam::Enum<EnumType>::lookupOrDefault
 (
     const word& key,
     const dictionary& dict,
-    const EnumType deflt
+    const EnumType defaultValue,
+    const bool failsafe
 ) const
 {
-    if (dict.found(key))
+    const entry* eptr = dict.findEntry(key, keyType::LITERAL);
+
+    if (eptr)
     {
-        return get(key, dict);
-    }
+        const word enumName(eptr->get<word>());
 
-    return deflt;
-}
-
-
-template<class EnumType>
-EnumType Foam::Enum<EnumType>::lookupOrFailsafe
-(
-    const word& key,
-    const dictionary& dict,
-    const EnumType deflt
-) const
-{
-    if (dict.found(key))
-    {
-        const word enumName(dict.get<word>(key));
-        const label idx = getIndex(enumName);
+        const label idx = find(enumName);
 
         if (idx >= 0)
         {
-            return EnumType(values_[idx]);
+            return EnumType(vals_[idx]);
         }
 
-        IOWarningInFunction(dict)
-            << "bad " << key <<" specifier " << enumName
-            << " using " << getName(deflt) << endl;
+        // Found the entry, but failed the name lookup
+
+        if (failsafe)
+        {
+            IOWarningInFunction(dict)
+                << enumName << " is not in enumeration: " << *this << nl
+                << "using failsafe " << get(defaultValue)
+                << " (value " << int(defaultValue) << ")" << endl;
+        }
+        else
+        {
+            FatalIOErrorInFunction(dict)
+                << enumName << " is not in enumeration: " << *this << nl
+                << exit(FatalIOError);
+        }
     }
 
-    return deflt;
+    return defaultValue;
 }
 
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+template<class EnumType>
+bool Foam::Enum<EnumType>::readEntry
+(
+    const word& key,
+    const dictionary& dict,
+    EnumType& val,
+    bool mandatory
+) const
+{
+    const entry* eptr = dict.findEntry(key, keyType::LITERAL);
+
+    if (eptr)
+    {
+        const word enumName(eptr->get<word>());
+
+        const label idx = find(enumName);
+
+        if (idx >= 0)
+        {
+            val = EnumType(vals_[idx]);
+
+            return true;
+        }
+
+        if (mandatory)
+        {
+            FatalIOErrorInFunction(dict)
+                << enumName << " is not in enumeration: " << *this << nl
+                << exit(FatalIOError);
+        }
+    }
+    else if (mandatory)
+    {
+        FatalIOErrorInFunction(dict)
+            << "'" << key << "' not found in dictionary " << dict.name() << nl
+            << exit(FatalIOError);
+    }
+
+    return false;
+}
+
 
 template<class EnumType>
-Foam::Ostream& Foam::operator<<
+bool Foam::Enum<EnumType>::readIfPresent
 (
-    Ostream& os,
-    const Enum<EnumType>& wrapped
-)
+    const word& key,
+    const dictionary& dict,
+    EnumType& val
+) const
 {
-    return wrapped.names().writeList(os, 10);
+    // Reading is non-mandatory
+    return readEntry(key, dict, val, false);
 }
 
 

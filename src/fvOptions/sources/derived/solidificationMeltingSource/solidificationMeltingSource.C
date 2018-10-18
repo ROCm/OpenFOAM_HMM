@@ -54,10 +54,10 @@ const Foam::Enum
     Foam::fv::solidificationMeltingSource::thermoMode
 >
 Foam::fv::solidificationMeltingSource::thermoModeTypeNames_
-{
+({
     { thermoMode::mdThermo, "thermo" },
     { thermoMode::mdLookup, "lookup" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -182,7 +182,7 @@ Foam::fv::solidificationMeltingSource::solidificationMeltingSource
     Tmelt_(coeffs_.get<scalar>("Tmelt")),
     L_(coeffs_.get<scalar>("L")),
     relax_(coeffs_.lookupOrDefault("relax", 0.9)),
-    mode_(thermoModeTypeNames_.lookup("thermoMode", coeffs_)),
+    mode_(thermoModeTypeNames_.get("thermoMode", coeffs_)),
     rhoRef_(coeffs_.get<scalar>("rhoRef")),
     TName_(coeffs_.lookupOrDefault<word>("T", "T")),
     CpName_(coeffs_.lookupOrDefault<word>("Cp", "Cp")),
@@ -319,7 +319,7 @@ bool Foam::fv::solidificationMeltingSource::read(const dictionary& dict)
 
         coeffs_.readIfPresent("relax", relax_);
 
-        mode_ = thermoModeTypeNames_.lookup("thermoMode", coeffs_);
+        thermoModeTypeNames_.readEntry("thermoMode", coeffs_, mode_);
 
         coeffs_.readEntry("rhoRef", rhoRef_);
         coeffs_.readIfPresent("T", TName_);

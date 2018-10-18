@@ -36,12 +36,12 @@ const Foam::Enum
     Foam::combustionModels::EDCversions
 >
 Foam::combustionModels::EDCversionNames
-{
+({
     { EDCversions::v1981, "v1981" },
     { EDCversions::v1996, "v1996" },
     { EDCversions::v2005, "v2005" },
     { EDCversions::v2016, "v2016" },
-};
+});
 
 const Foam::combustionModels::EDCversions
 Foam::combustionModels::EDCdefaultVersion(EDCversions::v2005);

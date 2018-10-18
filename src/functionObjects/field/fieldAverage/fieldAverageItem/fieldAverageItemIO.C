@@ -69,13 +69,12 @@ Foam::Istream& Foam::functionObjects::operator>>
     faItem.fieldName_ = dictEntry.keyword();
     faItem.mean_ = dict.get<bool>("mean");
     faItem.prime2Mean_ = dict.get<bool>("prime2Mean");
-    faItem.base_ = faItem.baseTypeNames_.lookup("base", dict);
+    faItem.base_ = faItem.baseTypeNames_.get("base", dict);
     faItem.window_ = dict.lookupOrDefault<scalar>("window", -1.0);
 
     if (faItem.window_ > 0)
     {
-        faItem.windowType_ =
-            faItem.windowTypeNames_.lookup("windowType", dict);
+        faItem.windowType_ = faItem.windowTypeNames_.get("windowType", dict);
 
         if (faItem.windowType_ != fieldAverageItem::windowType::NONE)
         {

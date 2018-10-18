@@ -347,14 +347,12 @@ void Foam::Time::readDict()
         controlDict_.readEntry("deltaT", deltaT_);
     }
 
-    if (controlDict_.found("writeControl"))
-    {
-        writeControl_ = writeControlNames.lookup
-        (
-            "writeControl",
-            controlDict_
-        );
-    }
+    writeControlNames.readIfPresent
+    (
+        "writeControl",
+        controlDict_,
+        writeControl_
+    );
 
     scalar oldWriteInterval = writeInterval_;
 
@@ -435,10 +433,8 @@ void Foam::Time::readDict()
 
     // stopAt at 'endTime' or a specified value
     // if nothing is specified, the endTime is zero
-    if (controlDict_.found("stopAt"))
+    if (stopAtControlNames.readIfPresent("stopAt", controlDict_, stopAt_))
     {
-        stopAt_ = stopAtControlNames.lookup("stopAt", controlDict_);
-
         if (stopAt_ == saEndTime)
         {
             controlDict_.readEntry("endTime", endTime_);

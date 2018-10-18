@@ -75,7 +75,7 @@ public:
     //  The lower bit is tested for the true/false condition.
     //  The values correspond to an index into the predefined output names
     //  for the c_str() method.
-    enum switchType
+    enum switchType : unsigned char
     {
         FALSE   = 0 /*!< "false" */, TRUE = 1 /*!< "true" */,
         NO      = 2 /*!< "no" */,    YES  = 3 /*!< "yes" */,
@@ -164,7 +164,7 @@ public:
         (
             const word& name,
             dictionary& dict,
-            const Switch& defaultValue = switchType::FALSE
+            const Switch defaultValue = switchType::FALSE
         );
 
 

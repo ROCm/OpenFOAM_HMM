@@ -33,7 +33,7 @@ const Foam::Enum
     Foam::indexedVertexEnum::vertexType
 >
 Foam::indexedVertexEnum::vertexTypeNames_
-{
+({
     { vertexType::vtUnassigned, "Unassigned" },
     { vertexType::vtInternal, "Internal" },
     { vertexType::vtInternalNearBoundary, "InternalNearBoundary" },
@@ -49,7 +49,7 @@ Foam::indexedVertexEnum::vertexTypeNames_
     { vertexType::vtExternalFeaturePoint, "ExternalFeaturePoint" },
     { vertexType::vtFar, "Far" },
     { vertexType::vtConstrained, "Constrained" },
-};
+});
 
 
 const Foam::Enum

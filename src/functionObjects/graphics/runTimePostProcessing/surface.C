@@ -56,13 +56,13 @@ const Foam::Enum
     Foam::functionObjects::runTimePostPro::surface::representationType
 >
 Foam::functionObjects::runTimePostPro::surface::representationTypeNames
-{
+({
     { representationType::rtNone, "none" },
     { representationType::rtWireframe, "wireframe" },
     { representationType::rtSurface, "surface" },
     { representationType::rtSurfaceWithEdges, "surfaceWithEdges" },
     { representationType::rtGlyph, "glyph" },
-};
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -149,7 +149,7 @@ Foam::functionObjects::runTimePostPro::surface::surface
     geometryBase(parent, dict, colours),
     representation_
     (
-        representationTypeNames.lookup("representation", dict)
+        representationTypeNames.get("representation", dict)
     ),
     featureEdges_(false),
     surfaceColour_(nullptr),

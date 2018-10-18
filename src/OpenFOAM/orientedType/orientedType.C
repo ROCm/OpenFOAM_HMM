@@ -32,11 +32,11 @@ const Foam::Enum
     Foam::orientedType::orientedOption
 >
 Foam::orientedType::orientedOptionNames
-{
+({
     { orientedOption::ORIENTED, "oriented" },
     { orientedOption::UNORIENTED, "unoriented" },
     { orientedOption::UNKNOWN, "unknown" },
-};
+});
 
 
 bool Foam::orientedType::checkType
@@ -45,19 +45,12 @@ bool Foam::orientedType::checkType
     const orientedType& ot2
 )
 {
-    if
+    return
     (
         (ot1.oriented() == UNKNOWN)
      || (ot2.oriented() == UNKNOWN)
      || (ot1.oriented() == ot2.oriented())
-    )
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    );
 }
 
 
@@ -115,7 +108,8 @@ void Foam::orientedType::read(const dictionary& dict)
     (
         "oriented",
         dict,
-        orientedOption::UNKNOWN
+        orientedOption::UNKNOWN,
+        true  // Failsafe behaviour
     );
 }
 

@@ -106,11 +106,12 @@ Foam::functionObjects::ensightWrite::ensightWrite
     fvMeshFunctionObject(name, runTime, dict),
     writeOpts_
     (
-        IOstreamOption::formatNames.lookupOrFailsafe
+        IOstreamOption::formatNames.lookupOrDefault
         (
             "format",
             dict,
-            runTime.writeFormat()
+            runTime.writeFormat(),
+            true  // Failsafe behaviour
         )
     ),
     caseOpts_(writeOpts_.format()),

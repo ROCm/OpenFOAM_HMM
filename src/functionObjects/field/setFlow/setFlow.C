@@ -53,12 +53,12 @@ const Foam::Enum
     Foam::functionObjects::setFlow::modeType
 >
 Foam::functionObjects::setFlow::modeTypeNames
-{
+({
     { functionObjects::setFlow::modeType::FUNCTION, "function" },
     { functionObjects::setFlow::modeType::ROTATION, "rotation" },
     { functionObjects::setFlow::modeType::VORTEX2D, "vortex2D" },
-    { functionObjects::setFlow::modeType::VORTEX3D, "vortex3D" }
-};
+    { functionObjects::setFlow::modeType::VORTEX3D, "vortex3D" },
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -137,7 +137,8 @@ bool Foam::functionObjects::setFlow::read(const dictionary& dict)
     if (fvMeshFunctionObject::read(dict))
     {
         Info<< name() << ":" << endl;
-        mode_ = modeTypeNames.lookup("mode", dict);
+
+        modeTypeNames.readEntry("mode", dict, mode_);
 
         Info<< "    operating mode: " << modeTypeNames[mode_] << endl;
 

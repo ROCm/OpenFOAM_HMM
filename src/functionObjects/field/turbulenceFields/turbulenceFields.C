@@ -50,7 +50,7 @@ const Foam::Enum
     Foam::functionObjects::turbulenceFields::compressibleField
 >
 Foam::functionObjects::turbulenceFields::compressibleFieldNames_
-{
+({
     { compressibleField::cfK, "k" },
     { compressibleField::cfEpsilon, "epsilon" },
     { compressibleField::cfOmega, "omega" },
@@ -62,8 +62,8 @@ Foam::functionObjects::turbulenceFields::compressibleFieldNames_
     { compressibleField::cfR, "R" },
     { compressibleField::cfDevRhoReff, "devRhoReff" },
     { compressibleField::cfL, "L" },
-    { compressibleField::cfI, "I" }
-};
+    { compressibleField::cfI, "I" },
+});
 
 
 const Foam::Enum
@@ -71,7 +71,7 @@ const Foam::Enum
     Foam::functionObjects::turbulenceFields::incompressibleField
 >
 Foam::functionObjects::turbulenceFields::incompressibleFieldNames_
-{
+({
     { incompressibleField::ifK, "k" },
     { incompressibleField::ifEpsilon, "epsilon" },
     { incompressibleField::ifOmega, "omega" },
@@ -81,8 +81,8 @@ Foam::functionObjects::turbulenceFields::incompressibleFieldNames_
     { incompressibleField::ifR, "R" },
     { incompressibleField::ifDevReff, "devReff" },
     { incompressibleField::ifL, "L" },
-    { incompressibleField::ifI, "I" }
-};
+    { incompressibleField::ifI, "I" },
+});
 
 
 const Foam::word Foam::functionObjects::turbulenceFields::modelName

@@ -36,12 +36,12 @@ const Foam::Enum
     Foam::temperatureCoupledBase::KMethodType
 >
 Foam::temperatureCoupledBase::KMethodTypeNames_
-{
+({
     { KMethodType::mtFluidThermo, "fluidThermo" },
     { KMethodType::mtSolidThermo, "solidThermo" },
     { KMethodType::mtDirectionalSolidThermo, "directionalSolidThermo" },
     { KMethodType::mtLookup, "lookup" },
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -68,7 +68,7 @@ Foam::temperatureCoupledBase::temperatureCoupledBase
 )
 :
     patch_(patch),
-    method_(KMethodTypeNames_.lookup("kappaMethod", dict)),
+    method_(KMethodTypeNames_.get("kappaMethod", dict)),
     kappaName_(dict.lookupOrDefault<word>("kappa", "none")),
     alphaAniName_(dict.lookupOrDefault<word>("alphaAni","none"))
 {

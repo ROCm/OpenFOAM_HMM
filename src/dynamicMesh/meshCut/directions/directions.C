@@ -40,11 +40,11 @@ const Foam::Enum
     Foam::directions::directionType
 >
 Foam::directions::directionTypeNames_
-{
+({
     { directionType::TAN1, "tan1" },
     { directionType::TAN2, "tan2" },
     { directionType::NORMAL, "normal" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

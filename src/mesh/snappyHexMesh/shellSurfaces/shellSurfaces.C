@@ -40,11 +40,11 @@ const Foam::Enum
     Foam::shellSurfaces::refineMode
 >
 Foam::shellSurfaces::refineModeNames_
-{
+({
     { refineMode::INSIDE, "inside" },
     { refineMode::OUTSIDE, "outside" },
     { refineMode::DISTANCE, "distance" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -621,7 +621,7 @@ Foam::shellSurfaces::shellSurfaces
             unmatchedKeys.erase(eptr->keyword());
 
             shells_[shellI] = geomI;
-            modes_[shellI] = refineModeNames_.lookup("mode", dict);
+            modes_[shellI] = refineModeNames_.get("mode", dict);
 
             // Read pairs of distance+level
             setAndCheckLevels(shellI, dict.lookup("levels"));

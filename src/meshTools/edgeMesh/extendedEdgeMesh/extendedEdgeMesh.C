@@ -48,12 +48,12 @@ const Foam::Enum
     Foam::extendedEdgeMesh::pointStatus
 >
 Foam::extendedEdgeMesh::pointStatusNames_
-{
+({
     { pointStatus::CONVEX, "convex" },
     { pointStatus::CONCAVE, "concave" },
     { pointStatus::MIXED, "mixed" },
     { pointStatus::NONFEATURE, "nonFeature" },
-};
+});
 
 
 const Foam::Enum
@@ -61,15 +61,14 @@ const Foam::Enum
     Foam::extendedEdgeMesh::edgeStatus
 >
 Foam::extendedEdgeMesh::edgeStatusNames_
-{
+({
     { edgeStatus::EXTERNAL, "external" },
     { edgeStatus::INTERNAL, "internal" },
     { edgeStatus::FLAT, "flat" },
     { edgeStatus::OPEN, "open" },
     { edgeStatus::MULTIPLE, "multiple" },
     { edgeStatus::NONE, "none" },
-
-};
+});
 
 
 const Foam::Enum
@@ -77,12 +76,12 @@ const Foam::Enum
     Foam::extendedEdgeMesh::sideVolumeType
 >
 Foam::extendedEdgeMesh::sideVolumeTypeNames_
-{
+({
     { sideVolumeType::INSIDE, "inside" },
     { sideVolumeType::OUTSIDE, "outside" },
     { sideVolumeType::BOTH, "both" },
     { sideVolumeType::NEITHER, "neither" },
-};
+});
 
 
 Foam::scalar Foam::extendedEdgeMesh::cosNormalAngleTol_ =

@@ -65,12 +65,12 @@ const Foam::Enum
     shapeSelector::shapeType
 >
 shapeSelector::shapeTypeNames
-{
+({
     { shapeSelector::shapeType::PLANE, "plane" },
     { shapeSelector::shapeType::SPHERE, "sphere" },
     { shapeSelector::shapeType::CYLINDER, "cylinder" },
     { shapeSelector::shapeType::SIN, "sin" },
-};
+});
 
 
 int main(int argc, char *argv[])
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 
     const shapeSelector::shapeType surfType
     (
-        shapeSelector::shapeTypeNames.lookup("type", dict)
+        shapeSelector::shapeTypeNames.get("type", dict)
     );
     const vector centre(dict.get<vector>("centre"));
     const word fieldName(dict.get<word>("field"));

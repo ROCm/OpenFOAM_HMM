@@ -97,11 +97,12 @@ Foam::interpolationTable<Type>::interpolationTable(const dictionary& dict)
     List<Tuple2<scalar, Type>>(),
     bounding_
     (
-        bounds::repeatableBoundingNames.lookupOrFailsafe
+        bounds::repeatableBoundingNames.lookupOrDefault
         (
             "outOfBounds",
             dict,
-            bounds::repeatableBounding::WARN
+            bounds::repeatableBounding::WARN,
+            true  // Failsafe behaviour
         )
     ),
     fileName_(dict.lookup("file")),

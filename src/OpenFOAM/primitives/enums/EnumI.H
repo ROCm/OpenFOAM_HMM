@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,56 +28,70 @@ License
 template<class EnumType>
 inline Foam::label Foam::Enum<EnumType>::size() const
 {
-    return names_.size();
+    return keys_.size();
 }
 
 
 template<class EnumType>
 inline const Foam::wordList& Foam::Enum<EnumType>::names() const
 {
-    return names_;
+    return keys_;
 }
 
 
 template<class EnumType>
 inline const Foam::wordList& Foam::Enum<EnumType>::toc() const
 {
-    return names_;
+    return keys_;
 }
 
 
 template<class EnumType>
 inline const Foam::List<int>& Foam::Enum<EnumType>::values() const
 {
-    return values_;
+    return vals_;
+}
+
+
+template<class EnumType>
+inline Foam::label Foam::Enum<EnumType>::find(const word& enumName) const
+{
+    return keys_.find(enumName);
+}
+
+
+template<class EnumType>
+inline Foam::label Foam::Enum<EnumType>::find(const EnumType e) const
+{
+    return vals_.find(int(e));
 }
 
 
 template<class EnumType>
 inline bool Foam::Enum<EnumType>::found(const word& enumName) const
 {
-    return getIndex(enumName) >= 0;
+    return keys_.found(enumName);
 }
 
 
 template<class EnumType>
 inline bool Foam::Enum<EnumType>::found(const EnumType e) const
 {
-    return getIndex(e) >= 0;
+    return vals_.found(int(e));
 }
 
 
 template<class EnumType>
-inline bool Foam::Enum<EnumType>::hasEnum(const word& enumName) const
+inline const Foam::word& Foam::Enum<EnumType>::get(const EnumType e) const
 {
-    return getIndex(enumName) >= 0;
-}
+    const label idx = find(e);
 
+    if (idx < 0)
+    {
+        return word::null;
+    }
 
-template<class EnumType>
-inline bool Foam::Enum<EnumType>::hasName(const EnumType e) const
-{
-    return getIndex(e) >= 0;
+    return keys_[idx];
 }
 
 
@@ -85,10 +99,22 @@ template<class EnumType>
 inline Foam::Ostream& Foam::Enum<EnumType>::writeList
 (
     Ostream& os,
-    const label shortListLen
+    const label shortLen
 ) const
 {
-    return names_.writeList(os, shortListLen);
+    return keys_.writeList(os, shortLen);
+}
+
+
+template<class EnumType>
+inline void Foam::Enum<EnumType>::write(const EnumType e, Ostream& os) const
+{
+    const label idx = find(e);
+
+    if (idx >= 0)
+    {
+        os << keys_[idx];
+    }
 }
 
 
@@ -100,7 +126,7 @@ inline EnumType Foam::Enum<EnumType>::operator[]
     const word& enumName
 ) const
 {
-    return getEnum(enumName);
+    return get(enumName);
 }
 
 
@@ -110,7 +136,7 @@ inline const Foam::word& Foam::Enum<EnumType>::operator[]
     const EnumType e
 ) const
 {
-    return getName(e);
+    return get(e);
 }
 
 
@@ -118,17 +144,26 @@ template<class EnumType>
 inline EnumType Foam::Enum<EnumType>::operator()
 (
     const word& enumName,
-    const EnumType deflt
+    const EnumType defaultValue
 ) const
 {
-    const label idx = getIndex(enumName);
+    const label idx = find(enumName);
 
     if (idx >= 0)
     {
-        return EnumType(values_[idx]);
+        return EnumType(vals_[idx]);
     }
 
-    return deflt;
+    return defaultValue;
+}
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+template<class EnumType>
+inline Foam::Ostream& Foam::operator<<(Ostream& os, const Enum<EnumType>& list)
+{
+    return list.names().writeList(os, 0);
 }
 
 

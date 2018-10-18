@@ -70,7 +70,7 @@ public:
     // Static data
 
     //- Names for the classification enumeration
-    static const Enum<volumeType> names;
+    static const Enum<volumeType::type> names;
 
 
 private:

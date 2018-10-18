@@ -58,11 +58,11 @@ Foam::sampledPatchInternalField::sampledPatchInternalField
     sampledPatch(name, mesh, dict),
     mappers_(patchIDs().size())
 {
-    mappedPatchBase::offsetMode mode = mappedPatchBase::NORMAL;
-    if (dict.found("offsetMode"))
-    {
-        mode = mappedPatchBase::offsetModeNames_.lookup("offsetMode", dict);
-    }
+    mappedPatchBase::offsetMode mode =
+        mappedPatchBase::offsetModeNames_.lookupOrDefault
+        (
+            "offsetMode", dict, mappedPatchBase::NORMAL
+        );
 
     switch (mode)
     {

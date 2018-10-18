@@ -32,13 +32,13 @@ const Foam::Enum
     Foam::coordSet::coordFormat
 >
 Foam::coordSet::coordFormatNames
-{
+({
     { coordFormat::XYZ, "xyz" },
     { coordFormat::X, "x" },
     { coordFormat::Y, "y" },
     { coordFormat::Z, "z" },
-    { coordFormat::DISTANCE, "distance" }
-};
+    { coordFormat::DISTANCE, "distance" },
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

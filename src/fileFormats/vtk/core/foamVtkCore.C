@@ -32,7 +32,7 @@ const Foam::Enum
     Foam::vtk::fileTag
 >
 Foam::vtk::fileTagNames
-{
+({
     { fileTag::VTK_FILE, "VTKFile" },
     { fileTag::DATA_ARRAY, "DataArray" },
     { fileTag::PIECE, "Piece" },
@@ -47,7 +47,7 @@ Foam::vtk::fileTagNames
     { fileTag::POLY_DATA, "PolyData" },
     { fileTag::UNSTRUCTURED_GRID, "UnstructuredGrid" },
     { fileTag::MULTI_BLOCK, "vtkMultiBlockDataSet" },
-};
+});
 
 
 const Foam::Enum
@@ -55,7 +55,7 @@ const Foam::Enum
     Foam::vtk::fileAttr
 >
 Foam::vtk::fileAttrNames
-{
+({
     { fileAttr::OFFSET, "offset" },
     { fileAttr::NUMBER_OF_COMPONENTS, "NumberOfComponents" },
     { fileAttr::NUMBER_OF_POINTS, "NumberOfPoints" },
@@ -63,7 +63,7 @@ Foam::vtk::fileAttrNames
     { fileAttr::NUMBER_OF_POLYS, "NumberOfPolys" },
     { fileAttr::NUMBER_OF_VERTS, "NumberOfVerts" },
     { fileAttr::NUMBER_OF_LINES, "NumberOfLines" },
-};
+});
 
 
 const Foam::Enum
@@ -71,14 +71,14 @@ const Foam::Enum
     Foam::vtk::dataArrayAttr
 >
 Foam::vtk::dataArrayAttrNames
-{
+({
     { dataArrayAttr::POINTS, "Points" },
     { dataArrayAttr::OFFSETS, "offsets" },
     { dataArrayAttr::CONNECTIVITY, "connectivity" },
     { dataArrayAttr::TYPES, "types" },
     { dataArrayAttr::FACES, "faces" },
     { dataArrayAttr::FACEOFFSETS, "faceoffsets" },
-};
+});
 
 
 // ************************************************************************* //

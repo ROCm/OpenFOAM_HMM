@@ -39,11 +39,11 @@ const Foam::Enum
     Foam::fileFormats::STARCDCore::fileHeader
 >
 Foam::fileFormats::STARCDCore::fileHeaders_
-{
+({
     { fileHeader::HEADER_CEL, "PROSTAR_CELL" },
     { fileHeader::HEADER_VRT, "PROSTAR_VERTEX" },
-    { fileHeader::HEADER_BND, "PROSTAR_BOUNDARY" }
-};
+    { fileHeader::HEADER_BND, "PROSTAR_BOUNDARY" },
+});
 
 
 const Foam::Enum
@@ -51,12 +51,12 @@ const Foam::Enum
     Foam::fileFormats::STARCDCore::fileExt
 >
 Foam::fileFormats::STARCDCore::fileExtensions_
-{
+({
     { fileExt::CEL_FILE, "cel" },
     { fileExt::VRT_FILE, "vrt" },
     { fileExt::BND_FILE, "bnd" },
-    { fileExt::INP_FILE, "inp" }
-};
+    { fileExt::INP_FILE, "inp" },
+});
 
 
 const char* const Foam::fileFormats::STARCDCore::defaultBoundaryName =

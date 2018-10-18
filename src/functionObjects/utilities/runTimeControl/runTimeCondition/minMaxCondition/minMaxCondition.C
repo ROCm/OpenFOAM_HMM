@@ -66,10 +66,10 @@ const Foam::Enum
   ::modeType
 >
 Foam::functionObjects::runTimeControls::minMaxCondition::modeTypeNames_
-{
+({
     { modeType::mdMin, "minimum" },
     { modeType::mdMax, "maximum" },
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -84,7 +84,7 @@ Foam::functionObjects::runTimeControls::minMaxCondition::minMaxCondition
 :
     runTimeCondition(name, obr, dict, state),
     functionObjectName_(dict.get<word>("functionObject")),
-    mode_(modeTypeNames_.lookup("mode", dict)),
+    mode_(modeTypeNames_.get("mode", dict)),
     fieldNames_(dict.get<wordList>("fields")),
     value_(dict.get<scalar>("value"))
 {}

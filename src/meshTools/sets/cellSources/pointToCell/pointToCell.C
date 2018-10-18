@@ -51,10 +51,10 @@ const Foam::Enum
     Foam::pointToCell::pointAction
 >
 Foam::pointToCell::pointActionNames_
-{
+({
     { pointAction::ANY, "any" },
     { pointAction::EDGE, "edge" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -130,7 +130,7 @@ Foam::pointToCell::pointToCell
 :
     topoSetSource(mesh),
     setName_(dict.get<word>("set")),
-    option_(pointActionNames_.lookup("option", dict))
+    option_(pointActionNames_.get("option", dict))
 {}
 
 

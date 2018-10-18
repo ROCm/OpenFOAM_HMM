@@ -36,12 +36,12 @@ const Foam::Enum
     Foam::solverTemplate::solverType
 >
 Foam::solverTemplate::solverTypeNames_
-{
+({
     { solverType::stCompressible, "compressible" },
     { solverType::stIncompressible, "incompressible" },
     { solverType::stBuoyant, "buoyant" },
     { solverType::stUnknown, "unknown" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -255,10 +255,10 @@ Foam::solverTemplate::solverTemplate
 
     Info<< "Selecting " << solverName << ": ";
 
-    solverType_ = solverTypeNames_.lookup("solverType", solverDict);
-    Info<< solverTypeNames_[solverType_];
-
+    solverType_ = solverTypeNames_.get("solverType", solverDict);
     multiRegion_ = solverDict.get<bool>("multiRegion");
+
+    Info<< solverTypeNames_[solverType_];
     if (multiRegion_)
     {
         Info<< ", multi-region";

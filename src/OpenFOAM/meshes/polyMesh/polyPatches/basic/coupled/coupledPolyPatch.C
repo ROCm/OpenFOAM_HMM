@@ -43,13 +43,13 @@ const Foam::Enum
     Foam::coupledPolyPatch::transformType
 >
 Foam::coupledPolyPatch::transformTypeNames
-{
+({
     { transformType::UNKNOWN, "unknown" },
     { transformType::ROTATIONAL, "rotational" },
     { transformType::TRANSLATIONAL, "translational" },
     { transformType::COINCIDENTFULLMATCH, "coincidentFullMatch" },
     { transformType::NOORDERING, "noOrdering" },
-};
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //

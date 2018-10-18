@@ -45,11 +45,11 @@ const Foam::Enum
     Foam::tetDecomposer::decompositionType
 >
 Foam::tetDecomposer::decompositionTypeNames
-{
+({
     { decompositionType::FACE_CENTRE_TRIS,  "faceCentre" },
     { decompositionType::FACE_DIAG_TRIS, "faceDiagonal" },
     { decompositionType::PYRAMID, "pyramid" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

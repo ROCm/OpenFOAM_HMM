@@ -51,10 +51,10 @@ const Foam::Enum
     Foam::faceZoneToCell::faceAction
 >
 Foam::faceZoneToCell::faceActionNames_
-{
+({
     { faceAction::MASTER, "master" },
     { faceAction::SLAVE, "slave" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -124,7 +124,7 @@ Foam::faceZoneToCell::faceZoneToCell
 :
     topoSetSource(mesh),
     zoneName_(dict.get<wordRe>("name")),
-    option_(faceActionNames_.lookup("option", dict))
+    option_(faceActionNames_.get("option", dict))
 {}
 
 

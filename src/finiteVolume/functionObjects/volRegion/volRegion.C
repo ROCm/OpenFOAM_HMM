@@ -43,10 +43,10 @@ const Foam::Enum
     Foam::functionObjects::volRegion::regionTypes
 >
 Foam::functionObjects::volRegion::regionTypeNames_
-{
+({
     { regionTypes::vrtCellZone, "cellZone" },
     { regionTypes::vrtAll, "all" },
-};
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //

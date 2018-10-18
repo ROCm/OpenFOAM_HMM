@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
             const word setType(dict.get<word>("type"));
 
             const topoSetSource::setAction action =
-                topoSetSource::actionNames.lookup("action", dict);
+                topoSetSource::actionNames.get("action", dict);
 
             autoPtr<topoSet> currentSet;
             if

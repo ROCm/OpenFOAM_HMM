@@ -56,14 +56,14 @@ const Foam::Enum
     Foam::mappedPatchBase::sampleMode
 >
 Foam::mappedPatchBase::sampleModeNames_
-{
+({
     { sampleMode::NEARESTCELL, "nearestCell" },
     { sampleMode::NEARESTPATCHFACE, "nearestPatchFace" },
     { sampleMode::NEARESTPATCHFACEAMI, "nearestPatchFaceAMI" },
     { sampleMode::NEARESTPATCHPOINT, "nearestPatchPoint" },
     { sampleMode::NEARESTFACE, "nearestFace" },
     { sampleMode::NEARESTONLYCELL, "nearestOnlyCell" },
-};
+});
 
 
 const Foam::Enum
@@ -71,11 +71,11 @@ const Foam::Enum
     Foam::mappedPatchBase::offsetMode
 >
 Foam::mappedPatchBase::offsetModeNames_
-{
+({
     { offsetMode::UNIFORM, "uniform" },
     { offsetMode::NONUNIFORM, "nonuniform" },
     { offsetMode::NORMAL, "normal" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -1018,7 +1018,7 @@ Foam::mappedPatchBase::mappedPatchBase
 :
     patch_(pp),
     sampleRegion_(dict.lookupOrDefault<word>("sampleRegion", "")),
-    mode_(sampleModeNames_.lookup("sampleMode", dict)),
+    mode_(sampleModeNames_.get("sampleMode", dict)),
     samplePatch_(dict.lookupOrDefault<word>("samplePatch", "")),
     coupleGroup_(dict),
     offsetMode_(UNIFORM),
@@ -1042,10 +1042,8 @@ Foam::mappedPatchBase::mappedPatchBase
         }
     }
 
-    if (dict.found("offsetMode"))
+    if (offsetModeNames_.readIfPresent("offsetMode", dict, offsetMode_))
     {
-        offsetMode_ = offsetModeNames_.lookup("offsetMode", dict);
-
         switch (offsetMode_)
         {
             case UNIFORM:

@@ -39,18 +39,18 @@ const Foam::Enum
     Foam::IOobject::fileCheckTypes
 >
 Foam::IOobject::fileCheckTypesNames
-{
+({
     { fileCheckTypes::timeStamp, "timeStamp" },
     { fileCheckTypes::timeStampMaster, "timeStampMaster" },
     { fileCheckTypes::inotify, "inotify" },
     { fileCheckTypes::inotifyMaster, "inotifyMaster" },
-};
+});
 
 
 // Default fileCheck type
 Foam::IOobject::fileCheckTypes Foam::IOobject::fileModificationChecking
 (
-    fileCheckTypesNames.lookup
+    fileCheckTypesNames.get
     (
         "fileModificationChecking",
         debug::optimisationSwitches()

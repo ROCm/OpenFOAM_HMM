@@ -41,7 +41,7 @@ const Foam::Enum
     Foam::meshToMesh::interpolationMethod
 >
 Foam::meshToMesh::interpolationMethodNames_
-{
+({
     { interpolationMethod::imDirect, "direct" },
     { interpolationMethod::imMapNearest, "mapNearest" },
     { interpolationMethod::imCellVolumeWeight, "cellVolumeWeight" },
@@ -49,7 +49,7 @@ Foam::meshToMesh::interpolationMethodNames_
         interpolationMethod::imCorrectedCellVolumeWeight,
         "correctedCellVolumeWeight"
     },
-};
+});
 
 
 const Foam::Enum

@@ -32,10 +32,10 @@ const Foam::Enum
     Foam::faceAreaIntersect::triangulationMode
 >
 Foam::faceAreaIntersect::triangulationModeNames_
-{
+({
     { triangulationMode::tmFan, "fan" },
-    { triangulationMode::tmMesh, "mesh" }
-};
+    { triangulationMode::tmMesh, "mesh" },
+});
 
 Foam::scalar Foam::faceAreaIntersect::tol = 1e-6;
 

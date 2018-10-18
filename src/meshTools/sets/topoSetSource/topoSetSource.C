@@ -45,7 +45,7 @@ const Foam::Enum
     Foam::topoSetSource::setAction
 >
 Foam::topoSetSource::actionNames
-{
+({
     { setAction::CLEAR, "clear" },
     { setAction::NEW, "new" },
     { setAction::INVERT, "invert" },
@@ -54,7 +54,7 @@ Foam::topoSetSource::actionNames
     { setAction::SUBSET, "subset" },
     { setAction::LIST, "list" },
     { setAction::REMOVE, "remove" },
-};
+});
 
 
 const Foam::string Foam::topoSetSource::illegalSource_

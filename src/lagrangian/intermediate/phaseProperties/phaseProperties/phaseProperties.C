@@ -32,12 +32,12 @@ const Foam::Enum
     Foam::phaseProperties::phaseType
 >
 Foam::phaseProperties::phaseTypeNames
-{
+({
     { phaseType::GAS, "gas" },
     { phaseType::LIQUID, "liquid" },
     { phaseType::SOLID, "solid" },
     { phaseType::UNKNOWN, "unknown" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

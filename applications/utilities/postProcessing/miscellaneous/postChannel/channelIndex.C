@@ -38,9 +38,11 @@ const Foam::Enum
     Foam::vector::components
 >
 Foam::channelIndex::vectorComponentsNames_
-(
-    Foam::vector::components::X, { "x", "y", "z" }
-);
+({
+    { vector::components::X, "x" },
+    { vector::components::Y, "y" },
+    { vector::components::Z, "z" },
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -224,7 +226,7 @@ Foam::channelIndex::channelIndex
 )
 :
     symmetric_(dict.get<bool>("symmetric")),
-    dir_(vectorComponentsNames_.lookup("component", dict))
+    dir_(vectorComponentsNames_.get("component", dict))
 {
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 

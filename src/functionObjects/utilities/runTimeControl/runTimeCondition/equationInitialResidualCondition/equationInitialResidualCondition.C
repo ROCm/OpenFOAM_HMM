@@ -58,10 +58,10 @@ const Foam::Enum
 >
 Foam::functionObjects::runTimeControls::equationInitialResidualCondition::
 operatingModeNames
-{
+({
     { operatingMode::omMin, "minimum" },
     { operatingMode::omMax, "maximum" },
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -79,7 +79,7 @@ equationInitialResidualCondition
     fieldNames_(dict.get<wordList>("fields")),
     value_(dict.get<scalar>("value")),
     timeStart_(dict.lookupOrDefault("timeStart", -GREAT)),
-    mode_(operatingModeNames.lookup("mode", dict))
+    mode_(operatingModeNames.get("mode", dict))
 {
     if (fieldNames_.size())
     {

@@ -48,10 +48,10 @@ const Foam::Enum
     Foam::fv::tabulatedNTUHeatTransfer::geometryModeType
 >
 Foam::fv::tabulatedNTUHeatTransfer::geometryModelNames_
-{
+({
     { geometryModeType::gmCalculated, "calculated" },
     { geometryModeType::gmUser, "user" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -89,7 +89,7 @@ void Foam::fv::tabulatedNTUHeatTransfer::initialiseGeometry()
 {
     if (Ain_ < 0)
     {
-        geometryMode_ = geometryModelNames_.lookup("geometryMode", coeffs_);
+        geometryMode_ = geometryModelNames_.get("geometryMode", coeffs_);
 
         Info<< "Region " << mesh_.name() << " " << type() << " " << name_
             << " " << geometryModelNames_[geometryMode_] << " geometry:" << nl;

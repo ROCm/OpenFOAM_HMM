@@ -35,11 +35,11 @@ const Foam::Enum
     Foam::radiation::boundaryRadiationPropertiesPatch::methodType
 >
 Foam::radiation::boundaryRadiationPropertiesPatch::methodTypeNames_
-{
+({
     { methodType::SOLIDRADIATION, "solidRadiation" },
     { methodType::LOOKUP, "lookup" },
-    { methodType::MODEL, "model" }
-};
+    { methodType::MODEL, "model" },
+});
 
 
 // * * * * * * * * * * * * * * * * Private functions * * * * * * * * * * * * //
@@ -74,7 +74,7 @@ boundaryRadiationPropertiesPatch
     const dictionary& dict
 )
 :
-    method_(methodTypeNames_.lookup("mode", dict)),
+    method_(methodTypeNames_.get("mode", dict)),
     dict_(dict),
     absorptionEmission_(nullptr),
     transmissivity_(nullptr),

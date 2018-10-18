@@ -43,10 +43,10 @@ const Foam::Enum
     Foam::solarCalculator::sunDirModel
 >
 Foam::solarCalculator::sunDirectionModelTypeNames_
-{
+({
     { sunDirModel::mSunDirConstant, "sunDirConstant" },
     { sunDirModel::mSunDirTracking, "sunDirTracking" },
-};
+});
 
 
 const Foam::Enum
@@ -54,14 +54,14 @@ const Foam::Enum
     Foam::solarCalculator::sunLModel
 >
 Foam::solarCalculator::sunLoadModelTypeNames_
-{
+({
     { sunLModel::mSunLoadConstant, "sunLoadConstant" },
     {
         sunLModel::mSunLoadFairWeatherConditions,
         "sunLoadFairWeatherConditions"
     },
     { sunLModel::mSunLoadTheoreticalMaximum, "sunLoadTheoreticalMaximum" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -261,17 +261,13 @@ Foam::solarCalculator::solarCalculator
     C_(dict.get<scalar>("C")),
     sunDirectionModel_
     (
-        sunDirectionModelTypeNames_.lookup("sunDirectionModel", dict)
+        sunDirectionModelTypeNames_.get("sunDirectionModel", dict)
     ),
-    sunLoadModel_
-    (
-        sunLoadModelTypeNames_.lookup("sunLoadModel", dict)
-    ),
+    sunLoadModel_(sunLoadModelTypeNames_.get("sunLoadModel", dict)),
     coord_()
 {
     init();
 }
-
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

@@ -40,7 +40,7 @@ const Foam::Enum
     Foam::waveSurfacePressureFvPatchScalarField::ddtSchemeType
 >
 Foam::waveSurfacePressureFvPatchScalarField::ddtSchemeTypeNames_
-{
+({
     {
         ddtSchemeType::tsEuler,
         fv::EulerDdtScheme<scalar>::typeName_()
@@ -53,7 +53,7 @@ Foam::waveSurfacePressureFvPatchScalarField::ddtSchemeTypeNames_
         ddtSchemeType::tsBackward,
         fv::backwardDdtScheme<scalar>::typeName_()
     },
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

@@ -40,11 +40,11 @@ const Foam::Enum
     Foam::discreteSurface::samplingSource
 >
 Foam::discreteSurface::samplingSourceNames_
-{
+({
     { samplingSource::cells, "cells" },
     { samplingSource::insideCells, "insideCells" },
     { samplingSource::boundaryFaces, "boundaryFaces" },
-};
+});
 
 
 namespace Foam
@@ -684,7 +684,7 @@ Foam::discreteSurface::discreteSurface
             false
         )
     ),
-    sampleSource_(samplingSourceNames_.lookup("source", dict)),
+    sampleSource_(samplingSourceNames_.get("source", dict)),
     needsUpdate_(true),
     keepIds_(dict.lookupOrDefault("keepIds", false)),
     originalIds_(),

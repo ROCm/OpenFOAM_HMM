@@ -35,11 +35,11 @@ const Foam::Enum
     Foam::energyRegionCoupledFvPatchScalarField::kappaMethodType
 >
 Foam::energyRegionCoupledFvPatchScalarField::methodTypeNames_
-{
+({
     { kappaMethodType::SOLID, "solid" },
     { kappaMethodType::FLUID, "fluid" },
     { kappaMethodType::UNDEFINED, "undefined" },
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Private members  * * * * * * * * * * * * *//

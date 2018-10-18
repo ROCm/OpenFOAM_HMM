@@ -40,11 +40,11 @@ const Foam::Enum
     Foam::sampledTriSurfaceMesh::samplingSource
 >
 Foam::sampledTriSurfaceMesh::samplingSourceNames_
-{
+({
     { samplingSource::cells, "cells" },
     { samplingSource::insideCells, "insideCells" },
     { samplingSource::boundaryFaces, "boundaryFaces" },
-};
+});
 
 
 namespace Foam
@@ -678,7 +678,7 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
         ),
         dict
     ),
-    sampleSource_(samplingSourceNames_.lookup("source", dict)),
+    sampleSource_(samplingSourceNames_.get("source", dict)),
     needsUpdate_(true),
     keepIds_(dict.lookupOrDefault("keepIds", false)),
     originalIds_(),

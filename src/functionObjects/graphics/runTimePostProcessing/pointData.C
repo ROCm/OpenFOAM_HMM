@@ -55,10 +55,10 @@ const Foam::Enum
     Foam::functionObjects::runTimePostPro::pointData::representationType
 >
 Foam::functionObjects::runTimePostPro::pointData::representationTypeNames
-{
+({
     { representationType::rtSphere, "sphere" },
     { representationType::rtVector, "vector" },
-};
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -99,7 +99,7 @@ Foam::functionObjects::runTimePostPro::pointData::pointData
     geometryBase(parent, dict, colours),
     representation_
     (
-        representationTypeNames.lookup("representation", dict)
+        representationTypeNames.get("representation", dict)
     ),
     maxGlyphLength_(dict.get<scalar>("maxGlyphLength")),
     pointColour_(nullptr)

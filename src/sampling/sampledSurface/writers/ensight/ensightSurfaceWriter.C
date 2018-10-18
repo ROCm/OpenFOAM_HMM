@@ -106,11 +106,12 @@ Foam::ensightSurfaceWriter::ensightSurfaceWriter(const dictionary& options)
     surfaceWriter(),
     writeFormat_
     (
-        IOstreamOption::formatNames.lookupOrFailsafe
+        IOstreamOption::formatNames.lookupOrDefault
         (
             "format",
             options,
-            IOstreamOption::ASCII
+            IOstreamOption::ASCII,
+            true  // Failsafe behaviour
         )
     ),
     collateTimes_(options.lookupOrDefault("collateTimes", true))

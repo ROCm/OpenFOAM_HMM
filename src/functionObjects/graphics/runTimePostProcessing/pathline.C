@@ -55,12 +55,12 @@ const Foam::Enum
     Foam::functionObjects::runTimePostPro::pathline::representationType
 >
 Foam::functionObjects::runTimePostPro::pathline::representationTypeNames
-{
+({
     { representationType::rtNone, "none" },
     { representationType::rtLine, "line" },
     { representationType::rtTube, "tube" },
     { representationType::rtVector, "vector" },
-};
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -129,7 +129,7 @@ Foam::functionObjects::runTimePostPro::pathline::pathline
     geometryBase(parent, dict, colours),
     representation_
     (
-        representationTypeNames.lookup("representation", dict)
+        representationTypeNames.get("representation", dict)
     ),
     tubeRadius_(0.0),
     lineColour_(nullptr)

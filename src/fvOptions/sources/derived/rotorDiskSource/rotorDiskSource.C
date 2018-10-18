@@ -50,10 +50,10 @@ const Foam::Enum
     Foam::fv::rotorDiskSource::geometryModeType
 >
 Foam::fv::rotorDiskSource::geometryModeTypeNames_
-{
+({
     { geometryModeType::gmAuto, "auto" },
     { geometryModeType::gmSpecified, "specified" },
-};
+});
 
 
 const Foam::Enum
@@ -61,11 +61,11 @@ const Foam::Enum
     Foam::fv::rotorDiskSource::inletFlowType
 >
 Foam::fv::rotorDiskSource::inletFlowTypeNames_
-{
+({
     { inletFlowType::ifFixed, "fixed" },
     { inletFlowType::ifSurfaceNormal, "surfaceNormal" },
     { inletFlowType::ifLocal, "local" },
-};
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -267,7 +267,7 @@ void Foam::fv::rotorDiskSource::createCoordinateSystem()
     vector refDir(Zero);
 
     geometryModeType gm =
-        geometryModeTypeNames_.lookup("geometryMode", coeffs_);
+        geometryModeTypeNames_.get("geometryMode", coeffs_);
 
     switch (gm)
     {
@@ -558,7 +558,7 @@ bool Foam::fv::rotorDiskSource::read(const dictionary& dict)
 
         coeffs_.readEntry("nBlades", nBlades_);
 
-        inletFlow_ = inletFlowTypeNames_.lookup("inletFlowType", coeffs_);
+        inletFlowTypeNames_.readEntry("inletFlowType", coeffs_, inletFlow_);
 
         coeffs_.readEntry("tipEffect", tipEffect_);
 
