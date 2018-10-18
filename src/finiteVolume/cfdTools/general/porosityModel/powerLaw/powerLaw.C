@@ -149,8 +149,7 @@ void Foam::porosityModels::powerLaw::correct
 
 bool Foam::porosityModels::powerLaw::writeData(Ostream& os) const
 {
-    os  << indent << name_ << endl;
-    dict_.write(os);
+    dict_.writeEntry(name_, os);
 
     return true;
 }

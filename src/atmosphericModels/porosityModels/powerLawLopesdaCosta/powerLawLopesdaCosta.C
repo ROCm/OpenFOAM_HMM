@@ -409,8 +409,7 @@ void Foam::porosityModels::powerLawLopesdaCosta::correct
 
 bool Foam::porosityModels::powerLawLopesdaCosta::writeData(Ostream& os) const
 {
-    os  << indent << name_ << endl;
-    dict_.write(os);
+    dict_.writeEntry(name_, os);
 
     return true;
 }

@@ -154,8 +154,7 @@ void Foam::porosityModels::solidification::correct
 
 bool Foam::porosityModels::solidification::writeData(Ostream& os) const
 {
-    os  << indent << name_ << endl;
-    dict_.write(os);
+    dict_.writeEntry(name_, os);
 
     return true;
 }

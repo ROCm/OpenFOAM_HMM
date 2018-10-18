@@ -288,8 +288,7 @@ void Foam::porosityModels::DarcyForchheimer::correct
 
 bool Foam::porosityModels::DarcyForchheimer::writeData(Ostream& os) const
 {
-    os  << indent << name_ << endl;
-    dict_.write(os);
+    dict_.writeEntry(name_, os);
 
     return true;
 }
