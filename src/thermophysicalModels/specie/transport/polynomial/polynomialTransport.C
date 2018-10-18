@@ -35,20 +35,8 @@ Foam::polynomialTransport<Thermo, PolySize>::polynomialTransport
 )
 :
     Thermo(dict),
-    muCoeffs_
-    (
-        dict.subDict("transport").lookup
-        (
-            "muCoeffs<" + Foam::name(PolySize) + '>'
-        )
-    ),
-    kappaCoeffs_
-    (
-        dict.subDict("transport").lookup
-        (
-            "kappaCoeffs<" + Foam::name(PolySize) + '>'
-        )
-    )
+    muCoeffs_(dict.subDict("transport").lookup(coeffsName("mu"))),
+    kappaCoeffs_(dict.subDict("transport").lookup(coeffsName("kappa")))
 {}
 
 
@@ -64,16 +52,8 @@ void Foam::polynomialTransport<Thermo, PolySize>::write(Ostream& os) const
     // Entries in dictionary format
     {
         os.beginBlock("transport");
-        os.writeEntry
-        (
-            word("muCoeffs<" + Foam::name(PolySize) + '>'),
-            muCoeffs_
-        );
-        os.writeEntry
-        (
-            word("kappaCoeffs<" + Foam::name(PolySize) + '>'),
-            kappaCoeffs_
-        );
+        os.writeEntry(coeffsName("mu"), muCoeffs_);
+        os.writeEntry(coeffsName("kappa"), kappaCoeffs_);
         os.endBlock();
     }
 

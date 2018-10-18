@@ -44,11 +44,13 @@ void Foam::linear<Specie>::write(Ostream& os) const
 {
     Specie::write(os);
 
-    dictionary dict("equationOfState");
-    dict.add("psi", psi_);
-    dict.add("rho0", rho0_);
-
-    os  << indent << dict.dictName() << dict;
+    // Entries in dictionary format
+    {
+        os.beginBlock("equationOfState");
+        os.writeEntry("psi", psi_);
+        os.writeEntry("rho0", rho0_);
+        os.endBlock();
+    }
 }
 
 

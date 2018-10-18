@@ -46,12 +46,15 @@ void Foam::hRefConstThermo<EquationOfState>::write(Ostream& os) const
 {
     EquationOfState::write(os);
 
-    dictionary dict("thermodynamics");
-    dict.add("Cp", Cp_);
-    dict.add("Hf", Hf_);
-    dict.add("Tref", Tref_);
-    dict.add("Href", Href_);
-    os  << indent << dict.dictName() << dict;
+    // Entries in dictionary format
+    {
+        os.beginBlock("thermodynamics");
+        os.writeEntry("Cp", Cp_);
+        os.writeEntry("Hf", Hf_);
+        os.writeEntry("Tref", Tref_);
+        os.writeEntry("Href", Href_);
+        os.endBlock();
+    }
 }
 
 

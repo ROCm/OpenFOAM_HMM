@@ -45,10 +45,13 @@ template<class Specie>
 void Foam::incompressiblePerfectGas<Specie>::write(Ostream& os) const
 {
     Specie::write(os);
-    dictionary dict("equationOfState");
-    dict.add("pRef", pRef_);
 
-    os  << indent << dict.dictName() << dict;
+    // Entries in dictionary format
+    {
+        os.beginBlock("equationOfState");
+        os.writeEntry("pRef", pRef_);
+        os.endBlock();
+    }
 }
 
 

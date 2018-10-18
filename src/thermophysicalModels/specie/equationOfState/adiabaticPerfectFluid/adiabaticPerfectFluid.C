@@ -49,13 +49,15 @@ void Foam::adiabaticPerfectFluid<Specie>::write(Ostream& os) const
 {
     Specie::write(os);
 
-    dictionary dict("equationOfState");
-    dict.add("p0", p0_);
-    dict.add("rho0", rho0_);
-    dict.add("gamma", gamma_);
-    dict.add("B", B_);
-
-    os  << indent << dict.dictName() << dict;
+    // Entries in dictionary format
+    {
+        os.beginBlock("equationOfState");
+        os.writeEntry("p0", p0_);
+        os.writeEntry("rho0", rho0_);
+        os.writeEntry("gamma", gamma_);
+        os.writeEntry("B", B_);
+        os.endBlock();
+    }
 }
 
 

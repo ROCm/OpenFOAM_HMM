@@ -93,13 +93,16 @@ void Foam::janafThermo<EquationOfState>::write(Ostream& os) const
         lowCpCoeffs[coefLabel] = lowCpCoeffs_[coefLabel]/this->R();
     }
 
-    dictionary dict("thermodynamics");
-    dict.add("Tlow", Tlow_);
-    dict.add("Thigh", Thigh_);
-    dict.add("Tcommon", Tcommon_);
-    dict.add("highCpCoeffs", highCpCoeffs);
-    dict.add("lowCpCoeffs", lowCpCoeffs);
-    os  << indent << dict.dictName() << dict;
+    // Entries in dictionary format
+    {
+        os.beginBlock("thermodynamics");
+        os.writeEntry("Tlow", Tlow_);
+        os.writeEntry("Thigh", Thigh_);
+        os.writeEntry("Tcommon", Tcommon_);
+        os.writeEntry("highCpCoeffs", highCpCoeffs);
+        os.writeEntry("lowCpCoeffs", lowCpCoeffs);
+        os.endBlock();
+    }
 }
 
 

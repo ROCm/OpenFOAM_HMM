@@ -44,11 +44,13 @@ void Foam::perfectFluid<Specie>::write(Ostream& os) const
 {
     Specie::write(os);
 
-    dictionary dict("equationOfState");
-    dict.add("R", R_);
-    dict.add("rho0", rho0_);
-
-    os  << indent << dict.dictName() << dict;
+    // Entries in dictionary format
+    {
+        os.beginBlock("equationOfState");
+        os.writeEntry("R", R_);
+        os.writeEntry("rho0", rho0_);
+        os.endBlock();
+    }
 }
 
 

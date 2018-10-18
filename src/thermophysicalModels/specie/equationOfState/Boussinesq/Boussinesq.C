@@ -47,12 +47,15 @@ template<class Specie>
 void Foam::Boussinesq<Specie>::write(Ostream& os) const
 {
     Specie::write(os);
-    dictionary dict("equationOfState");
-    dict.add("rho0", rho0_);
-    dict.add("T0", T0_);
-    dict.add("beta", beta_);
 
-    os  << indent << dict.dictName() << dict;
+    // Entries in dictionary format
+    {
+        os.beginBlock("equationOfState");
+        os.writeEntry("rho0", rho0_);
+        os.writeEntry("T0", T0_);
+        os.writeEntry("beta", beta_);
+        os.endBlock();
+    }
 }
 
 
