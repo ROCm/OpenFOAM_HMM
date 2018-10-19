@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,106 +22,67 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::sampledDiscreteSurface
+    Foam::sampledNone
 
 Description
-    A sampledSurface from a triSurfaceMesh.
-    It samples on the points/triangles of a triSurfaceMesh.
+    A no operation sampledSurface that can be used when a sampler
+    is expected but is not desired. For example, to temporarily disable
+    a sampling definition, or to provide a boilerplate definition that
+    is overwritten at a later stage in a dictionary.
 
-See Also
-    discreteSurface, sampledSurface
+Usage
+    \table
+        Property | Description                             | Required | Default
+        type     | 'none'                                  | yes      |
+    \endtable
 
 SourceFiles
-    sampledDiscreteSurface.C
-    sampledDiscreteSurfaceTemplates.C
+    sampledNone.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledDiscreteSurface_H
-#define sampledDiscreteSurface_H
+#ifndef sampledNone_H
+#define sampledNone_H
 
 #include "sampledSurface.H"
-#include "discreteSurface.H"
-#include "triSurfaceMesh.H"
-#include "MeshedSurface.H"
-#include "MeshedSurfacesFwd.H"
-
+#include "MeshedSurfaces.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class sampledDiscreteSurface;
-
 /*---------------------------------------------------------------------------*\
-                   Class sampledDiscreteSurface Declaration
+                         Class sampledNone Declaration
 \*---------------------------------------------------------------------------*/
 
-class sampledDiscreteSurface
+class sampledNone
 :
-    public sampledSurface,
-    public discreteSurface
+    public meshedSurface,
+    public sampledSurface
 {
-    //- Private typedefs for convenience
-    typedef discreteSurface MeshStorage;
-    typedef discreteSurface SurfaceSource;
-
-
-    // Private Member Functions
-
-        //- Sample volume field onto surface faces
-        template<class Type>
-        tmp<Field<Type>> sampleOnFaces
-        (
-            const interpolation<Type>& sampler
-        ) const;
-
-        //- Interpolate volume field onto surface points
-        template<class Type>
-        tmp<Field<Type>> sampleOnPoints
-        (
-            const interpolation<Type>& interpolator
-        ) const;
-
+    typedef meshedSurface Mesh;
 
 public:
 
     //- Runtime type information
-    TypeName("sampledDiscreteSurface");
+    TypeName("sampledNone");
 
 
     // Constructors
 
-        //- Construct from components
-        sampledDiscreteSurface
-        (
-            const word& name,
-            const polyMesh& mesh,
-            const word& surfaceName,
-            const discreteSurface::samplingSource sampleSource
-        );
+        //- Construct null
+        explicit sampledNone();
 
-        //- Construct from dictionary
-        sampledDiscreteSurface
-        (
-            const word& name,
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        //- Construct null, with specified name
+        explicit sampledNone(const word& name);
 
-        //- Construct from triSurface
-        sampledDiscreteSurface
-        (
-            const word& name,
-            const polyMesh& mesh,
-            const triSurface& surface,
-            const word& sampleSourceName
-        );
+        //- Construct null, with dictionary
+        sampledNone(const word& name, const polyMesh&, const dictionary&);
 
 
     //- Destructor
-    virtual ~sampledDiscreteSurface();
+    virtual ~sampledNone() = default;
 
 
     // Member Functions
@@ -130,75 +91,46 @@ public:
         virtual bool needsUpdate() const;
 
         //- Mark the surface as needing an update.
-        //  May also free up unneeded data.
-        //  Return false if surface was already marked as expired.
         virtual bool expire();
 
         //- Update the surface as required.
-        //  Do nothing (and return false) if no update was needed
         virtual bool update();
-
-        //- Update the surface using a bound box to limit the searching.
-        //  For direct use, i.e. not through sample.
-        //  Do nothing (and return false) if no update was needed
-        bool update(const treeBoundBox&);
 
         //- Points of surface
         virtual const pointField& points() const
         {
-            return MeshStorage::points();
+            return Mesh::points();
         }
 
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            return MeshStorage::surfFaces();
+            return Mesh::surfFaces();
         }
 
         //- Const access to per-face zone/region information
         virtual const labelList& zoneIds() const
         {
-            return MeshStorage::zoneIds();
+            return Foam::emptyLabelList;
         }
 
-        //- Face area vectors
+        //- Face area magnitudes
         virtual const vectorField& Sf() const
         {
-            return MeshStorage::Sf();
+            return Mesh::Sf();
         }
 
         //- Face area magnitudes
         virtual const scalarField& magSf() const
         {
-            return MeshStorage::magSf();
+            return Mesh::magSf();
         }
 
         //- Face centres
         virtual const vectorField& Cf() const
         {
-            return MeshStorage::Cf();
+            return Mesh::Cf();
         }
-
-        //- If element ids/order of the original surface are kept
-        virtual bool hasFaceIds() const
-        {
-            return MeshStorage::hasFaceIds();
-        }
-
-        //- List of element ids/order of the original surface,
-        //  when keepIds is active.
-        virtual const labelList& originalIds() const
-        {
-            return MeshStorage::originalIds();
-        }
-
-        //- Sample the volume field onto surface,
-        //  store it (temporarily) onto the given registry
-        virtual bool sampleAndStore
-        (
-            const objectRegistry& store,
-            const word& fieldName
-        ) const;
 
 
     // Sample
@@ -265,24 +197,12 @@ public:
         (
             const interpolation<tensor>& interpolator
         ) const;
-
-
-    // Output
-
-        //- Write
-        virtual void print(Ostream& os) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// #ifdef NoRepository
-//     #include "sampledDiscreteSurfaceTemplates.C"
-// #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

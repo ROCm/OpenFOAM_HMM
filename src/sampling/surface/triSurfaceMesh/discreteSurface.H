@@ -275,25 +275,23 @@ public:
         }
 
         //- If element ids/order of the original surface are kept
-        bool keepIds() const
+        virtual bool hasFaceIds() const
         {
             return keepIds_;
         }
 
         //- List of element ids/order of the original surface,
         //  when keepIds is active.
-        const labelList& originalIds() const
+        virtual const labelList& originalIds() const
         {
             return originalIds_;
         }
-
 
         //- Sampling boundary values instead of cell values
         bool onBoundary() const
         {
             return sampleSource_ == boundaryFaces;
         }
-
 
         //- From local surface face to mesh cell/face.
         const labelList& sampleElements() const

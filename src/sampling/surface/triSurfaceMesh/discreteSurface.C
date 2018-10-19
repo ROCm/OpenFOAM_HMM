@@ -651,8 +651,8 @@ Foam::discreteSurface::discreteSurface
     keepIds_(false),
     originalIds_(),
     zoneIds_(),
-    sampleElements_(0),
-    samplePoints_(0)
+    sampleElements_(),
+    samplePoints_()
 {}
 
 
@@ -689,8 +689,8 @@ Foam::discreteSurface::discreteSurface
     keepIds_(dict.lookupOrDefault("keepIds", false)),
     originalIds_(),
     zoneIds_(),
-    sampleElements_(0),
-    samplePoints_(0)
+    sampleElements_(),
+    samplePoints_()
 {}
 
 
@@ -726,8 +726,8 @@ Foam::discreteSurface::discreteSurface
     keepIds_(false),
     originalIds_(),
     zoneIds_(),
-    sampleElements_(0),
-    samplePoints_(0)
+    sampleElements_(),
+    samplePoints_()
 {}
 
 

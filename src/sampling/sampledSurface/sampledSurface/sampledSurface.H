@@ -70,12 +70,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-
-class sampledSurface;
-Ostream& operator<<(Ostream& os, const sampledSurface& s);
-
-
 /*---------------------------------------------------------------------------*\
                       Class sampledSurface Declaration
 \*---------------------------------------------------------------------------*/
@@ -84,6 +78,8 @@ class sampledSurface
 :
     public meshedSurf
 {
+private:
+
     // Private data
 
         //- Name of sample surface
@@ -127,6 +123,8 @@ protected:
 
         virtual void clearGeom() const;
 
+        //- Construct null
+        explicit sampledSurface(const word& name, std::nullptr_t);
 
 public:
 
@@ -180,7 +178,7 @@ public:
         sampledSurface
         (
             const word& name,
-            const polyMesh&,
+            const polyMesh& mesh,
             const bool interpolate = false
         );
 
@@ -188,8 +186,8 @@ public:
         sampledSurface
         (
             const word& name,
-            const polyMesh&,
-            const dictionary&
+            const polyMesh& mesh,
+            const dictionary& dict
         );
 
         //- Clone
@@ -206,8 +204,8 @@ public:
         static autoPtr<sampledSurface> New
         (
             const word& name,
-            const polyMesh&,
-            const dictionary&
+            const polyMesh& mesh,
+            const dictionary& dict
         );
 
 
@@ -267,6 +265,21 @@ public:
         //- The total surface area
         scalar area() const;
 
+        //- If element ids/order of the original surface are available
+        virtual bool hasFaceIds() const
+        {
+            return false;
+        }
+
+        //- List of element ids/order of the original surface,
+        //- when hasFaceIds is true.
+        const labelList& originalIds() const
+        {
+            return Foam::emptyLabelList;
+        }
+
+
+    // Sample (faces)
 
         //- Sample volume field onto surface faces
         virtual tmp<scalarField> sample
@@ -330,6 +343,8 @@ public:
         ) const;
 
 
+    // Interpolate (points)
+
         //- Interpolate volume field onto surface points
         virtual tmp<scalarField> interpolate
         (
@@ -374,11 +389,13 @@ public:
 
         //- Print information
         virtual void print(Ostream& os) const;
-
-        //- Ostream operator
-        friend Ostream& operator<<(Ostream& os, const sampledSurface& s);
 };
 
+
+// Global Operators
+
+//- Ostream operator
+Ostream& operator<<(Ostream& os, const sampledSurface& s);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
