@@ -182,11 +182,11 @@ int main(int argc, char *argv[])
 
             dictionary inputDict(is);
 
-            forAllConstIters(inputDict, iter)
+            for (const entry& dEntry : inputDict)
             {
-                if (iter().isDict())
+                if (dEntry.isDict())
                 {
-                    doTest(runTime, iter().dict());
+                    doTest(runTime, dEntry.dict());
                 }
             }
         }
@@ -204,11 +204,11 @@ int main(int argc, char *argv[])
 
             dictionary inputDict(is);
 
-            forAllConstIters(inputDict, iter)
+            for (const entry& dEntry : inputDict)
             {
-                if (iter().isDict())
+                if (dEntry.isDict())
                 {
-                    doTest(iter().dict());
+                    doTest(dEntry.dict());
                 }
             }
         }

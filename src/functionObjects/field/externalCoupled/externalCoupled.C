@@ -575,17 +575,17 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
     wordList allRegionNames(time_.lookupClass<fvMesh>().sortedToc());
 
     const dictionary& allRegionsDict = dict.subDict("regions");
-    forAllConstIters(allRegionsDict, iter)
+    for (const entry& dEntry : allRegionsDict)
     {
-        if (!iter().isDict())
+        if (!dEntry.isDict())
         {
             FatalIOErrorInFunction(allRegionsDict)
                 << "Regions must be specified in dictionary format"
                 << exit(FatalIOError);
         }
 
-        const wordRe regionGroupName(iter().keyword());
-        const dictionary& regionDict = iter().dict();
+        const wordRe regionGroupName(dEntry.keyword());
+        const dictionary& regionDict = dEntry.dict();
 
         labelList regionIDs = findStrings(regionGroupName, allRegionNames);
 
@@ -594,16 +594,17 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
         regionGroupNames_.append(compositeName(regionNames));
         regionGroupRegions_.append(regionNames);
 
-        forAllConstIters(regionDict, regionIter)
+        for (const entry& dEntry : regionDict)
         {
-            if (!regionIter().isDict())
+            if (!dEntry.isDict())
             {
                 FatalIOErrorInFunction(regionDict)
                     << "Regions must be specified in dictionary format"
                     << exit(FatalIOError);
             }
-            const wordRe groupName(regionIter().keyword());
-            const dictionary& groupDict = regionIter().dict();
+
+            const wordRe groupName(dEntry.keyword());
+            const dictionary& groupDict = dEntry.dict();
 
             const label nGroups = groupNames_.size();
             const wordList readFields(groupDict.get<wordList>("readFields"));
@@ -619,7 +620,7 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
                 regionToGroups_.insert
                 (
                     regionGroupNames_.last(),
-                    labelList{nGroups}
+                    labelList(one(), nGroups)
                 );
             }
             groupNames_.append(groupName);

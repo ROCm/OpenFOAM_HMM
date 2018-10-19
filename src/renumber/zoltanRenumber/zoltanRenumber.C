@@ -300,12 +300,12 @@ Foam::labelList Foam::zoltanRenumber::renumber
     polyMesh& mesh = const_cast<polyMesh&>(pMesh);
 
 
-    forAllConstIter(IDLList<entry>, coeffsDict_, iter)
+    for (const entry& dEntry : coeffsDict_)
     {
-        if (!iter().isDict())
+        if (!dEntry.isDict())
         {
-            const word& key = iter().keyword();
-            const word value(iter().stream());
+            const word& key = dEntry.keyword();
+            const word value(dEntry.get<word>());
 
             Info<< typeName << " : setting parameter " << key
                 << " to " << value << endl;

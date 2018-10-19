@@ -136,18 +136,19 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
 
     const dictionary& bodiesDict = coeffDict().subDict("bodies");
 
-    forAllConstIter(IDLList<entry>, bodiesDict, iter)
+    for (const entry& dEntry : bodiesDict)
     {
-        const dictionary& bodyDict = iter().dict();
+        const keyType& bodyName = dEntry.keyword();
+        const dictionary& bodyDict = dEntry.dict();
 
         if (bodyDict.found("patches"))
         {
-            const label bodyID = model_.bodyID(iter().keyword());
+            const label bodyID = model_.bodyID(bodyName);
 
             if (bodyID == -1)
             {
                 FatalErrorInFunction
-                    << "Body " << iter().keyword()
+                    << "Body " << bodyName
                     << " has been merged with another body"
                        " and cannot be assigned a set of patches"
                     << exit(FatalError);
@@ -158,7 +159,7 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
                 new bodyMesh
                 (
                     mesh,
-                    iter().keyword(),
+                    bodyName,
                     bodyID,
                     bodyDict
                 )

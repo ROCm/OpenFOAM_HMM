@@ -35,29 +35,30 @@ bool Foam::MultiInteraction<CloudType>::read(const dictionary& dict)
     Info<< "Patch interaction model " << typeName << nl
         << "Executing in turn " << endl;
 
-    label nModels = 0;
-    forAllConstIter(dictionary, dict, iter)
+    label count = 0;
+    for (const entry& dEntry : dict)
     {
-        if (iter().isDict())
+        if (dEntry.isDict())
         {
-            Info<< "    " << iter().name() << endl;
+            Info<< "    " << dEntry.name() << endl;
 
-            nModels++;
+            ++count;
         }
     }
 
-    models_.setSize(nModels);
-    nModels = 0;
-    forAllConstIter(dictionary, dict, iter)
+    models_.resize(count);
+
+    count = 0;
+    for (const entry& dEntry : dict)
     {
-        if (iter().isDict())
+        if (dEntry.isDict())
         {
             models_.set
             (
-                nModels++,
+                count++,
                 PatchInteractionModel<CloudType>::New
                 (
-                    iter().dict(),
+                    dEntry.dict(),
                     this->owner()
                 )
             );

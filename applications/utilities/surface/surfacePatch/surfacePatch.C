@@ -84,12 +84,12 @@ int main(int argc, char *argv[])
 
     const dictionary& surfacesDict = meshDict.subDict("surfaces");
 
-    forAllConstIter(dictionary, surfacesDict, surfacesIter)
+    for (const entry& dEntry : surfacesDict)
     {
-        if (surfacesIter().isDict())
+        if (dEntry.isDict())
         {
-            const word& surfName = surfacesIter().keyword();
-            const dictionary& surfDict = surfacesIter().dict();
+            const word& surfName = dEntry.keyword();
+            const dictionary& surfDict = dEntry.dict();
 
             // Look up surface
             searchableSurface& surf = allGeometry[surfName];
@@ -120,10 +120,11 @@ int main(int argc, char *argv[])
             if (surfDict.found("regions"))
             {
                 const dictionary& regionsDict = surfDict.subDict("regions");
-                forAllConstIter(dictionary, regionsDict, regionsIter)
+
+                for (const entry& e : regionsDict)
                 {
-                    const dictionary& regionDict = regionsIter().dict();
-                    const keyType& regionName = regionsIter().keyword();
+                    const keyType& regionName = e.keyword();
+                    const dictionary& regionDict = e.dict();
 
                     autoPtr<searchableSurfaceModifier> modifier
                     (

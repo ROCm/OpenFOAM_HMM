@@ -92,17 +92,17 @@ void Foam::RBD::rigidBodyModel::addRestraints
 
         restraints_.setSize(restraintDict.size());
 
-        forAllConstIter(IDLList<entry>, restraintDict, iter)
+        for (const entry& dEntry : restraintDict)
         {
-            if (iter().isDict())
+            if (dEntry.isDict())
             {
                 restraints_.set
                 (
                     i++,
                     restraint::New
                     (
-                        iter().keyword(),
-                        iter().dict(),
+                        dEntry.keyword(),
+                        dEntry.dict(),
                         *this
                     )
                 );
@@ -185,9 +185,10 @@ Foam::RBD::rigidBodyModel::rigidBodyModel
 
     const dictionary& bodiesDict = dict.subDict("bodies");
 
-    forAllConstIter(IDLList<entry>, bodiesDict, iter)
+    for (const entry& dEntry : bodiesDict)
     {
-        const dictionary& bodyDict = iter().dict();
+        const keyType& key = dEntry.keyword();
+        const dictionary& bodyDict = dEntry.dict();
 
         if (bodyDict.found("mergeWith"))
         {
@@ -195,7 +196,7 @@ Foam::RBD::rigidBodyModel::rigidBodyModel
             (
                 bodyID(bodyDict.lookup("mergeWith")),
                 bodyDict.lookup("transform"),
-                rigidBody::New(iter().keyword(), bodyDict)
+                rigidBody::New(key, bodyDict)
             );
         }
         else
@@ -205,7 +206,7 @@ Foam::RBD::rigidBodyModel::rigidBodyModel
                 bodyID(bodyDict.lookup("parent")),
                 bodyDict.lookup("transform"),
                 joint::New(bodyDict.subDict("joint")),
-                rigidBody::New(iter().keyword(), bodyDict)
+                rigidBody::New(key, bodyDict)
             );
         }
     }

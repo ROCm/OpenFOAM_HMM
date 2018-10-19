@@ -474,27 +474,24 @@ int main(int argc, char *argv[])
 
         const dictionary& selectionsDict = dict.subDict("baffles");
 
-        label n = 0;
-        forAllConstIter(dictionary, selectionsDict, iter)
+        selectors.resize(selectionsDict.size());
+
+        label nselect = 0;
+        for (const entry& dEntry : selectionsDict)
         {
-            if (iter().isDict())
-            {
-                n++;
-            }
-        }
-        selectors.setSize(n);
-        n = 0;
-        forAllConstIter(dictionary, selectionsDict, iter)
-        {
-            if (iter().isDict())
+            if (dEntry.isDict())
             {
                 selectors.set
                 (
-                    n++,
-                    faceSelection::New(iter().keyword(), mesh, iter().dict())
+                    nselect,
+                    faceSelection::New(dEntry.keyword(), mesh, dEntry.dict())
                 );
+
+                ++nselect;
             }
         }
+
+        selectors.resize(nselect);
     }
 
 
@@ -641,10 +638,9 @@ int main(int argc, char *argv[])
 
             if (dict.found("patches"))
             {
-                const dictionary& patchSources = dict.subDict("patches");
-                forAllConstIter(dictionary, patchSources, iter)
+                for (const entry& dEntry : dict.subDict("patches"))
                 {
-                    const word patchName(iter().dict().get<word>("name"));
+                    const word patchName(dEntry.dict().get<word>("name"));
 
                     bafflePatches.insert(patchName);
                 }
@@ -687,14 +683,15 @@ int main(int argc, char *argv[])
 
             if (dict.found("patches"))
             {
-                const dictionary& patchSources = dict.subDict("patches");
-                forAllConstIter(dictionary, patchSources, iter)
+                for (const entry& dEntry : dict.subDict("patches"))
                 {
-                    const word patchName(iter().dict().get<word>("name"));
+                    const dictionary& dict = dEntry.dict();
+
+                    const word patchName(dict.get<word>("name"));
 
                     if (pbm.findPatchID(patchName) == -1)
                     {
-                        dictionary patchDict = iter().dict();
+                        dictionary patchDict = dict;
                         patchDict.set("nFaces", 0);
                         patchDict.set("startFace", 0);
 
@@ -789,13 +786,14 @@ int main(int argc, char *argv[])
 
         if (dict.found("patches"))
         {
-            const dictionary& patchSources = dict.subDict("patches");
-
             bool master = true;
-            forAllConstIter(dictionary, patchSources, iter)
+
+            for (const entry& dEntry : dict.subDict("patches"))
             {
-                const word patchName(iter().dict().get<word>("name"));
-                label patchi = pbm.findPatchID(patchName);
+                const word patchName(dEntry.dict().get<word>("name"));
+
+                const label patchi = pbm.findPatchID(patchName);
+
                 if (master)
                 {
                     newMasterPatches.append(patchi);
@@ -885,17 +883,18 @@ int main(int argc, char *argv[])
             const dictionary& dict = selectors[selectorI].dict();
             if (dict.found("patches"))
             {
-                const dictionary& patchSources = dict.subDict("patches");
-
-                forAllConstIter(dictionary, patchSources, iter)
+                for (const entry& dEntry : dict.subDict("patches"))
                 {
-                    const word patchName(iter().dict().get<word>("name"));
+                    const dictionary& dict = dEntry.dict();
+
+                    const word patchName(dict.get<word>("name"));
+
                     label patchi = pbm.findPatchID(patchName);
 
-                    if (iter().dict().found("patchFields"))
+                    if (dEntry.dict().found("patchFields"))
                     {
                         const dictionary& patchFieldsDict =
-                            iter().dict().subDict
+                            dEntry.dict().subDict
                             (
                                 "patchFields"
                             );
@@ -928,11 +927,11 @@ int main(int argc, char *argv[])
                     if (sameGroup)
                     {
                         // Add coupleGroup to all entries
-                        forAllIter(dictionary, patchFieldsDict, iter)
+                        for (entry& dEntry : patchFieldsDict)
                         {
-                            if (iter().isDict())
+                            if (dEntry.isDict())
                             {
-                                dictionary& dict = iter().dict();
+                                dictionary& dict = dEntry.dict();
                                 dict.set("coupleGroup", groupName);
                             }
                         }

@@ -35,12 +35,7 @@
           - fvm::laplacian(rAUf, p_rgh)
         );
 
-        forAllConstIter
-        (
-            phaseSystem::phasePairTable,
-            fluid.totalPhasePairs(),
-            iter
-        )
+        forAllConstIters(fluid.totalPhasePairs(), iter)
         {
             const phasePair& pair = iter()();
 

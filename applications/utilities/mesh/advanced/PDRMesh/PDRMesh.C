@@ -650,17 +650,19 @@ int main(int argc, char *argv[])
 
     // Per faceSet the patch to put the coupled baffles into
     DynamicList<FixedList<word, 3>> coupledAndPatches(10);
+
     const dictionary& functionDicts = dict.subDict("coupledFaces");
-    forAllConstIter(dictionary, functionDicts, iter)
+
+    for (const entry& dEntry : functionDicts)
     {
-        // safety:
-        if (!iter().isDict())
+        if (!dEntry.isDict())  // Safety
         {
             continue;
         }
-        const word& key = iter().keyword();
 
-        const dictionary& dict = iter().dict();
+        const word& key = dEntry.keyword();
+        const dictionary& dict = dEntry.dict();
+
         const word cyclicName = dict.get<word>("cyclicMasterPatch");
         const word wallName = dict.get<word>("wallPatch");
         FixedList<word, 3> nameAndType;

@@ -54,9 +54,9 @@ Foam::boundaryTemplates::boundaryTemplates
         )
     );
 
-    forAllConstIter(dictionary, regionBCs, iter)
+    for (const entry& dEntry : regionBCs)
     {
-        const word& regionType = iter().keyword();
+        const word& regionType = dEntry.keyword();
         wordList patchTypes(regionBCs.lookup(regionType));
 
         dictionary regionTemplate = dictionary::null;
@@ -175,7 +175,7 @@ Foam::dictionary Foam::boundaryTemplates::generatePatchDict
     // look for inlet, outlet, wall etc
     if (regionTemplates.found(category))
     {
-        const dictionary& categoryDict(regionTemplates.subDict(category));
+        const dictionary& categoryDict = regionTemplates.subDict(category);
 
         // look for subSonic, slip etc
         if (categoryDict.found(patchType))
@@ -199,10 +199,8 @@ Foam::dictionary Foam::boundaryTemplates::generatePatchDict
 
                 const wordList requiredOptions(patchDict.lookup("OPTIONS"));
 
-                forAll(requiredOptions, i)
+                for (const word& option : requiredOptions)
                 {
-                    const word& option = requiredOptions[i];
-
                     word selected;
                     if (!conditionOptions.readIfPresent(option, selected))
                     {
@@ -252,18 +250,19 @@ Foam::dictionary Foam::boundaryTemplates::generatePatchDict
                 dictionary dict(dictionary::null);
                 const dictionary& fieldDict(patchDict.subDict(fieldName));
 
-                forAllConstIter(IDLList<entry>, fieldDict, iter)
+                for (const entry& dEntry : fieldDict)
                 {
                     OStringStream oss;
-                    oss << iter();
+                    oss << dEntry;
+
                     string s(oss.str());
-                    s.replace(iter().keyword(), "");
+                    s.replace(dEntry.keyword(), "");
                     s.replace
                     (
                         "VALUE",
                         "boundaryConditions." + condition + ".values"
                     );
-                    dict.add(iter().keyword(), s.c_str());
+                    dict.add(dEntry.keyword(), s.c_str());
                 }
 
                 return dict;
@@ -344,7 +343,7 @@ bool Foam::boundaryTemplates::optionsRequired
 
     if (regionTemplates.found(category))
     {
-        const dictionary& categoryDict(regionTemplates.subDict(category));
+        const dictionary& categoryDict = regionTemplates.subDict(category);
 
         if (categoryDict.found(patchType))
         {

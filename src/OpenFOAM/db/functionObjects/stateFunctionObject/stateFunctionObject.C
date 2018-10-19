@@ -154,9 +154,9 @@ Foam::word Foam::functionObjects::stateFunctionObject::objectResultType
         {
             const dictionary& objectDict = resultsDict.subDict(objectName);
 
-            forAllConstIter(dictionary, objectDict, iter)
+            for (const entry& dEntry : objectDict)
             {
-                const dictionary& dict = iter().dict();
+                const dictionary& dict = dEntry.dict();
 
                 if (dict.found(entryName))
                 {
@@ -195,9 +195,10 @@ objectResultEntries
         {
             const dictionary& objectDict = resultsDict.subDict(objectName);
 
-            forAllConstIter(dictionary, objectDict, iter)
+            for (const entry& dEntry : objectDict)
             {
-                const dictionary& dict = iter().dict();
+                const dictionary& dict = dEntry.dict();
+
                 result.append(dict.toc());
             }
         }

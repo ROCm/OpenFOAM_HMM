@@ -59,23 +59,25 @@ Foam::multiSolidBodyMotionSolver::multiSolidBodyMotionSolver
     pointIDs_.setSize(coeffDict().size());
     label zonei = 0;
 
-    forAllConstIter(dictionary, coeffDict(), iter)
+    for (const entry& dEntry : coeffDict())
     {
-        if (iter().isDict())
+        if (dEntry.isDict())
         {
-            zoneIDs_[zonei] = mesh.cellZones().findZoneID(iter().keyword());
+            const word& zoneName = dEntry.keyword();
+            const dictionary& subDict = dEntry.dict();
+
+            zoneIDs_[zonei] = mesh.cellZones().findZoneID(zoneName);
 
             if (zoneIDs_[zonei] == -1)
             {
                 FatalIOErrorInFunction
                 (
                     coeffDict()
-                )   << "Cannot find cellZone named " << iter().keyword()
-                    << ". Valid zones are " << mesh.cellZones().names()
+                )   << "Cannot find cellZone named " << zoneName
+                    << ". Valid zones are "
+                    << flatOutput(mesh.cellZones().names())
                     << exit(FatalIOError);
             }
-
-            const dictionary& subDict = iter().dict();
 
             SBMFs_.set
             (
@@ -119,7 +121,7 @@ Foam::multiSolidBodyMotionSolver::multiSolidBodyMotionSolver
             Info<< "Applying solid body motion " << SBMFs_[zonei].type()
                 << " to "
                 << returnReduce(pointIDs_[zonei].size(), sumOp<label>())
-                << " points of cellZone " << iter().keyword() << endl;
+                << " points of cellZone " << zoneName << endl;
 
             zonei++;
         }

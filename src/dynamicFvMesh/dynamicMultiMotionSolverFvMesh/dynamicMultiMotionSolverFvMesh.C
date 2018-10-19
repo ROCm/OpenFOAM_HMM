@@ -71,11 +71,11 @@ Foam::dynamicMultiMotionSolverFvMesh::dynamicMultiMotionSolverFvMesh
     pointIDs_.setSize(dynamicMeshCoeffs.size());
     label zoneI = 0;
 
-    forAllConstIter(dictionary, dynamicMeshCoeffs, iter)
+    for (const entry& dEntry : dynamicMeshCoeffs)
     {
-        if (iter().isDict())
+        if (dEntry.isDict())
         {
-            const dictionary& subDict = iter().dict();
+            const dictionary& subDict = dEntry.dict();
 
             const word zoneName(subDict.get<word>("cellZone"));
 

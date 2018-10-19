@@ -346,14 +346,15 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
                 << "VARIABLE" << nl;
 
             const dictionary& fieldsDict = dict.subDict("fields");
-            forAllConstIter(dictionary, fieldsDict, iter)
+            for (const entry& dEntry : fieldsDict)
             {
-                const dictionary& subDict = iter().dict();
+                const dictionary& subDict = dEntry.dict();
+
                 const word fieldType(subDict.get<word>("type"));
                 const word varName = subDict.lookupOrDefault
                 (
                     "name",
-                    iter().keyword() // fieldName as fallback
+                    dEntry.keyword() // fieldName as fallback
                 );
 
                 osCase

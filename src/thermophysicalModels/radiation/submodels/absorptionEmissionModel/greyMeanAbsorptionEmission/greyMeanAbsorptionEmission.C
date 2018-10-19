@@ -75,16 +75,18 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
     label nFunc = 0;
     const dictionary& functionDicts = dict.optionalSubDict(typeName + "Coeffs");
 
-    forAllConstIter(dictionary, functionDicts, iter)
+    for (const entry& dEntry : functionDicts)
     {
-        // safety:
-        if (!iter().isDict())
+        if (!dEntry.isDict())  // safety
         {
             continue;
         }
-        const word& key = iter().keyword();
+
+        const word& key = dEntry.keyword();
+        const dictionary& dict = dEntry.dict();
+
         speciesNames_.insert(key, nFunc);
-        const dictionary& dict = iter().dict();
+
         coeffs_[nFunc].initialise(dict);
         nFunc++;
     }

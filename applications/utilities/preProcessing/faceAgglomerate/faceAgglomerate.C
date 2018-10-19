@@ -86,9 +86,10 @@ int main(int argc, char *argv[])
 
     label nCoarseFaces = 0;
 
-    forAllConstIter(dictionary, agglomDict, iter)
+    for (const entry& dEntry : agglomDict)
     {
-        labelList patchids = boundary.indices(iter().keyword());
+        labelList patchids = boundary.indices(dEntry.keyword());
+
         for (const label patchi : patchids)
         {
             const polyPatch& pp = boundary[patchi];

@@ -65,36 +65,35 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
 {
     label nBand = 0;
     const dictionary& functionDicts = dict.optionalSubDict(typeName +"Coeffs");
-    forAllConstIter(dictionary, functionDicts, iter)
+    for (const entry& dEntry : functionDicts)
     {
-        // safety:
-        if (!iter().isDict())
+        if (!dEntry.isDict())  // safety
         {
             continue;
         }
 
-        const dictionary& dict = iter().dict();
+        const dictionary& dict = dEntry.dict();
+
         dict.readEntry("bandLimits", iBands_[nBand]);
         dict.readEntry("EhrrCoeff", iEhrrCoeffs_[nBand]);
         totalWaveLength_ += iBands_[nBand][1] - iBands_[nBand][0];
 
         label nSpec = 0;
+
         const dictionary& specDicts = dict.subDict("species");
-        forAllConstIter(dictionary, specDicts, iter)
+        for (const entry& dEntry : specDicts)
         {
-            const word& key = iter().keyword();
+            const word& key = dEntry.keyword();
+
             if (nBand == 0)
             {
                 speciesNames_.insert(key, nSpec);
             }
-            else
+            else if (!speciesNames_.found(key))
             {
-                if (!speciesNames_.found(key))
-                {
-                    FatalErrorInFunction
-                        << "specie: " << key << " is not in all the bands"
-                        << nl << exit(FatalError);
-                }
+                FatalErrorInFunction
+                    << "specie: " << key << " is not in all the bands"
+                    << nl << exit(FatalError);
             }
             coeffs_[nBand][nSpec].initialise(specDicts.subDict(key));
             nSpec++;

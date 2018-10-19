@@ -292,16 +292,17 @@ int main(int argc, char *argv[])
         // Suppress duplicate names
         wordHashSet requestedPatches;
 
-        forAllConstIters(stitchDict, iter)
+        for (const entry& dEntry : stitchDict)
         {
-            if (!iter().isDict())
+            if (!dEntry.isDict())
             {
                 Info<< "Ignoring non-dictionary entry: "
-                    << iter().keyword() << nl;
+                    << dEntry.keyword() << nl;
                 continue;
             }
 
-            const dictionary& dict = iter().dict();
+            const keyType& key = dEntry.keyword();
+            const dictionary& dict = dEntry.dict();
 
             // Match type
             word matchName;
@@ -358,7 +359,7 @@ int main(int argc, char *argv[])
 
             // Input was validated
 
-            validatedDict.add(iter().keyword(), iter().dict());
+            validatedDict.add(key, dict);
         }
     }
 
@@ -433,9 +434,9 @@ int main(int argc, char *argv[])
 
     // Step through the topology changes
     label actioni = 0;
-    forAllConstIters(validatedDict, iter)
+    for (const entry& dEntry : validatedDict)
     {
-        const dictionary& dict = iter().dict();
+        const dictionary& dict = dEntry.dict();
 
         // Match type
         bool perfect = false;

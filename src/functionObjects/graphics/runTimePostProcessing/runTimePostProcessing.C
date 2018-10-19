@@ -106,11 +106,11 @@ bool Foam::functionObjects::runTimePostProcessing::read(const dictionary& dict)
     readObjects(dict.subOrEmptyDict("lines"), lines_);
     readObjects(dict.subOrEmptyDict("surfaces"), surfaces_);
 
-
     const dictionary& textDict = dict.subDict("text");
-    forAllConstIter(dictionary, textDict, iter)
+
+    for (const entry& dEntry : textDict)
     {
-        if (!iter().isDict())
+        if (!dEntry.isDict())
         {
             FatalIOErrorInFunction(textDict)
                 << "text must be specified in dictionary format"
@@ -122,7 +122,7 @@ bool Foam::functionObjects::runTimePostProcessing::read(const dictionary& dict)
             new runTimePostPro::text
             (
                 *this,
-                iter().dict(),
+                dEntry.dict(),
                 scene_.colours()
             )
         );

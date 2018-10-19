@@ -113,14 +113,14 @@ Foam::twoPhaseSystem::twoPhaseSystem
 
 
     // Blending
-    forAllConstIter(dictionary, subDict("blending"), iter)
+    for (const entry& dEntry : subDict("blending"))
     {
         blendingMethods_.insert
         (
-            iter().dict().dictName(),
+            dEntry.dict().dictName(),
             blendingMethod::New
             (
-                iter().dict(),
+                dEntry.dict(),
                 wordList(lookup("phases"))
             )
         );

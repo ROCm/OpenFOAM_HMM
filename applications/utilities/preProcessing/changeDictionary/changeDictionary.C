@@ -97,10 +97,10 @@ HashTable<wordList> extractPatchGroups(const dictionary& boundaryDict)
 {
     HashTable<wordList> groupToPatch;
 
-    forAllConstIter(dictionary, boundaryDict, iter)
+    for (const entry& dEntry : boundaryDict)
     {
-        const word& patchName = iter().keyword();
-        const dictionary& patchDict = iter().dict();
+        const word& patchName = dEntry.keyword();
+        const dictionary& patchDict = dEntry.dict();
 
         wordList groups;
         if (patchDict.readIfPresent("inGroups", groups))
@@ -243,9 +243,9 @@ bool merge
 
     // Pass 1. All literal matches
 
-    forAllConstIter(IDLList<entry>, mergeDict, mergeIter)
+    for (const entry& mergeEntry : mergeDict)
     {
-        const keyType& key = mergeIter().keyword();
+        const keyType& key = mergeEntry.keyword();
 
         if (key[0] == '~')
         {
@@ -274,7 +274,7 @@ bool merge
                     (
                         thisDict,
                        *eptr,
-                        mergeIter(),
+                        mergeEntry,
                         literalRE,
                         shortcuts
                     )
@@ -287,8 +287,8 @@ bool merge
             {
                 if (addNonExisting)
                 {
-                    // not found - just add
-                    thisDict.add(mergeIter().clone(thisDict).ptr());
+                    // Not found - just add
+                    thisDict.add(mergeEntry.clone(thisDict).ptr());
                     changed = true;
                 }
                 else
@@ -309,9 +309,9 @@ bool merge
         // Pick up remaining dictionary entries
         wordList thisKeys(thisKeysSet.toc());
 
-        forAllConstIter(IDLList<entry>, mergeDict, mergeIter)
+        for (const entry& mergeEntry : mergeDict)
         {
-            const keyType& key = mergeIter().keyword();
+            const keyType& key = mergeEntry.keyword();
 
             if (key[0] == '~')
             {
@@ -364,7 +364,7 @@ bool merge
                         (
                             thisDict,
                            *eptr,
-                            mergeIter(),
+                            mergeEntry,
                             literalRE,
                             HashTable<wordList>(0)    // no shortcuts
                                                       // at deeper levels
@@ -462,7 +462,7 @@ int main(int argc, char *argv[])
         const bool enableEntries = args.found("enableFunctionEntries");
         if (enableEntries)
         {
-            Info<< "Allowing dictionary preprocessing ('#include', '#codeStream')."
+            Info<< "Allowing dictionary preprocessing (#include, #codeStream)."
                 << endl;
         }
 
@@ -550,9 +550,9 @@ int main(int argc, char *argv[])
 
         // Temporary convert to dictionary
         dictionary fieldDict;
-        forAll(dictList, i)
+        for (const entry& e : dictList)
         {
-            fieldDict.add(dictList[i].keyword(), dictList[i].dict());
+            fieldDict.add(e.keyword(), e.dict());
         }
 
         if (dictList.size())
@@ -582,9 +582,11 @@ int main(int argc, char *argv[])
 
         // Every replacement is a dictionary name and a keyword in this
 
-        forAllConstIter(dictionary, replaceDicts, fieldIter)
+        for (const entry& replaceEntry : replaceDicts)
         {
-            const word& fieldName = fieldIter().keyword();
+            const word& fieldName = replaceEntry.keyword();
+            const dictionary& replaceDict = replaceEntry.dict();
+
             Info<< "Replacing entries in dictionary " << fieldName << endl;
 
             // Handle 'boundary' specially:
@@ -595,11 +597,8 @@ int main(int argc, char *argv[])
                 Info<< "Special handling of " << fieldName
                     << " as polyMesh/boundary file." << endl;
 
-                // Get the replacement dictionary for the field
-                const dictionary& replaceDict = fieldIter().dict();
-                Info<< "Merging entries from " << replaceDict.toc() << endl;
-
                 // Merge the replacements in. Do not add non-existing entries.
+                Info<< "Merging entries from " << replaceDict.toc() << endl;
                 merge(false, fieldDict, replaceDict, literalRE, patchGroups);
 
                 Info<< "fieldDict:" << fieldDict << endl;
@@ -627,9 +626,9 @@ int main(int argc, char *argv[])
                 // Add remaining entries
                 label sz = dictList.size();
                 dictList.setSize(nEntries);
-                forAllConstIter(dictionary, fieldDict, iter)
+                for (const entry& e : fieldDict)
                 {
-                    dictList.set(sz++, iter().clone());
+                    dictList.set(sz++, e.clone());
                 }
 
                 Info<< "Writing modified " << fieldName << endl;
@@ -672,11 +671,8 @@ int main(int argc, char *argv[])
                     Info<< "Loaded dictionary " << fieldName
                         << " with entries " << fieldDict.toc() << endl;
 
-                    // Get the replacement dictionary for the field
-                    const dictionary& replaceDict = fieldIter().dict();
-                    Info<< "Merging entries from " << replaceDict.toc() << endl;
-
                     // Merge the replacements in (allow adding)
+                    Info<< "Merging entries from " << replaceDict.toc() << endl;
                     merge(true, fieldDict, replaceDict, literalRE, patchGroups);
 
                     Info<< "Writing modified fieldDict " << fieldName << endl;

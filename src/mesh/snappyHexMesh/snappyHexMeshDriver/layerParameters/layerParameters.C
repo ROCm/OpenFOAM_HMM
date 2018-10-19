@@ -259,11 +259,13 @@ Foam::layerParameters::layerParameters
 
     const dictionary& layersDict = dict.subDict("layers");
 
-    forAllConstIter(dictionary, layersDict, iter)
+    for (const entry& dEntry : layersDict)
     {
-        if (iter().isDict())
+        if (dEntry.isDict())
         {
-            const keyType& key = iter().keyword();
+            const keyType& key = dEntry.keyword();
+            const dictionary& layerDict = dEntry.dict();
+
             const labelHashSet patchIDs
             (
                 boundaryMesh.patchSet(List<wordRe>(1, wordRe(key)))
@@ -278,8 +280,6 @@ Foam::layerParameters::layerParameters
             }
             else
             {
-                const dictionary& layerDict = iter().dict();
-
                 for (const label patchi : patchIDs)
                 {
                     numLayers_[patchi] =

@@ -728,11 +728,11 @@ bool Foam::functionObjectList::read()
         newPtrs.setSize(functionsDict.size());
         newDigs.setSize(functionsDict.size());
 
-        forAllConstIter(dictionary, functionsDict, iter)
+        for (const entry& dEntry : functionsDict)
         {
-            const word& key = iter().keyword();
+            const word& key = dEntry.keyword();
 
-            if (!iter().isDict())
+            if (!dEntry.isDict())
             {
                 if (key != "libs")
                 {
@@ -743,7 +743,8 @@ bool Foam::functionObjectList::read()
                 continue;
             }
 
-            const dictionary& dict = iter().dict();
+            const dictionary& dict = dEntry.dict();
+
             bool enabled = dict.lookupOrDefault("enabled", true);
 
             newDigs[nFunc] = dict.digest();

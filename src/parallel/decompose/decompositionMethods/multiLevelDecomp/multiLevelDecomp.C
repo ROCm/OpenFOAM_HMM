@@ -161,26 +161,26 @@ void Foam::multiLevelDecomp::createMethodsDict()
         // - Only consider sub-dictionaries with a "numberOfSubdomains" entry
         //   This automatically filters out any coeffs dictionaries
 
-        forAllConstIters(coeffsDict_, iter)
+        for (const entry& dEntry : coeffsDict_)
         {
             word methodName;
 
             if
             (
-                iter().isDict()
+                dEntry.isDict()
                 // non-recursive, no patterns
-             && iter().dict().found("numberOfSubdomains", keyType::LITERAL)
+             && dEntry.dict().found("numberOfSubdomains", keyType::LITERAL)
             )
             {
                 // No method specified? can use a default method?
 
                 const bool addDefaultMethod
                 (
-                    !(iter().dict().found("method", keyType::LITERAL))
+                    !(dEntry.dict().found("method", keyType::LITERAL))
                  && !defaultMethod.empty()
                 );
 
-                entry* e = methodsDict_.add(iter());
+                entry* e = methodsDict_.add(dEntry);
 
                 if (addDefaultMethod && e && e->isDict())
                 {
@@ -201,17 +201,17 @@ void Foam::multiLevelDecomp::setMethods()
 
     methods_.clear();
     methods_.setSize(methodsDict_.size());
-    forAllConstIters(methodsDict_, iter)
+    for (const entry& dEntry : methodsDict_)
     {
         // Dictionary entries only
         // - these method dictionaries are non-regional
-        if (iter().isDict())
+        if (dEntry.isDict())
         {
             methods_.set
             (
                 nLevels++,
                 // non-verbose would be nicer
-                decompositionMethod::New(iter().dict())
+                decompositionMethod::New(dEntry.dict())
             );
         }
     }
@@ -475,11 +475,11 @@ void Foam::multiLevelDecomp::decompose
 
             // Get original level0 dictionary and modify numberOfSubdomains
             dictionary level0Dict;
-            forAllConstIters(methodsDict_, iter)
+            for (const entry& dEntry : methodsDict_)
             {
-                if (iter().isDict())
+                if (dEntry.isDict())
                 {
-                    level0Dict = iter().dict();
+                    level0Dict = dEntry.dict();
                     break;
                 }
             }

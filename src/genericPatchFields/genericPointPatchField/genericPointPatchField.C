@@ -53,17 +53,19 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
     actualTypeName_(dict.get<word>("type")),
     dict_(dict)
 {
-    forAllConstIter(dictionary, dict_, iter)
+    for (const entry& dEntry : dict_)
     {
-        if (iter().keyword() != "type")
+        const keyType& key = dEntry.keyword();
+
+        if (key != "type")
         {
             if
             (
-                iter().isStream()
-             && iter().stream().size()
+                dEntry.isStream()
+             && dEntry.stream().size()
             )
             {
-                ITstream& is = iter().stream();
+                ITstream& is = dEntry.stream();
 
                 // Read first token
                 token firstToken(is);
@@ -86,7 +88,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                         {
                             scalarFields_.insert
                             (
-                                iter().keyword(),
+                                key,
                                 autoPtr<scalarField>::New()
                             );
                         }
@@ -126,7 +128,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                             FatalIOErrorInFunction
                             (
                                 dict
-                            )   << "\n    size of field " << iter().keyword()
+                            )   << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -138,7 +140,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                                 << exit(FatalIOError);
                         }
 
-                        scalarFields_.insert(iter().keyword(), fPtr);
+                        scalarFields_.insert(key, fPtr);
                     }
                     else if
                     (
@@ -161,7 +163,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                             FatalIOErrorInFunction
                             (
                                 dict
-                            )   << "\n    size of field " << iter().keyword()
+                            )   << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -173,7 +175,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                                 << exit(FatalIOError);
                         }
 
-                        vectorFields_.insert(iter().keyword(), fPtr);
+                        vectorFields_.insert(key, fPtr);
                     }
                     else if
                     (
@@ -199,7 +201,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                             FatalIOErrorInFunction
                             (
                                 dict
-                            )   << "\n    size of field " << iter().keyword()
+                            )   << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -211,7 +213,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                                 << exit(FatalIOError);
                         }
 
-                        sphericalTensorFields_.insert(iter().keyword(), fPtr);
+                        sphericalTensorFields_.insert(key, fPtr);
                     }
                     else if
                     (
@@ -237,7 +239,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                             FatalIOErrorInFunction
                             (
                                 dict
-                            )   << "\n    size of field " << iter().keyword()
+                            )   << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -249,7 +251,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                                 << exit(FatalIOError);
                         }
 
-                        symmTensorFields_.insert(iter().keyword(), fPtr);
+                        symmTensorFields_.insert(key, fPtr);
                     }
                     else if
                     (
@@ -272,7 +274,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                             FatalIOErrorInFunction
                             (
                                 dict
-                            )   << "\n    size of field " << iter().keyword()
+                            )   << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -284,7 +286,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                                 << exit(FatalIOError);
                         }
 
-                        tensorFields_.insert(iter().keyword(), fPtr);
+                        tensorFields_.insert(key, fPtr);
                     }
                     else
                     {
@@ -574,47 +576,49 @@ void Foam::genericPointPatchField<Type>::write(Ostream& os) const
 {
     os.writeEntry("type", actualTypeName_);
 
-    forAllConstIter(dictionary, dict_, iter)
+    for (const entry& dEntry : dict_)
     {
-        if (iter().keyword() != "type")
+        const keyType& key = dEntry.keyword();
+
+        if (key != "type")
         {
             if
             (
-                iter().isStream()
-             && iter().stream().size()
-             && iter().stream()[0].isWord()
-             && iter().stream()[0].wordToken() == "nonuniform"
+                dEntry.isStream()
+             && dEntry.stream().size()
+             && dEntry.stream()[0].isWord()
+             && dEntry.stream()[0].wordToken() == "nonuniform"
             )
             {
-                if (scalarFields_.found(iter().keyword()))
+                if (scalarFields_.found(key))
                 {
-                    scalarFields_.find(iter().keyword())()
-                        ->writeEntry(iter().keyword(), os);
+                    scalarFields_.find(key)()
+                        ->writeEntry(key, os);
                 }
-                else if (vectorFields_.found(iter().keyword()))
+                else if (vectorFields_.found(key))
                 {
-                    vectorFields_.find(iter().keyword())()
-                        ->writeEntry(iter().keyword(), os);
+                    vectorFields_.find(key)()
+                        ->writeEntry(key, os);
                 }
-                else if (sphericalTensorFields_.found(iter().keyword()))
+                else if (sphericalTensorFields_.found(key))
                 {
-                    sphericalTensorFields_.find(iter().keyword())()
-                        ->writeEntry(iter().keyword(), os);
+                    sphericalTensorFields_.find(key)()
+                        ->writeEntry(key, os);
                 }
-                else if (symmTensorFields_.found(iter().keyword()))
+                else if (symmTensorFields_.found(key))
                 {
-                    symmTensorFields_.find(iter().keyword())()
-                        ->writeEntry(iter().keyword(), os);
+                    symmTensorFields_.find(key)()
+                        ->writeEntry(key, os);
                 }
-                else if (tensorFields_.found(iter().keyword()))
+                else if (tensorFields_.found(key))
                 {
-                    tensorFields_.find(iter().keyword())()
-                        ->writeEntry(iter().keyword(), os);
+                    tensorFields_.find(key)()
+                        ->writeEntry(key, os);
                 }
             }
             else
             {
-               iter().write(os);
+                dEntry.write(os);
             }
         }
     }

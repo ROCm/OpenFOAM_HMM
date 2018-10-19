@@ -119,14 +119,12 @@ Foam::searchableSurfaces::searchableSurfaces(const label size)
 //        {
 //            const dictionary& regionsDict = dict.subDict("regions");
 //
-//            forAllConstIter(dictionary, regionsDict, iter)
+//            for (const entry& dEntry : regionsDict)
 //            {
-//                const word& key = iter().keyword();
-//
-//                if (regionsDict.isDict(key))
+//                if (dEntry.isDict())
 //                {
-//                    // Get the dictionary for region iter.key()
-//                    const dictionary& regionDict = regionsDict.subDict(key);
+//                    const word& key = dEntry.keyword();
+//                    const dictionary& regionDict = dEntry.dict();
 //
 //                    label index = localNames.find(key);
 //
@@ -178,18 +176,18 @@ Foam::searchableSurfaces::searchableSurfaces
     allSurfaces_(identity(topDict.size()))
 {
     label surfI = 0;
-    forAllConstIter(dictionary, topDict, iter)
-    {
-        const word& key = iter().keyword();
 
-        if (!topDict.isDict(key))
+    for (const entry& dEntry : topDict)
+    {
+        if (!dEntry.isDict())
         {
             FatalErrorInFunction
-                << "Found non-dictionary entry " << iter()
+                << "Found non-dictionary entry " << dEntry
                 << " in top-level dictionary " << topDict
                 << exit(FatalError);
         }
 
+        const word& key = dEntry.keyword();
         const dictionary& dict = topDict.subDict(key);
 
         names_[surfI] = dict.lookupOrDefault<word>("name", key);
@@ -240,14 +238,12 @@ Foam::searchableSurfaces::searchableSurfaces
         {
             const dictionary& regionsDict = dict.subDict("regions");
 
-            forAllConstIter(dictionary, regionsDict, iter)
+            for (const entry& dEntry : regionsDict)
             {
-                const word& key = iter().keyword();
-
-                if (regionsDict.isDict(key))
+                if (dEntry.isDict())
                 {
-                    // Get the dictionary for region iter.keyword()
-                    const dictionary& regionDict = regionsDict.subDict(key);
+                    const word& key = dEntry.keyword();
+                    const dictionary& regionDict = dEntry.dict();
 
                     label index = localNames.find(key);
 
@@ -255,8 +251,9 @@ Foam::searchableSurfaces::searchableSurfaces
                     {
                         FatalErrorInFunction
                             << "Unknown region name " << key
-                            << " for surface " << s.name() << endl
+                            << " for surface " << s.name() << nl
                             << "Valid region names are " << localNames
+                            << endl
                             << exit(FatalError);
                     }
 

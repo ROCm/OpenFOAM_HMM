@@ -125,9 +125,9 @@ void Foam::decompositionMethod::readConstraints()
 
     if (dictptr)
     {
-        forAllConstIters(*dictptr, iter)
+        for (const entry& dEntry : *dictptr)
         {
-            const dictionary& dict = iter().dict();
+            const dictionary& dict = dEntry.dict();
 
             constraintTypes.append(dict.get<word>("type"));
 

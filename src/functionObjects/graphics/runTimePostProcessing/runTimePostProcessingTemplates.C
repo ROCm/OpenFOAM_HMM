@@ -33,9 +33,10 @@ void Foam::functionObjects::runTimePostProcessing::readObjects
 ) const
 {
     objects.clear();
-    forAllConstIter(dictionary, dict, iter)
+
+    for (const entry& dEntry : dict)
     {
-        if (!iter().isDict())
+        if (!dEntry.isDict())
         {
             FatalIOErrorInFunction(dict)
                 << dict.dictName()
@@ -43,12 +44,12 @@ void Foam::functionObjects::runTimePostProcessing::readObjects
                 << exit(FatalIOError);
         }
 
-        const dictionary& objectDict(iter().dict());
+        const dictionary& objectDict = dEntry.dict();
         const word objectType = objectDict.get<word>("type");
 
         objects.append
         (
-            Type::New(*this, iter().dict(), scene_.colours(), objectType)
+            Type::New(*this, objectDict, scene_.colours(), objectType)
         );
     }
 }

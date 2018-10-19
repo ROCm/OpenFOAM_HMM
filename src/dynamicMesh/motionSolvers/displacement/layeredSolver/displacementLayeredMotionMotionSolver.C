@@ -306,9 +306,9 @@ void Foam::displacementLayeredMotionMotionSolver::cellZoneSolve
 
     // Allocate the fields
     label patchi = 0;
-    forAllConstIter(dictionary, patchesDict, patchiter)
+    for (const entry& dEntry : patchesDict)
     {
-        const word& faceZoneName = patchiter().keyword();
+        const word& faceZoneName = dEntry.keyword();
         label zoneI = mesh().faceZones().findZoneID(faceZoneName);
         if (zoneI == -1)
         {
@@ -353,10 +353,10 @@ void Foam::displacementLayeredMotionMotionSolver::cellZoneSolve
     pointDisplacement_.correctBoundaryConditions();
 
     patchi = 0;
-    forAllConstIter(dictionary, patchesDict, patchiter)
+    for (const entry& dEntry : patchesDict)
     {
-        const word& faceZoneName = patchiter().keyword();
-        const dictionary& faceZoneDict = patchiter().dict();
+        const word& faceZoneName = dEntry.keyword();
+        const dictionary& faceZoneDict = dEntry.dict();
 
         // Determine the points of the faceZone within the cellZone
         const faceZone& fz = mesh().faceZones()[faceZoneName];
@@ -546,11 +546,10 @@ void Foam::displacementLayeredMotionMotionSolver::solve()
     pointDisplacement_.boundaryFieldRef().updateCoeffs();
 
     // Solve motion on all regions (=cellZones)
-    const dictionary& regionDicts = coeffDict().subDict("regions");
-    forAllConstIter(dictionary, regionDicts, regionIter)
+    for (const entry& dEntry : coeffDict().subDict("regions"))
     {
-        const word& cellZoneName = regionIter().keyword();
-        const dictionary& regionDict = regionIter().dict();
+        const word& cellZoneName = dEntry.keyword();
+        const dictionary& regionDict = dEntry.dict();
 
         label zoneI = mesh().cellZones().findZoneID(cellZoneName);
 

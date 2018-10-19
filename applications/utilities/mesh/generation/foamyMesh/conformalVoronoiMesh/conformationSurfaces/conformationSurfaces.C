@@ -535,16 +535,12 @@ Foam::conformationSurfaces::conformationSurfaces
         Info<< nl << "Reading additionalFeatures" << endl;
     }
 
-    forAllConstIter(dictionary, additionalFeaturesDict, iter)
+    for (const entry& dEntry : additionalFeaturesDict)
     {
-        word featureName = iter().keyword();
+        const word& featureName = dEntry.keyword();
+        const dictionary& featureSubDict = dEntry.dict();
 
-        Info<< nl << "    " << iter().keyword() << endl;
-
-        const dictionary& featureSubDict
-        (
-            additionalFeaturesDict.subDict(featureName)
-        );
+        Info<< nl << "    " << featureName << endl;
 
         readFeatures(featureSubDict, featureName, featureI);
     }

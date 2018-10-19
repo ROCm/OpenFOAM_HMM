@@ -187,13 +187,13 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
 
     label surfI = 0;
     label startIndex = 0;
-    forAllConstIter(dictionary, dict, iter)
+    for (const entry& dEntry : dict)
     {
-        if (dict.isDict(iter().keyword()))
+        if (dEntry.isDict())
         {
-            instance_[surfI] = iter().keyword();
+            instance_[surfI] = dEntry.keyword();
 
-            const dictionary& subDict = dict.subDict(instance_[surfI]);
+            const dictionary& subDict = dEntry.dict();
 
             subDict.readEntry("scale", scale_[surfI]);
             transform_.set

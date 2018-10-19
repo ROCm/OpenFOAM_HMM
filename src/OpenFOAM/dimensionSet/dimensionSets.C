@@ -120,17 +120,18 @@ const HashTable<dimensionedScalar>& unitSet()
 
         unitSetPtr_ = new HashTable<dimensionedScalar>(unitDict.size());
 
-        forAllConstIter(dictionary, unitDict, iter)
+        for (const entry& dEntry : unitDict)
         {
-            if (iter().keyword() != "writeUnits")
+            if (dEntry.keyword() != "writeUnits")
             {
                 dimensionedScalar dt;
-                dt.read(iter().stream(), unitDict);
-                bool ok = unitSetPtr_->insert(iter().keyword(), dt);
+                dt.read(dEntry.stream(), unitDict);
+
+                bool ok = unitSetPtr_->insert(dEntry.keyword(), dt);
                 if (!ok)
                 {
                     FatalIOErrorInFunction(dict)
-                        << "Duplicate unit " << iter().keyword()
+                        << "Duplicate unit " << dEntry.keyword()
                         << " in DimensionSets dictionary"
                         << exit(FatalIOError);
                 }

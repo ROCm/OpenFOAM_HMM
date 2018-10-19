@@ -147,11 +147,9 @@ void Foam::HashPtrTable<T, Key, Hash>::read
     const INew& inew
 )
 {
-    forAllConstIter(dictionary, dict, iter)
+    for (const entry& e : dict)
     {
-        const word& k = iter().keyword();
-
-        this->set(k, inew(dict.subDict(k)).ptr());
+        this->set(e.keyword(), inew(e.dict()).ptr());
     }
 }
 

@@ -241,14 +241,15 @@ int main(int argc, char *argv[])
     // Where to write VTK output files
     const fileName vtkOutputDir = runTime.constantPath()/"triSurface";
 
-    forAllConstIters(dict, iter)
+    for (const entry& dEntry : dict)
     {
-        if (!iter().isDict() || iter().keyword().isPattern())
+        if (!dEntry.isDict() || dEntry.keyword().isPattern())  // safety
         {
             continue;
         }
 
-        const dictionary& surfaceDict = iter().dict();
+        const word& dictName = dEntry.keyword();
+        const dictionary& surfaceDict = dEntry.dict();
 
         if (!surfaceDict.found("extractionMethod"))
         {
@@ -257,7 +258,6 @@ int main(int argc, char *argv[])
         }
 
         // The output name based in dictionary name (without extensions)
-        const word& dictName = iter().keyword();
         const word outputName = dictName.lessExt();
 
         autoPtr<surfaceFeaturesExtraction::method> extractor =

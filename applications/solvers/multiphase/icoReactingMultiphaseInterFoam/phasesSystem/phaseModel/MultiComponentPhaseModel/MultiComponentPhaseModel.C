@@ -202,7 +202,7 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::solveYi
 
     surfaceScalarField phir(0.0*phi);
 
-    forAllConstIter(phaseSystem::phaseModelTable,this->fluid().phases(),iter2)
+    forAllConstIters(this->fluid().phases(),iter2)
     {
         const volScalarField& alpha2 = iter2();
         if (&alpha2 == &alpha1)
@@ -251,10 +251,7 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::solveYi
 
             surfaceScalarField& phiYiCorr = phiYiCorrs[i];
 
-            forAllConstIter
-            (
-                phaseSystem::phaseModelTable, this->fluid().phases(), iter2
-            )
+            forAllConstIters(this->fluid().phases(), iter2)
             {
                 //const volScalarField& alpha2 = iter2()().oldTime();
                 const volScalarField& alpha2 = iter2();

@@ -109,9 +109,9 @@ void Foam::Time::readDict()
 
         simpleObjectRegistry& objs = debug::debugObjects();
 
-        forAllConstIters(*localDict, iter)
+        for (const entry& dEntry : *localDict)
         {
-            const word& name = iter().keyword();
+            const word& name = dEntry.keyword();
 
             simpleObjectRegistryEntry* objPtr = objs.lookupPtr(name);
 
@@ -119,14 +119,14 @@ void Foam::Time::readDict()
             {
                 const List<simpleRegIOobject*>& objects = *objPtr;
 
-                DetailInfo << "    " << iter() << nl;
+                DetailInfo << "    " << dEntry << nl;
 
-                if (iter().isDict())
+                if (dEntry.isDict())
                 {
                     for (simpleRegIOobject* obj : objects)
                     {
                         OStringStream os(IOstream::ASCII);
-                        os  << iter().dict();
+                        os  << dEntry.dict();
                         IStringStream is(os.str());
                         obj->readData(is);
                     }
@@ -135,7 +135,7 @@ void Foam::Time::readDict()
                 {
                     for (simpleRegIOobject* obj : objects)
                     {
-                        obj->readData(iter().stream());
+                        obj->readData(dEntry.stream());
                     }
                 }
             }
@@ -156,9 +156,9 @@ void Foam::Time::readDict()
 
         simpleObjectRegistry& objs = debug::infoObjects();
 
-        forAllConstIters(*localDict, iter)
+        for (const entry& dEntry : *localDict)
         {
-            const word& name = iter().keyword();
+            const word& name = dEntry.keyword();
 
             simpleObjectRegistryEntry* objPtr = objs.lookupPtr(name);
 
@@ -166,14 +166,14 @@ void Foam::Time::readDict()
             {
                 const List<simpleRegIOobject*>& objects = *objPtr;
 
-                DetailInfo << "    " << iter() << nl;
+                DetailInfo << "    " << dEntry << nl;
 
-                if (iter().isDict())
+                if (dEntry.isDict())
                 {
                     for (simpleRegIOobject* obj : objects)
                     {
                         OStringStream os(IOstream::ASCII);
-                        os  << iter().dict();
+                        os  << dEntry.dict();
                         IStringStream is(os.str());
                         obj->readData(is);
                     }
@@ -182,7 +182,7 @@ void Foam::Time::readDict()
                 {
                     for (simpleRegIOobject* obj : objects)
                     {
-                        obj->readData(iter().stream());
+                        obj->readData(dEntry.stream());
                     }
                 }
             }
@@ -202,24 +202,24 @@ void Foam::Time::readDict()
 
         simpleObjectRegistry& objs = debug::optimisationObjects();
 
-        forAllConstIters(*localDict, iter)
+        for (const entry& dEntry : *localDict)
         {
-            const word& name = iter().keyword();
+            const word& name = dEntry.keyword();
 
             simpleObjectRegistryEntry* objPtr = objs.lookupPtr(name);
 
             if (objPtr)
             {
-                DetailInfo << "    " << iter() << nl;
+                DetailInfo << "    " << dEntry << nl;
 
                 const List<simpleRegIOobject*>& objects = *objPtr;
 
-                if (iter().isDict())
+                if (dEntry.isDict())
                 {
                     for (simpleRegIOobject* obj : objects)
                     {
                         OStringStream os(IOstream::ASCII);
-                        os  << iter().dict();
+                        os  << dEntry.dict();
                         IStringStream is(os.str());
                         obj->readData(is);
                     }
@@ -228,7 +228,7 @@ void Foam::Time::readDict()
                 {
                     for (simpleRegIOobject* obj : objects)
                     {
-                        obj->readData(iter().stream());
+                        obj->readData(dEntry.stream());
                     }
                 }
             }

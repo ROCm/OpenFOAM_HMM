@@ -157,14 +157,14 @@ Foam::phaseSystem::phaseSystem
     phi_.writeOpt() = IOobject::AUTO_WRITE;
 
     // Blending methods
-    forAllConstIter(dictionary, subDict("blending"), iter)
+    for (const entry& dEntry : subDict("blending"))
     {
         blendingMethods_.insert
         (
-            iter().dict().dictName(),
+            dEntry.dict().dictName(),
             blendingMethod::New
             (
-                iter().dict(),
+                dEntry.dict(),
                 phaseModels_.toc()
             )
         );
