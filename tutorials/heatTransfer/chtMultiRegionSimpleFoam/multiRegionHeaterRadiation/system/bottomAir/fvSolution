@@ -18,7 +18,7 @@ solvers
 {
     rho
     {
-        solver          PCG
+        solver          PCG;
         preconditioner  DIC;
         tolerance       1e-7;
         relTol          0;
