@@ -35,7 +35,7 @@ Foam::AtomizationModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType(dict.lookup("atomizationModel"));
+    const word modelType(dict.get<word>("atomizationModel"));
 
     Info<< "Selecting atomizationModel " << modelType << endl;
 

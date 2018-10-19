@@ -33,7 +33,7 @@ Foam::wallBoilingModels::departureFrequencyModel::New
     const dictionary& dict
 )
 {
-    const word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Selecting departureFrequencyModel: " << modelType << endl;
 

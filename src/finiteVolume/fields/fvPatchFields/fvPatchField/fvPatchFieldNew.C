@@ -105,7 +105,7 @@ Foam::tmp<Foam::fvPatchField<Type>> Foam::fvPatchField<Type>::New
     const dictionary& dict
 )
 {
-    const word patchFieldType(dict.lookup("type"));
+    const word patchFieldType(dict.get<word>("type"));
 
     if (debug)
     {
@@ -138,8 +138,8 @@ Foam::tmp<Foam::fvPatchField<Type>> Foam::fvPatchField<Type>::New
 
     if
     (
-       !dict.found("patchType")
-     || word(dict.lookup("patchType")) != p.type()
+        !dict.found("patchType")
+     || dict.get<word>("patchType") != p.type()
     )
     {
         auto patchTypeCstrIter

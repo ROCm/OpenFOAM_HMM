@@ -230,7 +230,7 @@ Foam::displacementLayeredMotionMotionSolver::faceZoneEvaluate
     tmp<vectorField> tfld(new vectorField(meshPoints.size()));
     vectorField& fld = tfld.ref();
 
-    const word type(dict.lookup("type"));
+    const word type(dict.get<word>("type"));
 
     if (type == "fixedValue")
     {
@@ -262,7 +262,7 @@ Foam::displacementLayeredMotionMotionSolver::faceZoneEvaluate
     {
         // Reads name of name of patch. Then get average point displacement on
         // patch. That becomes the value of fld.
-        const word patchName(dict.lookup("patch"));
+        const word patchName(dict.get<word>("patch"));
         label patchID = mesh().boundaryMesh().findPatchID(patchName);
         pointField pdf
         (
@@ -451,7 +451,7 @@ void Foam::displacementLayeredMotionMotionSolver::cellZoneSolve
     }
 
 
-    const word interpolationScheme = zoneDict.lookup("interpolationScheme");
+    const word interpolationScheme(zoneDict.get<word>("interpolationScheme"));
 
     if (interpolationScheme == "oneSided")
     {

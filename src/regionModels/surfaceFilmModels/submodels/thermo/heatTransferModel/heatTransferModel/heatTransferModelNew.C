@@ -42,7 +42,7 @@ autoPtr<heatTransferModel> heatTransferModel::New
     const dictionary& dict
 )
 {
-    const word modelType(dict.lookup("heatTransferModel"));
+    const word modelType(dict.get<word>("heatTransferModel"));
 
     Info<< "    Selecting heatTransferModel " << modelType << endl;
 

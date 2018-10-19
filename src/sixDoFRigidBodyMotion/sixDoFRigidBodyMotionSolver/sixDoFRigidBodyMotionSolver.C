@@ -81,7 +81,7 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
         )
       : coeffDict()
     ),
-    patches_(wordRes(coeffDict().lookup("patches"))),
+    patches_(coeffDict().get<wordRes>("patches")),
     patchSet_(mesh.boundaryMesh().patchSet(patches_)),
     di_(coeffDict().get<scalar>("innerDistance")),
     do_(coeffDict().get<scalar>("outerDistance")),

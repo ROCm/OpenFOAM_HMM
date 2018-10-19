@@ -33,7 +33,7 @@ Foam::autoPtr<Foam::diameterModel> Foam::diameterModel::New
     const phaseModel& phase
 )
 {
-    const word modelType(dict.lookup("diameterModel"));
+    const word modelType(dict.get<word>("diameterModel"));
 
     Info << "Selecting diameterModel for phase "
         << phase.name()

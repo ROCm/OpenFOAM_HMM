@@ -42,7 +42,7 @@ autoPtr<filmTurbulenceModel> filmTurbulenceModel::New
     const dictionary& dict
 )
 {
-    const word modelType(dict.lookup("turbulence"));
+    const word modelType(dict.get<word>("turbulence"));
 
     Info<< "    Selecting filmTurbulenceModel " << modelType << endl;
 

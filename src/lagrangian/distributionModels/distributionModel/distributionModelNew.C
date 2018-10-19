@@ -33,7 +33,7 @@ Foam::autoPtr<Foam::distributionModel> Foam::distributionModel::New
     Random& rndGen
 )
 {
-    const word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Selecting distribution model " << modelType << endl;
 

@@ -107,7 +107,7 @@ const HashTable<dimensionedScalar>& unitSet()
                 << exit(FatalIOError);
         }
 
-        const word unitSetCoeffs(word(dict.lookup("unitSet")) + "Coeffs");
+        const word unitSetCoeffs(dict.get<word>("unitSet") + "Coeffs");
 
         if (!dict.found(unitSetCoeffs))
         {

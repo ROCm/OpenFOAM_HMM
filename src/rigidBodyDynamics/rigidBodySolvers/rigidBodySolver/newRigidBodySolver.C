@@ -33,7 +33,7 @@ Foam::autoPtr<Foam::RBD::rigidBodySolver> Foam::RBD::rigidBodySolver::New
     const dictionary& dict
 )
 {
-    const word solverType(dict.lookup("type"));
+    const word solverType(dict.get<word>("type"));
 
     Info<< "Selecting rigidBodySolver " << solverType << endl;
 

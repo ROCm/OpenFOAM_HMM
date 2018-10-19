@@ -33,7 +33,7 @@ Foam::kineticTheoryModels::radialModel::New
     const dictionary& dict
 )
 {
-    const word modelType(dict.lookup("radialModel"));
+    const word modelType(dict.get<word>("radialModel"));
 
     Info<< "Selecting radialModel " << modelType << endl;
 

@@ -61,7 +61,7 @@ Foam::autoPtr<Foam::ParticleStressModel> Foam::ParticleStressModel::New
     const dictionary& dict
 )
 {
-    const word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Selecting particle stress model " << modelType << endl;
 

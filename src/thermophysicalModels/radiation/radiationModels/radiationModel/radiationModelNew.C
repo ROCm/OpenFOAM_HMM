@@ -80,7 +80,7 @@ Foam::radiation::radiationModel::New
     const volScalarField& T
 )
 {
-    const word modelType(dict.lookup("radiationModel"));
+    const word modelType(dict.get<word>("radiationModel"));
 
     Info<< "Selecting radiationModel " << modelType << endl;
 

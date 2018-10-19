@@ -56,7 +56,7 @@ Foam::autoPtr<Foam::patchDistMethod> Foam::patchDistMethod::New
     const labelHashSet& patchIDs
 )
 {
-    const word methodType(dict.lookup("method"));
+    const word methodType(dict.get<word>("method"));
 
     Info<< "Selecting patchDistMethod " << methodType << endl;
 

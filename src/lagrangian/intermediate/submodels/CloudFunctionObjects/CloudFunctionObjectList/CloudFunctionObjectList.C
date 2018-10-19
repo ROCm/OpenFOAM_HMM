@@ -68,9 +68,6 @@ Foam::CloudFunctionObjectList<CloudType>::CloudFunctionObjectList
 
                 const dictionary& modelDict(dict.subDict(modelName));
 
-                // read the type of the function object
-                const word objectType(modelDict.lookup("type"));
-
                 this->set
                 (
                     i,
@@ -78,7 +75,7 @@ Foam::CloudFunctionObjectList<CloudType>::CloudFunctionObjectList
                     (
                         modelDict,
                         owner,
-                        objectType,
+                        modelDict.get<word>("type"),
                         modelName
                     )
                 );

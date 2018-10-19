@@ -35,7 +35,7 @@ Foam::swarmCorrection::New
     const phasePair& pair
 )
 {
-    const word correctionType(dict.lookup("type"));
+    const word correctionType(dict.get<word>("type"));
 
     Info<< "Selecting swarmCorrection for "
         << pair << ": " << correctionType << endl;

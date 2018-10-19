@@ -34,7 +34,7 @@ Foam::autoPtr<Foam::porousModel> Foam::porousModel::New
     const fvMesh& mesh
 )
 {
-    word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Selecting porousModel for "
         <<  ": " << modelType << endl;

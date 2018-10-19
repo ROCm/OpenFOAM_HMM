@@ -65,7 +65,7 @@ Foam::autoPtr<Foam::TimeScaleModel> Foam::TimeScaleModel::New
     const dictionary& dict
 )
 {
-    const word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Selecting time scale model " << modelType << endl;
 

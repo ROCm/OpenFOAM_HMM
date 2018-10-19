@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
                 (
                     searchableSurfaceModifier::New
                     (
-                        surfDict.lookup("type"),
+                        surfDict.get<word>("type"),
                         allGeometry,
                         surfDict
                     )
@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
                     (
                         searchableSurfaceModifier::New
                         (
-                            regionDict.lookup("type"),
+                            regionDict.get<word>("type"),
                             allGeometry,
                             regionDict
                         )

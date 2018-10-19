@@ -35,7 +35,10 @@ Foam::LduMatrix<Type, DType, LUType>::preconditioner::New
     const dictionary& preconditionerDict
 )
 {
-    const word preconditionerName = preconditionerDict.lookup("preconditioner");
+    const word preconditionerName
+    (
+        preconditionerDict.get<word>("preconditioner")
+    );
 
     if (sol.matrix().symmetric())
     {

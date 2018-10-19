@@ -104,7 +104,7 @@ Foam::autoPtr<Foam::relativeVelocityModel> Foam::relativeVelocityModel::New
     const incompressibleTwoPhaseInteractingMixture& mixture
 )
 {
-    const word modelType(dict.lookup(typeName));
+    const word modelType(dict.get<word>(typeName));
 
     Info<< "Selecting relative velocity model " << modelType << endl;
 

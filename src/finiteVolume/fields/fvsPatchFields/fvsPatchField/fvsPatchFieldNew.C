@@ -100,7 +100,7 @@ Foam::tmp<Foam::fvsPatchField<Type>> Foam::fvsPatchField<Type>::New
         InfoInFunction << "Constructing fvsPatchField<Type>" << endl;
     }
 
-    const word patchFieldType(dict.lookup("type"));
+    const word patchFieldType(dict.get<word>("type"));
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(patchFieldType);
 
@@ -127,7 +127,7 @@ Foam::tmp<Foam::fvsPatchField<Type>> Foam::fvsPatchField<Type>::New
     if
     (
         !dict.found("patchType")
-     || word(dict.lookup("patchType")) != p.type()
+     || dict.get<word>("patchType") != p.type()
     )
     {
         auto patchTypeCstrIter

@@ -35,7 +35,7 @@ Foam::PairModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType(dict.lookup("pairModel"));
+    const word modelType(dict.get<word>("pairModel"));
 
     Info<< "Selecting pair model " << modelType << endl;
 

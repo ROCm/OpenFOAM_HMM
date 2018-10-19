@@ -340,7 +340,7 @@ Foam::directions::directions
     {
         const dictionary& patchDict = dict.subDict("patchLocalCoeffs");
 
-        const word patchName(patchDict.lookup("patch"));
+        const word patchName(patchDict.get<word>("patch"));
 
         const label patchi = mesh.boundaryMesh().findPatchID(patchName);
 

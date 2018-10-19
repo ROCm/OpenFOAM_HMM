@@ -156,7 +156,7 @@ void thermalBaffleFvPatchScalarField::createPatchMesh()
 {
     const fvMesh& thisMesh = patch().boundaryMesh().mesh();
 
-    word regionName = dict_.lookup("region");
+    const word regionName(dict_.get<word>("region"));
 
     List<polyPatch*> regionPatches(3);
     List<word> patchNames(regionPatches.size());

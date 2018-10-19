@@ -89,7 +89,7 @@ Foam::displacementMotionSolver::New
     const pointIOField& points0
 )
 {
-    //const word solverTypeName(solverDict.lookup("solver"));
+    //const word solverTypeName(solverDict.get<word>("solver"));
 
     Info<< "Selecting motion solver: " << solverTypeName << endl;
 

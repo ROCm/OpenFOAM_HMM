@@ -41,7 +41,7 @@ Foam::autoPtr<Foam::faceZone> Foam::faceZone::New
         InfoInFunction << "Constructing faceZone " << name << endl;
     }
 
-    const word zoneType(dict.lookup("type"));
+    const word zoneType(dict.get<word>("type"));
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(zoneType);
 

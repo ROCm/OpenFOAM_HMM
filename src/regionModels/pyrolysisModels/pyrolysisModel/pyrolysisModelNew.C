@@ -58,7 +58,7 @@ autoPtr<pyrolysisModel> pyrolysisModel::New
                 IOobject::NO_WRITE,
                 false
             )
-        ).lookup("pyrolysisModel")
+        ).get<word>("pyrolysisModel")
     );
 
     Info<< "Selecting pyrolysisModel " << modelType << endl;
@@ -87,7 +87,7 @@ autoPtr<pyrolysisModel> pyrolysisModel::New
 )
 {
 
-    const word modelType = dict.lookup("pyrolysisModel");
+    const word modelType(dict.get<word>("pyrolysisModel"));
 
     Info<< "Selecting pyrolysisModel " << modelType << endl;
 

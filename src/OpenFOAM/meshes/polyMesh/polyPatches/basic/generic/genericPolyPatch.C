@@ -63,7 +63,7 @@ Foam::genericPolyPatch::genericPolyPatch
 )
 :
     polyPatch(name, dict, index, bm, patchType),
-    actualTypeName_(dict.lookup("type")),
+    actualTypeName_(dict.get<word>("type")),
     dict_(dict)
 {}
 

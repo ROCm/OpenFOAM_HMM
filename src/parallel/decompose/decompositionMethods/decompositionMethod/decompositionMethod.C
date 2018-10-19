@@ -129,7 +129,7 @@ void Foam::decompositionMethod::readConstraints()
         {
             const dictionary& dict = iter().dict();
 
-            constraintTypes.append(dict.lookup("type"));
+            constraintTypes.append(dict.get<word>("type"));
 
             constraints_.append
             (
@@ -353,7 +353,7 @@ Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
     const dictionary& decompDict
 )
 {
-    const word methodType(decompDict.lookup("method"));
+    const word methodType(decompDict.get<word>("method"));
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(methodType);
 
@@ -392,7 +392,7 @@ Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
         return decompositionMethod::New(decompDict);
     }
 
-    word methodType(decompDict.lookup("method"));
+    word methodType(decompDict.get<word>("method"));
     regionDict.readIfPresent("method", methodType);
 
     auto cstrIter = dictionaryRegionConstructorTablePtr_->cfind(methodType);

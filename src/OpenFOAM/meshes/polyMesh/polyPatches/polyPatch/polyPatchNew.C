@@ -83,7 +83,7 @@ Foam::autoPtr<Foam::polyPatch> Foam::polyPatch::New
         InfoInFunction << "Constructing polyPatch" << endl;
     }
 
-    word patchType(dict.lookup("type"));
+    word patchType(dict.get<word>("type"));
     dict.readIfPresent("geometricType", patchType);
 
     return polyPatch::New(patchType, name, dict, index, bm);

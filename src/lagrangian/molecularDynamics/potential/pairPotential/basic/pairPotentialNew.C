@@ -34,7 +34,7 @@ Foam::autoPtr<Foam::pairPotential> Foam::pairPotential::New
     const dictionary& propDict
 )
 {
-    const word potentialType(propDict.lookup("pairPotential"));
+    const word potentialType(propDict.get<word>("pairPotential"));
 
     Info<< nl << "Selecting intermolecular pair potential "
         << potentialType << " for "

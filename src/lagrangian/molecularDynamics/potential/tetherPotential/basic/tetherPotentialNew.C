@@ -33,7 +33,7 @@ Foam::autoPtr<Foam::tetherPotential> Foam::tetherPotential::New
     const dictionary& propDict
 )
 {
-    const word potentialType(propDict.lookup("tetherPotential"));
+    const word potentialType(propDict.get<word>("tetherPotential"));
 
     Info<< nl << "Selecting tether potential " << potentialType
         << " for " << name << endl;

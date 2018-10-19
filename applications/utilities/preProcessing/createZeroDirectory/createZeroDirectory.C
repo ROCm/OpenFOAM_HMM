@@ -257,7 +257,7 @@ int main(int argc, char *argv[])
     entry::disableFunctionEntries = 1;
 
     // Read the solver
-    const word& solverName = controlDict.lookup("application");
+    const word solverName(controlDict.get<word>("application"));
 
     // Generate solver template
     const solverTemplate solver(baseDir, runTime, solverName);

@@ -340,7 +340,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
 
     SOI_ = owner.db().time().userTimeToTime(SOI_);
 
-    const word parcelBasisType = this->coeffDict().lookup("parcelBasisType");
+    const word parcelBasisType(this->coeffDict().getWord("parcelBasisType"));
 
     if (parcelBasisType == "mass")
     {

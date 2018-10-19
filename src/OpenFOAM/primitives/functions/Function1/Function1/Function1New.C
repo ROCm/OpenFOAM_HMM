@@ -38,7 +38,7 @@ Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
     {
         const dictionary& coeffsDict(dict.subDict(entryName));
 
-        const word Function1Type(coeffsDict.lookup("type"));
+        const word Function1Type(coeffsDict.get<word>("type"));
 
         auto cstrIter = dictionaryConstructorTablePtr_->cfind(Function1Type);
 
@@ -57,7 +57,7 @@ Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
     }
     else
     {
-        Istream& is = dict.lookup(entryName); // non-recursive, allow patterns
+        Istream& is = dict.lookup(entryName, keyType::REGEX);
 
         token firstToken(is);
         word Function1Type;

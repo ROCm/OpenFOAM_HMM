@@ -160,7 +160,7 @@ bool Foam::sixDoFRigidBodyMotionRestraints::tabulatedAxialAngularSpring::read
             << exit(FatalError);
     }
 
-    axis_ = sDoFRBMRCoeffs_.lookup("axis");
+    sDoFRBMRCoeffs_.readEntry("axis", axis_);
 
     scalar magAxis(mag(axis_));
 
@@ -177,7 +177,7 @@ bool Foam::sixDoFRigidBodyMotionRestraints::tabulatedAxialAngularSpring::read
 
     moment_ = interpolationTable<scalar>(sDoFRBMRCoeffs_);
 
-    const word angleFormat = sDoFRBMRCoeffs_.lookup("angleFormat");
+    const word angleFormat(sDoFRBMRCoeffs_.get<word>("angleFormat"));
 
     if (angleFormat == "degrees" || angleFormat == "degree")
     {

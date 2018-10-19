@@ -51,7 +51,7 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
     {
         IOdictionary dict(dictHeader);
 
-        const word modelType(dict.lookup("dynamicFvMesh"));
+        const word modelType(dict.get<word>("dynamicFvMesh"));
 
         Info<< "Selecting dynamicFvMesh " << modelType << endl;
 

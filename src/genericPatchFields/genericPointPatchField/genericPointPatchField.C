@@ -50,7 +50,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
 )
 :
     calculatedPointPatchField<Type>(p, iF, dict),
-    actualTypeName_(dict.lookup("type")),
+    actualTypeName_(dict.get<word>("type")),
     dict_(dict)
 {
     forAllConstIter(dictionary, dict_, iter)

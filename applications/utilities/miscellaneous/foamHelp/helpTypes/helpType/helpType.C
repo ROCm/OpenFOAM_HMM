@@ -138,13 +138,22 @@ void Foam::helpType::displayDoc
 
     if (parser.found(className))
     {
-        fileName docFile(doxyPath/parser.subDict(className).lookup("filename"));
+        fileName docFile
+        (
+            doxyPath/parser.subDict(className).get<fileName>("filename")
+        );
 
         // can use FOAM_DOC_BROWSER='application file://%f' if required
         docBrowser.replaceAll("%f", docFile);
 
-        fileName classDirectory(parser.subDict(className).lookup("path"));
-        word classFile(parser.subDict(className).lookup("name"));
+        fileName classDirectory
+        (
+            parser.subDict(className).get<fileName>("path")
+        );
+        const word classFile
+        (
+            parser.subDict(className).get<word>("name")
+        );
 
         Info<< "Showing documentation for type " << className << nl << endl;
 

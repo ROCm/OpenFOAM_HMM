@@ -114,7 +114,7 @@ Foam::autoPtr<Foam::pointPatchField<Type>> Foam::pointPatchField<Type>::New
         InfoInFunction << "Constructing pointPatchField<Type>" << endl;
     }
 
-    word patchFieldType(dict.lookup("type"));
+    const word patchFieldType(dict.get<word>("type"));
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(patchFieldType);
 
@@ -144,7 +144,7 @@ Foam::autoPtr<Foam::pointPatchField<Type>> Foam::pointPatchField<Type>::New
     if
     (
        !dict.found("patchType")
-     || word(dict.lookup("patchType")) != p.type()
+     || dict.get<word>("patchType") != p.type()
     )
     {
         if (pfPtr().constraintType() == p.constraintType())

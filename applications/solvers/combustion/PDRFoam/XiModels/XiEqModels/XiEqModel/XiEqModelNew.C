@@ -35,7 +35,7 @@ Foam::autoPtr<Foam::XiEqModel> Foam::XiEqModel::New
     const volScalarField& Su
 )
 {
-    const word modelType(propDict.lookup("XiEqModel"));
+    const word modelType(propDict.get<word>("XiEqModel"));
 
     Info<< "Selecting flame-wrinkling model " << modelType << endl;
 

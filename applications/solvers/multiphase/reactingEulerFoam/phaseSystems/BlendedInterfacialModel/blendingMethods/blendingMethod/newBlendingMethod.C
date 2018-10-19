@@ -33,7 +33,7 @@ Foam::autoPtr<Foam::blendingMethod> Foam::blendingMethod::New
     const wordList& phaseNames
 )
 {
-    const word methodType(dict.lookup("type"));
+    const word methodType(dict.get<word>("type"));
 
     Info<< "Selecting " << dict.dictName() << " blending method: "
         << methodType << endl;

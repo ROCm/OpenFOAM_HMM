@@ -34,7 +34,7 @@ Foam::autoPtr<Foam::integrationScheme> Foam::integrationScheme::New
     const dictionary& dict
 )
 {
-    const word schemeName(dict.lookup(phiName));
+    const word schemeName(dict.get<word>(phiName));
 
     Info<< "Selecting " << phiName << " integration scheme "
         << schemeName << endl;

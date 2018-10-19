@@ -68,7 +68,7 @@ Foam::surfaceFeaturesExtraction::method::New
     const dictionary& dict
 )
 {
-    const word methodName = dict.lookup("extractionMethod");
+    const word methodName(dict.get<word>("extractionMethod"));
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(methodName);
 

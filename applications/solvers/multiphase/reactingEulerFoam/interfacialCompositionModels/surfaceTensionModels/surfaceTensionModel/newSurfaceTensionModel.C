@@ -35,7 +35,7 @@ Foam::surfaceTensionModel::New
     const phasePair& pair
 )
 {
-    const word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Selecting surfaceTensionModel for "
         << pair << ": " << modelType << endl;

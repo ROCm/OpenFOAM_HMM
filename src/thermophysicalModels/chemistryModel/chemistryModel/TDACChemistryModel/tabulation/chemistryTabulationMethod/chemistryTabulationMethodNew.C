@@ -38,7 +38,7 @@ Foam::chemistryTabulationMethod<CompType, ThermoType>::New
 {
     const dictionary& tabulationDict(dict.subDict("tabulation"));
 
-    const word methodName(tabulationDict.lookup("method"));
+    const word methodName(tabulationDict.get<word>("method"));
 
     Info<< "Selecting chemistry tabulation method " << methodName << endl;
     const word methodTypeName =

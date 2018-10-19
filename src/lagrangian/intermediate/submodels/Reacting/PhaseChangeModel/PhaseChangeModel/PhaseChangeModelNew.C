@@ -35,7 +35,7 @@ Foam::PhaseChangeModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType(dict.lookup("phaseChangeModel"));
+    const word modelType(dict.get<word>("phaseChangeModel"));
 
     Info<< "Selecting phase change model " << modelType << endl;
 

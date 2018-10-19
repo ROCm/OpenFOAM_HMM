@@ -80,7 +80,7 @@ Foam::autoPtr<Foam::thermophysicalFunction> Foam::thermophysicalFunction::New
             << endl;
     }
 
-    const word functionType(dict.lookup("functionType"));
+    const word functionType(dict.get<word>("functionType"));
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(functionType);
 

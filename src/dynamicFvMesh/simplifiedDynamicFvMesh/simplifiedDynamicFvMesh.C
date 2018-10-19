@@ -60,7 +60,7 @@ Foam::simplifiedMeshes::simplifiedDynamicFvMeshBase::New
     {
         IOdictionary dict(dictHeader);
 
-        const word modelType(dict.lookup("dynamicFvMesh"));
+        const word modelType(dict.get<word>("dynamicFvMesh"));
 
         auto cstrIter = timeConstructorTablePtr_->cfind(modelType);
 

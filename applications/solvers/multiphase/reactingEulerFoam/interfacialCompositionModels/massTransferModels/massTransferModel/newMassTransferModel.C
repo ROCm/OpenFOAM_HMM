@@ -34,7 +34,7 @@ Foam::autoPtr<Foam::massTransferModel> Foam::massTransferModel::New
     const phasePair& pair
 )
 {
-    const word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Selecting massTransferModel for "
         << pair << ": " << modelType << endl;

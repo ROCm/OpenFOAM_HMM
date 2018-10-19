@@ -65,7 +65,7 @@ T dimensionedConstant
 {
     dictionary& dict = dimensionedConstants();
 
-    const word unitSet(dict.lookup("unitSet"));
+    const word unitSet(dict.get<word>("unitSet"));
 
     dictionary& unitDict(dict.subDict(unitSet + "Coeffs"));
 

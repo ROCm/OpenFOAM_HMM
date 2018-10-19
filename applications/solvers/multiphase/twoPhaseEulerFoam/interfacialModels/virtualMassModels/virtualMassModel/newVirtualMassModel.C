@@ -34,7 +34,7 @@ Foam::autoPtr<Foam::virtualMassModel> Foam::virtualMassModel::New
     const phasePair& pair
 )
 {
-    const word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Selecting virtualMassModel for "
         << pair << ": " << modelType << endl;

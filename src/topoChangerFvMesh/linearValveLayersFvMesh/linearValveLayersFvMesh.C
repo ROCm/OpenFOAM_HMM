@@ -83,7 +83,10 @@ void Foam::linearValveLayersFvMesh::addZonesAndModifiers()
     // Do face zones for slider
 
     // Inner slider
-    const word innerSliderName(motionDict_.subDict("slider").lookup("inside"));
+    const word innerSliderName
+    (
+        motionDict_.subDict("slider").get<word>("inside")
+    );
     const polyPatch& innerSlider = boundaryMesh()[innerSliderName];
 
     fz[0] = new faceZone
@@ -96,7 +99,10 @@ void Foam::linearValveLayersFvMesh::addZonesAndModifiers()
     );
 
     // Outer slider
-    const word outerSliderName(motionDict_.subDict("slider").lookup("outside"));
+    const word outerSliderName
+    (
+        motionDict_.subDict("slider").get<word>("outside")
+    );
     const polyPatch& outerSlider = boundaryMesh()[outerSliderName];
 
     fz[1] = new faceZone
@@ -114,7 +120,7 @@ void Foam::linearValveLayersFvMesh::addZonesAndModifiers()
     // Add face zone for layer addition
     const word layerPatchName
     (
-        motionDict_.subDict("layer").lookup("patch")
+        motionDict_.subDict("layer").get<word>("patch")
     );
 
     const polyPatch& layerPatch = boundaryMesh()[layerPatchName];
@@ -275,7 +281,7 @@ Foam::tmp<Foam::pointField> Foam::linearValveLayersFvMesh::newPoints() const
 
     const word layerPatchName
     (
-        motionDict_.subDict("layer").lookup("patch")
+        motionDict_.subDict("layer").get<word>("patch")
     );
 
     const polyPatch& layerPatch = boundaryMesh()[layerPatchName];
@@ -284,7 +290,7 @@ Foam::tmp<Foam::pointField> Foam::linearValveLayersFvMesh::newPoints() const
 
     const vector vel
     (
-        motionDict_.lookup("pistonVelocity")
+        motionDict_.get<vector>("pistonVelocity")
     );
 
     forAll(patchPoints, ppI)

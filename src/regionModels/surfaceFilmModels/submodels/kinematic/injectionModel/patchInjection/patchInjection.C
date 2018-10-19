@@ -57,9 +57,9 @@ patchInjection::patchInjection
         pbm.size() - film.regionMesh().globalData().processorPatches().size()
     );
 
-    if (coeffDict_.found("patches"))
+    wordRes patchNames;
+    if (coeffDict_.readIfPresent("patches", patchNames))
     {
-        wordReList patchNames(coeffDict_.lookup("patches"));
         const labelHashSet patchSet = pbm.patchSet(patchNames);
 
         Info<< "        applying to patches:" << nl;

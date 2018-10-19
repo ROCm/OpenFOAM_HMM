@@ -35,7 +35,7 @@ Foam::RBD::restraint::New
     const rigidBodyModel& model
 )
 {
-    const word restraintType(dict.lookup("type"));
+    const word restraintType(dict.get<word>("type"));
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(restraintType);
 

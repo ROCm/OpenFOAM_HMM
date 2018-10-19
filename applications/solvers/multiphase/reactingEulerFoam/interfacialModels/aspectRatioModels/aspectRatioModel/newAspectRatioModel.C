@@ -35,7 +35,7 @@ Foam::aspectRatioModel::New
     const phasePair& pair
 )
 {
-    const word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Selecting aspectRatioModel for "
         << pair << ": " << modelType << endl;

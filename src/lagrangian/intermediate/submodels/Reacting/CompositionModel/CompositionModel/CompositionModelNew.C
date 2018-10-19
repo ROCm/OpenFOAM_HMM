@@ -35,7 +35,7 @@ Foam::CompositionModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType(dict.lookup("compositionModel"));
+    const word modelType(dict.get<word>("compositionModel"));
 
     Info<< "Selecting composition model " << modelType << endl;
 

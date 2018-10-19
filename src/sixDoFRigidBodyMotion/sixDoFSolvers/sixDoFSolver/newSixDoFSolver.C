@@ -33,7 +33,7 @@ Foam::autoPtr<Foam::sixDoFSolver> Foam::sixDoFSolver::New
     sixDoFRigidBodyMotion& body
 )
 {
-    word solverType(dict.lookup("type"));
+    const word solverType(dict.get<word>("type"));
 
     Info<< "Selecting sixDoFSolver " << solverType << endl;
 

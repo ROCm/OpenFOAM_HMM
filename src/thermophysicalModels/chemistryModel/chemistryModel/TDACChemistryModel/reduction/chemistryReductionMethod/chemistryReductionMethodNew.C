@@ -38,7 +38,7 @@ Foam::chemistryReductionMethod<CompType, ThermoType>::New
 {
     const dictionary& reductionDict(dict.subDict("reduction"));
 
-    const word methodName(reductionDict.lookup("method"));
+    const word methodName(reductionDict.get<word>("method"));
 
     Info<< "Selecting chemistry reduction method " << methodName << endl;
 

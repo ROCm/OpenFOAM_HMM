@@ -34,7 +34,7 @@ Foam::tabulatedWallFunctions::tabulatedWallFunction::New
     const polyMesh& mesh
 )
 {
-    const word functionName = dict.lookup("tabulatedWallFunction");
+    const word functionName(dict.get<word>("tabulatedWallFunction"));
 
     Info<< "Selecting tabulatedWallFunction " << functionName << endl;
 

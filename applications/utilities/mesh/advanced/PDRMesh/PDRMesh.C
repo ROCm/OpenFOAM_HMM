@@ -661,8 +661,8 @@ int main(int argc, char *argv[])
         const word& key = iter().keyword();
 
         const dictionary& dict = iter().dict();
-        const word cyclicName = dict.lookup("cyclicMasterPatch");
-        const word wallName = dict.lookup("wallPatch");
+        const word cyclicName = dict.get<word>("cyclicMasterPatch");
+        const word wallName = dict.get<word>("wallPatch");
         FixedList<word, 3> nameAndType;
         nameAndType[0] = key;
         nameAndType[1] = wallName;
@@ -685,12 +685,12 @@ int main(int argc, char *argv[])
     }
 
     // All exposed faces that are not explicitly marked to be put into a patch
-    const word defaultPatch(dict.lookup("defaultPatch"));
+    const word defaultPatch(dict.get<word>("defaultPatch"));
 
     Info<< "Faces that get exposed become boundary faces in patch "
         << defaultPatch << endl;
 
-    const word blockedSetName(dict.lookup("blockedCells"));
+    const word blockedSetName(dict.get<word>("blockedCells"));
 
     Info<< "Reading blocked cells from cellSet " << blockedSetName
         << endl;
@@ -1276,7 +1276,7 @@ int main(int argc, char *argv[])
             << " so might have to be moved back to constant/" << nl
             << endl;
 
-        word startFrom(runTime.controlDict().lookup("startFrom"));
+        const word startFrom(runTime.controlDict().get<word>("startFrom"));
 
         if (startFrom != "latestTime")
         {

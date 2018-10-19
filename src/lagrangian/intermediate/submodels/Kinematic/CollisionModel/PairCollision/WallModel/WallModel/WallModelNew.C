@@ -35,7 +35,7 @@ Foam::WallModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType(dict.lookup("wallModel"));
+    const word modelType(dict.get<word>("wallModel"));
 
     Info<< "Selecting wall model " << modelType << endl;
 

@@ -1756,7 +1756,7 @@ bool Foam::medialAxisMeshMover::move
     // ~~~~~~~~~~~~~~~~~~~
 
     //- Name of field specifying min thickness
-    const word minThicknessName = word(moveDict.lookup("minThicknessName"));
+    const word minThicknessName = moveDict.get<word>("minThicknessName");
 
 
     // Extract out patch-wise displacement

@@ -65,7 +65,7 @@ Foam::InjectionModelList<CloudType>::InjectionModelList
                 (
                     props,
                     model,
-                    props.lookup("type"),
+                    props.get<word>("type"),
                     owner
                 )
             );

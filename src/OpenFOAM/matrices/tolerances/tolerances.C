@@ -57,7 +57,7 @@ bool Foam::tolerances::read()
 {
     if (regIOobject::read())
     {
-        const word toleranceSetName(lookup("toleranceSet"));
+        const word toleranceSetName(get<word>("toleranceSet"));
         const dictionary& toleranceSet(subDict(toleranceSetName));
 
         if (toleranceSet.found("relaxationFactors"))
@@ -78,10 +78,8 @@ bool Foam::tolerances::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

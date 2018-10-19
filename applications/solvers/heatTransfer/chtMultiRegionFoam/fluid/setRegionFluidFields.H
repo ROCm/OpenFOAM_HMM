@@ -11,7 +11,7 @@
     label inertIndex = -1;
     if (Y.size())
     {
-        const word inertSpecie(thermo.lookup("inertSpecie"));
+        const word inertSpecie(thermo.get<word>("inertSpecie"));
         if (!composition.species().found(inertSpecie))
         {
             FatalIOErrorIn(args.executable().c_str(), thermo)

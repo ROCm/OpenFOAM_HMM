@@ -75,7 +75,7 @@ Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
         << "constructing faePatchField<Type>"
         << endl;
 
-    word patchFieldType(dict.lookup("type"));
+    const word patchFieldType(dict.get<word>("type"));
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(patchFieldType);
 

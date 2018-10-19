@@ -33,7 +33,7 @@ Foam::kineticTheoryModels::conductivityModel::New
     const dictionary& dict
 )
 {
-    const word modelType(dict.lookup("conductivityModel"));
+    const word modelType(dict.get<word>("conductivityModel"));
 
     Info<< "Selecting conductivityModel " << modelType << endl;
 

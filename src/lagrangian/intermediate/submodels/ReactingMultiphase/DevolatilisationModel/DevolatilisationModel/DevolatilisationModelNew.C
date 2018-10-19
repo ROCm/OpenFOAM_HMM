@@ -35,7 +35,7 @@ Foam::DevolatilisationModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType(dict.lookup("devolatilisationModel"));
+    const word modelType(dict.get<word>("devolatilisationModel"));
 
     Info<< "Selecting devolatilisation model " << modelType << endl;
 

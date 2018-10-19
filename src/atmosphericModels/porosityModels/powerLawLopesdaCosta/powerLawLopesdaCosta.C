@@ -63,7 +63,7 @@ Foam::porosityModels::powerLawLopesdaCostaZone::powerLawLopesdaCostaZone
     scalar searchSpan(coeffs.get<scalar>("searchSpan"));
 
     // Top surface file name defining the extent of the porous region
-    word topSurfaceFileName(coeffs.lookup("topSurface"));
+    const word topSurfaceFileName(coeffs.get<word>("topSurface"));
 
     // List of the ground patches defining the lower surface
     // of the porous region

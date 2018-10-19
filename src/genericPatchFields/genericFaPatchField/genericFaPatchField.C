@@ -54,7 +54,7 @@ Foam::genericFaPatchField<Type>::genericFaPatchField
 )
 :
     calculatedFaPatchField<Type>(p, iF, dict),
-    actualTypeName_(dict.lookup("type")),
+    actualTypeName_(dict.get<word>("type")),
     dict_(dict)
 {
     if (!dict.found("value"))

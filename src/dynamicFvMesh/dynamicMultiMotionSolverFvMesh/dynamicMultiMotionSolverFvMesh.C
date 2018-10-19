@@ -77,7 +77,7 @@ Foam::dynamicMultiMotionSolverFvMesh::dynamicMultiMotionSolverFvMesh
         {
             const dictionary& subDict = iter().dict();
 
-            word zoneName(subDict.lookup("cellZone"));
+            const word zoneName(subDict.get<word>("cellZone"));
 
             zoneIDs_[zoneI] = cellZones().findZoneID(zoneName);
 

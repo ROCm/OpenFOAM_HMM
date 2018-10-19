@@ -34,7 +34,7 @@ Foam::autoPtr<Foam::dragModel> Foam::dragModel::New
     const phaseModel& phase2
 )
 {
-    const word modelType(interfaceDict.lookup("type"));
+    const word modelType(interfaceDict.get<word>("type"));
 
     Info << "Selecting dragModel for phase "
         << phase1.name()
