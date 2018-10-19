@@ -56,7 +56,10 @@ singleProcessorFaceSetsConstraint
 )
 :
     decompositionConstraint(constraintsDict, typeName),
-    setNameAndProcs_(coeffDict_.lookup("singleProcessorFaceSets"))
+    setNameAndProcs_
+    (
+        coeffDict_.lookupCompat("sets", {{"singleProcessorFaceSets", 1806}})
+    )
 {
     if (decompositionConstraint::debug)
     {
