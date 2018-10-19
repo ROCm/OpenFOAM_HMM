@@ -24,6 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "rawSurfaceWriter.H"
+#include "OFstream.H"
+#include "OSspecific.H"
 #include "makeSurfaceWriterMethods.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -35,169 +37,25 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-inline void Foam::rawSurfaceWriter::writeLocation
-(
-    Ostream& os,
-    const point& pt
-)
-{
-    os  << pt.x() << ' ' << pt.y() << ' ' << pt.z() << ' ';
-}
-
-
-inline void Foam::rawSurfaceWriter::writeLocation
-(
-    Ostream& os,
-    const pointField& points,
-    const face& f
-)
-{
-    writeLocation(os, f.centre(points));
-}
-
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    template<>
-    void Foam::rawSurfaceWriter::writeHeader
-    (
-        Ostream& os,
-        const word& fieldName,
-        const Field<scalar>& values
-    )
+    // Emit x,y,z
+    static inline void writePoint(Ostream& os, const point& p)
     {
-        os  << values.size() << nl
-            << "#  x  y  z  " << fieldName << nl;
+        os << p.x() << ' ' << p.y() << ' ' << p.z();
     }
+} // End namespace Foam
 
 
-    template<>
-    void Foam::rawSurfaceWriter::writeHeader
-    (
-        Ostream& os,
-        const word& fieldName,
-        const Field<vector>& values
-    )
-    {
-        os  << values.size() << nl
-            << "#  x  y  z  "
-            << fieldName << "_x  "
-            << fieldName << "_y  "
-            << fieldName << "_z  "
-            << endl;
-    }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Field writing implementation
+#include "rawSurfaceWriterImpl.C"
 
-    template<>
-    void Foam::rawSurfaceWriter::writeHeader
-    (
-        Ostream& os,
-        const word& fieldName,
-        const Field<sphericalTensor>& values
-    )
-    {
-        os  << values.size() << nl
-            << "#  ii  "
-            << fieldName << "_ii" << nl;
-    }
-
-
-    template<>
-    void Foam::rawSurfaceWriter::writeHeader
-    (
-        Ostream& os,
-        const word& fieldName,
-        const Field<symmTensor>& values
-    )
-    {
-        os  << values.size() << nl
-            << "#  xx  xy  xz  yy  yz ";
-        for (int i=0; i<6; ++i)
-        {
-            os  << fieldName << "_" << i << "  ";
-        }
-        os  << endl;
-    }
-
-
-    template<>
-    void Foam::rawSurfaceWriter::writeHeader
-    (
-        Ostream& os,
-        const word& fieldName,
-        const Field<tensor>& values
-    )
-    {
-        os  << values.size() << nl
-            << "#  xx  xy  xz  yx  yy  yz  zx  zy  zz";
-        for (int i=0; i<9; ++i)
-        {
-            os  << fieldName << "_" << i << "  ";
-        }
-        os  << nl;
-    }
-
-
-    template<>
-    inline void Foam::rawSurfaceWriter::writeData
-    (
-        Ostream& os,
-        const scalar& v
-    )
-    {
-        os  << v << nl;
-    }
-
-
-    template<>
-    inline void Foam::rawSurfaceWriter::writeData
-    (
-        Ostream& os,
-        const vector& v
-    )
-    {
-        os  << v[0] << ' ' << v[1] << ' ' << v[2] << nl;
-    }
-
-
-    template<>
-    inline void Foam::rawSurfaceWriter::writeData
-    (
-        Ostream& os,
-        const sphericalTensor& v
-    )
-    {
-        os  << v[0] << nl;
-    }
-
-
-    template<>
-    inline void Foam::rawSurfaceWriter::writeData
-    (
-        Ostream& os,
-        const symmTensor& v
-    )
-    {
-        os  << v[0] << ' ' << v[1] << ' ' << v[2] << ' '
-            << v[3] << ' ' << v[4] << ' ' << v[5] << nl;
-    }
-
-
-    template<>
-    inline void Foam::rawSurfaceWriter::writeData
-    (
-        Ostream& os,
-        const tensor& v
-    )
-    {
-        os  << v[0] << ' ' << v[1] << ' ' << v[2] << ' '
-            << v[3] << ' ' << v[4] << ' ' << v[5] << ' '
-            << v[6] << ' ' << v[7] << ' ' << v[8] << nl;
-    }
-
-}
+// Field writing methods
+defineSurfaceWriterWriteFields(Foam::rawSurfaceWriter);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -232,8 +90,11 @@ Foam::fileName Foam::rawSurfaceWriter::write
     const bool verbose
 ) const
 {
+    // geometry:  rootdir/time/surfaceName.raw
+
     const pointField& points = surf.points();
     const faceList&    faces = surf.faces();
+
 
     if (!isDir(outputDir))
     {
@@ -253,28 +114,21 @@ Foam::fileName Foam::rawSurfaceWriter::write
         Info<< "Writing geometry to " << os.name() << endl;
     }
 
-
     // Header
     os  << "# geometry NO_DATA " << faces.size() << nl
         << "#  x  y  z" << nl;
 
     // Write faces centres
-    forAll(faces, elemI)
+    for (const face& f : faces)
     {
-        writeLocation(os, points, faces[elemI]);
-        os  << nl;
+        writePoint(os, f.centre(points));
+        os << nl;
     }
 
     os  << nl;
 
     return os.name();
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// Create write methods
-defineSurfaceWriterWriteFields(Foam::rawSurfaceWriter);
 
 
 // ************************************************************************* //

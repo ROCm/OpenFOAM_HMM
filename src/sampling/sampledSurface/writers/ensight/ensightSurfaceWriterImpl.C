@@ -48,7 +48,11 @@ Foam::fileName Foam::ensightSurfaceWriter::writeUncollated
     const ensight::FileName surfName(surfaceName);
     const ensight::VarName  varName(fieldName);
 
-    // use variable name as sub-directory for results
+    // geometry:  rootdir/time/<field>/surfaceName.case
+    // geometry:  rootdir/time/<field>/surfaceName.<index>.mesh
+    // field:     rootdir/time/<field>/surfaceName.<index>.field
+
+    // Variable name as sub-directory for results
     // eg, something like this:
     // - VAR1/SURF1.case
     // - VAR1/SURF1.0000.mesh
@@ -163,7 +167,11 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
     const ensight::FileName surfName(surfaceName);
     const ensight::VarName  varName(fieldName);
 
-    // use surface name as sub-directory for results
+    // geometry:  rootdir/surfaceName/surfaceName.case
+    // geometry:  rootdir/surfaceName/surfaceName/data/<index>/geometry
+    // field:     rootdir/surfaceName/surfaceName/data/<index>/field
+
+    // Use surface name as sub-directory for results
     // eg, something like this:
     // - SURF1/SURF1.case
     // - SURF1/SURF1/data/00000000/geometry

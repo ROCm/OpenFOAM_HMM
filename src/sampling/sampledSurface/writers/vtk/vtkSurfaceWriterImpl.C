@@ -60,13 +60,15 @@ Foam::fileName Foam::vtkSurfaceWriter::writeTemplate
     const bool verbose
 ) const
 {
+    // field:  rootdir/time/<field>_surfaceName.{vtk|vtp}
+
     if (!isDir(outputDir))
     {
         mkDir(outputDir);
     }
 
     OFstream os(outputDir/fieldName + '_' + surfaceName + ".vtk");
-    os.precision(writePrecision_);
+    os.precision(precision_);
 
     if (verbose)
     {

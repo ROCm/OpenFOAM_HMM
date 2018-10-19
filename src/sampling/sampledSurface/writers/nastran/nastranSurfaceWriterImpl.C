@@ -164,6 +164,9 @@ Foam::fileName Foam::nastranSurfaceWriter::writeTemplate
 
     const loadFormat& format(fieldMap_[fieldName]);
 
+    // field:  rootdir/time/field/surfaceName.nas
+
+
     if (!isDir(outputDir/fieldName))
     {
         mkDir(outputDir/fieldName);

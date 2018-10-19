@@ -35,6 +35,15 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Field writing implementation
+#include "foamSurfaceWriterImpl.C"
+
+// Field writing methods
+defineSurfaceWriterWriteFields(Foam::foamSurfaceWriter);
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::fileName Foam::foamSurfaceWriter::write
@@ -45,8 +54,8 @@ Foam::fileName Foam::foamSurfaceWriter::write
     const bool verbose
 ) const
 {
-    const pointField& points = surf.points();
-    const faceList&    faces = surf.faces();
+    // Output:
+    // - rootdir/time/surfaceName/{points,faces}
 
     fileName surfaceDir(outputDir/surfaceName);
 
@@ -60,6 +69,8 @@ Foam::fileName Foam::foamSurfaceWriter::write
         Info<< "Writing geometry to " << surfaceDir << endl;
     }
 
+    const pointField& points = surf.points();
+    const faceList&    faces = surf.faces();
 
     // Points
     OFstream(surfaceDir/"points")() << points;
@@ -80,10 +91,6 @@ Foam::fileName Foam::foamSurfaceWriter::write
 
     return surfaceDir;
 }
-
-
-// Create write methods
-defineSurfaceWriterWriteFields(Foam::foamSurfaceWriter);
 
 
 // ************************************************************************* //

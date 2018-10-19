@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,12 +25,11 @@ License
 
 #include "OFstream.H"
 #include "OSspecific.H"
-#include "IOmanip.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-Foam::fileName Foam::rawSurfaceWriter::writeTemplate
+Foam::fileName Foam::foamSurfaceWriter::writeTemplate
 (
     const fileName& outputDir,
     const fileName& surfaceName,
@@ -41,52 +40,33 @@ Foam::fileName Foam::rawSurfaceWriter::writeTemplate
     const bool verbose
 ) const
 {
-    const pointField& points = surf.points();
-    const faceList&    faces = surf.faces();
+    // Geometry should already have been written
+    // Values to separate directory (e.g. "scalarField/p")
 
-    if (!isDir(outputDir))
-    {
-        mkDir(outputDir);
-    }
+    // field:    rootdir/time/surfaceName/fieldType/field
 
-    OFstream os(outputDir/fieldName + '_' + surfaceName + ".raw");
+    const word fieldTypeName
+    (
+        word(pTraits<Type>::typeName) + FieldBase::typeName
+    );
+
+    const fileName base(outputDir/surfaceName);
+    const fileName outputFile(base / fieldTypeName / fieldName);
 
     if (verbose)
     {
-        Info<< "Writing field " << fieldName << " to " << os.name() << endl;
+        Info<< "Writing field " << fieldName << " to " << base << endl;
     }
 
-    // header
-    os  << "# " << fieldName;
-    if (isNodeValues)
+
+    if (!isDir(outputFile.path()))
     {
-        os  << "  POINT_DATA ";
-    }
-    else
-    {
-        os  << "  FACE_DATA ";
+        mkDir(outputFile.path());
     }
 
-    // header
-    writeHeader(os, fieldName, values);
-
-    // values
-    if (isNodeValues)
-    {
-        forAll(values, elemI)
-        {
-            writeLocation(os, points[elemI]);
-            writeData(os, values[elemI]);
-        }
-    }
-    else
-    {
-        forAll(values, elemI)
-        {
-            writeLocation(os, points, faces[elemI]);
-            writeData(os, values[elemI]);
-        }
-    }
+    // Write field
+    OFstream os(outputFile);
+    os << values;
 
     return os.name();
 }

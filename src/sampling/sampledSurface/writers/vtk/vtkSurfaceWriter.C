@@ -24,6 +24,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "vtkSurfaceWriter.H"
+#include "foamVtkOutputOptions.H"
+
+#include "OFstream.H"
+#include "OSspecific.H"
 #include "makeSurfaceWriterMethods.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -34,22 +38,34 @@ namespace Foam
     addToRunTimeSelectionTable(surfaceWriter, vtkSurfaceWriter, wordDict);
 }
 
+// Field writing implementation
+#include "vtkSurfaceWriterImpl.C"
+
+// Field writing methods
+defineSurfaceWriterWriteFields(Foam::vtkSurfaceWriter);
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::vtkSurfaceWriter::writeGeometry
 (
     Ostream& os,
-    const meshedSurf& surf
+    const meshedSurf& surf,
+    std::string title
 )
 {
     const pointField& points = surf.points();
     const faceList&    faces = surf.faces();
 
+    if (title.empty())
+    {
+        title = "sampleSurface";
+    }
+
     // header
     os
         << "# vtk DataFile Version 2.0" << nl
-        << "sampleSurface" << nl
+        << title.c_str() << nl
         << "ASCII" << nl
         << "DATASET POLYDATA" << nl;
 
@@ -193,7 +209,6 @@ namespace Foam
                 << nl;
         }
     }
-
 }
 
 
@@ -202,22 +217,47 @@ namespace Foam
 Foam::vtkSurfaceWriter::vtkSurfaceWriter()
 :
     surfaceWriter(),
-    writePrecision_(IOstream::defaultPrecision())
+    fmtType_(unsigned(vtk::formatType::LEGACY_ASCII)),
+    precision_(IOstream::defaultPrecision())
 {}
 
 
 Foam::vtkSurfaceWriter::vtkSurfaceWriter(const dictionary& options)
 :
     surfaceWriter(),
-    writePrecision_
+    fmtType_(static_cast<unsigned>(vtk::formatType::LEGACY_ASCII)),
+    precision_(IOstream::defaultPrecision())
+{
+#if 0
+    // Future
+    // format: ascii | binary
+    // legacy  true | false
+
+    vtk::outputOptions opts(static_cast<vtk::formatType>(fmtType_));
+
+    opts.ascii
     (
-        options.lookupOrDefault
+        options.found("format")
+     && (IOstream::formatEnum(options.get<word>("format")) == IOstream::ASCII)
+    );
+
+    if (options.lookupOrDefault("legacy", false))
+    {
+        opts.legacy(true);
+    }
+
+    // Convert back to raw data type
+    fmtType_ = static_cast<unsigned>(opts.fmt());
+#endif
+
+    // The write precision for ASCII formatters
+    precision_ =
+        options.lookupOrDefaultCompat
         (
-            "writePrecision",
+            "precision", {{"writePrecision", -1806}},
             IOstream::defaultPrecision()
-        )
-    )
-{}
+        );
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -230,27 +270,25 @@ Foam::fileName Foam::vtkSurfaceWriter::write
     const bool verbose
 ) const
 {
+    // geometry:  rootdir/time/surfaceName.{vtk|vtp}
+
     if (!isDir(outputDir))
     {
         mkDir(outputDir);
     }
 
     OFstream os(outputDir/surfaceName + ".vtk");
-    os.precision(writePrecision_);
+    os.precision(precision_);
 
     if (verbose)
     {
         Info<< "Writing geometry to " << os.name() << endl;
     }
 
-    writeGeometry(os, surf);
+    writeGeometry(os, surf, surfaceName);
 
     return os.name();
 }
-
-
-// Create write methods
-defineSurfaceWriterWriteFields(Foam::vtkSurfaceWriter);
 
 
 // ************************************************************************* //

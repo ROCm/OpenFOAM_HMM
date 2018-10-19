@@ -27,23 +27,55 @@ Class
 Description
     A surface writer for the Nastran file format - both surface mesh and fields
 
+    The formatOptions for nastran:
+    \table
+        Property | Description                              | Required | Default
+        fields   | field pairs for PLOAD2, PLOAD4           | yes   |
+        format   | short / long / free                      | no    | long
+        scale    | output scaling                           | no    | 1
+    \endtable
+
+    For example,
     \verbatim
     formatOptions
     {
         nastran
         {
-            // From OpenFOAM field name to NASTRAN field name
+            // OpenFOAM field name to NASTRAN field name
             fields
             (
                 (pMean  PLOAD2)
                 (p      PLOAD4)
             );
-            // Optional scale
-            scale   2.0;
-            // Optional format
-            format  free;    // short, long, free
+            format  free;     // format type
+            scale   2.0;      // output scaling
         }
     }
+    \endverbatim
+
+    \heading Output file locations
+
+    The \c rootdir normally corresponds to something like
+    \c postProcessing/\<name\>
+
+    \subheading Geometry
+    \verbatim
+    rootdir
+    `-- timeName
+        |-- surfaceName0.{nas}
+        `-- surfaceName1.{nas}
+    \endverbatim
+
+    \subheading Fields
+    \verbatim
+    rootdir
+    `-- timeName
+        `-- field0
+        |   |-- surfaceName0.{nas}
+        |   `-- surfaceName1.{nas}
+        `-- field1
+            |-- surfaceName0.{nas}
+            `-- surfaceName1.{nas}
     \endverbatim
 
 SourceFiles
@@ -57,7 +89,6 @@ SourceFiles
 
 #include "surfaceWriter.H"
 #include "NASCore.H"
-#include "OFstream.H"
 #include "HashTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -162,13 +193,13 @@ private:
         template<class Type>
         fileName writeTemplate
         (
-            const fileName& outputDir,
-            const fileName& surfaceName,
-            const meshedSurf& surf,
-            const word& fieldName,
-            const Field<Type>& values,
-            const bool isNodeValues,
-            const bool verbose
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<Type>& values,      //!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const;
 
 
@@ -203,75 +234,76 @@ public:
         //- Write single surface geometry to file.
         virtual fileName write
         (
-            const fileName& outputDir,
-            const fileName& surfaceName,
-            const meshedSurf& surf,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
 
+
         //- Write scalarField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,
-            const fileName& surfaceName,
-            const meshedSurf& surf,
-            const word& fieldName,
-            const Field<scalar>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<scalar>& values,    //!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
 
         //- Write vectorField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,
-            const fileName& surfaceName,
-            const meshedSurf& surf,
-            const word& fieldName,
-            const Field<vector>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<vector>& values,    //!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
 
         //- Write sphericalTensorField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,
-            const fileName& surfaceName,
-            const meshedSurf& surf,
-            const word& fieldName,
-            const Field<sphericalTensor>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<sphericalTensor>& values, //!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
 
         //- Write symmTensorField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,
-            const fileName& surfaceName,
-            const meshedSurf& surf,
-            const word& fieldName,
-            const Field<symmTensor>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<symmTensor>& values,//!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
 
         //- Write tensorField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,
-            const fileName& surfaceName,
-            const meshedSurf& surf,
-            const word& fieldName,
-            const Field<tensor>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<tensor>& values,    //!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
 };
 
@@ -279,12 +311,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "nastranSurfaceWriterTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

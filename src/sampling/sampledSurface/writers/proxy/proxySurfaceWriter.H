@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,18 @@ Class
 Description
     A surfaceWriter that writes the geometry via the MeshedSurfaceProxy, but
     which does not support any fields.
+
+    \heading Output file locations
+
+    The \c rootdir normally corresponds to something like
+    \c postProcessing/\<name\>
+
+    \subheading Geometry
+    \verbatim
+    rootdir
+    `-- timeName
+        `-- surfaceName.{obj|stl|..}
+    \endverbatim
 
 SourceFiles
     proxySurfaceWriter.C
@@ -54,8 +66,9 @@ class proxySurfaceWriter
 
     // Private data
 
-        //- The associated file extension
-        word ext_;
+        //- The file extension associated with the proxy
+        word fileExtension_;
+
 
 public:
 
@@ -66,7 +79,7 @@ public:
     // Constructors
 
         //- Construct for a given extension
-        proxySurfaceWriter(const word& ext);
+        proxySurfaceWriter(const word& fileExt);
 
 
     //- Destructor
@@ -87,10 +100,10 @@ public:
         //- Write single surface geometry to file.
         virtual fileName write
         (
-            const fileName& outputDir,
-            const fileName& surfaceName,
-            const meshedSurf& surf,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
 };
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,47 +26,66 @@ License
 #include "OFstream.H"
 #include "OSspecific.H"
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    // Emit each component
+    template<class Type>
+    static inline void writeData(Ostream& os, const Type& val)
+    {
+        const direction ncmpt = pTraits<Type>::nComponents;
+        for (direction cmpt=0; cmpt < ncmpt; ++cmpt)
+        {
+            os  << ' ' << component(val, cmpt);
+        }
+        os  << nl;
+    }
+
+} // End namespace Foam
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-Foam::fileName Foam::foamSurfaceWriter::writeTemplate
+Foam::fileName Foam::starcdSurfaceWriter::writeTemplate
 (
     const fileName& outputDir,
     const fileName& surfaceName,
-    const meshedSurf& surf,
+    const meshedSurf&,
     const word& fieldName,
     const Field<Type>& values,
     const bool isNodeValues,
     const bool verbose
 ) const
 {
-    fileName surfaceDir(outputDir/surfaceName);
+    // field:  rootdir/time/<field>_surfaceName.usr
 
-    if (!isDir(surfaceDir))
+    if (!isDir(outputDir))
     {
-        mkDir(surfaceDir);
+        mkDir(outputDir);
     }
+
+    OFstream os(outputDir/fieldName + '_' + surfaceName + ".usr");
 
     if (verbose)
     {
-        Info<< "Writing field " << fieldName << " to " << surfaceDir << endl;
+        Info<< "Writing field " << fieldName << " to " << os.name() << endl;
     }
 
-    // geometry should already have been written
-    // Values to separate directory (e.g. "scalarField/p")
+    // 1-based ids
+    label elemId = 1;
 
-    fileName foamName(pTraits<Type>::typeName);
-    fileName valuesDir(surfaceDir/(foamName + Field<Type>::typeName));
-
-    if (!isDir(valuesDir))
+    // No header, just write values
+    for (const Type& val : values)
     {
-        mkDir(valuesDir);
+        os  << elemId;
+        writeData(os, val);
+
+        ++elemId;
     }
 
-    // values
-    OFstream(valuesDir/fieldName)()  << values;
-
-    return valuesDir/fieldName;
+    return os.name();
 }
 
 

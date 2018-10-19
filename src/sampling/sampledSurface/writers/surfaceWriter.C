@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +69,7 @@ Foam::surfaceWriter::New(const word& writeType)
         {
             FatalErrorInFunction
                 << "Unknown write type \"" << writeType << "\"\n\n"
-                << "Valid write types : "
+                << "Valid types : "
                 << wordConstructorTablePtr_->sortedToc() << nl
                 << "Valid proxy types : "
                 << MeshedSurfaceProxy<face>::writeTypes() << endl
@@ -82,18 +82,18 @@ Foam::surfaceWriter::New(const word& writeType)
 
 
 Foam::autoPtr<Foam::surfaceWriter>
-Foam::surfaceWriter::New(const word& writeType, const dictionary& optDict)
+Foam::surfaceWriter::New(const word& writeType, const dictionary& options)
 {
-    // find constructors with dictionary options
+    // Constructors with dictionary options
     auto cstrIter = wordDictConstructorTablePtr_->cfind(writeType);
 
     if (!cstrIter.found())
     {
-        // revert to versions without options
+        // Revert to version without options
         return Foam::surfaceWriter::New(writeType);
     }
 
-    return autoPtr<surfaceWriter>(cstrIter()(optDict));
+    return autoPtr<surfaceWriter>(cstrIter()(options));
 }
 
 
