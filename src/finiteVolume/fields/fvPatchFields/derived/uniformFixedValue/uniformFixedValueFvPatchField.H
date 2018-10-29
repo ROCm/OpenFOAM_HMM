@@ -63,7 +63,7 @@ SourceFiles
 #define uniformFixedValueFvPatchField_H
 
 #include "fixedValueFvPatchFields.H"
-#include "Function1.H"
+#include "PatchFunction1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -81,7 +81,7 @@ class uniformFixedValueFvPatchField
 {
     // Private data
 
-        autoPtr<Function1<Type>> uniformValue_;
+        autoPtr<PatchFunction1<Type>> uniformValue_;
 
 
 public:
