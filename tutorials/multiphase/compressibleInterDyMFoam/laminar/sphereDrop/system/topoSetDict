@@ -27,7 +27,7 @@ actions
         source  zoneToCell;
         sourceInfo
         {
-            name    topBlock;
+            zone    topBlock;
         }
     }
 
@@ -39,7 +39,7 @@ actions
         source  zoneToCell;
         sourceInfo
         {
-            name    centralBlock;
+            zone    centralBlock;
         }
     }
 
@@ -51,7 +51,7 @@ actions
         source zoneToCell;
         sourceInfo
         {
-            name    bottomBlock;
+            zone    bottomBlock;
         }
     }
 

@@ -54,7 +54,7 @@ void Foam::zoneToCell::combine(topoSet& set, const bool add) const
 
     for (const cellZone& zone : mesh_.cellZones())
     {
-        if (zoneName_.match(zone.name()))
+        if (selectedZones_.match(zone.name()))
         {
             hasMatched = true;
 
@@ -77,7 +77,8 @@ void Foam::zoneToCell::combine(topoSet& set, const bool add) const
     if (!hasMatched)
     {
         WarningInFunction
-            << "Cannot find any cellZone named " << zoneName_ << nl
+            << "Cannot find any cellZone matching "
+            << flatOutput(selectedZones_) << nl
             << "Valid names: " << flatOutput(mesh_.cellZones().names())
             << endl;
     }
@@ -89,11 +90,11 @@ void Foam::zoneToCell::combine(topoSet& set, const bool add) const
 Foam::zoneToCell::zoneToCell
 (
     const polyMesh& mesh,
-    const word& zoneName
+    const wordRe& zoneName
 )
 :
     topoSetSource(mesh),
-    zoneName_(zoneName)
+    selectedZones_(one(), zoneName)
 {}
 
 
@@ -104,8 +105,16 @@ Foam::zoneToCell::zoneToCell
 )
 :
     topoSetSource(mesh),
-    zoneName_(dict.get<wordRe>("name"))
-{}
+    selectedZones_()
+{
+    // Look for 'zones' and 'zone', but accept 'name' as well
+    if (!dict.readIfPresent("zones", selectedZones_))
+    {
+        selectedZones_.resize(1);
+        selectedZones_.first() =
+            dict.getCompat<wordRe>("zone", {{"name", 1806}});
+    }
+}
 
 
 Foam::zoneToCell::zoneToCell
@@ -115,7 +124,7 @@ Foam::zoneToCell::zoneToCell
 )
 :
     topoSetSource(mesh),
-    zoneName_(checkIs(is))
+    selectedZones_(one(), wordRe(checkIs(is)))
 {}
 
 
@@ -129,15 +138,15 @@ void Foam::zoneToCell::applyToSet
 {
     if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
     {
-        Info<< "    Adding all cells of cellZone " << zoneName_ << " ..."
-            << endl;
+        Info<< "    Adding all cells of cell zones "
+            << flatOutput(selectedZones_) << " ..." << endl;
 
         combine(set, true);
     }
     else if (action == topoSetSource::DELETE)
     {
-        Info<< "    Removing all cells of cellZone " << zoneName_ << " ..."
-            << endl;
+        Info<< "    Removing all cells of cell zones "
+            << flatOutput(selectedZones_) << " ..." << endl;
 
         combine(set, false);
     }

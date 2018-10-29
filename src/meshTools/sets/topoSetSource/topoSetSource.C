@@ -148,11 +148,7 @@ Foam::autoPtr<Foam::topoSetSource> Foam::topoSetSource::New
 
 Foam::Istream& Foam::topoSetSource::checkIs(Istream& is)
 {
-    if (is.good() && !is.eof())
-    {
-        return is;
-    }
-    else
+    if (!is.good() || is.eof())
     {
         FatalErrorInFunction
             << exit(FatalError);

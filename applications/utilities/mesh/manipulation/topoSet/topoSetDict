@@ -63,7 +63,9 @@ FoamFile
 //    source faceZoneToCell;
 //    sourceInfo
 //    {
-//        name ".*Zone";      // Name of faceZone, regular expressions allowed
+//        zones (".*Zone");   // Name of faceZone, regular expressions allowed
+//  // OR zone ".*Zone";      // Name of faceZone, regular expressions allowed
+//  // OR name ".*Zone";      // Name of faceZone, regular expressions allowed
 //        option master;      // master/slave
 //    }
 //

@@ -25,13 +25,18 @@ Class
     Foam::zoneToFace
 
 Description
-    A topoSetSource to select faces based on faceZone.
+    A topoSetSource to select faces based on one of more faceZones.
 
     \heading Dictionary parameters
     \table
-        Property    | Description                       | Required  | Default
-        name        | The face zone name or regex       | yes   |
+        Property    | Description                           | Required | Default
+        zone        | The face zone name or regex           | possibly |
+        zones       | The face zone names or regexs         | possibly |
+        name        | Older specification for 'zone'        | no    |
     \endtable
+
+Note
+    Selection of multiple zones has precedence.
 
 SourceFiles
     zoneToFace.C
@@ -42,7 +47,7 @@ SourceFiles
 #define zoneToFace_H
 
 #include "topoSetSource.H"
-#include "wordRe.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,7 +55,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class zoneToFace Declaration
+                         Class zoneToFace Declaration
 \*---------------------------------------------------------------------------*/
 
 class zoneToFace
@@ -63,8 +68,8 @@ class zoneToFace
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Name/regular expression of the faceZone
-        wordRe zoneName_;
+        //- Matcher for zones
+        wordRes selectedZones_;
 
 
     // Private Member Functions
@@ -80,11 +85,7 @@ public:
     // Constructors
 
         //- Construct from components
-        zoneToFace
-        (
-            const polyMesh& mesh,
-            const word& zoneName
-        );
+        zoneToFace(const polyMesh& mesh, const wordRe& zoneName);
 
         //- Construct from dictionary
         zoneToFace(const polyMesh& mesh, const dictionary& dict);
@@ -99,7 +100,7 @@ public:
 
     // Member Functions
 
-        virtual sourceType setType() const
+        virtual topoSetSource::sourceType setType() const
         {
             return FACESETSOURCE;
         }

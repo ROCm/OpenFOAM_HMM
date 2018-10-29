@@ -25,17 +25,7 @@ actions
         source  zoneToCell;
         sourceInfo
         {
-            name    cylinder;
-        }
-    }
-    {
-        name    rotorCells;
-        type    cellSet;
-        action  add;
-        source  zoneToCell;
-        sourceInfo
-        {
-            name    innerCylinder;
+            zones (cylinder innerCylinder);
         }
     }
     {

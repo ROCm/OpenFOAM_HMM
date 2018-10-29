@@ -65,7 +65,7 @@ void Foam::faceZoneToCell::combine(topoSet& set, const bool add) const
 
     for (const faceZone& zone : mesh_.faceZones())
     {
-        if (zoneName_.match(zone.name()))
+        if (selectedZones_.match(zone.name()))
         {
             hasMatched = true;
 
@@ -77,8 +77,8 @@ void Foam::faceZoneToCell::combine(topoSet& set, const bool add) const
             );
 
             Info<< "    Found matching zone " << zone.name()
-                << " with " << cellLabels.size() << " cells on selected side."
-                << endl;
+                << " with " << cellLabels.size() << " cells on "
+                << faceActionNames_[option_] << " side" << endl;
 
             for (const label celli : cellLabels)
             {
@@ -94,7 +94,8 @@ void Foam::faceZoneToCell::combine(topoSet& set, const bool add) const
     if (!hasMatched)
     {
         WarningInFunction
-            << "Cannot find any faceZone named " << zoneName_ << nl
+            << "Cannot find any faceZone matching "
+            << flatOutput(selectedZones_) << nl
             << "Valid names: " << flatOutput(mesh_.faceZones().names())
             << endl;
     }
@@ -106,12 +107,12 @@ void Foam::faceZoneToCell::combine(topoSet& set, const bool add) const
 Foam::faceZoneToCell::faceZoneToCell
 (
     const polyMesh& mesh,
-    const word& zoneName,
+    const wordRe& zoneName,
     const faceAction option
 )
 :
     topoSetSource(mesh),
-    zoneName_(zoneName),
+    selectedZones_(one(), zoneName),
     option_(option)
 {}
 
@@ -123,9 +124,17 @@ Foam::faceZoneToCell::faceZoneToCell
 )
 :
     topoSetSource(mesh),
-    zoneName_(dict.get<wordRe>("name")),
+    selectedZones_(),
     option_(faceActionNames_.get("option", dict))
-{}
+{
+    // Look for 'zones' and 'zone', but accept 'name' as well
+    if (!dict.readIfPresent("zones", selectedZones_))
+    {
+        selectedZones_.resize(1);
+        selectedZones_.first() =
+            dict.getCompat<wordRe>("zone", {{"name", 1806}});
+    }
+}
 
 
 Foam::faceZoneToCell::faceZoneToCell
@@ -135,7 +144,7 @@ Foam::faceZoneToCell::faceZoneToCell
 )
 :
     topoSetSource(mesh),
-    zoneName_(checkIs(is)),
+    selectedZones_(one(), wordRe(checkIs(is))),
     option_(faceActionNames_.read(checkIs(is)))
 {}
 
@@ -151,14 +160,16 @@ void Foam::faceZoneToCell::applyToSet
     if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
     {
         Info<< "    Adding all " << faceActionNames_[option_]
-            << " cells of faceZone " << zoneName_ << " ..." << endl;
+            << " cells of face zones "
+            << flatOutput(selectedZones_) << " ..." << endl;
 
         combine(set, true);
     }
     else if (action == topoSetSource::DELETE)
     {
         Info<< "    Removing all " << faceActionNames_[option_]
-            << " cells of faceZone " << zoneName_ << " ..." << endl;
+            << " cells of face zones "
+            << flatOutput(selectedZones_) << " ..." << endl;
 
         combine(set, false);
     }

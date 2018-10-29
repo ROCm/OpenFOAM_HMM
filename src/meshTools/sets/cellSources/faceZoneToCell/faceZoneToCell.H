@@ -29,10 +29,15 @@ Description
 
     \heading Dictionary parameters
     \table
-        Property    | Description                       | Required  | Default
-        name        | The face zone name or regex       | yes   |
-        option      | Selection type (master / slave)   | yes   |
+        Property    | Description                           | Required | Default
+        option      | Selection type (master / slave)       | yes   |
+        zone        | The face zone name or regex           | possibly |
+        zones       | The face zone names or regexs         | possibly |
+        name        | Older specification for 'zone'        | no    |
     \endtable
+
+Note
+    Selection of multiple zones has precedence.
 
 SourceFiles
     faceZoneToCell.C
@@ -43,7 +48,7 @@ SourceFiles
 #define faceZoneToCell_H
 
 #include "topoSetSource.H"
-#include "wordRe.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,8 +80,8 @@ private:
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Name/regular expression of faceZone
-        wordRe zoneName_;
+        //- Matcher for face zones
+        wordRes selectedZones_;
 
         //- Option
         faceAction option_;
@@ -98,7 +103,7 @@ public:
         faceZoneToCell
         (
             const polyMesh& mesh,
-            const word& zoneName,
+            const wordRe& zoneName,
             const faceAction option
         );
 
@@ -115,7 +120,7 @@ public:
 
     // Member Functions
 
-        virtual sourceType setType() const
+        virtual topoSetSource::sourceType setType() const
         {
             return CELLSETSOURCE;
         }

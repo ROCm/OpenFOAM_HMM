@@ -54,7 +54,7 @@ void Foam::zoneToFace::combine(topoSet& set, const bool add) const
 
     for (const faceZone& zone : mesh_.faceZones())
     {
-        if (zoneName_.match(zone.name()))
+        if (selectedZones_.match(zone.name()))
         {
             hasMatched = true;
 
@@ -77,8 +77,10 @@ void Foam::zoneToFace::combine(topoSet& set, const bool add) const
     if (!hasMatched)
     {
         WarningInFunction
-            << "Cannot find any faceZone named " << zoneName_ << endl
-            << "Valid names are " << mesh_.faceZones().names() << endl;
+            << "Cannot find any faceZone matching "
+            << flatOutput(selectedZones_) << nl
+            << "Valid names are " << flatOutput(mesh_.faceZones().names())
+            << endl;
     }
 }
 
@@ -88,11 +90,11 @@ void Foam::zoneToFace::combine(topoSet& set, const bool add) const
 Foam::zoneToFace::zoneToFace
 (
     const polyMesh& mesh,
-    const word& zoneName
+    const wordRe& zoneName
 )
 :
     topoSetSource(mesh),
-    zoneName_(zoneName)
+    selectedZones_(one(), zoneName)
 {}
 
 
@@ -103,8 +105,16 @@ Foam::zoneToFace::zoneToFace
 )
 :
     topoSetSource(mesh),
-    zoneName_(dict.get<wordRe>("name"))
-{}
+    selectedZones_()
+{
+    // Look for 'zones' and 'zone', but accept 'name' as well
+    if (!dict.readIfPresent("zones", selectedZones_))
+    {
+        selectedZones_.resize(1);
+        selectedZones_.first() =
+            dict.getCompat<wordRe>("zone", {{"name", 1806}});
+    }
+}
 
 
 Foam::zoneToFace::zoneToFace
@@ -114,7 +124,7 @@ Foam::zoneToFace::zoneToFace
 )
 :
     topoSetSource(mesh),
-    zoneName_(checkIs(is))
+    selectedZones_(one(), wordRe(checkIs(is)))
 {}
 
 
@@ -128,15 +138,15 @@ void Foam::zoneToFace::applyToSet
 {
     if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
     {
-        Info<< "    Adding all faces of faceZone " << zoneName_ << " ..."
-            << endl;
+        Info<< "    Adding all faces of face zones "
+            << flatOutput(selectedZones_) << " ..." << endl;
 
         combine(set, true);
     }
     else if (action == topoSetSource::DELETE)
     {
-        Info<< "    Removing all faces of faceZone " << zoneName_ << " ..."
-            << endl;
+        Info<< "    Removing all faces of face zones "
+            << flatOutput(selectedZones_) << " ..." << endl;
 
         combine(set, false);
     }

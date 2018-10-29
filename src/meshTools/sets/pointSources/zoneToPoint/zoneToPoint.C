@@ -54,7 +54,7 @@ void Foam::zoneToPoint::combine(topoSet& set, const bool add) const
 
     for (const pointZone& zone : mesh_.pointZones())
     {
-        if (zoneName_.match(zone.name()))
+        if (selectedZones_.match(zone.name()))
         {
             hasMatched = true;
 
@@ -77,7 +77,8 @@ void Foam::zoneToPoint::combine(topoSet& set, const bool add) const
     if (!hasMatched)
     {
         WarningInFunction
-            << "Cannot find any pointZone named " << zoneName_ << nl
+            << "Cannot find any pointZone matching "
+            << flatOutput(selectedZones_) << nl
             << "Valid names: " << flatOutput(mesh_.pointZones().names())
             << endl;
     }
@@ -89,11 +90,11 @@ void Foam::zoneToPoint::combine(topoSet& set, const bool add) const
 Foam::zoneToPoint::zoneToPoint
 (
     const polyMesh& mesh,
-    const word& zoneName
+    const wordRe& zoneName
 )
 :
     topoSetSource(mesh),
-    zoneName_(zoneName)
+    selectedZones_(one(), zoneName)
 {}
 
 
@@ -104,8 +105,16 @@ Foam::zoneToPoint::zoneToPoint
 )
 :
     topoSetSource(mesh),
-    zoneName_(dict.get<wordRe>("name"))
-{}
+    selectedZones_()
+{
+    // Look for 'zones' and 'zone', but accept 'name' as well
+    if (!dict.readIfPresent("zones", selectedZones_))
+    {
+        selectedZones_.resize(1);
+        selectedZones_.first() =
+            dict.getCompat<wordRe>("zone", {{"name", 1806}});
+    }
+}
 
 
 Foam::zoneToPoint::zoneToPoint
@@ -115,7 +124,7 @@ Foam::zoneToPoint::zoneToPoint
 )
 :
     topoSetSource(mesh),
-    zoneName_(checkIs(is))
+    selectedZones_(one(), wordRe(checkIs(is)))
 {}
 
 
@@ -129,15 +138,15 @@ void Foam::zoneToPoint::applyToSet
 {
     if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
     {
-        Info<< "    Adding all points of pointZone " << zoneName_ << " ..."
-            << endl;
+        Info<< "    Adding all points of point zones "
+            << flatOutput(selectedZones_) << " ..." << endl;
 
         combine(set, true);
     }
     else if (action == topoSetSource::DELETE)
     {
-        Info<< "    Removing all points of pointZone " << zoneName_ << " ..."
-            << endl;
+        Info<< "    Removing all points of point zones "
+            << flatOutput(selectedZones_) << " ..." << endl;
 
         combine(set, false);
     }
