@@ -21,7 +21,7 @@ namespace Foam
         const polyMesh& mesh,
         const surfaceWriter& writer,
         const word& name,
-        const indirectPrimitivePatch setPatch,
+        const indirectPrimitivePatch& setPatch,
         const fileName& outputDir
     );
 
