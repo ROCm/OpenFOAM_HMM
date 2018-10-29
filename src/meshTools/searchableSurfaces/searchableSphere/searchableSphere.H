@@ -29,10 +29,11 @@ Description
 
     \heading Dictionary parameters
     \table
-        Property    | Description                       | Required | Default
-        type        | sphere / searchableSphere         | selector |
-        centre      | The sphere centre                 | yes   |
-        radius      | The (outside) radius of sphere    | yes   |
+        Property    | Description                           | Required | Default
+        type        | sphere / searchableSphere             | selector |
+        origin      | The origin (centre) of the sphere     | yes   |
+        radius      | The (outside) radius of sphere        | yes   |
+        centre      | Alternative for 'origin'              | no    |
     \endtable
 
 SourceFiles
@@ -64,7 +65,7 @@ private:
     // Private Member Data
 
         //- Centre point of the sphere
-        const point centre_;
+        const point origin_;
 
         //- The outer radius of the sphere
         const scalar radius_;
@@ -151,7 +152,7 @@ public:
         //  Usually the element centres (should be of length size()).
         virtual tmp<pointField> coordinates() const
         {
-            return tmp<pointField>::New(1, centre_);
+            return tmp<pointField>::New(1, origin_);
         }
 
         //- Get bounding spheres (centre and radius squared), one per element.

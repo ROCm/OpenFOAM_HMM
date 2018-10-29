@@ -55,7 +55,7 @@ void Foam::sphereToCell::combine(topoSet& set, const bool add) const
 
     forAll(ctrs, celli)
     {
-        if (magSqr(ctrs[celli] - centre_) <= rad2)
+        if (magSqr(ctrs[celli] - origin_) <= rad2)
         {
             addOrDelete(set, celli, add);
         }
@@ -68,12 +68,12 @@ void Foam::sphereToCell::combine(topoSet& set, const bool add) const
 Foam::sphereToCell::sphereToCell
 (
     const polyMesh& mesh,
-    const point& centre,
+    const point& origin,
     const scalar radius
 )
 :
     topoSetSource(mesh),
-    centre_(centre),
+    origin_(origin),
     radius_(radius)
 {}
 
@@ -84,9 +84,12 @@ Foam::sphereToCell::sphereToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    centre_(dict.get<point>("centre")),
-    radius_(dict.get<scalar>("radius"))
+    sphereToCell
+    (
+        mesh,
+        dict.getCompat<vector>("origin", {{"centre", 1806}}),
+        dict.get<scalar>("radius")
+    )
 {}
 
 
@@ -97,7 +100,7 @@ Foam::sphereToCell::sphereToCell
 )
 :
     topoSetSource(mesh),
-    centre_(checkIs(is)),
+    origin_(checkIs(is)),
     radius_(readScalar(checkIs(is)))
 {}
 
@@ -112,15 +115,15 @@ void Foam::sphereToCell::applyToSet
 {
     if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
     {
-        Info<< "    Adding cells with centre within sphere, with centre = "
-            << centre_ << " and radius = " << radius_ << endl;
+        Info<< "    Adding cells within a sphere with centre = "
+            << origin_ << " and radius = " << radius_ << endl;
 
         combine(set, true);
     }
     else if (action == topoSetSource::DELETE)
     {
-        Info<< "    Removing cells with centre within sphere, with centre = "
-            << centre_ << " and radius = " << radius_ << endl;
+        Info<< "    Removing cells within a sphere with centre = "
+            << origin_ << " and radius = " << radius_ << endl;
 
         combine(set, false);
     }

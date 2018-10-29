@@ -57,18 +57,18 @@ Foam::pointIndexHit Foam::searchableSphere::findNearest
 {
     pointIndexHit info(false, sample, -1);
 
-    const vector n(sample - centre_);
+    const vector n(sample - origin_);
     scalar magN = mag(n);
 
     if (nearestDistSqr >= sqr(magN - radius_))
     {
         if (magN < ROOTVSMALL)
         {
-            info.rawPoint() = centre_ + vector(1,0,0)*radius_;
+            info.rawPoint() = origin_ + vector(1,0,0)*radius_;
         }
         else
         {
-            info.rawPoint() = centre_ + n/magN*radius_;
+            info.rawPoint() = origin_ + n/magN*radius_;
         }
         info.setHit();
         info.setIndex(0);
@@ -95,7 +95,7 @@ void Foam::searchableSphere::findLineAll
 
     if (magSqrDir > ROOTVSMALL)
     {
-        const vector toCentre(centre_-start);
+        const vector toCentre(origin_ - start);
         scalar magSqrToCentre = magSqr(toCentre);
 
         dir /= Foam::sqrt(magSqrDir);
@@ -135,18 +135,18 @@ void Foam::searchableSphere::findLineAll
 Foam::searchableSphere::searchableSphere
 (
     const IOobject& io,
-    const point& centre,
+    const point& origin,
     const scalar radius
 )
 :
     searchableSurface(io),
-    centre_(centre),
+    origin_(origin),
     radius_(radius)
 {
     bounds() = boundBox
     (
-        centre_ - radius_*vector::one,
-        centre_ + radius_*vector::one
+        origin_ - radius_*vector::one,
+        origin_ + radius_*vector::one
     );
 }
 
@@ -157,23 +157,20 @@ Foam::searchableSphere::searchableSphere
     const dictionary& dict
 )
 :
-    searchableSurface(io),
-    centre_(dict.get<point>("centre")),
-    radius_(dict.get<scalar>("radius"))
-{
-    bounds() = boundBox
+    searchableSphere
     (
-        centre_ - radius_*vector::one,
-        centre_ + radius_*vector::one
-    );
-}
+        io,
+        dict.getCompat<vector>("origin", {{"centre", 1806}}),
+        dict.get<scalar>("radius")
+    )
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::searchableSphere::overlaps(const boundBox& bb) const
 {
-    return bb.overlaps(centre_, sqr(radius_));
+    return bb.overlaps(origin_, sqr(radius_));
 }
 
 
@@ -181,8 +178,8 @@ const Foam::wordList& Foam::searchableSphere::regions() const
 {
     if (regions_.empty())
     {
-        regions_.setSize(1);
-        regions_[0] = "region0";
+        regions_.resize(1);
+        regions_.first() = "region0";
     }
     return regions_;
 }
@@ -195,10 +192,10 @@ void Foam::searchableSphere::boundingSpheres
     scalarField& radiusSqr
 ) const
 {
-    centres.setSize(1);
-    centres[0] = centre_;
+    centres.resize(1);
+    centres[0] = origin_;
 
-    radiusSqr.setSize(1);
+    radiusSqr.resize(1);
     radiusSqr[0] = Foam::sqr(radius_);
 
     // Add a bit to make sure all points are tested inside
@@ -336,7 +333,7 @@ void Foam::searchableSphere::getNormal
     {
         if (info[i].hit())
         {
-            normal[i] = normalised(info[i].hitPoint() - centre_);
+            normal[i] = normalised(info[i].hitPoint() - origin_);
         }
         else
         {
@@ -362,7 +359,7 @@ void Foam::searchableSphere::getVolumeType
 
         volType[pointi] =
         (
-            (magSqr(pt - centre_) <= rad2)
+            (magSqr(pt - origin_) <= rad2)
           ? volumeType::INSIDE : volumeType::OUTSIDE
         );
     }

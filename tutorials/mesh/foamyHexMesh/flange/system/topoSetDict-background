@@ -110,7 +110,7 @@ FoamFile
 //    // Cells with centre within sphere
 //    source sphereToCell;
 //    {
-//       centre   (0.2 0.2 -10);
+//       origin   (0.2 0.2 -10);
 //       radius   5.0;
 //    }
 //
