@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,90 +22,117 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Function1Types::Table
+    Foam::coordinateScaling
 
 Description
-    Templated table container function.
+    Helper class to wrap coordinate system and component-wise scaling
 
-    Items are stored in a list of Tuple2's. First column is always stored as
-    scalar entries. Data is read in Tuple2 form.
-
-    Usage:
-    \verbatim
-        <entryName>   table
-        (
-            (0.0 (1 2 3))
-            (1.0 (4 5 6))
-        );
-    \endverbatim
+See also
+    Foam::Function1Types
 
 SourceFiles
-    Table.C
+    coordinateScaling.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Table_H
-#define Table_H
+#ifndef coordinateScaling_H
+#define coordinateScaling_H
 
-#include "TableBase.H"
+#include "coordinateSystem.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace Function1Types
-{
 
 /*---------------------------------------------------------------------------*\
-                           Class Table Declaration
+                     Class coordinateScaling Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class Table
-:
-    public TableBase<Type>
+class coordinateScaling
 {
+    // Private data
+
+        //- Local co-ordinate system
+        const autoPtr<coordinateSystem> coordSys_;
+
+        //- In local co-ordinate system component-wise scaling
+        PtrList<Function1<Type>> scale_;
+
+        //- Cached whether any scaling or coordinate system
+        bool active_;
+
+
     // Private Member Functions
 
         //- No copy assignment
-        void operator=(const Table<Type>&) = delete;
-
+        void operator=(const coordinateScaling<Type>&) = delete;
 
 public:
 
-    //- Runtime type information
-    TypeName("table");
-
-
     // Constructors
 
-        //- Construct from entry name and Istream
-        Table(const word& entryName, const dictionary& dict);
+        //- Construct null
+        coordinateScaling();
 
-        //- Copy constructor
-        explicit Table(const Table<Type>& tbl);
+        //- Construct from registry and dictionary
+        coordinateScaling
+        (
+            const objectRegistry&,
+            const dictionary&
+        );
 
-        //- Construct and return a clone
-        virtual tmp<Function1<Type>> clone() const
-        {
-            return tmp<Function1<Type>>(new Table<Type>(*this));
-        }
+        //- Construct copy
+        coordinateScaling(const coordinateScaling&);
 
 
     //- Destructor
-    virtual ~Table();
+    virtual ~coordinateScaling();
+
+
+    // Member functions
+
+        //- Has any scaling or coordinate transformation
+        bool active() const
+        {
+            return active_;
+        }
+
+        //- Access to optional coordinate system
+        const autoPtr<coordinateSystem>& coordSys() const
+        {
+            return coordSys_;
+        }
+
+        //- Evaluate
+        virtual tmp<Field<Type>> transform
+        (
+            const pointField& pos,
+            const Field<Type>& local
+        ) const;
+
+        //- Write dictionary entry
+        virtual void writeEntry(Ostream&) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Function1Types
+template<>
+tmp<Field<label>> coordinateScaling<label>::transform
+(
+    const pointField& pos,
+    const Field<label>& local
+) const;
+
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "Table.C"
+    #include "coordinateScaling.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

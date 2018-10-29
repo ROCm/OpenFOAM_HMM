@@ -275,6 +275,9 @@ mappedPatches/mappedPolyPatch/mappedVariableThicknessWallPolyPatch.C
 mappedPatches/mappedPointPatch/mappedPointPatch.C
 mappedPatches/mappedPointPatch/mappedWallPointPatch.C
 
+PatchFunction1/makePatchFunction1s.C
+PatchFunction1/coordinateLabelScaling.C
+
 meshStructure/meshStructure.C
 meshStructure/topoDistanceData.C
 meshStructure/pointTopoDistanceData.C

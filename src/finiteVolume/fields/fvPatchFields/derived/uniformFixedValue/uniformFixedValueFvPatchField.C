@@ -61,7 +61,7 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF, dict, false),
-    uniformValue_(Function1<Type>::New("uniformValue", dict))
+    uniformValue_(PatchFunction1<Type>::New(p.patch(), "uniformValue", dict))
 {
     this->evaluate();
 }
@@ -77,7 +77,7 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF),   // Don't map
-    uniformValue_(ptf.uniformValue_.clone())
+    uniformValue_(ptf.uniformValue_.clone(p.patch()))
 {
     // Evaluate since value not mapped
     this->evaluate();
@@ -106,7 +106,7 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
     uniformValue_(ptf.uniformValue_.clone())
 {
     // Evaluate the profile if defined
-    if (ptf.uniformValue_.valid())
+    if (uniformValue_.valid())
     {
         this->evaluate();
     }
@@ -125,7 +125,6 @@ void Foam::uniformFixedValueFvPatchField<Type>::updateCoeffs()
 
     const scalar t = this->db().time().timeOutputValue();
     fvPatchField<Type>::operator==(uniformValue_->value(t));
-
     fixedValueFvPatchField<Type>::updateCoeffs();
 }
 
