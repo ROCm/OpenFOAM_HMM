@@ -684,11 +684,21 @@ Foam::cellCellStencils::cellVolumeWeight::cellVolumeWeight
         zeroGradientFvPatchScalarField::typeName
     )
 {
+    // Protect local fields from interpolation
+    nonInterpolatedFields_.insert("cellTypes");
+    nonInterpolatedFields_.insert("cellInterpolationWeight");
+
+    // For convenience also suppress frequently used displacement field
+    nonInterpolatedFields_.insert("cellDisplacement");
+    nonInterpolatedFields_.insert("grad(cellDisplacement)");
+    const word w("snGradCorr(cellDisplacement)");
+    const word d("((viscosity*faceDiffusivity)*magSf)");
+    nonInterpolatedFields_.insert("surfaceIntegrate(("+d+"*"+w+"))");
+
     // Read zoneID
     this->zoneID();
 
     // Read old-time cellTypes
-    nonInterpolatedFields_.insert("cellTypes");
     IOobject io
     (
         "cellTypes",
