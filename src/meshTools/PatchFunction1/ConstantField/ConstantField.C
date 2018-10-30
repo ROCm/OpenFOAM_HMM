@@ -70,11 +70,44 @@ Foam::Field<Type> Foam::PatchFunction1Types::ConstantField<Type>::getValue
                 fld.setSize(len);
                 fld = pTraits<Type>(is);
             }
+            else if (firstToken.wordToken() == "nonuniform")
+            {
+                List<Type>& list = fld;
+                is >> list;
+                label currentSize = fld.size();
+                if (currentSize != len)
+                {
+                    if
+                    (
+                        len < currentSize
+                     && FieldBase::allowConstructFromLargerSize
+                    )
+                    {
+                        #ifdef FULLDEBUG
+                        IOWarningInFunction(dict)
+                            << "Sizes do not match. "
+                            << "Re-sizing " << currentSize
+                            << " entries to " << len
+                            << endl;
+                        #endif
+
+                        // Resize the data
+                        fld.setSize(len);
+                    }
+                    else
+                    {
+                        FatalIOErrorInFunction(dict)
+                            << "size " << fld.size()
+                            << " is not equal to the given value of " << len
+                            << exit(FatalIOError);
+                    }
+                }
+            }
             else
             {
                 FatalIOErrorInFunction(dict)
-                    << "expected keyword 'uniform' or 'constant', found "
-                    << firstToken.wordToken()
+                    << "expected keyword 'uniform', 'nonuniform' or 'constant'"
+                    << ", found " << firstToken.wordToken()
                     << exit(FatalIOError);
             }
         }
