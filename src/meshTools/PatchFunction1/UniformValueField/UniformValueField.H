@@ -80,19 +80,11 @@ public:
 
     // Constructors
 
-//        //- Construct from components
-//        UniformValueField
-//        (
-//            const polyPatch& pp,
-//            const word& entryName,
-//            const Field<Type>& value,
-//            const bool faceValues = true
-//        );
-
         //- Construct from entry name and dictionary
         UniformValueField
         (
             const polyPatch& pp,
+            const word& type,
             const word& entryName,
             const dictionary& dict,
             const bool faceValues = true

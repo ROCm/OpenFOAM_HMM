@@ -115,11 +115,12 @@ public:
         dictionary,
         (
             const polyPatch& pp,
+            const word& type,
             const word& entryName,
             const dictionary& dict,
             const bool faceValues
         ),
-        (pp, entryName, dict, faceValues)
+        (pp, type, entryName, dict, faceValues)
     );
 
 

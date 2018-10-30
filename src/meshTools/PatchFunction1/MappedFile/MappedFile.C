@@ -33,6 +33,7 @@ template<class Type>
 Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
 (
     const polyPatch& pp,
+    const word& type,
     const word& entryName,
     const dictionary& dict,
     const bool faceValues

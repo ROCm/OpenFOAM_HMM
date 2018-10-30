@@ -55,7 +55,7 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
                 << exit(FatalIOError);
         }
 
-        return cstrIter()(pp, entryName, coeffsDict, faceValues);
+        return cstrIter()(pp, modelType, entryName, coeffsDict, faceValues);
     }
     else
     {
@@ -75,7 +75,7 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
                 (
                     pp,
                     entryName,
-                    value,
+                    value,          // Supply value
                     dict,
                     faceValues
                 )
@@ -92,6 +92,7 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
                 new PatchFunction1Types::ConstantField<Type>
                 (
                     pp,
+                    PatchFunction1Types::ConstantField<Type>::typeName,
                     entryName,
                     dict
                 )
@@ -114,6 +115,7 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
         return cstrIter()
         (
             pp,
+            modelType,
             entryName,
             dict.found(entryName + "Coeffs")
           ? dict.subDict(entryName + "Coeffs")

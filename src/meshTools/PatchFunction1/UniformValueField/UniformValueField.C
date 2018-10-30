@@ -32,13 +32,22 @@ template<class Type>
 Foam::PatchFunction1Types::UniformValueField<Type>::UniformValueField
 (
     const polyPatch& pp,
+    const word& type,
     const word& entryName,
     const dictionary& dict,
     const bool faceValues
 )
 :
     PatchFunction1<Type>(pp, entryName, dict, faceValues),
-    uniformValuePtr_(Function1<Type>::New(entryName, dict))
+    uniformValuePtr_
+    (
+        Function1<Type>::New
+        (
+            entryName,
+            dict,
+            type
+        )
+    )
 {}
 
 
