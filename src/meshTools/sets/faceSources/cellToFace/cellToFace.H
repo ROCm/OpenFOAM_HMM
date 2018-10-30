@@ -25,7 +25,7 @@ Class
     Foam::cellToFace
 
 Description
-    A topoSetSource to select a faceSet from cells.
+    A topoSetFaceSource to select a faceSet from a cellSet.
 
     Either use 'all' cell faces, or only faces that have cells
     on 'both' sides.
@@ -48,7 +48,7 @@ SourceFiles
 #ifndef cellToFace_H
 #define cellToFace_H
 
-#include "topoSetSource.H"
+#include "topoSetFaceSource.H"
 #include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -62,7 +62,7 @@ namespace Foam
 
 class cellToFace
 :
-    public topoSetSource
+    public topoSetFaceSource
 {
 public:
         //- Enumeration defining the valid options
@@ -120,11 +120,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return FACESETSOURCE;
-        }
 
         virtual void applyToSet
         (

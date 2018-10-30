@@ -25,7 +25,7 @@ Class
     Foam::nearestToCell
 
 Description
-    A topoSetSource to select cells nearest to points.
+    A topoSetCellSource to select cells nearest to points.
 
     \heading Dictionary parameters
     \table
@@ -41,7 +41,7 @@ SourceFiles
 #ifndef nearestToCell_H
 #define nearestToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +54,7 @@ namespace Foam
 
 class nearestToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -78,12 +78,11 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        nearestToCell
-        (
-            const polyMesh& mesh,
-            const pointField& points
-        );
+        //- Construct from components, copying points
+        nearestToCell(const polyMesh& mesh, const pointField& points);
+
+        //- Construct from components, moving points
+        nearestToCell(const polyMesh& mesh, pointField&& points);
 
         //- Construct from dictionary
         nearestToCell(const polyMesh& mesh, const dictionary& dict);
@@ -97,11 +96,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

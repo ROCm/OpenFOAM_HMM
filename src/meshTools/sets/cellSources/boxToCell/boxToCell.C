@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(boxToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, boxToCell, word);
     addToRunTimeSelectionTable(topoSetSource, boxToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, boxToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, boxToCell, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        boxToCell,
+        word,
+        box
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        boxToCell,
+        istream,
+        box
+    );
 }
 
 
@@ -73,8 +89,19 @@ Foam::boxToCell::boxToCell
     const treeBoundBoxList& bbs
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     bbs_(bbs)
+{}
+
+
+Foam::boxToCell::boxToCell
+(
+    const polyMesh& mesh,
+    treeBoundBoxList&& bbs
+)
+:
+    topoSetCellSource(mesh),
+    bbs_(std::move(bbs))
 {}
 
 
@@ -84,7 +111,7 @@ Foam::boxToCell::boxToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     bbs_()
 {
     // Look for 'boxes' or 'box'
@@ -102,8 +129,8 @@ Foam::boxToCell::boxToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    bbs_(1, treeBoundBox(checkIs(is)))
+    topoSetCellSource(mesh),
+    bbs_(one(), treeBoundBox(checkIs(is)))
 {}
 
 

@@ -34,6 +34,32 @@ namespace Foam
     defineTypeNameAndDebug(cylinderAnnulusToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, cylinderAnnulusToCell, word);
     addToRunTimeSelectionTable(topoSetSource, cylinderAnnulusToCell, istream);
+    addToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        cylinderAnnulusToCell,
+        word
+    );
+    addToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        cylinderAnnulusToCell,
+        istream
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        cylinderAnnulusToCell,
+        word,
+        cylinderAnnulus
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        cylinderAnnulusToCell,
+        istream,
+        cylinderAnnulus
+    );
 }
 
 
@@ -85,7 +111,7 @@ Foam::cylinderAnnulusToCell::cylinderAnnulusToCell
     const scalar innerRadius
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     point1_(point1),
     point2_(point2),
     outerRadius_(outerRadius),
@@ -99,11 +125,14 @@ Foam::cylinderAnnulusToCell::cylinderAnnulusToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    point1_(dict.get<point>("p1")),
-    point2_(dict.get<point>("p2")),
-    outerRadius_(dict.get<scalar>("outerRadius")),
-    innerRadius_(dict.get<scalar>("innerRadius"))
+    cylinderAnnulusToCell
+    (
+        mesh,
+        dict.get<point>("p1"),
+        dict.get<point>("p2"),
+        dict.get<scalar>("outerRadius"),
+        dict.get<scalar>("innerRadius")
+    )
 {}
 
 
@@ -113,7 +142,7 @@ Foam::cylinderAnnulusToCell::cylinderAnnulusToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     point1_(checkIs(is)),
     point2_(checkIs(is)),
     outerRadius_(readScalar(checkIs(is))),

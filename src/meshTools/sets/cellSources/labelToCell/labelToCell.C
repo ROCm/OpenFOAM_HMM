@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(labelToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, labelToCell, word);
     addToRunTimeSelectionTable(topoSetSource, labelToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, labelToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, labelToCell, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        labelToCell,
+        word,
+        label
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        labelToCell,
+        istream,
+        label
+    );
 }
 
 
@@ -53,8 +69,19 @@ Foam::labelToCell::labelToCell
     const labelList& labels
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     labels_(labels)
+{}
+
+
+Foam::labelToCell::labelToCell
+(
+    const polyMesh& mesh,
+    labelList&& labels
+)
+:
+    topoSetCellSource(mesh),
+    labels_(std::move(labels))
 {}
 
 
@@ -64,8 +91,7 @@ Foam::labelToCell::labelToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    labels_(dict.get<labelList>("value"))
+    labelToCell(mesh, dict.get<labelList>("value"))
 {}
 
 
@@ -75,7 +101,7 @@ Foam::labelToCell::labelToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     labels_(checkIs(is))
 {
     check(labels_, mesh.nCells());

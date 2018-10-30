@@ -25,7 +25,7 @@ Class
     Foam::faceZoneToCell
 
 Description
-    A topoSetSource to select cells based on side of faceZone.
+    A topoSetCellSource to select cells based on side of faceZone.
 
     \heading Dictionary parameters
     \table
@@ -47,7 +47,7 @@ SourceFiles
 #ifndef faceZoneToCell_H
 #define faceZoneToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 #include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -61,7 +61,7 @@ namespace Foam
 
 class faceZoneToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 public:
         //- Enumeration defining the valid options
@@ -119,11 +119,6 @@ public:
 
 
     // Member Functions
-
-        virtual topoSetSource::sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

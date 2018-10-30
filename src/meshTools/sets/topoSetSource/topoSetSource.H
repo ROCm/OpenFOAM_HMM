@@ -39,14 +39,13 @@ SourceFiles
 #define topoSetSource_H
 
 #include "pointField.H"
-#include "word.H"
 #include "labelList.H"
 #include "faceList.H"
 #include "typeInfo.H"
-#include "runTimeSelectionTables.H"
 #include "autoPtr.H"
 #include "Enum.H"
 #include "HashTable.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

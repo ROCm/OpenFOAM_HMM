@@ -40,6 +40,8 @@ namespace Foam
     defineTypeNameAndDebug(surfaceToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, surfaceToCell, word);
     addToRunTimeSelectionTable(topoSetSource, surfaceToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, surfaceToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, surfaceToCell, istream);
 }
 
 
@@ -72,25 +74,22 @@ Foam::label Foam::surfaceToCell::getNearest
     Map<label>& cache
 )
 {
-    Map<label>::const_iterator iter = cache.find(pointi);
+    const auto iter = cache.cfind(pointi);
 
-    if (iter != cache.end())
+    if (iter.found())
     {
-        // Found cached answer
-        return iter();
+        return *iter;  // Return cached value
     }
-    else
-    {
-        pointIndexHit inter = querySurf.nearest(pt, span);
 
-        // Triangle label (can be -1)
-        label triI = inter.index();
+    pointIndexHit inter = querySurf.nearest(pt, span);
 
-        // Store triangle on point
-        cache.insert(pointi, triI);
+    // Triangle label (can be -1)
+    const label trii = inter.index();
 
-        return triI;
-    }
+    // Store triangle on point
+    cache.insert(pointi, trii);
+
+    return trii;
 }
 
 
@@ -147,7 +146,6 @@ bool Foam::surfaceToCell::differingPointNormals
 void Foam::surfaceToCell::combine(topoSet& set, const bool add) const
 {
     cpuTime timer;
-
 
     if (useSurfaceOrientation_ && (includeInside_ || includeOutside_))
     {
@@ -364,7 +362,7 @@ Foam::surfaceToCell::surfaceToCell
     const scalar curvature
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     surfName_(surfName),
     outsidePoints_(outsidePoints),
     includeCut_(includeCut),
@@ -396,7 +394,7 @@ Foam::surfaceToCell::surfaceToCell
     const scalar curvature
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     surfName_(surfName),
     outsidePoints_(outsidePoints),
     includeCut_(includeCut),
@@ -419,7 +417,7 @@ Foam::surfaceToCell::surfaceToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     surfName_(dict.get<fileName>("file").expand()),
     outsidePoints_(dict.get<pointField>("outsidePoints")),
     includeCut_(dict.get<bool>("includeCut")),
@@ -452,7 +450,7 @@ Foam::surfaceToCell::surfaceToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     surfName_(checkIs(is)),
     outsidePoints_(checkIs(is)),
     includeCut_(readBool(checkIs(is))),

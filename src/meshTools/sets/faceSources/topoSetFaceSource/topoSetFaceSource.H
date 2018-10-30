@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,26 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::setsToFaceZone
+    Foam::topoSetFaceSource
 
 Description
-    A topoSetSource to select faces based on usage in a faceSet and cellSet
-
-    \heading Dictionary parameters
-    \table
-        Property    | Description                           | Required | Default
-        cellSet     | Name of input cellSet                 | yes   |
-        faceSet     | Name of input faceSet                 | yes   |
-        flip        | Force flip of faces                   | no    | false
-    \endtable
+    Base class of a topoSet source for selecting faces.
 
 SourceFiles
-    setsToFaceZone.C
+    topoSetFaceSource.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef setsToFaceZone_H
-#define setsToFaceZone_H
+#ifndef topoSetFaceSource_H
+#define topoSetFaceSource_H
 
 #include "topoSetSource.H"
 
@@ -51,67 +43,82 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class setsToFaceZone Declaration
+                      Class topoSetFaceSource Declaration
 \*---------------------------------------------------------------------------*/
 
-class setsToFaceZone
+class topoSetFaceSource
 :
     public topoSetSource
 {
-    // Private data
-
-        //- Add usage string
-        static addToUsageTable usage_;
-
-        //- Name of set to use
-        const word faceSetName_;
-
-        //- Name of set to use
-        const word cellSetName_;
-
-        //- Whether cellSet is slave cells or master cells
-        const bool flip_;
-
 public:
 
     //- Runtime type information
-    TypeName("setsToFaceZone");
+    TypeName("topoSetFaceSource");
+
+    // Declare run-time constructor selection table
+
+        // For the dictionary constructor
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            topoSetFaceSource,
+            word,
+            (
+                const polyMesh& mesh,
+                const dictionary& dict
+            ),
+            (mesh, dict)
+        );
+
+        // For the Istream constructor
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            topoSetFaceSource,
+            istream,
+            (
+                const polyMesh& mesh,
+                Istream& is
+            ),
+            (mesh, is)
+        );
+
 
     // Constructors
 
         //- Construct from components
-        setsToFaceZone
+        explicit topoSetFaceSource(const polyMesh& mesh);
+
+
+    // Selectors
+
+        //- Return a reference to the selected source type
+        static autoPtr<topoSetFaceSource> New
         (
+            const word& sourceType,
             const polyMesh& mesh,
-            const word& faceSetName,
-            const word& cellSetName,
-            const bool flip
+            const dictionary& dict
         );
 
-        //- Construct from dictionary
-        setsToFaceZone(const polyMesh& mesh, const dictionary& dict);
-
-        //- Construct from Istream
-        setsToFaceZone(const polyMesh& mesh, Istream& is);
+        //- Return a reference to the selected source type
+        static autoPtr<topoSetFaceSource> New
+        (
+            const word& sourceType,
+            const polyMesh& mesh,
+            Istream& is
+        );
 
 
     //- Destructor
-    virtual ~setsToFaceZone() = default;
+    virtual ~topoSetFaceSource() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
+        virtual topoSetSource::sourceType setType() const
         {
-            return FACEZONESOURCE;
+            return FACESETSOURCE;
         }
-
-        virtual void applyToSet
-        (
-            const topoSetSource::setAction action,
-            topoSet&
-        ) const;
-
 };
 
 

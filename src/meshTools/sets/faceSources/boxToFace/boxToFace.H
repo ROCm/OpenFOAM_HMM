@@ -25,7 +25,7 @@ Class
     Foam::boxToFace
 
 Description
-    A topoSetSource to select faces based on face centres inside box.
+    A topoSetFaceSource to select faces based on face centres inside box.
 
     \heading Dictionary parameters
     \table
@@ -46,7 +46,7 @@ SourceFiles
 #ifndef boxToFace_H
 #define boxToFace_H
 
-#include "topoSetSource.H"
+#include "topoSetFaceSource.H"
 #include "treeBoundBoxList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -60,7 +60,7 @@ namespace Foam
 
 class boxToFace
 :
-    public topoSetSource
+    public topoSetFaceSource
 {
     // Private data
 
@@ -83,12 +83,11 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        boxToFace
-        (
-            const polyMesh& mesh,
-            const treeBoundBoxList& bbs
-        );
+        //- Construct from components, copying bounding boxes
+        boxToFace(const polyMesh& mesh, const treeBoundBoxList& bbs);
+
+        //- Construct from components, moving bounding boxes
+        boxToFace(const polyMesh& mesh, treeBoundBoxList&& bbs);
 
         //- Construct from dictionary
         boxToFace(const polyMesh& mesh, const dictionary& dict);
@@ -102,11 +101,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return FACESETSOURCE;
-        }
 
         virtual void applyToSet
         (

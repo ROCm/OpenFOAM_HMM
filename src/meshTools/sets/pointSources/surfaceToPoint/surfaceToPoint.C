@@ -37,6 +37,8 @@ namespace Foam
     defineTypeNameAndDebug(surfaceToPoint, 0);
     addToRunTimeSelectionTable(topoSetSource, surfaceToPoint, word);
     addToRunTimeSelectionTable(topoSetSource, surfaceToPoint, istream);
+    addToRunTimeSelectionTable(topoSetPointSource, surfaceToPoint, word);
+    addToRunTimeSelectionTable(topoSetPointSource, surfaceToPoint, istream);
 }
 
 
@@ -133,7 +135,7 @@ Foam::surfaceToPoint::surfaceToPoint
     const bool includeOutside
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     surfName_(surfName),
     scale_(1.0),
     nearDist_(nearDist),
@@ -150,7 +152,7 @@ Foam::surfaceToPoint::surfaceToPoint
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     surfName_(dict.get<fileName>("file").expand()),
     scale_(dict.lookupOrDefault<scalar>("scale", -1)),
     nearDist_(dict.get<scalar>("nearDistance")),
@@ -167,7 +169,7 @@ Foam::surfaceToPoint::surfaceToPoint
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     surfName_(checkIs(is)),
     scale_(1.0),
     nearDist_(readScalar(checkIs(is))),

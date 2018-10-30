@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,13 +33,25 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(badQualityToCell, 0);
-
-addToRunTimeSelectionTable(topoSetSource, badQualityToCell, word);
-
-addToRunTimeSelectionTable(topoSetSource, badQualityToCell, istream);
-
+    defineTypeNameAndDebug(badQualityToCell, 0);
+    addToRunTimeSelectionTable(topoSetSource, badQualityToCell, word);
+    addToRunTimeSelectionTable(topoSetSource, badQualityToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, badQualityToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, badQualityToCell, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        badQualityToCell,
+        word,
+        badQuality
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        badQualityToCell,
+        istream,
+        badQuality
+    );
 }
 
 
@@ -59,9 +71,8 @@ void Foam::badQualityToCell::combine(topoSet& set, const bool add) const
     motionSmoother::checkMesh(false, mesh_, dict_, faces);
     faces.sync(mesh_);
 
-    forAllConstIter(faceSet, faces, iter)
+    for (const label facei : faces)
     {
-        label facei = iter.key();
         addOrDelete(set, mesh_.faceOwner()[facei], add);
         if (mesh_.isInternalFace(facei))
         {
@@ -73,33 +84,25 @@ void Foam::badQualityToCell::combine(topoSet& set, const bool add) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from dictionary
 Foam::badQualityToCell::badQualityToCell
 (
     const polyMesh& mesh,
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     dict_(dict)
 {}
 
 
-// Construct from Istream
 Foam::badQualityToCell::badQualityToCell
 (
     const polyMesh& mesh,
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     dict_(is)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::badQualityToCell::~badQualityToCell()
 {}
 
 

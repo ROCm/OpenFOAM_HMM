@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(boxToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, boxToFace, word);
     addToRunTimeSelectionTable(topoSetSource, boxToFace, istream);
+    addToRunTimeSelectionTable(topoSetFaceSource, boxToFace, word);
+    addToRunTimeSelectionTable(topoSetFaceSource, boxToFace, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        boxToFace,
+        word,
+        box
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        boxToFace,
+        istream,
+        box
+    );
 }
 
 
@@ -73,8 +89,19 @@ Foam::boxToFace::boxToFace
     const treeBoundBoxList& bbs
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     bbs_(bbs)
+{}
+
+
+Foam::boxToFace::boxToFace
+(
+    const polyMesh& mesh,
+    treeBoundBoxList&& bbs
+)
+:
+    topoSetFaceSource(mesh),
+    bbs_(std::move(bbs))
 {}
 
 
@@ -84,7 +111,7 @@ Foam::boxToFace::boxToFace
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     bbs_()
 {
     // Look for 'boxes' or 'box'
@@ -102,8 +129,8 @@ Foam::boxToFace::boxToFace
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    bbs_(1, treeBoundBox(checkIs(is)))
+    topoSetFaceSource(mesh),
+    bbs_(one(), treeBoundBox(checkIs(is)))
 {}
 
 

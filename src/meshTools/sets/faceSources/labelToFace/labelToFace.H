@@ -25,7 +25,7 @@ Class
     Foam::labelToFace
 
 Description
-    A topoSetSource to select faces given explicitly provided face labels.
+    A topoSetFaceSource to select faces given explicitly provided face labels.
 
     \heading Dictionary parameters
     \table
@@ -42,7 +42,7 @@ SourceFiles
 #ifndef labelToFace_H
 #define labelToFace_H
 
-#include "topoSetSource.H"
+#include "topoSetFaceSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,7 +55,7 @@ namespace Foam
 
 class labelToFace
 :
-    public topoSetSource
+    public topoSetFaceSource
 {
 
     // Private data
@@ -74,12 +74,11 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        labelToFace
-        (
-            const polyMesh& mesh,
-            const labelList& labels
-        );
+        //- Construct from components, copying labels
+        labelToFace(const polyMesh& mesh, const labelList& labels);
+
+        //- Construct from components, moving labels
+        labelToFace(const polyMesh& mesh, labelList&& labels);
 
         //- Construct from dictionary
         labelToFace(const polyMesh& mesh, const dictionary& dict);
@@ -93,11 +92,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return FACESETSOURCE;
-        }
 
         virtual void applyToSet
         (

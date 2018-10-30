@@ -35,6 +35,8 @@ namespace Foam
     defineTypeNameAndDebug(pointToPoint, 0);
     addToRunTimeSelectionTable(topoSetSource, pointToPoint, word);
     addToRunTimeSelectionTable(topoSetSource, pointToPoint, istream);
+    addToRunTimeSelectionTable(topoSetPointSource, pointToPoint, word);
+    addToRunTimeSelectionTable(topoSetPointSource, pointToPoint, istream);
 }
 
 
@@ -54,7 +56,7 @@ Foam::pointToPoint::pointToPoint
     const word& setName
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     setName_(setName)
 {}
 
@@ -65,8 +67,7 @@ Foam::pointToPoint::pointToPoint
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    setName_(dict.get<word>("set"))
+    pointToPoint(mesh, dict.get<word>("set"))
 {}
 
 
@@ -76,7 +77,7 @@ Foam::pointToPoint::pointToPoint
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     setName_(checkIs(is))
 {}
 

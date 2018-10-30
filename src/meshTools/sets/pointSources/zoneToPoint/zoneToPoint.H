@@ -25,7 +25,7 @@ Class
     Foam::zoneToPoint
 
 Description
-    A topoSetSource to select points based on one or more pointZones.
+    A topoSetPointSource to select points based on one or more pointZones.
 
     \heading Dictionary parameters
     \table
@@ -46,7 +46,7 @@ SourceFiles
 #ifndef zoneToPoint_H
 #define zoneToPoint_H
 
-#include "topoSetSource.H"
+#include "topoSetPointSource.H"
 #include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -60,7 +60,7 @@ namespace Foam
 
 class zoneToPoint
 :
-    public topoSetSource
+    public topoSetPointSource
 {
 
     // Private data
@@ -99,11 +99,6 @@ public:
 
 
     // Member Functions
-
-        virtual topoSetSource::sourceType setType() const
-        {
-            return POINTSETSOURCE;
-        }
 
         virtual void applyToSet
         (

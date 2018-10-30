@@ -25,7 +25,7 @@ Class
     Foam::labelToCell
 
 Description
-    A topoSetSource to select cells based on explicitly given labels.
+    A topoSetCellSource to select cells based on explicitly given labels.
 
     \heading Dictionary parameters
     \table
@@ -41,7 +41,7 @@ SourceFiles
 #ifndef labelToCell_H
 #define labelToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +54,7 @@ namespace Foam
 
 class labelToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -73,12 +73,11 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        labelToCell
-        (
-            const polyMesh& mesh,
-            const labelList& labels
-        );
+        //- Construct from components, copying labels
+        labelToCell(const polyMesh& mesh, const labelList& labels);
+
+        //- Construct from components, moving labels
+        labelToCell(const polyMesh& mesh, labelList&& labels);
 
         //- Construct from dictionary
         labelToCell(const polyMesh& mesh, const dictionary& dict);
@@ -92,11 +91,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

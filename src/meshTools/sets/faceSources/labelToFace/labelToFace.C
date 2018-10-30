@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(labelToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, labelToFace, word);
     addToRunTimeSelectionTable(topoSetSource, labelToFace, istream);
+    addToRunTimeSelectionTable(topoSetFaceSource, labelToFace, word);
+    addToRunTimeSelectionTable(topoSetFaceSource, labelToFace, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        labelToFace,
+        word,
+        label
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        labelToFace,
+        istream,
+        label
+    );
 }
 
 
@@ -53,8 +69,19 @@ Foam::labelToFace::labelToFace
     const labelList& labels
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     labels_(labels)
+{}
+
+
+Foam::labelToFace::labelToFace
+(
+    const polyMesh& mesh,
+    labelList&& labels
+)
+:
+    topoSetFaceSource(mesh),
+    labels_(std::move(labels))
 {}
 
 
@@ -64,8 +91,11 @@ Foam::labelToFace::labelToFace
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    labels_(dict.get<labelList>("value"))
+    labelToFace
+    (
+        mesh,
+        dict.get<labelList>("value")
+    )
 {}
 
 
@@ -75,7 +105,7 @@ Foam::labelToFace::labelToFace
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     labels_(checkIs(is))
 {
     check(labels_, mesh.nFaces());

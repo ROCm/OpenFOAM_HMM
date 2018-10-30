@@ -34,6 +34,8 @@ namespace Foam
     defineTypeNameAndDebug(faceZoneToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, faceZoneToCell, word);
     addToRunTimeSelectionTable(topoSetSource, faceZoneToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, faceZoneToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, faceZoneToCell, istream);
 }
 
 
@@ -111,7 +113,7 @@ Foam::faceZoneToCell::faceZoneToCell
     const faceAction option
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     selectedZones_(one(), zoneName),
     option_(option)
 {}
@@ -123,7 +125,7 @@ Foam::faceZoneToCell::faceZoneToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     selectedZones_(),
     option_(faceActionNames_.get("option", dict))
 {
@@ -143,7 +145,7 @@ Foam::faceZoneToCell::faceZoneToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     selectedZones_(one(), wordRe(checkIs(is))),
     option_(faceActionNames_.read(checkIs(is)))
 {}

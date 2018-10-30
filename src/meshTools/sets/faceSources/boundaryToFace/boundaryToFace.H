@@ -25,7 +25,7 @@ Class
     Foam::boundaryToFace
 
 Description
-    A topoSetSource to select all external (boundary) faces.
+    A topoSetFaceSource to select all external (boundary) faces.
 
     \heading Dictionary parameters
     None
@@ -38,7 +38,7 @@ SourceFiles
 #ifndef boundaryToFace_H
 #define boundaryToFace_H
 
-#include "topoSetSource.H"
+#include "topoSetFaceSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,7 +51,7 @@ namespace Foam
 
 class boundaryToFace
 :
-    public topoSetSource
+    public topoSetFaceSource
 {
     // Private data
 
@@ -86,11 +86,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return FACESETSOURCE;
-        }
 
         virtual void applyToSet
         (

@@ -84,13 +84,11 @@ SourceFiles
 #ifndef directionalPressureGradientExplicitSource_H
 #define directionalPressureGradientExplicitSource_H
 
-#include "cellSetOption.H"
 #include "autoPtr.H"
-#include "topoSetSource.H"
-#include "cellSet.H"
 #include "fvMesh.H"
 #include "volFields.H"
 #include "fvOption.H"
+#include "cellSetOption.H"
 #include "interpolationTable.H"
 
 

@@ -35,6 +35,22 @@ namespace Foam
     defineTypeNameAndDebug(normalToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, normalToFace, word);
     addToRunTimeSelectionTable(topoSetSource, normalToFace, istream);
+    addToRunTimeSelectionTable(topoSetFaceSource, normalToFace, word);
+    addToRunTimeSelectionTable(topoSetFaceSource, normalToFace, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        normalToFace,
+        word,
+        normal
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        normalToFace,
+        istream,
+        normal
+    );
 }
 
 
@@ -73,7 +89,7 @@ Foam::normalToFace::normalToFace
     const scalar tol
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     normal_(normal),
     tol_(tol)
 {
@@ -83,9 +99,12 @@ Foam::normalToFace::normalToFace
 
 Foam::normalToFace::normalToFace(const polyMesh& mesh, const dictionary& dict)
 :
-    topoSetSource(mesh),
-    normal_(dict.get<vector>("normal")),
-    tol_(dict.get<scalar>("cos"))
+    normalToFace
+    (
+        mesh,
+        dict.get<vector>("normal"),
+        dict.get<scalar>("cos")
+    )
 {
     setNormal();
 }
@@ -93,7 +112,7 @@ Foam::normalToFace::normalToFace(const polyMesh& mesh, const dictionary& dict)
 
 Foam::normalToFace::normalToFace(const polyMesh& mesh, Istream& is)
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     normal_(checkIs(is)),
     tol_(readScalar(checkIs(is)))
 {
@@ -131,10 +150,8 @@ void Foam::normalToFace::applyToSet
 
         DynamicList<label> toBeRemoved(set.size()/10);
 
-        forAllConstIter(topoSet, set, iter)
+        for (const label facei : static_cast<const labelHashSet&>(set))
         {
-            const label facei = iter.key();
-
             const vector n = normalised(mesh_.faceAreas()[facei]);
 
             if (mag(1 - (n & normal_)) < tol_)

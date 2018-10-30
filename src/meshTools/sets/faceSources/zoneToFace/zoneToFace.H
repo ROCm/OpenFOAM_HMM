@@ -25,7 +25,7 @@ Class
     Foam::zoneToFace
 
 Description
-    A topoSetSource to select faces based on one of more faceZones.
+    A topoSetFaceSource to select faces based on one of more faceZones.
 
     \heading Dictionary parameters
     \table
@@ -46,7 +46,7 @@ SourceFiles
 #ifndef zoneToFace_H
 #define zoneToFace_H
 
-#include "topoSetSource.H"
+#include "topoSetFaceSource.H"
 #include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -60,7 +60,7 @@ namespace Foam
 
 class zoneToFace
 :
-    public topoSetSource
+    public topoSetFaceSource
 {
 
     // Private data
@@ -99,11 +99,6 @@ public:
 
 
     // Member Functions
-
-        virtual topoSetSource::sourceType setType() const
-        {
-            return FACESETSOURCE;
-        }
 
         virtual void applyToSet
         (

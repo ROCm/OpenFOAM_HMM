@@ -25,7 +25,7 @@ Class
     Foam::labelToPoint
 
 Description
-    A topoSetSource to select points given explicitly provided labels.
+    A topoSetPointSource to select points given explicitly provided labels.
 
     \heading Dictionary parameters
     \table
@@ -41,7 +41,7 @@ SourceFiles
 #ifndef labelToPoint_H
 #define labelToPoint_H
 
-#include "topoSetSource.H"
+#include "topoSetPointSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +54,7 @@ namespace Foam
 
 class labelToPoint
 :
-    public topoSetSource
+    public topoSetPointSource
 {
 
     // Private data
@@ -73,12 +73,11 @@ public:
 
     // Constructors
 
-        //- Copy construct from components
-        labelToPoint
-        (
-            const polyMesh& mesh,
-            const labelList& labels
-        );
+        //- Construct from components, copying labels
+        labelToPoint(const polyMesh& mesh, const labelList& labels);
+
+        //- Construct from components, moving labels
+        labelToPoint(const polyMesh& mesh, labelList&& labels);
 
         //- Construct from dictionary
         labelToPoint(const polyMesh& mesh, const dictionary& dict);
@@ -92,11 +91,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return POINTSETSOURCE;
-        }
 
         virtual void applyToSet
         (

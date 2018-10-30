@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(sphereToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, sphereToCell, word);
     addToRunTimeSelectionTable(topoSetSource, sphereToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, sphereToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, sphereToCell, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        sphereToCell,
+        word,
+        sphere
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        sphereToCell,
+        istream,
+        sphere
+    );
 }
 
 
@@ -72,7 +88,7 @@ Foam::sphereToCell::sphereToCell
     const scalar radius
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     origin_(origin),
     radius_(radius)
 {}
@@ -99,7 +115,7 @@ Foam::sphereToCell::sphereToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     origin_(checkIs(is)),
     radius_(readScalar(checkIs(is)))
 {}

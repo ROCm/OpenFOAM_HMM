@@ -25,7 +25,7 @@ Class
     Foam::zoneToCell
 
 Description
-    A topoSetSource to select cells based on one or more cellZones.
+    A topoSetCellSource to select cells based on one or more cellZones.
 
     \heading Dictionary parameters
     \table
@@ -46,7 +46,7 @@ SourceFiles
 #ifndef zoneToCell_H
 #define zoneToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 #include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -60,7 +60,7 @@ namespace Foam
 
 class zoneToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -99,11 +99,6 @@ public:
 
 
     // Member Functions
-
-        virtual topoSetSource::sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

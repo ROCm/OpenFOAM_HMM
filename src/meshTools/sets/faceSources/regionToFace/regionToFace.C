@@ -40,6 +40,22 @@ namespace Foam
     defineTypeNameAndDebug(regionToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, regionToFace, word);
     addToRunTimeSelectionTable(topoSetSource, regionToFace, istream);
+    addToRunTimeSelectionTable(topoSetFaceSource, regionToFace, word);
+    addToRunTimeSelectionTable(topoSetFaceSource, regionToFace, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        regionToFace,
+        word,
+        region
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        regionToFace,
+        istream,
+        region
+    );
 }
 
 
@@ -180,7 +196,7 @@ Foam::regionToFace::regionToFace
     const point& nearPoint
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     setName_(setName),
     nearPoint_(nearPoint)
 {}
@@ -192,7 +208,7 @@ Foam::regionToFace::regionToFace
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     setName_(dict.get<word>("set")),
     nearPoint_(dict.get<point>("nearPoint"))
 {}
@@ -204,7 +220,7 @@ Foam::regionToFace::regionToFace
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     setName_(checkIs(is)),
     nearPoint_(checkIs(is))
 {}

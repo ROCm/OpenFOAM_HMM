@@ -37,6 +37,8 @@ namespace Foam
     defineTypeNameAndDebug(shapeToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, shapeToCell, word);
     addToRunTimeSelectionTable(topoSetSource, shapeToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, shapeToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, shapeToCell, istream);
 }
 
 
@@ -94,7 +96,7 @@ Foam::shapeToCell::shapeToCell
     const word& shapeName
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     type_(shapeName)
 {
     if (!cellModel::ptr(type_) && type_ != "splitHex")
@@ -111,15 +113,8 @@ Foam::shapeToCell::shapeToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    type_(dict.get<word>("type"))
-{
-    if (!cellModel::ptr(type_) && type_ != "splitHex")
-    {
-        FatalErrorInFunction
-            << "Illegal cell type " << type_ << exit(FatalError);
-    }
-}
+    shapeToCell(mesh, dict.get<word>("type"))
+{}
 
 
 Foam::shapeToCell::shapeToCell
@@ -128,7 +123,7 @@ Foam::shapeToCell::shapeToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     type_(checkIs(is))
 {
     if (!cellModel::ptr(type_) && type_ != "splitHex")

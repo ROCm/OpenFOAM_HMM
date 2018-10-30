@@ -25,7 +25,7 @@ Class
     Foam::patchToFace
 
 Description
-    A topoSetSource to select faces based on usage in patches.
+    A topoSetFaceSource to select faces based on usage in patches.
 
     \heading Dictionary parameters
     \table
@@ -46,7 +46,7 @@ SourceFiles
 #ifndef patchToFace_H
 #define patchToFace_H
 
-#include "topoSetSource.H"
+#include "topoSetFaceSource.H"
 #include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -60,7 +60,7 @@ namespace Foam
 
 class patchToFace
 :
-    public topoSetSource
+    public topoSetFaceSource
 {
 
     // Private data
@@ -99,11 +99,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return FACESETSOURCE;
-        }
 
         virtual void applyToSet
         (

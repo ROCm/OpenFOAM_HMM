@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(cylinderToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, cylinderToFace, word);
     addToRunTimeSelectionTable(topoSetSource, cylinderToFace, istream);
+    addToRunTimeSelectionTable(topoSetFaceSource, cylinderToFace, word);
+    addToRunTimeSelectionTable(topoSetFaceSource, cylinderToFace, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        cylinderToFace,
+        word,
+        cylinder
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        cylinderToFace,
+        istream,
+        cylinder
+    );
 }
 
 
@@ -82,7 +98,7 @@ Foam::cylinderToFace::cylinderToFace
     const scalar radius
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     point1_(point1),
     point2_(point2),
     radius_(radius)
@@ -95,10 +111,13 @@ Foam::cylinderToFace::cylinderToFace
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    point1_(dict.get<point>("p1")),
-    point2_(dict.get<point>("p2")),
-    radius_(dict.get<scalar>("radius"))
+    cylinderToFace
+    (
+        mesh,
+        dict.get<point>("p1"),
+        dict.get<point>("p2"),
+        dict.get<scalar>("radius")
+    )
 {}
 
 
@@ -108,7 +127,7 @@ Foam::cylinderToFace::cylinderToFace
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     point1_(checkIs(is)),
     point2_(checkIs(is)),
     radius_(readScalar(checkIs(is)))

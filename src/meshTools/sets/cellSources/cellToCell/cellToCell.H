@@ -25,7 +25,7 @@ Class
     Foam::cellToCell
 
 Description
-    A topoSetSource to select the cells from another cellSet.
+    A topoSetCellSource to select the cells from another cellSet.
 
     \heading Dictionary parameters
     \table
@@ -41,7 +41,7 @@ SourceFiles
 #ifndef cellToCell_H
 #define cellToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +54,7 @@ namespace Foam
 
 class cellToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
     // Private data
 
@@ -72,11 +72,7 @@ public:
     // Constructors
 
         //- Construct from components
-        cellToCell
-        (
-            const polyMesh& mesh,
-            const word& setName
-        );
+        cellToCell(const polyMesh& mesh, const word& setName);
 
         //- Construct from dictionary
         cellToCell(const polyMesh& mesh, const dictionary& dict);
@@ -90,11 +86,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

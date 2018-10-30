@@ -109,10 +109,8 @@ void Foam::setToCellZone::applyToSet
             // Start off from copy
             DynamicList<label> newAddressing(fzSet.addressing());
 
-            forAllConstIter(cellSet, fSet, iter)
+            for (const label celli : fSet)
             {
-                label celli = iter.key();
-
                 if (!fzSet.found(celli))
                 {
                     newAddressing.append(celli);

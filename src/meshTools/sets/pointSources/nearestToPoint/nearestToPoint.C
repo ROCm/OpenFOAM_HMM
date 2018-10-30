@@ -35,6 +35,22 @@ namespace Foam
     defineTypeNameAndDebug(nearestToPoint, 0);
     addToRunTimeSelectionTable(topoSetSource, nearestToPoint, word);
     addToRunTimeSelectionTable(topoSetSource, nearestToPoint, istream);
+    addToRunTimeSelectionTable(topoSetPointSource, nearestToPoint, word);
+    addToRunTimeSelectionTable(topoSetPointSource, nearestToPoint, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetPointSource,
+        nearestToPoint,
+        word,
+        nearest
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetPointSource,
+        nearestToPoint,
+        istream,
+        nearest
+    );
 }
 
 
@@ -106,8 +122,19 @@ Foam::nearestToPoint::nearestToPoint
     const pointField& points
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     points_(points)
+{}
+
+
+Foam::nearestToPoint::nearestToPoint
+(
+    const polyMesh& mesh,
+    pointField&& points
+)
+:
+    topoSetPointSource(mesh),
+    points_(std::move(points))
 {}
 
 
@@ -117,8 +144,7 @@ Foam::nearestToPoint::nearestToPoint
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    points_(dict.get<pointField>("points"))
+    nearestToPoint(mesh, dict.get<pointField>("points"))
 {}
 
 
@@ -128,7 +154,7 @@ Foam::nearestToPoint::nearestToPoint
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     points_(checkIs(is))
 {}
 

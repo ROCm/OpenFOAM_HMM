@@ -25,7 +25,7 @@ Class
     Foam::pointToPoint
 
 Description
-    A topoSetSource to select the points from another pointSet.
+    A topoSetPointSource to select the points from another pointSet.
 
     \heading Dictionary parameters
     \table
@@ -41,7 +41,7 @@ SourceFiles
 #ifndef pointToPoint_H
 #define pointToPoint_H
 
-#include "topoSetSource.H"
+#include "topoSetPointSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +54,7 @@ namespace Foam
 
 class pointToPoint
 :
-    public topoSetSource
+    public topoSetPointSource
 {
     // Private data
 
@@ -90,11 +90,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return POINTSETSOURCE;
-        }
 
         virtual void applyToSet
         (

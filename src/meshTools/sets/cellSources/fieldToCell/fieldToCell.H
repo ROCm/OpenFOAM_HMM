@@ -25,7 +25,7 @@ Class
     Foam::fieldToCell
 
 Description
-    A topoSetSource to select cells based on field values.
+    A topoSetCellSource to select cells based on field values.
 
     \heading Dictionary parameters
     \table
@@ -43,7 +43,7 @@ SourceFiles
 #ifndef fieldToCell_H
 #define fieldToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 #include "scalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -57,7 +57,7 @@ namespace Foam
 
 class fieldToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -114,11 +114,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

@@ -35,6 +35,8 @@ namespace Foam
     defineTypeNameAndDebug(faceToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, faceToCell, word);
     addToRunTimeSelectionTable(topoSetSource, faceToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, faceToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, faceToCell, istream);
 }
 
 
@@ -133,7 +135,7 @@ Foam::faceToCell::faceToCell
     const faceAction option
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     setName_(setName),
     option_(option)
 {}
@@ -145,9 +147,12 @@ Foam::faceToCell::faceToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    setName_(dict.get<word>("set")),
-    option_(faceActionNames_.get("option", dict))
+    faceToCell
+    (
+        mesh,
+        dict.get<word>("set"),
+        faceActionNames_.get("option", dict)
+    )
 {}
 
 
@@ -157,7 +162,7 @@ Foam::faceToCell::faceToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     setName_(checkIs(is)),
     option_(faceActionNames_.read(checkIs(is)))
 {}

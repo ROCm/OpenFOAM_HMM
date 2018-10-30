@@ -25,7 +25,7 @@ Class
     Foam::rotatedBoxToCell
 
 Description
-    A topoSetSource to select cells based on cell centres inside
+    A topoSetCellSource to select cells based on cell centres inside
     rotated/skewed box (parallelopiped?).
 
     Box defined as origin and i,j,k vectors.
@@ -55,7 +55,7 @@ SourceFiles
 #ifndef rotatedBoxToCell_H
 #define rotatedBoxToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 #include "treeBoundBox.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -69,7 +69,7 @@ namespace Foam
 
 class rotatedBoxToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -119,11 +119,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

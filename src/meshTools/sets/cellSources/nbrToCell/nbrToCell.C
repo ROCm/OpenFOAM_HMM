@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(nbrToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, nbrToCell, word);
     addToRunTimeSelectionTable(topoSetSource, nbrToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, nbrToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, nbrToCell, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        nbrToCell,
+        word,
+        nbr
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        nbrToCell,
+        istream,
+        nbr
+    );
 }
 
 
@@ -101,7 +117,7 @@ Foam::nbrToCell::nbrToCell
     const label minNbrs
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     minNbrs_(minNbrs)
 {}
 
@@ -112,8 +128,7 @@ Foam::nbrToCell::nbrToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    minNbrs_(dict.get<label>("neighbours"))
+    nbrToCell(mesh, dict.get<label>("neighbours"))
 {}
 
 
@@ -123,7 +138,7 @@ Foam::nbrToCell::nbrToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     minNbrs_(readLabel(checkIs(is)))
 {}
 

@@ -25,7 +25,7 @@ Class
     Foam::pointToFace
 
 Description
-    A topoSetSource to select faces based on use of points.
+    A topoSetFaceSource to select faces based on use of points.
 
     \heading Dictionary parameters
     \table
@@ -42,7 +42,7 @@ SourceFiles
 #ifndef pointToFace_H
 #define pointToFace_H
 
-#include "topoSetSource.H"
+#include "topoSetFaceSource.H"
 #include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -56,7 +56,7 @@ namespace Foam
 
 class pointToFace
 :
-    public topoSetSource
+    public topoSetFaceSource
 {
 
 public:
@@ -117,11 +117,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return FACESETSOURCE;
-        }
 
         virtual void applyToSet
         (

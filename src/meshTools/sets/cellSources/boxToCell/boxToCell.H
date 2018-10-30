@@ -25,7 +25,7 @@ Class
     Foam::boxToCell
 
 Description
-    A topoSetSource to select cells based on cell centres inside box(es).
+    A topoSetCellSource to select cells based on cell centres inside box(es).
 
     \heading Dictionary parameters
     \table
@@ -46,7 +46,7 @@ SourceFiles
 #ifndef boxToCell_H
 #define boxToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 #include "treeBoundBoxList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -60,7 +60,7 @@ namespace Foam
 
 class boxToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
     // Private data
 
@@ -83,12 +83,11 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        boxToCell
-        (
-            const polyMesh& mesh,
-            const treeBoundBoxList& bbs
-        );
+        //- Construct from components, copying bounding boxes
+        boxToCell(const polyMesh& mesh, const treeBoundBoxList& bbs);
+
+        //- Construct from components, moving bounding boxes
+        boxToCell(const polyMesh& mesh, treeBoundBoxList&& bbs);
 
         //- Construct from dictionary
         boxToCell(const polyMesh& mesh, const dictionary& dict);
@@ -102,11 +101,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

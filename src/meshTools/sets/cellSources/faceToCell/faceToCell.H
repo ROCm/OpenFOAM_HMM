@@ -25,7 +25,7 @@ Class
     Foam::faceToCell
 
 Description
-    A topoSetSource to select cells based on usage in a face set.
+    A topoSetCellSource to select cells based on usage in a face set.
 
     \heading Dictionary parameters
     \table
@@ -42,7 +42,7 @@ SourceFiles
 #ifndef faceToCell_H
 #define faceToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 #include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -56,7 +56,7 @@ namespace Foam
 
 class faceToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 public:
         //- Enumeration defining the valid options
@@ -117,11 +117,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

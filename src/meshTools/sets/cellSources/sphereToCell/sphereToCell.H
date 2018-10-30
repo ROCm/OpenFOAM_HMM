@@ -25,7 +25,7 @@ Class
     Foam::sphereToCell
 
 Description
-    A topoSetSource to select cells based on cell centres inside sphere.
+    A topoSetCellSource to select cells based on cell centres inside sphere.
 
     \heading Dictionary parameters
     \table
@@ -43,7 +43,7 @@ SourceFiles
 #ifndef sphereToCell_H
 #define sphereToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,7 +56,7 @@ namespace Foam
 
 class sphereToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -104,11 +104,6 @@ public:
 
 
     // Member Functions
-
-        virtual topoSetSource::sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

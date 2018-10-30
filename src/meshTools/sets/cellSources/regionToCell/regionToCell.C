@@ -37,6 +37,8 @@ namespace Foam
     defineTypeNameAndDebug(regionToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, regionToCell, word);
     addToRunTimeSelectionTable(topoSetSource, regionToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, regionToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, regionToCell, istream);
 }
 
 
@@ -386,7 +388,7 @@ Foam::regionToCell::regionToCell
     const label nErode
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     setName_(setName),
     insidePoints_(insidePoints),
     nErode_(nErode)
@@ -399,7 +401,7 @@ Foam::regionToCell::regionToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     setName_(dict.lookupOrDefault<word>("set", "none")),
     insidePoints_
     (
@@ -415,7 +417,7 @@ Foam::regionToCell::regionToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     setName_(checkIs(is)),
     insidePoints_(checkIs(is)),
     nErode_(readLabel(checkIs(is)))

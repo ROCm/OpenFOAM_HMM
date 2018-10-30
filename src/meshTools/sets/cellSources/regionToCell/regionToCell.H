@@ -25,8 +25,8 @@ Class
     Foam::regionToCell
 
 Description
-    TopoSetSource. Select cells belonging to topological connected region
-    (that contains given points)
+    A topoSetCellSource to select cells belonging to a topological connected
+    region (that contains given points)
 
     In dictionary input:
     \verbatim
@@ -43,10 +43,10 @@ Description
 
     \heading Dictionary parameters
     \table
-        Property    | Description                       | Required  | Default
-        insidePoints | Points inside regions            | yes   |
-        nErode      | Cell layers to erode to detect holes | no | 0
-        set         | Restrict to named cellSet         | no    | ''
+        Property    | Description                           | Required | Default
+        insidePoints | Points inside regions                | yes   |
+        nErode      | Cell layers to erode to detect holes  | no | 0
+        set         | Restrict to named cellSet             | no    | ""
     \endtable
 
 SourceFiles
@@ -57,7 +57,7 @@ SourceFiles
 #ifndef regionToCell_H
 #define regionToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 #include "boolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -73,7 +73,7 @@ class regionSplit;
 
 class regionToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -145,11 +145,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

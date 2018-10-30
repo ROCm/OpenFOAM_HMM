@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(boundaryToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, boundaryToFace, word);
     addToRunTimeSelectionTable(topoSetSource, boundaryToFace, istream);
+    addToRunTimeSelectionTable(topoSetFaceSource, boundaryToFace, word);
+    addToRunTimeSelectionTable(topoSetFaceSource, boundaryToFace, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        boundaryToFace,
+        word,
+        boundary
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        boundaryToFace,
+        istream,
+        boundary
+    );
 }
 
 
@@ -65,7 +81,7 @@ void Foam::boundaryToFace::combine(topoSet& set, const bool add) const
 
 Foam::boundaryToFace::boundaryToFace(const polyMesh& mesh)
 :
-    topoSetSource(mesh)
+    topoSetFaceSource(mesh)
 {}
 
 
@@ -75,7 +91,7 @@ Foam::boundaryToFace::boundaryToFace
     const dictionary&
 )
 :
-    topoSetSource(mesh)
+    topoSetFaceSource(mesh)
 {}
 
 
@@ -85,7 +101,7 @@ Foam::boundaryToFace::boundaryToFace
     Istream&
 )
 :
-    topoSetSource(mesh)
+    topoSetFaceSource(mesh)
 {}
 
 

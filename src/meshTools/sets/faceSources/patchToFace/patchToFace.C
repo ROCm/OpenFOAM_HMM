@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(patchToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, patchToFace, word);
     addToRunTimeSelectionTable(topoSetSource, patchToFace, istream);
+    addToRunTimeSelectionTable(topoSetFaceSource, patchToFace, word);
+    addToRunTimeSelectionTable(topoSetFaceSource, patchToFace, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        patchToFace,
+        word,
+        patch
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        patchToFace,
+        istream,
+        patch
+    );
 }
 
 
@@ -93,7 +109,7 @@ Foam::patchToFace::patchToFace
     const wordRe& patchName
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     selectedPatches_(one(), patchName)
 {}
 
@@ -104,7 +120,7 @@ Foam::patchToFace::patchToFace
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     selectedPatches_()
 {
     // Look for 'patches' and 'patch', but accept 'name' as well
@@ -123,7 +139,7 @@ Foam::patchToFace::patchToFace
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     selectedPatches_(one(), wordRe(checkIs(is)))
 {}
 

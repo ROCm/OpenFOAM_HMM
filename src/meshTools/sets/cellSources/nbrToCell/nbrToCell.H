@@ -25,7 +25,7 @@ Class
     Foam::nbrToCell
 
 Description
-    A topoSetSource to select cells based on number of neighbouring cells
+    A topoSetCellSource to select cells based on number of neighbouring cells
     (i.e. number of internal or coupled faces)
 
     \heading Dictionary parameters
@@ -42,7 +42,7 @@ SourceFiles
 #ifndef nbrToCell_H
 #define nbrToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,7 +55,7 @@ namespace Foam
 
 class nbrToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -81,11 +81,7 @@ public:
     // Constructors
 
         //- Construct from components
-        nbrToCell
-        (
-            const polyMesh& mesh,
-            const label minNbrs
-        );
+        nbrToCell(const polyMesh& mesh, const label minNbrs);
 
         //- Construct from dictionary
         nbrToCell(const polyMesh& mesh, const dictionary& dict);
@@ -99,11 +95,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

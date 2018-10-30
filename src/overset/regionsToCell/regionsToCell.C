@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,13 +34,25 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(regionsToCell, 0);
-
-addToRunTimeSelectionTable(topoSetSource, regionsToCell, word);
-
-addToRunTimeSelectionTable(topoSetSource, regionsToCell, istream);
-
+    defineTypeNameAndDebug(regionsToCell, 0);
+    addToRunTimeSelectionTable(topoSetSource, regionsToCell, word);
+    addToRunTimeSelectionTable(topoSetSource, regionsToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, regionsToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, regionsToCell, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        regionsToCell,
+        word,
+        regions
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        regionsToCell,
+        istream,
+        regions
+    );
 }
 
 
@@ -112,11 +124,9 @@ Foam::boolList Foam::regionsToCell::findRegions
 {
     boolList keepRegion(cellRegion.nRegions(), false);
 
-    forAll(insidePoints_, i)
+    for (const point& insidePt : insidePoints_)
     {
         // Find the region containing the insidePoint
-
-        const point& insidePt = insidePoints_[i];
 
         //label cellI = mesh_.findCell(insidePt);
         label cellI = -1;
@@ -204,10 +214,8 @@ void Foam::regionsToCell::shrinkRegions
 
     const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
 
-    forAll(pbm, patchI)
+    for (const polyPatch& pp : pbm)
     {
-        const polyPatch& pp = pbm[patchI];
-
         if (!pp.coupled() && !isA<emptyPolyPatch>(pp))
         {
             forAll(pp, i)
@@ -374,9 +382,9 @@ void Foam::regionsToCell::combine(topoSet& set, const bool add) const
         cellSet subSet(mesh_, setName_);
 
         selectedCell = false;
-        forAllConstIter(cellSet, subSet, iter)
+        for (const label celli : static_cast<const labelHashSet&>(subSet))
         {
-            selectedCell[iter.key()] = true;
+            selectedCell[celli] = true;
         }
     }
 
@@ -401,7 +409,6 @@ void Foam::regionsToCell::combine(topoSet& set, const bool add) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::regionsToCell::regionsToCell
 (
     const polyMesh& mesh,
@@ -410,21 +417,20 @@ Foam::regionsToCell::regionsToCell
     const label nErode
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     setName_(setName),
     insidePoints_(insidePoints),
     nErode_(nErode)
 {}
 
 
-// Construct from dictionary
 Foam::regionsToCell::regionsToCell
 (
     const polyMesh& mesh,
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     setName_(dict.lookupOrDefault<word>("set", "none")),
     insidePoints_
     (
@@ -432,27 +438,20 @@ Foam::regionsToCell::regionsToCell
       ? dict.lookup("insidePoints")
       : dict.lookup("insidePoint")
     ),
-    nErode_(dict.lookupOrDefault("nErode", 0))
+    nErode_(dict.lookupOrDefault<label>("nErode", 0))
 {}
 
 
-// Construct from Istream
 Foam::regionsToCell::regionsToCell
 (
     const polyMesh& mesh,
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     setName_(checkIs(is)),
     insidePoints_(checkIs(is)),
     nErode_(readLabel(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::regionsToCell::~regionsToCell()
 {}
 
 

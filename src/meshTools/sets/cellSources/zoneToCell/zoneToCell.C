@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(zoneToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, zoneToCell, word);
     addToRunTimeSelectionTable(topoSetSource, zoneToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, zoneToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, zoneToCell, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        zoneToCell,
+        word,
+        zone
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        zoneToCell,
+        istream,
+        zone
+    );
 }
 
 
@@ -93,7 +109,7 @@ Foam::zoneToCell::zoneToCell
     const wordRe& zoneName
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     selectedZones_(one(), zoneName)
 {}
 
@@ -104,7 +120,7 @@ Foam::zoneToCell::zoneToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     selectedZones_()
 {
     // Look for 'zones' and 'zone', but accept 'name' as well
@@ -123,7 +139,7 @@ Foam::zoneToCell::zoneToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     selectedZones_(one(), wordRe(checkIs(is)))
 {}
 
