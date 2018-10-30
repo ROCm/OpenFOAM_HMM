@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,9 +29,14 @@ Description
 
     \heading Dictionary parameters
     \table
-        Property    | Description                       | Required  | Default
-        name        | Patch name or regex to select     | yes   |
+        Property    | Description                           | Required | Default
+        patch       | The face zone name or regex           | possibly |
+        patches     | The face zone names or regexs         | possibly |
+        name        | Older specification for 'patch'       | no    |
     \endtable
+
+Note
+    Selection of multiple patches has precedence.
 
 SourceFiles
     patchToFace.C
@@ -42,7 +47,7 @@ SourceFiles
 #define patchToFace_H
 
 #include "topoSetSource.H"
-#include "wordRe.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,8 +68,8 @@ class patchToFace
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Name/regular expression of patch
-        wordRe patchName_;
+        //- Matcher for patches
+        wordRes selectedPatches_;
 
 
     // Private Member Functions
@@ -80,11 +85,7 @@ public:
     // Constructors
 
         //- Construct from components
-        patchToFace
-        (
-            const polyMesh& mesh,
-            const word& patchName
-        );
+        patchToFace(const polyMesh& mesh, const wordRe& patchName);
 
         //- Construct from dictionary
         patchToFace(const polyMesh& mesh, const dictionary& dict);

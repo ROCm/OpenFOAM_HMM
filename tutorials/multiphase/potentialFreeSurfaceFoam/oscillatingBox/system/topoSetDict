@@ -41,7 +41,7 @@ actions
         source  patchToFace;
         sourceInfo
         {
-            name   freeSurface;
+            patch   freeSurface;
         }
     }
 

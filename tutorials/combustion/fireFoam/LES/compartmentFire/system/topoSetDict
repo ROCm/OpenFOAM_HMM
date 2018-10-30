@@ -67,7 +67,7 @@ actions
         source  patchToFace;
         sourceInfo
         {
-           name inlet;
+            patch   inlet;
         }
     }
 

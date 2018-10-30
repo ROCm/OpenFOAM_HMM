@@ -24,7 +24,7 @@ actions
         source  patchToFace;
         sourceInfo
         {
-            name "side1";
+            patch   side1;
         }
     }
     {
@@ -57,7 +57,7 @@ actions
         source  patchToFace;
         sourceInfo
         {
-            name "walls";
+            patch   walls;
         }
     }
     {

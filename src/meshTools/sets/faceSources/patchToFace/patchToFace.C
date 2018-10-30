@@ -51,7 +51,7 @@ void Foam::patchToFace::combine(topoSet& set, const bool add) const
 {
     labelHashSet patchIDs = mesh_.boundaryMesh().patchSet
     (
-        List<wordRe>(1, patchName_),
+        selectedPatches_,
         true,           // warn if not found
         true            // use patch groups if available
     );
@@ -77,8 +77,10 @@ void Foam::patchToFace::combine(topoSet& set, const bool add) const
     if (patchIDs.empty())
     {
         WarningInFunction
-            << "Cannot find any patch named " << patchName_ << endl
-            << "Valid names are " << mesh_.boundaryMesh().names() << endl;
+            << "Cannot find any patches matching "
+            << flatOutput(selectedPatches_) << nl
+            << "Valid names are " << flatOutput(mesh_.boundaryMesh().names())
+            << endl;
     }
 }
 
@@ -88,11 +90,11 @@ void Foam::patchToFace::combine(topoSet& set, const bool add) const
 Foam::patchToFace::patchToFace
 (
     const polyMesh& mesh,
-    const word& patchName
+    const wordRe& patchName
 )
 :
     topoSetSource(mesh),
-    patchName_(patchName)
+    selectedPatches_(one(), patchName)
 {}
 
 
@@ -103,8 +105,16 @@ Foam::patchToFace::patchToFace
 )
 :
     topoSetSource(mesh),
-    patchName_(dict.get<wordRe>("name"))
-{}
+    selectedPatches_()
+{
+    // Look for 'patches' and 'patch', but accept 'name' as well
+    if (!dict.readIfPresent("patches", selectedPatches_))
+    {
+        selectedPatches_.resize(1);
+        selectedPatches_.first() =
+            dict.getCompat<wordRe>("patch", {{"name", 1806}});
+    }
+}
 
 
 Foam::patchToFace::patchToFace
@@ -114,7 +124,7 @@ Foam::patchToFace::patchToFace
 )
 :
     topoSetSource(mesh),
-    patchName_(checkIs(is))
+    selectedPatches_(one(), wordRe(checkIs(is)))
 {}
 
 
@@ -128,14 +138,15 @@ void Foam::patchToFace::applyToSet
 {
     if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
     {
-        Info<< "    Adding all faces of patch " << patchName_ << " ..." << endl;
+        Info<< "    Adding all faces of patches "
+            << flatOutput(selectedPatches_) << " ..." << endl;
 
         combine(set, true);
     }
     else if (action == topoSetSource::DELETE)
     {
-        Info<< "    Removing all faces of patch " << patchName_ << " ..."
-            << endl;
+        Info<< "    Removing all faces of patches "
+            << flatOutput(selectedPatches_) << " ..." << endl;
 
         combine(set, false);
     }

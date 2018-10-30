@@ -186,7 +186,7 @@ FoamFile
 //    // All faces of patch
 //    source patchToFace;
 //    {
-//        name ".*Wall";      // Name of patch, regular expressions allowed
+//        patch   ".*Wall";   // Name of patch, regular expressions allowed
 //    }
 //
 //    // All faces of faceZone
