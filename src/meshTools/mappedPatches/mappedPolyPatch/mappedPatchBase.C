@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1206,9 +1206,13 @@ void Foam::mappedPatchBase::clearOut()
 
 const Foam::polyMesh& Foam::mappedPatchBase::sampleMesh() const
 {
-    return patch_.boundaryMesh().mesh().time().lookupObject<polyMesh>
+    const polyMesh& thisMesh = patch_.boundaryMesh().mesh();
+
+    return
     (
-        sampleRegion()
+        sameRegion_
+      ? thisMesh
+      : thisMesh.time().lookupObject<polyMesh>(sampleRegion())
     );
 }
 
