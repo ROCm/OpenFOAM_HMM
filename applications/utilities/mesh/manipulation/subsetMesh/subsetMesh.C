@@ -344,11 +344,11 @@ void subsetTopoSets
 
         labelHashSet subset(2*min(set.size(), map.size()));
 
-        for (const label id : map)
+        forAll(map, i)
         {
-            if (set.found(id))
+            if (set.found(map[i]))
             {
-                subset.insert(id);
+                subset.insert(i);
             }
         }
 
