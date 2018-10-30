@@ -56,7 +56,7 @@ actions
     {
         name    inner;
         type    cellSet;
-        action  delete;
+        action  subtract;
         source  cellToCell;
         sourceInfo
         {
@@ -67,7 +67,7 @@ actions
     {
         name    outer;
         type    cellSet;
-        action  delete;
+        action  subtract;
         source  cellToCell;
         sourceInfo
         {

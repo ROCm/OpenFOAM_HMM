@@ -94,7 +94,7 @@ void Foam::faceToFace::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
         Info<< "    Adding all faces from faceSet " << setName_ << " ..."
             << endl;
@@ -104,7 +104,7 @@ void Foam::faceToFace::applyToSet
 
         set.addSet(loadedSet);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
         Info<< "    Removing all faces from faceSet " << setName_ << " ..."
             << endl;
@@ -112,7 +112,7 @@ void Foam::faceToFace::applyToSet
         // Load the set
         faceSet loadedSet(mesh_, setName_);
 
-        set.deleteSet(loadedSet);
+        set.subtractSet(loadedSet);
     }
 }
 

@@ -90,7 +90,7 @@ void Foam::pointToPoint::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
         Info<< "    Adding all from pointSet " << setName_ << " ..." << endl;
 
@@ -99,14 +99,14 @@ void Foam::pointToPoint::applyToSet
 
         set.addSet(loadedSet);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
         Info<< "    Removing all from pointSet " << setName_ << " ..." << endl;
 
         // Load the set
         pointSet loadedSet(mesh_, setName_);
 
-        set.deleteSet(loadedSet);
+        set.subtractSet(loadedSet);
     }
 }
 

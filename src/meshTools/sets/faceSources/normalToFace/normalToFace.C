@@ -128,7 +128,7 @@ void Foam::normalToFace::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
         Info<< "    Adding faces according to normal being aligned with "
             << normal_ << " (to within " << tol_ << ") ..." << endl;
@@ -139,11 +139,11 @@ void Foam::normalToFace::applyToSet
 
             if (mag(1 - (n & normal_)) < tol_)
             {
-                set.insert(facei);
+                set.set(facei);
             }
         }
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
         Info<< "    Removing faces according to normal being aligned with "
             << normal_ << " (to within " << tol_ << ") ..." << endl;
@@ -160,7 +160,7 @@ void Foam::normalToFace::applyToSet
             }
         }
 
-        set.erase(toBeRemoved);
+        set.unset(toBeRemoved);
     }
 }
 

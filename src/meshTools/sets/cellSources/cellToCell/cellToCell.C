@@ -94,7 +94,7 @@ void Foam::cellToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::ADD) || (action == topoSetSource::NEW))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
         Info<< "    Adding all elements of cellSet " << setName_ << " ..."
             << endl;
@@ -104,7 +104,7 @@ void Foam::cellToCell::applyToSet
 
         set.addSet(loadedSet);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
         Info<< "    Removing all elements of cellSet " << setName_ << " ..."
             << endl;
@@ -112,7 +112,7 @@ void Foam::cellToCell::applyToSet
         // Load the set
         cellSet loadedSet(mesh_, setName_);
 
-        set.deleteSet(loadedSet);
+        set.subtractSet(loadedSet);
     }
 }
 

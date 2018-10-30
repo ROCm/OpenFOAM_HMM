@@ -176,15 +176,15 @@ void Foam::rotatedBoxToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells with center within rotated box " << endl;
+        Info<< "    Adding cells with centre within rotated box " << endl;
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells with center within rotated box " << endl;
+        Info<< "    Removing cells with centre within rotated box " << endl;
 
         combine(set, false);
     }

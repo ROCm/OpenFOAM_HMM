@@ -151,14 +151,14 @@ void Foam::nbrToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
         Info<< "    Adding cells with only " << minNbrs_ << " or less"
                 " neighbouring cells" << " ..." << endl;
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
         Info<< "    Removing cells with only " << minNbrs_ << " or less"
                 " neighbouring cells" << " ..." << endl;

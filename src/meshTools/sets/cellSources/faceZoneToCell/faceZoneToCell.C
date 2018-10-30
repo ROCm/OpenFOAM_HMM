@@ -159,7 +159,7 @@ void Foam::faceZoneToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
         Info<< "    Adding all " << faceActionNames_[option_]
             << " cells of face zones "
@@ -167,7 +167,7 @@ void Foam::faceZoneToCell::applyToSet
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
         Info<< "    Removing all " << faceActionNames_[option_]
             << " cells of face zones "

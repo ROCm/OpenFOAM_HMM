@@ -153,7 +153,7 @@ void Foam::pointSet::sync(const polyMesh& mesh)
     {
         if (contents[pointi])
         {
-            newContents.insert(pointi);
+            newContents.set(pointi);
         }
     }
 
@@ -202,7 +202,7 @@ void Foam::pointSet::distribute(const mapDistributePolyMesh& map)
     {
         if (inSet[pointi])
         {
-            insert(pointi);
+            this->set(pointi);
         }
     }
 }

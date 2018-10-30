@@ -54,7 +54,7 @@ void Foam::faceZoneSet::updateSet()
 
     faceSet::clearStorage();
     faceSet::resize(2*addressing_.size());
-    faceSet::insert(addressing_);
+    faceSet::set(addressing_);
 }
 
 
@@ -260,7 +260,7 @@ void Foam::faceZoneSet::addSet(const topoSet& set)
 }
 
 
-void Foam::faceZoneSet::deleteSet(const topoSet& set)
+void Foam::faceZoneSet::subtractSet(const topoSet& set)
 {
     label nConflict = 0;
 
@@ -301,7 +301,7 @@ void Foam::faceZoneSet::deleteSet(const topoSet& set)
     if (nConflict > 0)
     {
         WarningInFunction
-            << "deleteSet : there are " << nConflict
+            << "subtractSet : there are " << nConflict
             << " faces with different orientation in faceZonesSets "
             << name() << " and " << set.name() << endl;
     }

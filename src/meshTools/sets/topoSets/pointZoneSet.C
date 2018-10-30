@@ -50,7 +50,7 @@ void Foam::pointZoneSet::updateSet()
 
     pointSet::clearStorage();
     pointSet::resize(2*addressing_.size());
-    pointSet::insert(addressing_);
+    pointSet::set(addressing_);
 }
 
 
@@ -189,7 +189,7 @@ void Foam::pointZoneSet::addSet(const topoSet& set)
 }
 
 
-void Foam::pointZoneSet::deleteSet(const topoSet& set)
+void Foam::pointZoneSet::subtractSet(const topoSet& set)
 {
     DynamicList<label> newAddressing(addressing_.size());
 

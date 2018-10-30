@@ -65,7 +65,7 @@ actions
     {
         name    baffleFaceSet;
         type    faceSet;
-        action  delete;
+        action  subtract;
         source  boxToFace;
         sourceInfo
         {

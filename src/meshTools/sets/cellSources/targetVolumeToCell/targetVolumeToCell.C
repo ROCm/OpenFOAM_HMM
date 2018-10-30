@@ -327,14 +327,14 @@ void Foam::targetVolumeToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
         Info<< "    Adding cells up to target volume " << vol_
             << " out of total volume " << gSum(mesh_.cellVolumes()) << endl;
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
         Info<< "    Removing cells up to target volume " << vol_
             << " out of total volume " << gSum(mesh_.cellVolumes()) << endl;

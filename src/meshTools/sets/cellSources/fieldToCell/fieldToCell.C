@@ -74,10 +74,9 @@ void Foam::fieldToCell::applyToSet
     topoSet& set
 ) const
 {
-    Info<< "    Field min:" << min(field)
-        << " max:" << max(field) << endl;
+    Info<< "    Field min:" << min(field) << " max:" << max(field) << endl;
 
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
         Info<< "    Adding all cells with value of field " << fieldName_
             << " within range " << min_ << ".." << max_ << endl;
@@ -86,11 +85,11 @@ void Foam::fieldToCell::applyToSet
         {
             if (field[celli] >= min_ && field[celli] <= max_)
             {
-                set.insert(celli);
+                set.set(celli);
             }
         }
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
         Info<< "    Removing all cells with value of field " << fieldName_
             << " within range " << min_ << ".." << max_ << endl;
@@ -99,7 +98,7 @@ void Foam::fieldToCell::applyToSet
         {
             if (field[celli] >= min_ && field[celli] <= max_)
             {
-                set.erase(celli);
+                set.unset(celli);
             }
         }
     }

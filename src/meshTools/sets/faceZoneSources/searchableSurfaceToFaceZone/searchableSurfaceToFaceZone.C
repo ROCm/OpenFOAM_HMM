@@ -162,7 +162,7 @@ void Foam::searchableSurfaceToFaceZone::applyToSet
         // Select intersected faces
         // ~~~~~~~~~~~~~~~~~~~~~~~~
 
-        if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+        if (action == topoSetSource::ADD || action == topoSetSource::NEW)
         {
             Info<< "    Adding all faces from surface "
                 << surfacePtr_().name() << " ..." << endl;
@@ -184,7 +184,7 @@ void Foam::searchableSurfaceToFaceZone::applyToSet
             fzSet.flipMap().transfer(newFlipMap);
             fzSet.updateSet();
         }
-        else if (action == topoSetSource::DELETE)
+        else if (action == topoSetSource::SUBTRACT)
         {
             Info<< "    Removing all faces from surface "
                 << surfacePtr_().name() << " ..." << endl;

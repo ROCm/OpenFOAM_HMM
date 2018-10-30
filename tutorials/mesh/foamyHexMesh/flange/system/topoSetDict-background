@@ -23,7 +23,7 @@ FoamFile
 //
 //     // action to perform on set. Two types:
 //     // - require no source : clear/invert
-//     // - require source    : new/add/delete/subset
+//     // - require source    : add/subtract/subset/new
 //     action  new;
 //
 // The source entry varies according to the type of set:

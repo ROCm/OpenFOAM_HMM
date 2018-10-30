@@ -158,7 +158,7 @@ void Foam::cylinderAnnulusToFace::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
         Info<< "    Adding faces with centre within cylinder annulus,"
             << " with p1 = "
@@ -168,7 +168,7 @@ void Foam::cylinderAnnulusToFace::applyToSet
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
         Info<< "    Removing faces with centre within cylinder annulus,"
             << " with p1 = "

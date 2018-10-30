@@ -18,8 +18,8 @@ FoamFile
 // Name of set to operate on
 name facesToBeRemoved;
 
-// One of (clear | new | invert | add | delete | subset | list)
-action new;
+// One of (add | subtract | subset | clear | new | invert | list)
+action  new;
 
 // Actions to apply to pointSet. These are all the topoSetSource's ending
 // in ..ToFace (see the meshTools library).

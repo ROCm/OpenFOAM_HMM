@@ -228,19 +228,13 @@ actions
     {
         name    wallPanel;
         type    faceZoneSet;
-        action  delete;
+        action  subtract;
         source  setToFaceZone;
         sourceInfo
         {
             faceSet inletFace;
         }
     }
-
-
-
-
-
-
 );
 
 // ************************************************************************* //

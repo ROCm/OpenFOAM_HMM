@@ -63,7 +63,7 @@ actions
     {
         name    solid;
         type    cellSet;
-        action  delete;
+        action  subtract;
         source  cellToCell;
         sourceInfo
         {
@@ -108,7 +108,7 @@ actions
     {
         name    solid;
         type    cellSet;
-        action  delete;
+        action  subtract;
         source  cellToCell;
         sourceInfo
         {

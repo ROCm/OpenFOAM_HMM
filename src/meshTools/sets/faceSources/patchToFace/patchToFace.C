@@ -152,14 +152,14 @@ void Foam::patchToFace::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
         Info<< "    Adding all faces of patches "
             << flatOutput(selectedPatches_) << " ..." << endl;
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
         Info<< "    Removing all faces of patches "
             << flatOutput(selectedPatches_) << " ..." << endl;

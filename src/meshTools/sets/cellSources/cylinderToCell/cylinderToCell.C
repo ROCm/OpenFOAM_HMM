@@ -142,7 +142,7 @@ void Foam::cylinderToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
         Info<< "    Adding cells with centre within cylinder, with p1 = "
             << point1_ << ", p2 = " << point2_ << ", radius = " << radius_
@@ -150,7 +150,7 @@ void Foam::cylinderToCell::applyToSet
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
         Info<< "    Removing cells with centre within cylinder, with p1 = "
             << point1_ << ", p2 = " << point2_ << ", radius = " << radius_

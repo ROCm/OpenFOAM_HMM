@@ -247,8 +247,8 @@ int main(int argc, char *argv[])
             autoPtr<topoSet> currentSet;
             if
             (
-                (action == topoSetSource::NEW)
-             || (action == topoSetSource::CLEAR)
+                action == topoSetSource::NEW
+             || action == topoSetSource::CLEAR
             )
             {
                 currentSet = topoSet::New(setType, mesh, setName, 10000);
@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
             {
                 case topoSetSource::NEW:
                 case topoSetSource::ADD:
-                case topoSetSource::DELETE:
+                case topoSetSource::SUBTRACT:
                 {
                     const word sourceName(dict.get<word>("source"));
 

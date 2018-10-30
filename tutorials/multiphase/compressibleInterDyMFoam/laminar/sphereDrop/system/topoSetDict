@@ -263,7 +263,7 @@ actions
     {
         name    topBlockCells;
         type    cellSet;
-        action  delete;
+        action  subtract;
         source  cellToCell;
         sourceInfo
         {

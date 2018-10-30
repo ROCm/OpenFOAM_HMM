@@ -129,14 +129,14 @@ void Foam::sphereToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
         Info<< "    Adding cells within a sphere with centre = "
             << origin_ << " and radius = " << radius_ << endl;
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
         Info<< "    Removing cells within a sphere with centre = "
             << origin_ << " and radius = " << radius_ << endl;

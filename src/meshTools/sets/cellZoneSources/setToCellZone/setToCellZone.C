@@ -96,9 +96,9 @@ void Foam::setToCellZone::applyToSet
     }
     else
     {
-        cellZoneSet& fzSet = refCast<cellZoneSet>(set);
+        cellZoneSet& zoneSet = refCast<cellZoneSet>(set);
 
-        if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+        if (action == topoSetSource::ADD || action == topoSetSource::NEW)
         {
             Info<< "    Adding all cells from cellSet " << setName_
                 << " ..." << endl;
@@ -107,20 +107,20 @@ void Foam::setToCellZone::applyToSet
             cellSet fSet(mesh_, setName_);
 
             // Start off from copy
-            DynamicList<label> newAddressing(fzSet.addressing());
+            DynamicList<label> newAddressing(zoneSet.addressing());
 
             for (const label celli : fSet)
             {
-                if (!fzSet.found(celli))
+                if (!zoneSet.found(celli))
                 {
                     newAddressing.append(celli);
                 }
             }
 
-            fzSet.addressing().transfer(newAddressing);
-            fzSet.updateSet();
+            zoneSet.addressing().transfer(newAddressing);
+            zoneSet.updateSet();
         }
-        else if (action == topoSetSource::DELETE)
+        else if (action == topoSetSource::SUBTRACT)
         {
             Info<< "    Removing all cells from cellSet " << setName_
                 << " ..." << endl;
@@ -129,17 +129,17 @@ void Foam::setToCellZone::applyToSet
             cellSet loadedSet(mesh_, setName_);
 
             // Start off empty
-            DynamicList<label> newAddressing(fzSet.addressing().size());
+            DynamicList<label> newAddressing(zoneSet.addressing().size());
 
-            forAll(fzSet.addressing(), i)
+            forAll(zoneSet.addressing(), i)
             {
-                if (!loadedSet.found(fzSet.addressing()[i]))
+                if (!loadedSet.found(zoneSet.addressing()[i]))
                 {
-                    newAddressing.append(fzSet.addressing()[i]);
+                    newAddressing.append(zoneSet.addressing()[i]);
                 }
             }
-            fzSet.addressing().transfer(newAddressing);
-            fzSet.updateSet();
+            zoneSet.addressing().transfer(newAddressing);
+            zoneSet.updateSet();
         }
     }
 }

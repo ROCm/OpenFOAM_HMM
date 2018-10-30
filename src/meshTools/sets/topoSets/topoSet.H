@@ -324,7 +324,11 @@ public:
         //- Add elements present in set.
         virtual void addSet(const topoSet& set);
 
-        //- Delete elements present in set.
+        //- Subtract elements present in set.
+        virtual void subtractSet(const topoSet& set);
+
+        //- Subtract elements present in set.
+        //  \deprecated use subtractSet instead (OCT-2018)
         virtual void deleteSet(const topoSet& set);
 
         //- Sync set across coupled patches.
