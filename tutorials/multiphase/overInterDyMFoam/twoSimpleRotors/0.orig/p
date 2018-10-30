@@ -25,6 +25,7 @@ boundaryField
     "(walls|hole|outlet|inlet)"
     {
         type            calculated;
+        value           $internalField;
     }
     overset
     {
