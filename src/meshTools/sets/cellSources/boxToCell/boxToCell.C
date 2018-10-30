@@ -87,14 +87,11 @@ Foam::boxToCell::boxToCell
     topoSetSource(mesh),
     bbs_()
 {
-    if (dict.found("box"))
+    // Look for 'boxes' or 'box'
+    if (!dict.readIfPresent("boxes", bbs_))
     {
         bbs_.resize(1);
         dict.readEntry("box", bbs_.first());
-    }
-    else
-    {
-        dict.readEntry("boxes", bbs_);
     }
 }
 

@@ -29,13 +29,14 @@ Description
 
     \heading Dictionary parameters
     \table
-        Property    | Description                       | Required  | Default
-        box         | A single bounding box             | partly    |
-        boxes       | Multiple bounding boxes           | partly    |
+        Property    | Description                           | Required | Default
+        box         | A single bounding box                 | partly   |
+        boxes       | Multiple bounding boxes               | partly   |
     \endtable
 
 Note
-    Must specify either "box" or "boxes"
+    Must specify either "box" or "boxes".
+    The selection of multiple boxes has precedence.
 
 SourceFiles
     boxToCell.C
