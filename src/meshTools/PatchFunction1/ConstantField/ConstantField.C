@@ -43,6 +43,54 @@ Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
 
 
 template<class Type>
+Foam::Field<Type> Foam::PatchFunction1Types::ConstantField<Type>::getValue
+(
+    const word& keyword,
+    const dictionary& dict,
+    const label len
+)
+{
+    Field<Type> fld;
+
+    if (len)
+    {
+        ITstream& is = dict.lookup(keyword);
+
+        // Read first token
+        token firstToken(is);
+
+        if (firstToken.isWord())
+        {
+            if
+            (
+                firstToken.wordToken() == "uniform"
+             || firstToken.wordToken() == "constant"
+            )
+            {
+                fld.setSize(len);
+                fld = pTraits<Type>(is);
+            }
+            else
+            {
+                FatalIOErrorInFunction(dict)
+                    << "expected keyword 'uniform' or 'constant', found "
+                    << firstToken.wordToken()
+                    << exit(FatalIOError);
+            }
+        }
+        else
+        {
+            fld.setSize(len);
+
+            is.putBack(firstToken);
+            fld = pTraits<Type>(is);
+        }
+    }
+    return fld;
+}
+
+
+template<class Type>
 Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
 (
     const polyPatch& pp,
@@ -52,7 +100,7 @@ Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
 )
 :
     PatchFunction1<Type>(pp, entryName, dict, faceValues),
-    value_(entryName, dict, pp.size())
+    value_(getValue(entryName, dict, pp.size()))
 {}
 
 

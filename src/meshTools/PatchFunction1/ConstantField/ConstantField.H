@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,6 +65,14 @@ class ConstantField
 
 
     // Private Member Functions
+
+        //- Helper to read value from dictionary
+        static Field<Type> getValue
+        (
+            const word& keyword,
+            const dictionary& dict,
+            const label len
+        );
 
         //- No copy assignment
         void operator=(const ConstantField<Type>&) = delete;
