@@ -23,7 +23,7 @@ internalFacesOnly false;
 // Baffles to create.
 baffles
 {
-    // NOTE: cyclicAMI patches MUST BE defined PRIOR to their associted
+    // NOTE: cyclicAMI patches MUST BE defined PRIOR to their associated
     //       blockage patches
 
     ACMI1
