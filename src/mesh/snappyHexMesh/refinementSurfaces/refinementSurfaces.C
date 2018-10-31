@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -185,7 +185,7 @@ Foam::refinementSurfaces::refinementSurfaces
         const word& geomName = allGeometry_.names()[geomI];
 
         const entry* ePtr =
-            surfacesDict.findEntry(geomName, keyType::LITERAL);
+            surfacesDict.findEntry(geomName, keyType::REGEX);
 
         if (ePtr)
         {

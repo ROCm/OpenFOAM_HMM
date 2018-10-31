@@ -52,6 +52,8 @@ geometry
         {
             surface box1;
             scale (1.0 1.0 2.1);
+
+            // Old syntax
             transform
             {
                 coordinateSystem
@@ -71,19 +73,13 @@ geometry
         {
             surface box1;
             scale (1.0 1.0 2.1);
+
+            // Simplified syntax
             transform
             {
-                coordinateSystem
-                {
-                    type    cartesian;
-                    origin  (3.5 3 0);
-                    coordinateRotation
-                    {
-                        type    axesRotation;
-                        e1      (1 0 0);
-                        e3      (0 0 1);
-                    }
-                }
+                origin  (3.5 3 0);
+                e1      (1 0 0);
+                e3      (0 0 1);
             }
         }
     }

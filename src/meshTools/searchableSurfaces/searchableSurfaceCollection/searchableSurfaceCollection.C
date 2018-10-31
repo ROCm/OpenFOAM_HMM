@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -193,16 +193,31 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
         {
             instance_[surfI] = dEntry.keyword();
 
-            const dictionary& subDict = dEntry.dict();
+            const dictionary& sDict = dEntry.dict();
 
-            subDict.readEntry("scale", scale_[surfI]);
-            transform_.set
-            (
-                surfI,
-                new coordSystem::cartesian(subDict, "transform")
-            );
+            sDict.readEntry("scale", scale_[surfI]);
 
-            const word subGeomName(subDict.get<word>("surface"));
+            const dictionary& coordDict = sDict.subDict("transform");
+            if (coordDict.found("coordinateSystem"))
+            {
+                // Backwards compatibility: use coordinateSystem subdictionary
+                transform_.set
+                (
+                    surfI,
+                    new coordSystem::cartesian(coordDict, "coordinateSystem")
+                );
+            }
+            else
+            {
+                // New form: directly set from dictionary
+                transform_.set
+                (
+                    surfI,
+                    new coordSystem::cartesian(sDict, "transform")
+                );
+            }
+
+            const word subGeomName(sDict.get<word>("surface"));
             //Pout<< "Trying to find " << subGeomName << endl;
 
             searchableSurface& s =

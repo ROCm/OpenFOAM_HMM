@@ -613,7 +613,7 @@ Foam::shellSurfaces::shellSurfaces
     {
         const word& geomName = allGeometry_.names()[geomI];
 
-        const entry* eptr = shellsDict.findEntry(geomName, keyType::LITERAL);
+        const entry* eptr = shellsDict.findEntry(geomName, keyType::REGEX);
 
         if (eptr)
         {
