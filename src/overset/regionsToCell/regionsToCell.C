@@ -189,7 +189,7 @@ void Foam::regionsToCell::unselectOutsideRegions
     regionSplit cellRegion(mesh_, blockedFace);
 
     // Determine regions containing insidePoints_
-    boolList keepRegion(findRegions(true, selectedCell, cellRegion));
+    boolList keepRegion(findRegions(verbose_, selectedCell, cellRegion));
 
     // Go back to bool per cell
     forAll(cellRegion, cellI)
@@ -298,7 +298,7 @@ void Foam::regionsToCell::erode
     regionSplit cellRegion(mesh_, blockedFace);
 
     // Determine regions containing insidePoints
-    boolList keepRegion(findRegions(true, shrunkSelectedCell, cellRegion));
+    boolList keepRegion(findRegions(verbose_, shrunkSelectedCell, cellRegion));
 
 
     // Extract cells in regions that are not to be kept.
@@ -465,15 +465,23 @@ void Foam::regionsToCell::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all cells of connected region containing points "
-            << insidePoints_ << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all cells of connected region "
+                << "containing points "
+                << insidePoints_ << " ..." << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all cells of connected region containing points "
-            << insidePoints_ << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all cells of connected region "
+                << "containing points "
+                << insidePoints_ << " ..." << endl;
+        }
 
         combine(set, false);
     }

@@ -76,8 +76,11 @@ void Foam::zoneToFace::combine(topoSet& set, const bool add) const
 
             const labelList& faceLabels = zone;
 
-            Info<< "    Found matching zone " << zone.name()
-                << " with " << faceLabels.size() << " faces." << endl;
+            if (verbose_)
+            {
+                Info<< "    Found matching zone " << zone.name()
+                    << " with " << faceLabels.size() << " faces." << endl;
+            }
 
             for (const label facei : faceLabels)
             {
@@ -154,15 +157,21 @@ void Foam::zoneToFace::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all faces of face zones "
-            << flatOutput(selectedZones_) << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all faces of face zones "
+                << flatOutput(selectedZones_) << " ..." << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all faces of face zones "
-            << flatOutput(selectedZones_) << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all faces of face zones "
+                << flatOutput(selectedZones_) << " ..." << endl;
+        }
 
         combine(set, false);
     }

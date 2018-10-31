@@ -63,8 +63,11 @@ void Foam::surfaceToPoint::combine(topoSet& set, const bool add) const
 
     triSurface surf(surfName_, scale_);
 
-    Info<< "    Read surface from " << surfName_
-        << " in = "<< timer.cpuTimeIncrement() << " s" << endl << endl;
+    if (verbose_)
+    {
+        Info<< "    Read surface from " << surfName_
+            << " in = "<< timer.cpuTimeIncrement() << " s" << nl << endl;
+    }
 
     // Construct search engine on surface
     triSurfaceSearch querySurf(surf);
@@ -190,15 +193,21 @@ void Foam::surfaceToPoint::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding points in relation to surface " << surfName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding points in relation to surface " << surfName_
+                << " ..." << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing points in relation to surface " << surfName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing points in relation to surface " << surfName_
+                << " ..." << endl;
+        }
 
         combine(set, false);
     }

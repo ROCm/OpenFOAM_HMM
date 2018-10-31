@@ -144,13 +144,21 @@ void Foam::boxToCell::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells with centre within boxes " << bbs_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells with centre within boxes "
+                << bbs_ << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells with centre within boxes " << bbs_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells with centre within boxes "
+                << bbs_ << endl;
+        }
 
         combine(set, false);
     }

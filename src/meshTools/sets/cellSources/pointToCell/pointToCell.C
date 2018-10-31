@@ -161,15 +161,21 @@ void Foam::pointToCell::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells according to pointSet " << setName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells according to pointSet " << setName_
+                << " ..." << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells according to pointSet " << setName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells according to pointSet " << setName_
+                << " ..." << endl;
+        }
 
         combine(set, false);
     }

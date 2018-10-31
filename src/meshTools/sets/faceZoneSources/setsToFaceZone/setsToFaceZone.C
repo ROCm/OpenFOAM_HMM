@@ -110,8 +110,11 @@ void Foam::setsToFaceZone::applyToSet
 
         if (action == topoSetSource::ADD || action == topoSetSource::NEW)
         {
-            Info<< "    Adding all faces from faceSet " << faceSetName_
-                << " ..." << endl;
+            if (verbose_)
+            {
+                Info<< "    Adding all faces from faceSet " << faceSetName_
+                    << " ..." << endl;
+            }
 
             // Load the sets
             faceSet fSet(mesh_, faceSetName_);
@@ -182,8 +185,11 @@ void Foam::setsToFaceZone::applyToSet
         }
         else if (action == topoSetSource::SUBTRACT)
         {
-            Info<< "    Removing all faces from faceSet " << faceSetName_
-                << " ..." << endl;
+            if (verbose_)
+            {
+                Info<< "    Removing all faces from faceSet " << faceSetName_
+                    << " ..." << endl;
+            }
 
             // Load the set
             faceZoneSet loadedSet(mesh_, faceSetName_);

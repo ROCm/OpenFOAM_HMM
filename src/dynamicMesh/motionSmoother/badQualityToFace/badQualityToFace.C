@@ -112,12 +112,20 @@ void Foam::badQualityToFace::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding bad-quality faces" << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding bad-quality faces" << endl;
+        }
+
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing bad-quality faces" << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing bad-quality faces" << endl;
+        }
+
         combine(set, false);
     }
 }

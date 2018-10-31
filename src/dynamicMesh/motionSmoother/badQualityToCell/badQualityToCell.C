@@ -116,12 +116,20 @@ void Foam::badQualityToCell::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding bad-quality cells" << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding bad-quality cells" << endl;
+        }
+
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing bad-quality cells" << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing bad-quality cells" << endl;
+        }
+
         combine(set, false);
     }
 }

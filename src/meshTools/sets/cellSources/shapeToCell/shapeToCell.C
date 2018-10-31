@@ -144,13 +144,21 @@ void Foam::shapeToCell::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all cells of type " << type_ << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all cells of type " << type_
+                << " ..." << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all cells of type " << type_ << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all cells of type " << type_
+                << " ..." << endl;
+        }
 
         combine(set, false);
     }

@@ -74,12 +74,18 @@ void Foam::fieldToCell::applyToSet
     topoSet& set
 ) const
 {
-    Info<< "    Field min:" << min(field) << " max:" << max(field) << endl;
+    if (verbose_)
+    {
+        Info << "    Field min:" << min(field) << " max:" << max(field) << nl;
+    }
 
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all cells with value of field " << fieldName_
-            << " within range " << min_ << ".." << max_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all cells with value of field " << fieldName_
+                << " within range " << min_ << ".." << max_ << endl;
+        }
 
         forAll(field, celli)
         {
@@ -91,8 +97,11 @@ void Foam::fieldToCell::applyToSet
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all cells with value of field " << fieldName_
-            << " within range " << min_ << ".." << max_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all cells with value of field " << fieldName_
+                << " within range " << min_ << ".." << max_ << endl;
+        }
 
         forAll(field, celli)
         {

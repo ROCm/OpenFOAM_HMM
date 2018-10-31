@@ -154,8 +154,11 @@ void Foam::surfaceToCell::combine(topoSet& set, const bool add) const
         //- Calculate for each searchPoint inside/outside status.
         boolList isInside(querySurf().calcInside(mesh_.cellCentres()));
 
-        Info<< "    Marked inside/outside using surface orientation in = "
-            << timer.cpuTimeIncrement() << " s" << endl << endl;
+        if (verbose_)
+        {
+            Info<< "    Marked inside/outside using surface orientation in = "
+                << timer.cpuTimeIncrement() << " s" << nl << endl;
+        }
 
         forAll(isInside, celli)
         {
@@ -206,8 +209,11 @@ void Foam::surfaceToCell::combine(topoSet& set, const bool add) const
         );
 
 
-        Info<< "    Marked inside/outside using surface intersection in = "
-            << timer.cpuTimeIncrement() << " s" << endl << endl;
+        if (verbose_)
+        {
+            Info<< "    Marked inside/outside using surface intersection in = "
+                << timer.cpuTimeIncrement() << " s" << nl << endl;
+        }
 
         //- Add/remove cells using set
         forAll(cellType, celli)
@@ -250,8 +256,11 @@ void Foam::surfaceToCell::combine(topoSet& set, const bool add) const
 
         if (curvature_ < -1)
         {
-            Info<< "    Selecting cells with cellCentre closer than "
-                << nearDist_ << " to surface" << endl;
+            if (verbose_)
+            {
+                Info<< "    Selecting cells with cellCentre closer than "
+                    << nearDist_ << " to surface" << endl;
+            }
 
             // No need to test curvature. Insert near cells into set.
 
@@ -267,17 +276,22 @@ void Foam::surfaceToCell::combine(topoSet& set, const bool add) const
                 }
             }
 
-            Info<< "    Determined nearest surface point in = "
-                << timer.cpuTimeIncrement() << " s" << endl << endl;
-
+            if (verbose_)
+            {
+                Info<< "    Determined nearest surface point in = "
+                    << timer.cpuTimeIncrement() << " s" << nl << endl;
+            }
         }
         else
         {
             // Test near cells for curvature
 
-            Info<< "    Selecting cells with cellCentre closer than "
-                << nearDist_ << " to surface and curvature factor"
-                << " less than " << curvature_ << endl;
+            if (verbose_)
+            {
+                Info<< "    Selecting cells with cellCentre closer than "
+                    << nearDist_ << " to surface and curvature factor"
+                    << " less than " << curvature_ << endl;
+            }
 
             // Cache for nearest surface triangle for a point
             Map<label> pointToNearest(mesh_.nCells()/10);
@@ -307,8 +321,11 @@ void Foam::surfaceToCell::combine(topoSet& set, const bool add) const
                 }
             }
 
-            Info<< "    Determined nearest surface point in = "
-                << timer.cpuTimeIncrement() << " s" << endl << endl;
+            if (verbose_)
+            {
+                Info<< "    Determined nearest surface point in = "
+                    << timer.cpuTimeIncrement() << " s" << nl << endl;
+            }
         }
     }
 }
@@ -489,15 +506,21 @@ void Foam::surfaceToCell::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells in relation to surface " << surfName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells in relation to surface " << surfName_
+                << " ..." << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells in relation to surface " << surfName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells in relation to surface " << surfName_
+                << " ..." << endl;
+        }
 
         combine(set, false);
     }

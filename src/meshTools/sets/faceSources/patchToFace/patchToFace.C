@@ -76,8 +76,11 @@ void Foam::patchToFace::combine(topoSet& set, const bool add) const
     {
         const polyPatch& pp = mesh_.boundaryMesh()[patchi];
 
-        Info<< "    Found matching patch " << pp.name()
-            << " with " << pp.size() << " faces." << endl;
+        if (verbose_)
+        {
+            Info<< "    Found matching patch " << pp.name()
+                << " with " << pp.size() << " faces." << endl;
+        }
 
         for
         (
@@ -154,15 +157,21 @@ void Foam::patchToFace::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all faces of patches "
-            << flatOutput(selectedPatches_) << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all faces of patches "
+                << flatOutput(selectedPatches_) << " ..." << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all faces of patches "
-            << flatOutput(selectedPatches_) << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all faces of patches "
+                << flatOutput(selectedPatches_) << " ..." << endl;
+        }
 
         combine(set, false);
     }

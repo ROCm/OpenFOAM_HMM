@@ -124,8 +124,11 @@ void Foam::targetVolumeToCell::combine(topoSet& set, const bool add) const
     if (maskSetName_.size())
     {
         // Read cellSet
-        Info<< "    Operating on subset defined by cellSet " << maskSetName_
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Operating on subset defined by cellSet "
+                << maskSetName_ << endl;
+        }
 
         maskSet = false;
         cellSet subset(mesh_, maskSetName_);
@@ -262,9 +265,11 @@ void Foam::targetVolumeToCell::combine(topoSet& set, const bool add) const
     }
 
 
-    Info<< "    Selected " << nSelected << " with actual volume "
-        << selectedVol << endl;
-
+    if (verbose_)
+    {
+        Info<< "    Selected " << nSelected << " with actual volume "
+            << selectedVol << endl;
+    }
 
     // Loop over selected cells only
     for (const label celli : selected)
@@ -329,15 +334,23 @@ void Foam::targetVolumeToCell::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells up to target volume " << vol_
-            << " out of total volume " << gSum(mesh_.cellVolumes()) << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells up to target volume " << vol_
+                << " out of total volume "
+                << gSum(mesh_.cellVolumes()) << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells up to target volume " << vol_
-            << " out of total volume " << gSum(mesh_.cellVolumes()) << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells up to target volume " << vol_
+                << " out of total volume "
+                << gSum(mesh_.cellVolumes()) << endl;
+        }
 
         combine(set, false);
     }

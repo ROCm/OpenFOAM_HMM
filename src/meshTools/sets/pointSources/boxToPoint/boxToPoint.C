@@ -144,15 +144,21 @@ void Foam::boxToPoint::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding points that are within boxes " << bbs_ << " ..."
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding points that are within boxes " << bbs_
+                << " ..." << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing points that are within boxes " << bbs_ << " ..."
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing points that are within boxes " << bbs_
+                << " ..." << endl;
+        }
 
         combine(set, false);
     }

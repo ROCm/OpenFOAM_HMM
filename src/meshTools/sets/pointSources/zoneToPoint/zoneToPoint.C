@@ -76,8 +76,11 @@ void Foam::zoneToPoint::combine(topoSet& set, const bool add) const
 
             const labelList& pointLabels = zone;
 
-            Info<< "    Found matching zone " << zone.name()
-                << " with " << pointLabels.size() << " points." << endl;
+            if (verbose_)
+            {
+                Info<< "    Found matching zone " << zone.name()
+                    << " with " << pointLabels.size() << " points." << endl;
+            }
 
             for (const label pointi : pointLabels)
             {
@@ -154,15 +157,21 @@ void Foam::zoneToPoint::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all points of point zones "
-            << flatOutput(selectedZones_) << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all points of point zones "
+                << flatOutput(selectedZones_) << " ..." << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all points of point zones "
-            << flatOutput(selectedZones_) << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all points of point zones "
+                << flatOutput(selectedZones_) << " ..." << endl;
+        }
 
         combine(set, false);
     }

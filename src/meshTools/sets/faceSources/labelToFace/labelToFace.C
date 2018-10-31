@@ -122,13 +122,21 @@ void Foam::labelToFace::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding faces mentioned in dictionary" << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding faces mentioned in dictionary"
+                << " ..." << endl;
+        }
 
         addOrDelete(set, labels_, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing faces mentioned dictionary" << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing faces mentioned dictionary"
+                << " ..." << endl;
+        }
 
         addOrDelete(set, labels_, false);
     }

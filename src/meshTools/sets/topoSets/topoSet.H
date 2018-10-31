@@ -66,7 +66,6 @@ class topoSet
     public regIOobject,
     public labelHashSet
 {
-
 protected:
 
     // Protected Member Functions
@@ -312,7 +311,19 @@ public:
     virtual ~topoSet() = default;
 
 
-    // Member functions
+    // Member Functions
+
+        //- Set an index
+        virtual bool set(const label id);
+
+        //- Unset an index
+        virtual bool unset(const label id);
+
+        //- Set multiple indices
+        virtual void set(const labelUList& labels);
+
+        //- Unset multiple indices
+        virtual void unset(const labelUList& labels);
 
         //- Invert contents.
         //  Insert all members [0,maxLen) which were not in set.

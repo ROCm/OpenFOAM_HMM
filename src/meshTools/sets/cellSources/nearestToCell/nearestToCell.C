@@ -154,13 +154,19 @@ void Foam::nearestToCell::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells nearest to " << points_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells nearest to " << points_ << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells nearest to " << points_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells nearest to " << points_ << endl;
+        }
 
         combine(set, false);
     }

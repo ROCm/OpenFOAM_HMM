@@ -144,13 +144,21 @@ void Foam::boxToFace::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding faces with centre within boxes " << bbs_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding faces with centre within boxes "
+                << bbs_ << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing faces with centre within boxes " << bbs_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing faces with centre within boxes "
+                << bbs_ << endl;
+        }
 
         combine(set, false);
     }

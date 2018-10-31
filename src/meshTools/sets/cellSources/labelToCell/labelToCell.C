@@ -118,13 +118,21 @@ void Foam::labelToCell::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells mentioned in dictionary" << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells mentioned in dictionary"
+                << " ..." << endl;
+        }
 
         addOrDelete(set, labels_, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells mentioned in dictionary" << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells mentioned in dictionary"
+                << " ..." << endl;
+        }
 
         addOrDelete(set, labels_, false);
     }

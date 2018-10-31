@@ -144,17 +144,23 @@ void Foam::cylinderToFace::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding faces with centre within cylinder, with  p1 = "
-            << point1_ << ", p2 = " << point2_ << ", radius = " << radius_
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding faces with centre within cylinder, with  p1 = "
+                << point1_ << ", p2 = " << point2_ << ", radius = " << radius_
+                << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing faces with centre within cylinder, with p1 = "
-            << point1_ << ", p2 = " << point2_ << ", radius = " << radius_
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing faces with centre within cylinder, with p1 = "
+                << point1_ << ", p2 = " << point2_ << ", radius = " << radius_
+                << endl;
+        }
 
         combine(set, false);
     }

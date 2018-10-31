@@ -100,8 +100,11 @@ void Foam::setToPointZone::applyToSet
 
         if (action == topoSetSource::ADD || action == topoSetSource::NEW)
         {
-            Info<< "    Adding all points from pointSet " << setName_
-                << " ..." << endl;
+            if (verbose_)
+            {
+                Info<< "    Adding all points from pointSet " << setName_
+                    << " ..." << endl;
+            }
 
             // Load the sets
             pointSet loadedSet(mesh_, setName_);
@@ -123,8 +126,11 @@ void Foam::setToPointZone::applyToSet
         }
         else if (action == topoSetSource::SUBTRACT)
         {
-            Info<< "    Removing all points from pointSet " << setName_
-                << " ..." << endl;
+            if (verbose_)
+            {
+                Info<< "    Removing all points from pointSet " << setName_
+                    << " ..." << endl;
+            }
 
             // Load the set
             pointSet loadedSet(mesh_, setName_);

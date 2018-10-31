@@ -169,13 +169,19 @@ void Foam::nearestToPoint::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding points nearest to " << points_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding points nearest to " << points_ << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing points nearest to " << points_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing points nearest to " << points_ << endl;
+        }
 
         combine(set, false);
     }

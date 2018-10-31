@@ -115,13 +115,19 @@ void Foam::boundaryToFace::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all boundary faces ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all boundary faces ..." << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all boundary faces ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all boundary faces ..." << endl;
+        }
 
         combine(set, false);
     }

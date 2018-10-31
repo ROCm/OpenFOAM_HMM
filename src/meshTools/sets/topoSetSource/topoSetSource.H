@@ -126,10 +126,13 @@ protected:
         };
 
 
-    // Protected data
+    // Protected Data
 
         //- Reference to the mesh
         const polyMesh& mesh_;
+
+        //- Verbosity (default: true)
+        bool verbose_;
 
 
     // Protected Member Functions
@@ -289,6 +292,18 @@ public:
             return mesh_;
         }
 
+        //- Return the current verbosity
+        bool verbose() const
+        {
+            return verbose_;
+        }
+
+        //- Set the current verbosity
+        void verbose(bool on)
+        {
+            verbose_ = on;
+        }
+
 
     // Member Functions
 
@@ -296,7 +311,11 @@ public:
         virtual sourceType setType() const = 0;
 
         //- Apply specified action to the topoSet
-        virtual void applyToSet(const setAction action, topoSet& set) const = 0;
+        virtual void applyToSet
+        (
+            const setAction action,
+            topoSet& set
+        ) const = 0;
 
 };
 

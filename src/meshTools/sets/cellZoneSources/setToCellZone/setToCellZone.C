@@ -100,8 +100,11 @@ void Foam::setToCellZone::applyToSet
 
         if (action == topoSetSource::ADD || action == topoSetSource::NEW)
         {
-            Info<< "    Adding all cells from cellSet " << setName_
-                << " ..." << endl;
+            if (verbose_)
+            {
+                Info<< "    Adding all cells from cellSet " << setName_
+                    << " ..." << endl;
+            }
 
             // Load the sets
             cellSet fSet(mesh_, setName_);
@@ -122,8 +125,11 @@ void Foam::setToCellZone::applyToSet
         }
         else if (action == topoSetSource::SUBTRACT)
         {
-            Info<< "    Removing all cells from cellSet " << setName_
-                << " ..." << endl;
+            if (verbose_)
+            {
+                Info<< "    Removing all cells from cellSet " << setName_
+                    << " ..." << endl;
+            }
 
             // Load the set
             cellSet loadedSet(mesh_, setName_);

@@ -164,8 +164,11 @@ void Foam::searchableSurfaceToFaceZone::applyToSet
 
         if (action == topoSetSource::ADD || action == topoSetSource::NEW)
         {
-            Info<< "    Adding all faces from surface "
-                << surfacePtr_().name() << " ..." << endl;
+            if (verbose_)
+            {
+                Info<< "    Adding all faces from surface "
+                    << surfacePtr_().name() << " ..." << endl;
+            }
 
             DynamicList<label> newAddressing(fzSet.addressing());
             DynamicList<bool> newFlipMap(fzSet.flipMap());
@@ -186,8 +189,11 @@ void Foam::searchableSurfaceToFaceZone::applyToSet
         }
         else if (action == topoSetSource::SUBTRACT)
         {
-            Info<< "    Removing all faces from surface "
-                << surfacePtr_().name() << " ..." << endl;
+            if (verbose_)
+            {
+                Info<< "    Removing all faces from surface "
+                    << surfacePtr_().name() << " ..." << endl;
+            }
 
             // Start off empty
             DynamicList<label> newAddressing(fzSet.addressing().size());

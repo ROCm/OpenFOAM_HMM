@@ -124,8 +124,11 @@ void Foam::regionToFace::markZone
 
 void Foam::regionToFace::combine(topoSet& set, const bool add) const
 {
-    Info<< "    Loading subset " << setName_
-        << " to delimit search region." << endl;
+    if (verbose_)
+    {
+        Info<< "    Loading subset " << setName_
+            << " to delimit search region." << endl;
+    }
 
     faceSet subSet(mesh_, setName_);
 
@@ -162,10 +165,13 @@ void Foam::regionToFace::combine(topoSet& set, const bool add) const
     // Globally reduce
     combineReduce(ni, mappedPatchBase::nearestEqOp());
 
-    Info<< "    Found nearest face at " << ni.first().rawPoint()
-        << " on processor " << ni.second().second()
-        << " face " << ni.first().index()
-        << " distance " << Foam::sqrt(ni.second().first()) << endl;
+    if (verbose_)
+    {
+        Info<< "    Found nearest face at " << ni.first().rawPoint()
+            << " on processor " << ni.second().second()
+            << " face " << ni.first().index()
+            << " distance " << Foam::sqrt(ni.second().first()) << endl;
+    }
 
     labelList faceRegion(patch.size(), -1);
     markZone
@@ -236,19 +242,23 @@ void Foam::regionToFace::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all faces of connected region of set "
-            << setName_
-            << " starting from point "
-            << nearPoint_ << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all faces of connected region of set "
+                << setName_ << " starting from point " << nearPoint_
+                << " ..." << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all cells of connected region of set "
-            << setName_
-            << " starting from point "
-            << nearPoint_ << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all cells of connected region of set "
+                << setName_ << " starting from point " << nearPoint_
+                << " ..." << endl;
+        }
 
         combine(set, false);
     }

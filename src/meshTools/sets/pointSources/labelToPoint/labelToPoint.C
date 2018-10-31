@@ -118,13 +118,21 @@ void Foam::labelToPoint::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding points mentioned in dictionary" << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding points mentioned in dictionary"
+                << " ..." << endl;
+        }
 
         addOrDelete(set, labels_, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing points mentioned in dictionary" << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing points mentioned in dictionary"
+                << " ..." << endl;
+        }
 
         addOrDelete(set, labels_, false);
     }

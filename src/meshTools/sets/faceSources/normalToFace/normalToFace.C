@@ -69,8 +69,6 @@ void Foam::normalToFace::setNormal()
 {
     normal_.normalise();
 
-    Info<< "    normalToFace : Normalized vector to " << normal_ << endl;
-
     if (tol_ < -1 || tol_ > 1)
     {
         FatalErrorInFunction
@@ -130,8 +128,11 @@ void Foam::normalToFace::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding faces according to normal being aligned with "
-            << normal_ << " (to within " << tol_ << ") ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding faces according to normal being aligned with "
+                << normal_ << " (to within " << tol_ << ") ..." << endl;
+        }
 
         forAll(mesh_.faceAreas(), facei)
         {
@@ -145,8 +146,11 @@ void Foam::normalToFace::applyToSet
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing faces according to normal being aligned with "
-            << normal_ << " (to within " << tol_ << ") ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing faces according to normal being aligned with "
+                << normal_ << " (to within " << tol_ << ") ..." << endl;
+        }
 
         DynamicList<label> toBeRemoved(set.size()/10);
 

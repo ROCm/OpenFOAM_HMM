@@ -153,15 +153,21 @@ void Foam::nbrToCell::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells with only " << minNbrs_ << " or less"
-                " neighbouring cells" << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells with only " << minNbrs_
+                << " or fewer neighbouring cells" << " ..." << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells with only " << minNbrs_ << " or less"
-                " neighbouring cells" << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells with only " << minNbrs_
+                << " or fewer neighbouring cells" << " ..." << endl;
+        }
 
         combine(set, false);
     }

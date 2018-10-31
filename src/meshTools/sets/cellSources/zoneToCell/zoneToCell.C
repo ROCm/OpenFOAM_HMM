@@ -76,8 +76,11 @@ void Foam::zoneToCell::combine(topoSet& set, const bool add) const
 
             const labelList& cellLabels = zone;
 
-            Info<< "    Found matching zone " << zone.name()
-                << " with " << cellLabels.size() << " cells." << endl;
+            if (verbose_)
+            {
+                Info<< "    Found matching zone " << zone.name()
+                    << " with " << cellLabels.size() << " cells." << endl;
+            }
 
             for (const label celli : cellLabels)
             {
@@ -154,15 +157,21 @@ void Foam::zoneToCell::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all cells of cell zones "
-            << flatOutput(selectedZones_) << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all cells of cell zones "
+                << flatOutput(selectedZones_) << " ..." << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all cells of cell zones "
-            << flatOutput(selectedZones_) << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all cells of cell zones "
+                << flatOutput(selectedZones_) << " ..." << endl;
+        }
 
         combine(set, false);
     }

@@ -135,13 +135,21 @@ void Foam::cellToPoint::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding from " << setName_ << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding from " << setName_
+                << " ..." << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing from " << setName_ << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing from " << setName_
+                << " ..." << endl;
+        }
 
         combine(set, false);
     }

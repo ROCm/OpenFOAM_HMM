@@ -160,21 +160,27 @@ void Foam::cylinderAnnulusToCell::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells with centre within cylinder annulus,"
-            << " with p1 = "
-            << point1_ << ", p2 = " << point2_ << ", radius = " << outerRadius_
-            << ", inner radius = " << innerRadius_
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells with centre within cylinder annulus,"
+                << " with p1 = " << point1_ << ", p2 = " << point2_
+                << ", radius = " << outerRadius_
+                << ", inner radius = " << innerRadius_
+                << endl;
+        }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells with centre within cylinder annulus,"
-            << " with p1 = "
-            << point1_ << ", p2 = " << point2_ << ", radius = " << outerRadius_
-            << ", inner radius = " << innerRadius_
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells with centre within cylinder annulus,"
+                << " with p1 = " << point1_ << ", p2 = " << point2_
+                << ", radius = " << outerRadius_
+                << ", inner radius = " << innerRadius_
+                << endl;
+        }
 
         combine(set, false);
     }

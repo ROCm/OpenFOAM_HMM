@@ -491,6 +491,30 @@ Foam::topoSet::topoSet(const IOobject& io, labelHashSet&& labels)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+bool Foam::topoSet::set(const label id)
+{
+    return static_cast<labelHashSet&>(*this).set(id);
+}
+
+
+bool Foam::topoSet::unset(const label id)
+{
+    return static_cast<labelHashSet&>(*this).unset(id);
+}
+
+
+void Foam::topoSet::set(const labelUList& labels)
+{
+    static_cast<labelHashSet&>(*this).set(labels);
+}
+
+
+void Foam::topoSet::unset(const labelUList& labels)
+{
+    static_cast<labelHashSet&>(*this).unset(labels);
+}
+
+
 void Foam::topoSet::invert(const label maxLen)
 {
     // Retain a copy of the original (current) set.

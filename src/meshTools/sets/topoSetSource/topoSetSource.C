@@ -201,7 +201,8 @@ void Foam::topoSetSource::addOrDelete
 
 Foam::topoSetSource::topoSetSource(const polyMesh& mesh)
 :
-    mesh_(mesh)
+    mesh_(mesh),
+    verbose_(true)
 {}
 
 
