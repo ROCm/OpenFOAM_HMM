@@ -134,6 +134,7 @@ searchableSurfaces/subTriSurfaceMesh/subTriSurfaceMesh.C
 searchableSurfaces/triSurfaceMesh/triSurfaceMesh.C
 
 topoSets = sets/topoSets
+$(topoSets)/cellBitSet.C
 $(topoSets)/cellSet.C
 $(topoSets)/topoSet.C
 $(topoSets)/faceSet.C

@@ -491,6 +491,12 @@ Foam::topoSet::topoSet(const IOobject& io, labelHashSet&& labels)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+bool Foam::topoSet::found(const label id) const
+{
+    return static_cast<const labelHashSet&>(*this).found(id);
+}
+
+
 bool Foam::topoSet::set(const label id)
 {
     return static_cast<labelHashSet&>(*this).set(id);

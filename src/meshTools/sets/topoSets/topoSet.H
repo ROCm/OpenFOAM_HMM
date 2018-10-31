@@ -313,6 +313,9 @@ public:
 
     // Member Functions
 
+        //- Has the given index?
+        virtual bool found(const label id) const;
+
         //- Set an index
         virtual bool set(const label id);
 
