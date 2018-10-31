@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,70 +22,75 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::searchableSurfaceToFaceZone
+    Foam::searchableSurfaceToCell
 
 Description
-    A topoSetSource to select faces based on intersection (of cell-cell
-    vector) with a surface.
+    A topoSetSource to select cells based on cell centres within a
+    searchableSurface.
 
     \heading Dictionary parameters
     \table
-        Property    | Description                        | Required  | Default
-        surface     | The searchable surface type        | yes   |
-        name        | Name for the IOobject              | no    | mesh-name
+        Property    | Description                           | Required | Default
+        surface     | The searchable surface type           | yes   |
+        name        | Name for the IOobject                 | no    | mesh-name
     \endtable
 
 SourceFiles
-    searchableSurfaceToFaceZone.C
+    searchableSurfaceToCell.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef searchableSurfaceToFaceZone_H
-#define searchableSurfaceToFaceZone_H
+#ifndef searchableSurfaceToCell_H
+#define searchableSurfaceToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
+#include "searchableSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class searchableSurface;
-
 /*---------------------------------------------------------------------------*\
-                   Class searchableSurfaceToFaceZone Declaration
+                   Class searchableSurfaceToCell Declaration
 \*---------------------------------------------------------------------------*/
 
-class searchableSurfaceToFaceZone
+class searchableSurfaceToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Surface
-        autoPtr<searchableSurface> surfacePtr_;
+        //- The searchableSurface
+        autoPtr<searchableSurface> surf_;
+
+
+    // Private Member Functions
+
+        void combine(topoSet& set, const bool add) const;
+
 
 public:
 
     //- Runtime type information
-    TypeName("searchableSurfaceToFaceZone");
+    TypeName("searchableSurfaceToCell");
+
 
     // Constructors
 
         //- Construct surface-type from dictionary
-        searchableSurfaceToFaceZone
+        searchableSurfaceToCell
         (
             const word& surfaceType,
             const polyMesh& mesh,
             const dictionary& dict
         );
 
-
         //- Construct from dictionary
-        searchableSurfaceToFaceZone
+        searchableSurfaceToCell
         (
             const polyMesh& mesh,
             const dictionary& dict
@@ -93,22 +98,16 @@ public:
 
 
     //- Destructor
-    virtual ~searchableSurfaceToFaceZone();
+    virtual ~searchableSurfaceToCell() = default;
 
 
     // Member Functions
-
-        virtual topoSetSource::sourceType setType() const
-        {
-            return FACEZONESOURCE;
-        }
 
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

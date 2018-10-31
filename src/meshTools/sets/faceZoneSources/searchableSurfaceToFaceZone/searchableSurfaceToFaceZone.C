@@ -58,6 +58,7 @@ Foam::topoSetSource::addToUsageTable Foam::searchableSurfaceToFaceZone::usage_
 
 Foam::searchableSurfaceToFaceZone::searchableSurfaceToFaceZone
 (
+    const word& surfaceType,
     const polyMesh& mesh,
     const dictionary& dict
 )
@@ -67,7 +68,7 @@ Foam::searchableSurfaceToFaceZone::searchableSurfaceToFaceZone
     (
         searchableSurface::New
         (
-            dict.get<word>("surface"),
+            surfaceType,
             IOobject
             (
                 dict.lookupOrDefault("name", mesh.objectRegistry::db().name()),
@@ -79,6 +80,21 @@ Foam::searchableSurfaceToFaceZone::searchableSurfaceToFaceZone
             ),
             dict
         )
+    )
+{}
+
+
+Foam::searchableSurfaceToFaceZone::searchableSurfaceToFaceZone
+(
+    const polyMesh& mesh,
+    const dictionary& dict
+)
+:
+    searchableSurfaceToFaceZone
+    (
+        dict.get<word>("surface"),
+        mesh,
+        dict
     )
 {}
 

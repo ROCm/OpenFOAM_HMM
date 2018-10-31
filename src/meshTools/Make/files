@@ -162,6 +162,7 @@ $(cellSources)/pointToCell/pointToCell.C
 $(cellSources)/regionToCell/regionToCell.C
 $(cellSources)/rotatedBoxToCell/rotatedBoxToCell.C
 $(cellSources)/shapeToCell/shapeToCell.C
+$(cellSources)/searchableSurfaceToCell/searchableSurfaceToCell.C
 $(cellSources)/sphereToCell/sphereToCell.C
 $(cellSources)/surfaceToCell/surfaceToCell.C
 $(cellSources)/targetVolumeToCell/targetVolumeToCell.C
