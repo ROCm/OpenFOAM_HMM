@@ -1,15 +1,14 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # Run from this directory
-
-targetType=libso
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 
-wmakeLnInclude massTransferModels
-wmake phasesSystem
-wmake massTransferModels
-wmake CompressibleMultiPhaseTurbulenceModels
-wmake laserDTRM
-wmake
+#------------------------------------------------------------------------------
 
+wmakeLnInclude massTransferModels
+wmake $targetType phasesSystem
+wmake $targetType massTransferModels
+wmake $targetType CompressibleMultiPhaseTurbulenceModels
+wmake $targetType laserDTRM
+wmake $targetType
 
 # ----------------------------------------------------------------- end-of-file

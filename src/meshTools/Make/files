@@ -157,7 +157,6 @@ $(cellSources)/fieldToCell/fieldToCell.C
 $(cellSources)/labelToCell/labelToCell.C
 $(cellSources)/nbrToCell/nbrToCell.C
 $(cellSources)/nearestToCell/nearestToCell.C
-$(cellSources)/noneToCell/noneToCell.C
 $(cellSources)/pointToCell/pointToCell.C
 $(cellSources)/regionToCell/regionToCell.C
 $(cellSources)/rotatedBoxToCell/rotatedBoxToCell.C
@@ -177,7 +176,6 @@ $(faceSources)/cylinderAnnulusToFace/cylinderAnnulusToFace.C
 $(faceSources)/cylinderToFace/cylinderToFace.C
 $(faceSources)/faceToFace/faceToFace.C
 $(faceSources)/labelToFace/labelToFace.C
-$(faceSources)/noneToFace/noneToFace.C
 $(faceSources)/normalToFace/normalToFace.C
 $(faceSources)/patchToFace/patchToFace.C
 $(faceSources)/pointToFace/pointToFace.C
@@ -191,7 +189,6 @@ $(pointSources)/cellToPoint/cellToPoint.C
 $(pointSources)/faceToPoint/faceToPoint.C
 $(pointSources)/labelToPoint/labelToPoint.C
 $(pointSources)/nearestToPoint/nearestToPoint.C
-$(pointSources)/noneToPoint/noneToPoint.C
 $(pointSources)/pointToPoint/pointToPoint.C
 $(pointSources)/surfaceToPoint/surfaceToPoint.C
 $(pointSources)/zoneToPoint/zoneToPoint.C
