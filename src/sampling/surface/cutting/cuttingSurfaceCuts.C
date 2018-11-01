@@ -91,30 +91,11 @@ void Foam::cuttingSurface::calcCellCuts
 
 
     boundBox cellBb;
-    labelHashSet cpts;
 
     for (const label celli : cellCuts)
     {
         cellBb.clear();
-
-        if (fvm.hasCellPoints())
-        {
-            cellBb.add(pts, fvm.cellPoints(celli));
-        }
-        else
-        {
-            // DIY version of cellPoints
-            cpts.clear();
-
-            const cell& cFaces = cells[celli];
-
-            for (const label facei : cFaces)
-            {
-                cpts.insert(faces[facei]);
-            }
-
-            cellBb.add(pts, cpts);
-        }
+        cellBb.add(pts, fvm.cellPoints(celli));
 
         if (!cellBb.contains(nearest[celli].hitPoint()))
         {

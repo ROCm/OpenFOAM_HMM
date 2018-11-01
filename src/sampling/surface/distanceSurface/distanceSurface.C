@@ -202,8 +202,6 @@ void Foam::distanceSurface::createGeometry()
                   : Foam::sign(diff & norms[i]) * Foam::mag(diff)
                 );
 
-                // Since cellPoints() is used in isoSurfaceCell too,
-                // no additional overhead caused here
                 if (filterCells)
                 {
                     cellBb.clear();
