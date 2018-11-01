@@ -34,6 +34,8 @@ namespace Foam
     defineTypeNameAndDebug(faceZoneToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, faceZoneToCell, word);
     addToRunTimeSelectionTable(topoSetSource, faceZoneToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, faceZoneToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, faceZoneToCell, istream);
 }
 
 
@@ -65,7 +67,7 @@ void Foam::faceZoneToCell::combine(topoSet& set, const bool add) const
 
     for (const faceZone& zone : mesh_.faceZones())
     {
-        if (zoneName_.match(zone.name()))
+        if (selectedZones_.match(zone.name()))
         {
             hasMatched = true;
 
@@ -76,9 +78,12 @@ void Foam::faceZoneToCell::combine(topoSet& set, const bool add) const
               : zone.slaveCells()
             );
 
-            Info<< "    Found matching zone " << zone.name()
-                << " with " << cellLabels.size() << " cells on selected side."
-                << endl;
+            if (verbose_)
+            {
+                Info<< "    Found matching zone " << zone.name()
+                    << " with " << cellLabels.size() << " cells on "
+                    << faceActionNames_[option_] << " side" << endl;
+            }
 
             for (const label celli : cellLabels)
             {
@@ -94,7 +99,8 @@ void Foam::faceZoneToCell::combine(topoSet& set, const bool add) const
     if (!hasMatched)
     {
         WarningInFunction
-            << "Cannot find any faceZone named " << zoneName_ << nl
+            << "Cannot find any faceZone matching "
+            << flatOutput(selectedZones_) << nl
             << "Valid names: " << flatOutput(mesh_.faceZones().names())
             << endl;
     }
@@ -106,12 +112,12 @@ void Foam::faceZoneToCell::combine(topoSet& set, const bool add) const
 Foam::faceZoneToCell::faceZoneToCell
 (
     const polyMesh& mesh,
-    const word& zoneName,
+    const wordRe& zoneName,
     const faceAction option
 )
 :
-    topoSetSource(mesh),
-    zoneName_(zoneName),
+    topoSetCellSource(mesh),
+    selectedZones_(one(), zoneName),
     option_(option)
 {}
 
@@ -122,10 +128,18 @@ Foam::faceZoneToCell::faceZoneToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    zoneName_(dict.get<wordRe>("name")),
+    topoSetCellSource(mesh),
+    selectedZones_(),
     option_(faceActionNames_.get("option", dict))
-{}
+{
+    // Look for 'zones' and 'zone', but accept 'name' as well
+    if (!dict.readIfPresent("zones", selectedZones_))
+    {
+        selectedZones_.resize(1);
+        selectedZones_.first() =
+            dict.getCompat<wordRe>("zone", {{"name", 1806}});
+    }
+}
 
 
 Foam::faceZoneToCell::faceZoneToCell
@@ -134,8 +148,8 @@ Foam::faceZoneToCell::faceZoneToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    zoneName_(checkIs(is)),
+    topoSetCellSource(mesh),
+    selectedZones_(one(), wordRe(checkIs(is))),
     option_(faceActionNames_.read(checkIs(is)))
 {}
 
@@ -148,17 +162,25 @@ void Foam::faceZoneToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all " << faceActionNames_[option_]
-            << " cells of faceZone " << zoneName_ << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all " << faceActionNames_[option_]
+                << " cells of face zones "
+                << flatOutput(selectedZones_) << " ..." << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all " << faceActionNames_[option_]
-            << " cells of faceZone " << zoneName_ << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all " << faceActionNames_[option_]
+                << " cells of face zones "
+                << flatOutput(selectedZones_) << " ..." << endl;
+        }
 
         combine(set, false);
     }

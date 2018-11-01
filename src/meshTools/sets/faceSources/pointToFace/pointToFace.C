@@ -35,6 +35,22 @@ namespace Foam
     defineTypeNameAndDebug(pointToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, pointToFace, word);
     addToRunTimeSelectionTable(topoSetSource, pointToFace, istream);
+    addToRunTimeSelectionTable(topoSetFaceSource, pointToFace, word);
+    addToRunTimeSelectionTable(topoSetFaceSource, pointToFace, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        pointToFace,
+        word,
+        point
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        pointToFace,
+        istream,
+        point
+    );
 }
 
 
@@ -147,7 +163,7 @@ Foam::pointToFace::pointToFace
     const pointAction option
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     setName_(setName),
     option_(option)
 {}
@@ -159,9 +175,12 @@ Foam::pointToFace::pointToFace
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    setName_(dict.get<word>("set")),
-    option_(pointActionNames_.get("option", dict))
+    pointToFace
+    (
+        mesh,
+        dict.get<word>("set"),
+        pointActionNames_.get("option", dict)
+    )
 {}
 
 
@@ -171,7 +190,7 @@ Foam::pointToFace::pointToFace
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     setName_(checkIs(is)),
     option_(pointActionNames_.read(checkIs(is)))
 {}
@@ -185,17 +204,23 @@ void Foam::pointToFace::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding faces according to pointSet " << setName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding faces according to pointSet " << setName_
+                << " ..." << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing faces according to pointSet " << setName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing faces according to pointSet " << setName_
+                << " ..." << endl;
+        }
 
         combine(set, false);
     }

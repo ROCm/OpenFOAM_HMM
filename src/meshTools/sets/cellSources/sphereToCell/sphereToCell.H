@@ -25,13 +25,14 @@ Class
     Foam::sphereToCell
 
 Description
-    A topoSetSource to select cells based on cell centres inside sphere.
+    A topoSetCellSource to select cells based on cell centres inside sphere.
 
     \heading Dictionary parameters
     \table
-        Property    | Description                       | Required  | Default
-        centre      | The sphere centre                 | yes   |
-        radius      | The (outside) radius of sphere    | yes   |
+        Property    | Description                           | Required | Default
+        origin      | The origin (centre) of the sphere     | yes   |
+        radius      | The (outside) radius of sphere        | yes   |
+        centre      | Alternative for 'origin'              | no    |
     \endtable
 
 SourceFiles
@@ -42,7 +43,7 @@ SourceFiles
 #ifndef sphereToCell_H
 #define sphereToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,7 +56,7 @@ namespace Foam
 
 class sphereToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -64,7 +65,7 @@ class sphereToCell
         static addToUsageTable usage_;
 
         //- Centre point of the sphere
-        point centre_;
+        point origin_;
 
         //- The outer radius of the sphere
         scalar radius_;
@@ -87,7 +88,7 @@ public:
         sphereToCell
         (
             const polyMesh& mesh,
-            const point& centre,
+            const point& origin,
             const scalar radius
         );
 
@@ -103,11 +104,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

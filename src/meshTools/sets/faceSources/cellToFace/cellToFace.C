@@ -37,6 +37,8 @@ namespace Foam
     defineTypeNameAndDebug(cellToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, cellToFace, word);
     addToRunTimeSelectionTable(topoSetSource, cellToFace, istream);
+    addToRunTimeSelectionTable(topoSetFaceSource, cellToFace, word);
+    addToRunTimeSelectionTable(topoSetFaceSource, cellToFace, istream);
 }
 
 
@@ -153,7 +155,7 @@ Foam::cellToFace::cellToFace
     const cellAction option
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     setName_(setName),
     option_(option)
 {}
@@ -165,9 +167,12 @@ Foam::cellToFace::cellToFace
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    setName_(dict.get<word>("set")),
-    option_(cellActionNames_.get("option", dict))
+    cellToFace
+    (
+        mesh,
+        dict.get<word>("set"),
+        cellActionNames_.get("option", dict)
+    )
 {}
 
 
@@ -177,7 +182,7 @@ Foam::cellToFace::cellToFace
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     setName_(checkIs(is)),
     option_(cellActionNames_.read(checkIs(is)))
 {}
@@ -191,17 +196,23 @@ void Foam::cellToFace::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding faces according to cellSet " << setName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding faces according to cellSet " << setName_
+                << " ..." << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing faces according to cellSet " << setName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing faces according to cellSet " << setName_
+                << " ..." << endl;
+        }
 
         combine(set, false);
     }

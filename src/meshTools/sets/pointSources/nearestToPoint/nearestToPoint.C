@@ -35,6 +35,22 @@ namespace Foam
     defineTypeNameAndDebug(nearestToPoint, 0);
     addToRunTimeSelectionTable(topoSetSource, nearestToPoint, word);
     addToRunTimeSelectionTable(topoSetSource, nearestToPoint, istream);
+    addToRunTimeSelectionTable(topoSetPointSource, nearestToPoint, word);
+    addToRunTimeSelectionTable(topoSetPointSource, nearestToPoint, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetPointSource,
+        nearestToPoint,
+        word,
+        nearest
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetPointSource,
+        nearestToPoint,
+        istream,
+        nearest
+    );
 }
 
 
@@ -106,8 +122,19 @@ Foam::nearestToPoint::nearestToPoint
     const pointField& points
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     points_(points)
+{}
+
+
+Foam::nearestToPoint::nearestToPoint
+(
+    const polyMesh& mesh,
+    pointField&& points
+)
+:
+    topoSetPointSource(mesh),
+    points_(std::move(points))
 {}
 
 
@@ -117,8 +144,7 @@ Foam::nearestToPoint::nearestToPoint
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    points_(dict.get<pointField>("points"))
+    nearestToPoint(mesh, dict.get<pointField>("points"))
 {}
 
 
@@ -128,7 +154,7 @@ Foam::nearestToPoint::nearestToPoint
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     points_(checkIs(is))
 {}
 
@@ -141,15 +167,21 @@ void Foam::nearestToPoint::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding points nearest to " << points_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding points nearest to " << points_ << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing points nearest to " << points_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing points nearest to " << points_ << endl;
+        }
 
         combine(set, false);
     }

@@ -27,7 +27,7 @@ actions
         source  zoneToCell;
         sourceInfo
         {
-            name    topBlock;
+            zone    topBlock;
         }
     }
 
@@ -39,7 +39,7 @@ actions
         source  zoneToCell;
         sourceInfo
         {
-            name    centralBlock;
+            zone    centralBlock;
         }
     }
 
@@ -51,7 +51,7 @@ actions
         source zoneToCell;
         sourceInfo
         {
-            name    bottomBlock;
+            zone    bottomBlock;
         }
     }
 
@@ -66,7 +66,7 @@ actions
         source  patchToFace;
         sourceInfo
         {
-            name    top;
+            patch    top;
         }
     }
 
@@ -192,7 +192,7 @@ actions
         source  patchToFace;
         sourceInfo
         {
-            name    bottom;
+            patch   bottom;
         }
     }
 
@@ -263,7 +263,7 @@ actions
     {
         name    topBlockCells;
         type    cellSet;
-        action  delete;
+        action  subtract;
         source  cellToCell;
         sourceInfo
         {

@@ -38,6 +38,22 @@ namespace Foam
     defineTypeNameAndDebug(targetVolumeToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, targetVolumeToCell, word);
     addToRunTimeSelectionTable(topoSetSource, targetVolumeToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, targetVolumeToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, targetVolumeToCell, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        targetVolumeToCell,
+        word,
+        targetVolume
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        targetVolumeToCell,
+        istream,
+        targetVolume
+    );
 }
 
 
@@ -103,14 +119,16 @@ void Foam::targetVolumeToCell::combine(topoSet& set, const bool add) const
         return;
     }
 
-
     bitSet maskSet(mesh_.nCells(), true);
     label nTotCells = mesh_.globalData().nTotalCells();
     if (maskSetName_.size())
     {
         // Read cellSet
-        Info<< "    Operating on subset defined by cellSet " << maskSetName_
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Operating on subset defined by cellSet "
+                << maskSetName_ << endl;
+        }
 
         maskSet = false;
         cellSet subset(mesh_, maskSetName_);
@@ -138,7 +156,7 @@ void Foam::targetVolumeToCell::combine(topoSet& set, const bool add) const
         label maxPointi = -1;
         forAll(points, pointi)
         {
-            scalar c = (points[pointi] & normal_);
+            const scalar c = (points[pointi] & normal_);
             if (c > maxComp)
             {
                 maxComp = c;
@@ -247,9 +265,11 @@ void Foam::targetVolumeToCell::combine(topoSet& set, const bool add) const
     }
 
 
-    Info<< "    Selected " << nSelected << " with actual volume "
-        << selectedVol << endl;
-
+    if (verbose_)
+    {
+        Info<< "    Selected " << nSelected << " with actual volume "
+            << selectedVol << endl;
+    }
 
     // Loop over selected cells only
     for (const label celli : selected)
@@ -265,12 +285,14 @@ Foam::targetVolumeToCell::targetVolumeToCell
 (
     const polyMesh& mesh,
     const scalar vol,
-    const vector& normal
+    const vector& normal,
+    const word& maskSetName
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     vol_(vol),
-    normal_(normal)
+    normal_(normal),
+    maskSetName_(maskSetName)
 {}
 
 
@@ -280,10 +302,13 @@ Foam::targetVolumeToCell::targetVolumeToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    vol_(dict.get<scalar>("volume")),
-    normal_(dict.get<vector>("normal")),
-    maskSetName_(dict.lookupOrDefault<word>("set", ""))
+    targetVolumeToCell
+    (
+        mesh,
+        dict.get<scalar>("volume"),
+        dict.get<vector>("normal"),
+        dict.lookupOrDefault<word>("set", "")
+    )
 {}
 
 
@@ -293,7 +318,7 @@ Foam::targetVolumeToCell::targetVolumeToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     vol_(readScalar(checkIs(is))),
     normal_(checkIs(is))
 {}
@@ -307,17 +332,25 @@ void Foam::targetVolumeToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells up to target volume " << vol_
-            << " out of total volume " << gSum(mesh_.cellVolumes()) << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells up to target volume " << vol_
+                << " out of total volume "
+                << gSum(mesh_.cellVolumes()) << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells up to target volume " << vol_
-            << " out of total volume " << gSum(mesh_.cellVolumes()) << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells up to target volume " << vol_
+                << " out of total volume "
+                << gSum(mesh_.cellVolumes()) << endl;
+        }
 
         combine(set, false);
     }

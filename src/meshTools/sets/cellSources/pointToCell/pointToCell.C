@@ -35,6 +35,8 @@ namespace Foam
     defineTypeNameAndDebug(pointToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, pointToCell, word);
     addToRunTimeSelectionTable(topoSetSource, pointToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, pointToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, pointToCell, istream);
 }
 
 
@@ -116,7 +118,7 @@ Foam::pointToCell::pointToCell
     const pointAction option
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     setName_(setName),
     option_(option)
 {}
@@ -128,9 +130,12 @@ Foam::pointToCell::pointToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    setName_(dict.get<word>("set")),
-    option_(pointActionNames_.get("option", dict))
+    pointToCell
+    (
+        mesh,
+        dict.get<word>("set"),
+        pointActionNames_.get("option", dict)
+    )
 {}
 
 
@@ -140,7 +145,7 @@ Foam::pointToCell::pointToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     setName_(checkIs(is)),
     option_(pointActionNames_.read(checkIs(is)))
 {}
@@ -154,17 +159,23 @@ void Foam::pointToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells according to pointSet " << setName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells according to pointSet " << setName_
+                << " ..." << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells according to pointSet " << setName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells according to pointSet " << setName_
+                << " ..." << endl;
+        }
 
         combine(set, false);
     }

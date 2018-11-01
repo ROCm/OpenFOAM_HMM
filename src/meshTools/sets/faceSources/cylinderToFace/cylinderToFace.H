@@ -25,7 +25,7 @@ Class
     Foam::cylinderToFace
 
 Description
-    A topoSetSource to select faces based on face centres inside a cylinder.
+    A topoSetFaceSource to select faces based on face centres inside a cylinder.
 
     \heading Dictionary parameters
     \table
@@ -43,7 +43,7 @@ SourceFiles
 #ifndef cylinderToFace_H
 #define cylinderToFace_H
 
-#include "topoSetSource.H"
+#include "topoSetFaceSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,7 +56,7 @@ namespace Foam
 
 class cylinderToFace
 :
-    public topoSetSource
+    public topoSetFaceSource
 {
 
     // Private data
@@ -108,11 +108,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

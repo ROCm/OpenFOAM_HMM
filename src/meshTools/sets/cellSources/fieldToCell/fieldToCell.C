@@ -38,6 +38,22 @@ namespace Foam
     defineTypeNameAndDebug(fieldToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, fieldToCell, word);
     addToRunTimeSelectionTable(topoSetSource, fieldToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, fieldToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, fieldToCell, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        fieldToCell,
+        word,
+        field
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        fieldToCell,
+        istream,
+        field
+    );
 }
 
 
@@ -58,32 +74,40 @@ void Foam::fieldToCell::applyToSet
     topoSet& set
 ) const
 {
-    Info<< "    Field min:" << min(field)
-        << " max:" << max(field) << endl;
-
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (verbose_)
     {
-        Info<< "    Adding all cells with value of field " << fieldName_
-            << " within range " << min_ << ".." << max_ << endl;
+        Info << "    Field min:" << min(field) << " max:" << max(field) << nl;
+    }
+
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
+    {
+        if (verbose_)
+        {
+            Info<< "    Adding all cells with value of field " << fieldName_
+                << " within range " << min_ << ".." << max_ << endl;
+        }
 
         forAll(field, celli)
         {
             if (field[celli] >= min_ && field[celli] <= max_)
             {
-                set.insert(celli);
+                set.set(celli);
             }
         }
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all cells with value of field " << fieldName_
-            << " within range " << min_ << ".." << max_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all cells with value of field " << fieldName_
+                << " within range " << min_ << ".." << max_ << endl;
+        }
 
         forAll(field, celli)
         {
             if (field[celli] >= min_ && field[celli] <= max_)
             {
-                set.erase(celli);
+                set.unset(celli);
             }
         }
     }
@@ -100,7 +124,7 @@ Foam::fieldToCell::fieldToCell
     const scalar max
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     fieldName_(fieldName),
     min_(min),
     max_(max)
@@ -113,10 +137,13 @@ Foam::fieldToCell::fieldToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    fieldName_(dict.get<word>("field")),
-    min_(dict.get<scalar>("min")),
-    max_(dict.get<scalar>("max"))
+    fieldToCell
+    (
+        mesh,
+        dict.get<word>("field"),
+        dict.get<scalar>("min"),
+        dict.get<scalar>("max")
+    )
 {}
 
 
@@ -126,7 +153,7 @@ Foam::fieldToCell::fieldToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     fieldName_(checkIs(is)),
     min_(readScalar(checkIs(is))),
     max_(readScalar(checkIs(is)))

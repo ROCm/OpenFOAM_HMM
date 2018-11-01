@@ -24,7 +24,7 @@ actions
         source  patchToFace;
         sourceInfo
         {
-            name    sides;
+            patch   sides;
         }
     }
 

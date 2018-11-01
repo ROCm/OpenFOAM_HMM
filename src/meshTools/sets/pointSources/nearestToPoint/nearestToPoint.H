@@ -25,7 +25,7 @@ Class
     Foam::nearestToPoint
 
 Description
-    A topoSetSource to select points nearest to points.
+    A topoSetPointSource to select points nearest to points.
 
     \heading Dictionary parameters
     \table
@@ -41,7 +41,7 @@ SourceFiles
 #ifndef nearestToPoint_H
 #define nearestToPoint_H
 
-#include "topoSetSource.H"
+#include "topoSetPointSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +54,7 @@ namespace Foam
 
 class nearestToPoint
 :
-    public topoSetSource
+    public topoSetPointSource
 {
 
     // Private data
@@ -78,12 +78,11 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        nearestToPoint
-        (
-            const polyMesh& mesh,
-            const pointField& points
-        );
+        //- Construct from components, copying points
+        nearestToPoint(const polyMesh& mesh, const pointField& points);
+
+        //- Construct from components, moving points
+        nearestToPoint(const polyMesh& mesh, pointField&& points);
 
         //- Construct from dictionary
         nearestToPoint(const polyMesh& mesh, const dictionary& dict);
@@ -97,11 +96,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return POINTSETSOURCE;
-        }
 
         virtual void applyToSet
         (

@@ -132,9 +132,9 @@ void printHelp(Ostream& os)
         << "    clear           - clears the set" << nl
         << "    invert          - inverts the set" << nl
         << "    remove          - remove the set" << nl
-        << "    new <source>    - sets to set to the source set" << nl
+        << "    new <source>    - use all elements from the source set" << nl
         << "    add <source>    - adds all elements from the source set" << nl
-        << "    delete <source> - deletes      ,," << nl
+        << "    subtract <source> - subtract the source set elements" << nl
         << "    subset <source> - combines current set with the source set"
         << nl
         << nl

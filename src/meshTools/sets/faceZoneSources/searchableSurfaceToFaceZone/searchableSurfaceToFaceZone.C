@@ -58,6 +58,7 @@ Foam::topoSetSource::addToUsageTable Foam::searchableSurfaceToFaceZone::usage_
 
 Foam::searchableSurfaceToFaceZone::searchableSurfaceToFaceZone
 (
+    const word& surfaceType,
     const polyMesh& mesh,
     const dictionary& dict
 )
@@ -67,7 +68,7 @@ Foam::searchableSurfaceToFaceZone::searchableSurfaceToFaceZone
     (
         searchableSurface::New
         (
-            dict.get<word>("surface"),
+            surfaceType,
             IOobject
             (
                 dict.lookupOrDefault("name", mesh.objectRegistry::db().name()),
@@ -79,6 +80,21 @@ Foam::searchableSurfaceToFaceZone::searchableSurfaceToFaceZone
             ),
             dict
         )
+    )
+{}
+
+
+Foam::searchableSurfaceToFaceZone::searchableSurfaceToFaceZone
+(
+    const polyMesh& mesh,
+    const dictionary& dict
+)
+:
+    searchableSurfaceToFaceZone
+    (
+        dict.get<word>("surface"),
+        mesh,
+        dict
     )
 {}
 
@@ -162,10 +178,13 @@ void Foam::searchableSurfaceToFaceZone::applyToSet
         // Select intersected faces
         // ~~~~~~~~~~~~~~~~~~~~~~~~
 
-        if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+        if (action == topoSetSource::ADD || action == topoSetSource::NEW)
         {
-            Info<< "    Adding all faces from surface "
-                << surfacePtr_().name() << " ..." << endl;
+            if (verbose_)
+            {
+                Info<< "    Adding all faces from surface "
+                    << surfacePtr_().name() << " ..." << endl;
+            }
 
             DynamicList<label> newAddressing(fzSet.addressing());
             DynamicList<bool> newFlipMap(fzSet.flipMap());
@@ -184,10 +203,13 @@ void Foam::searchableSurfaceToFaceZone::applyToSet
             fzSet.flipMap().transfer(newFlipMap);
             fzSet.updateSet();
         }
-        else if (action == topoSetSource::DELETE)
+        else if (action == topoSetSource::SUBTRACT)
         {
-            Info<< "    Removing all faces from surface "
-                << surfacePtr_().name() << " ..." << endl;
+            if (verbose_)
+            {
+                Info<< "    Removing all faces from surface "
+                    << surfacePtr_().name() << " ..." << endl;
+            }
 
             // Start off empty
             DynamicList<label> newAddressing(fzSet.addressing().size());

@@ -49,7 +49,7 @@ void Foam::cellZoneSet::updateSet()
 
     cellSet::clearStorage();
     cellSet::resize(2*addressing_.size());
-    cellSet::insert(addressing_);
+    cellSet::set(addressing_);
 }
 
 
@@ -189,7 +189,7 @@ void Foam::cellZoneSet::addSet(const topoSet& set)
 }
 
 
-void Foam::cellZoneSet::deleteSet(const topoSet& set)
+void Foam::cellZoneSet::subtractSet(const topoSet& set)
 {
     DynamicList<label> newAddressing(addressing_.size());
 

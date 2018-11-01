@@ -37,6 +37,8 @@ namespace Foam
     defineTypeNameAndDebug(surfaceToPoint, 0);
     addToRunTimeSelectionTable(topoSetSource, surfaceToPoint, word);
     addToRunTimeSelectionTable(topoSetSource, surfaceToPoint, istream);
+    addToRunTimeSelectionTable(topoSetPointSource, surfaceToPoint, word);
+    addToRunTimeSelectionTable(topoSetPointSource, surfaceToPoint, istream);
 }
 
 
@@ -61,8 +63,11 @@ void Foam::surfaceToPoint::combine(topoSet& set, const bool add) const
 
     triSurface surf(surfName_, scale_);
 
-    Info<< "    Read surface from " << surfName_
-        << " in = "<< timer.cpuTimeIncrement() << " s" << endl << endl;
+    if (verbose_)
+    {
+        Info<< "    Read surface from " << surfName_
+            << " in = "<< timer.cpuTimeIncrement() << " s" << nl << endl;
+    }
 
     // Construct search engine on surface
     triSurfaceSearch querySurf(surf);
@@ -133,7 +138,7 @@ Foam::surfaceToPoint::surfaceToPoint
     const bool includeOutside
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     surfName_(surfName),
     scale_(1.0),
     nearDist_(nearDist),
@@ -150,7 +155,7 @@ Foam::surfaceToPoint::surfaceToPoint
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     surfName_(dict.get<fileName>("file").expand()),
     scale_(dict.lookupOrDefault<scalar>("scale", -1)),
     nearDist_(dict.get<scalar>("nearDistance")),
@@ -167,7 +172,7 @@ Foam::surfaceToPoint::surfaceToPoint
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     surfName_(checkIs(is)),
     scale_(1.0),
     nearDist_(readScalar(checkIs(is))),
@@ -186,17 +191,23 @@ void Foam::surfaceToPoint::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding points in relation to surface " << surfName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding points in relation to surface " << surfName_
+                << " ..." << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing points in relation to surface " << surfName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing points in relation to surface " << surfName_
+                << " ..." << endl;
+        }
 
         combine(set, false);
     }

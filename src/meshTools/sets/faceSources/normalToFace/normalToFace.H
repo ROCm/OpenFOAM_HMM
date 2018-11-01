@@ -25,7 +25,7 @@ Class
     Foam::normalToFace
 
 Description
-    A topoSetSource to select faces based on normal.
+    A topoSetFaceSource to select faces based on normal.
 
     \heading Dictionary parameters
     \table
@@ -42,7 +42,7 @@ SourceFiles
 #ifndef normalToFace_H
 #define normalToFace_H
 
-#include "topoSetSource.H"
+#include "topoSetFaceSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,7 +55,7 @@ namespace Foam
 
 class normalToFace
 :
-    public topoSetSource
+    public topoSetFaceSource
 {
 
 private:
@@ -103,11 +103,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return FACESETSOURCE;
-        }
 
         virtual void applyToSet
         (

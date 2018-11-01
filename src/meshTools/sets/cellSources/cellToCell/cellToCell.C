@@ -35,6 +35,8 @@ namespace Foam
     defineTypeNameAndDebug(cellToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, cellToCell, word);
     addToRunTimeSelectionTable(topoSetSource, cellToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, cellToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, cellToCell, istream);
 }
 
 
@@ -54,7 +56,7 @@ Foam::cellToCell::cellToCell
     const word& setName
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     setName_(setName)
 {}
 
@@ -65,8 +67,11 @@ Foam::cellToCell::cellToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    setName_(dict.get<word>("set"))
+    cellToCell
+    (
+        mesh,
+        dict.get<word>("set")
+    )
 {}
 
 
@@ -76,7 +81,7 @@ Foam::cellToCell::cellToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     setName_(checkIs(is))
 {}
 
@@ -89,25 +94,31 @@ void Foam::cellToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::ADD) || (action == topoSetSource::NEW))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all elements of cellSet " << setName_ << " ..."
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all elements of cellSet " << setName_
+                << " ..." << endl;
+        }
 
         // Load the set
         cellSet loadedSet(mesh_, setName_);
 
         set.addSet(loadedSet);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all elements of cellSet " << setName_ << " ..."
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all elements of cellSet " << setName_
+                << " ..." << endl;
+        }
 
         // Load the set
         cellSet loadedSet(mesh_, setName_);
 
-        set.deleteSet(loadedSet);
+        set.subtractSet(loadedSet);
     }
 }
 

@@ -25,7 +25,7 @@ Class
     Foam::cylinderAnnulusToCell
 
 Description
-    A topoSetSource to select cells based on cell centres inside a
+    A topoSetCellSource to select cells based on cell centres inside a
     cylinder annulus.
 
     \heading Dictionary parameters
@@ -45,7 +45,7 @@ SourceFiles
 #ifndef cylinderAnnulusToCell_H
 #define cylinderAnnulusToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +58,7 @@ namespace Foam
 
 class cylinderAnnulusToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -99,7 +99,7 @@ public:
             const point& point1,
             const point& point2,
             const scalar outerRadius,
-            const scalar innerRadius
+            const scalar innerRadius = 0
         );
 
         //- Construct from dictionary
@@ -114,11 +114,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

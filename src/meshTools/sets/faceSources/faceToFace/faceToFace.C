@@ -35,6 +35,8 @@ namespace Foam
     defineTypeNameAndDebug(faceToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, faceToFace, word);
     addToRunTimeSelectionTable(topoSetSource, faceToFace, istream);
+    addToRunTimeSelectionTable(topoSetFaceSource, faceToFace, word);
+    addToRunTimeSelectionTable(topoSetFaceSource, faceToFace, istream);
 }
 
 
@@ -54,7 +56,7 @@ Foam::faceToFace::faceToFace
     const word& setName
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     setName_(setName)
 {}
 
@@ -65,8 +67,11 @@ Foam::faceToFace::faceToFace
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    setName_(dict.get<word>("set"))
+    faceToFace
+    (
+        mesh,
+        dict.get<word>("set")
+    )
 {}
 
 
@@ -76,7 +81,7 @@ Foam::faceToFace::faceToFace
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     setName_(checkIs(is))
 {}
 
@@ -89,25 +94,31 @@ void Foam::faceToFace::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all faces from faceSet " << setName_ << " ..."
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all faces from faceSet " << setName_
+                << " ..." << endl;
+        }
 
         // Load the set
         faceSet loadedSet(mesh_, setName_);
 
         set.addSet(loadedSet);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all faces from faceSet " << setName_ << " ..."
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all faces from faceSet " << setName_
+                << " ..." << endl;
+        }
 
         // Load the set
         faceSet loadedSet(mesh_, setName_);
 
-        set.deleteSet(loadedSet);
+        set.subtractSet(loadedSet);
     }
 }
 

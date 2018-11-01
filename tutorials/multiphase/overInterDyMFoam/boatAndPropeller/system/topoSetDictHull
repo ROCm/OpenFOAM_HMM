@@ -17,14 +17,14 @@ FoamFile
 actions
 (
     {
-      name    bgr0;       // all around bgr
-      type    cellSet;
-      action  new;
-      source  zoneToCell;
-      sourceInfo
-      {
-          name    background;
-      }
+        name    bgr0;       // all around bgr
+        type    cellSet;
+        action  new;
+        source  zoneToCell;
+        sourceInfo
+        {
+            zone    background;
+        }
     }
     {
         name    hullBox0;       // all around bgr
@@ -33,7 +33,7 @@ actions
         source  zoneToCell;
         sourceInfo
         {
-            name    hullBox;
+            zone    hullBox;
         }
     }
     {
@@ -43,7 +43,7 @@ actions
         source  zoneToCell;
         sourceInfo
         {
-            name    propeller;
+            zone    propeller;
         }
     }
     {
@@ -53,7 +53,7 @@ actions
         source  zoneToCell;
         sourceInfo
         {
-            name    rudder;
+            zone    rudder;
         }
     }
 

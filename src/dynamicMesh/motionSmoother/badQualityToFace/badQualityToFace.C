@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,13 +33,25 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(badQualityToFace, 0);
-
-addToRunTimeSelectionTable(topoSetSource, badQualityToFace, word);
-
-addToRunTimeSelectionTable(topoSetSource, badQualityToFace, istream);
-
+    defineTypeNameAndDebug(badQualityToFace, 0);
+    addToRunTimeSelectionTable(topoSetSource, badQualityToFace, word);
+    addToRunTimeSelectionTable(topoSetSource, badQualityToFace, istream);
+    addToRunTimeSelectionTable(topoSetFaceSource, badQualityToFace, word);
+    addToRunTimeSelectionTable(topoSetFaceSource, badQualityToFace, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        badQualityToFace,
+        word,
+        badQuality
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        badQualityToFace,
+        istream,
+        badQuality
+    );
 }
 
 
@@ -59,9 +71,8 @@ void Foam::badQualityToFace::combine(topoSet& set, const bool add) const
     motionSmoother::checkMesh(false, mesh_, dict_, faces);
     faces.sync(mesh_);
 
-    forAllConstIter(faceSet, faces, iter)
+    for (const label facei : faces)
     {
-        label facei = iter.key();
         addOrDelete(set, facei, add);
     }
 }
@@ -69,33 +80,25 @@ void Foam::badQualityToFace::combine(topoSet& set, const bool add) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from dictionary
 Foam::badQualityToFace::badQualityToFace
 (
     const polyMesh& mesh,
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     dict_(dict)
 {}
 
 
-// Construct from Istream
 Foam::badQualityToFace::badQualityToFace
 (
     const polyMesh& mesh,
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     dict_(is)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::badQualityToFace::~badQualityToFace()
 {}
 
 
@@ -107,14 +110,22 @@ void Foam::badQualityToFace::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding bad-quality faces" << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding bad-quality faces" << endl;
+        }
+
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing bad-quality faces" << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing bad-quality faces" << endl;
+        }
+
         combine(set, false);
     }
 }

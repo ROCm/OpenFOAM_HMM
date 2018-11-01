@@ -23,7 +23,7 @@ FoamFile
 //
 //     // action to perform on set. Two types:
 //     // - require no source : clear/invert
-//     // - require source    : new/add/delete/subset
+//     // - require source    : add/subtract/subset/new
 //     action  new;
 //
 // The source entry varies according to the type of set:
@@ -46,13 +46,15 @@ FoamFile
 //    // Cells in cell zone
 //    source zoneToCell;
 //    {
-//        name ".*Zone";      // Name of cellZone, regular expressions allowed
+//        zones (".*Zone");   // Name of cellZones, regular expressions allowed
+//        zone ".*Zone";      // Name of cellZone, regular expressions allowed
 //    }
 //
 //    // Cells on master or slave side of faceZone
 //    source faceZoneToCell;
 //    {
-//        name ".*Zone";      // Name of faceZone, regular expressions allowed
+//        zones (".*Zone");   // Name of faceZones, regular expressions allowed
+//        zone ".*Zone";      // Name of faceZone, regular expressions allowed
 //        option master;      // master/slave
 //    }
 //
@@ -108,7 +110,7 @@ FoamFile
 //    // Cells with centre within sphere
 //    source sphereToCell;
 //    {
-//       centre   (0.2 0.2 -10);
+//       origin   (0.2 0.2 -10);
 //       radius   5.0;
 //    }
 //
@@ -184,13 +186,13 @@ FoamFile
 //    // All faces of patch
 //    source patchToFace;
 //    {
-//        name ".*Wall";      // Name of patch, regular expressions allowed
+//        patch   ".*Wall";   // Name of patch, regular expressions allowed
 //    }
 //
 //    // All faces of faceZone
 //    source zoneToFace;
 //    {
-//        name ".*Zone1";     // Name of faceZone, regular expressions allowed
+//        zone ".*Zone1";     // Name of faceZone, regular expressions allowed
 //    }
 //
 //    // Faces with face centre within box
@@ -240,7 +242,7 @@ FoamFile
 //    // All points in pointzone
 //    source zoneToPoint;
 //    {
-//        name ".*Zone";      // name of pointZone, regular expressions allowed
+//        zone ".*Zone";      // name of pointZone, regular expressions allowed
 //    }
 //
 //    // Points nearest to coordinates

@@ -143,7 +143,7 @@ void Foam::faceSet::sync(const polyMesh& mesh)
     {
         if (set[facei])
         {
-            if (insert(facei))
+            if (this->set(facei))
             {
                 ++nAdded;
             }
@@ -207,7 +207,7 @@ void Foam::faceSet::distribute(const mapDistributePolyMesh& map)
     {
         if (inSet[facei])
         {
-            insert(facei);
+            this->set(facei);
         }
     }
 }

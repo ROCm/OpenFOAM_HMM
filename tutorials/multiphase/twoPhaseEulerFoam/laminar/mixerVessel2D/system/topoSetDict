@@ -24,7 +24,7 @@ actions
         source  zoneToCell;
         sourceInfo
         {
-            name rotor;
+            zone rotor;
         }
     }
 );

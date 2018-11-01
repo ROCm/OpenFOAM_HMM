@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(sphereToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, sphereToCell, word);
     addToRunTimeSelectionTable(topoSetSource, sphereToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, sphereToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, sphereToCell, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        sphereToCell,
+        word,
+        sphere
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        sphereToCell,
+        istream,
+        sphere
+    );
 }
 
 
@@ -55,7 +71,7 @@ void Foam::sphereToCell::combine(topoSet& set, const bool add) const
 
     forAll(ctrs, celli)
     {
-        if (magSqr(ctrs[celli] - centre_) <= rad2)
+        if (magSqr(ctrs[celli] - origin_) <= rad2)
         {
             addOrDelete(set, celli, add);
         }
@@ -68,12 +84,12 @@ void Foam::sphereToCell::combine(topoSet& set, const bool add) const
 Foam::sphereToCell::sphereToCell
 (
     const polyMesh& mesh,
-    const point& centre,
+    const point& origin,
     const scalar radius
 )
 :
-    topoSetSource(mesh),
-    centre_(centre),
+    topoSetCellSource(mesh),
+    origin_(origin),
     radius_(radius)
 {}
 
@@ -84,9 +100,12 @@ Foam::sphereToCell::sphereToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    centre_(dict.get<point>("centre")),
-    radius_(dict.get<scalar>("radius"))
+    sphereToCell
+    (
+        mesh,
+        dict.getCompat<vector>("origin", {{"centre", -1806}}),
+        dict.get<scalar>("radius")
+    )
 {}
 
 
@@ -96,8 +115,8 @@ Foam::sphereToCell::sphereToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    centre_(checkIs(is)),
+    topoSetCellSource(mesh),
+    origin_(checkIs(is)),
     radius_(readScalar(checkIs(is)))
 {}
 
@@ -110,17 +129,23 @@ void Foam::sphereToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells with centre within sphere, with centre = "
-            << centre_ << " and radius = " << radius_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells within a sphere with centre = "
+                << origin_ << " and radius = " << radius_ << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells with centre within sphere, with centre = "
-            << centre_ << " and radius = " << radius_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells within a sphere with centre = "
+                << origin_ << " and radius = " << radius_ << endl;
+        }
 
         combine(set, false);
     }

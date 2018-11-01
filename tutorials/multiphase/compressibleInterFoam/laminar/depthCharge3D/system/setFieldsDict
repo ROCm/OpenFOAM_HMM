@@ -27,8 +27,9 @@ regions
 (
     sphereToCell
     {
-        centre (0.5 0.5 0.5);
-        radius 0.1;
+        origin  (0.5 0.5 0.5);
+        radius  0.1;
+
         fieldValues
         (
             volScalarFieldValue alpha.water 0

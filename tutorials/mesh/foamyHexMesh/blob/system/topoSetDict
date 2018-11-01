@@ -110,7 +110,7 @@ actions
         source  sphereToCell;
         sourceInfo
         {
-            centre (-0.3 -0.3 -0.3);
+            origin (-0.3 -0.3 -0.3);
             radius 0.4;
         }
     }

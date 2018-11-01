@@ -25,13 +25,18 @@ Class
     Foam::zoneToPoint
 
 Description
-    A topoSetSource to select points based on pointZone.
+    A topoSetPointSource to select points based on one or more pointZones.
 
     \heading Dictionary parameters
     \table
-        Property    | Description                       | Required  | Default
-        name        | The point zone name or regex      | yes   |
+        Property    | Description                           | Required | Default
+        zone        | The point zone name or regex          | possibly |
+        zones       | The point zone names or regexs        | possibly |
+        name        | Older specification for 'zone'        | no    |
     \endtable
+
+Note
+    Selection of multiple zones has precedence.
 
 SourceFiles
     zoneToPoint.C
@@ -41,8 +46,8 @@ SourceFiles
 #ifndef zoneToPoint_H
 #define zoneToPoint_H
 
-#include "topoSetSource.H"
-#include "wordRe.H"
+#include "topoSetPointSource.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,12 +55,12 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class zoneToPoint Declaration
+                         Class zoneToPoint Declaration
 \*---------------------------------------------------------------------------*/
 
 class zoneToPoint
 :
-    public topoSetSource
+    public topoSetPointSource
 {
 
     // Private data
@@ -63,8 +68,8 @@ class zoneToPoint
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Name/regular expression of zone
-        wordRe zoneName_;
+        //- Matcher for zones
+        wordRes selectedZones_;
 
 
     // Private Member Functions
@@ -80,11 +85,7 @@ public:
     // Constructors
 
         //- Construct from components
-        zoneToPoint
-        (
-            const polyMesh& mesh,
-            const word& zoneName
-        );
+        zoneToPoint(const polyMesh& mesh, const wordRe& zoneName);
 
         //- Construct from dictionary
         zoneToPoint(const polyMesh& mesh, const dictionary& dict);
@@ -98,11 +99,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return POINTSETSOURCE;
-        }
 
         virtual void applyToSet
         (

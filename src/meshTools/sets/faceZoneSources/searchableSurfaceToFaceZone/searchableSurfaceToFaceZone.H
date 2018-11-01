@@ -75,6 +75,15 @@ public:
 
     // Constructors
 
+        //- Construct surface-type from dictionary
+        searchableSurfaceToFaceZone
+        (
+            const word& surfaceType,
+            const polyMesh& mesh,
+            const dictionary& dict
+        );
+
+
         //- Construct from dictionary
         searchableSurfaceToFaceZone
         (
@@ -89,7 +98,7 @@ public:
 
     // Member Functions
 
-        virtual sourceType setType() const
+        virtual topoSetSource::sourceType setType() const
         {
             return FACEZONESOURCE;
         }

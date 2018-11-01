@@ -25,7 +25,7 @@ Class
     Foam::targetVolumeToCell
 
 Description
-    A topoSetSource to select cells based on the wanted volume of selected
+    A topoSetCellSource to select cells based on the wanted volume of selected
     cells. Adapts a plane until it has enough.
 
     \heading Dictionary parameters
@@ -44,7 +44,7 @@ SourceFiles
 #ifndef targetVolumeToCell_H
 #define targetVolumeToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,7 +60,7 @@ class bitSet;
 
 class targetVolumeToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -105,7 +105,8 @@ public:
         (
             const polyMesh& mesh,
             const scalar vol,
-            const vector& normal
+            const vector& normal,
+            const word& maskSetName = ""
         );
 
         //- Construct from dictionary
@@ -120,11 +121,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

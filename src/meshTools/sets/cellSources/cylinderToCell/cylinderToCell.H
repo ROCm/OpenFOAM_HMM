@@ -25,7 +25,7 @@ Class
     Foam::cylinderToCell
 
 Description
-    A topoSetSource to select cells based on cell centres inside a cylinder.
+    A topoSetCellSource to select cells with their centres inside a cylinder.
 
     \heading Dictionary parameters
     \table
@@ -43,7 +43,7 @@ SourceFiles
 #ifndef cylinderToCell_H
 #define cylinderToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,7 +56,7 @@ namespace Foam
 
 class cylinderToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -108,11 +108,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

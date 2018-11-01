@@ -25,14 +25,19 @@ Class
     Foam::faceZoneToCell
 
 Description
-    A topoSetSource to select cells based on side of faceZone.
+    A topoSetCellSource to select cells based on side of faceZone.
 
     \heading Dictionary parameters
     \table
-        Property    | Description                       | Required  | Default
-        name        | The face zone name or regex       | yes   |
-        option      | Selection type (master / slave)   | yes   |
+        Property    | Description                           | Required | Default
+        option      | Selection type (master / slave)       | yes   |
+        zone        | The face zone name or regex           | possibly |
+        zones       | The face zone names or regexs         | possibly |
+        name        | Older specification for 'zone'        | no    |
     \endtable
+
+Note
+    Selection of multiple zones has precedence.
 
 SourceFiles
     faceZoneToCell.C
@@ -42,8 +47,8 @@ SourceFiles
 #ifndef faceZoneToCell_H
 #define faceZoneToCell_H
 
-#include "topoSetSource.H"
-#include "wordRe.H"
+#include "topoSetCellSource.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,7 +61,7 @@ namespace Foam
 
 class faceZoneToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 public:
         //- Enumeration defining the valid options
@@ -75,8 +80,8 @@ private:
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Name/regular expression of faceZone
-        wordRe zoneName_;
+        //- Matcher for face zones
+        wordRes selectedZones_;
 
         //- Option
         faceAction option_;
@@ -98,7 +103,7 @@ public:
         faceZoneToCell
         (
             const polyMesh& mesh,
-            const word& zoneName,
+            const wordRe& zoneName,
             const faceAction option
         );
 
@@ -114,11 +119,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

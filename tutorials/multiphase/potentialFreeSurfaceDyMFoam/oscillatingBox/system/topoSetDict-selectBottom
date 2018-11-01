@@ -24,7 +24,7 @@ actions
         source  patchToFace;
         sourceInfo
         {
-            name   floatingObject;
+            patch   floatingObject;
         }
     }
 

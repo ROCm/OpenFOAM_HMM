@@ -122,8 +122,8 @@ public:
         //- Add elements present in set.
         virtual void addSet(const topoSet& set);
 
-        //- Delete elements present in set.
-        virtual void deleteSet(const topoSet& set);
+        //- Subtract elements present in set.
+        virtual void subtractSet(const topoSet& set);
 
         //- Sync cellSet across coupled patches; update cellZone from cellSet
         virtual void sync(const polyMesh& mesh);

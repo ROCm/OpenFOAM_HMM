@@ -24,7 +24,7 @@ actions
         source  patchToFace;
         sourceInfo
         {
-            name filmWalls;
+            patch   filmWalls;
         }
     }
     {

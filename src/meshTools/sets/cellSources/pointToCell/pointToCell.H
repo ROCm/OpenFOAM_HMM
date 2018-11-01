@@ -25,7 +25,7 @@ Class
     Foam::pointToCell
 
 Description
-    A topoSetSource to select cells based on usage of points.
+    A topoSetCellSource to select cells based on usage of points.
 
     \heading Dictionary parameters
     \table
@@ -42,7 +42,7 @@ SourceFiles
 #ifndef pointToCell_H
 #define pointToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 #include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -56,7 +56,7 @@ namespace Foam
 
 class pointToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 public:
         //- Enumeration defining the valid options
@@ -114,11 +114,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(zoneToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, zoneToCell, word);
     addToRunTimeSelectionTable(topoSetSource, zoneToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, zoneToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, zoneToCell, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        zoneToCell,
+        word,
+        zone
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        zoneToCell,
+        istream,
+        zone
+    );
 }
 
 
@@ -54,14 +70,17 @@ void Foam::zoneToCell::combine(topoSet& set, const bool add) const
 
     for (const cellZone& zone : mesh_.cellZones())
     {
-        if (zoneName_.match(zone.name()))
+        if (selectedZones_.match(zone.name()))
         {
             hasMatched = true;
 
             const labelList& cellLabels = zone;
 
-            Info<< "    Found matching zone " << zone.name()
-                << " with " << cellLabels.size() << " cells." << endl;
+            if (verbose_)
+            {
+                Info<< "    Found matching zone " << zone.name()
+                    << " with " << cellLabels.size() << " cells." << endl;
+            }
 
             for (const label celli : cellLabels)
             {
@@ -77,7 +96,8 @@ void Foam::zoneToCell::combine(topoSet& set, const bool add) const
     if (!hasMatched)
     {
         WarningInFunction
-            << "Cannot find any cellZone named " << zoneName_ << nl
+            << "Cannot find any cellZone matching "
+            << flatOutput(selectedZones_) << nl
             << "Valid names: " << flatOutput(mesh_.cellZones().names())
             << endl;
     }
@@ -89,11 +109,11 @@ void Foam::zoneToCell::combine(topoSet& set, const bool add) const
 Foam::zoneToCell::zoneToCell
 (
     const polyMesh& mesh,
-    const word& zoneName
+    const wordRe& zoneName
 )
 :
-    topoSetSource(mesh),
-    zoneName_(zoneName)
+    topoSetCellSource(mesh),
+    selectedZones_(one(), zoneName)
 {}
 
 
@@ -103,9 +123,17 @@ Foam::zoneToCell::zoneToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    zoneName_(dict.get<wordRe>("name"))
-{}
+    topoSetCellSource(mesh),
+    selectedZones_()
+{
+    // Look for 'zones' and 'zone', but accept 'name' as well
+    if (!dict.readIfPresent("zones", selectedZones_))
+    {
+        selectedZones_.resize(1);
+        selectedZones_.first() =
+            dict.getCompat<wordRe>("zone", {{"name", 1806}});
+    }
+}
 
 
 Foam::zoneToCell::zoneToCell
@@ -114,8 +142,8 @@ Foam::zoneToCell::zoneToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    zoneName_(checkIs(is))
+    topoSetCellSource(mesh),
+    selectedZones_(one(), wordRe(checkIs(is)))
 {}
 
 
@@ -127,17 +155,23 @@ void Foam::zoneToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all cells of cellZone " << zoneName_ << " ..."
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all cells of cell zones "
+                << flatOutput(selectedZones_) << " ..." << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all cells of cellZone " << zoneName_ << " ..."
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all cells of cell zones "
+                << flatOutput(selectedZones_) << " ..." << endl;
+        }
 
         combine(set, false);
     }

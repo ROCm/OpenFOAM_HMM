@@ -39,14 +39,13 @@ SourceFiles
 #define topoSetSource_H
 
 #include "pointField.H"
-#include "word.H"
 #include "labelList.H"
 #include "faceList.H"
 #include "typeInfo.H"
-#include "runTimeSelectionTables.H"
 #include "autoPtr.H"
 #include "Enum.H"
 #include "HashTable.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,26 +69,27 @@ public:
         //- Enumeration defining the types of sources
         enum sourceType
         {
-            CELLSETSOURCE,
-            FACESETSOURCE,
-            POINTSETSOURCE,
+            CELLSETSOURCE = 0x1,        //!< Cells
+            FACESETSOURCE = 0x2,        //!< Faces
+            POINTSETSOURCE = 0x4,       //!< Points
 
-            CELLZONESOURCE,
-            FACEZONESOURCE,
-            POINTZONESOURCE
+            CELLZONESOURCE = 0x11,      //!< Cells as zone
+            FACEZONESOURCE = 0x12,      //!< Faces as zone
+            POINTZONESOURCE = 0x14,     //!< Points as zone
         };
 
         //- Enumeration defining the valid actions
         enum setAction
         {
-            CLEAR,
-            NEW,
-            INVERT,
-            ADD,
-            DELETE,
-            SUBSET,
-            LIST,
-            REMOVE
+            ADD,                //!< Adds elements to the set
+            SUBTRACT,           //!< Removes elements from the set
+            SUBSET,             //!< Subset with elements in the set
+            INVERT,             //!< Invert the elements in the set
+            CLEAR,              //!< Clear the set, possibly creating it
+            NEW,                //!< Create a new set and ADD elemets to it
+            REMOVE,             //!< Remove the set (from the file system)
+            LIST,               //!< Print contents of the set
+            DELETE = SUBTRACT,  //!< \deprecated alias for SUBTRACT (OCT-2018)
         };
 
         //- The setActions text representations
@@ -126,10 +126,13 @@ protected:
         };
 
 
-    // Protected data
+    // Protected Data
 
         //- Reference to the mesh
         const polyMesh& mesh_;
+
+        //- Verbosity (default: true)
+        bool verbose_;
 
 
     // Protected Member Functions
@@ -289,6 +292,18 @@ public:
             return mesh_;
         }
 
+        //- Return the current verbosity
+        bool verbose() const
+        {
+            return verbose_;
+        }
+
+        //- Set the current verbosity
+        void verbose(bool on)
+        {
+            verbose_ = on;
+        }
+
 
     // Member Functions
 
@@ -296,7 +311,11 @@ public:
         virtual sourceType setType() const = 0;
 
         //- Apply specified action to the topoSet
-        virtual void applyToSet(const setAction action, topoSet& set) const = 0;
+        virtual void applyToSet
+        (
+            const setAction action,
+            topoSet& set
+        ) const = 0;
 
 };
 

@@ -30,8 +30,8 @@ Description
 
     \heading Dictionary parameters
     \table
-        Property    | Description                       | Required  | Default
-        faceSet     | Name of input faceSet             | yes   |
+        Property    | Description                           | Required | Default
+        faceSet     | Name of input faceSet                 | yes   |
     \endtable
 
 Note

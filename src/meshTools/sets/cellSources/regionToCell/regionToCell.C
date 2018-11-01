@@ -37,6 +37,8 @@ namespace Foam
     defineTypeNameAndDebug(regionToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, regionToCell, word);
     addToRunTimeSelectionTable(topoSetSource, regionToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, regionToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, regionToCell, istream);
 }
 
 
@@ -155,7 +157,7 @@ void Foam::regionToCell::unselectOutsideRegions
     regionSplit cellRegion(mesh_, blockedFace);
 
     // Determine regions containing insidePoints_
-    boolList keepRegion(findRegions(true, cellRegion));
+    boolList keepRegion(findRegions(verbose_, cellRegion));
 
     // Go back to bool per cell
     forAll(cellRegion, celli)
@@ -266,7 +268,7 @@ void Foam::regionToCell::erode
     regionSplit cellRegion(mesh_, blockedFace);
 
     // Determine regions containing insidePoints
-    boolList keepRegion(findRegions(true, cellRegion));
+    boolList keepRegion(findRegions(verbose_, cellRegion));
 
 
     // Extract cells in regions that are not to be kept.
@@ -386,7 +388,7 @@ Foam::regionToCell::regionToCell
     const label nErode
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     setName_(setName),
     insidePoints_(insidePoints),
     nErode_(nErode)
@@ -399,7 +401,7 @@ Foam::regionToCell::regionToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     setName_(dict.lookupOrDefault<word>("set", "none")),
     insidePoints_
     (
@@ -415,7 +417,7 @@ Foam::regionToCell::regionToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     setName_(checkIs(is)),
     insidePoints_(checkIs(is)),
     nErode_(readLabel(checkIs(is)))
@@ -430,17 +432,25 @@ void Foam::regionToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all cells of connected region containing points "
-            << insidePoints_ << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all cells of connected region "
+                << "containing points "
+                << insidePoints_ << " ..." << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all cells of connected region containing points "
-            << insidePoints_ << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all cells of connected region "
+                << "containing points "
+                << insidePoints_ << " ..." << endl;
+        }
 
         combine(set, false);
     }

@@ -25,17 +25,18 @@ Class
     Foam::boxToPoint
 
 Description
-    A topoSetSource to select points based on whether they are inside box.
+    A topoSetPointSource to select points based on whether they are inside box.
 
     \heading Dictionary parameters
     \table
-        Property    | Description                       | Required  | Default
-        box         | A single bounding box             | partly    |
-        boxes       | Multiple bounding boxes           | partly    |
+        Property    | Description                           | Required | Default
+        box         | A single bounding box                 | partly   |
+        boxes       | Multiple bounding boxes               | partly   |
     \endtable
 
 Note
-    Must specify either "box" or "boxes"
+    Must specify either "box" or "boxes".
+    The selection of multiple boxes has precedence.
 
 SourceFiles
     boxToPoint.C
@@ -45,7 +46,7 @@ SourceFiles
 #ifndef boxToPoint_H
 #define boxToPoint_H
 
-#include "topoSetSource.H"
+#include "topoSetPointSource.H"
 #include "treeBoundBoxList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -59,7 +60,7 @@ namespace Foam
 
 class boxToPoint
 :
-    public topoSetSource
+    public topoSetPointSource
 {
 
     // Private data
@@ -83,12 +84,11 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        boxToPoint
-        (
-            const polyMesh& mesh,
-            const treeBoundBoxList& bbs
-        );
+        //- Construct from components, copying bounding boxes
+        boxToPoint(const polyMesh& mesh, const treeBoundBoxList& bbs);
+
+        //- Construct from components, moving bounding boxes
+        boxToPoint(const polyMesh& mesh, treeBoundBoxList&& bbs);
 
         //- Construct from dictionary
         boxToPoint(const polyMesh& mesh, const dictionary& dict);
@@ -102,11 +102,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return POINTSETSOURCE;
-        }
 
         virtual void applyToSet
         (

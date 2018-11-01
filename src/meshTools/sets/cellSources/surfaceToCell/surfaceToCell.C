@@ -40,6 +40,8 @@ namespace Foam
     defineTypeNameAndDebug(surfaceToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, surfaceToCell, word);
     addToRunTimeSelectionTable(topoSetSource, surfaceToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, surfaceToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, surfaceToCell, istream);
 }
 
 
@@ -72,25 +74,22 @@ Foam::label Foam::surfaceToCell::getNearest
     Map<label>& cache
 )
 {
-    Map<label>::const_iterator iter = cache.find(pointi);
+    const auto iter = cache.cfind(pointi);
 
-    if (iter != cache.end())
+    if (iter.found())
     {
-        // Found cached answer
-        return iter();
+        return *iter;  // Return cached value
     }
-    else
-    {
-        pointIndexHit inter = querySurf.nearest(pt, span);
 
-        // Triangle label (can be -1)
-        label triI = inter.index();
+    pointIndexHit inter = querySurf.nearest(pt, span);
 
-        // Store triangle on point
-        cache.insert(pointi, triI);
+    // Triangle label (can be -1)
+    const label trii = inter.index();
 
-        return triI;
-    }
+    // Store triangle on point
+    cache.insert(pointi, trii);
+
+    return trii;
 }
 
 
@@ -148,7 +147,6 @@ void Foam::surfaceToCell::combine(topoSet& set, const bool add) const
 {
     cpuTime timer;
 
-
     if (useSurfaceOrientation_ && (includeInside_ || includeOutside_))
     {
         const meshSearch queryMesh(mesh_);
@@ -156,8 +154,11 @@ void Foam::surfaceToCell::combine(topoSet& set, const bool add) const
         //- Calculate for each searchPoint inside/outside status.
         boolList isInside(querySurf().calcInside(mesh_.cellCentres()));
 
-        Info<< "    Marked inside/outside using surface orientation in = "
-            << timer.cpuTimeIncrement() << " s" << endl << endl;
+        if (verbose_)
+        {
+            Info<< "    Marked inside/outside using surface orientation in = "
+                << timer.cpuTimeIncrement() << " s" << nl << endl;
+        }
 
         forAll(isInside, celli)
         {
@@ -208,8 +209,11 @@ void Foam::surfaceToCell::combine(topoSet& set, const bool add) const
         );
 
 
-        Info<< "    Marked inside/outside using surface intersection in = "
-            << timer.cpuTimeIncrement() << " s" << endl << endl;
+        if (verbose_)
+        {
+            Info<< "    Marked inside/outside using surface intersection in = "
+                << timer.cpuTimeIncrement() << " s" << nl << endl;
+        }
 
         //- Add/remove cells using set
         forAll(cellType, celli)
@@ -252,8 +256,11 @@ void Foam::surfaceToCell::combine(topoSet& set, const bool add) const
 
         if (curvature_ < -1)
         {
-            Info<< "    Selecting cells with cellCentre closer than "
-                << nearDist_ << " to surface" << endl;
+            if (verbose_)
+            {
+                Info<< "    Selecting cells with cellCentre closer than "
+                    << nearDist_ << " to surface" << endl;
+            }
 
             // No need to test curvature. Insert near cells into set.
 
@@ -269,17 +276,22 @@ void Foam::surfaceToCell::combine(topoSet& set, const bool add) const
                 }
             }
 
-            Info<< "    Determined nearest surface point in = "
-                << timer.cpuTimeIncrement() << " s" << endl << endl;
-
+            if (verbose_)
+            {
+                Info<< "    Determined nearest surface point in = "
+                    << timer.cpuTimeIncrement() << " s" << nl << endl;
+            }
         }
         else
         {
             // Test near cells for curvature
 
-            Info<< "    Selecting cells with cellCentre closer than "
-                << nearDist_ << " to surface and curvature factor"
-                << " less than " << curvature_ << endl;
+            if (verbose_)
+            {
+                Info<< "    Selecting cells with cellCentre closer than "
+                    << nearDist_ << " to surface and curvature factor"
+                    << " less than " << curvature_ << endl;
+            }
 
             // Cache for nearest surface triangle for a point
             Map<label> pointToNearest(mesh_.nCells()/10);
@@ -309,8 +321,11 @@ void Foam::surfaceToCell::combine(topoSet& set, const bool add) const
                 }
             }
 
-            Info<< "    Determined nearest surface point in = "
-                << timer.cpuTimeIncrement() << " s" << endl << endl;
+            if (verbose_)
+            {
+                Info<< "    Determined nearest surface point in = "
+                    << timer.cpuTimeIncrement() << " s" << nl << endl;
+            }
         }
     }
 }
@@ -364,7 +379,7 @@ Foam::surfaceToCell::surfaceToCell
     const scalar curvature
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     surfName_(surfName),
     outsidePoints_(outsidePoints),
     includeCut_(includeCut),
@@ -396,7 +411,7 @@ Foam::surfaceToCell::surfaceToCell
     const scalar curvature
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     surfName_(surfName),
     outsidePoints_(outsidePoints),
     includeCut_(includeCut),
@@ -419,7 +434,7 @@ Foam::surfaceToCell::surfaceToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     surfName_(dict.get<fileName>("file").expand()),
     outsidePoints_(dict.get<pointField>("outsidePoints")),
     includeCut_(dict.get<bool>("includeCut")),
@@ -452,7 +467,7 @@ Foam::surfaceToCell::surfaceToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     surfName_(checkIs(is)),
     outsidePoints_(checkIs(is)),
     includeCut_(readBool(checkIs(is))),
@@ -489,17 +504,23 @@ void Foam::surfaceToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells in relation to surface " << surfName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells in relation to surface " << surfName_
+                << " ..." << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells in relation to surface " << surfName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells in relation to surface " << surfName_
+                << " ..." << endl;
+        }
 
         combine(set, false);
     }

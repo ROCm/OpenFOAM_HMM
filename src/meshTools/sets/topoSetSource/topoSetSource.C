@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,14 +46,15 @@ const Foam::Enum
 >
 Foam::topoSetSource::actionNames
 ({
+    { setAction::ADD, "add" },
+    { setAction::SUBTRACT, "subtract" },
+    { setAction::SUBSET, "subset" },
+    { setAction::INVERT, "invert" },
     { setAction::CLEAR, "clear" },
     { setAction::NEW, "new" },
-    { setAction::INVERT, "invert" },
-    { setAction::ADD, "add" },
-    { setAction::DELETE, "delete" },
-    { setAction::SUBSET, "subset" },
-    { setAction::LIST, "list" },
     { setAction::REMOVE, "remove" },
+    { setAction::LIST, "list" },
+    { setAction::SUBTRACT, "delete" },   // Compat (1806)
 });
 
 
@@ -148,11 +149,7 @@ Foam::autoPtr<Foam::topoSetSource> Foam::topoSetSource::New
 
 Foam::Istream& Foam::topoSetSource::checkIs(Istream& is)
 {
-    if (is.good() && !is.eof())
-    {
-        return is;
-    }
-    else
+    if (!is.good() || is.eof())
     {
         FatalErrorInFunction
             << exit(FatalError);
@@ -173,11 +170,11 @@ void Foam::topoSetSource::addOrDelete
 {
     if (add)
     {
-        set.insert(id);
+        set.set(id);
     }
     else
     {
-        set.erase(id);
+        set.unset(id);
     }
 }
 
@@ -191,11 +188,11 @@ void Foam::topoSetSource::addOrDelete
 {
     if (add)
     {
-        set.insert(labels);
+        set.set(labels);
     }
     else
     {
-        set.erase(labels);
+        set.unset(labels);
     }
 }
 
@@ -204,7 +201,8 @@ void Foam::topoSetSource::addOrDelete
 
 Foam::topoSetSource::topoSetSource(const polyMesh& mesh)
 :
-    mesh_(mesh)
+    mesh_(mesh),
+    verbose_(true)
 {}
 
 

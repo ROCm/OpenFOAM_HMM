@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,7 @@ SourceFiles
 #ifndef regionsToCell_H
 #define regionsToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 #include "boolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -57,6 +57,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class regionSplit;
 
 /*---------------------------------------------------------------------------*\
@@ -65,7 +66,7 @@ class regionSplit;
 
 class regionsToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -98,7 +99,7 @@ class regionsToCell
         (
             const bool verbose,
             const boolList& selectedCell,
-            const regionSplit&
+            const regionSplit& cellRegion
         ) const;
 
         //- Unselect regions not containing a locationInMesh
@@ -131,33 +132,23 @@ public:
         );
 
         //- Construct from dictionary
-        regionsToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        regionsToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        regionsToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        regionsToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~regionsToCell();
+    virtual ~regionsToCell() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
-
-        virtual void applyToSet(const topoSetSource::setAction action, topoSet&)
-         const;
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet& set
+        ) const;
 
 };
 

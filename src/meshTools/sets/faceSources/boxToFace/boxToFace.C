@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(boxToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, boxToFace, word);
     addToRunTimeSelectionTable(topoSetSource, boxToFace, istream);
+    addToRunTimeSelectionTable(topoSetFaceSource, boxToFace, word);
+    addToRunTimeSelectionTable(topoSetFaceSource, boxToFace, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        boxToFace,
+        word,
+        box
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        boxToFace,
+        istream,
+        box
+    );
 }
 
 
@@ -73,8 +89,19 @@ Foam::boxToFace::boxToFace
     const treeBoundBoxList& bbs
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     bbs_(bbs)
+{}
+
+
+Foam::boxToFace::boxToFace
+(
+    const polyMesh& mesh,
+    treeBoundBoxList&& bbs
+)
+:
+    topoSetFaceSource(mesh),
+    bbs_(std::move(bbs))
 {}
 
 
@@ -84,17 +111,14 @@ Foam::boxToFace::boxToFace
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     bbs_()
 {
-    if (dict.found("box"))
+    // Look for 'boxes' or 'box'
+    if (!dict.readIfPresent("boxes", bbs_))
     {
         bbs_.resize(1);
         dict.readEntry("box", bbs_.first());
-    }
-    else
-    {
-        dict.readEntry("boxes", bbs_);
     }
 }
 
@@ -105,8 +129,8 @@ Foam::boxToFace::boxToFace
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    bbs_(1, treeBoundBox(checkIs(is)))
+    topoSetFaceSource(mesh),
+    bbs_(one(), treeBoundBox(checkIs(is)))
 {}
 
 
@@ -118,15 +142,23 @@ void Foam::boxToFace::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding faces with centre within boxes " << bbs_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding faces with centre within boxes "
+                << bbs_ << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing faces with centre within boxes " << bbs_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing faces with centre within boxes "
+                << bbs_ << endl;
+        }
 
         combine(set, false);
     }

@@ -27,7 +27,7 @@ actions
         source  patchToFace;
         sourceInfo
         {
-            name "AMI.*";
+            patch   "AMI.*";
         }
     }
 );

@@ -174,7 +174,7 @@ void Foam::topoSet::updateLabels(const labelList& map)
 
             if (newId >= 0)
             {
-                newSet.insert(newId);
+                newSet.set(newId);
             }
         }
 
@@ -491,6 +491,36 @@ Foam::topoSet::topoSet(const IOobject& io, labelHashSet&& labels)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+bool Foam::topoSet::found(const label id) const
+{
+    return static_cast<const labelHashSet&>(*this).found(id);
+}
+
+
+bool Foam::topoSet::set(const label id)
+{
+    return static_cast<labelHashSet&>(*this).set(id);
+}
+
+
+bool Foam::topoSet::unset(const label id)
+{
+    return static_cast<labelHashSet&>(*this).unset(id);
+}
+
+
+void Foam::topoSet::set(const labelUList& labels)
+{
+    static_cast<labelHashSet&>(*this).set(labels);
+}
+
+
+void Foam::topoSet::unset(const labelUList& labels)
+{
+    static_cast<labelHashSet&>(*this).unset(labels);
+}
+
+
 void Foam::topoSet::invert(const label maxLen)
 {
     // Retain a copy of the original (current) set.
@@ -506,7 +536,7 @@ void Foam::topoSet::invert(const label maxLen)
     {
         if (!original.found(id))
         {
-            insert(id);
+            this->set(id);
         }
     }
 }
@@ -514,22 +544,28 @@ void Foam::topoSet::invert(const label maxLen)
 
 void Foam::topoSet::subset(const topoSet& set)
 {
-    // Only retain entries found in both HashSets
+    // Only retain entries found in both sets
     static_cast<labelHashSet&>(*this) &= set;
 }
 
 
 void Foam::topoSet::addSet(const topoSet& set)
 {
-    // Add entries to the HashSet
-    static_cast<labelHashSet&>(*this) += set;
+    // Add entries to the set
+    static_cast<labelHashSet&>(*this) |= set;
+}
+
+
+void Foam::topoSet::subtractSet(const topoSet& set)
+{
+    // Subtract entries from the set
+    static_cast<labelHashSet&>(*this) -= set;
 }
 
 
 void Foam::topoSet::deleteSet(const topoSet& set)
 {
-    // Remove entries from the HashSet
-    static_cast<labelHashSet&>(*this) -= set;
+    this->subtractSet(set);
 }
 
 

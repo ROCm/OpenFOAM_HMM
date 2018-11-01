@@ -25,8 +25,8 @@ Class
     Foam::regionToFace
 
 Description
-    A topoSetSource to select faces belonging to topological connected region
-    (that contains given point)
+    A topoSetFaceSource to select faces belonging to a topological connected
+    region (that contains given point)
 
     \heading Dictionary parameters
     \table
@@ -43,7 +43,7 @@ SourceFiles
 #ifndef regionToFace_H
 #define regionToFace_H
 
-#include "topoSetSource.H"
+#include "topoSetFaceSource.H"
 #include "indirectPrimitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -57,7 +57,7 @@ namespace Foam
 
 class regionToFace
 :
-    public topoSetSource
+    public topoSetFaceSource
 {
     // Private data
 
@@ -112,11 +112,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return FACESETSOURCE;
-        }
 
         virtual void applyToSet
         (

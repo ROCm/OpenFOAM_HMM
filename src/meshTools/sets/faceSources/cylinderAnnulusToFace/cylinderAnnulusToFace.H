@@ -25,7 +25,7 @@ Class
     Foam::cylinderAnnulusToFace
 
 Description
-    A topoSetSource to select faces based on face centres inside a
+    A topoSetFaceSource to select faces based on face centres inside a
     cylinder annulus.
 
     \heading Dictionary parameters
@@ -45,7 +45,7 @@ SourceFiles
 #ifndef cylinderAnnulusToFace_H
 #define cylinderAnnulusToFace_H
 
-#include "topoSetSource.H"
+#include "topoSetFaceSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +58,7 @@ namespace Foam
 
 class cylinderAnnulusToFace
 :
-    public topoSetSource
+    public topoSetFaceSource
 {
 
     // Private data
@@ -114,11 +114,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

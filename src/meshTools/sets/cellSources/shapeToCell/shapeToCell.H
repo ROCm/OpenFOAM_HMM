@@ -25,7 +25,7 @@ Class
     Foam::shapeToCell
 
 Description
-    A topoSetSource to select cells based on cell shape.
+    A topoSetCellSource to select cells based on cell shape.
 
     Handles all known ones from static collection in cellModel
     and splitHex with 10 degrees feature angle.
@@ -44,7 +44,7 @@ SourceFiles
 #ifndef shapeToCell_H
 #define shapeToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,7 +57,7 @@ namespace Foam
 
 class shapeToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -90,11 +90,7 @@ public:
     // Constructors
 
         //- Construct from components
-        shapeToCell
-        (
-            const polyMesh& mesh,
-            const word& shapeName
-        );
+        shapeToCell(const polyMesh& mesh, const word& shapeName);
 
         //- Construct from dictionary
         shapeToCell(const polyMesh& mesh, const dictionary& dict);
@@ -108,11 +104,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(boxToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, boxToCell, word);
     addToRunTimeSelectionTable(topoSetSource, boxToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, boxToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, boxToCell, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        boxToCell,
+        word,
+        box
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        boxToCell,
+        istream,
+        box
+    );
 }
 
 
@@ -73,8 +89,19 @@ Foam::boxToCell::boxToCell
     const treeBoundBoxList& bbs
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     bbs_(bbs)
+{}
+
+
+Foam::boxToCell::boxToCell
+(
+    const polyMesh& mesh,
+    treeBoundBoxList&& bbs
+)
+:
+    topoSetCellSource(mesh),
+    bbs_(std::move(bbs))
 {}
 
 
@@ -84,17 +111,14 @@ Foam::boxToCell::boxToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     bbs_()
 {
-    if (dict.found("box"))
+    // Look for 'boxes' or 'box'
+    if (!dict.readIfPresent("boxes", bbs_))
     {
         bbs_.resize(1);
         dict.readEntry("box", bbs_.first());
-    }
-    else
-    {
-        dict.readEntry("boxes", bbs_);
     }
 }
 
@@ -105,8 +129,8 @@ Foam::boxToCell::boxToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    bbs_(1, treeBoundBox(checkIs(is)))
+    topoSetCellSource(mesh),
+    bbs_(one(), treeBoundBox(checkIs(is)))
 {}
 
 
@@ -118,15 +142,23 @@ void Foam::boxToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells with center within boxes " << bbs_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells with centre within boxes "
+                << bbs_ << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells with center within boxes " << bbs_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells with centre within boxes "
+                << bbs_ << endl;
+        }
 
         combine(set, false);
     }

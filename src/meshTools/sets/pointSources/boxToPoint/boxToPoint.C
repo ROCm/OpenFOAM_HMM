@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(boxToPoint, 0);
     addToRunTimeSelectionTable(topoSetSource, boxToPoint, word);
     addToRunTimeSelectionTable(topoSetSource, boxToPoint, istream);
+    addToRunTimeSelectionTable(topoSetPointSource, boxToPoint, word);
+    addToRunTimeSelectionTable(topoSetPointSource, boxToPoint, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetPointSource,
+        boxToPoint,
+        word,
+        box
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetPointSource,
+        boxToPoint,
+        istream,
+        box
+    );
 }
 
 
@@ -73,8 +89,19 @@ Foam::boxToPoint::boxToPoint
     const treeBoundBoxList& bbs
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     bbs_(bbs)
+{}
+
+
+Foam::boxToPoint::boxToPoint
+(
+    const polyMesh& mesh,
+    treeBoundBoxList&& bbs
+)
+:
+    topoSetPointSource(mesh),
+    bbs_(std::move(bbs))
 {}
 
 
@@ -84,17 +111,14 @@ Foam::boxToPoint::boxToPoint
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     bbs_()
 {
-    if (dict.found("box"))
+    // Look for 'boxes' or 'box'
+    if (!dict.readIfPresent("boxes", bbs_))
     {
         bbs_.resize(1);
         dict.readEntry("box", bbs_.first());
-    }
-    else
-    {
-        dict.readEntry("boxes", bbs_);
     }
 }
 
@@ -105,8 +129,8 @@ Foam::boxToPoint::boxToPoint
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    bbs_(1, treeBoundBox(checkIs(is)))
+    topoSetPointSource(mesh),
+    bbs_(one(), treeBoundBox(checkIs(is)))
 {}
 
 
@@ -118,17 +142,23 @@ void Foam::boxToPoint::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding points that are within boxes " << bbs_ << " ..."
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding points that are within boxes " << bbs_
+                << " ..." << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing points that are within boxes " << bbs_ << " ..."
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing points that are within boxes " << bbs_
+                << " ..." << endl;
+        }
 
         combine(set, false);
     }

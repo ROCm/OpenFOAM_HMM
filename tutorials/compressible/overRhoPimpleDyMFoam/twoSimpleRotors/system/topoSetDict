@@ -59,7 +59,7 @@ actions
     {
         name    c1;
         type    cellSet;
-        action  delete;
+        action  subtract;
         source  cellToCell;
         sourceInfo
         {

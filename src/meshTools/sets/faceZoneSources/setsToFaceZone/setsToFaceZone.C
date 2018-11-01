@@ -106,26 +106,29 @@ void Foam::setsToFaceZone::applyToSet
     }
     else
     {
-        faceZoneSet& fzSet = refCast<faceZoneSet>(set);
+        faceZoneSet& zoneSet = refCast<faceZoneSet>(set);
 
-        if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+        if (action == topoSetSource::ADD || action == topoSetSource::NEW)
         {
-            Info<< "    Adding all faces from faceSet " << faceSetName_
-                << " ..." << endl;
+            if (verbose_)
+            {
+                Info<< "    Adding all faces from faceSet " << faceSetName_
+                    << " ..." << endl;
+            }
 
             // Load the sets
             faceSet fSet(mesh_, faceSetName_);
             cellSet cSet(mesh_, cellSetName_);
 
             // Start off from copy
-            DynamicList<label> newAddressing(fzSet.addressing());
-            DynamicList<bool> newFlipMap(fzSet.flipMap());
+            DynamicList<label> newAddressing(zoneSet.addressing());
+            DynamicList<bool> newFlipMap(zoneSet.flipMap());
 
             forAllConstIter(faceSet, fSet, iter)
             {
                 label facei = iter.key();
 
-                if (!fzSet.found(facei))
+                if (!zoneSet.found(facei))
                 {
                     bool flipFace = false;
 
@@ -176,33 +179,36 @@ void Foam::setsToFaceZone::applyToSet
                 }
             }
 
-            fzSet.addressing().transfer(newAddressing);
-            fzSet.flipMap().transfer(newFlipMap);
-            fzSet.updateSet();
+            zoneSet.addressing().transfer(newAddressing);
+            zoneSet.flipMap().transfer(newFlipMap);
+            zoneSet.updateSet();
         }
-        else if (action == topoSetSource::DELETE)
+        else if (action == topoSetSource::SUBTRACT)
         {
-            Info<< "    Removing all faces from faceSet " << faceSetName_
-                << " ..." << endl;
+            if (verbose_)
+            {
+                Info<< "    Removing all faces from faceSet " << faceSetName_
+                    << " ..." << endl;
+            }
 
             // Load the set
             faceZoneSet loadedSet(mesh_, faceSetName_);
 
             // Start off empty
-            DynamicList<label> newAddressing(fzSet.addressing().size());
-            DynamicList<bool> newFlipMap(fzSet.flipMap().size());
+            DynamicList<label> newAddressing(zoneSet.addressing().size());
+            DynamicList<bool> newFlipMap(zoneSet.flipMap().size());
 
-            forAll(fzSet.addressing(), i)
+            forAll(zoneSet.addressing(), i)
             {
-                if (!loadedSet.found(fzSet.addressing()[i]))
+                if (!loadedSet.found(zoneSet.addressing()[i]))
                 {
-                    newAddressing.append(fzSet.addressing()[i]);
-                    newFlipMap.append(fzSet.flipMap()[i]);
+                    newAddressing.append(zoneSet.addressing()[i]);
+                    newFlipMap.append(zoneSet.flipMap()[i]);
                 }
             }
-            fzSet.addressing().transfer(newAddressing);
-            fzSet.flipMap().transfer(newFlipMap);
-            fzSet.updateSet();
+            zoneSet.addressing().transfer(newAddressing);
+            zoneSet.flipMap().transfer(newFlipMap);
+            zoneSet.updateSet();
         }
     }
 }

@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(boundaryToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, boundaryToFace, word);
     addToRunTimeSelectionTable(topoSetSource, boundaryToFace, istream);
+    addToRunTimeSelectionTable(topoSetFaceSource, boundaryToFace, word);
+    addToRunTimeSelectionTable(topoSetFaceSource, boundaryToFace, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        boundaryToFace,
+        word,
+        boundary
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        boundaryToFace,
+        istream,
+        boundary
+    );
 }
 
 
@@ -65,7 +81,7 @@ void Foam::boundaryToFace::combine(topoSet& set, const bool add) const
 
 Foam::boundaryToFace::boundaryToFace(const polyMesh& mesh)
 :
-    topoSetSource(mesh)
+    topoSetFaceSource(mesh)
 {}
 
 
@@ -75,7 +91,7 @@ Foam::boundaryToFace::boundaryToFace
     const dictionary&
 )
 :
-    topoSetSource(mesh)
+    topoSetFaceSource(mesh)
 {}
 
 
@@ -85,7 +101,7 @@ Foam::boundaryToFace::boundaryToFace
     Istream&
 )
 :
-    topoSetSource(mesh)
+    topoSetFaceSource(mesh)
 {}
 
 
@@ -97,15 +113,21 @@ void Foam::boundaryToFace::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all boundary faces ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all boundary faces ..." << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all boundary faces ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all boundary faces ..." << endl;
+        }
 
         combine(set, false);
     }

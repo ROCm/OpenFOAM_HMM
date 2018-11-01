@@ -25,7 +25,7 @@ Class
     Foam::surfaceToPoint
 
 Description
-    A topoSetSource to selects points based on relation to surface.
+    A topoSetPointSource to select points based on relation to surface.
 
     Select based on:
     - distance to surface
@@ -51,7 +51,7 @@ SourceFiles
 #ifndef surfaceToPoint_H
 #define surfaceToPoint_H
 
-#include "topoSetSource.H"
+#include "topoSetPointSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,7 +67,7 @@ class triSurfaceSearch;
 
 class surfaceToPoint
 :
-    public topoSetSource
+    public topoSetPointSource
 {
 
     // Private data
@@ -128,11 +128,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return POINTSETSOURCE;
-        }
 
         virtual void applyToSet
         (

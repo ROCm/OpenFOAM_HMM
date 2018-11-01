@@ -24,7 +24,7 @@ actions
         source  patchToFace;
         sourceInfo
         {
-            name "side1";
+            patch   side1;
         }
     }
     {
@@ -57,13 +57,13 @@ actions
         source  patchToFace;
         sourceInfo
         {
-            name "walls";
+            patch   walls;
         }
     }
     {
         name    c0;
         type    cellSet;
-        action  delete;
+        action  subtract;
         source  faceToCell;
         sourceInfo
         {

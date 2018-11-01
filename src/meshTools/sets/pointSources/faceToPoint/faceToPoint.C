@@ -35,6 +35,8 @@ namespace Foam
     defineTypeNameAndDebug(faceToPoint, 0);
     addToRunTimeSelectionTable(topoSetSource, faceToPoint, word);
     addToRunTimeSelectionTable(topoSetSource, faceToPoint, istream);
+    addToRunTimeSelectionTable(topoSetPointSource, faceToPoint, word);
+    addToRunTimeSelectionTable(topoSetPointSource, faceToPoint, istream);
 }
 
 Foam::topoSetSource::addToUsageTable Foam::faceToPoint::usage_
@@ -84,7 +86,7 @@ Foam::faceToPoint::faceToPoint
     const faceAction option
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     setName_(setName),
     option_(option)
 {}
@@ -96,9 +98,12 @@ Foam::faceToPoint::faceToPoint
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    setName_(dict.get<word>("set")),
-    option_(faceActionNames_.get("option", dict))
+    faceToPoint
+    (
+        mesh,
+        dict.get<word>("set"),
+        faceActionNames_.get("option", dict)
+    )
 {}
 
 
@@ -108,7 +113,7 @@ Foam::faceToPoint::faceToPoint
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     setName_(checkIs(is)),
     option_(faceActionNames_.read(checkIs(is)))
 {}
@@ -122,17 +127,23 @@ void Foam::faceToPoint::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding points from face in faceSet " << setName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding points from face in faceSet " << setName_
+                << " ..." << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing points from face in faceSet " << setName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing points from face in faceSet " << setName_
+                << " ..." << endl;
+        }
 
         combine(set, false);
     }

@@ -27,7 +27,7 @@ actions
         source  patchToFace;
         sourceInfo
         {
-            name    couple1;
+            patch   couple1;
         }
     }
     {
@@ -49,7 +49,7 @@ actions
         source  patchToFace;
         sourceInfo
         {
-            name    couple2;
+            patch   couple2;
         }
     }
     {

@@ -34,6 +34,32 @@ namespace Foam
     defineTypeNameAndDebug(cylinderAnnulusToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, cylinderAnnulusToFace, word);
     addToRunTimeSelectionTable(topoSetSource, cylinderAnnulusToFace, istream);
+    addToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        cylinderAnnulusToFace,
+        word
+    );
+    addToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        cylinderAnnulusToFace,
+        istream
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        cylinderAnnulusToFace,
+        word,
+        cylinderAnnulus
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        cylinderAnnulusToFace,
+        istream,
+        cylinderAnnulus
+    );
 }
 
 
@@ -85,7 +111,7 @@ Foam::cylinderAnnulusToFace::cylinderAnnulusToFace
     const scalar innerRadius
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     point1_(point1),
     point2_(point2),
     outerRadius_(outerRadius),
@@ -99,11 +125,14 @@ Foam::cylinderAnnulusToFace::cylinderAnnulusToFace
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    point1_(dict.get<point>("p1")),
-    point2_(dict.get<point>("p2")),
-    outerRadius_(dict.get<scalar>("outerRadius")),
-    innerRadius_(dict.get<scalar>("innerRadius"))
+    cylinderAnnulusToFace
+    (
+        mesh,
+        dict.get<point>("p1"),
+        dict.get<point>("p2"),
+        dict.get<scalar>("outerRadius"),
+        dict.get<scalar>("innerRadius")
+    )
 {}
 
 
@@ -113,7 +142,7 @@ Foam::cylinderAnnulusToFace::cylinderAnnulusToFace
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     point1_(checkIs(is)),
     point2_(checkIs(is)),
     outerRadius_(readScalar(checkIs(is))),
@@ -129,23 +158,31 @@ void Foam::cylinderAnnulusToFace::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding faces with centre within cylinder annulus,"
-            << " with p1 = "
-            << point1_ << ", p2 = " << point2_ << ", radius = " << outerRadius_
-            << ", inner radius = " << innerRadius_
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding faces with centre within cylinder annulus,"
+                << " with p1 = "
+                << point1_ << ", p2 = " << point2_
+                << ", radius = " << outerRadius_
+                << ", inner radius = " << innerRadius_
+                << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing faces with centre within cylinder annulus,"
-            << " with p1 = "
-            << point1_ << ", p2 = " << point2_ << ", radius = " << outerRadius_
-            << ", inner radius = " << innerRadius_
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing faces with centre within cylinder annulus,"
+                << " with p1 = "
+                << point1_ << ", p2 = " << point2_
+                << ", radius = " << outerRadius_
+                << ", inner radius = " << innerRadius_
+                << endl;
+        }
 
         combine(set, false);
     }

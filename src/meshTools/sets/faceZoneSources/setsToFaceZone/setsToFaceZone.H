@@ -29,10 +29,10 @@ Description
 
     \heading Dictionary parameters
     \table
-        Property    | Description                       | Required  | Default
-        cellSet     | Name of input cellSet             | yes   |
-        faceSet     | Name of input faceSet             | yes   |
-        flip        | Force flip of faces               | no    | false
+        Property    | Description                           | Required | Default
+        cellSet     | Name of input cellSet                 | yes   |
+        faceSet     | Name of input faceSet                 | yes   |
+        flip        | Force flip of faces                   | no    | false
     \endtable
 
 SourceFiles

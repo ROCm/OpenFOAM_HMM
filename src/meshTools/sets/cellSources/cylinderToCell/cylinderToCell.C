@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(cylinderToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, cylinderToCell, word);
     addToRunTimeSelectionTable(topoSetSource, cylinderToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, cylinderToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, cylinderToCell, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        cylinderToCell,
+        word,
+        cylinder
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        cylinderToCell,
+        istream,
+        cylinder
+    );
 }
 
 
@@ -82,7 +98,7 @@ Foam::cylinderToCell::cylinderToCell
     const scalar radius
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     point1_(point1),
     point2_(point2),
     radius_(radius)
@@ -95,10 +111,13 @@ Foam::cylinderToCell::cylinderToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    point1_(dict.get<point>("p1")),
-    point2_(dict.get<point>("p2")),
-    radius_(dict.get<scalar>("radius"))
+    cylinderToCell
+    (
+        mesh,
+        dict.get<point>("p1"),
+        dict.get<point>("p2"),
+        dict.get<scalar>("radius")
+    )
 {}
 
 
@@ -108,7 +127,7 @@ Foam::cylinderToCell::cylinderToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     point1_(checkIs(is)),
     point2_(checkIs(is)),
     radius_(readScalar(checkIs(is)))
@@ -123,19 +142,25 @@ void Foam::cylinderToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells with centre within cylinder, with p1 = "
-            << point1_ << ", p2 = " << point2_ << ", radius = " << radius_
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells with centre within cylinder, with p1 = "
+                << point1_ << ", p2 = " << point2_ << ", radius = " << radius_
+                << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells with centre within cylinder, with p1 = "
-            << point1_ << ", p2 = " << point2_ << ", radius = " << radius_
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells with centre within cylinder, with p1 = "
+                << point1_ << ", p2 = " << point2_ << ", radius = " << radius_
+                << endl;
+        }
 
         combine(set, false);
     }

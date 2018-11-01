@@ -35,6 +35,22 @@ namespace Foam
     defineTypeNameAndDebug(nearestToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, nearestToCell, word);
     addToRunTimeSelectionTable(topoSetSource, nearestToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, nearestToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, nearestToCell, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        nearestToCell,
+        word,
+        nearest
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        nearestToCell,
+        istream,
+        nearest
+    );
 }
 
 
@@ -87,8 +103,19 @@ Foam::nearestToCell::nearestToCell
     const pointField& points
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     points_(points)
+{}
+
+
+Foam::nearestToCell::nearestToCell
+(
+    const polyMesh& mesh,
+    pointField&& points
+)
+:
+    topoSetCellSource(mesh),
+    points_(std::move(points))
 {}
 
 
@@ -98,8 +125,11 @@ Foam::nearestToCell::nearestToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    points_(dict.get<pointField>("points"))
+    nearestToCell
+    (
+        mesh,
+        dict.get<pointField>("points")
+    )
 {}
 
 
@@ -109,7 +139,7 @@ Foam::nearestToCell::nearestToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     points_(checkIs(is))
 {}
 
@@ -122,15 +152,21 @@ void Foam::nearestToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells nearest to " << points_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells nearest to " << points_ << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells nearest to " << points_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells nearest to " << points_ << endl;
+        }
 
         combine(set, false);
     }

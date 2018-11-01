@@ -25,7 +25,7 @@ Class
     Foam::faceToFace
 
 Description
-    A topoSetSource to select faces based on usage in another faceSet.
+    A topoSetFaceSource to select faces based on usage in another faceSet.
 
     \heading Dictionary parameters
     \table
@@ -41,7 +41,7 @@ SourceFiles
 #ifndef faceToFace_H
 #define faceToFace_H
 
-#include "topoSetSource.H"
+#include "topoSetFaceSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +54,7 @@ namespace Foam
 
 class faceToFace
 :
-    public topoSetSource
+    public topoSetFaceSource
 {
     // Private data
 
@@ -72,11 +72,7 @@ public:
     // Constructors
 
         //- Construct from components
-        faceToFace
-        (
-            const polyMesh& mesh,
-            const word& setName
-        );
+        faceToFace(const polyMesh& mesh, const word& setName);
 
         //- Construct from dictionary
         faceToFace(const polyMesh& mesh, const dictionary& dict);
@@ -90,11 +86,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return FACESETSOURCE;
-        }
 
         virtual void applyToSet
         (

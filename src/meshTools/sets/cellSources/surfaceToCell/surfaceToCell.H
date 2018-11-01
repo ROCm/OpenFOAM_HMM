@@ -25,7 +25,7 @@ Class
     Foam::surfaceToCell
 
 Description
-    A topoSetSource to select cells based on relation to surface.
+    A topoSetCellSource to select cells based on relation to surface.
 
     Selects:
     - all cells inside/outside/cut by surface
@@ -58,7 +58,7 @@ SourceFiles
 #ifndef surfaceToCell_H
 #define surfaceToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 #include "Map.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -74,7 +74,7 @@ class triSurface;
 
 class surfaceToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -208,11 +208,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

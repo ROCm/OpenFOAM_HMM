@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     (
         shapeSelector::shapeTypeNames.get("type", dict)
     );
-    const vector centre(dict.get<vector>("centre"));
+    const vector origin(dict.getCompat<vector>("origin", {{"centre", 1806}}));
     const word fieldName(dict.get<word>("field"));
 
     Info<< "Reading field " << fieldName << "\n" << endl;
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
         mesh
     );
 
-    scalar f0 = 0.0;
+    scalar f0 = 0;
     scalarField f(mesh.points().size());
 
     Info<< "Processing type '" << shapeSelector::shapeTypeNames[surfType]
@@ -126,15 +126,15 @@ int main(int argc, char *argv[])
         {
             const vector direction(dict.get<vector>("direction"));
 
-            f = -(mesh.points() - centre) & (direction/mag(direction));
-            f0 = 0.0;
+            f = -(mesh.points() - origin) & (direction/mag(direction));
+            f0 = 0;
             break;
         }
         case shapeSelector::shapeType::SPHERE:
         {
             const scalar radius(dict.get<scalar>("radius"));
 
-            f = -mag(mesh.points() - centre);
+            f = -mag(mesh.points() - origin);
             f0 = -radius;
             break;
         }
@@ -145,8 +145,8 @@ int main(int argc, char *argv[])
 
             f = -sqrt
             (
-                sqr(mag(mesh.points() - centre))
-              - sqr(mag((mesh.points() - centre) & direction))
+                sqr(mag(mesh.points() - origin))
+              - sqr(mag((mesh.points() - origin) & direction))
             );
             f0 = -radius;
             break;
@@ -160,9 +160,9 @@ int main(int argc, char *argv[])
 
             const scalarField xx
             (
-                (mesh.points() - centre) & direction/mag(direction)
+                (mesh.points() - origin) & direction/mag(direction)
             );
-            const scalarField zz((mesh.points() - centre) & up/mag(up));
+            const scalarField zz((mesh.points() - origin) & up/mag(up));
 
             f = amplitude*Foam::sin(2*mathematical::pi*xx/period) - zz;
             f0 = 0;

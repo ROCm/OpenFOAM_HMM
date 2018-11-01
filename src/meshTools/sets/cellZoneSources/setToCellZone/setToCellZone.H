@@ -72,17 +72,13 @@ public:
     // Constructors
 
         //- Construct from components
-        setToCellZone
-        (
-            const polyMesh& mesh,
-            const word& setName
-        );
+        setToCellZone(const polyMesh& mesh, const word& setName);
 
         //- Construct from dictionary
         setToCellZone(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        setToCellZone(const polyMesh& mesh, Istream& is );
+        setToCellZone(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor

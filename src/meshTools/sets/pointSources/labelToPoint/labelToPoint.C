@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(labelToPoint, 0);
     addToRunTimeSelectionTable(topoSetSource, labelToPoint, word);
     addToRunTimeSelectionTable(topoSetSource, labelToPoint, istream);
+    addToRunTimeSelectionTable(topoSetPointSource, labelToPoint, word);
+    addToRunTimeSelectionTable(topoSetPointSource, labelToPoint, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetPointSource,
+        labelToPoint,
+        word,
+        label
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetPointSource,
+        labelToPoint,
+        istream,
+        label
+    );
 }
 
 
@@ -53,8 +69,19 @@ Foam::labelToPoint::labelToPoint
     const labelList& labels
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     labels_(labels)
+{}
+
+
+Foam::labelToPoint::labelToPoint
+(
+    const polyMesh& mesh,
+    labelList&& labels
+)
+:
+    topoSetPointSource(mesh),
+    labels_(std::move(labels))
 {}
 
 
@@ -64,8 +91,7 @@ Foam::labelToPoint::labelToPoint
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    labels_(dict.get<labelList>("value"))
+    labelToPoint(mesh, dict.get<labelList>("value"))
 {}
 
 
@@ -75,7 +101,7 @@ Foam::labelToPoint::labelToPoint
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     labels_(checkIs(is))
 {
     check(labels_, mesh.nPoints());
@@ -90,15 +116,23 @@ void Foam::labelToPoint::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding points mentioned in dictionary" << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding points mentioned in dictionary"
+                << " ..." << endl;
+        }
 
         addOrDelete(set, labels_, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing points mentioned in dictionary" << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing points mentioned in dictionary"
+                << " ..." << endl;
+        }
 
         addOrDelete(set, labels_, false);
     }

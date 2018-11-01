@@ -35,6 +35,22 @@ namespace Foam
     defineTypeNameAndDebug(rotatedBoxToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, rotatedBoxToCell, word);
     addToRunTimeSelectionTable(topoSetSource, rotatedBoxToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, rotatedBoxToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, rotatedBoxToCell, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        rotatedBoxToCell,
+        word,
+        rotatedBox
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        rotatedBoxToCell,
+        istream,
+        rotatedBox
+    );
 }
 
 
@@ -117,7 +133,7 @@ Foam::rotatedBoxToCell::rotatedBoxToCell
     const vector& k
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     origin_(origin),
     i_(i),
     j_(j),
@@ -131,17 +147,20 @@ Foam::rotatedBoxToCell::rotatedBoxToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    origin_(dict.get<point>("origin")),
-    i_(dict.get<vector>("i")),
-    j_(dict.get<vector>("j")),
-    k_(dict.get<vector>("k"))
+    rotatedBoxToCell
+    (
+        mesh,
+        dict.get<point>("origin"),
+        dict.get<vector>("i"),
+        dict.get<vector>("j"),
+        dict.get<vector>("k")
+    )
 {}
 
 
 Foam::rotatedBoxToCell::rotatedBoxToCell(const polyMesh& mesh, Istream& is)
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     origin_(is),
     i_(is),
     j_(is),
@@ -157,15 +176,23 @@ void Foam::rotatedBoxToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells with center within rotated box " << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells with centre within rotated box"
+                << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells with center within rotated box " << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells with centre within rotated box"
+                << endl;
+        }
 
         combine(set, false);
     }
