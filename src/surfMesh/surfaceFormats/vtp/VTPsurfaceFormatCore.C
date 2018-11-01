@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,9 +25,37 @@ License
 
 #include "VTPsurfaceFormatCore.H"
 #include "clock.H"
-#include "foamVtkOutput.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+Foam::vtk::outputOptions
+Foam::fileFormats::VTPsurfaceFormatCore::formatOptions
+(
+    const dictionary& dict,
+    vtk::outputOptions opts
+)
+{
+    opts.legacy(false); // Non-legacy. Use VTKsurfaceFormat for legacy
+    opts.append(false); // No append format
+
+    const word formatName = dict.lookupOrDefault<word>("format", "");
+    if (formatName.size())
+    {
+        opts.ascii(IOstream::formatEnum(formatName) == IOstream::ASCII);
+    }
+
+    opts.precision
+    (
+        dict.lookupOrDefault
+        (
+            "precision",
+            IOstream::defaultPrecision()
+        )
+    );
+
+    return opts;
+}
+
 
 void Foam::fileFormats::VTPsurfaceFormatCore::writeHeader
 (

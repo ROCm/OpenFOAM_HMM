@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,15 @@ Class
     Foam::fileFormats::VTPsurfaceFormatCore
 
 Description
-    Internal class used by the VTPsurfaceFormat
+    Internal class used by the VTPsurfaceFormat.
+    The default format is INLINE_BASE64
+
+    \heading Output Options
+    \table
+        Property    | Description                       | Required | Default
+        format      | ascii or binary format            | no | binary
+        precision   | Write precision in ascii          | no | same as IOstream
+    \endtable
 
 SourceFiles
     VTPsurfaceFormatCore.C
@@ -35,9 +43,9 @@ SourceFiles
 #ifndef VTPsurfaceFormatCore_H
 #define VTPsurfaceFormatCore_H
 
-#include "foamVtkFormatter.H"
 #include "point.H"
 #include "surfZone.H"
+#include "foamVtkOutputOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,6 +63,13 @@ class VTPsurfaceFormatCore
 protected:
 
     // Protected Static Member Functions
+
+        //- Extract format options (default format INLINE_BASE64)
+        static vtk::outputOptions formatOptions
+        (
+            const dictionary& dict,
+            vtk::outputOptions opts = vtk::formatType::INLINE_BASE64
+        );
 
         //- Write header information with points
         static void writeHeader

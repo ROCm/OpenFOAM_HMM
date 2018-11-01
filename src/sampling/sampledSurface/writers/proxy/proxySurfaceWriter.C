@@ -45,6 +45,18 @@ Foam::proxySurfaceWriter::proxySurfaceWriter(const word& fileExt)
 {}
 
 
+Foam::proxySurfaceWriter::proxySurfaceWriter
+(
+    const word& fileExt,
+    const dictionary& options
+)
+:
+    surfaceWriter(),
+    fileExtension_(fileExt),
+    options_(options)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::fileName Foam::proxySurfaceWriter::write
@@ -73,8 +85,16 @@ Foam::fileName Foam::proxySurfaceWriter::write
         Info<< "Writing geometry to " << outputFile << endl;
     }
 
-    MeshedSurfaceProxy<face>(surf.points(), surf.faces())
-        .write(outputFile, fileExtension_);
+    MeshedSurfaceProxy<face>
+    (
+        surf.points(),
+        surf.faces()
+    ).write
+    (
+        outputFile,
+        fileExtension_,
+        options_
+    );
 
     return outputFile;
 }

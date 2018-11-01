@@ -64,15 +64,6 @@ class AC3DsurfaceFormat
     public MeshedSurface<Face>,
     public AC3DsurfaceFormatCore
 {
-    // Private Member Functions
-
-        //- No copy construct
-        AC3DsurfaceFormat(const AC3DsurfaceFormat<Face>&) = delete;
-
-        //- No copy assignment
-        void operator=(const AC3DsurfaceFormat<Face>&) = delete;
-
-
 public:
 
     // Constructors
@@ -109,7 +100,7 @@ public:
         //- Read from file
         virtual bool read(const fileName& filename);
 
-        //- Write object
+        //- Write surface mesh to file
         virtual void write
         (
             const fileName& name,

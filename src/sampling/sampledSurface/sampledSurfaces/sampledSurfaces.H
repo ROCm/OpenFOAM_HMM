@@ -53,7 +53,13 @@ Description
 
         // Output surface format
         surfaceFormat   vtk;
-        formatOptions   { }
+        formatOptions
+        {
+            vtk
+            {
+                precision  10;
+            }
+        }
 
         surfaces
         (

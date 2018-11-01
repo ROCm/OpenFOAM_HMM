@@ -54,46 +54,70 @@ namespace Foam
 Foam::autoPtr<Foam::surfaceWriter>
 Foam::surfaceWriter::New(const word& writeType)
 {
-    auto cstrIter = wordConstructorTablePtr_->cfind(writeType);
+    const auto cstrIter = wordConstructorTablePtr_->cfind(writeType);
 
-    if (!cstrIter.found())
+    if (cstrIter.found())
     {
-        if (MeshedSurfaceProxy<face>::canWriteType(writeType))
-        {
-            // generally unknown, but can be written via MeshedSurfaceProxy
-            // use 'proxy' handler instead
-            return autoPtr<surfaceWriter>(new proxySurfaceWriter(writeType));
-        }
-
-        if (!cstrIter.found())
-        {
-            FatalErrorInFunction
-                << "Unknown write type \"" << writeType << "\"\n\n"
-                << "Valid types : "
-                << wordConstructorTablePtr_->sortedToc() << nl
-                << "Valid proxy types : "
-                << MeshedSurfaceProxy<face>::writeTypes() << endl
-                << exit(FatalError);
-        }
+        return autoPtr<surfaceWriter>(cstrIter()());
+    }
+    else if (MeshedSurfaceProxy<face>::canWriteType(writeType))
+    {
+        // Unknown, but proxy handler can manage it
+        return autoPtr<surfaceWriter>(new proxySurfaceWriter(writeType));
     }
 
-    return autoPtr<surfaceWriter>(cstrIter()());
+    FatalErrorInFunction
+        << "Unknown write type \"" << writeType << "\"\n\n"
+        << "Valid types : "
+        << wordConstructorTablePtr_->sortedToc() << nl
+        << "Valid proxy types : "
+        << MeshedSurfaceProxy<face>::writeTypes() << endl
+        << exit(FatalError);
+
+    return nullptr;
 }
 
 
 Foam::autoPtr<Foam::surfaceWriter>
 Foam::surfaceWriter::New(const word& writeType, const dictionary& options)
 {
-    // Constructors with dictionary options
-    auto cstrIter = wordDictConstructorTablePtr_->cfind(writeType);
-
-    if (!cstrIter.found())
     {
-        // Revert to version without options
-        return Foam::surfaceWriter::New(writeType);
+        // Constructor with options (dictionary)
+        const auto cstrIter = wordDictConstructorTablePtr_->cfind(writeType);
+
+        if (cstrIter.found())
+        {
+            return autoPtr<surfaceWriter>(cstrIter()(options));
+        }
     }
 
-    return autoPtr<surfaceWriter>(cstrIter()(options));
+
+    // Drop through to version without options
+
+    const auto cstrIter = wordConstructorTablePtr_->cfind(writeType);
+
+    if (cstrIter.found())
+    {
+        return autoPtr<surfaceWriter>(cstrIter()());
+    }
+    else if (MeshedSurfaceProxy<face>::canWriteType(writeType))
+    {
+        // Unknown, but proxy handler can manage it
+        return autoPtr<surfaceWriter>
+        (
+            new proxySurfaceWriter(writeType, options)
+        );
+    }
+
+    FatalErrorInFunction
+        << "Unknown write type \"" << writeType << "\"\n\n"
+        << "Valid types : "
+        << wordConstructorTablePtr_->sortedToc() << nl
+        << "Valid proxy types : "
+        << MeshedSurfaceProxy<face>::writeTypes() << endl
+        << exit(FatalError);
+
+    return nullptr;
 }
 
 

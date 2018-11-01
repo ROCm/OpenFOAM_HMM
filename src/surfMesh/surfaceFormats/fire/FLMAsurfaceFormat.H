@@ -61,12 +61,6 @@ class FLMAsurfaceFormat
         static inline void writeShell(OSstream& os, const Face& f);
         static inline void writeType(OSstream& os, const Face& f);
 
-        //- No copy construct
-        FLMAsurfaceFormat(const FLMAsurfaceFormat<Face>&) = delete;
-
-        //- No copy assignment
-        void operator=(const FLMAsurfaceFormat<Face>&) = delete;
-
 
 protected:
 
@@ -114,7 +108,7 @@ public:
 
     // Member Functions
 
-        //- Write flma file
+        //- Write surface mesh as flma file
         virtual void write
         (
             const fileName& name,
@@ -136,15 +130,6 @@ class FLMAZsurfaceFormat
 :
     public FLMAsurfaceFormat<Face>
 {
-    // Private Member Functions
-
-        //- No copy construct
-        FLMAZsurfaceFormat(const FLMAZsurfaceFormat<Face>&) = delete;
-
-        //- No copy assignment
-        void operator=(const FLMAZsurfaceFormat<Face>&) = delete;
-
-
 public:
 
     // Constructors
@@ -170,7 +155,7 @@ public:
 
     // Member Functions
 
-        //- Write flmaz file
+        //- Write surface mesh as flmaz file
         virtual void write
         (
             const fileName& name,

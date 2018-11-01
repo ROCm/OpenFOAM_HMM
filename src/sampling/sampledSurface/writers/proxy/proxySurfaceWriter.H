@@ -40,6 +40,9 @@ Description
         `-- surfaceName.{obj|stl|..}
     \endverbatim
 
+Note
+    The formatOptions for proxy are file-type dependent.
+
 SourceFiles
     proxySurfaceWriter.C
 
@@ -63,11 +66,13 @@ class proxySurfaceWriter
 :
     public surfaceWriter
 {
-
     // Private data
 
         //- The file extension associated with the proxy
         word fileExtension_;
+
+        //- Format options
+        dictionary options_;
 
 
 public:
@@ -79,7 +84,10 @@ public:
     // Constructors
 
         //- Construct for a given extension
-        proxySurfaceWriter(const word& fileExt);
+        explicit proxySurfaceWriter(const word& fileExt);
+
+        //- Construct for a given extension, with some output options
+        proxySurfaceWriter(const word& fileExt, const dictionary& options);
 
 
     //- Destructor

@@ -73,12 +73,6 @@ class STARCDsurfaceFormat
             const label cellTableId
         );
 
-        //- No copy construct
-        STARCDsurfaceFormat(const STARCDsurfaceFormat<Face>&) = delete;
-
-        //- No copy assignment
-        void operator=(const STARCDsurfaceFormat<Face>&) = delete;
-
 
 public:
 
@@ -108,7 +102,7 @@ public:
         //- Read from file
         virtual bool read(const fileName& filename);
 
-        //- Write object
+        //- Write surface mesh to file
         virtual void write
         (
             const fileName& name,

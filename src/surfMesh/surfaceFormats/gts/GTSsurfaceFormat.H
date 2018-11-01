@@ -64,12 +64,6 @@ class GTSsurfaceFormat
         //  Triangulating on-the-fly is otherwise too annoying
         static bool checkIfTriangulated(const UList<Face>& faceLst);
 
-        //- No copy construct
-        GTSsurfaceFormat(const GTSsurfaceFormat<Face>&) = delete;
-
-        //- No copy assignment
-        void operator=(const GTSsurfaceFormat<Face>&) = delete;
-
 
 public:
 
@@ -107,7 +101,7 @@ public:
         //- Read from file
         virtual bool read(const fileName& filename);
 
-        //- Write object
+        //- Write surface mesh to file
         virtual void write
         (
             const fileName& name,

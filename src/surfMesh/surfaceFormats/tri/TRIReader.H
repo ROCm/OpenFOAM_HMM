@@ -78,12 +78,6 @@ class TRIReader
 
         bool readFile(const fileName& filename);
 
-        //- No copy construct
-        TRIReader(const TRIReader&) = delete;
-
-        //- No copy assignment
-        TRIReader& operator=(const TRIReader&) = delete;
-
 
 public:
 

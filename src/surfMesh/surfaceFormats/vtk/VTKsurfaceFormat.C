@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,20 +27,7 @@ License
 #include "vtkUnstructuredReader.H"
 #include "scalarIOField.H"
 #include "faceTraits.H"
-#include "OFstream.H"
-#include "foamVtkOutput.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-// File-scope constant.
-//
-// TODO: make this run-time selectable (ASCII | BINARY)
-// - Legacy mode only
-
-static const Foam::vtk::formatType fmtType =
-    Foam::vtk::formatType::LEGACY_ASCII;
-    // Foam::vtk::formatType::LEGACY_BINARY;
-
+#include <fstream>
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -278,10 +265,11 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
 
     const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
 
-    std::ofstream os(filename);
+    vtk::outputOptions opts = formatOptions(options);
 
-    autoPtr<vtk::formatter> format =
-        vtk::newFormatter(os, fmtType);
+    std::ofstream os(filename, std::ios::binary);
+
+    autoPtr<vtk::formatter> format = opts.newFormatter(os);
 
     writeHeader(format(), pointLst);
 
@@ -337,10 +325,11 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
     const dictionary& options
 )
 {
-    std::ofstream os(filename);
+    vtk::outputOptions opts = formatOptions(options);
 
-    autoPtr<vtk::formatter> format =
-        vtk::newFormatter(os, fmtType);
+    std::ofstream os(filename, std::ios::binary);
+
+    autoPtr<vtk::formatter> format = opts.newFormatter(os);
 
     writeHeader(format(), surf.points());
 

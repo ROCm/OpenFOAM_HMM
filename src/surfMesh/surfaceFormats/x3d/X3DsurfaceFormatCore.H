@@ -51,6 +51,7 @@ namespace fileFormats
 class X3DsurfaceFormatCore
 {
 protected:
+
     // Protected Member Functions
 
     //- Write file header

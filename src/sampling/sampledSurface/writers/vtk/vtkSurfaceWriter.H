@@ -142,7 +142,7 @@ public:
         vtkSurfaceWriter();
 
         //- Construct with some output options
-        vtkSurfaceWriter(const dictionary& options);
+        explicit vtkSurfaceWriter(const dictionary& options);
 
 
     //- Destructor
