@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 
 #include "foamVtkAsciiFormatter.H"
 #include "foamVtkOutputOptions.H"
+#include <limits>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -139,8 +140,20 @@ void Foam::vtk::asciiFormatter::write(const float val)
 
 void Foam::vtk::asciiFormatter::write(const double val)
 {
-    next();
-    os()<< float(val);
+    // Limit range of double to float conversion
+    if (val >= std::numeric_limits<float>::max())
+    {
+        write(std::numeric_limits<float>::max());
+    }
+    else if (val <= std::numeric_limits<float>::lowest())
+    {
+        write(std::numeric_limits<float>::lowest());
+    }
+    else
+    {
+        float copy(val);
+        write(copy);
+    }
 }
 
 

@@ -85,6 +85,12 @@ SourceFiles
 namespace Foam
 {
 
+namespace vtk
+{
+// Forward declarations
+class formatter;
+}
+
 /*---------------------------------------------------------------------------*\
                       Class vtkSurfaceWriter Declaration
 \*---------------------------------------------------------------------------*/
@@ -107,13 +113,17 @@ class vtkSurfaceWriter
 
         static void writeGeometry
         (
-            Ostream& os,
+            vtk::formatter& format,
             const meshedSurf& surf,
             std::string title = ""
         );
 
         template<class Type>
-        static void writeData(Ostream&, const Field<Type>&);
+        static void writeField
+        (
+            vtk::formatter& format,
+            const Field<Type>& values
+        );
 
 
         //- Templated write operation

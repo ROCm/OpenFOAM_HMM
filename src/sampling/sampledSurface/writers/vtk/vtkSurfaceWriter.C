@@ -25,9 +25,8 @@ License
 
 #include "vtkSurfaceWriter.H"
 #include "foamVtkOutputOptions.H"
-
-#include "OFstream.H"
 #include "OSspecific.H"
+#include <fstream>
 #include "makeSurfaceWriterMethods.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -49,7 +48,7 @@ defineSurfaceWriterWriteFields(Foam::vtkSurfaceWriter);
 
 void Foam::vtkSurfaceWriter::writeGeometry
 (
-    Ostream& os,
+    vtk::formatter& format,
     const meshedSurf& surf,
     std::string title
 )
@@ -62,153 +61,40 @@ void Foam::vtkSurfaceWriter::writeGeometry
         title = "sampleSurface";
     }
 
-    // header
-    os
-        << "# vtk DataFile Version 2.0" << nl
-        << title.c_str() << nl
-        << "ASCII" << nl
-        << "DATASET POLYDATA" << nl;
+    vtk::legacy::fileHeader
+    (
+        format,
+        title,
+        vtk::fileTag::POLY_DATA
+    );
 
-    // Write vertex coords
-    os  << "POINTS " << points.size() << " double" << nl;
-    for (const point& pt : points)
-    {
-        os  << float(pt.x()) << ' '
-            << float(pt.y()) << ' '
-            << float(pt.z()) << nl;
-    }
-    os  << nl;
+    vtk::legacy::beginPoints(format.os(), points.size());
 
+    vtk::writeList(format, points);
+    format.flush();
 
     // Write faces
-    label nNodes = 0;
+    // connectivity count without additional storage (done internally)
+    label nConnectivity = 0;
     for (const face& f : faces)
     {
-        nNodes += f.size();
+        nConnectivity += f.size();
     }
 
-    os  << "POLYGONS " << faces.size() << ' '
-        << faces.size() + nNodes << nl;
+    vtk::legacy::beginPolys
+    (
+        format.os(),
+        faces.size(),
+        nConnectivity
+    );
 
     for (const face& f : faces)
     {
-        os  << f.size();
-        for (const label verti : f)
-        {
-            os  << ' ' << verti;
-        }
-        os  << nl;
-    }
-}
-
-
-namespace Foam
-{
-
-    template<>
-    void Foam::vtkSurfaceWriter::writeData
-    (
-        Ostream& os,
-        const Field<scalar>& values
-    )
-    {
-        os  << "1 " << values.size() << " double" << nl;
-
-        forAll(values, elemI)
-        {
-            if (elemI)
-            {
-                if (elemI % 10)
-                {
-                    os  << ' ';
-                }
-                else
-                {
-                    os  << nl;
-                }
-            }
-
-            os  << float(values[elemI]);
-        }
-        os  << nl;
+        format.write(f.size());  // The size prefix
+        vtk::writeList(format, f);
     }
 
-
-    template<>
-    void Foam::vtkSurfaceWriter::writeData
-    (
-        Ostream& os,
-        const Field<vector>& values
-    )
-    {
-        os  << "3 " << values.size() << " double" << nl;
-
-        for (const vector& v : values)
-        {
-            os  << float(v[0]) << ' '
-                << float(v[1]) << ' '
-                << float(v[2]) << nl;
-        }
-    }
-
-
-    template<>
-    void Foam::vtkSurfaceWriter::writeData
-    (
-        Ostream& os,
-        const Field<sphericalTensor>& values
-    )
-    {
-        os  << "1 " << values.size() << " double" << nl;
-
-        for (const sphericalTensor& v : values)
-        {
-            os  << float(v[0]) << nl;
-        }
-    }
-
-
-    template<>
-    void Foam::vtkSurfaceWriter::writeData
-    (
-        Ostream& os,
-        const Field<symmTensor>& values
-    )
-    {
-        os  << "6 " << values.size() << " double" << nl;
-
-        // symmTensor ( XX, XY, XZ, YY, YZ, ZZ )
-        // VTK order  ( XX, YY, ZZ, XY, YZ, XZ ) -> (0, 3, 5, 1, 4, 2)
-
-        for (const symmTensor& v : values)
-        {
-            os  << float(v[0]) << ' ' << float(v[3]) << ' ' << float(v[5])
-                << ' '
-                << float(v[1]) << ' ' << float(v[4]) << ' ' << float(v[2])
-                << nl;
-        }
-    }
-
-
-    template<>
-    void Foam::vtkSurfaceWriter::writeData
-    (
-        Ostream& os,
-        const Field<tensor>& values
-    )
-    {
-        os  << "9 " << values.size() << " double" << nl;
-
-        for (const tensor& v : values)
-        {
-            os  << float(v[0]) << ' ' << float(v[1]) << ' ' << float(v[2])
-                << ' '
-                << float(v[3]) << ' ' << float(v[4]) << ' ' << float(v[5])
-                << ' '
-                << float(v[6]) << ' ' << float(v[7]) << ' ' << float(v[8])
-                << nl;
-        }
-    }
+    format.flush();
 }
 
 
@@ -235,11 +121,14 @@ Foam::vtkSurfaceWriter::vtkSurfaceWriter(const dictionary& options)
 
     vtk::outputOptions opts(static_cast<vtk::formatType>(fmtType_));
 
-    opts.ascii
-    (
-        options.found("format")
-     && (IOstream::formatEnum(options.get<word>("format")) == IOstream::ASCII)
-    );
+    const word formatName = options.lookupOrDefault<word>("format", "");
+    if (formatName.size())
+    {
+        opts.ascii
+        (
+            IOstream::formatEnum(formatName) == IOstream::ASCII
+        );
+    }
 
     if (options.lookupOrDefault("legacy", false))
     {
@@ -272,22 +161,29 @@ Foam::fileName Foam::vtkSurfaceWriter::write
 {
     // geometry:  rootdir/time/surfaceName.{vtk|vtp}
 
+    fileName outputFile(outputDir/surfaceName + ".vtk");
+
     if (!isDir(outputDir))
     {
         mkDir(outputDir);
     }
-
-    OFstream os(outputDir/surfaceName + ".vtk");
-    os.precision(precision_);
-
     if (verbose)
     {
-        Info<< "Writing geometry to " << os.name() << endl;
+        Info<< "Writing geometry to " << outputFile << endl;
     }
 
-    writeGeometry(os, surf, surfaceName);
+    // As vtk::outputOptions
+    vtk::outputOptions opts(static_cast<vtk::formatType>(fmtType_));
+    opts.legacy(true);
+    opts.precision(precision_);
 
-    return os.name();
+    std::ofstream os(outputFile);
+
+    auto format = opts.newFormatter(os);
+
+    writeGeometry(*format, surf, surfaceName);
+
+    return outputFile;
 }
 
 

@@ -23,28 +23,69 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "OFstream.H"
+#include "foamVtkOutputOptions.H"
 #include "OSspecific.H"
+#include <fstream>
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    template<class Type>
+    static inline void beginFloatField
+    (
+        vtk::formatter& format,
+        const word& fieldName,
+        const Field<Type>& values
+    )
+    {
+        // Use 'double' instead of 'float' for ASCII output (issue #891)
+        if (format.opts().ascii())
+        {
+            format.os()
+                << fieldName << ' '
+                << int(pTraits<Type>::nComponents) << ' '
+                << values.size() << " double" << nl;
+        }
+        else
+        {
+            format.os()
+                << fieldName << ' '
+                << int(pTraits<Type>::nComponents) << ' '
+                << values.size() << " float" << nl;
+        }
+    }
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+// // Unspecialized (unknown) data type - map as zeros
+// void Foam::vtkSurfaceWriter::writeZeros
+// (
+//     vtk::formatter& format,
+//     const label count
+// )
+// {
+//     const float val(0);
+//
+//     for (label i=0; i < count; ++i)
+//     {
+//         format.write(val);
+//     }
+//     format.flush();
+// }
+
+
 template<class Type>
-void Foam::vtkSurfaceWriter::writeData
+void Foam::vtkSurfaceWriter::writeField
 (
-    Ostream& os,
+    vtk::formatter& format,
     const Field<Type>& values
 )
 {
-    // Unspecialized (unknown) data type - map as zeros
-
-    const label len = values.size();
-
-    os  << "1 " << len << " double" << nl;
-
-    for (label i=0; i < len; ++i)
-    {
-        os  << float(0) << nl;
-    }
+    vtk::writeList(format, values);
+    format.flush();
 }
 
 
@@ -62,39 +103,48 @@ Foam::fileName Foam::vtkSurfaceWriter::writeTemplate
 {
     // field:  rootdir/time/<field>_surfaceName.{vtk|vtp}
 
+    fileName outputFile(outputDir/fieldName + '_' + surfaceName + ".vtk");
+
     if (!isDir(outputDir))
     {
         mkDir(outputDir);
     }
-
-    OFstream os(outputDir/fieldName + '_' + surfaceName + ".vtk");
-    os.precision(precision_);
-
     if (verbose)
     {
-        Info<< "Writing field " << fieldName << " to " << os.name() << endl;
+        Info<< "Writing field " << fieldName << " to "
+            << outputFile << endl;
     }
 
-    writeGeometry(os, surf);
+    // As vtk::outputOptions
+    vtk::outputOptions opts(static_cast<vtk::formatType>(fmtType_));
+    opts.legacy(true);
+    opts.precision(precision_);
 
-    // start writing data
+    std::ofstream os(outputFile);
+
+    auto format = opts.newFormatter(os);
+
+    writeGeometry(*format, surf);
+
     if (isNodeValues)
     {
-        os  << "POINT_DATA ";
+        format->os()
+            << "POINT_DATA "
+            << values.size() << nl
+            << "FIELD attributes 1" << nl;
     }
     else
     {
-        os  << "CELL_DATA ";
+        format->os()
+            << "CELL_DATA "
+            << values.size() << nl
+            << "FIELD attributes 1" << nl;
     }
 
-    os  << values.size() << nl
-        << "FIELD attributes 1" << nl
-        << fieldName << " ";
+    beginFloatField(*format, fieldName, values);
+    writeField(*format, values);
 
-    // Write data
-    writeData(os, values);
-
-    return os.name();
+    return outputFile;
 }
 
 
