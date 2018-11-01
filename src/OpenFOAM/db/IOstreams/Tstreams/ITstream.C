@@ -208,12 +208,9 @@ Foam::Istream& Foam::ITstream::read(token& tok)
     {
         if (eof())
         {
-            FatalIOErrorInFunction
-            (
-                *this
-            )   << "attempt to read beyond EOF"
+            FatalIOErrorInFunction(*this)
+                << "attempt to read beyond EOF"
                 << exit(FatalIOError);
-
             setBad();
         }
         else

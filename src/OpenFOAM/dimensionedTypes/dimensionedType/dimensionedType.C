@@ -54,13 +54,11 @@ void Foam::dimensioned<Type>::initialize(Istream& is)
 
         if (dims != dimensions_)
         {
-            FatalIOErrorInFunction
-            (
-                is
-            ) << "The dimensions " << dims
-              << " provided do not match the required dimensions "
-              << dimensions_
-              << abort(FatalIOError);
+            FatalIOErrorInFunction(is)
+                << "The dimensions " << dims
+                << " provided do not match the required dimensions "
+                << dimensions_
+                << abort(FatalIOError);
         }
     }
 

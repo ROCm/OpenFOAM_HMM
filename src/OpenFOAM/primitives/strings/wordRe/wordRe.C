@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,43 +45,45 @@ Foam::wordRe::wordRe(Istream& is)
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, wordRe& w)
+Foam::Istream& Foam::operator>>(Istream& is, wordRe& val)
 {
     token t(is);
 
     if (!t.good())
     {
+        FatalIOErrorInFunction(is)
+            << "Bad token - could not get wordRe"
+            << exit(FatalIOError);
         is.setBad();
         return is;
     }
 
     if (t.isWord())
     {
-        w = t.wordToken();
+        val = t.wordToken();
     }
     else if (t.isString())
     {
-        // Auto-tests for regular expression
-        w = t.stringToken();
+        // Auto-detects regex
+        val = t.stringToken();
 
-        // flag empty strings as an error
-        if (w.empty())
+        // Flag empty strings as an error
+        if (val.empty())
         {
-            is.setBad();
             FatalIOErrorInFunction(is)
-                << "empty word/expression "
+                << "Empty word/expression"
                 << exit(FatalIOError);
+            is.setBad();
             return is;
         }
     }
     else
     {
-        is.setBad();
         FatalIOErrorInFunction(is)
-            << "wrong token type - expected word or string, found "
+            << "Wrong token type - expected word or string, found "
             << t.info()
             << exit(FatalIOError);
-
+        is.setBad();
         return is;
     }
 

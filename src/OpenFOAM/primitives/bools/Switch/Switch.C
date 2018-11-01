@@ -161,6 +161,9 @@ Foam::Istream& Foam::operator>>(Istream& is, Switch& sw)
 
     if (!t.good())
     {
+        FatalIOErrorInFunction(is)
+            << "Bad token - could not get bool"
+            << exit(FatalIOError);
         is.setBad();
         return is;
     }
@@ -171,26 +174,26 @@ Foam::Istream& Foam::operator>>(Istream& is, Switch& sw)
     }
     else if (t.isWord())
     {
-        // Allow reading invalid value, but report immediately
+        // Permit invalid value, but catch immediately for better messages
         sw = Switch(t.wordToken(), true);
 
         if (!sw.valid())
         {
-            is.setBad();
             FatalIOErrorInFunction(is)
-                << "expected 'true/false', 'on/off' ... found " << t.wordToken()
+                << "Expected 'true/false', 'on/off' ... found "
+                << t.wordToken()
                 << exit(FatalIOError);
-
+            is.setBad();
             return is;
         }
     }
     else
     {
-        is.setBad();
         FatalIOErrorInFunction(is)
-            << "wrong token type - expected bool, found " << t
+            << "Wrong token type - expected bool, found "
+            << t.info()
             << exit(FatalIOError);
-
+        is.setBad();
         return is;
     }
 

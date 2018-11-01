@@ -80,6 +80,9 @@ Foam::Istream& Foam::operator>>(Istream& is, int64_t& val)
 
     if (!t.good())
     {
+        FatalIOErrorInFunction(is)
+            << "Bad token - could not get int64"
+            << exit(FatalIOError);
         is.setBad();
         return is;
     }
@@ -90,11 +93,11 @@ Foam::Istream& Foam::operator>>(Istream& is, int64_t& val)
     }
     else
     {
-        is.setBad();
         FatalIOErrorInFunction(is)
-            << "wrong token type - expected int64_t, found " << t.info()
+            << "Wrong token type - expected label (int64), found "
+            << t.info()
             << exit(FatalIOError);
-
+        is.setBad();
         return is;
     }
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,44 +58,46 @@ bool Foam::keyType::match(const std::string& text, bool literal) const
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, keyType& kw)
+Foam::Istream& Foam::operator>>(Istream& is, keyType& val)
 {
     token t(is);
 
     if (!t.good())
     {
+        FatalIOErrorInFunction(is)
+            << "Bad token - could not get a word/regex"
+            << exit(FatalIOError);
         is.setBad();
         return is;
     }
 
     if (t.isWord())
     {
-        kw = t.wordToken();
+        val = t.wordToken();
     }
     else if (t.isString())
     {
-        // Assign from string. Set as regular expression.
-        kw = t.stringToken();
-        kw.isPattern_ = true;
+        // Assign from string, treat as regular expression
+        val = t.stringToken();
+        val.isPattern_ = true;
 
-        // flag empty strings as an error
-        if (kw.empty())
+        // Flag empty strings as an error
+        if (val.empty())
         {
-            is.setBad();
             FatalIOErrorInFunction(is)
-                << "empty word/expression "
+                << "Empty word/expression"
                 << exit(FatalIOError);
+            is.setBad();
             return is;
         }
     }
     else
     {
-        is.setBad();
         FatalIOErrorInFunction(is)
-            << "wrong token type - expected word or string, found "
+            << "Wrong token type - expected word or string, found "
             << t.info()
             << exit(FatalIOError);
-
+        is.setBad();
         return is;
     }
 

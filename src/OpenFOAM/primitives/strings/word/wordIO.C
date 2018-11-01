@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,46 +36,47 @@ Foam::word::word(Istream& is)
 }
 
 
-Foam::Istream& Foam::operator>>(Istream& is, word& w)
+Foam::Istream& Foam::operator>>(Istream& is, word& val)
 {
     token t(is);
 
     if (!t.good())
     {
+        FatalIOErrorInFunction(is)
+            << "Bad token - could not get word"
+            << exit(FatalIOError);
         is.setBad();
         return is;
     }
 
     if (t.isWord())
     {
-        w = t.wordToken();
+        val = t.wordToken();
     }
     else if (t.isString())
     {
         // Try a bit harder and convert string to word
-        w = t.stringToken();
-        string::stripInvalid<word>(w);
+        val = t.stringToken();
+        string::stripInvalid<word>(val);
 
         // Flag empty strings and bad chars as an error
-        if (w.empty() || w.size() != t.stringToken().size())
+        if (val.empty() || val.size() != t.stringToken().size())
         {
-            is.setBad();
             FatalIOErrorInFunction(is)
-                << "wrong token type - expected word,"
-                " found non-word characters "
+                << "Empty word or non-word characters "
                 << t.info()
                 << exit(FatalIOError);
+            is.setBad();
             return is;
         }
     }
     else
     {
-        is.setBad();
         FatalIOErrorInFunction(is)
-            << "wrong token type - expected word, found "
+            << "Wrong token type - expected word, found "
             << t.info()
             << exit(FatalIOError);
-
+        is.setBad();
         return is;
     }
 
