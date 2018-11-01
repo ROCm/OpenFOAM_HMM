@@ -120,10 +120,10 @@ Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
     {
         const face& f = mesh_.faces()[facei];
 
-        // Check pyramids cut
-        for (const label labi : f)
+        // Check pyramid edges (corner point to cell centre)
+        for (const label pointi : f)
         {
-            if (cellLower != (pointValues[labi] < iso_))
+            if (cellLower != (pointValues[pointi] < iso_))
             {
                 edgeCut = true;
                 break;
@@ -135,6 +135,7 @@ Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
             break;
         }
 
+        // Check (triangulated) face edges
         const label fp0 = mesh_.tetBasePtIs()[facei];
         label fp = f.fcIndex(fp0);
         for (label i = 2; i < f.size(); ++i)
@@ -165,23 +166,23 @@ Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
 
         const labelList& cPoints = mesh_.cellPoints(celli);
 
-        label nCuts = 0;
+        label nPyrEdgeCuts = 0;
 
         for (const label pointi : cPoints)
         {
             if (cellLower != (pointValues[pointi] < iso_))
             {
-                ++nCuts;
+                ++nPyrEdgeCuts;
             }
         }
 
-        if (nCuts == cPoints.size())
+        if (nPyrEdgeCuts == cPoints.size())
         {
             return SPHERE;
         }
-        else if (nCuts > 1)
+        else if (nPyrEdgeCuts)
         {
-            // Need at least two edge cuts, otherwise this is a spurious cut
+            // There is a pyramid edge cut. E.g. lopping off a tet from a corner
             return CUT;
         }
     }
