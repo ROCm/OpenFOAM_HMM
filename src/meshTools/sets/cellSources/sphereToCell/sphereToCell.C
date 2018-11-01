@@ -103,7 +103,7 @@ Foam::sphereToCell::sphereToCell
     sphereToCell
     (
         mesh,
-        dict.getCompat<vector>("origin", {{"centre", 1806}}),
+        dict.getCompat<vector>("origin", {{"centre", -1806}}),
         dict.get<scalar>("radius")
     )
 {}
