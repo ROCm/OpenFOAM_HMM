@@ -23,7 +23,7 @@ constraints
     //- Keep owner and neighbour on same processor for faces in zones:
     faces
     {
-        type    preserveFaceZones,
+        type    preserveFaceZones;
         zones   (cycLeft cycRight);
     }
 }
