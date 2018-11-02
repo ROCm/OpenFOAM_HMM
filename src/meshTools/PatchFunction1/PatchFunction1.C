@@ -135,10 +135,8 @@ Foam::PatchFunction1<Type>::localPosition(const pointField& globalPos) const
     {
         return globalPos;
     }
-    else
-    {
-        return coordSys_.coordSys()().localPosition(globalPos);
-    }
+
+    return coordSys_.coordSys()().localPosition(globalPos);
 }
 
 
@@ -153,13 +151,13 @@ Foam::tmp<Foam::Field<Type>> Foam::PatchFunction1<Type>::transform
         return tfld;
     }
 
-    const pointField& fc =
+    tmp<Field<Type>> tresult =
     (
         faceValues_
-      ? this->patch_.faceCentres()
-      : this->patch_.localPoints()
+      ? this->coordSys_.transform(this->patch_.faceCentres(), tfld())
+      : this->coordSys_.transform(this->patch_.localPoints(), tfld())
     );
-    auto tresult = this->coordSys_.transform(fc, tfld());
+
     tfld.clear();
     return tresult;
 }
@@ -176,13 +174,14 @@ Foam::tmp<Foam::Field<Type>> Foam::PatchFunction1<Type>::transform
         return fld;
     }
 
-    const pointField& fc =
-    (
-        faceValues_
-      ? this->patch_.faceCentres()
-      : this->patch_.localPoints()
-    );
-    return this->coordSys_.transform(fc, fld);
+    if (faceValues_)
+    {
+        return this->coordSys_.transform(this->patch_.faceCentres(), fld);
+    }
+    else
+    {
+        return this->coordSys_.transform(this->patch_.localPoints(), fld);
+    }
 }
 
 
