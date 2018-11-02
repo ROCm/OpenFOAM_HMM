@@ -142,7 +142,7 @@ protected:
 
     // Protected data
 
-        label  startTimeIndex_;
+        label startTimeIndex_;
 
         scalar startTime_;
 
@@ -154,7 +154,7 @@ protected:
 
         scalar writeInterval_;
 
-        label  purgeWrite_;
+        label purgeWrite_;
 
         mutable FIFOStack<word> previousWriteTimes_;
 
