@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -264,214 +264,163 @@ void Foam::functionObjects::extractEulerianParticles::setBlockedFaces
 }
 
 
-void Foam::functionObjects::extractEulerianParticles::collectParticles
+void Foam::functionObjects::extractEulerianParticles::collectParticle
 (
     const scalar time,
-    const boolList& collectParticle
+    const label regioni
 )
 {
-    DebugInFunction << "collectParticle: " << collectParticle << endl;
+    DebugInFunction << "collectParticle: " << regioni << endl;
 
-    // Collect particles on local processors that have passed through faceZone
-    forAll(collectParticle, regioni)
+    const label particlei = regionToParticleMap_[regioni];
+    eulerianParticle p = particles_[particlei];
+
+    if (p.faceIHit != -1 && nInjectorLocations_)
     {
-        if (!collectParticle[regioni])
+        // Use coarse face index for tag output
+        label coarseFacei = fineToCoarseAddr_[p.faceIHit];
+        p.faceIHit = globalCoarseFaces_.toGlobal(coarseFacei);
+    }
+
+    reduce(p, sumParticleOp<eulerianParticle>());
+
+    const scalar pDiameter = cbrt(6.0*p.V/constant::mathematical::pi);
+
+    if ((pDiameter > minDiameter_) && (pDiameter < maxDiameter_))
+    {
+        if (Pstream::master())
         {
-            continue;
-        }
-
-        Map<label>::const_iterator iter = regionToParticleMap_.find(regioni);
-        eulerianParticle p = particles_[iter()];
-
-        if (p.faceIHit != -1 && nInjectorLocations_)
-        {
-            // Use coarse face index for tag output
-            label coarseFacei = fineToCoarseAddr_[p.faceIHit];
-            p.faceIHit = globalCoarseFaces_.toGlobal(coarseFacei);
-        }
-
-        reduce(p, sumParticleOp<eulerianParticle>());
-
-        const scalar pDiameter = cbrt(6.0*p.V/constant::mathematical::pi);
-
-        if ((pDiameter > minDiameter_) && (pDiameter < maxDiameter_))
-        {
-            if (Pstream::master())
+            const scalar d = cbrt(6*p.V/constant::mathematical::pi);
+            const point position = p.VC/(p.V + ROOTVSMALL);
+            const vector U = p.VU/(p.V + ROOTVSMALL);
+            label tag = -1;
+            if (nInjectorLocations_)
             {
-                const scalar d = cbrt(6*p.V/constant::mathematical::pi);
-                const point position = p.VC/(p.V + ROOTVSMALL);
-                const vector U = p.VU/(p.V + ROOTVSMALL);
-                label tag = -1;
-                if (nInjectorLocations_)
-                {
-                    tag = p.faceIHit;
-                }
-
-                injectedParticle* ip = new injectedParticle
-                (
-                    mesh_,
-                    position,
-                    tag,
-                    time,
-                    d,
-                    U,
-                    false // not looking to set cell owner etc.
-                );
-
-                cloud_.addParticle(ip);
+                tag = p.faceIHit;
             }
 
-            nCollectedParticles_++;
+            injectedParticle* ip = new injectedParticle
+            (
+                mesh_,
+                position,
+                tag,
+                time,
+                d,
+                U,
+                false // not looking to set cell owner etc.
+            );
+
+            cloud_.addParticle(ip);
+
+            collectedVolume_ += p.V;
         }
-        else
-        {
-            // Discard particles over/under diameter threshold
-            nDiscardedParticles_++;
-            discardedVolume_ += p.V;
-        }
+
+        ++nCollectedParticles_;
+    }
+    else
+    {
+        // Discard particles over/under diameter threshold
+        ++nDiscardedParticles_;
+        discardedVolume_ += p.V;
     }
 }
 
 
 void Foam::functionObjects::extractEulerianParticles::calculateAddressing
 (
-    const label nRegionsOld,
-    const label nRegionsNew,
+    const label nNewRegions,
     const scalar time,
     labelList& regionFaceIDs
 )
 {
     DebugInFunction << endl;
 
-    // New region can only point to one old region
-    // Old region can only point to one new region.  If old region intersects
-    // multiple new regions, select max of new region indices.
-
-    labelList oldToNewRegion(nRegionsOld, -1);
-    labelList newToOldRegion(nRegionsNew, -1);
+    // Determine mapping between old and new regions so that we can
+    // accumulate particle info
+    labelList oldToNewRegion(particles_.size(), -1);
+    labelList newToNewRegion(identity(nNewRegions));
 
     forAll(regionFaceIDs, facei)
     {
         label newRegioni = regionFaceIDs[facei];
         label oldRegioni = regions0_[facei];
 
-        if (newRegioni != -1)
+        if (newRegioni != -1 && oldRegioni != -1)
         {
-            newToOldRegion[newRegioni] = oldRegioni;
-
-            if (oldRegioni != -1)
-            {
-                // New region linked to old (so can accumulate particle data)
-                // Old region might already be mapped to a new region
-                oldToNewRegion[oldRegioni] =
-                    max(newRegioni, oldToNewRegion[oldRegioni]);
-            }
+            // If old region has split into multiple regions we need to
+            // renumber new regions to maintain connectivity with old regions
+            newToNewRegion[newRegioni] =
+                max(newRegioni, oldToNewRegion[oldRegioni]);
+            oldToNewRegion[oldRegioni] = newRegioni;
         }
     }
 
-    // Need to re-number the new region indices based on knowledge of which
-    // old region they intersect.  After operations, there should be a
-    // one-to-one match between the old and new regions.
+    // Create map from new regions to slots in particles list
+    // - filter through new-to-new addressing to identify new particles
+    Pstream::listCombineGather(newToNewRegion, maxEqOp<label>());
+    Pstream::listCombineScatter(newToNewRegion);
 
-    // Ensure all old regions point to the same new regions (if present)
+    label nParticle = -1;
+    labelHashSet newRegions;
+    Map<label> newRegionToParticleMap;
+    forAll(newToNewRegion, newRegioni0)
+    {
+        label newRegioni = newToNewRegion[newRegioni0];
+        if (newRegions.insert(newRegioni))
+        {
+            ++nParticle;
+        }
+
+        // New particle slot
+        newRegionToParticleMap.insert(newRegioni0, nParticle);
+    }
+
+    // Accumulate old region data or create a new particle if there is no
+    // mapping from the old-to-new region
     Pstream::listCombineGather(oldToNewRegion, maxEqOp<label>());
     Pstream::listCombineScatter(oldToNewRegion);
-
-    // Any new region that points to an old region should be renumbered to the
-    // new region specified by the oldToNewRegion index
-
-    if (oldToNewRegion.size())
+    List<eulerianParticle> newParticles(newRegionToParticleMap.size());
+    forAll(oldToNewRegion, oldRegioni)
     {
-        // Create corrected new to new addressing
-        labelList newToNewRegionCorr(newToOldRegion.size(), -1);
-        forAll(newToOldRegion, newRegioni)
+        label newRegioni = oldToNewRegion[oldRegioni];
+        if (newRegioni == -1)
         {
-            label oldRegioni = newToOldRegion[newRegioni];
-            if (oldRegioni != -1)
-            {
-                label newRegionICorr = oldToNewRegion[oldRegioni];
-                newToNewRegionCorr[newRegioni] = newRegionICorr;
-                newToOldRegion[newRegioni] = oldRegioni;
-            }
-        }
+            // No mapping from old-to-new - collect new particle
+            DebugInfo
+                << "Collecting particle from oldRegion:" << oldRegioni
+                << endl;
 
-        // Renumber the new (current) face region IDs
-        forAll(regionFaceIDs, facei)
-        {
-            label newRegioni = regionFaceIDs[facei];
-
-            if (newRegioni != -1)
-            {
-                label newRegionICorr = newToNewRegionCorr[newRegioni];
-
-                // Note: newRegionICorr can be -1 if the region is new, since
-                // the address corrections are based on inverting the
-                // old-to-new addressing
-                if (newRegionICorr != -1)
-                {
-                    regionFaceIDs[facei] = newRegionICorr;
-                }
-            }
-        }
-
-
-        boolList collectParticleFlag(nRegionsOld, true);
-        forAll(oldToNewRegion, oldRegioni)
-        {
-            label newRegioni = oldToNewRegion[oldRegioni];
-            if (newRegioni != -1)
-            {
-                collectParticleFlag[oldRegioni] = false;
-            }
-        }
-
-        // Collect particles whose IDs are no longer active
-        collectParticles(time, collectParticleFlag);
-    }
-
-
-    // Re-order collection bins
-
-    Map<label> newRegionToParticleMap(nRegionsNew);
-    List<eulerianParticle> newParticles(nRegionsNew);
-    label particlei = 0;
-
-    forAll(newToOldRegion, newRegioni)
-    {
-        label oldRegioni = newToOldRegion[newRegioni];
-        if (oldRegioni == -1)
-        {
-            // No mapping from old to new - this is a new particle
-            newRegionToParticleMap.insert(newRegioni, particlei);
-            particlei++;
+            collectParticle(time, oldRegioni);
         }
         else
         {
-            // Update addressing for old to new regions
+            // Combine existing particle into new particle
+            label newParticlei = newRegionToParticleMap[newRegioni];
             label oldParticlei = regionToParticleMap_[oldRegioni];
-            if (newRegionToParticleMap.insert(newRegioni, particlei))
-            {
-                // First time this particle has been seen
-                newParticles[particlei] = particles_[oldParticlei];
-                particlei++;
-            }
-            else
-            {
-                // Combine with existing contribution
-                label newParticlei = newRegionToParticleMap[newRegioni];
-                newParticles[newParticlei] =
-                    sumParticleOp<eulerianParticle>()
-                    (
-                        newParticles[newParticlei],
-                        particles_[oldParticlei]
-                    );
-            }
+
+            DebugInfo
+                << "Combining newRegioni: " << newRegioni
+                << "(p:" << newParticlei << ") and "
+                << "oldRegioni: " << oldRegioni
+                << "(p:" << oldParticlei << ")"
+                << endl;
+
+            newParticles[newParticlei] =
+                sumParticleOp<eulerianParticle>()
+                (
+                    newParticles[newParticlei],
+                    particles_[oldParticlei]
+                );
         }
     }
 
     // Reset the particles list and addressing for latest available info
     particles_.transfer(newParticles);
     regionToParticleMap_ = newRegionToParticleMap;
+
+    // Reset the region IDs for the next integration step
+    // - these become the oldRegioni's
+    regions0_ = regionFaceIDs;
 }
 
 
@@ -494,7 +443,6 @@ void Foam::functionObjects::extractEulerianParticles::accumulateParticleInfo
     forAll(regionFaceIDs, localFacei)
     {
         const label newRegioni = regionFaceIDs[localFacei];
-
         if (newRegioni != -1)
         {
             const label particlei = regionToParticleMap_[newRegioni];
@@ -547,14 +495,14 @@ Foam::functionObjects::extractEulerianParticles::extractEulerianParticles
     fineToCoarseAddr_(),
     globalCoarseFaces_(),
     regions0_(),
-    nRegions0_(0),
     particles_(),
     regionToParticleMap_(),
     minDiameter_(ROOTVSMALL),
     maxDiameter_(GREAT),
-    nCollectedParticles_(0),
-    nDiscardedParticles_(0),
-    discardedVolume_(0)
+    nCollectedParticles_(getProperty<label>("nCollectedParticles", 0)),
+    collectedVolume_(getProperty<scalar>("collectedVolume", 0)),
+    nDiscardedParticles_(getProperty<label>("nDiscardedParticles", 0)),
+    discardedVolume_(getProperty<scalar>("discardedVolume", 0))
 {
     if (mesh_.nSolutionD() != 3)
     {
@@ -565,12 +513,6 @@ Foam::functionObjects::extractEulerianParticles::extractEulerianParticles
 
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::extractEulerianParticles::~extractEulerianParticles()
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
@@ -644,9 +586,9 @@ bool Foam::functionObjects::extractEulerianParticles::execute()
 
     // Calculate the addressing between the old and new region information
     // Also collects particles that have traversed the faceZone
+    // - Note: may also update regionFaceIDs
     calculateAddressing
     (
-        nRegions0_,
         nRegionsNew,
         mesh_.time().value(),
         regionFaceIDs
@@ -656,13 +598,11 @@ bool Foam::functionObjects::extractEulerianParticles::execute()
     tmp<surfaceScalarField> tphi = phiU();
     accumulateParticleInfo(alphaf, tphi(), regionFaceIDs, fz);
 
-    // Reset the blocked faces for the next integration step
-    nRegions0_ = nRegionsNew;
-    regions0_ = regionFaceIDs;
-
-    Log << "    Collected particles: " << nCollectedParticles_ << nl
-        << "    Discarded particles: " << nDiscardedParticles_ << nl
-        << "    Discarded volume: " << discardedVolume_ << nl
+    Log << "    Collected particles   : " << nCollectedParticles_ << nl
+        << "    Collected volume      : " << collectedVolume_ << nl
+        << "    Discarded particles   : " << nDiscardedParticles_ << nl
+        << "    Discarded volume      : " << discardedVolume_ << nl
+        << "    Particles in progress : " << particles_.size() << nl
         << endl;
 
     return true;
@@ -674,6 +614,11 @@ bool Foam::functionObjects::extractEulerianParticles::write()
     DebugInFunction << endl;
 
     cloud_.write();
+
+    setProperty("nCollectedParticles", nCollectedParticles_);
+    setProperty("collectedVolume", collectedVolume_);
+    setProperty("nDiscardedParticles", nDiscardedParticles_);
+    setProperty("discardedVolume", discardedVolume_);
 
     return true;
 }
