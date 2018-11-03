@@ -72,7 +72,7 @@ inline int Foam::ISstream::peek()
 }
 
 
-inline Foam::ISstream& Foam::ISstream::getLine(string& str)
+inline Foam::ISstream& Foam::ISstream::getLine(std::string& str)
 {
     std::getline(is_, str);
     setState(is_.rdstate());
