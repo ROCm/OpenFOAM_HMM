@@ -38,9 +38,6 @@ void Foam::cuttingSurface::calcCellCuts
 )
 {
     const pointField& cc = fvm.C();
-
-    const faceList& faces = fvm.faces();
-    const cellList& cells = fvm.cells();
     const pointField& pts = fvm.points();
 
     const label nCells  = fvm.nCells();
