@@ -72,7 +72,7 @@ MultiComponentPhaseModel
 
     species_ = thermoPtr_->composition().species();
 
-    inertIndex_ = species_[thermoPtr_().lookup("inertSpecie")];
+    inertIndex_ = species_[thermoPtr_->getWord("inertSpecie")];
 
     X_.setSize(thermoPtr_->composition().species().size());
 
@@ -103,7 +103,6 @@ MultiComponentPhaseModel
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 
 template<class BasePhaseModel, class phaseThermo>
 void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>

@@ -130,7 +130,7 @@ public:
 
         //- Construct from Istream
         //  Treat as regular expression if surrounded by quotation marks.
-        keyType(Istream& is);
+        explicit keyType(Istream& is);
 
 
     // Member Functions

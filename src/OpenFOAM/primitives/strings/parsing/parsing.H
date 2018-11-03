@@ -49,8 +49,6 @@ namespace Foam
 
 namespace parsing
 {
-  // Enumerations
-
     //- Enumeration for possible parsing error
     enum class errorType
     {

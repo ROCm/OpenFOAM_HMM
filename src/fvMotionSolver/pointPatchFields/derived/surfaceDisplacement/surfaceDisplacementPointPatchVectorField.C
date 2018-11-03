@@ -316,10 +316,10 @@ surfaceDisplacementPointPatchVectorField
 )
 :
     fixedValuePointPatchVectorField(p, iF, dict),
-    velocity_(dict.lookup("velocity")),
+    velocity_(dict.get<vector>("velocity")),
     surfacesDict_(dict.subDict("geometry")),
     projectMode_(projectModeNames_.get("projectMode", dict)),
-    projectDir_(dict.lookup("projectDirection")),
+    projectDir_(dict.get<vector>("projectDirection")),
     wedgePlane_(dict.lookupOrDefault("wedgePlane", -1)),
     frozenPointsZone_(dict.lookupOrDefault("frozenPointsZone", word::null))
 {

@@ -50,7 +50,7 @@ template<class Type, class DType, class LUType>
 typename Foam::SolverPerformance<Type>
 Foam::PCICG<Type, DType, LUType>::solve(Field<Type>& psi) const
 {
-    word preconditionerName(this->controlDict_.lookup("preconditioner"));
+    const word preconditionerName(this->controlDict_.getWord("preconditioner"));
 
     // --- Setup class containing solver performance data
     SolverPerformance<Type> solverPerf

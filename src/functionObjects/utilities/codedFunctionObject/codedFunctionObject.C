@@ -50,6 +50,7 @@ namespace functionObjects
 }
 }
 
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::functionObjects::codedFunctionObject::prepare
@@ -194,9 +195,10 @@ bool Foam::functionObjects::codedFunctionObject::read(const dictionary& dict)
     dict.readCompat<word>("name", {{"redirectType", 1706}}, name_);
 
     const entry* dataPtr = dict.findEntry("codeData", keyType::LITERAL);
+
     if (dataPtr)
     {
-        codeData_ = stringOps::trim(dataPtr->stream());
+        dataPtr->readEntry(codeData_);
         stringOps::inplaceExpand(codeData_, dict);
         dynamicCodeContext::addLineDirective
         (
@@ -207,9 +209,10 @@ bool Foam::functionObjects::codedFunctionObject::read(const dictionary& dict)
     }
 
     const entry* readPtr = dict.findEntry("codeRead", keyType::LITERAL);
+
     if (readPtr)
     {
-        codeRead_ = stringOps::trim(readPtr->stream());
+        readPtr->readEntry(codeRead_);
         stringOps::inplaceExpand(codeRead_, dict);
         dynamicCodeContext::addLineDirective
         (
@@ -220,9 +223,10 @@ bool Foam::functionObjects::codedFunctionObject::read(const dictionary& dict)
     }
 
     const entry* execPtr = dict.findEntry("codeExecute", keyType::LITERAL);
+
     if (execPtr)
     {
-        codeExecute_ = stringOps::trim(execPtr->stream());
+        execPtr->readEntry(codeExecute_);
         stringOps::inplaceExpand(codeExecute_, dict);
         dynamicCodeContext::addLineDirective
         (
@@ -233,9 +237,10 @@ bool Foam::functionObjects::codedFunctionObject::read(const dictionary& dict)
     }
 
     const entry* writePtr = dict.findEntry("codeWrite", keyType::LITERAL);
+
     if (writePtr)
     {
-        codeWrite_ = stringOps::trim(writePtr->stream());
+        writePtr->readEntry(codeWrite_);
         stringOps::inplaceExpand(codeWrite_, dict);
         dynamicCodeContext::addLineDirective
         (
@@ -246,9 +251,10 @@ bool Foam::functionObjects::codedFunctionObject::read(const dictionary& dict)
     }
 
     const entry* endPtr = dict.findEntry("codeEnd", keyType::LITERAL);
+
     if (endPtr)
     {
-        codeEnd_ = stringOps::trim(endPtr->stream());
+        endPtr->readEntry(codeEnd_);
         stringOps::inplaceExpand(codeEnd_, dict);
         dynamicCodeContext::addLineDirective
         (
@@ -260,10 +266,8 @@ bool Foam::functionObjects::codedFunctionObject::read(const dictionary& dict)
 
     if (!dataPtr && !readPtr && !execPtr && !writePtr && !endPtr)
     {
-        IOWarningInFunction
-        (
-            dict
-        )   << "No critical \"code\" prefixed keywords were found."
+        IOWarningInFunction(dict)
+            << "No critical \"code\" prefixed keywords were found."
             << " Please check the code documentation for more details."
             << nl << endl;
     }

@@ -1297,6 +1297,7 @@ public:
         defineDictionaryGetter(getBool, bool);
         defineDictionaryGetter(getLabel, label);
         defineDictionaryGetter(getScalar, scalar);
+        defineDictionaryGetter(getString, string);
         defineDictionaryGetter(getWord, word);
         defineDictionaryGetter(getFileName, fileName);
 

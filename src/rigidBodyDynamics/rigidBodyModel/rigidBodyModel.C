@@ -194,7 +194,7 @@ Foam::RBD::rigidBodyModel::rigidBodyModel
         {
             merge
             (
-                bodyID(bodyDict.lookup("mergeWith")),
+                bodyID(bodyDict.get<word>("mergeWith")),
                 bodyDict.lookup("transform"),
                 rigidBody::New(key, bodyDict)
             );
@@ -203,7 +203,7 @@ Foam::RBD::rigidBodyModel::rigidBodyModel
         {
             join
             (
-                bodyID(bodyDict.lookup("parent")),
+                bodyID(bodyDict.get<word>("parent")),
                 bodyDict.lookup("transform"),
                 joint::New(bodyDict.subDict("joint")),
                 rigidBody::New(key, bodyDict)

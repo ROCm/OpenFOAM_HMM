@@ -64,16 +64,16 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
     const dictionary& chemistryTypeDict =
         chemistryDict.subDict("chemistryType");
 
-    const word& solverName
+    const word solverName
     (
-        chemistryTypeDict.found("solver")
-      ? chemistryTypeDict.lookup("solver")
-      : chemistryTypeDict.found("chemistrySolver")
-      ? chemistryTypeDict.lookup("chemistrySolver")
-      : chemistryTypeDict.lookup("solver") // error if neither entry is found
+        chemistryTypeDict.getCompat<word>
+        (
+            "solver",
+            {{"chemistrySolver", -1712}}
+        )
     );
 
-    const word& methodName
+    const word methodName
     (
         chemistryTypeDict.lookupOrDefault<word>
         (
@@ -90,8 +90,7 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
 
     Info<< "Selecting chemistry solver " << chemistryTypeDictNew << endl;
 
-    typedef typename ChemistryModel::thermoConstructorTable cstrTableType;
-    cstrTableType* cstrTable = ChemistryModel::thermoConstructorTablePtr_;
+    auto* cstrTable = ChemistryModel::thermoConstructorTablePtr_;
 
     const word chemSolverCompThermoName =
         solverName + '<' + methodName + '<'
@@ -106,7 +105,7 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
             << "Unknown " << typeName_() << " type " << solverName << endl
             << endl;
 
-        const wordList names(cstrTable->toc());
+        const wordList names(cstrTable->sortedToc());
 
         wordList thisCmpts;
         thisCmpts.append(word::null);
@@ -123,7 +122,7 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
             const wordList cmpts(basicThermo::splitThermoName(names[i], 8));
 
             bool isValid = true;
-            for (label i = 2; i < cmpts.size() && isValid; ++ i)
+            for (label i = 2; i < cmpts.size() && isValid; ++i)
             {
                 isValid = isValid && cmpts[i] == thisCmpts[i];
             }

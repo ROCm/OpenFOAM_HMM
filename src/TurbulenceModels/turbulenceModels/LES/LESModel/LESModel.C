@@ -65,7 +65,7 @@ Foam::LESModel<BasicTurbulenceModel>::LESModel
     ),
 
     LESDict_(this->subOrEmptyDict("LES")),
-    turbulence_(LESDict_.lookup("turbulence")),
+    turbulence_(LESDict_.get<Switch>("turbulence")),
     printCoeffs_(LESDict_.lookupOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(LESDict_.optionalSubDict(type + "Coeffs")),
 

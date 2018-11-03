@@ -109,7 +109,7 @@ Foam::laminarModel<BasicTurbulenceModel>::New
         // otherwise it is registered in the database twice
         const word modelType
         (
-            modelDict.subDict("laminar").lookup("laminarModel")
+            modelDict.subDict("laminar").get<word>("laminarModel")
         );
 
         Info<< "Selecting laminar stress model " << modelType << endl;

@@ -74,7 +74,7 @@ Foam::solidReaction<ReactionThermo>::solidReaction
 {
     this->setLRhs
     (
-        IStringStream(dict.lookup("reaction"))(),
+        IStringStream(dict.getString("reaction"))(),
         pyrolisisGases_,
         glhs_,
         grhs_

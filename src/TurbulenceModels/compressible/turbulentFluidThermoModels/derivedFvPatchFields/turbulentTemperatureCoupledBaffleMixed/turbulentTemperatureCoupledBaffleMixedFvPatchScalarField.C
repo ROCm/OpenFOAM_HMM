@@ -86,7 +86,7 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), dict),
-    TnbrName_(dict.lookup("Tnbr")),
+    TnbrName_(dict.get<word>("Tnbr")),
     thicknessLayers_(0),
     kappaLayers_(0),
     contactRes_(0.0)

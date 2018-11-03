@@ -162,7 +162,7 @@ public:
 
         //- Construct from Istream
         //  Words are treated as literals, strings with an auto-test
-        wordRe(Istream& is);
+        explicit wordRe(Istream& is);
 
 
     // Member Functions

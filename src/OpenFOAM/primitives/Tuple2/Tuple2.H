@@ -44,7 +44,7 @@ See also
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 template<class Type1, class Type2>
 class Tuple2;
@@ -93,7 +93,7 @@ public:
         {}
 
         //- Construct from Istream
-        inline Tuple2(Istream& is)
+        inline explicit Tuple2(Istream& is)
         {
             is >> *this;
         }

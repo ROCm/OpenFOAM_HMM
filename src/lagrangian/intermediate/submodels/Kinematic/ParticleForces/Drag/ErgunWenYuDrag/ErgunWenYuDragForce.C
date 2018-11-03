@@ -60,7 +60,7 @@ Foam::ErgunWenYuDragForce<CloudType>::ErgunWenYuDragForce
     (
         this->mesh().template lookupObject<volScalarField>
         (
-            this->coeffs().lookup("alphac")
+            this->coeffs().getWord("alphac")
         )
     )
 {}
@@ -77,7 +77,7 @@ Foam::ErgunWenYuDragForce<CloudType>::ErgunWenYuDragForce
     (
         this->mesh().template lookupObject<volScalarField>
         (
-            this->coeffs().lookup("alphac")
+            this->coeffs().getWord("alphac")
         )
     )
 {}

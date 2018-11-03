@@ -489,7 +489,7 @@ Foam::ThermoSurfaceFilm<CloudType>::ThermoSurfaceFilm
     CpFilmPatch_(0),
     interactionType_
     (
-        interactionTypeEnum(this->coeffDict().lookup("interactionType"))
+        interactionTypeEnum(this->coeffDict().getWord("interactionType"))
     ),
     deltaWet_(0.0),
     splashParcelType_(0),

@@ -335,7 +335,7 @@ Foam::Reaction<ReactionThermo>::Reaction
 {
     setLRhs
     (
-        IStringStream(dict.lookup("reaction"))(),
+        IStringStream(dict.getString("reaction"))(),
         species_,
         lhs_,
         rhs_

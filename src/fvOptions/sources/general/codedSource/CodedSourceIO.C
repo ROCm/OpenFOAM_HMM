@@ -43,7 +43,8 @@ bool Foam::fv::CodedSource<Type>::read(const dictionary& dict)
             const entry& e =
                 coeffs_.lookupEntry("codeCorrect", keyType::LITERAL);
 
-            codeCorrect_ = stringOps::trim(e.stream());
+            e.readEntry(codeCorrect_);
+            stringOps::inplaceTrim(codeCorrect_);
             stringOps::inplaceExpand(codeCorrect_, coeffs_);
             dynamicCodeContext::addLineDirective
             (
@@ -57,7 +58,8 @@ bool Foam::fv::CodedSource<Type>::read(const dictionary& dict)
             const entry& e =
                 coeffs_.lookupEntry("codeAddSup", keyType::LITERAL);
 
-            codeAddSup_ = stringOps::trim(e.stream());
+            e.readEntry(codeAddSup_);
+            stringOps::inplaceTrim(codeAddSup_);
             stringOps::inplaceExpand(codeAddSup_, coeffs_);
             dynamicCodeContext::addLineDirective
             (
@@ -71,7 +73,8 @@ bool Foam::fv::CodedSource<Type>::read(const dictionary& dict)
             const entry& e =
                 coeffs_.lookupEntry("codeSetValue", keyType::LITERAL);
 
-            codeSetValue_ = stringOps::trim(e.stream());
+            e.readEntry(codeSetValue_);
+            stringOps::inplaceTrim(codeSetValue_);
             stringOps::inplaceExpand(codeSetValue_, coeffs_);
             dynamicCodeContext::addLineDirective
             (

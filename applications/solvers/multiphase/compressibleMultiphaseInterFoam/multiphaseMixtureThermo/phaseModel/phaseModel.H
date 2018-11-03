@@ -98,7 +98,7 @@ public:
 
             autoPtr<phaseModel> operator()(Istream& is) const
             {
-                return autoPtr<phaseModel>::New(is, p_, T_);
+                return autoPtr<phaseModel>::New(word(is), p_, T_);
             }
         };
 

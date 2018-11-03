@@ -65,7 +65,7 @@ Foam::RASModel<BasicTurbulenceModel>::RASModel
     ),
 
     RASDict_(this->subOrEmptyDict("RAS")),
-    turbulence_(RASDict_.lookup("turbulence")),
+    turbulence_(RASDict_.get<Switch>("turbulence")),
     printCoeffs_(RASDict_.lookupOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(RASDict_.optionalSubDict(type + "Coeffs")),
 

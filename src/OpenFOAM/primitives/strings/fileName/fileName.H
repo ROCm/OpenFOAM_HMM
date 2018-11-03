@@ -137,9 +137,8 @@ public:
         //- Construct by concatenating words separated by '/'
         explicit fileName(std::initializer_list<word> list);
 
-
         //- Construct from Istream
-        fileName(Istream& is);
+        explicit fileName(Istream& is);
 
 
     // Member Functions

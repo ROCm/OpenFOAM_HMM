@@ -83,11 +83,6 @@ protected:
         //- Print model coefficients
         virtual void printCoeffs(const word& type);
 
-
-private:
-
-    // Private Member Functions
-
         //- No copy construct
         RASModel(const RASModel&) = delete;
 
@@ -158,8 +153,7 @@ public:
 
 
     //- Destructor
-    virtual ~RASModel()
-    {}
+    virtual ~RASModel() = default;
 
 
     // Member Functions

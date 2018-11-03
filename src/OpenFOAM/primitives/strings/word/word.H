@@ -109,7 +109,7 @@ public:
         inline word(const char* s, size_type len, bool doStrip);
 
         //- Construct from Istream
-        word(Istream& is);
+        explicit word(Istream& is);
 
 
     // Member Functions

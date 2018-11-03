@@ -118,7 +118,7 @@ Foam::displacementMotionSolverMeshMover::displacementMotionSolverMeshMover
     (
         displacementMotionSolver::New
         (
-            dict.lookup("solver"),
+            dict.get<word>("solver"),
             pointDisplacement.mesh()(),
             IOdictionary
             (

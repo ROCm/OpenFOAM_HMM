@@ -69,7 +69,7 @@ outletMachNumberPressureFvPatchScalarField
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     UName_(dict.lookupOrDefault<word>("U", "U")),
-    choked_(dict.lookup("choked")),
+    choked_(dict.get<Switch>("choked")),
     relax_(dict.lookupOrDefault<scalar>("relax", 0))
 {}
 

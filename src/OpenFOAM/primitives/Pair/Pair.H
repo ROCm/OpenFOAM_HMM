@@ -77,7 +77,7 @@ public:
         inline Pair(const FixedList<T, 2>& lst, const bool doSort);
 
         //- Construct from Istream
-        inline Pair(Istream& is);
+        inline explicit Pair(Istream& is);
 
 
     // Member Functions

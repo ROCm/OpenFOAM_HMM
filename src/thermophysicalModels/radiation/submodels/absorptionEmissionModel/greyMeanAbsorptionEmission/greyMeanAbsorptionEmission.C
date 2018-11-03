@@ -91,28 +91,28 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
         nFunc++;
     }
 
-    if (coeffsDict_.found("lookUpTableFileName"))
+    if
+    (
+        coeffsDict_.found("lookUpTableFileName")
+     && "none" != coeffsDict_.get<word>("lookUpTableFileName")
+    )
     {
-        const word name = coeffsDict_.lookup("lookUpTableFileName");
-        if (name != "none")
-        {
-            lookUpTablePtr_.reset
+        lookUpTablePtr_.reset
+        (
+            new interpolationLookUpTable<scalar>
             (
-                new interpolationLookUpTable<scalar>
-                (
-                    fileName(coeffsDict_.lookup("lookUpTableFileName")),
-                    mesh.time().constant(),
-                    mesh
-                )
-            );
+                coeffsDict_.get<fileName>("lookUpTableFileName"),
+                mesh.time().constant(),
+                mesh
+            )
+        );
 
-            if (!mesh.foundObject<volScalarField>("ft"))
-            {
-                FatalErrorInFunction
-                    << "specie ft is not present to use with "
-                    << "lookUpTableFileName " << nl
-                    << exit(FatalError);
-            }
+        if (!mesh.foundObject<volScalarField>("ft"))
+        {
+            FatalErrorInFunction
+                << "specie ft is not present to use with "
+                << "lookUpTableFileName " << nl
+                << exit(FatalError);
         }
     }
 
@@ -213,7 +213,7 @@ Foam::radiation::greyMeanAbsorptionEmission::aCont(const label bandI) const
 
     forAll(a, celli)
     {
-        forAllConstIter(HashTable<label>, speciesNames_, iter)
+        forAllConstIters(speciesNames_, iter)
         {
             label n = iter();
             scalar Xipi = 0.0;

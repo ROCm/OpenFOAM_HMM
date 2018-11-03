@@ -53,13 +53,7 @@ Foam::surfaceTensionModels::liquidProperties::liquidProperties
 )
 :
     surfaceTensionModel(mesh),
-    phaseName_(dict.lookup("phase"))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::surfaceTensionModels::liquidProperties::~liquidProperties()
+    phaseName_(dict.get<word>("phase"))
 {}
 
 

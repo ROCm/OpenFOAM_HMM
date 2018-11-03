@@ -98,7 +98,7 @@ Foam::velocityDisplacementMotionSolver::velocityDisplacementMotionSolver
         (
             displacementMotionSolver::New
             (
-                coeffDict().lookup("solver"),
+                coeffDict().get<word>("solver"),
                 mesh,
                 IOdictionary
                 (

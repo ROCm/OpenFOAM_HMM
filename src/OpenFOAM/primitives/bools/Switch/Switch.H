@@ -153,7 +153,7 @@ public:
         {}
 
         //- Construct from Istream
-        Switch(Istream& is);
+        explicit Switch(Istream& is);
 
 
     // Helpers

@@ -153,11 +153,9 @@ void Foam::fv::CodedSource<Type>::correct
     GeometricField<Type, fvPatchField, volMesh>& field
 )
 {
-    if (debug)
-    {
-        Info<< "CodedSource<"<< pTraits<Type>::typeName
-            << ">::correct for source " << name_ << endl;
-    }
+    DebugInfo
+        << "CodedSource<" << pTraits<Type>::typeName
+        << ">::correct for source " << name_ << endl;
 
     updateLibrary(name_);
     redirectFvOption().correct(field);
@@ -171,11 +169,9 @@ void Foam::fv::CodedSource<Type>::addSup
     const label fieldi
 )
 {
-    if (debug)
-    {
-        Info<< "CodedSource<"<< pTraits<Type>::typeName
-            << ">::addSup for source " << name_ << endl;
-    }
+    DebugInfo
+        << "CodedSource<" << pTraits<Type>::typeName
+        << ">::addSup for source " << name_ << endl;
 
     updateLibrary(name_);
     redirectFvOption().addSup(eqn, fieldi);
@@ -190,11 +186,9 @@ void Foam::fv::CodedSource<Type>::addSup
     const label fieldi
 )
 {
-    if (debug)
-    {
-        Info<< "CodedSource<"<< pTraits<Type>::typeName
-            << ">::addSup for source " << name_ << endl;
-    }
+    DebugInfo
+        << "CodedSource<" << pTraits<Type>::typeName
+        << ">::addSup for source " << name_ << endl;
 
     updateLibrary(name_);
     redirectFvOption().addSup(rho, eqn, fieldi);
@@ -208,11 +202,9 @@ void Foam::fv::CodedSource<Type>::constrain
     const label fieldi
 )
 {
-    if (debug)
-    {
-        Info<< "CodedSource<"<< pTraits<Type>::typeName
-            << ">::constrain for source " << name_ << endl;
-    }
+    DebugInfo
+        << "CodedSource<" << pTraits<Type>::typeName
+        << ">::constrain for source " << name_ << endl;
 
     updateLibrary(name_);
     redirectFvOption().constrain(eqn, fieldi);

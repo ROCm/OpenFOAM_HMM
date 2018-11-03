@@ -48,7 +48,7 @@ Foam::fixedNormalSlipPointPatchField<Type>::fixedNormalSlipPointPatchField
 )
 :
     slipPointPatchField<Type>(p, iF, dict),
-    n_(dict.lookup("n"))
+    n_(dict.get<vector>("n"))
 {}
 
 

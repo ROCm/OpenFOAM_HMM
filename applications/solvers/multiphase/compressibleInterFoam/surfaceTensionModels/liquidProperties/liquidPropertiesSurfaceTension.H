@@ -95,7 +95,7 @@ public:
 
 
     //- Destructor
-    virtual ~liquidProperties();
+    virtual ~liquidProperties() = default;
 
 
     // Member Functions

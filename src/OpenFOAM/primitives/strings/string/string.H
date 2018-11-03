@@ -182,7 +182,7 @@ public:
         inline string(const size_type len, const char c);
 
         //- Construct from Istream
-        string(Istream& is);
+        explicit string(Istream& is);
 
 
     // Member Functions
