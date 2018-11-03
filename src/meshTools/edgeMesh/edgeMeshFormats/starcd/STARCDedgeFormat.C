@@ -39,19 +39,21 @@ inline void Foam::fileFormats::STARCDedgeFormat::writeLines
 {
     writeHeader(os, STARCDCore::HEADER_CEL);
 
-    forAll(edges, edgeI)
-    {
-        const edge& e = edges[edgeI];
-        const label cellId = edgeI + 1;
+    label starCellId = 1;  // 1-based cellId
 
-        os  << cellId                    // includes 1 offset
+    for (const edge& e : edges)
+    {
+        os  << starCellId
             << ' ' << starcdLine         // 2(line) shape
             << ' ' << e.size()
             << ' ' << 401                // arbitrary value
             << ' ' << starcdLineType;    // 5(line)
 
-        os  << nl << "  " << cellId << "  "
+        os  << nl
+            << "  " << starCellId << "  "
             << (e[0]+1) << "  " << (e[1]+1) << nl;
+
+        ++starCellId;
     }
 }
 
@@ -67,7 +69,7 @@ void Foam::fileFormats::STARCDedgeFormat::writeCase
 {
     const word caseName = os.name().nameLessExt();
 
-    os  << "! STAR-CD file written " << clock::dateTime().c_str() << nl
+    os  << "! STARCD file written " << clock::dateTime().c_str() << nl
         << "! " << pointLst.size() << " points, " << nEdges << " lines" << nl
         << "! case " << caseName << nl
         << "! ------------------------------" << nl;
@@ -112,10 +114,10 @@ bool Foam::fileFormats::STARCDedgeFormat::read
 
     fileName baseName = filename.lessExt();
 
-    // STAR-CD index of points
+    // STARCD index of points
     List<label> pointId;
 
-    // read points from .vrt file
+    // Read points from .vrt file
     readPoints
     (
         IFstream(starFileName(baseName, STARCDCore::VRT_FILE))(),
@@ -123,7 +125,7 @@ bool Foam::fileFormats::STARCDedgeFormat::read
         pointId
     );
 
-    // Build inverse mapping (STAR-CD pointId -> index)
+    // Build inverse mapping (STARCD pointId -> index)
     Map<label> mapPointId(2*pointId.size());
     forAll(pointId, i)
     {
@@ -131,11 +133,11 @@ bool Foam::fileFormats::STARCDedgeFormat::read
     }
     pointId.clear();
 
-    // note which points were really used and which can be culled
+    // Note which points were really used and which can be culled
     bitSet usedPoints(points().size());
 
-    //
-    // read .cel file
+
+    // Read .cel file
     // ~~~~~~~~~~~~~~
     IFstream is(starFileName(baseName, STARCDCore::CEL_FILE));
     if (!is.good())
@@ -147,29 +149,35 @@ bool Foam::fileFormats::STARCDedgeFormat::read
 
     readHeader(is, STARCDCore::HEADER_CEL);
 
-    DynamicList<edge>  dynEdges;
+    DynamicList<edge> dynEdges;
 
-    label lineLabel, shapeId, nLabels, cellTableId, typeId;
+    label ignoredLabel, shapeId, nLabels, cellTableId, typeId;
     DynamicList<label> vertexLabels(64);
 
-    while ((is >> lineLabel).good())
+    token tok;
+
+    while (is.read(tok).good() && tok.isLabel())
     {
-        is >> shapeId >> nLabels >> cellTableId >> typeId;
+        // const label starCellId = tok.labelToken();
+        is  >> shapeId
+            >> nLabels
+            >> cellTableId
+            >> typeId;
 
         vertexLabels.clear();
         vertexLabels.reserve(nLabels);
 
-        // read indices - max 8 per line
+        // Read indices - max 8 per line
         for (label i = 0; i < nLabels; ++i)
         {
             label vrtId;
             if ((i % 8) == 0)
             {
-               is >> lineLabel;
+                is >> ignoredLabel; // Skip cellId for continuation lines
             }
             is >> vrtId;
 
-            // convert original vertex id to point label
+            // Convert original vertex id to point label
             vertexLabels.append(mapPointId[vrtId]);
         }
 
@@ -200,7 +208,7 @@ bool Foam::fileFormats::STARCDedgeFormat::read
                 pts[nUsed] = pts[pointi];
             }
 
-            // map prev -> new id
+            // Map prev -> new id
             mapPointId.set(pointi, nUsed);
 
             ++nUsed;
@@ -208,10 +216,8 @@ bool Foam::fileFormats::STARCDedgeFormat::read
         pts.resize(nUsed);
 
         // Renumber edge vertices
-        forAll(dynEdges, edgeI)
+        for (edge& e : dynEdges)
         {
-            edge& e = dynEdges[edgeI];
-
             e[0] = mapPointId[e[0]];
             e[1] = mapPointId[e[1]];
         }
@@ -245,7 +251,7 @@ void Foam::fileFormats::STARCDedgeFormat::write
         edgeLst
     );
 
-    // write a simple .inp file
+    // Write a simple .inp file
     writeCase
     (
         OFstream(starFileName(baseName, STARCDCore::INP_FILE))(),

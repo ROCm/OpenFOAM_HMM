@@ -24,9 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "STARCDMeshWriter.H"
-
 #include "Time.H"
-#include "SortableList.H"
 #include "OFstream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -35,7 +33,7 @@ Foam::label Foam::fileFormats::STARCDMeshWriter::findDefaultBoundary() const
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    // find Default_Boundary_Region if it exists
+    // Find "Default_Boundary_Region" if it exists
     forAll(patches, patchi)
     {
         if (defaultBoundaryName == patches[patchi].name())
@@ -51,7 +49,7 @@ Foam::label Foam::fileFormats::STARCDMeshWriter::findDefaultBoundary() const
 
 void Foam::fileFormats::STARCDMeshWriter::getCellTable()
 {
-    // read constant/polyMesh/propertyName
+    // Read constant/polyMesh/propertyName
     IOList<label> ioList
     (
         IOobject
@@ -112,9 +110,8 @@ void Foam::fileFormats::STARCDMeshWriter::getCellTable()
         // get the cellZone <-> cellTable correspondence
         Info<< "matching cellZones to cellTable" << endl;
 
-        forAll(mesh_.cellZones(), zoneI)
+        for (const cellZone& cZone : mesh_.cellZones())
         {
-            const cellZone& cZone = mesh_.cellZones()[zoneI];
             if (cZone.size())
             {
                 nUnzoned -= cZone.size();
@@ -129,9 +126,9 @@ void Foam::fileFormats::STARCDMeshWriter::getCellTable()
                     tableId = cellTable_.append(dict);
                 }
 
-                forAll(cZone, i)
+                for (const label celli : cZone)
                 {
-                    cellTableId_[cZone[i]] = tableId;
+                    cellTableId_[celli] = tableId;
                 }
             }
         }
@@ -142,7 +139,7 @@ void Foam::fileFormats::STARCDMeshWriter::getCellTable()
 
             dict.add("Label", "__unZonedCells__");
             dict.add("MaterialType", "fluid");
-            label tableId = cellTable_.append(dict);
+            const label tableId = cellTable_.append(dict);
 
             forAll(cellTableId_, i)
             {
@@ -205,36 +202,36 @@ void Foam::fileFormats::STARCDMeshWriter::writeCells
         const cellShape& shape = shapes[cellId];
         const label mapIndex = shape.model().index();
 
-        // a registered primitive type
+        // A registered primitive type
         if (shapeLookupIndex.found(mapIndex))
         {
             const label shapeId = shapeLookupIndex[mapIndex];
             const labelList& vrtList = shapes[cellId];
 
             os  << cellId + 1
-                << " " << shapeId
-                << " " << vrtList.size()
-                << " " << tableId
-                << " " << materialType;
+                << ' ' << shapeId
+                << ' ' << vrtList.size()
+                << ' ' << tableId
+                << ' ' << materialType;
 
-            // primitives have <= 8 vertices, but prevent overrun anyhow
+            // Primitives have <= 8 vertices, but prevent overrun anyhow
             // indent following lines for ease of reading
             label count = 0;
-            forAll(vrtList, i)
+            for (const label pointi : vrtList)
             {
                 if ((count % 8) == 0)
                 {
                     os  << nl
                         << "  " << cellId + 1;
                 }
-                os << " " << vrtList[i] + 1;
-                count++;
+                os << ' ' << pointi + 1;
+                ++count;
             }
-            os << endl;
+            os << nl;
         }
         else
         {
-            // treat as general polyhedral
+            // Treat as general polyhedral
             const label shapeId = STARCDCore::starcdPoly;
             const labelList& cFaces  = cells[cellId];
 
@@ -251,29 +248,28 @@ void Foam::fileFormats::STARCDMeshWriter::writeCells
             }
 
             os  << cellId + 1
-                << " " << shapeId
-                << " " << count
-                << " " << tableId
-                << " " << materialType;
+                << ' ' << shapeId
+                << ' ' << count
+                << ' ' << tableId
+                << ' ' << materialType;
 
-            // write indices - max 8 per line
+            // Write indices - max 8 per line
             // indent following lines for ease of reading
             count = 0;
-            forAll(indices, i)
+            for (const label pointi : indices)
             {
                 if ((count % 8) == 0)
                 {
                     os  << nl
                         << "  " << cellId + 1;
                 }
-                os << " " << indices[i];
-                count++;
+                os << ' ' << pointi;
+                ++count;
             }
 
             // write faces - max 8 per line
-            forAll(cFaces, facei)
+            for (const label meshFace : cFaces)
             {
-                label meshFace = cFaces[facei];
                 face f;
 
                 if (owner[meshFace] == cellId)
@@ -285,7 +281,7 @@ void Foam::fileFormats::STARCDMeshWriter::writeCells
                     f = faces[meshFace].reverseFace();
                 }
 
-                forAll(f, i)
+                for (const label pointi : f)
                 {
                     if ((count % 8) == 0)
                     {
@@ -293,8 +289,8 @@ void Foam::fileFormats::STARCDMeshWriter::writeCells
                             << "  " << cellId + 1;
                     }
 
-                    os << " " << f[i] + 1;
-                    count++;
+                    os << ' ' << pointi + 1;
+                    ++count;
                 }
             }
 
@@ -349,7 +345,7 @@ void Foam::fileFormats::STARCDMeshWriter::writeBoundary
         }
         else if (defaultId == -1 || regionId < defaultId)
         {
-            regionId++;
+            ++regionId;
         }
 
         label patchStart = patches[patchi].start();
@@ -377,7 +373,7 @@ void Foam::fileFormats::STARCDMeshWriter::writeBoundary
             //   as defined by primitiveMesh::cellShapes()
             // Thus, for registered primitive types, do the lookup ourselves.
             // Finally, the cellModel face number is re-mapped to the
-            // STAR-CD local face number
+            // STARCD local face number
 
             label mapIndex = shape.model().index();
 
@@ -400,15 +396,15 @@ void Foam::fileFormats::STARCDMeshWriter::writeBoundary
             }
             // Info<< endl;
 
-            boundId++;
+            ++boundId;
 
             os
                 << boundId
-                << " " << cellId + 1
-                << " " << cellFaceId + 1
-                << " " << regionId
-                << " " << 0
-                << " " << bndType.c_str()
+                << ' ' << cellId + 1
+                << ' ' << cellFaceId + 1
+                << ' ' << regionId
+                << ' ' << 0
+                << ' ' << bndType.c_str()
                 << endl;
         }
     }
@@ -433,12 +429,6 @@ Foam::fileFormats::STARCDMeshWriter::STARCDMeshWriter
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fileFormats::STARCDMeshWriter::~STARCDMeshWriter()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::fileFormats::STARCDMeshWriter::write(const fileName& meshName) const
@@ -461,7 +451,7 @@ bool Foam::fileFormats::STARCDMeshWriter::write(const fileName& meshName) const
 
     STARCDCore::removeFiles(baseName);
 
-    // points
+    // Points
     {
         OFstream os
         (
@@ -474,10 +464,10 @@ bool Foam::fileFormats::STARCDMeshWriter::write(const fileName& meshName) const
         writePoints(os, mesh_.points(), scaleFactor_);
     }
 
-    // cells
+    // Cells
     writeCells(baseName);
 
-    // boundaries
+    // Boundaries
     if (writeBoundary_)
     {
         writeBoundary(baseName);

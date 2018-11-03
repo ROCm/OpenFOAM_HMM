@@ -99,7 +99,7 @@ public:
 
 
     //- Destructor
-    virtual ~STARCDMeshWriter();
+    virtual ~STARCDMeshWriter() = default;
 
 
     // Member Functions

@@ -71,15 +71,6 @@ class STARCDMeshReader
         bool keepSolids_;
 
 
-    // Private member functions
-
-        //- No copy construct
-        STARCDMeshReader(const STARCDMeshReader&) = delete;
-
-        //- No copy assignment
-        void operator=(const STARCDMeshReader&) = delete;
-
-
 protected:
 
     // Protected Data
@@ -126,15 +117,14 @@ public:
         STARCDMeshReader
         (
             const fileName& prefix,
-            const objectRegistry&,
+            const objectRegistry& registry,
             const scalar scaleFactor = 1.0,
             const bool keepSolids = false
         );
 
 
     //- Destructor
-    virtual ~STARCDMeshReader();
-
+    virtual ~STARCDMeshReader() = default;
 };
 
 

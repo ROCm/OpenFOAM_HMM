@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,16 +44,16 @@ inline void Foam::fileFormats::STARCDsurfaceFormat<Face>::writeShell
         << ' ' << cellTableId
         << ' ' << starcdShellType;   // 4(shell)
 
-    // primitives have <= 8 vertices, but prevent overrun anyhow
+    // Primitives have <= 8 vertices, but prevent overrun anyhow
     // indent following lines for ease of reading
     label count = 0;
-    for (const label verti : f)
+    for (const label pointi : f)
     {
         if ((count % 8) == 0)
         {
             os  << nl << "  " << cellId;
         }
-        os  << ' ' << verti + 1;
+        os  << ' ' << pointi + 1;
         ++count;
     }
     os  << nl;
@@ -91,7 +91,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     );
 
 
-    // STAR-CD index of points
+    // STARCD index of points
     List<label> pointId;
 
     // read points from .vrt file
@@ -102,7 +102,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
         pointId
     );
 
-    // Build inverse mapping (STAR-CD pointId -> index)
+    // Build inverse mapping (STARCD pointId -> index)
     Map<label> mapPointId(2*pointId.size());
     forAll(pointId, i)
     {
@@ -133,27 +133,33 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     bool sorted = true;
     label zoneId = 0;
 
-    label lineLabel, shapeId, nLabels, cellTableId, typeId;
+    label ignoredLabel, shapeId, nLabels, cellTableId, typeId;
     DynamicList<label> vertexLabels(64);
 
-    while ((is >> lineLabel).good())
+    token tok;
+
+    while (is.read(tok).good() && tok.isLabel())
     {
-        is >> shapeId >> nLabels >> cellTableId >> typeId;
+        // const label starCellId = tok.labelToken();
+        is  >> shapeId
+            >> nLabels
+            >> cellTableId
+            >> typeId;
 
         vertexLabels.clear();
         vertexLabels.reserve(nLabels);
 
-        // read indices - max 8 per line
+        // Read indices - max 8 per line
         for (label i = 0; i < nLabels; ++i)
         {
             label vrtId;
             if ((i % 8) == 0)
             {
-               is >> lineLabel;
+                is >> ignoredLabel; // Skip cellId for continuation lines
             }
             is >> vrtId;
 
-            // convert original vertex id to point label
+            // Convert original vertex id to point label
             vertexLabels.append(mapPointId[vrtId]);
         }
 
@@ -183,10 +189,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
                 }
                 else
                 {
-                    dynNames.append
-                    (
-                        word("cellTable_") + ::Foam::name(cellTableId)
-                    );
+                    dynNames.append("cellTable_" + ::Foam::name(cellTableId));
                 }
 
                 dynSizes.append(0);
@@ -204,7 +207,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 
                 for (const face& tri : trias)
                 {
-                    // a triangular 'face', convert to 'triFace' etc
+                    // A triangular 'face', convert to 'triFace' etc
                     dynFaces.append(Face(tri));
                     dynZones.append(zoneId);
                     dynSizes[zoneId]++;

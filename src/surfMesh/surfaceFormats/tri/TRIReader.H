@@ -43,6 +43,7 @@ SourceFiles
 
 #include "STLpoint.H"
 #include "labelList.H"
+#include "surfaceFormatsCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,6 +57,8 @@ namespace fileFormats
 \*---------------------------------------------------------------------------*/
 
 class TRIReader
+:
+    public surfaceFormatsCore
 {
     // Private Data
 

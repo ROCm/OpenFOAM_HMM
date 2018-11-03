@@ -86,7 +86,7 @@ void Foam::fileFormats::STARCDsurfaceFormatCore::writeCase
 {
     const word caseName = os.name().nameLessExt();
 
-    os  << "! STAR-CD file written " << clock::dateTime().c_str() << nl
+    os  << "! STARCD file written " << clock::dateTime().c_str() << nl
         << "! " << pts.size() << " points, " << nFaces << " faces" << nl
         << "! case " << caseName << nl
         << "! ------------------------------" << nl;

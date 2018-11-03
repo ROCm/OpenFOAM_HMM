@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,13 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "STARCDCore.H"
-#include "ListOps.H"
-#include "clock.H"
-#include "bitSet.H"
 #include "DynamicList.H"
-#include "StringStream.H"
 #include "OSspecific.H"
-
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -85,8 +80,40 @@ Foam::fileFormats::STARCDCore::starToFoamFaceAddr =
     { starcdPyr,   { 0, -1, 4, 2, 1, 3 } }
 };
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+    // Read and discard to newline
+    static inline void readToNewline(ISstream& is)
+    {
+        char ch = '\n';
+        do
+        {
+            is.get(ch);
+        }
+        while ((is) && ch != '\n');
+    }
+
+} // End namespace Foam
+
 
 // * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
+
+// Read two-line header
+//
+/*---------------------------------------------------------------------------*\
+Line 1:
+  PROSTAR_(BOUNDARY|CELL|VERTEX) [newline]
+
+Line 2:
+  <version> 0 0 0 0 0 0 0 [newline]
+
+Body:
+  ...
+
+\*---------------------------------------------------------------------------*/
 
 bool Foam::fileFormats::STARCDCore::readHeader
 (
@@ -100,23 +127,20 @@ bool Foam::fileFormats::STARCDCore::readHeader
             << abort(FatalError);
     }
 
-    word  magic;
+    word magic;
+    is >> magic;
+    readToNewline(is);
+
     label majorVersion;
+    is >> majorVersion;
+    readToNewline(is);
 
-    string line;
-
-    is.getLine(line);
-    IStringStream(line)() >> magic;
-
-    is.getLine(line);
-    IStringStream(line)() >> majorVersion;
-
-    // add other checks ...
+    // Add other checks ...
     if (magic != fileHeaders_[header])
     {
-        Info<< "header mismatch " << fileHeaders_[header]
+        Info<< "Header mismatch " << fileHeaders_[header]
             << "  " << is.name()
-            << endl;
+            << nl;
 
         return false;
     }
@@ -133,14 +157,14 @@ void Foam::fileFormats::STARCDCore::writeHeader
 {
     os  << fileHeaders_[header] << nl
         << 4000
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << endl;
+        << ' ' << 0
+        << ' ' << 0
+        << ' ' << 0
+        << ' ' << 0
+        << ' ' << 0
+        << ' ' << 0
+        << ' ' << 0
+        << nl;
 }
 
 
@@ -173,6 +197,7 @@ Foam::label Foam::fileFormats::STARCDCore::readPoints
 )
 {
     label maxId = 0;
+    token tok;
 
     if (!is.good())
     {
@@ -183,24 +208,26 @@ Foam::label Foam::fileFormats::STARCDCore::readPoints
 
     readHeader(is, HEADER_VRT);
 
-    // reuse memory if possible
+    // Reuse memory if possible
     DynamicList<point> dynPoints(std::move(points));
-    DynamicList<label> dynPointId(std::move(ids)); // STAR-CD index of points
+    DynamicList<label> dynPointId(std::move(ids));  // STARCD index of points
 
     dynPoints.clear();
     dynPointId.clear();
 
     {
-        label lineLabel;
         scalar x, y, z;
 
-        while ((is >> lineLabel).good())
+        while (is.read(tok).good() && tok.isLabel())
         {
-            maxId = max(maxId, lineLabel);
+            const label starVertexId = tok.labelToken();
+
             is >> x >> y >> z;
 
+            maxId = max(maxId, starVertexId);
+
             dynPoints.append(point(x, y, z));
-            dynPointId.append(lineLabel);
+            dynPointId.append(starVertexId);
         }
     }
 
@@ -223,18 +250,23 @@ void Foam::fileFormats::STARCDCore::writePoints
     // Set the precision of the points data to 10
     os.precision(10);
 
-    // force decimal point for Fortran input
+    // Force decimal point for Fortran input
     os.setf(std::ios::showpoint);
 
-    forAll(points, ptI)
+    label starVertId = 1;  // 1-based vertex labels
+
+    for (const point& p : points)
     {
-        // convert [m] -> [mm] etc
+        // Convert [m] -> [mm] etc
         os
-            << ptI + 1 << ' '
-            << scaleFactor * points[ptI].x() << ' '
-            << scaleFactor * points[ptI].y() << ' '
-            << scaleFactor * points[ptI].z() << '\n';
+            << starVertId << ' '
+            << scaleFactor * p.x() << ' '
+            << scaleFactor * p.y() << ' '
+            << scaleFactor * p.z() << nl;
+
+        ++starVertId;
     }
+
     os.flush();
 }
 

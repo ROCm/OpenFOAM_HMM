@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,23 +30,27 @@ License
 #include "symmetryPolyPatch.H"
 #include "cellModel.H"
 #include "ListOps.H"
+#include "stringOps.H"
 #include "IFstream.H"
 #include "IOMap.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-//! \cond fileScope
-//- Read and discard to newline
-static void readToNewline(Foam::IFstream& is)
+namespace Foam
 {
-    char ch = '\n';
-    do
+
+    // Read and discard to newline
+    static inline void readToNewline(ISstream& is)
     {
-        (is).get(ch);
+        char ch = '\n';
+        do
+        {
+            is.get(ch);
+        }
+        while ((is) && ch != '\n');
     }
-    while ((is) && ch != '\n');
-}
-//! \endcond
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -61,7 +65,7 @@ void Foam::fileFormats::STARCDMeshReader::readAux
 }
 
 
-// read in the points from the .vrt file
+// Read points from <.vrt> file
 //
 /*---------------------------------------------------------------------------*\
 Line 1:
@@ -81,6 +85,7 @@ Foam::label Foam::fileFormats::STARCDMeshReader::readPoints
 )
 {
     label nPoints = 0, maxId = 0;
+    token tok;
 
     // Pass 1:
     // get # points and maximum vertex label
@@ -88,20 +93,22 @@ Foam::label Foam::fileFormats::STARCDMeshReader::readPoints
         IFstream is(inputName);
         readHeader(is, STARCDCore::HEADER_VRT);
 
-        label lineLabel;
         scalar x, y, z;
 
-        while ((is >> lineLabel).good())
+        while (is.read(tok).good() && tok.isLabel())
         {
-            nPoints++;
-            maxId = max(maxId, lineLabel);
+            const label starVertexId = tok.labelToken();
+
             is >> x >> y >> z;
+
+            maxId = max(maxId, starVertexId);
+            ++nPoints;
         }
     }
 
     Info<< "Number of points  = " << nPoints << endl;
 
-    // set sizes and reset to invalid values
+    // Set sizes and reset to invalid values
 
     points_.setSize(nPoints);
     mapToFoamPointId_.setSize(maxId+1);
@@ -116,24 +123,30 @@ Foam::label Foam::fileFormats::STARCDMeshReader::readPoints
     // Pass 2:
     // construct pointList and conversion table
     // from Star vertex numbers to Foam point labels
-    if (nPoints > 0)
+    if (!nPoints)
+    {
+        FatalErrorInFunction
+            << "no points in file " << inputName
+            << abort(FatalError);
+    }
+    else
     {
         IFstream is(inputName);
         readHeader(is, STARCDCore::HEADER_VRT);
 
-        label lineLabel;
-
         label pointi = 0;
-        while ((is >> lineLabel).good())
+        while (is.read(tok).good() && tok.isLabel())
         {
+            const label starVertexId = tok.labelToken();
+
             is  >> points_[pointi].x()
                 >> points_[pointi].y()
                 >> points_[pointi].z();
 
             // might need again in the future
-            ////  origPointId[pointi] = lineLabel;
-            mapToFoamPointId_[lineLabel] = pointi;
-            pointi++;
+            ////  origPointId[pointi] = starVertexId;
+            mapToFoamPointId_[starVertexId] = pointi;
+            ++pointi;
         }
 
         if (nPoints > pointi)
@@ -144,23 +157,21 @@ Foam::label Foam::fileFormats::STARCDMeshReader::readPoints
             //// origPointId.setSize(nPoints);
         }
 
-        if (scaleFactor > 1.0 + SMALL || scaleFactor < 1.0 - SMALL)
+        if
+        (
+            scaleFactor > 0
+         && (scaleFactor > 1.0 + SMALL || scaleFactor < 1.0 - SMALL)
+        )
         {
             points_ *= scaleFactor;
         }
-    }
-    else
-    {
-        FatalErrorInFunction
-            << "no points in file " << inputName
-            << abort(FatalError);
     }
 
     return maxId;
 }
 
 
-// read in the cells from the .cel file
+// Read cells from <.cel> file
 //
 /*---------------------------------------------------------------------------*\
 Line 1:
@@ -204,6 +215,7 @@ void Foam::fileFormats::STARCDMeshReader::readCells(const fileName& inputName)
 {
     label nFluids = 0, nSolids = 0, nBaffles = 0, nShells = 0;
     label maxId = 0;
+    token tok;
 
     bool unknownVertices = false;
 
@@ -215,20 +227,21 @@ void Foam::fileFormats::STARCDMeshReader::readCells(const fileName& inputName)
         IFstream is(inputName);
         readHeader(is, STARCDCore::HEADER_CEL);
 
-        label lineLabel, shapeId, nLabels, cellTableId, typeId;
+        label shapeId, nLabels, cellTableId, typeId;
 
-        while ((is >> lineLabel).good())
+        while (is.read(tok).good() && tok.isLabel())
         {
-            label starCellId = lineLabel;
+            const label starCellId = tok.labelToken();
+
             is  >> shapeId
                 >> nLabels
                 >> cellTableId
                 >> typeId;
 
-            // skip the rest of the line
+            // Skip the rest of the line
             readToNewline(is);
 
-            // max 8 indices per line
+            // Max 8 indices per line
             while (nLabels > 0)
             {
                 readToNewline(is);
@@ -237,7 +250,7 @@ void Foam::fileFormats::STARCDMeshReader::readCells(const fileName& inputName)
 
             if (typeId == STARCDCore::starcdFluidType)
             {
-                nFluids++;
+                ++nFluids;
                 maxId = max(maxId, starCellId);
 
                 if (!cellTable_.found(cellTableId))
@@ -248,7 +261,7 @@ void Foam::fileFormats::STARCDMeshReader::readCells(const fileName& inputName)
             }
             else if (typeId == STARCDCore::starcdSolidType)
             {
-                nSolids++;
+                ++nSolids;
                 if (keepSolids_)
                 {
                     maxId = max(maxId, starCellId);
@@ -264,12 +277,12 @@ void Foam::fileFormats::STARCDMeshReader::readCells(const fileName& inputName)
             else if (typeId == STARCDCore::starcdBaffleType)
             {
                 // baffles have no cellTable entry
-                nBaffles++;
+                ++nBaffles;
                 maxId = max(maxId, starCellId);
             }
             else if (typeId == STARCDCore::starcdShellType)
             {
-                nShells++;
+                ++nShells;
                 if (!cellTable_.found(cellTableId))
                 {
                     cellTable_.setName(cellTableId);
@@ -336,14 +349,14 @@ void Foam::fileFormats::STARCDMeshReader::readCells(const fileName& inputName)
         readHeader(is, STARCDCore::HEADER_CEL);
 
         labelList starLabels(64);
-        label lineLabel, shapeId, nLabels, cellTableId, typeId;
+        label ignoredLabel, shapeId, nLabels, cellTableId, typeId;
 
-        label celli = 0;
-        label baffleI = 0;
+        label celli = 0, bafflei = 0;
 
-        while ((is >> lineLabel).good())
+        while (is.read(tok).good() && tok.isLabel())
         {
-            label starCellId = lineLabel;
+            const label starCellId = tok.labelToken();
+
             is  >> shapeId
                 >> nLabels
                 >> cellTableId
@@ -355,17 +368,17 @@ void Foam::fileFormats::STARCDMeshReader::readCells(const fileName& inputName)
             }
             starLabels = -1;
 
-            // read indices - max 8 per line
+            // Read indices - max 8 per line
             for (label i = 0; i < nLabels; ++i)
             {
                 if ((i % 8) == 0)
                 {
-                    is >> lineLabel;
+                    is >> ignoredLabel; // Skip cellId for continuation lines
                 }
                 is >> starLabels[i];
             }
 
-            // skip solid cells
+            // Skip solid cells
             if
             (
                 typeId == STARCDCore::starcdSolidType
@@ -375,7 +388,7 @@ void Foam::fileFormats::STARCDMeshReader::readCells(const fileName& inputName)
                 continue;
             }
 
-            // determine the OpenFOAM cell shape
+            // Determine the OpenFOAM cell shape
             const cellModel* curModelPtr = nullptr;
 
             // fluid/solid cells
@@ -432,7 +445,7 @@ void Foam::fileFormats::STARCDMeshReader::readCells(const fileName& inputName)
                 );
 
                 cellFaces_[celli] = cellShapes_[celli].faces();
-                celli++;
+                ++celli;
             }
             else if (shapeId == STARCDCore::starcdPoly)
             {
@@ -509,7 +522,7 @@ void Foam::fileFormats::STARCDMeshReader::readCells(const fileName& inputName)
                 cellTableId_[celli] = cellTableId;
                 cellShapes_[celli]  = genericShape;
                 cellFaces_[celli]   = faces;
-                celli++;
+                ++celli;
             }
             else if (typeId == STARCDCore::starcdBaffleType)
             {
@@ -547,16 +560,16 @@ void Foam::fileFormats::STARCDMeshReader::readCells(const fileName& inputName)
                 // valid faces only
                 if (f.size() >= 3)
                 {
-                    baffleFaces_[baffleI] = f;
+                    baffleFaces_[bafflei] = f;
                     // insert lookup addressing in normal list
-                    mapToFoamCellId_[starCellId]  = nCells + baffleI;
-                    origCellId_[nCells + baffleI] = starCellId;
-                    baffleI++;
+                    mapToFoamCellId_[starCellId]  = nCells + bafflei;
+                    origCellId_[nCells + bafflei] = starCellId;
+                    ++bafflei;
                 }
             }
         }
 
-        baffleFaces_.setSize(baffleI);
+        baffleFaces_.setSize(bafflei);
     }
 
     if (unknownVertices)
@@ -577,7 +590,7 @@ void Foam::fileFormats::STARCDMeshReader::readCells(const fileName& inputName)
 }
 
 
-// read in the boundaries from the .bnd file
+// Read boundaries from <.bnd> file
 //
 /*---------------------------------------------------------------------------*\
 Line 1:
@@ -603,7 +616,8 @@ void Foam::fileFormats::STARCDMeshReader::readBoundary
 )
 {
     label nPatches = 0, nFaces = 0, nBafflePatches = 0, maxId = 0;
-    label lineLabel, starCellId, cellFaceId, starRegion, configNumber;
+    label starCellId, cellFaceId, starRegion, configNumber;
+    token tok;
     word patchType;
 
     labelList mapToFoamPatchId(1000, label(-1));
@@ -641,9 +655,12 @@ void Foam::fileFormats::STARCDMeshReader::readBoundary
         {
             readHeader(is, STARCDCore::HEADER_BND);
 
-            while ((is >> lineLabel).good())
+            while (is.read(tok).good() && tok.isLabel())
             {
-                nFaces++;
+                // Ignore boundary id (not needed)
+
+                ++nFaces;
+
                 is  >> starCellId
                     >> cellFaceId
                     >> starRegion
@@ -664,12 +681,12 @@ void Foam::fileFormats::STARCDMeshReader::readBoundary
                     // should actually be case-insensitive
                     if (patchType == "BAFF")
                     {
-                        nBafflePatches++;
+                        ++nBafflePatches;
                     }
-                    nPatches++;
+                    ++nPatches;
                 }
 
-                nPatchFaces[patchLabel]++;
+                ++nPatchFaces[patchLabel];
             }
 
             if (nPatches == 0)
@@ -684,7 +701,7 @@ void Foam::fileFormats::STARCDMeshReader::readBoundary
     }
 
     // keep empty patch region in reserve
-    nPatches++;
+    ++nPatches;
     Info<< "Number of patches = " << nPatches
         << " (including extra for missing)" << endl;
 
@@ -703,37 +720,22 @@ void Foam::fileFormats::STARCDMeshReader::readBoundary
     // - use 'Label' entry from "constant/boundaryRegion" dictionary
     forAll(patchTypes_, patchi)
     {
-        bool foundName = false, foundType = false;
+        bool fndName = false, fndType = false;
 
-        Map<dictionary>::const_iterator
-            iter = boundaryRegion_.find(origRegion[patchi]);
+        auto iter = boundaryRegion_.cfind(origRegion[patchi]);
 
-        if
-        (
-            iter != boundaryRegion_.end()
-        )
+        if (iter.found())
         {
-            foundType = iter().readIfPresent
-            (
-                "BoundaryType",
-                patchTypes_[patchi]
-            );
+            const dictionary& dict = *iter;
 
-            foundName = iter().readIfPresent
-            (
-                "Label",
-                patchNames_[patchi]
-            );
+            fndType = dict.readIfPresent("BoundaryType", patchTypes_[patchi]);
+            fndName = dict.readIfPresent("Label", patchNames_[patchi]);
         }
 
-        // consistent names, in long form and in lowercase
-        if (!foundType)
+        // Consistent names. Long form and in lowercase
+        if (!fndType)
         {
-            // transform
-            forAllIter(string, patchTypes_[patchi], i)
-            {
-                *i = tolower(*i);
-            }
+            stringOps::inplaceLower(patchTypes_[patchi]);
 
             if (patchTypes_[patchi] == "symp")
             {
@@ -753,19 +755,19 @@ void Foam::fileFormats::STARCDMeshReader::readBoundary
             }
         }
 
-        // create a name if needed
-        if (!foundName)
+        // Create a name if needed
+        if (!fndName)
         {
             patchNames_[patchi] =
                 patchTypes_[patchi] + "_" + name(origRegion[patchi]);
         }
     }
 
-    // enforce name "Default_Boundary_Region"
+    // Enforce name "Default_Boundary_Region"
     patchNames_[nPatches-1] = defaultBoundaryName;
 
-    // sort according to ascending region numbers, but leave
-    // Default_Boundary_Region as the final patch
+    // Sort according to ascending region numbers, but leave
+    // "Default_Boundary_Region" as the final patch
     {
         labelList sortedIndices;
         sortedOrder(SubList<label>(origRegion, nPatches-1), sortedIndices);
@@ -829,8 +831,10 @@ void Foam::fileFormats::STARCDMeshReader::readBoundary
         IFstream is(inputName);
         readHeader(is, STARCDCore::HEADER_BND);
 
-        while ((is >> lineLabel).good())
+        while (is.read(tok).good() && tok.isLabel())
         {
+            // Ignore boundary id (not needed)
+
             is
                 >> starCellId
                 >> cellFaceId
@@ -885,8 +889,8 @@ void Foam::fileFormats::STARCDMeshReader::readBoundary
 #ifdef DEBUG_BOUNDARY
                 Info<< "bnd " << cellId << " " << cellFaceId << endl;
 #endif
-                // increment counter of faces in current patch
-                nPatchFaces[patchi]++;
+                // Increment counter of faces in current patch
+                ++nPatchFaces[patchi];
             }
         }
     }
@@ -969,7 +973,7 @@ void Foam::fileFormats::STARCDMeshReader::cullPoints()
         }
     }
 
-    // the new ordering and the count of unused points
+    // The new ordering and the count of unused points
     label pointi = 0;
     forAll(oldToNew, i)
     {
@@ -979,30 +983,29 @@ void Foam::fileFormats::STARCDMeshReader::cullPoints()
         }
     }
 
-    // report unused points
+    // Report unused points
     if (nPoints > pointi)
     {
         Info<< "Unused    points  = " << (nPoints - pointi) << endl;
         nPoints = pointi;
 
-        // adjust points and truncate
+        // Adjust points and truncate
         inplaceReorder(oldToNew, points_);
         points_.setSize(nPoints);
 
-        // adjust cellFaces - with mesh shapes this might be faster
-        forAll(cellFaces_, celli)
+        // Adjust cellFaces - with mesh shapes this might be faster
+        for (faceList& faces : cellFaces_)
         {
-            faceList& faces = cellFaces_[celli];
-            forAll(faces, i)
+            for (face& f : faces)
             {
-                inplaceRenumber(oldToNew, faces[i]);
+                inplaceRenumber(oldToNew, f);
             }
         }
 
-        // adjust baffles
-        forAll(baffleFaces_, facei)
+        // Adjust baffles
+        for (face& f : baffleFaces_)
         {
-            inplaceRenumber(oldToNew, baffleFaces_[facei]);
+            inplaceRenumber(oldToNew, f);
         }
     }
 }
@@ -1049,12 +1052,6 @@ Foam::fileFormats::STARCDMeshReader::STARCDMeshReader
 {
     readAux(registry);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fileFormats::STARCDMeshReader::~STARCDMeshReader()
-{}
 
 
 // ************************************************************************* //

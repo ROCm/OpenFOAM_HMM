@@ -41,9 +41,9 @@ void Foam::vtkUnstructuredReader::readBlock
 ) const
 {
     list.setSize(n);
-    forAll(list, i)
+    for (T& val : list)
     {
-        inFile >> list[i];
+        inFile >> val;
     }
 }
 
