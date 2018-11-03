@@ -105,9 +105,11 @@ Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::New
     const IOdictionary& solverDict
 )
 {
+    // The change from "solver" to "motionSolver" has not been
+    // applied consistently. Accept both without complaint.
     const word solverName
     (
-        solverDict.getCompat<word>("motionSolver", {{"solver", 1612}})
+        solverDict.getCompat<word>("motionSolver", {{"solver", -1612}})
     );
 
     Info<< "Selecting motion solver: " << solverName << nl;
