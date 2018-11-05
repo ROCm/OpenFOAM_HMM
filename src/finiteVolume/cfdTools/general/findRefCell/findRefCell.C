@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -111,6 +111,10 @@ bool Foam::setRefCell
 
         return true;
     }
+    else
+    {
+        refCelli = -1;
+    }
 
     return false;
 }
@@ -141,25 +145,14 @@ Foam::scalar Foam::getRefCellValue
         FatalErrorInFunction
             << "Illegal reference cellID " << refCelli
             << ". Mesh has " << field.mesh().nCells() << ". cells."
-            << exit(FatalIOError);
+            << exit(FatalError);
     }
-
-    // Catch duplicates
-    label hasRef =
-        (refCelli >= 0 && refCelli < field.mesh().nCells() ? 1 : 0);
-
-    if (1 != returnReduce<label>(hasRef, sumOp<label>()))
-    {
-        FatalErrorInFunction
-            << "Invalid reference cellID " << refCelli
-            << ". Mesh has " << field.mesh().nCells() << ". cells."
-            << exit(FatalIOError);
-    }
-    scalar refCellValue = (hasRef ? field[refCelli] : 0.0);
-    #else
-    scalar refCellValue = (refCelli >= 0 ? field[refCelli] : 0.0);
     #endif
+    scalar refCellValue = (refCelli >= 0 ? field[refCelli] : 0.0);
 
+    // Currently distributing the value to all processors. This is generally
+    // not needed since only the processor holding the reference cell needs
+    // it. Tdb.
     return returnReduce(refCellValue, sumOp<scalar>());
 }
 
