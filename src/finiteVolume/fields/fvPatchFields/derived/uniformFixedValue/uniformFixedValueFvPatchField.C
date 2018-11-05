@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,7 +91,7 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf),
-    uniformValue_(ptf.uniformValue_.clone())
+    uniformValue_(ptf.uniformValue_.clone(this->patch().patch()))
 {}
 
 
@@ -103,7 +103,7 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, iF),
-    uniformValue_(ptf.uniformValue_.clone())
+    uniformValue_(ptf.uniformValue_.clone(this->patch().patch()))
 {
     // Evaluate the profile if defined
     if (uniformValue_.valid())
@@ -114,6 +114,33 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+void Foam::uniformFixedValueFvPatchField<Type>::autoMap
+(
+    const fvPatchFieldMapper& mapper
+)
+{
+    fixedValueFvPatchField<Type>::autoMap(mapper);
+    uniformValue_().autoMap(mapper);
+}
+
+
+template<class Type>
+void Foam::uniformFixedValueFvPatchField<Type>::rmap
+(
+    const fvPatchField<Type>& ptf,
+    const labelList& addr
+)
+{
+    fixedValueFvPatchField<Type>::rmap(ptf, addr);
+
+    const uniformFixedValueFvPatchField& tiptf =
+        refCast<const uniformFixedValueFvPatchField>(ptf);
+
+    uniformValue_().rmap(tiptf.uniformValue_(), addr);
+}
+
 
 template<class Type>
 void Foam::uniformFixedValueFvPatchField<Type>::updateCoeffs()
