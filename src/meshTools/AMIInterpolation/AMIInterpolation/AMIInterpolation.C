@@ -966,10 +966,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
 
         for (labelList& addressing : tgtAddress_)
         {
-            for (label& addr : addressing)
-            {
-                addr = globalSrcFaces.toGlobal(addr);
-            }
+            globalSrcFaces.inplaceToGlobal(addressing);
         }
 
         // Send data back to originating procs. Note that contributions

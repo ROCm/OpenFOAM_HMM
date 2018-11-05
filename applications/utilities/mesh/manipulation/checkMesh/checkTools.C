@@ -416,11 +416,7 @@ void Foam::mergeAndWrite
 
         // Get renumbered local data
         pointField myPoints(mesh.points(), setPointIDs);
-        labelList myIDs(setPointIDs.size());
-        forAll(setPointIDs, i)
-        {
-            myIDs[i] = globalNumbering.toGlobal(setPointIDs[i]);
-        }
+        labelList myIDs(globalNumbering.toGlobal(setPointIDs));
 
         if (Pstream::master())
         {

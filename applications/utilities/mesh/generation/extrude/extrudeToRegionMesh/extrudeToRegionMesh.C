@@ -492,15 +492,8 @@ labelListList globalEdgeFaces
 
     forAll(edgeFaces, edgeI)
     {
-        const labelList& eFaces = edgeFaces[edgeI];
-
         // Store pp face and processor as unique tag.
-        labelList& globalEFaces = globalEdgeFaces[edgeI];
-        globalEFaces.setSize(eFaces.size());
-        forAll(eFaces, i)
-        {
-            globalEFaces[i] = globalFaces.toGlobal(eFaces[i]);
-        }
+        globalEdgeFaces[edgeI] = globalFaces.toGlobal(edgeFaces[edgeI]);
     }
 
     // Synchronise across coupled edges.

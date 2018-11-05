@@ -524,24 +524,19 @@ void Foam::meshToMesh::calculate(const word& methodName, const bool normalise)
 
         calcAddressing(methodName, srcRegion_, newTgt);
 
-        // per source cell the target cell address in newTgt mesh
-        forAll(srcToTgtCellAddr_, i)
+        // Per source cell the target cell address in newTgt mesh
+        for (labelList& addressing : srcToTgtCellAddr_)
         {
-            labelList& addressing = srcToTgtCellAddr_[i];
-            forAll(addressing, addrI)
+            for (label& addr : addressing)
             {
-                addressing[addrI] = newTgtCellIDs[addressing[addrI]];
+                addr = newTgtCellIDs[addr];
             }
         }
 
-        // convert target addresses in newTgtMesh into global cell numbering
-        forAll(tgtToSrcCellAddr_, i)
+        // Convert target addresses in newTgtMesh into global cell numbering
+        for (labelList& addressing : tgtToSrcCellAddr_)
         {
-            labelList& addressing = tgtToSrcCellAddr_[i];
-            forAll(addressing, addrI)
-            {
-                addressing[addrI] = globalSrcCells.toGlobal(addressing[addrI]);
-            }
+            globalSrcCells.inplaceToGlobal(addressing);
         }
 
         // set up as a reverse distribute

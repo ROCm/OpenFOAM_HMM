@@ -269,14 +269,7 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
     bitSet isMasterFace(syncTools::getMasterFaces(mesh_));
 
     {
-        label nMasterFaces = 0;
-        forAll(isMasterFace, facei)
-        {
-            if (isMasterFace.test(facei))
-            {
-                ++nMasterFaces;
-            }
-        }
+        label nMasterFaces = isMasterFace.count();
         reduce(nMasterFaces, sumOp<label>());
 
         label nChangedFaces = 0;
@@ -2659,11 +2652,10 @@ Foam::bitSet Foam::meshRefinement::getMasterPoints
 {
     const globalIndex globalPoints(meshPoints.size());
 
-    labelList myPoints(meshPoints.size());
-    forAll(meshPoints, pointi)
-    {
-        myPoints[pointi] = globalPoints.toGlobal(pointi);
-    }
+    labelList myPoints
+    (
+        identity(globalPoints.localSize(), globalPoints.localStart())
+    );
 
     syncTools::syncPointList
     (
@@ -2696,11 +2688,10 @@ Foam::bitSet Foam::meshRefinement::getMasterEdges
 {
     const globalIndex globalEdges(meshEdges.size());
 
-    labelList myEdges(meshEdges.size());
-    forAll(meshEdges, edgei)
-    {
-        myEdges[edgei] = globalEdges.toGlobal(edgei);
-    }
+    labelList myEdges
+    (
+        identity(globalEdges.localSize(), globalEdges.localStart())
+    );
 
     syncTools::syncEdgeList
     (
@@ -2741,24 +2732,10 @@ const
 
     {
         bitSet isMasterFace(syncTools::getMasterFaces(mesh_));
-        label nMasterFaces = 0;
-        forAll(isMasterFace, i)
-        {
-            if (isMasterFace.test(i))
-            {
-                ++nMasterFaces;
-            }
-        }
+        label nMasterFaces = isMasterFace.count();
 
         bitSet isMeshMasterPoint(syncTools::getMasterPoints(mesh_));
-        label nMasterPoints = 0;
-        forAll(isMeshMasterPoint, i)
-        {
-            if (isMeshMasterPoint.test(i))
-            {
-                ++nMasterPoints;
-            }
-        }
+        label nMasterPoints = isMeshMasterPoint.count();
 
         Info<< msg.c_str()
             << " : cells:" << pData.nTotalCells()

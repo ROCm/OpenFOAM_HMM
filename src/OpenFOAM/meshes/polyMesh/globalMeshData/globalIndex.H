@@ -85,9 +85,9 @@ public:
         inline globalIndex
         (
             const label localSize,
-            const int tag,
-            const label comm,
-            const bool parallel     // use parallel comms
+            const int tag,          //!< message tag
+            const label comm,       //!< communicator
+            const bool parallel     //!< use parallel comms
         );
 
         //- Copy construct from list of labels
@@ -97,7 +97,7 @@ public:
         inline explicit globalIndex(labelList&& offsets);
 
         //- Construct from Istream
-        globalIndex(Istream& is);
+        explicit globalIndex(Istream& is);
 
 
     // Member Functions
@@ -123,9 +123,9 @@ public:
         void reset
         (
             const label localSize,
-            const int tag,
-            const label comm,
-            const bool parallel     // use parallel comms
+            const int tag,          //!< message tag
+            const label comm,       //!< communicator
+            const bool parallel     //!< use parallel comms
         );
 
 
@@ -140,11 +140,17 @@ public:
             //- Return start/size range of local processor data
             inline labelRange range() const;
 
-            //- From local to global
-            inline label toGlobal(const label i) const;
-
             //- Is on local processor
             inline bool isLocal(const label i) const;
+
+            //- From local to global index
+            inline label toGlobal(const label i) const;
+
+            //- From local to global index
+            inline labelList toGlobal(const labelUList& labels) const;
+
+            //- From local to global index (inplace)
+            inline void inplaceToGlobal(labelList& labels) const;
 
             //- From global to local on current processor.
             //  FatalError if not on local processor.
@@ -168,11 +174,26 @@ public:
             //- Return start/size range of proci data
             inline labelRange range(const label proci) const;
 
+            //- Is on processor proci
+            inline bool isLocal(const label proci, const label i) const;
+
             //- From local to global on proci
             inline label toGlobal(const label proci, const label i) const;
 
-            //- Is on processor proci
-            inline bool isLocal(const label proci, const label i) const;
+            //- From local to global on proci
+            inline labelList toGlobal
+            (
+                const label proci,
+                const labelUList& labels
+            ) const;
+
+            //- From local to global index on proci (inplace)
+            inline void inplaceToGlobal
+            (
+                const label proci,
+                labelList& labels
+            ) const;
+
 
             //- From global to local on proci
             inline label toLocal(const label proci, const label i) const;

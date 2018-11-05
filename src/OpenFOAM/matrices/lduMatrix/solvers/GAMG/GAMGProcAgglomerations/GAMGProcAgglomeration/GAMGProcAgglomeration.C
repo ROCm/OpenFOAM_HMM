@@ -133,12 +133,14 @@ Foam::labelListList Foam::GAMGProcAgglomeration::globalCellCells
         Pstream::parRun()
     );
 
-    labelList globalIndices(addr.size());
-    forAll(globalIndices, celli)
-    {
-        globalIndices[celli] = globalNumbering.toGlobal(myProcID, celli);
-    }
-
+    labelList globalIndices
+    (
+        identity
+        (
+            globalNumbering.localSize(myProcID),
+            globalNumbering.localStart(myProcID)
+        )
+    );
 
     // Get the interface cells
     PtrList<labelList> nbrGlobalCells(interfaces.size());

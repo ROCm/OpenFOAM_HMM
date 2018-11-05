@@ -134,12 +134,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::distributePatches
 
         if (domain != Pstream::myProcNo() && sendElems.size())
         {
-            labelList globalElems(sendElems.size());
-            forAll(sendElems, i)
-            {
-                globalElems[i] = gi.toGlobal(sendElems[i]);
-            }
-
             faceList subFaces(UIndirectList<face>(pp, sendElems));
             primitivePatch subPatch
             (
@@ -156,7 +150,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::distributePatches
             UOPstream toDomain(domain, pBufs);
             toDomain
                 << subPatch.localFaces() << subPatch.localPoints()
-                << globalElems;
+                << gi.toGlobal(sendElems);
         }
     }
 
@@ -186,12 +180,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::distributePatches
 
         faces[Pstream::myProcNo()] = subPatch.localFaces();
         points[Pstream::myProcNo()] = subPatch.localPoints();
-
-        faceIDs[Pstream::myProcNo()].setSize(sendElems.size());
-        forAll(sendElems, i)
-        {
-            faceIDs[Pstream::myProcNo()][i] = gi.toGlobal(sendElems[i]);
-        }
+        faceIDs[Pstream::myProcNo()] = gi.toGlobal(sendElems);
     }
 
     // Consume

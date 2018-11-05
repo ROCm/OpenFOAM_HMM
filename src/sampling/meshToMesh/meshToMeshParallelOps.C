@@ -455,18 +455,17 @@ void Foam::meshToMesh::distributeCells
             }
 
             // tgt cells into global numbering
-            labelList globalElems(sendElems.size());
-            forAll(sendElems, i)
+            labelList globalElems(globalI.toGlobal(sendElems));
+
+            if (debug > 1)
             {
-                if (debug > 1)
+                forAll(sendElems, i)
                 {
                     Pout<< "tgtProc:" << Pstream::myProcNo()
                         << " sending tgt cell " << sendElems[i]
-                        << "[" << globalI.toGlobal(sendElems[i]) << "]"
+                        << "[" << globalElems[i] << "]"
                         << " to srcProc " << domain << endl;
                 }
-
-                globalElems[i] = globalI.toGlobal(sendElems[i]);
             }
 
             // pass data

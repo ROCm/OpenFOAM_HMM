@@ -689,12 +689,7 @@ void Foam::globalMeshData::calcGlobalPointEdges
     forAll(pointEdges, pointi)
     {
         const labelList& pEdges = pointEdges[pointi];
-        labelList& globalPEdges = globalPointEdges[pointi];
-        globalPEdges.setSize(pEdges.size());
-        forAll(pEdges, i)
-        {
-            globalPEdges[i] = globalEdgeNumbers.toGlobal(pEdges[i]);
-        }
+        globalPointEdges[pointi] = globalEdgeNumbers.toGlobal(pEdges);
 
         labelPairList& globalPPoints = globalPointPoints[pointi];
         globalPPoints.setSize(pEdges.size());

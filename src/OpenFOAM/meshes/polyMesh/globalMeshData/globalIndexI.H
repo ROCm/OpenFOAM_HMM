@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,6 +130,18 @@ inline Foam::label Foam::globalIndex::size() const
 }
 
 
+inline bool Foam::globalIndex::isLocal(const label proci, const label i) const
+{
+    return i >= offsets_[proci] && i < offsets_[proci+1];
+}
+
+
+inline bool Foam::globalIndex::isLocal(const label i) const
+{
+    return isLocal(Pstream::myProcNo(), i);
+}
+
+
 inline Foam::label Foam::globalIndex::toGlobal
 (
     const label proci,
@@ -146,15 +158,46 @@ inline Foam::label Foam::globalIndex::toGlobal(const label i) const
 }
 
 
-inline bool Foam::globalIndex::isLocal(const label proci, const label i) const
+inline Foam::labelList Foam::globalIndex::toGlobal
+(
+    const label proci,
+    const labelUList& labels
+) const
 {
-    return i >= offsets_[proci] && i < offsets_[proci+1];
+    labelList result(labels);
+    inplaceToGlobal(proci, result);
+
+    return result;
 }
 
 
-inline bool Foam::globalIndex::isLocal(const label i) const
+inline Foam::labelList Foam::globalIndex::toGlobal
+(
+    const labelUList& labels
+) const
 {
-    return isLocal(Pstream::myProcNo(), i);
+    return toGlobal(Pstream::myProcNo(), labels);
+}
+
+
+inline void Foam::globalIndex::inplaceToGlobal
+(
+    const label proci,
+    labelList& labels
+) const
+{
+    const label off = offsets_[proci];
+
+    for (label& val : labels)
+    {
+        val += off;
+    }
+}
+
+
+inline void Foam::globalIndex::inplaceToGlobal(labelList& labels) const
+{
+    inplaceToGlobal(Pstream::myProcNo(), labels);
 }
 
 

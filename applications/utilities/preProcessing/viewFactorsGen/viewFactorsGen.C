@@ -822,9 +822,9 @@ int main(int argc, char *argv[])
     {
         const Map<label>& localToCompactMap = compactMap[procI];
 
-        forAllConstIter(Map<label>, localToCompactMap, iter)
+        forAllConstIters(localToCompactMap, iter)
         {
-            compactToGlobal[iter()] = globalNumbering.toGlobal
+            compactToGlobal[*iter] = globalNumbering.toGlobal
             (
                 procI,
                 iter.key()

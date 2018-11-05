@@ -476,20 +476,13 @@ void Foam::radiation::viewFactor::calculate()
     map_->distribute(compactCoarseHo);
 
     // Distribute local global ID
-    labelList compactGlobalIds(map_->constructSize(), 0.0);
-
-    labelList localGlobalIds(nLocalCoarseFaces_);
-
-    for(label k = 0; k < nLocalCoarseFaces_; k++)
-    {
-        localGlobalIds[k] = globalNumbering.toGlobal(Pstream::myProcNo(), k);
-    }
+    labelList compactGlobalIds(map_->constructSize(), Zero);
 
     SubList<label>
     (
         compactGlobalIds,
         nLocalCoarseFaces_
-    ) = localGlobalIds;
+    ) = identity(globalNumbering.localSize(), globalNumbering.localStart());
 
     map_->distribute(compactGlobalIds);
 
