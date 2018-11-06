@@ -114,11 +114,15 @@ Foam::boxToCell::boxToCell
     topoSetCellSource(mesh),
     bbs_()
 {
-    // Look for 'boxes' or 'box'
+    // Accept 'boxes', 'box' or 'min/max'
     if (!dict.readIfPresent("boxes", bbs_))
     {
         bbs_.resize(1);
-        dict.readEntry("box", bbs_.first());
+        if (!dict.readIfPresent("box", bbs_.first()))
+        {
+            dict.readEntry<point>("min", bbs_.first().min());
+            dict.readEntry<point>("max", bbs_.first().max());
+        }
     }
 }
 

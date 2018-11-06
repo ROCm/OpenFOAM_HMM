@@ -30,13 +30,15 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                           | Required | Default
-        box         | A single bounding box                 | partly   |
         boxes       | Multiple bounding boxes               | partly   |
+        box         | A single bounding box                 | partly   |
+        min         | Minimum point for a single box        | partly   |
+        max         | Maximum point for a single box        | partly   |
     \endtable
 
 Note
-    Must specify either "box" or "boxes".
-    The selection of multiple boxes has precedence.
+    In the order of highest to lowest precedence, must specify "boxes",
+    "box" or a "min/max" pair (compatibility with searchable box).
 
 SourceFiles
     boxToFace.C
@@ -92,7 +94,7 @@ public:
         //- Construct from dictionary
         boxToFace(const polyMesh& mesh, const dictionary& dict);
 
-        //- Construct from Istream
+        //- Construct from stream - a single box.
         boxToFace(const polyMesh& mesh, Istream& is);
 
 
