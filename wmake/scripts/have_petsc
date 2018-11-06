@@ -55,9 +55,17 @@ echo_petsc()
 have_petsc()
 {
     local header library static label settings warn
-    # warn="==> skip petsc"
+    warn="==> skip petsc"
 
-    # Basic setup/checks
+    # Basic setup/checks. Prefer current environment value? (TDB)
+    if [ ! -d "$PETSC_ARCH_PATH" ]
+    then
+        settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/petsc) || {
+            [ -n "$warn" ] && echo "$warn (no config.sh/petsc settings)"
+            return 1
+        }
+        . $settings
+    fi
     if isNone "$PETSC_ARCH_PATH"
     then
         [ -n "$warn" ] && echo "$warn (not available)"

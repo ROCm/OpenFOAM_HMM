@@ -43,6 +43,16 @@ then
 
     unset petsc_version
 
+elif [ "$1" = "-force" ]
+then
+    # Forced command-line sourcing
+
+    if output="$($WM_PROJECT_DIR/bin/tools/lib-dir -sh $PETSC_ARCH_PATH 2>/dev/null)"
+    then
+        eval "$output"
+    fi
+
+    unset petsc_version output
 fi
 
 #------------------------------------------------------------------------------
