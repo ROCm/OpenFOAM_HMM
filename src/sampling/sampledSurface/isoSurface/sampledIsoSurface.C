@@ -434,10 +434,8 @@ Foam::sampledIsoSurface::sampledIsoSurface
 {
     if (!sampledSurface::interpolate())
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Non-interpolated iso surface not supported since triangles"
+        FatalIOErrorInFunction(dict)
+            << "Non-interpolated iso surface not supported since triangles"
             << " span across cells." << exit(FatalIOError);
     }
 

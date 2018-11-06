@@ -83,10 +83,8 @@ Foam::dynamicMultiMotionSolverFvMesh::dynamicMultiMotionSolverFvMesh
 
             if (zoneIDs_[zoneI] == -1)
             {
-                FatalIOErrorInFunction
-                (
-                    dynamicMeshCoeffs
-                )   << "Cannot find cellZone named " << zoneName
+                FatalIOErrorInFunction(dynamicMeshCoeffs)
+                    << "Cannot find cellZone named " << zoneName
                     << ". Valid zones are " << cellZones().names()
                     << exit(FatalIOError);
             }

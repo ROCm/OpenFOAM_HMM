@@ -76,10 +76,8 @@ Foam::cyclicAMIFvsPatchField<Type>::cyclicAMIFvsPatchField
 {
     if (!isA<cyclicAMIFvPatch>(p))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "patch " << this->patch().index() << " not cyclicAMI type. "
+        FatalIOErrorInFunction(dict)
+            << "patch " << this->patch().index() << " not cyclicAMI type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
     }

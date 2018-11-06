@@ -91,10 +91,8 @@ void Foam::ILList<LListBase, T>::readIstream(Istream& is, const INew& inew)
     {
         if (firstToken.pToken() != token::BEGIN_LIST)
         {
-            FatalIOErrorInFunction
-            (
-                is
-            )   << "incorrect first token, '(', found " << firstToken.info()
+            FatalIOErrorInFunction(is)
+                << "incorrect first token, '(', found " << firstToken.info()
                 << exit(FatalIOError);
         }
 

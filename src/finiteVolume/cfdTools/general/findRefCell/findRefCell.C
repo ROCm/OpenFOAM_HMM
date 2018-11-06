@@ -51,10 +51,8 @@ bool Foam::setRefCell
 
                 if (refCelli < 0 || refCelli >= field.mesh().nCells())
                 {
-                    FatalIOErrorInFunction
-                    (
-                        dict
-                    )   << "Illegal master cellID " << refCelli
+                    FatalIOErrorInFunction(dict)
+                        << "Illegal master cellID " << refCelli
                         << ". Should be 0.." << field.mesh().nCells()
                         << exit(FatalIOError);
                 }
@@ -86,10 +84,8 @@ bool Foam::setRefCell
 
             if (sumHasRef != 1)
             {
-                FatalIOErrorInFunction
-                (
-                    dict
-                )   << "Unable to set reference cell for field " << field.name()
+                FatalIOErrorInFunction(dict)
+                    << "Unable to set reference cell for field " << field.name()
                     << nl << "    Reference point " << refPointName
                     << " " << refPointi
                     << " found on " << sumHasRef << " domains (should be one)"
@@ -98,10 +94,8 @@ bool Foam::setRefCell
         }
         else
         {
-            FatalIOErrorInFunction
-            (
-                dict
-            )   << "Unable to set reference cell for field " << field.name()
+            FatalIOErrorInFunction(dict)
+                << "Unable to set reference cell for field " << field.name()
                 << nl
                 << "    Please supply either " << refCellName
                 << " or " << refPointName << nl << exit(FatalIOError);

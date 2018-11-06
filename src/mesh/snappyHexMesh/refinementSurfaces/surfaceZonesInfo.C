@@ -110,10 +110,8 @@ Foam::surfaceZonesInfo::surfaceZonesInfo
             && !surface.hasVolumeType()
             )
             {
-                IOWarningInFunction
-                (
-                    surfacesDict
-                )   << "Illegal entry zoneInside "
+                IOWarningInFunction(surfacesDict)
+                    << "Illegal entry zoneInside "
                     << areaSelectionAlgoNames[zoneInside_]
                     << " for faceZone "
                     << faceZoneName_
@@ -122,10 +120,8 @@ Foam::surfaceZonesInfo::surfaceZonesInfo
         }
         else if (hasSide)
         {
-            IOWarningInFunction
-            (
-                surfacesDict
-            )   << "Unused entry zoneInside for faceZone "
+            IOWarningInFunction(surfacesDict)
+                << "Unused entry zoneInside for faceZone "
                 << faceZoneName_
                 << " since no cellZone specified."
                 << endl;

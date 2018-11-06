@@ -50,10 +50,8 @@ Foam::symmetryPointPatchField<Type>::symmetryPointPatchField
 {
     if (!isType<symmetryPointPatch>(p))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "patch " << this->patch().index() << " not symmetry type. "
+        FatalIOErrorInFunction(dict)
+            << "patch " << this->patch().index() << " not symmetry type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
     }

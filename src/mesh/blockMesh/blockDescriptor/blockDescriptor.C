@@ -217,10 +217,8 @@ Foam::blockDescriptor::blockDescriptor
         }
         else
         {
-            FatalIOErrorInFunction
-            (
-                is
-            )   << "incorrect token while reading n, expected '(', found "
+            FatalIOErrorInFunction(is)
+                << "incorrect token while reading n, expected '(', found "
                 << t.info()
                 << exit(FatalIOError);
         }

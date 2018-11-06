@@ -56,10 +56,8 @@ tmp<divScheme<Type>> divScheme<Type>::New
 
     if (schemeData.eof())
     {
-        FatalIOErrorInFunction
-        (
-            schemeData
-        )   << "Div scheme not specified" << endl << endl
+        FatalIOErrorInFunction(schemeData)
+            << "Div scheme not specified" << endl << endl
             << "Valid div schemes are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
@@ -71,10 +69,8 @@ tmp<divScheme<Type>> divScheme<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction
-        (
-            schemeData
-        )   << "unknown div scheme "
+        FatalIOErrorInFunction(schemeData)
+            << "unknown div scheme "
             << schemeName << nl << nl
             << "Valid div schemes are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()

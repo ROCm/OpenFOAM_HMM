@@ -373,10 +373,8 @@ Foam::refinementSurfaces::refinementSurfaces
 
     if (unmatchedKeys.size() > 0)
     {
-        IOWarningInFunction
-        (
-            surfacesDict
-        )   << "Not all entries in refinementSurfaces dictionary were used."
+        IOWarningInFunction(surfacesDict)
+            << "Not all entries in refinementSurfaces dictionary were used."
             << " The following entries were not used : "
             << unmatchedKeys.sortedToc()
             << endl;

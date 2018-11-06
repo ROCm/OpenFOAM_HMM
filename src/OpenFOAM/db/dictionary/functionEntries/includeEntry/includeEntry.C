@@ -159,10 +159,8 @@ bool Foam::functionEntries::includeEntry::execute
         return true;
     }
 
-    FatalIOErrorInFunction
-    (
-        is
-    )   << "Cannot open include file "
+    FatalIOErrorInFunction(is)
+        << "Cannot open include file "
         << (ifs.name().size() ? ifs.name() : rawName)
         << " while reading dictionary " << parentDict.name()
         << exit(FatalIOError);
@@ -206,10 +204,8 @@ bool Foam::functionEntries::includeEntry::execute
         return true;
     }
 
-    FatalIOErrorInFunction
-    (
-        is
-    )   << "Cannot open include file "
+    FatalIOErrorInFunction(is)
+        << "Cannot open include file "
         << (ifs.name().size() ? ifs.name() : rawName)
         << " while reading dictionary " << parentDict.name()
         << exit(FatalIOError);

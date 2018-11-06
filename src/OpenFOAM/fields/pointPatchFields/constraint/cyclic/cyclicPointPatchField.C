@@ -55,10 +55,8 @@ Foam::cyclicPointPatchField<Type>::cyclicPointPatchField
 {
     if (!isType<cyclicPointPatch>(p))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "patch " << this->patch().index() << " not cyclic type. "
+        FatalIOErrorInFunction(dict)
+            << "patch " << this->patch().index() << " not cyclic type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
     }

@@ -115,10 +115,8 @@ Foam::autoPtr<Foam::polyPatch> Foam::polyPatch::New
 
         if (!cstrIter.found())
         {
-            FatalIOErrorInFunction
-            (
-                dict
-            )   << "Unknown polyPatch type "
+            FatalIOErrorInFunction(dict)
+                << "Unknown polyPatch type "
                 << patchType << " for patch " << name << nl << nl
                 << "Valid polyPatch types :" << endl
                 << dictionaryConstructorTablePtr_->sortedToc()

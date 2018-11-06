@@ -47,10 +47,8 @@ Foam::autoPtr<Foam::polyMeshModifier> Foam::polyMeshModifier::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Unknown polyMeshModifier type "
+        FatalIOErrorInFunction(dict)
+            << "Unknown polyMeshModifier type "
             << modifierType << nl << nl
             << "Valid polyMeshModifier types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()

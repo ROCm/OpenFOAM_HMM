@@ -68,10 +68,8 @@ tmp<convectionScheme<Type>> convectionScheme<Type>::New
 
     if (schemeData.eof())
     {
-        FatalIOErrorInFunction
-        (
-            schemeData
-        )   << "Convection scheme not specified" << endl << endl
+        FatalIOErrorInFunction(schemeData)
+            << "Convection scheme not specified" << endl << endl
             << "Valid convection schemes are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
@@ -83,10 +81,8 @@ tmp<convectionScheme<Type>> convectionScheme<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction
-        (
-            schemeData
-        )   << "Unknown convection scheme "
+        FatalIOErrorInFunction(schemeData)
+            << "Unknown convection scheme "
             << schemeName << nl << nl
             << "Valid convection schemes are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
@@ -114,10 +110,8 @@ tmp<convectionScheme<Type>> convectionScheme<Type>::New
 
     if (schemeData.eof())
     {
-        FatalIOErrorInFunction
-        (
-            schemeData
-        )   << "Convection scheme not specified" << endl << endl
+        FatalIOErrorInFunction(schemeData)
+            << "Convection scheme not specified" << endl << endl
             << "Valid convection schemes are :" << endl
             << MultivariateConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
@@ -129,10 +123,8 @@ tmp<convectionScheme<Type>> convectionScheme<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction
-        (
-            schemeData
-        )   << "Unknown convection scheme "
+        FatalIOErrorInFunction(schemeData)
+            << "Unknown convection scheme "
             << schemeName << nl << nl
             << "Valid convection schemes are :" << endl
             << MultivariateConstructorTablePtr_->sortedToc()

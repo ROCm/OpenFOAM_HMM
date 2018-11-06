@@ -294,10 +294,8 @@ Foam::dimensionedScalar Foam::dimensionSet::parse
                 token t = tis.nextToken();
                 if (!t.isPunctuation()  || t.pToken() !=  token::END_LIST)
                 {
-                    FatalIOErrorInFunction
-                    (
-                        tis.stream()
-                    )   << "Illegal token " << t << exit(FatalIOError);
+                    FatalIOErrorInFunction(tis.stream())
+                        << "Illegal token " << t << exit(FatalIOError);
                 }
 
                 ds.dimensions() *= sub.dimensions();
@@ -363,18 +361,14 @@ Foam::dimensionedScalar Foam::dimensionSet::parse
             }
             else
             {
-                FatalIOErrorInFunction
-                (
-                    tis.stream()
-                )   << "Illegal token " << nextToken << exit(FatalIOError);
+                FatalIOErrorInFunction(tis.stream())
+                    << "Illegal token " << nextToken << exit(FatalIOError);
             }
         }
         else
         {
-            FatalIOErrorInFunction
-            (
-                tis.stream()
-            )   << "Illegal token " << nextToken << exit(FatalIOError);
+            FatalIOErrorInFunction(tis.stream())
+                << "Illegal token " << nextToken << exit(FatalIOError);
         }
 
 
@@ -415,10 +409,8 @@ Foam::Istream& Foam::dimensionSet::read
 
     if (startToken != token::BEGIN_SQR)
     {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "expected a " << token::BEGIN_SQR << " in dimensionSet"
+        FatalIOErrorInFunction(is)
+            << "Expected a " << token::BEGIN_SQR << " in dimensionSet"
             << endl << "in stream " << is.info()
             << exit(FatalIOError);
     }
@@ -471,10 +463,8 @@ Foam::Istream& Foam::dimensionSet::read
         // Check end of dimensionSet
         if (nextToken != token::END_SQR)
         {
-            FatalIOErrorInFunction
-            (
-                is
-            )   << "expected a " << token::END_SQR << " in dimensionSet "
+            FatalIOErrorInFunction(is)
+                << "Expected a " << token::END_SQR << " in dimensionSet "
                 << endl << "in stream " << is.info()
                 << exit(FatalIOError);
         }
@@ -509,10 +499,8 @@ Foam::Istream& Foam::dimensionSet::read
 
     if (startToken != token::BEGIN_SQR)
     {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "expected a " << token::BEGIN_SQR << " in dimensionSet"
+        FatalIOErrorInFunction(is)
+            << "Expected a " << token::BEGIN_SQR << " in dimensionSet"
             << endl << "in stream " << is.info()
             << exit(FatalIOError);
     }
@@ -609,10 +597,8 @@ Foam::Istream& Foam::dimensionSet::read
         // Check end of dimensionSet
         if (nextToken != token::END_SQR)
         {
-            FatalIOErrorInFunction
-            (
-                is
-            )   << "expected a " << token::END_SQR << " in dimensionSet "
+            FatalIOErrorInFunction(is)
+                << "Expected a " << token::END_SQR << " in dimensionSet "
                 << endl << "in stream " << is.info()
                 << exit(FatalIOError);
         }

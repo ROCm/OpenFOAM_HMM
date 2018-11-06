@@ -113,10 +113,8 @@ Foam::tmp<Foam::fvsPatchField<Type>> Foam::fvsPatchField<Type>::New
 
         if (!cstrIter.found())
         {
-            FatalIOErrorInFunction
-            (
-                dict
-            )   << "Unknown patchField type " << patchFieldType
+            FatalIOErrorInFunction(dict)
+                << "Unknown patchField type " << patchFieldType
                 << " for patch type " << p.type() << nl << nl
                 << "Valid patchField types :" << endl
                 << dictionaryConstructorTablePtr_->sortedToc()
@@ -135,10 +133,8 @@ Foam::tmp<Foam::fvsPatchField<Type>> Foam::fvsPatchField<Type>::New
 
         if (patchTypeCstrIter.found() && patchTypeCstrIter() != cstrIter())
         {
-            FatalIOErrorInFunction
-            (
-                dict
-            )   << "inconsistent patch and patchField types for \n"
+            FatalIOErrorInFunction(dict)
+                << "inconsistent patch and patchField types for \n"
                    "    patch type " << p.type()
                 << " and patchField type " << patchFieldType
                 << exit(FatalIOError);

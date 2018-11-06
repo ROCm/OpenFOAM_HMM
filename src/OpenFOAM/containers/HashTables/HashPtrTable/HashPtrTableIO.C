@@ -80,10 +80,8 @@ void Foam::HashPtrTable<T, Key, Hash>::readIstream
             }
             else
             {
-                FatalIOErrorInFunction
-                (
-                    is
-                )   << "incorrect first token, '(', found " << firstToken.info()
+                FatalIOErrorInFunction(is)
+                    << "incorrect first token, '(', found " << firstToken.info()
                     << exit(FatalIOError);
             }
         }
@@ -95,10 +93,8 @@ void Foam::HashPtrTable<T, Key, Hash>::readIstream
     {
         if (firstToken.pToken() != token::BEGIN_LIST)
         {
-            FatalIOErrorInFunction
-            (
-                is
-            )   << "incorrect first token, '(', found " << firstToken.info()
+            FatalIOErrorInFunction(is)
+                << "incorrect first token, '(', found " << firstToken.info()
                 << exit(FatalIOError);
         }
 
@@ -127,10 +123,8 @@ void Foam::HashPtrTable<T, Key, Hash>::readIstream
     }
     else
     {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "incorrect first token, expected <int> or '(', found "
+        FatalIOErrorInFunction(is)
+            << "incorrect first token, expected <int> or '(', found "
             << firstToken.info()
             << exit(FatalIOError);
     }

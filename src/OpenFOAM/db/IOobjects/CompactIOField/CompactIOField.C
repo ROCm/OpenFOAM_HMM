@@ -47,10 +47,8 @@ void Foam::CompactIOField<T, BaseType>::readFromStream(const bool valid)
         }
         else
         {
-            FatalIOErrorInFunction
-            (
-                is
-            )   << "unexpected class name " << headerClassName()
+            FatalIOErrorInFunction(is)
+                << "unexpected class name " << headerClassName()
                 << " expected " << typeName << " or " << IOField<T>::typeName
                 << endl
                 << "    while reading object " << name()

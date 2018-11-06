@@ -59,10 +59,8 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
 {
     if (!dict.found("value"))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "\n    Cannot find 'value' entry"
+        FatalIOErrorInFunction(dict)
+            << "\n    Cannot find 'value' entry"
             << " on patch " << this->patch().name()
             << " of field " << this->internalField().name()
             << " in file " << this->internalField().objectPath()
@@ -116,17 +114,15 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
                         }
                         else
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    token following 'nonuniform' "
-                                  "is not a compound"
+                            FatalIOErrorInFunction(dict)
+                                << "\n    token following 'nonuniform' "
+                                   "is not a compound"
                                 << "\n    on patch " << this->patch().name()
                                 << " of field "
                                 << this->internalField().name()
                                 << " in file "
                                 << this->internalField().objectPath()
-                            << exit(FatalIOError);
+                                << exit(FatalIOError);
                         }
                     }
                     else if
@@ -147,10 +143,8 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
 
                         if (fPtr->size() != this->size())
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    size of field " << key
+                            FatalIOErrorInFunction(dict)
+                                << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -182,10 +176,8 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
 
                         if (fPtr->size() != this->size())
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    size of field " << key
+                            FatalIOErrorInFunction(dict)
+                                << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -220,10 +212,8 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
 
                         if (fPtr->size() != this->size())
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    size of field " << key
+                            FatalIOErrorInFunction(dict)
+                                << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -258,10 +248,8 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
 
                         if (fPtr->size() != this->size())
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    size of field " << key
+                            FatalIOErrorInFunction(dict)
+                                << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -293,10 +281,8 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
 
                         if (fPtr->size() != this->size())
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    size of field " << key
+                            FatalIOErrorInFunction(dict)
+                                << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -312,10 +298,8 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
                     }
                     else
                     {
-                        FatalIOErrorInFunction
-                        (
-                            dict
-                        )   << "\n    compound " << fieldToken.compoundToken()
+                        FatalIOErrorInFunction(dict)
+                            << "\n    compound " << fieldToken.compoundToken()
                             << " not supported"
                             << "\n    on patch " << this->patch().name()
                             << " of field "
@@ -415,10 +399,8 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
                         }
                         else
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    unrecognised native type " << l
+                            FatalIOErrorInFunction(dict)
+                                << "\n    unrecognised native type " << l
                                 << "\n    on patch " << this->patch().name()
                                 << " of field "
                                 << this->internalField().name()

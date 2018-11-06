@@ -884,7 +884,7 @@ Foam::tmp<Foam::pointField> Foam::mappedPatchBase::readListOrField
             else
             {
                 FatalIOErrorInFunction(dict)
-                    << "expected keyword 'uniform' or 'nonuniform', found "
+                    << "Expected keyword 'uniform' or 'nonuniform', found "
                     << firstToken.wordToken()
                     << exit(FatalIOError);
             }
@@ -892,7 +892,7 @@ Foam::tmp<Foam::pointField> Foam::mappedPatchBase::readListOrField
         else if (is.version() == IOstream::versionNumber(2,0))
         {
             IOWarningInFunction(dict)
-                << "expected keyword 'uniform' or 'nonuniform', "
+                << "Expected keyword 'uniform' or 'nonuniform', "
                    "assuming List format for backwards compatibility."
                    "Foam version 2.0." << endl;
 

@@ -41,10 +41,8 @@ Foam::surfaceInterpolationScheme<Type>::New
 {
     if (schemeData.eof())
     {
-        FatalIOErrorInFunction
-        (
-            schemeData
-        )   << "Discretisation scheme not specified"
+        FatalIOErrorInFunction(schemeData)
+            << "Discretisation scheme not specified"
             << endl << endl
             << "Valid schemes are :" << endl
             << MeshConstructorTablePtr_->sortedToc()
@@ -62,10 +60,8 @@ Foam::surfaceInterpolationScheme<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction
-        (
-            schemeData
-        )   << "Unknown discretisation scheme "
+        FatalIOErrorInFunction(schemeData)
+            << "Unknown discretisation scheme "
             << schemeName << nl << nl
             << "Valid schemes are :" << endl
             << MeshConstructorTablePtr_->sortedToc()
@@ -87,10 +83,8 @@ Foam::surfaceInterpolationScheme<Type>::New
 {
     if (schemeData.eof())
     {
-        FatalIOErrorInFunction
-        (
-            schemeData
-        )   << "Discretisation scheme not specified"
+        FatalIOErrorInFunction(schemeData)
+            << "Discretisation scheme not specified"
             << endl << endl
             << "Valid schemes are :" << endl
             << MeshConstructorTablePtr_->sortedToc()
@@ -109,10 +103,8 @@ Foam::surfaceInterpolationScheme<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction
-        (
-            schemeData
-        )   << "Unknown discretisation scheme "
+        FatalIOErrorInFunction(schemeData)
+            << "Unknown discretisation scheme "
             << schemeName << nl << nl
             << "Valid schemes are :" << endl
             << MeshFluxConstructorTablePtr_->sortedToc()

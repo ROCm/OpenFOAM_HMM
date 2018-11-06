@@ -279,10 +279,8 @@ Foam::scalar Foam::solution::fieldRelaxationFactor(const word& name) const
     }
     else
     {
-        FatalIOErrorInFunction
-        (
-            fieldRelaxDict_
-        )   << "Cannot find variable relaxation factor for '" << name
+        FatalIOErrorInFunction(fieldRelaxDict_)
+            << "Cannot find variable relaxation factor for '" << name
             << "' or a suitable default value."
             << exit(FatalIOError);
 
@@ -308,10 +306,8 @@ Foam::scalar Foam::solution::equationRelaxationFactor(const word& name) const
     }
     else
     {
-        FatalIOErrorInFunction
-        (
-            eqnRelaxDict_
-        )   << "Cannot find equation relaxation factor for '" << name
+        FatalIOErrorInFunction(eqnRelaxDict_)
+            << "Cannot find equation relaxation factor for '" << name
             << "' or a suitable default value."
             << exit(FatalIOError);
 

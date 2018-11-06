@@ -92,10 +92,8 @@ void Foam::refinementFeatures::read
 
             if (fName.empty())
             {
-                FatalIOErrorInFunction
-                (
-                    dict
-                )   << "Could not open " << featObj.objectPath()
+                FatalIOErrorInFunction(dict)
+                    << "Could not open " << featObj.objectPath()
                     << exit(FatalIOError);
             }
 

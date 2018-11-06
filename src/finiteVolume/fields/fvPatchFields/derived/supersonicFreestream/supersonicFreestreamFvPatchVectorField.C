@@ -89,10 +89,8 @@ supersonicFreestreamFvPatchVectorField
 
     if (pInf_ < SMALL)
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "    unphysical pInf specified (pInf <= 0.0)"
+        FatalIOErrorInFunction(dict)
+            << "    unphysical pInf specified (pInf <= 0.0)"
             << "\n    on patch " << this->patch().name()
             << " of field " << this->internalField().name()
             << " in file " << this->internalField().objectPath()

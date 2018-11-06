@@ -69,10 +69,8 @@ Foam::multivariateSurfaceInterpolationScheme<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction
-        (
-            schemeData
-        )   << "Unknown discretisation scheme " << schemeName << nl << nl
+        FatalIOErrorInFunction(schemeData)
+            << "Unknown discretisation scheme " << schemeName << nl << nl
             << "Valid schemes are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);

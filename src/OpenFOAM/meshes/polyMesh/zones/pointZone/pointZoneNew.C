@@ -47,10 +47,8 @@ Foam::autoPtr<Foam::pointZone> Foam::pointZone::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Unknown pointZone type "
+        FatalIOErrorInFunction(dict)
+            << "Unknown pointZone type "
             << zoneType << nl << nl
             << "Valid pointZone types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()

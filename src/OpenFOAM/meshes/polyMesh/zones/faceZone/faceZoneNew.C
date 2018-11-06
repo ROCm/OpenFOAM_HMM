@@ -47,10 +47,8 @@ Foam::autoPtr<Foam::faceZone> Foam::faceZone::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Unknown faceZone type "
+        FatalIOErrorInFunction(dict)
+            << "Unknown faceZone type "
             << zoneType << nl << nl
             << "Valid faceZone types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()

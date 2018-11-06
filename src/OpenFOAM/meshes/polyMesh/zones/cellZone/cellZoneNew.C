@@ -47,10 +47,8 @@ Foam::autoPtr<Foam::cellZone> Foam::cellZone::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Unknown cellZone type "
+        FatalIOErrorInFunction(dict)
+            << "Unknown cellZone type "
             << zoneType << nl << nl
             << "Valid cellZone types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()

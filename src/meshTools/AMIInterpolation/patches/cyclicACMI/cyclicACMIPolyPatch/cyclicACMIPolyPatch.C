@@ -375,10 +375,8 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
 
     if (nonOverlapPatchName_ == name)
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Non-overlapping patch name " << nonOverlapPatchName_
+        FatalIOErrorInFunction(dict)
+            << "Non-overlapping patch name " << nonOverlapPatchName_
             << " cannot be the same as this patch " << name
             << exit(FatalIOError);
     }

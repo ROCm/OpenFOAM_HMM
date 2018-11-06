@@ -660,10 +660,8 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 {
     if (neighbPatchName_ == word::null && !coupleGroup_.valid())
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "No \"neighbourPatch\" provided." << endl
+        FatalIOErrorInFunction(dict)
+            << "No \"neighbourPatch\" provided." << endl
             << "Is your mesh uptodate with split cyclics?" << endl
             << "Run foamUpgradeCyclics to convert mesh and fields"
             << " to split cyclics." << exit(FatalIOError);

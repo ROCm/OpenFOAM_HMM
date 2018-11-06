@@ -487,18 +487,14 @@ Foam::string Foam::stringOps::getVariable
     {
         if (allowEnvVars)
         {
-            FatalIOErrorInFunction
-            (
-                dict
-            )   << "Cannot find dictionary or environment variable "
+            FatalIOErrorInFunction(dict)
+                << "Cannot find dictionary or environment variable "
                 << name << exit(FatalIOError);
         }
         else
         {
-            FatalIOErrorInFunction
-            (
-                dict
-            )   << "Cannot find dictionary variable "
+            FatalIOErrorInFunction(dict)
+                << "Cannot find dictionary variable "
                 << name << exit(FatalIOError);
         }
     }

@@ -74,10 +74,8 @@ Foam::surfaceFeaturesExtraction::method::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Unknown extractionMethod " << methodName << nl << nl
+        FatalIOErrorInFunction(dict)
+            << "Unknown extractionMethod " << methodName << nl << nl
             << "Valid extraction methods:" << nl
             << flatOutput(dictionaryConstructorTablePtr_->sortedToc())
             << exit(FatalIOError);

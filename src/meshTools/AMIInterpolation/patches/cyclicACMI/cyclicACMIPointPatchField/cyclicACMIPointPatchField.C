@@ -59,10 +59,8 @@ Foam::cyclicACMIPointPatchField<Type>::cyclicACMIPointPatchField
 {
     if (!isType<cyclicACMIPointPatch>(p))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "patch " << this->patch().index() << " not cyclicACMI type. "
+        FatalIOErrorInFunction(dict)
+            << "patch " << this->patch().index() << " not cyclicACMI type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
     }

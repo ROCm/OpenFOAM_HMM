@@ -96,10 +96,8 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregatedOrCoupled
     }
     else
     {
-        FatalIOErrorInFunction
-        (
-            solverControls
-        )   << "Unknown type " << type
+        FatalIOErrorInFunction(solverControls)
+            << "Unknown type " << type
             << "; currently supported solver types are segregated and coupled"
             << exit(FatalIOError);
 

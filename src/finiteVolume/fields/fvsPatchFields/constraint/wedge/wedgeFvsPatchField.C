@@ -50,10 +50,8 @@ Foam::wedgeFvsPatchField<Type>::wedgeFvsPatchField
 {
     if (!isType<wedgeFvPatch>(p))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "patch " << this->patch().index() << " not wedge type. "
+        FatalIOErrorInFunction(dict)
+            << "patch " << this->patch().index() << " not wedge type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
     }

@@ -94,11 +94,9 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                         }
                         else
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    token following 'nonuniform' "
-                                  "is not a compound"
+                            FatalIOErrorInFunction(dict)
+                                << "\n    token following 'nonuniform' "
+                                   "is not a compound"
                                 << "\n    on patch " << this->patch().name()
                                 << " of field "
                                 << this->internalField().name()
@@ -125,10 +123,8 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
 
                         if (fPtr->size() != this->size())
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    size of field " << key
+                            FatalIOErrorInFunction(dict)
+                                << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -160,10 +156,8 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
 
                         if (fPtr->size() != this->size())
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    size of field " << key
+                            FatalIOErrorInFunction(dict)
+                                << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -198,10 +192,8 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
 
                         if (fPtr->size() != this->size())
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    size of field " << key
+                            FatalIOErrorInFunction(dict)
+                                << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -236,10 +228,8 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
 
                         if (fPtr->size() != this->size())
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    size of field " << key
+                            FatalIOErrorInFunction(dict)
+                                << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -271,10 +261,8 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
 
                         if (fPtr->size() != this->size())
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    size of field " << key
+                            FatalIOErrorInFunction(dict)
+                                << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -290,10 +278,8 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                     }
                     else
                     {
-                        FatalIOErrorInFunction
-                        (
-                            dict
-                        )   << "\n    compound " << fieldToken.compoundToken()
+                        FatalIOErrorInFunction(dict)
+                            << "\n    compound " << fieldToken.compoundToken()
                             << " not supported"
                             << "\n    on patch " << this->patch().name()
                             << " of field "

@@ -96,10 +96,8 @@ Foam::maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
      || mag(accommodationCoeff_) > 2.0
     )
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "unphysical accommodationCoeff_ specified"
+        FatalIOErrorInFunction(dict)
+            << "unphysical accommodationCoeff_ specified"
             << "(0 < accommodationCoeff_ <= 1)" << endl
             << exit(FatalIOError);
     }

@@ -87,10 +87,8 @@ bool Foam::primitiveEntry::expandVariable
 
         if (str.empty())
         {
-            FatalIOErrorInFunction
-            (
-                dict
-            )   << "Illegal dictionary entry or environment variable name "
+            FatalIOErrorInFunction(dict)
+                << "Illegal dictionary entry or environment variable name "
                 << varName << endl << "Valid dictionary entries are "
                 << dict.toc() << exit(FatalIOError);
 

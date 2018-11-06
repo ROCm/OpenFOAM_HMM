@@ -54,10 +54,8 @@ tmp<laplacianScheme<Type, GType>> laplacianScheme<Type, GType>::New
 
     if (schemeData.eof())
     {
-        FatalIOErrorInFunction
-        (
-            schemeData
-        )   << "Laplacian scheme not specified" << endl << endl
+        FatalIOErrorInFunction(schemeData)
+            << "Laplacian scheme not specified" << endl << endl
             << "Valid laplacian schemes are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
@@ -69,10 +67,8 @@ tmp<laplacianScheme<Type, GType>> laplacianScheme<Type, GType>::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction
-        (
-            schemeData
-        )   << "Unknown laplacian scheme "
+        FatalIOErrorInFunction(schemeData)
+            << "Unknown laplacian scheme "
             << schemeName << nl << nl
             << "Valid laplacian schemes are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()

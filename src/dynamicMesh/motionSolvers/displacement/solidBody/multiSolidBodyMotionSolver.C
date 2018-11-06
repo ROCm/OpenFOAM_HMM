@@ -70,10 +70,8 @@ Foam::multiSolidBodyMotionSolver::multiSolidBodyMotionSolver
 
             if (zoneIDs_[zonei] == -1)
             {
-                FatalIOErrorInFunction
-                (
-                    coeffDict()
-                )   << "Cannot find cellZone named " << zoneName
+                FatalIOErrorInFunction(coeffDict())
+                    << "Cannot find cellZone named " << zoneName
                     << ". Valid zones are "
                     << flatOutput(mesh.cellZones().names())
                     << exit(FatalIOError);

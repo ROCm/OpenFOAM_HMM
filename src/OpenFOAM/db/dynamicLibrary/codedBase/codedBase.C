@@ -117,28 +117,22 @@ void* Foam::codedBase::loadLibrary
                     }
                     else
                     {
-                        FatalIOErrorInFunction
-                        (
-                            contextDict
-                        )   << "Failed looking up symbol " << globalFuncName
+                        FatalIOErrorInFunction(contextDict)
+                            << "Failed looking up symbol " << globalFuncName
                             << nl << "from " << libPath << exit(FatalIOError);
                     }
                 }
                 else
                 {
-                    FatalIOErrorInFunction
-                    (
-                        contextDict
-                    )   << "Failed looking up symbol " << globalFuncName << nl
+                    FatalIOErrorInFunction(contextDict)
+                        << "Failed looking up symbol " << globalFuncName << nl
                         << "from " << libPath << exit(FatalIOError);
 
                     lib = 0;
                     if (!libs().close(libPath, false))
                     {
-                        FatalIOErrorInFunction
-                        (
-                            contextDict
-                        )   << "Failed unloading library "
+                        FatalIOErrorInFunction(contextDict)
+                            << "Failed unloading library "
                             << libPath
                             << exit(FatalIOError);
                     }
@@ -187,20 +181,16 @@ void Foam::codedBase::unloadLibrary
         }
         else
         {
-            FatalIOErrorInFunction
-            (
-                contextDict
-            )   << "Failed looking up symbol " << globalFuncName << nl
+            FatalIOErrorInFunction(contextDict)
+                << "Failed looking up symbol " << globalFuncName << nl
                 << "from " << libPath << exit(FatalIOError);
         }
     }
 
     if (!libs().close(libPath, false))
     {
-        FatalIOErrorInFunction
-        (
-            contextDict
-        )   << "Failed unloading library " << libPath
+        FatalIOErrorInFunction(contextDict)
+            << "Failed unloading library " << libPath
             << exit(FatalIOError);
     }
 }
@@ -228,10 +218,8 @@ void Foam::codedBase::createLibrary
 
             if (!dynCode.copyOrCreateFiles(true))
             {
-                FatalIOErrorInFunction
-                (
-                    context.dict()
-                )   << "Failed writing files for" << nl
+                FatalIOErrorInFunction(context.dict())
+                    << "Failed writing files for" << nl
                     << dynCode.libRelPath() << nl
                     << exit(FatalIOError);
             }
@@ -239,10 +227,8 @@ void Foam::codedBase::createLibrary
 
         if (!dynCode.wmakeLibso())
         {
-            FatalIOErrorInFunction
-            (
-                context.dict()
-            )   << "Failed wmake " << dynCode.libRelPath() << nl
+            FatalIOErrorInFunction(context.dict())
+                << "Failed wmake " << dynCode.libRelPath() << nl
                 << exit(FatalIOError);
         }
     }
@@ -289,10 +275,8 @@ void Foam::codedBase::createLibrary
 
             if (mySize < masterSize)
             {
-                FatalIOErrorInFunction
-                (
-                    context.dict()
-                )   << "Cannot read (NFS mounted) library " << nl
+                FatalIOErrorInFunction(context.dict())
+                    << "Cannot read (NFS mounted) library " << nl
                     << libPath << nl
                     << "on processor " << Pstream::myProcNo()
                     << " detected size " << mySize

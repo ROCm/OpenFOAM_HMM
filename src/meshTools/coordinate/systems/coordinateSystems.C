@@ -158,10 +158,8 @@ void Foam::coordinateSystems::readFromStream(const bool valid)
         }
         else
         {
-            FatalIOErrorInFunction
-            (
-                is
-            )   << "unexpected class name " << headerClassName()
+            FatalIOErrorInFunction(is)
+                << "unexpected class name " << headerClassName()
                 << " expected " << typeName
                 << " or " << headerTypeCompat << nl
                 << "    while reading object " << name()

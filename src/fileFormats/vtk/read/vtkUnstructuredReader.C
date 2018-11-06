@@ -143,10 +143,8 @@ void Foam::vtkUnstructuredReader::extractCells
                 label nRead = cellVertData[dataIndex++];
                 if (nRead != 1)
                 {
-                    FatalIOErrorInFunction
-                    (
-                        inFile
-                    )   << "Expected size 1 for VTK_VERTEX but found "
+                    FatalIOErrorInFunction(inFile)
+                        << "Expected size 1 for VTK_VERTEX but found "
                         << nRead << exit(FatalIOError);
                 }
                 dataIndex += nRead;
@@ -167,10 +165,8 @@ void Foam::vtkUnstructuredReader::extractCells
                 label nRead = cellVertData[dataIndex++];
                 if (nRead != 2)
                 {
-                    FatalIOErrorInFunction
-                    (
-                        inFile
-                    )   << "Expected size 2 for VTK_LINE but found "
+                    FatalIOErrorInFunction(inFile)
+                        << "Expected size 2 for VTK_LINE but found "
                         << nRead << exit(FatalIOError);
                 }
                 lineMap_[lineI] = i;
@@ -203,10 +199,8 @@ void Foam::vtkUnstructuredReader::extractCells
                 label nRead = cellVertData[dataIndex++];
                 if (nRead != 3)
                 {
-                    FatalIOErrorInFunction
-                    (
-                        inFile
-                    )   << "Expected size 3 for VTK_TRIANGLE but found "
+                    FatalIOErrorInFunction(inFile)
+                        << "Expected size 3 for VTK_TRIANGLE but found "
                         << nRead << exit(FatalIOError);
                 }
                 f[0] = cellVertData[dataIndex++];
@@ -223,10 +217,8 @@ void Foam::vtkUnstructuredReader::extractCells
                 label nRead = cellVertData[dataIndex++];
                 if (nRead != 4)
                 {
-                    FatalIOErrorInFunction
-                    (
-                        inFile
-                    )   << "Expected size 4 for VTK_QUAD but found "
+                    FatalIOErrorInFunction(inFile)
+                        << "Expected size 4 for VTK_QUAD but found "
                         << nRead << exit(FatalIOError);
                 }
                 f[0] = cellVertData[dataIndex++];
@@ -254,10 +246,8 @@ void Foam::vtkUnstructuredReader::extractCells
                 label nRead = cellVertData[dataIndex++];
                 if (nRead != 4)
                 {
-                    FatalIOErrorInFunction
-                    (
-                        inFile
-                    )   << "Expected size 4 for VTK_TETRA but found "
+                    FatalIOErrorInFunction(inFile)
+                        << "Expected size 4 for VTK_TETRA but found "
                         << nRead << exit(FatalIOError);
                 }
                 tetPoints[0] = cellVertData[dataIndex++];
@@ -274,10 +264,8 @@ void Foam::vtkUnstructuredReader::extractCells
                 label nRead = cellVertData[dataIndex++];
                 if (nRead != 5)
                 {
-                    FatalIOErrorInFunction
-                    (
-                        inFile
-                    )   << "Expected size 5 for VTK_PYRAMID but found "
+                    FatalIOErrorInFunction(inFile)
+                        << "Expected size 5 for VTK_PYRAMID but found "
                         << nRead << exit(FatalIOError);
                 }
                 pyrPoints[0] = cellVertData[dataIndex++];
@@ -295,10 +283,8 @@ void Foam::vtkUnstructuredReader::extractCells
                 label nRead = cellVertData[dataIndex++];
                 if (nRead != 6)
                 {
-                    FatalIOErrorInFunction
-                    (
-                        inFile
-                    )   << "Expected size 6 for VTK_WEDGE but found "
+                    FatalIOErrorInFunction(inFile)
+                        << "Expected size 6 for VTK_WEDGE but found "
                         << nRead << exit(FatalIOError);
                 }
                 //- From mesh description in vtk documentation
@@ -318,10 +304,8 @@ void Foam::vtkUnstructuredReader::extractCells
                 label nRead = cellVertData[dataIndex++];
                 if (nRead != 8)
                 {
-                    FatalIOErrorInFunction
-                    (
-                        inFile
-                    )   << "Expected size 8 for VTK_HEXAHEDRON but found "
+                    FatalIOErrorInFunction(inFile)
+                        << "Expected size 8 for VTK_HEXAHEDRON but found "
                         << nRead << exit(FatalIOError);
                 }
                 hexPoints[0] = cellVertData[dataIndex++];
@@ -543,7 +527,8 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
     if (dataType_ == "BINARY")
     {
         FatalIOErrorInFunction(inFile)
-            << "Binary reading not supported " << exit(FatalIOError);
+            << "Binary reading not supported"
+            << exit(FatalIOError);
     }
 
     parseMode readMode = NOMODE;

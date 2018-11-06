@@ -50,10 +50,8 @@ Foam::symmetryPlaneFvsPatchField<Type>::symmetryPlaneFvsPatchField
 {
     if (!isType<symmetryPlaneFvPatch>(p))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "patch " << this->patch().index() << " not symmetryPlane type. "
+        FatalIOErrorInFunction(dict)
+            << "patch " << this->patch().index() << " not symmetryPlane type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
     }

@@ -46,10 +46,8 @@ Foam::Function1Types::TableFile<Type>::TableFile
 
     if (!is.good())
     {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "Cannot open file." << exit(FatalIOError);
+        FatalIOErrorInFunction(is)
+            << "Cannot open file." << exit(FatalIOError);
     }
 
     is  >> this->table_;

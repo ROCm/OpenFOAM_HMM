@@ -59,10 +59,8 @@ void Foam::hierarchGeomDecomp::setDecompOrder()
     {
         if (order.size() != 3)
         {
-            FatalIOErrorInFunction
-            (
-                decompositionDict_
-            )   << "number of characters in order (" << order << ") != 3"
+            FatalIOErrorInFunction(decompositionDict_)
+                << "number of characters in order (" << order << ") != 3"
                 << exit(FatalIOError);
         }
 
@@ -77,10 +75,8 @@ void Foam::hierarchGeomDecomp::setDecompOrder()
                 case 'z': decompOrder_[i] = 2; break;
 
                 default:
-                    FatalIOErrorInFunction
-                    (
-                        decompositionDict_
-                    )   << "Illegal decomposition order " << order << nl
+                    FatalIOErrorInFunction(decompositionDict_)
+                        << "Illegal decomposition order " << order << nl
                         << "It should only contain x, y or z"
                         << exit(FatalError);
                     break;

@@ -751,10 +751,8 @@ Foam::shellSurfaces::shellSurfaces
 
     if (unmatchedKeys.size() > 0)
     {
-        IOWarningInFunction
-        (
-            shellsDict
-        )   << "Not all entries in refinementRegions dictionary were used."
+        IOWarningInFunction(shellsDict)
+            << "Not all entries in refinementRegions dictionary were used."
             << " The following entries were not used : "
             << unmatchedKeys.sortedToc()
             << endl;

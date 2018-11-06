@@ -599,10 +599,8 @@ Foam::oldCyclicPolyPatch::oldCyclicPolyPatch
 {
     if (dict.found("neighbourPatch"))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Found \"neighbourPatch\" entry when reading cyclic patch "
+        FatalIOErrorInFunction(dict)
+            << "Found \"neighbourPatch\" entry when reading cyclic patch "
             << name << endl
             << "Is this mesh already with split cyclics?" << endl
             << "If so run a newer version that supports it"

@@ -107,10 +107,8 @@ Foam::advectiveFvPatchField<Type>::advectiveFvPatchField
 
         if (lInf_ < 0.0)
         {
-            FatalIOErrorInFunction
-            (
-                dict
-            )   << "unphysical lInf specified (lInf < 0)" << nl
+            FatalIOErrorInFunction(dict)
+                << "unphysical lInf specified (lInf < 0)" << nl
                 << "    on patch " << this->patch().name()
                 << " of field " << this->internalField().name()
                 << " in file " << this->internalField().objectPath()

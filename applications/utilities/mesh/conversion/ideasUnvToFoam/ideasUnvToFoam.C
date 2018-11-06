@@ -211,10 +211,8 @@ void readPoints
         {
             hasWarned = true;
 
-            IOWarningInFunction
-            (
-                is
-            )   << "Points not in order starting at point " << pointi
+            IOWarningInFunction(is)
+                << "Points not in order starting at point " << pointi
                 << endl;
         }
 

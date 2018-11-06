@@ -55,10 +55,8 @@ Foam::cyclicACMIFvPatchField<Type>::cyclicACMIFvPatchField
 {
     if (!isA<cyclicACMIFvPatch>(p))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "    patch type '" << p.type()
+        FatalIOErrorInFunction(dict)
+            << "    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->internalField().name()
@@ -78,10 +76,7 @@ Foam::cyclicACMIFvPatchField<Type>::cyclicACMIFvPatchField
             );
         if (!fld.boundaryField().set(cyclicACMIPatch_.nonOverlapPatchID()))
         {
-            FatalIOErrorInFunction
-            (
-                dict
-            )
+            FatalIOErrorInFunction(dict)
                 << "    patch " << p.name()
                 << " of field " << this->internalField().name()
                 << " refers to non-overlap patch "

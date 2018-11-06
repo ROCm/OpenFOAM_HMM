@@ -546,19 +546,15 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 {
     if (nbrPatchName_ == word::null && !coupleGroup_.valid())
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "No \"neighbourPatch\" or \"coupleGroup\" provided."
+        FatalIOErrorInFunction(dict)
+            << "No \"neighbourPatch\" or \"coupleGroup\" provided."
             << exit(FatalIOError);
     }
 
     if (nbrPatchName_ == name)
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Neighbour patch name " << nbrPatchName_
+        FatalIOErrorInFunction(dict)
+            << "Neighbour patch name " << nbrPatchName_
             << " cannot be the same as this patch " << name
             << exit(FatalIOError);
     }
@@ -584,10 +580,8 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
             scalar magRot = mag(rotationAxis_);
             if (magRot < SMALL)
             {
-                FatalIOErrorInFunction
-                (
-                    dict
-                )   << "Illegal rotationAxis " << rotationAxis_ << endl
+                FatalIOErrorInFunction(dict)
+                    << "Illegal rotationAxis " << rotationAxis_ << endl
                     << "Please supply a non-zero vector."
                     << exit(FatalIOError);
             }

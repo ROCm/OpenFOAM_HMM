@@ -91,10 +91,8 @@ Foam::lduMatrix::preconditioner::New
 
         if (!cstrIter.found())
         {
-            FatalIOErrorInFunction
-            (
-                controls
-            )   << "Unknown symmetric matrix preconditioner "
+            FatalIOErrorInFunction(controls)
+                << "Unknown symmetric matrix preconditioner "
                 << name << nl << nl
                 << "Valid symmetric matrix preconditioners :" << endl
                 << symMatrixConstructorTablePtr_->sortedToc()
@@ -116,10 +114,8 @@ Foam::lduMatrix::preconditioner::New
 
         if (!cstrIter.found())
         {
-            FatalIOErrorInFunction
-            (
-                controls
-            )   << "Unknown asymmetric matrix preconditioner "
+            FatalIOErrorInFunction(controls)
+                << "Unknown asymmetric matrix preconditioner "
                 << name << nl << nl
                 << "Valid asymmetric matrix preconditioners :" << endl
                 << asymMatrixConstructorTablePtr_->sortedToc()
@@ -136,10 +132,8 @@ Foam::lduMatrix::preconditioner::New
         );
     }
 
-    FatalIOErrorInFunction
-    (
-        controls
-    )   << "cannot solve incomplete matrix, "
+    FatalIOErrorInFunction(controls)
+        << "cannot solve incomplete matrix, "
            "no diagonal or off-diagonal coefficient"
         << exit(FatalIOError);
 

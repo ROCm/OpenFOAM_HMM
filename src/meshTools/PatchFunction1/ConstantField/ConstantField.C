@@ -106,7 +106,7 @@ Foam::Field<Type> Foam::PatchFunction1Types::ConstantField<Type>::getValue
             else
             {
                 FatalIOErrorInFunction(dict)
-                    << "expected keyword 'uniform', 'nonuniform' or 'constant'"
+                    << "Expected keyword 'uniform', 'nonuniform' or 'constant'"
                     << ", found " << firstToken.wordToken()
                     << exit(FatalIOError);
             }

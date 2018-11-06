@@ -226,10 +226,8 @@ Foam::layerParameters::layerParameters
 
     if (layerSpec_ == ILLEGAL || nSpec != 2)
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Over- or underspecified layer thickness."
+        FatalIOErrorInFunction(dict)
+            << "Over- or underspecified layer thickness."
             << " Please specify" << nl
             << "    first layer thickness ('firstLayerThickness')"
             << " and overall thickness ('thickness') or" << nl
@@ -250,7 +248,7 @@ Foam::layerParameters::layerParameters
     if (nLayerIter_ < 0 || nRelaxedIter_ < 0)
     {
         FatalIOErrorInFunction(dict)
-            << "Layer iterations should be >= 0." << endl
+            << "Layer iterations should be >= 0." << nl
             << "nLayerIter:" << nLayerIter_
             << " nRelaxedIter:" << nRelaxedIter_
             << exit(FatalIOError);
@@ -353,10 +351,8 @@ Foam::layerParameters::layerParameters
                         break;
 
                         default:
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "problem." << exit(FatalIOError);
+                            FatalIOErrorInFunction(dict)
+                                << "problem." << exit(FatalIOError);
                         break;
                     }
 

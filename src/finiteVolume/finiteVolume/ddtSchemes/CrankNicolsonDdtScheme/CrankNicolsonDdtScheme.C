@@ -308,10 +308,8 @@ CrankNicolsonDdtScheme<Type>::CrankNicolsonDdtScheme
         const scalar ocCoeff = firstToken.number();
         if (ocCoeff < 0 || ocCoeff > 1)
         {
-            FatalIOErrorInFunction
-            (
-                is
-            )   << "Off-centreing coefficient = " << ocCoeff
+            FatalIOErrorInFunction(is)
+                << "Off-centreing coefficient = " << ocCoeff
                 << " should be >= 0 and <= 1"
                 << exit(FatalIOError);
         }

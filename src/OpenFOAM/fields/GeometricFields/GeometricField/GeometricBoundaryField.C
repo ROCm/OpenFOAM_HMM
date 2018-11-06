@@ -158,10 +158,8 @@ readField
         {
             if (bmesh_[patchi].type() == cyclicPolyPatch::typeName)
             {
-                FatalIOErrorInFunction
-                (
-                    dict
-                )   << "Cannot find patchField entry for cyclic "
+                FatalIOErrorInFunction(dict)
+                    << "Cannot find patchField entry for cyclic "
                     << bmesh_[patchi].name() << endl
                     << "Is your field uptodate with split cyclics?" << endl
                     << "Run foamUpgradeCyclics to convert mesh and fields"
@@ -169,10 +167,8 @@ readField
             }
             else
             {
-                FatalIOErrorInFunction
-                (
-                    dict
-                )   << "Cannot find patchField entry for "
+                FatalIOErrorInFunction(dict)
+                    << "Cannot find patchField entry for "
                     << bmesh_[patchi].name() << exit(FatalIOError);
             }
         }

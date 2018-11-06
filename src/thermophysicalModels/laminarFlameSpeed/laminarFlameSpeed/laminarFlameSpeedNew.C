@@ -54,12 +54,10 @@ Foam::autoPtr<Foam::laminarFlameSpeed> Foam::laminarFlameSpeed::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction
-        (
-            propDict
-        )   << "Unknown laminarFlameSpeed type "
+        FatalIOErrorInFunction(propDict)
+            << "Unknown laminarFlameSpeed type "
             << modelType << nl << nl
-            << "Valid laminarFlameSpeed types :" << endl
+            << "Valid laminarFlameSpeed types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }

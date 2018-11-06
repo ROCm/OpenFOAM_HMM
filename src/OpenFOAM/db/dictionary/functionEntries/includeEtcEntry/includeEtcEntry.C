@@ -108,10 +108,8 @@ bool Foam::functionEntries::includeEtcEntry::execute
         return true;
     }
 
-    FatalIOErrorInFunction
-    (
-        is
-    )   << "Cannot open etc file "
+    FatalIOErrorInFunction(is)
+        << "Cannot open etc file "
         << (ifs.name().size() ? ifs.name() : rawName)
         << " while reading dictionary " << parentDict.name()
         << exit(FatalIOError);
@@ -143,10 +141,8 @@ bool Foam::functionEntries::includeEtcEntry::execute
         return true;
     }
 
-    FatalIOErrorInFunction
-    (
-        is
-    )   << "Cannot open etc file "
+    FatalIOErrorInFunction(is)
+        << "Cannot open etc file "
         << (ifs.name().size() ? ifs.name() : rawName)
         << " while reading dictionary " << parentDict.name()
         << exit(FatalIOError);

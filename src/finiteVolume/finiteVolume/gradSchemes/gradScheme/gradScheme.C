@@ -43,10 +43,8 @@ Foam::tmp<Foam::fv::gradScheme<Type>> Foam::fv::gradScheme<Type>::New
 
     if (schemeData.eof())
     {
-        FatalIOErrorInFunction
-        (
-            schemeData
-        )   << "Grad scheme not specified" << endl << endl
+        FatalIOErrorInFunction(schemeData)
+            << "Grad scheme not specified" << endl << endl
             << "Valid grad schemes are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
@@ -58,10 +56,8 @@ Foam::tmp<Foam::fv::gradScheme<Type>> Foam::fv::gradScheme<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction
-        (
-            schemeData
-        )   << "Unknown grad scheme "
+        FatalIOErrorInFunction(schemeData)
+            << "Unknown grad scheme "
             << schemeName << nl << nl
             << "Valid grad schemes are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
