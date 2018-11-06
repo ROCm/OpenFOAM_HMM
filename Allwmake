@@ -16,7 +16,11 @@ cd ${0%/*} && wmakeCheckPwd "$WM_PROJECT_DIR" 2>/dev/null || {
 #------------------------------------------------------------------------------
 echo "========================================"
 date "+%Y-%m-%d %H:%M:%S %z" 2>/dev/null || echo "date is unknown"
-echo "Starting ${WM_PROJECT_DIR##*/} ${0##*}"
+echo "Starting compile ${WM_PROJECT_DIR##*/} ${0##*}"
+case "$WM_COMPILER" in
+    Gcc*)    gcc --version 2>/dev/null | sed -ne '1p' ;;
+    Clang*)  clang --version 2>/dev/null | sed -ne '1p' ;;
+esac
 echo "  $WM_COMPILER $WM_COMPILER_TYPE compiler"
 echo "  ${WM_OPTIONS}, with ${WM_MPLIB} ${FOAM_MPI}"
 echo
