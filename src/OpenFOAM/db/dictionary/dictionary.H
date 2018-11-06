@@ -357,12 +357,6 @@ private:
         ) const;
 
 
-        //- Check after reading if the input token stream has unconsumed
-        //- tokens remaining or if there were no tokens in the first place.
-        //  Emits FatalIOError
-        void checkITstream(const word& keyword, const ITstream& is) const;
-
-
 public:
 
     // Declare name of the class and its debug switch
@@ -798,6 +792,11 @@ public:
 
 
     // Read
+
+        //- Check after reading if the input token stream has unconsumed
+        //- tokens remaining or if there were no tokens in the first place.
+        //  Emits FatalIOError
+        void checkITstream(const ITstream& is, const word& keyword) const;
 
         //- Read dictionary from Istream
         bool read(Istream& is);

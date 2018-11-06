@@ -93,7 +93,7 @@ bool Foam::dictionary::readCompat
         ITstream& is = finder.ptr()->stream();
         is >> val;
 
-        checkITstream(keyword, is);
+        checkITstream(is, keyword);
 
         return true;
     }
@@ -126,7 +126,7 @@ T Foam::dictionary::lookupOrDefault
         ITstream& is = finder.ptr()->stream();
         is >> val;
 
-        checkITstream(keyword, is);
+        checkITstream(is, keyword);
 
         return val;
     }
@@ -159,7 +159,7 @@ T Foam::dictionary::lookupOrAddDefault
         ITstream& is = finder.ptr()->stream();
         is >> val;
 
-        checkITstream(keyword, is);
+        checkITstream(is, keyword);
 
         return val;
     }
@@ -192,7 +192,7 @@ bool Foam::dictionary::readEntry
         ITstream& is = finder.ptr()->stream();
         is >> val;
 
-        checkITstream(keyword, is);
+        checkITstream(is, keyword);
 
         return true;
     }
@@ -239,7 +239,7 @@ T Foam::dictionary::lookupOrDefaultCompat
         ITstream& is = finder.ptr()->stream();
         is >> val;
 
-        checkITstream(keyword, is);
+        checkITstream(is, keyword);
 
         return val;
     }

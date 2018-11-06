@@ -107,11 +107,6 @@ private:
         //  \return True if it is a valid keyType.
         static bool getKeyword(keyType& keyword, Istream& is);
 
-        //- Check after reading if the input token stream has unconsumed
-        //- tokens remaining or if there were no tokens in the first place.
-        //  Emits FatalIOError
-        void checkITstream(const ITstream& is) const;
-
 
 public:
 
@@ -245,9 +240,12 @@ public:
         virtual dictionary& dict() = 0;
 
 
-        //- Write
-        virtual void write(Ostream& os) const = 0;
+    // Read
 
+        //- Check after reading if the input token stream has unconsumed
+        //- tokens remaining or if there were no tokens in the first place.
+        //  Emits FatalIOError
+        void checkITstream(const ITstream& is) const;
 
         //- Get a T from the stream,
         //- FatalIOError if the number of tokens is incorrect.
@@ -271,6 +269,11 @@ public:
 
             checkITstream(is);
         }
+
+    // Write
+
+        //- Write
+        virtual void write(Ostream& os) const = 0;
 
 
     // Member Operators

@@ -47,7 +47,29 @@ void Foam::entry::resetInputMode()
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::entry::entry(const keyType& keyword)
+:
+    IDLList<entry>::link(),
+    keyword_(keyword)
+{}
+
+
+Foam::entry::entry(const entry& e)
+:
+    IDLList<entry>::link(),
+    keyword_(e.keyword_)
+{}
+
+
+Foam::autoPtr<Foam::entry> Foam::entry::clone() const
+{
+    return clone(dictionary::null);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::entry::checkITstream(const ITstream& is) const
 {
@@ -126,28 +148,6 @@ void Foam::entry::checkITstream(const ITstream& is) const
             ::exit(1);
         }
     }
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::entry::entry(const keyType& keyword)
-:
-    IDLList<entry>::link(),
-    keyword_(keyword)
-{}
-
-
-Foam::entry::entry(const entry& e)
-:
-    IDLList<entry>::link(),
-    keyword_(e.keyword_)
-{}
-
-
-Foam::autoPtr<Foam::entry> Foam::entry::clone() const
-{
-    return clone(dictionary::null);
 }
 
 
