@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,37 +25,40 @@ License
 
 #include "volFields.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTemplate2TypeNameAndDebug(volScalarField::Internal, 0);
+    defineTemplate2TypeNameAndDebug(volVectorField::Internal, 0);
+    defineTemplate2TypeNameAndDebug
+    (
+        volSphericalTensorField::Internal,
+        0
+    );
+    defineTemplate2TypeNameAndDebug
+    (
+        volSymmTensorField::Internal,
+        0
+    );
+    defineTemplate2TypeNameAndDebug(volTensorField::Internal, 0);
+
+    defineTemplateTypeNameAndDebug(volScalarField, 0);
+    defineTemplateTypeNameAndDebug(volVectorField, 0);
+    defineTemplateTypeNameAndDebug(volSphericalTensorField, 0);
+    defineTemplateTypeNameAndDebug(volSymmTensorField, 0);
+    defineTemplateTypeNameAndDebug(volTensorField, 0);
+
+} // End namespace Foam
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Specializations
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTemplate2TypeNameAndDebug(volScalarField::Internal, 0);
-defineTemplate2TypeNameAndDebug(volVectorField::Internal, 0);
-defineTemplate2TypeNameAndDebug
-(
-    volSphericalTensorField::Internal,
-    0
-);
-defineTemplate2TypeNameAndDebug
-(
-    volSymmTensorField::Internal,
-    0
-);
-defineTemplate2TypeNameAndDebug(volTensorField::Internal, 0);
-
-defineTemplateTypeNameAndDebug(volScalarField, 0);
-defineTemplateTypeNameAndDebug(volVectorField, 0);
-defineTemplateTypeNameAndDebug(volSphericalTensorField, 0);
-defineTemplateTypeNameAndDebug(volSymmTensorField, 0);
-defineTemplateTypeNameAndDebug(volTensorField, 0);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// specialization for scalar fields
 template<>
 tmp<GeometricField<scalar, fvPatchField, volMesh>>
 GeometricField<scalar, fvPatchField, volMesh>::component
@@ -67,7 +70,6 @@ GeometricField<scalar, fvPatchField, volMesh>::component
 }
 
 
-// specialization for scalar fields
 template<>
 void GeometricField<scalar, fvPatchField, volMesh>::replace
 (
@@ -78,8 +80,29 @@ void GeometricField<scalar, fvPatchField, volMesh>::replace
     *this == gsf;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 } // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * * Global Data * * * * * * * * * * * * * * * //
+
+const Foam::wordList Foam::fieldTypes::internal
+({
+    Foam::volScalarField::Internal::typeName,
+    Foam::volVectorField::Internal::typeName,
+    Foam::volSphericalTensorField::Internal::typeName,
+    Foam::volSymmTensorField::Internal::typeName,
+    Foam::volTensorField::Internal::typeName
+});
+
+
+const Foam::wordList Foam::fieldTypes::volume
+({
+    Foam::volScalarField::typeName,
+    Foam::volVectorField::typeName,
+    Foam::volSphericalTensorField::typeName,
+    Foam::volSymmTensorField::typeName,
+    Foam::volTensorField::typeName
+});
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

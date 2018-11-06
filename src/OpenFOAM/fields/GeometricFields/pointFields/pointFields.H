@@ -35,9 +35,9 @@ SourceFiles
 #define pointFields_H
 
 #include "GeometricFields.H"
-#include "fieldTypes.H"
-#include "pointPatchFields.H"
 #include "pointMesh.H"
+#include "pointPatchFields.H"
+#include "pointFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

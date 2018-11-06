@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,14 +23,25 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointPatchFields_H
-#define pointPatchFields_H
+#include "fieldTypes.H"
+#include "labelIOField.H"
+#include "scalarIOField.H"
+#include "vectorIOField.H"
+#include "sphericalTensorIOField.H"
+#include "symmTensorIOField.H"
+#include "tensorIOField.H"
 
-#include "pointPatchField.H"
-#include "pointPatchFieldsFwd.H"
+// * * * * * * * * * * * * * * * * Global Data * * * * * * * * * * * * * * * //
+
+const Foam::wordList Foam::fieldTypes::basic
+({
+    Foam::labelIOField::typeName,
+    Foam::scalarIOField::typeName,
+    Foam::vectorIOField::typeName,
+    Foam::sphericalTensorIOField::typeName,
+    Foam::symmTensorIOField::typeName,
+    Foam::tensorIOField::typeName
+});
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
-
-// ************************************************************************* //

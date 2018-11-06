@@ -54,7 +54,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Specializations
 
 template<>
 tmp<GeometricField<scalar, faPatchField, areaMesh>>

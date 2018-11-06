@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           |
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
 -------------------------------------------------------------------------------
@@ -23,10 +23,8 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    areaFields
-
 Description
+    Forwards and collection of common area field types
 
 SourceFiles
     areaFields.C
@@ -59,6 +57,20 @@ typedef GeometricField<sphericalTensor, faPatchField, areaMesh>
     areaSphericalTensorField;
 typedef GeometricField<symmTensor, faPatchField, areaMesh> areaSymmTensorField;
 typedef GeometricField<tensor, faPatchField, areaMesh> areaTensorField;
+
+
+
+/*---------------------------------------------------------------------------*\
+                       Namespace fieldTypes Declaration
+\*---------------------------------------------------------------------------*/
+
+namespace fieldTypes
+{
+    //- Standard area field types (scalar, vector, tensor, etc)
+    extern const wordList area;
+
+} // End namespace fieldTypes
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

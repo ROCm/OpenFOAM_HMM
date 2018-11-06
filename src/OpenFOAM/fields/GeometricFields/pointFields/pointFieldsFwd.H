@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,7 @@ InClass
     Foam::pointFields
 
 Description
+    Forwards and collection of common point field types
 
 SourceFiles
     pointFields.C
@@ -58,6 +59,19 @@ typedef GeometricField<sphericalTensor, pointPatchField, pointMesh>
 typedef GeometricField<symmTensor, pointPatchField, pointMesh>
     pointSymmTensorField;
 typedef GeometricField<tensor, pointPatchField, pointMesh> pointTensorField;
+
+
+/*---------------------------------------------------------------------------*\
+                       Namespace fieldTypes Declaration
+\*---------------------------------------------------------------------------*/
+
+namespace fieldTypes
+{
+    //- Standard point field types (scalar, vector, tensor, etc)
+    extern const wordList point;
+
+} // End namespace fieldTypes
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
