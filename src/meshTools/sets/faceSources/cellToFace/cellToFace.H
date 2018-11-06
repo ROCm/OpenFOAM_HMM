@@ -33,12 +33,14 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                       | Required  | Default
-        set         | Name of input cellSet             | yes   |
+        sets        | The cellSet names to use          | possibly |
+        set         | The cellSet name to use           | possibly |
         option      | Selection (all/both)              | yes   |
     \endtable
 
 Note
-    When picking up coupled faces uses cells on neighbouring processors.
+    Must specify "sets" or "set" (highest to lowest precedence).
+    When picking up coupled faces, it uses cells on neighbouring processors.
 
 SourceFiles
     cellToFace.C
@@ -80,8 +82,8 @@ private:
 
         static const Enum<cellAction> cellActionNames_;
 
-        //- Name of set to use
-        word setName_;
+        //- Names of sets to use
+        wordList names_;
 
         //- Option
         cellAction option_;
@@ -90,7 +92,7 @@ private:
     // Private Member Functions
 
         //- Depending on face to cell option add to or delete from cellSet.
-        void combine(topoSet& set, const bool add) const;
+        void combine(topoSet& set, const bool add, const word& setName) const;
 
 
 public:

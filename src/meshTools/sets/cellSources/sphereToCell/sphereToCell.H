@@ -31,7 +31,8 @@ Description
     \table
         Property    | Description                           | Required | Default
         origin      | The origin (centre) of the sphere     | yes   |
-        radius      | The (outside) radius of sphere        | yes   |
+        radius      | The (outer) radius of sphere          | yes   |
+        innerRadius | The inner radius of sphere            | no    | 0
         centre      | Alternative for 'origin'              | no    |
     \endtable
 
@@ -70,6 +71,9 @@ class sphereToCell
         //- The outer radius of the sphere
         scalar radius_;
 
+        //- The inner radius of the sphere
+        scalar innerRadius_;
+
 
     // Private Member Functions
 
@@ -89,7 +93,8 @@ public:
         (
             const polyMesh& mesh,
             const point& origin,
-            const scalar radius
+            const scalar radius,
+            const scalar innerRadius = 0
         );
 
         //- Construct from dictionary

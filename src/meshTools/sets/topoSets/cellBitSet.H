@@ -36,8 +36,7 @@ SourceFiles
 #ifndef cellBitSet_H
 #define cellBitSet_H
 
-#include "topoSet.H"
-#include "bitSet.H"
+#include "topoBitSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,12 +49,8 @@ namespace Foam
 
 class cellBitSet
 :
-    public topoSet
+    public topoBitSet
 {
-    // Private data
-
-        bitSet selected_;
-
 public:
 
     //- Runtime type information
@@ -70,58 +65,18 @@ public:
         //- Construct with nCells elements, using initial val
         cellBitSet(const polyMesh& mesh, const bool val);
 
+        //- Copy construct from bitset, resizing to nCells elements as required
+        cellBitSet(const polyMesh& mesh, const bitSet& bits);
+
+        //- Move construct from bitset, resizing to nCells elements as required
+        cellBitSet(const polyMesh& mesh, bitSet&& bits);
+
 
     //- Destructor
     virtual ~cellBitSet() = default;
 
 
     // Member Functions
-
-        //- Return the bitSet
-        const bitSet& addressing() const
-        {
-            return selected_;
-        }
-
-        //- Access the bitSet
-        bitSet& addressing()
-        {
-            return selected_;
-        }
-
-        //- Set values to false, leaving the size untouched
-        void reset()
-        {
-            selected_.reset();
-        }
-
-        //- Has the given index?
-        virtual bool found(const label id) const;
-
-        //- Set an index
-        virtual bool set(const label id);
-
-        //- Unset an index
-        virtual bool unset(const label id);
-
-        //- Set multiple indices
-        virtual void set(const labelUList& labels);
-
-        //- Unset multiple indices
-        virtual void unset(const labelUList& labels);
-
-        //- Invert contents.
-        //  Insert all members [0,maxLen) which were not in set.
-        virtual void invert(const label maxLen);
-
-        //- Subset contents. Only elements present in both sets remain.
-        virtual void subset(const topoSet& set);
-
-        //- Add elements present in set.
-        virtual void addSet(const topoSet& set);
-
-        //- Subtract elements present in set.
-        virtual void subtractSet(const topoSet& set);
 
         //- Sync cellBitSet across coupled patches.
         virtual void sync(const polyMesh& mesh)

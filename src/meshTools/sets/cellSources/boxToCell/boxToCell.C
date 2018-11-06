@@ -67,13 +67,13 @@ void Foam::boxToCell::combine(topoSet& set, const bool add) const
 {
     const pointField& ctrs = mesh_.cellCentres();
 
-    forAll(ctrs, celli)
+    forAll(ctrs, elemi)
     {
         for (const auto& bb : bbs_)
         {
-            if (bb.contains(ctrs[celli]))
+            if (bb.contains(ctrs[elemi]))
             {
-                addOrDelete(set, celli, add);
+                addOrDelete(set, elemi, add);
                 break;
             }
         }

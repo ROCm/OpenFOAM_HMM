@@ -65,15 +65,15 @@ Foam::topoSetSource::addToUsageTable Foam::boxToPoint::usage_
 
 void Foam::boxToPoint::combine(topoSet& set, const bool add) const
 {
-    const pointField& pts = mesh_.points();
+    const pointField& ctrs = mesh_.points();
 
-    forAll(pts, pointi)
+    forAll(ctrs, elemi)
     {
         for (const auto& bb : bbs_)
         {
-            if (bb.contains(pts[pointi]))
+            if (bb.contains(ctrs[elemi]))
             {
-                addOrDelete(set, pointi, add);
+                addOrDelete(set, elemi, add);
                 break;
             }
         }

@@ -29,9 +29,13 @@ Description
 
     \heading Dictionary parameters
     \table
-        Property    | Description                       | Required  | Default
-        set         | The cell set name                 | yes   |
+        Property    | Description                          | Required | Default
+        sets        | The input cellSet names              | possibly |
+        set         | The input cellSet name               | possibly |
     \endtable
+
+Note
+    Must specify "sets" or "set" (highest to lowest precedence).
 
 SourceFiles
     cellToCell.C
@@ -61,8 +65,9 @@ class cellToCell
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Name of set to use
-        word setName_;
+        //- Names of sets to use
+        wordList names_;
+
 
 public:
 

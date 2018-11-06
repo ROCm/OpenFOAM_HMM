@@ -30,8 +30,12 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                       | Required  | Default
-        set         | Name of the input faceSet         | yes   |
+        sets        | The input faceSet names           | possibly |
+        set         | The input faceSet name            | possibly |
     \endtable
+
+Note
+    Must specify "sets" or "set" (highest to lowest precedence).
 
 SourceFiles
     faceToFace.C
@@ -61,8 +65,9 @@ class faceToFace
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Name of set to use
-        word setName_;
+        //- Names of sets to use
+        wordList names_;
+
 
 public:
 

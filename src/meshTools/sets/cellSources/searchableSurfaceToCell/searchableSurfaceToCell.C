@@ -47,7 +47,7 @@ namespace Foam
     );
     addNamedToRunTimeSelectionTable
     (
-        topoSetSource,
+        topoSetCellSource,
         searchableSurfaceToCell,
         word,
         surface
@@ -64,6 +64,25 @@ Foam::topoSetSource::addToUsageTable Foam::searchableSurfaceToCell::usage_
 );
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::word Foam::searchableSurfaceToCell::getSurfaceName
+(
+    const dictionary& dict,
+    const word& defaultName
+)
+{
+    // Unfortunately cannot get a good default name from the dictionary name.
+    // It could be
+    //     sourceInfo { .. }
+    // But even with something like
+    //     mySurf.stl { .. }
+    // The dictName() method will only return the "stl" ending.
+
+    return dict.lookupOrDefault<word>("surfaceName", defaultName);
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::searchableSurfaceToCell::combine(topoSet& set, const bool add) const
@@ -72,21 +91,20 @@ void Foam::searchableSurfaceToCell::combine(topoSet& set, const bool add) const
     {
         return;
     }
+    const pointField& ctrs = mesh_.cellCentres();
     const searchableSurface& s = *surf_;
 
-    // Add cells within the enclosing volumes
-
-    const label len = mesh_.nCells();
+    // Cell centres within the enclosing volumes
 
     List<volumeType> volTypes;
+    s.getVolumeType(ctrs, volTypes);
 
-    s.getVolumeType(mesh_.cellCentres(), volTypes);
-
-    for (label celli=0; celli < len; ++celli)
+    const label len = volTypes.size();
+    for (label elemi=0; elemi < len; ++elemi)
     {
-        if (volTypes[celli] == volumeType::INSIDE)
+        if (volTypes[elemi] == volumeType::INSIDE)
         {
-            addOrDelete(set, celli, add);
+            addOrDelete(set, elemi, add);
         }
     }
 }
@@ -109,10 +127,10 @@ Foam::searchableSurfaceToCell::searchableSurfaceToCell
             surfaceType,
             IOobject
             (
-                dict.lookupOrDefault("name", mesh.objectRegistry::db().name()),
-                mesh.time().constant(), // Instance
-                "triSurface",           // Local
-                mesh.time(),            // Registry
+                getSurfaceName(dict, mesh.objectRegistry::db().name()),
+                mesh.time().constant(),     // Instance
+                "triSurface",               // Local
+                mesh.objectRegistry::db(),  // Registry
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE
             ),
@@ -124,8 +142,8 @@ Foam::searchableSurfaceToCell::searchableSurfaceToCell
     if (surf_ && !surf_->hasVolumeType())
     {
         WarningInFunction
-            << nl << "The surface '" << surf_->name() << "' of type '"
-            << surf_->type() << "' appears to be unclosed ... ignoring"
+            << nl << "The surface " << surf_->name() << " (type: "
+            << surf_->type() << ") appears to be unclosed ... ignoring"
             << nl << endl;
 
         surf_.clear();
@@ -141,7 +159,7 @@ Foam::searchableSurfaceToCell::searchableSurfaceToCell
 :
     searchableSurfaceToCell
     (
-        dict.get<word>("surface"),
+        dict.getCompat<word>("surfaceType", {{"surface", 0}}),
         mesh,
         dict
     )
@@ -165,8 +183,9 @@ void Foam::searchableSurfaceToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding cells enclosed by searchableSurface"
-                << "..." << endl;
+            Info<< "    Adding cells enclosed by surface '"
+                << surf_->name() << "' (type: " << surf_->type() << ") ..."
+                << endl;
         }
 
         combine(set, true);
@@ -175,8 +194,9 @@ void Foam::searchableSurfaceToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Removing cells enclosed by searchableSurface"
-                << "..." << endl;
+            Info<< "    Removing cells enclosed by surface '"
+                << surf_->name() << "' (type: " << surf_->type() << ") ..."
+                << endl;
         }
 
         combine(set, false);

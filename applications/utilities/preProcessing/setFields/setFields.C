@@ -157,6 +157,12 @@ public:
             selectedCells_(selectedCells)
         {}
 
+        iNew(const fvMesh& mesh, labelList&& selectedCells)
+        :
+            mesh_(mesh),
+            selectedCells_(std::move(selectedCells))
+        {}
+
         autoPtr<setCellField> operator()(Istream& fieldValues) const
         {
             word fieldType(fieldValues);
@@ -348,6 +354,12 @@ public:
             selectedFaces_(selectedFaces)
         {}
 
+        iNew(const fvMesh& mesh, labelList&& selectedFaces)
+        :
+            mesh_(mesh),
+            selectedFaces_(std::move(selectedFaces))
+        {}
+
         autoPtr<setFaceField> operator()(Istream& fieldValues) const
         {
             word fieldType(fieldValues);
@@ -438,7 +450,7 @@ int main(int argc, char *argv[])
             PtrList<setCellField> fieldValues
             (
                 region.dict().lookup("fieldValues"),
-                setCellField::iNew(mesh, selectedCellSet.toc())
+                setCellField::iNew(mesh, selectedCellSet.sortedToc())
             );
         }
         else if (source().setType() == topoSetSource::FACESETSOURCE)
@@ -459,7 +471,7 @@ int main(int argc, char *argv[])
             PtrList<setFaceField> fieldValues
             (
                 region.dict().lookup("fieldValues"),
-                setFaceField::iNew(mesh, selectedFaceSet.toc())
+                setFaceField::iNew(mesh, selectedFaceSet.sortedToc())
             );
         }
     }

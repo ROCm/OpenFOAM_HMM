@@ -37,8 +37,8 @@ Description
     \endtable
 
 Note
-    In the order of highest to lowest precedence, must specify "boxes",
-    "box" or a "min/max" pair (compatibility with searchable box).
+    Must specify "boxes", "box" or a "min/max" pair
+    (compatibility with searchable box) - highest to lowest precedence.
 
 SourceFiles
     boxToCell.C

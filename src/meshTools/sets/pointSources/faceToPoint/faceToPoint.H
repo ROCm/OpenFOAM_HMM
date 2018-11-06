@@ -29,10 +29,14 @@ Description
 
     \heading Dictionary parameters
     \table
-        Property    | Description                       | Required  | Default
-        name        | The input faceSet name            | yes   |
+        Property    | Description                       | Required | Default
+        sets        | The faceSet names to use          | possibly |
+        set         | The faceSet name to use           | possibly |
         option      | Selection type (all)              | yes   |
     \endtable
+
+Note
+    Must specify "sets" or "set" (highest to lowest precedence).
 
 SourceFiles
     faceToPoint.C
@@ -73,8 +77,8 @@ private:
 
         static const Enum<faceAction> faceActionNames_;
 
-        //- Name of set to use
-        word setName_;
+        //- Names of sets to use
+        wordList names_;
 
         //- Option
         faceAction option_;
@@ -83,7 +87,7 @@ private:
     // Private Member Functions
 
         //- Depending on face to cell option add to or delete from cellSet.
-        void combine(topoSet& set, const bool add) const;
+        void combine(topoSet& set, const bool add, const word& setName) const;
 
 
 public:

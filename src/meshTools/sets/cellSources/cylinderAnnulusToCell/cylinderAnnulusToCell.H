@@ -31,10 +31,10 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                       | Required  | Default
-        p1          | coordinate of endpoint            | yes   |
-        p2          | coordinate of endpoint            | yes   |
-        outerRadius | cylinder outer radius             | yes   |
-        innerRadius | cylinder inner radius             | yes   |
+        p1          | Coordinate of endpoint            | yes   |
+        p2          | Coordinate of endpoint            | yes   |
+        outerRadius | Cylinder outer radius             | yes   |
+        innerRadius | Cylinder inner radius             | yes   |
     \endtable
 
 SourceFiles
@@ -72,10 +72,10 @@ class cylinderAnnulusToCell
         //- Second point on cylinder axis
         point point2_;
 
-        //- Outer Radius
-        scalar outerRadius_;
+        //- Outer radius
+        scalar radius_;
 
-        //- Inner Radius
+        //- Inner radius
         scalar innerRadius_;
 
 
@@ -98,7 +98,7 @@ public:
             const polyMesh& mesh,
             const point& point1,
             const point& point2,
-            const scalar outerRadius,
+            const scalar radius,
             const scalar innerRadius = 0
         );
 

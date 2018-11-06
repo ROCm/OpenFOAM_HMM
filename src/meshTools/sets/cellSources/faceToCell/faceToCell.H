@@ -29,10 +29,14 @@ Description
 
     \heading Dictionary parameters
     \table
-        Property    | Description                       | Required  | Default
-        set         | The face set name to use          | yes   |
+        Property    | Description                           | Required | Default
+        sets        | The faceSet names to use              | possibly |
+        set         | The faceSet name to use               | possibly |
         option      | Selection type (all/any/owner/neighbour)  | yes   |
     \endtable
+
+Note
+    Must specify "sets" or "set" (highest to lowest precedence).
 
 SourceFiles
     faceToCell.C
@@ -76,8 +80,8 @@ private:
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Name of set to use
-        word setName_;
+        //- Names of sets to use
+        wordList names_;
 
         //- Option
         faceAction option_;
@@ -86,7 +90,7 @@ private:
     // Private Member Functions
 
         //- Depending on face to cell option add to or delete from cellSet.
-        void combine(topoSet& set, const bool add) const;
+        void combine(topoSet& set, const bool add, const word& setName) const;
 
 
 public:

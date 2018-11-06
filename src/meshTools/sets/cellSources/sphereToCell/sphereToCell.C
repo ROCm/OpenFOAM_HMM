@@ -67,13 +67,18 @@ void Foam::sphereToCell::combine(topoSet& set, const bool add) const
 {
     const pointField& ctrs = mesh_.cellCentres();
 
-    const scalar rad2 = radius_*radius_;
+    const scalar orad2 = sqr(radius_);
+    const scalar irad2 = innerRadius_ > 0 ? sqr(innerRadius_) : -1;
 
-    forAll(ctrs, celli)
+    // Treat innerRadius == 0 like unspecified innerRadius (always accept)
+
+    forAll(ctrs, elemi)
     {
-        if (magSqr(ctrs[celli] - origin_) <= rad2)
+        const scalar d2 = magSqr(ctrs[elemi] - origin_);
+
+        if ((d2 < orad2) && (d2 > irad2))
         {
-            addOrDelete(set, celli, add);
+            addOrDelete(set, elemi, add);
         }
     }
 }
@@ -85,12 +90,14 @@ Foam::sphereToCell::sphereToCell
 (
     const polyMesh& mesh,
     const point& origin,
-    const scalar radius
+    const scalar radius,
+    const scalar innerRadius
 )
 :
     topoSetCellSource(mesh),
     origin_(origin),
-    radius_(radius)
+    radius_(radius),
+    innerRadius_(innerRadius)
 {}
 
 
@@ -104,7 +111,8 @@ Foam::sphereToCell::sphereToCell
     (
         mesh,
         dict.getCompat<vector>("origin", {{"centre", -1806}}),
-        dict.get<scalar>("radius")
+        dict.get<scalar>("radius"),
+        dict.lookupOrDefault<scalar>("innerRadius", 0)
     )
 {}
 
@@ -117,7 +125,8 @@ Foam::sphereToCell::sphereToCell
 :
     topoSetCellSource(mesh),
     origin_(checkIs(is)),
-    radius_(readScalar(checkIs(is)))
+    radius_(readScalar(checkIs(is))),
+    innerRadius_(0)
 {}
 
 
@@ -133,8 +142,15 @@ void Foam::sphereToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding cells within a sphere with centre = "
-                << origin_ << " and radius = " << radius_ << endl;
+            Info<< "    Adding cells within sphere,"
+                << " origin = " << origin_ << ", radius = " << radius_;
+
+            if (innerRadius_ > 0)
+            {
+                Info<< ", innerRadius = " << innerRadius_;
+            }
+
+            Info<< endl;
         }
 
         combine(set, true);
@@ -143,8 +159,15 @@ void Foam::sphereToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Removing cells within a sphere with centre = "
-                << origin_ << " and radius = " << radius_ << endl;
+            Info<< "    Removing cells within sphere,"
+                << " origin = " << origin_ << ", radius = " << radius_;
+
+            if (innerRadius_ > 0)
+            {
+                Info<< ", innerRadius = " << innerRadius_;
+            }
+
+            Info<< endl;
         }
 
         combine(set, false);

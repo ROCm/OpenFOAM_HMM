@@ -25,14 +25,15 @@ Class
     Foam::searchableSurfaceToCell
 
 Description
-    A topoSetSource to select cells based on cell centres within a
+    A topoSetCellSource to select cells with centres within a
     searchableSurface.
 
     \heading Dictionary parameters
     \table
         Property    | Description                           | Required | Default
-        surface     | The searchable surface type           | yes   |
-        name        | Name for the IOobject                 | no    | mesh-name
+        surfaceType | The searchable surface type           | yes   |
+        surfaceName | Name for the IOobject                 | no    | mesh-name
+        surface     | Same as 'surfaceType'                 | no    |
     \endtable
 
 SourceFiles
@@ -71,6 +72,18 @@ class searchableSurfaceToCell
     // Private Member Functions
 
         void combine(topoSet& set, const bool add) const;
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Retrieve surface name from dictionary entry
+        static word getSurfaceName
+        (
+            const dictionary& dict,
+            const word& defaultName
+        );
 
 
 public:

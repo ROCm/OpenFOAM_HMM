@@ -57,7 +57,7 @@ Foam::faceToFace::faceToFace
 )
 :
     topoSetFaceSource(mesh),
-    setName_(setName)
+    names_(one(), setName)
 {}
 
 
@@ -67,12 +67,16 @@ Foam::faceToFace::faceToFace
     const dictionary& dict
 )
 :
-    faceToFace
-    (
-        mesh,
-        dict.get<word>("set")
-    )
-{}
+    topoSetFaceSource(mesh),
+    names_()
+{
+    // Look for 'sets' or 'set'
+    if (!dict.readIfPresent("sets", names_))
+    {
+        names_.resize(1);
+        dict.readEntry("set", names_.first());
+    }
+}
 
 
 Foam::faceToFace::faceToFace
@@ -82,7 +86,7 @@ Foam::faceToFace::faceToFace
 )
 :
     topoSetFaceSource(mesh),
-    setName_(checkIs(is))
+    names_(one(), word(checkIs(is)))
 {}
 
 
@@ -98,27 +102,31 @@ void Foam::faceToFace::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding all faces from faceSet " << setName_
-                << " ..." << endl;
+            Info<< "    Adding all elements of faceSet "
+                << flatOutput(names_) << nl;
         }
 
-        // Load the set
-        faceSet loadedSet(mesh_, setName_);
+        for (const word& setName : names_)
+        {
+            faceSet loadedSet(mesh_, setName);
 
-        set.addSet(loadedSet);
+            set.addSet(loadedSet);
+        }
     }
     else if (action == topoSetSource::SUBTRACT)
     {
         if (verbose_)
         {
-            Info<< "    Removing all faces from faceSet " << setName_
-                << " ..." << endl;
+            Info<< "    Removing all elements of faceSet "
+                << flatOutput(names_) << nl;
         }
 
-        // Load the set
-        faceSet loadedSet(mesh_, setName_);
+        for (const word& setName : names_)
+        {
+            faceSet loadedSet(mesh_, setName);
 
-        set.subtractSet(loadedSet);
+            set.subtractSet(loadedSet);
+        }
     }
 }
 

@@ -89,6 +89,13 @@ public:
         //- Construct from components
         explicit topoSetPointSource(const polyMesh& mesh);
 
+        //- Clone (disallowed)
+        autoPtr<topoSetPointSource> clone() const
+        {
+            NotImplemented;
+            return nullptr;
+        }
+
 
     // Selectors
 

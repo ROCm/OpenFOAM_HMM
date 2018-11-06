@@ -30,8 +30,12 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                       | Required  | Default
-        set         | The point set name                | yes   |
+        sets        | The input pointSet names          | possibly |
+        set         | The input pointSet name           | possibly |
     \endtable
+
+Note
+    Must specify "sets" or "set" (highest to lowest precedence).
 
 SourceFiles
     pointToPoint.C
@@ -61,8 +65,9 @@ class pointToPoint
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Name of set to use
-        word setName_;
+        //- Names of sets to use
+        wordList names_;
+
 
 public:
 
@@ -72,11 +77,7 @@ public:
     // Constructors
 
         //- Construct from components
-        pointToPoint
-        (
-            const polyMesh& mesh,
-            const word& setName
-        );
+        pointToPoint(const polyMesh& mesh, const word& setName);
 
         //- Construct from dictionary
         pointToPoint(const polyMesh& mesh, const dictionary& dict);

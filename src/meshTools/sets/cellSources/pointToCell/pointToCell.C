@@ -61,10 +61,15 @@ Foam::pointToCell::pointActionNames_
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::pointToCell::combine(topoSet& set, const bool add) const
+void Foam::pointToCell::combine
+(
+    topoSet& set,
+    const bool add,
+    const word& setName
+) const
 {
     // Load the set
-    pointSet loadedSet(mesh_, setName_);
+    pointSet loadedSet(mesh_, setName);
 
     const labelHashSet& pointLabels = loadedSet;
 
@@ -119,7 +124,7 @@ Foam::pointToCell::pointToCell
 )
 :
     topoSetCellSource(mesh),
-    setName_(setName),
+    names_(one(), setName),
     option_(option)
 {}
 
@@ -130,13 +135,17 @@ Foam::pointToCell::pointToCell
     const dictionary& dict
 )
 :
-    pointToCell
-    (
-        mesh,
-        dict.get<word>("set"),
-        pointActionNames_.get("option", dict)
-    )
-{}
+    topoSetCellSource(mesh),
+    names_(),
+    option_(pointActionNames_.get("option", dict))
+{
+    // Look for 'sets' or 'set'
+    if (!dict.readIfPresent("sets", names_))
+    {
+        names_.resize(1);
+        dict.readEntry("set", names_.first());
+    }
+}
 
 
 Foam::pointToCell::pointToCell
@@ -146,7 +155,7 @@ Foam::pointToCell::pointToCell
 )
 :
     topoSetCellSource(mesh),
-    setName_(checkIs(is)),
+    names_(one(), word(checkIs(is))),
     option_(pointActionNames_.read(checkIs(is)))
 {}
 
@@ -163,21 +172,27 @@ void Foam::pointToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding cells according to pointSet " << setName_
-                << " ..." << endl;
+            Info<< "    Adding cells according to pointSet "
+                << flatOutput(names_) << nl;
         }
 
-        combine(set, true);
+        for (const word& setName : names_)
+        {
+            combine(set, true, setName);
+        }
     }
     else if (action == topoSetSource::SUBTRACT)
     {
         if (verbose_)
         {
-            Info<< "    Removing cells according to pointSet " << setName_
-                << " ..." << endl;
+            Info<< "    Removing cells according to pointSet "
+                << flatOutput(names_) << nl;
         }
 
-        combine(set, false);
+        for (const word& setName : names_)
+        {
+            combine(set, false, setName);
+        }
     }
 }
 

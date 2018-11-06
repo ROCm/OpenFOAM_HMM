@@ -57,7 +57,7 @@ Foam::pointToPoint::pointToPoint
 )
 :
     topoSetPointSource(mesh),
-    setName_(setName)
+    names_(one(), setName)
 {}
 
 
@@ -67,8 +67,16 @@ Foam::pointToPoint::pointToPoint
     const dictionary& dict
 )
 :
-    pointToPoint(mesh, dict.get<word>("set"))
-{}
+    topoSetPointSource(mesh),
+    names_()
+{
+    // Look for 'sets' or 'set'
+    if (!dict.readIfPresent("sets", names_))
+    {
+        names_.resize(1);
+        dict.readEntry("set", names_.first());
+    }
+}
 
 
 Foam::pointToPoint::pointToPoint
@@ -78,7 +86,7 @@ Foam::pointToPoint::pointToPoint
 )
 :
     topoSetPointSource(mesh),
-    setName_(checkIs(is))
+    names_(one(), word(checkIs(is)))
 {}
 
 
@@ -94,27 +102,31 @@ void Foam::pointToPoint::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding all from pointSet " << setName_
-                << " ..." << endl;
+            Info<< "    Adding all elements of pointSet "
+                << flatOutput(names_) << nl;
         }
 
-        // Load the set
-        pointSet loadedSet(mesh_, setName_);
+        for (const word& setName : names_)
+        {
+            pointSet loadedSet(mesh_, setName);
 
-        set.addSet(loadedSet);
+            set.addSet(loadedSet);
+        }
     }
     else if (action == topoSetSource::SUBTRACT)
     {
         if (verbose_)
         {
-            Info<< "    Removing all from pointSet " << setName_
-                << " ..." << endl;
+            Info<< "    Removing all elements of pointSet "
+                << flatOutput(names_) << nl;
         }
 
-        // Load the set
-        pointSet loadedSet(mesh_, setName_);
+        for (const word& setName : names_)
+        {
+            pointSet loadedSet(mesh_, setName);
 
-        set.subtractSet(loadedSet);
+            set.subtractSet(loadedSet);
+        }
     }
 }
 

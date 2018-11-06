@@ -59,10 +59,15 @@ Foam::cellToPoint::cellActionNames_
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::cellToPoint::combine(topoSet& set, const bool add) const
+void Foam::cellToPoint::combine
+(
+    topoSet& set,
+    const bool add,
+    const word& setName
+) const
 {
     // Load the set
-    cellSet loadedSet(mesh_, setName_);
+    cellSet loadedSet(mesh_, setName);
     const labelHashSet& cellLabels = loadedSet;
 
     // Add all point from cells in loadedSet
@@ -93,7 +98,7 @@ Foam::cellToPoint::cellToPoint
 )
 :
     topoSetPointSource(mesh),
-    setName_(setName),
+    names_(one(), setName),
     option_(option)
 {}
 
@@ -104,13 +109,17 @@ Foam::cellToPoint::cellToPoint
     const dictionary& dict
 )
 :
-    cellToPoint
-    (
-        mesh,
-        dict.get<word>("set"),
-        cellActionNames_.get("option", dict)
-    )
-{}
+    topoSetPointSource(mesh),
+    names_(),
+    option_(cellActionNames_.get("option", dict))
+{
+    // Look for 'sets' or 'set'
+    if (!dict.readIfPresent("sets", names_))
+    {
+        names_.resize(1);
+        dict.readEntry("set", names_.first());
+    }
+}
 
 
 Foam::cellToPoint::cellToPoint
@@ -120,7 +129,7 @@ Foam::cellToPoint::cellToPoint
 )
 :
     topoSetPointSource(mesh),
-    setName_(checkIs(is)),
+    names_(one(), word(checkIs(is))),
     option_(cellActionNames_.read(checkIs(is)))
 {}
 
@@ -137,21 +146,27 @@ void Foam::cellToPoint::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding from " << setName_
-                << " ..." << endl;
+            Info<< "    Adding points in cellSet "
+                << flatOutput(names_) << nl;
         }
 
-        combine(set, true);
+        for (const word& setName : names_)
+        {
+            combine(set, true, setName);
+        }
     }
     else if (action == topoSetSource::SUBTRACT)
     {
         if (verbose_)
         {
-            Info<< "    Removing from " << setName_
-                << " ..." << endl;
+            Info<< "    Removing points in cellSet "
+                << flatOutput(names_) << nl;
         }
 
-        combine(set, false);
+        for (const word& setName : names_)
+        {
+            combine(set, false, setName);
+        }
     }
 }
 

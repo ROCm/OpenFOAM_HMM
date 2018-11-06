@@ -29,10 +29,11 @@ Description
 
     \heading Dictionary parameters
     \table
-        Property    | Description                       | Required  | Default
-        p1          | coordinate of endpoint            | yes   |
-        p2          | coordinate of endpoint            | yes   |
-        radius      | cylinder radius                   | yes   |
+        Property    | Description                       | Required | Default
+        p1          | Coordinate of endpoint            | yes   |
+        p2          | Coordinate of endpoint            | yes   |
+        radius      | Cylinder (outer) radius           | yes   |
+        innerRadius | Cylinder inner radius             | no    | 0
     \endtable
 
 SourceFiles
@@ -70,8 +71,11 @@ class cylinderToCell
         //- Second point on cylinder axis
         point point2_;
 
-        //- Radius
+        //- Outer radius
         scalar radius_;
+
+        //- Inner radius
+        scalar innerRadius_;
 
 
     // Private Member Functions
@@ -93,7 +97,8 @@ public:
             const polyMesh& mesh,
             const point& point1,
             const point& point2,
-            const scalar radius
+            const scalar radius,
+            const scalar innerRadius = 0
         );
 
         //- Construct from dictionary

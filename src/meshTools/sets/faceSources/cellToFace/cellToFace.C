@@ -63,16 +63,21 @@ Foam::cellToFace::cellActionNames_
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::cellToFace::combine(topoSet& set, const bool add) const
+void Foam::cellToFace::combine
+(
+    topoSet& set,
+    const bool add,
+    const word& setName
+) const
 {
     // Load the set
-    if (!exists(mesh_.time().path()/topoSet::localPath(mesh_, setName_)))
+    if (!exists(mesh_.time().path()/topoSet::localPath(mesh_, setName)))
     {
         SeriousError<< "Cannot load set "
-            << setName_ << endl;
+            << setName << endl;
     }
 
-    cellSet loadedSet(mesh_, setName_);
+    cellSet loadedSet(mesh_, setName);
     const labelHashSet& cellLabels = loadedSet;
 
     if (option_ == ALL)
@@ -156,7 +161,7 @@ Foam::cellToFace::cellToFace
 )
 :
     topoSetFaceSource(mesh),
-    setName_(setName),
+    names_(one(), setName),
     option_(option)
 {}
 
@@ -167,13 +172,17 @@ Foam::cellToFace::cellToFace
     const dictionary& dict
 )
 :
-    cellToFace
-    (
-        mesh,
-        dict.get<word>("set"),
-        cellActionNames_.get("option", dict)
-    )
-{}
+    topoSetFaceSource(mesh),
+    names_(),
+    option_(cellActionNames_.get("option", dict))
+{
+    // Look for 'sets' or 'set'
+    if (!dict.readIfPresent("sets", names_))
+    {
+        names_.resize(1);
+        dict.readEntry("set", names_.first());
+    }
+}
 
 
 Foam::cellToFace::cellToFace
@@ -183,7 +192,7 @@ Foam::cellToFace::cellToFace
 )
 :
     topoSetFaceSource(mesh),
-    setName_(checkIs(is)),
+    names_(one(), word(checkIs(is))),
     option_(cellActionNames_.read(checkIs(is)))
 {}
 
@@ -200,21 +209,27 @@ void Foam::cellToFace::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding faces according to cellSet " << setName_
-                << " ..." << endl;
+            Info<< "    Adding faces according to cellSet "
+                << flatOutput(names_) << nl;
         }
 
-        combine(set, true);
+        for (const word& setName : names_)
+        {
+            combine(set, true, setName);
+        }
     }
     else if (action == topoSetSource::SUBTRACT)
     {
         if (verbose_)
         {
-            Info<< "    Removing faces according to cellSet " << setName_
-                << " ..." << endl;
+            Info<< "    Removing faces according to cellSet "
+                << flatOutput(names_) << nl;
         }
 
-        combine(set, false);
+        for (const word& setName : names_)
+        {
+            combine(set, false, setName);
+        }
     }
 }
 

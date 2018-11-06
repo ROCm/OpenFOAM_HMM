@@ -30,9 +30,13 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                       | Required  | Default
-        set         | The point set name                | yes   |
-        option      | Selection type (any / edge)       | yes   |
+        sets        | The pointSet names to use         | possibly |
+        set         | The pointSet name to use          | possibly |
+        option      | Selection type (any/edge)         | yes   |
     \endtable
+
+Note
+    Must specify "sets" or "set" (highest to lowest precedence).
 
 SourceFiles
     pointToCell.C
@@ -74,8 +78,8 @@ private:
 
         static const Enum<pointAction> pointActionNames_;
 
-        //- Name of set to use
-        word setName_;
+        //- Names of sets to use
+        wordList names_;
 
         //- Option
         pointAction option_;
@@ -84,7 +88,7 @@ private:
     // Private Member Functions
 
         //- Depending on point-to-cell option add to or delete from cellSet.
-        void combine(topoSet& set, const bool add) const;
+        void combine(topoSet& set, const bool add, const word& setName) const;
 
 
 public:

@@ -67,13 +67,13 @@ void Foam::boxToFace::combine(topoSet& set, const bool add) const
 {
     const pointField& ctrs = mesh_.faceCentres();
 
-    forAll(ctrs, facei)
+    forAll(ctrs, elemi)
     {
         for (const auto& bb : bbs_)
         {
-            if (bb.contains(ctrs[facei]))
+            if (bb.contains(ctrs[elemi]))
             {
-                addOrDelete(set, facei, add);
+                addOrDelete(set, elemi, add);
                 break;
             }
         }

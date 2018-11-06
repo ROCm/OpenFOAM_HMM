@@ -63,10 +63,15 @@ Foam::faceToCell::faceActionNames_
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::faceToCell::combine(topoSet& set, const bool add) const
+void Foam::faceToCell::combine
+(
+    topoSet& set,
+    const bool add,
+    const word& setName
+) const
 {
     // Load the set
-    faceSet loadedSet(mesh_, setName_);
+    faceSet loadedSet(mesh_, setName);
 
     const labelHashSet& faceLabels = loadedSet;
 
@@ -136,7 +141,7 @@ Foam::faceToCell::faceToCell
 )
 :
     topoSetCellSource(mesh),
-    setName_(setName),
+    names_(one(), setName),
     option_(option)
 {}
 
@@ -147,13 +152,17 @@ Foam::faceToCell::faceToCell
     const dictionary& dict
 )
 :
-    faceToCell
-    (
-        mesh,
-        dict.get<word>("set"),
-        faceActionNames_.get("option", dict)
-    )
-{}
+    topoSetCellSource(mesh),
+    names_(),
+    option_(faceActionNames_.get("option", dict))
+{
+    // Look for 'sets' or 'set'
+    if (!dict.readIfPresent("sets", names_))
+    {
+        names_.resize(1);
+        dict.readEntry("set", names_.first());
+    }
+}
 
 
 Foam::faceToCell::faceToCell
@@ -163,7 +172,7 @@ Foam::faceToCell::faceToCell
 )
 :
     topoSetCellSource(mesh),
-    setName_(checkIs(is)),
+    names_(one(), word(checkIs(is))),
     option_(faceActionNames_.read(checkIs(is)))
 {}
 
@@ -180,21 +189,27 @@ void Foam::faceToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding cells according to faceSet " << setName_
-                << " ..." << endl;
+            Info<< "    Adding cells according to faceSet "
+                << flatOutput(names_) << nl;
         }
 
-        combine(set, true);
+        for (const word& setName : names_)
+        {
+            combine(set, true, setName);
+        }
     }
     else if (action == topoSetSource::SUBTRACT)
     {
         if (verbose_)
         {
-            Info<< "    Removing cells according to faceSet " << setName_
-                << " ..." << endl;
+            Info<< "    Removing cells according to faceSet "
+                << flatOutput(names_) << nl;
         }
 
-        combine(set, false);
+        for (const word& setName : names_)
+        {
+            combine(set, false, setName);
+        }
     }
 }
 

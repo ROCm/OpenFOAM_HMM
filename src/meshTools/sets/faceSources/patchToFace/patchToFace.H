@@ -30,13 +30,13 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                           | Required | Default
-        patch       | The face zone name or regex           | possibly |
         patches     | The face zone names or regexs         | possibly |
+        patch       | The face zone name or regex           | possibly |
         name        | Older specification for 'patch'       | no    |
     \endtable
 
 Note
-    Selection of multiple patches has precedence.
+    Must specify "patches", "patch" or "name" (highest to lowest precedence).
 
 SourceFiles
     patchToFace.C

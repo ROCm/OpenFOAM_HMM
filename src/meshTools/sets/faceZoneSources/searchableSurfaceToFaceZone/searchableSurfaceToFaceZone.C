@@ -54,6 +54,32 @@ Foam::topoSetSource::addToUsageTable Foam::searchableSurfaceToFaceZone::usage_
 );
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::word Foam::searchableSurfaceToFaceZone::getSurfaceName
+(
+    const dictionary& dict,
+    const word& defaultName
+)
+{
+    // Unfortunately cannot get a good default name from the dictionary name.
+    // It could be
+    //     sourceInfo { .. }
+    // But even with something like
+    //     mySurf.stl { .. }
+    // The dictName() method will only return the "stl" ending.
+
+
+    return
+        dict.lookupOrDefaultCompat<word>
+        (
+            "surfaceName",
+            {{"name", 1806}},
+            defaultName
+        );
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::searchableSurfaceToFaceZone::searchableSurfaceToFaceZone
@@ -71,10 +97,10 @@ Foam::searchableSurfaceToFaceZone::searchableSurfaceToFaceZone
             surfaceType,
             IOobject
             (
-                dict.lookupOrDefault("name", mesh.objectRegistry::db().name()),
-                mesh.time().constant(),
-                "triSurface",
-                mesh.objectRegistry::db(),
+                getSurfaceName(dict, mesh.objectRegistry::db().name()),
+                mesh.time().constant(),     // Instance
+                "triSurface",               // Local
+                mesh.objectRegistry::db(),  // Registry
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE
             ),
@@ -92,16 +118,10 @@ Foam::searchableSurfaceToFaceZone::searchableSurfaceToFaceZone
 :
     searchableSurfaceToFaceZone
     (
-        dict.get<word>("surface"),
+        dict.getCompat<word>("surfaceType", {{"surface", 0}}),
         mesh,
         dict
     )
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::searchableSurfaceToFaceZone::~searchableSurfaceToFaceZone()
 {}
 
 

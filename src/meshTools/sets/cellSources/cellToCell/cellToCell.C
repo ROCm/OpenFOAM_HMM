@@ -57,7 +57,7 @@ Foam::cellToCell::cellToCell
 )
 :
     topoSetCellSource(mesh),
-    setName_(setName)
+    names_(one(), setName)
 {}
 
 
@@ -67,12 +67,16 @@ Foam::cellToCell::cellToCell
     const dictionary& dict
 )
 :
-    cellToCell
-    (
-        mesh,
-        dict.get<word>("set")
-    )
-{}
+    topoSetCellSource(mesh),
+    names_()
+{
+    // Look for 'sets' or 'set'
+    if (!dict.readIfPresent("sets", names_))
+    {
+        names_.resize(1);
+        dict.readEntry("set", names_.first());
+    }
+}
 
 
 Foam::cellToCell::cellToCell
@@ -82,7 +86,7 @@ Foam::cellToCell::cellToCell
 )
 :
     topoSetCellSource(mesh),
-    setName_(checkIs(is))
+    names_(one(), word(checkIs(is)))
 {}
 
 
@@ -98,27 +102,31 @@ void Foam::cellToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding all elements of cellSet " << setName_
-                << " ..." << endl;
+            Info<< "    Adding all elements of cellSet "
+                << flatOutput(names_) << nl;
         }
 
-        // Load the set
-        cellSet loadedSet(mesh_, setName_);
+        for (const word& setName : names_)
+        {
+            cellSet loadedSet(mesh_, setName);
 
-        set.addSet(loadedSet);
+            set.addSet(loadedSet);
+        }
     }
     else if (action == topoSetSource::SUBTRACT)
     {
         if (verbose_)
         {
-            Info<< "    Removing all elements of cellSet " << setName_
-                << " ..." << endl;
+            Info<< "    Removing all elements of cellSet "
+                << flatOutput(names_) << nl;
         }
 
-        // Load the set
-        cellSet loadedSet(mesh_, setName_);
+        for (const word& setName : names_)
+        {
+            cellSet loadedSet(mesh_, setName);
 
-        set.subtractSet(loadedSet);
+            set.subtractSet(loadedSet);
+        }
     }
 }
 

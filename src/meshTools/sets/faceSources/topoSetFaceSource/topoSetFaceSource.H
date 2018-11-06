@@ -89,6 +89,13 @@ public:
         //- Construct from components
         explicit topoSetFaceSource(const polyMesh& mesh);
 
+        //- Clone (disallowed)
+        autoPtr<topoSetFaceSource> clone() const
+        {
+            NotImplemented;
+            return nullptr;
+        }
+
 
     // Selectors
 

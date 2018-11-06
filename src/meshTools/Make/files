@@ -136,12 +136,17 @@ searchableSurfaces/triSurfaceMesh/triSurfaceMesh.C
 topoSets = sets/topoSets
 $(topoSets)/cellBitSet.C
 $(topoSets)/cellSet.C
-$(topoSets)/topoSet.C
-$(topoSets)/faceSet.C
-$(topoSets)/pointSet.C
 $(topoSets)/cellZoneSet.C
+$(topoSets)/faceBitSet.C
+$(topoSets)/faceBoolSet.C
+$(topoSets)/faceSet.C
 $(topoSets)/faceZoneSet.C
+$(topoSets)/pointBitSet.C
+$(topoSets)/pointSet.C
 $(topoSets)/pointZoneSet.C
+$(topoSets)/topoBoolSet.C
+$(topoSets)/topoBitSet.C
+$(topoSets)/topoSet.C
 
 sets/topoSetSource/topoSetSource.C
 
@@ -180,16 +185,21 @@ $(faceSources)/normalToFace/normalToFace.C
 $(faceSources)/patchToFace/patchToFace.C
 $(faceSources)/pointToFace/pointToFace.C
 $(faceSources)/regionToFace/regionToFace.C
+$(faceSources)/searchableSurfaceToFace/searchableSurfaceToFace.C
+$(faceSources)/sphereToFace/sphereToFace.C
 $(faceSources)/zoneToFace/zoneToFace.C
 
 pointSources = sets/pointSources
 $(pointSources)/topoSetPointSource/topoSetPointSource.C
 $(pointSources)/boxToPoint/boxToPoint.C
 $(pointSources)/cellToPoint/cellToPoint.C
+$(pointSources)/cylinderToPoint/cylinderToPoint.C
 $(pointSources)/faceToPoint/faceToPoint.C
 $(pointSources)/labelToPoint/labelToPoint.C
 $(pointSources)/nearestToPoint/nearestToPoint.C
 $(pointSources)/pointToPoint/pointToPoint.C
+$(pointSources)/searchableSurfaceToPoint/searchableSurfaceToPoint.C
+$(pointSources)/sphereToPoint/sphereToPoint.C
 $(pointSources)/surfaceToPoint/surfaceToPoint.C
 $(pointSources)/zoneToPoint/zoneToPoint.C
 

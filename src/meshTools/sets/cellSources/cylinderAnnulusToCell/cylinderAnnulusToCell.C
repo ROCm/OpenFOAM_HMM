@@ -76,16 +76,18 @@ Foam::topoSetSource::addToUsageTable Foam::cylinderAnnulusToCell::usage_
 
 void Foam::cylinderAnnulusToCell::combine(topoSet& set, const bool add) const
 {
-    const vector axis = (point2_ - point1_);
-    const scalar orad2 = sqr(outerRadius_);
-    const scalar irad2 = sqr(innerRadius_);
-    const scalar magAxis2 = magSqr(axis);
-
     const pointField& ctrs = mesh_.cellCentres();
 
-    forAll(ctrs, celli)
+    const vector axis = (point2_ - point1_);
+    const scalar magAxis2 = magSqr(axis);
+    const scalar orad2 = sqr(radius_);
+    const scalar irad2 = innerRadius_ > 0 ? sqr(innerRadius_) : -1;
+
+    // Treat innerRadius == 0 like unspecified innerRadius (always accept)
+
+    forAll(ctrs, elemi)
     {
-        const vector d = ctrs[celli] - point1_;
+        const vector d = ctrs[elemi] - point1_;
         const scalar magD = d & axis;
 
         if ((magD > 0) && (magD < magAxis2))
@@ -93,7 +95,7 @@ void Foam::cylinderAnnulusToCell::combine(topoSet& set, const bool add) const
             const scalar d2 = (d & d) - sqr(magD)/magAxis2;
             if ((d2 < orad2) && (d2 > irad2))
             {
-                addOrDelete(set, celli, add);
+                addOrDelete(set, elemi, add);
             }
         }
     }
@@ -107,14 +109,14 @@ Foam::cylinderAnnulusToCell::cylinderAnnulusToCell
     const polyMesh& mesh,
     const point& point1,
     const point& point2,
-    const scalar outerRadius,
+    const scalar radius,
     const scalar innerRadius
 )
 :
     topoSetCellSource(mesh),
     point1_(point1),
     point2_(point2),
-    outerRadius_(outerRadius),
+    radius_(radius),
     innerRadius_(innerRadius)
 {}
 
@@ -145,7 +147,7 @@ Foam::cylinderAnnulusToCell::cylinderAnnulusToCell
     topoSetCellSource(mesh),
     point1_(checkIs(is)),
     point2_(checkIs(is)),
-    outerRadius_(readScalar(checkIs(is))),
+    radius_(readScalar(checkIs(is))),
     innerRadius_(readScalar(checkIs(is)))
 {}
 
@@ -164,7 +166,7 @@ void Foam::cylinderAnnulusToCell::applyToSet
         {
             Info<< "    Adding cells with centre within cylinder annulus,"
                 << " with p1 = " << point1_ << ", p2 = " << point2_
-                << ", radius = " << outerRadius_
+                << ", radius = " << radius_
                 << ", inner radius = " << innerRadius_
                 << endl;
         }
@@ -177,7 +179,7 @@ void Foam::cylinderAnnulusToCell::applyToSet
         {
             Info<< "    Removing cells with centre within cylinder annulus,"
                 << " with p1 = " << point1_ << ", p2 = " << point2_
-                << ", radius = " << outerRadius_
+                << ", radius = " << radius_
                 << ", inner radius = " << innerRadius_
                 << endl;
         }

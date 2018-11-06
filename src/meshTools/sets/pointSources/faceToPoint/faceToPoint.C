@@ -58,10 +58,15 @@ Foam::faceToPoint::faceActionNames_
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::faceToPoint::combine(topoSet& set, const bool add) const
+void Foam::faceToPoint::combine
+(
+    topoSet& set,
+    const bool add,
+    const word& setName
+) const
 {
     // Load the set
-    faceSet loadedSet(mesh_, setName_);
+    faceSet loadedSet(mesh_, setName);
     const labelHashSet& faceLabels = loadedSet;
 
     // Add all points from faces in loadedSet
@@ -87,7 +92,7 @@ Foam::faceToPoint::faceToPoint
 )
 :
     topoSetPointSource(mesh),
-    setName_(setName),
+    names_(one(), setName),
     option_(option)
 {}
 
@@ -98,13 +103,17 @@ Foam::faceToPoint::faceToPoint
     const dictionary& dict
 )
 :
-    faceToPoint
-    (
-        mesh,
-        dict.get<word>("set"),
-        faceActionNames_.get("option", dict)
-    )
-{}
+    topoSetPointSource(mesh),
+    names_(),
+    option_(faceActionNames_.get("option", dict))
+{
+    // Look for 'sets' or 'set'
+    if (!dict.readIfPresent("sets", names_))
+    {
+        names_.resize(1);
+        dict.readEntry("set", names_.first());
+    }
+}
 
 
 Foam::faceToPoint::faceToPoint
@@ -114,7 +123,7 @@ Foam::faceToPoint::faceToPoint
 )
 :
     topoSetPointSource(mesh),
-    setName_(checkIs(is)),
+    names_(one(), word(checkIs(is))),
     option_(faceActionNames_.read(checkIs(is)))
 {}
 
@@ -131,21 +140,27 @@ void Foam::faceToPoint::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding points from face in faceSet " << setName_
-                << " ..." << endl;
+            Info<< "    Adding points from face in faceSet "
+                << flatOutput(names_) << nl;
         }
 
-        combine(set, true);
+        for (const word& setName : names_)
+        {
+            combine(set, true, setName);
+        }
     }
     else if (action == topoSetSource::SUBTRACT)
     {
         if (verbose_)
         {
-            Info<< "    Removing points from face in faceSet " << setName_
-                << " ..." << endl;
+            Info<< "    Removing points from face in faceSet "
+                << flatOutput(names_) << nl;
         }
 
-        combine(set, false);
+        for (const word& setName : names_)
+        {
+            combine(set, false, setName);
+        }
     }
 }
 

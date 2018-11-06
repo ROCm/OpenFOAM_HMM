@@ -30,13 +30,13 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                           | Required | Default
-        zone        | The point zone name or regex          | possibly |
         zones       | The point zone names or regexs        | possibly |
+        zone        | The point zone name or regex          | possibly |
         name        | Older specification for 'zone'        | no    |
     \endtable
 
 Note
-    Selection of multiple zones has precedence.
+    Must specify "zones", "zone" or "name" (highest to lowest precedence).
 
 SourceFiles
     zoneToPoint.C

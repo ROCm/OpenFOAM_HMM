@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,9 +30,11 @@ Description
 
     \heading Dictionary parameters
     \table
-        Property    | Description                        | Required  | Default
-        surface     | The searchable surface type        | yes   |
-        name        | Name for the IOobject              | no    | mesh-name
+        Property    | Description                           | Required | Default
+        surfaceType | The searchable surface type           | yes   |
+        surfaceName | Name for the IOobject                 | no    | mesh-name
+        surface     | Same as 'surfaceType'                 | no    |
+        name        | Older specification for 'surfaceName' | no    |
     \endtable
 
 SourceFiles
@@ -68,6 +70,19 @@ class searchableSurfaceToFaceZone
         //- Surface
         autoPtr<searchableSurface> surfacePtr_;
 
+
+protected:
+
+    // Protected Member Functions
+
+        //- Retrieve surface name from dictionary entry
+        static word getSurfaceName
+        (
+            const dictionary& dict,
+            const word& defaultName
+        );
+
+
 public:
 
     //- Runtime type information
@@ -93,7 +108,7 @@ public:
 
 
     //- Destructor
-    virtual ~searchableSurfaceToFaceZone();
+    virtual ~searchableSurfaceToFaceZone() = default;
 
 
     // Member Functions
