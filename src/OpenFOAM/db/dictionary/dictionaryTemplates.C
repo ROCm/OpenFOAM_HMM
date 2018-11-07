@@ -100,8 +100,7 @@ bool Foam::dictionary::readCompat
     else if (mandatory)
     {
         FatalIOErrorInFunction(*this)
-            << "'" << keyword << "' not found in dictionary "
-            << name()
+            << "Entry '" << keyword << "' not found in dictionary " << name()
             << exit(FatalIOError);
     }
 
@@ -133,9 +132,9 @@ T Foam::dictionary::lookupOrDefault
     else if (writeOptionalEntries)
     {
         IOInfoInFunction(*this)
-            << "Optional entry '" << keyword << "' not found,"
-            << " using default value '" << deflt << "'"
-            << endl;
+            << "Optional entry '" << keyword
+            << "' not found, using default value '" << deflt << "'"
+            << nl;
     }
 
     return deflt;
@@ -166,9 +165,9 @@ T Foam::dictionary::lookupOrAddDefault
     else if (writeOptionalEntries)
     {
         IOInfoInFunction(*this)
-            << "Optional entry '" << keyword << "' not found,"
-            << " adding default value '" << deflt << "'"
-            << endl;
+            << "Optional entry '" << keyword
+            << "' not found, adding default value '" << deflt << "'"
+            << nl;
     }
 
     add(new primitiveEntry(keyword, deflt));
@@ -199,8 +198,7 @@ bool Foam::dictionary::readEntry
     else if (mandatory)
     {
         FatalIOErrorInFunction(*this)
-            << "'" << keyword << "' not found in dictionary "
-            << name()
+            << "Entry '" << keyword << "' not found in dictionary " << name()
             << exit(FatalIOError);
     }
 
@@ -248,7 +246,7 @@ T Foam::dictionary::lookupOrDefaultCompat
         IOInfoInFunction(*this)
             << "Optional entry '" << keyword << "' not found,"
             << " using default value '" << deflt << "'"
-            << endl;
+            << nl;
     }
 
     return deflt;
