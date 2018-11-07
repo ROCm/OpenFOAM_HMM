@@ -92,7 +92,7 @@ void Foam::entry::checkITstream(const ITstream& is) const
                     is.lineNumber()     // ioStartLineNumber
                 );
 
-            err << "'" << keyword << "' has "
+            err << "Entry '" << keyword << "' has "
                 << remaining << " excess tokens in stream" << nl << nl
                 << "    ";
             is.writeList(err, 0);
@@ -106,7 +106,7 @@ void Foam::entry::checkITstream(const ITstream& is) const
                 << "--> FOAM FATAL IO ERROR:" << nl;
 
             std::cerr
-                << "'" << keyword << "' has "
+                << "Entry '" << keyword << "' has "
                 << remaining << " excess tokens in stream" << nl << nl;
 
             std::cerr
@@ -130,7 +130,8 @@ void Foam::entry::checkITstream(const ITstream& is) const
                 this->name(),       // ioFileName
                 is.lineNumber()     // ioStartLineNumber
             )
-                << "'" << keyword << "' had no tokens in stream" << nl << nl
+                << "Entry '" << keyword
+                << "' had no tokens in stream" << nl << nl
                 << exit(FatalIOError);
         }
         else
@@ -138,7 +139,8 @@ void Foam::entry::checkITstream(const ITstream& is) const
             std::cerr
                 << nl
                 << "--> FOAM FATAL IO ERROR:" << nl
-                << "'" << keyword << "' had no tokens in stream" << nl << nl;
+                << "Entry '" << keyword
+                << "' had no tokens in stream" << nl << nl;
 
             std::cerr
                 << "file: " << this->name()

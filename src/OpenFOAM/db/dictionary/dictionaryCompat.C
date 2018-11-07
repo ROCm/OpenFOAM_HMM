@@ -77,7 +77,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchCompat
                 std::cerr
                     << "--> FOAM IOWarning :" << nl
                     << "    Found [v" << iter.second << "] '"
-                    << iter.first << "' instead of '"
+                    << iter.first << "' entry instead of '"
                     << keyword.c_str() << "' in dictionary \""
                     << name().c_str() << "\" "
                     << nl
@@ -128,7 +128,7 @@ const Foam::entry& Foam::dictionary::lookupEntryCompat
     if (!finder.found())
     {
         FatalIOErrorInFunction(*this)
-            << "'" << keyword << "' not found in dictionary "
+            << "Entry '" << keyword << "' not found in dictionary "
             << name()
             << exit(FatalIOError);
     }

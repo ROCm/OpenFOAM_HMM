@@ -100,7 +100,8 @@ bool Foam::dictionary::readCompat
     else if (mandatory)
     {
         FatalIOErrorInFunction(*this)
-            << "Entry '" << keyword << "' not found in dictionary " << name()
+            << "Entry '" << keyword << "' not found in dictionary "
+            << name()
             << exit(FatalIOError);
     }
 
@@ -198,7 +199,8 @@ bool Foam::dictionary::readEntry
     else if (mandatory)
     {
         FatalIOErrorInFunction(*this)
-            << "Entry '" << keyword << "' not found in dictionary " << name()
+            << "Entry '" << keyword << "' not found in dictionary "
+            << name()
             << exit(FatalIOError);
     }
 

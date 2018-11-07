@@ -248,7 +248,7 @@ void Foam::dictionary::checkITstream
                     is.lineNumber()     // ioStartLineNumber
                 );
 
-            err << "'" << keyword << "' has "
+            err << "Entry '" << keyword << "' has "
                 << remaining << " excess tokens in stream" << nl << nl
                 << "    ";
             is.writeList(err, 0);
@@ -262,7 +262,7 @@ void Foam::dictionary::checkITstream
                 << "--> FOAM FATAL IO ERROR:" << nl;
 
             std::cerr
-                << "'" << keyword << "' has "
+                << "Entry '" << keyword << "' has "
                 << remaining << " excess tokens in stream" << nl << nl;
 
             std::cerr
@@ -286,7 +286,8 @@ void Foam::dictionary::checkITstream
                 this->name(),       // ioFileName
                 is.lineNumber()     // ioStartLineNumber
             )
-                << "'" << keyword << "' had no tokens in stream" << nl << nl
+                << "Entry '" << keyword
+                << "' had no tokens in stream" << nl << nl
                 << exit(FatalIOError);
         }
         else
@@ -294,7 +295,8 @@ void Foam::dictionary::checkITstream
             std::cerr
                 << nl
                 << "--> FOAM FATAL IO ERROR:" << nl
-                << "'" << keyword << "' had no tokens in stream" << nl << nl;
+                << "Entry '" << keyword
+                << "' had no tokens in stream" << nl << nl;
 
             std::cerr
                 << "file: " << this->name()
@@ -358,7 +360,7 @@ const Foam::entry& Foam::dictionary::lookupEntry
     if (!finder.found())
     {
         FatalIOErrorInFunction(*this)
-            << "'" << keyword << "' not found in dictionary "
+            << "Entry '" << keyword << "' not found in dictionary "
             << name()
             << exit(FatalIOError);
     }
@@ -472,7 +474,7 @@ const Foam::dictionary& Foam::dictionary::subDict(const word& keyword) const
     if (!finder.found())
     {
         FatalIOErrorInFunction(*this)
-            << "'" << keyword << "' not found in dictionary "
+            << "Entry '" << keyword << "' not found in dictionary "
             << name()
             << exit(FatalIOError);
     }
@@ -489,7 +491,7 @@ Foam::dictionary& Foam::dictionary::subDict(const word& keyword)
     if (!finder.found())
     {
         FatalIOErrorInFunction(*this)
-            << "'" << keyword << "' not found in dictionary "
+            << "Entry '" << keyword << "' not found in dictionary "
             << name()
             << exit(FatalIOError);
     }
@@ -516,7 +518,7 @@ Foam::dictionary Foam::dictionary::subOrEmptyDict
     if (mandatory)
     {
         FatalIOErrorInFunction(*this)
-            << "'" << keyword
+            << "Entry '" << keyword
             << "' is not a sub-dictionary in dictionary "
             << name()
             << exit(FatalIOError);
@@ -525,7 +527,7 @@ Foam::dictionary Foam::dictionary::subOrEmptyDict
     if (finder.found())
     {
         IOWarningInFunction(*this)
-            << "'" << keyword
+            << "Entry '" << keyword
             << "' found but not a sub-dictionary in dictionary "
             << name() << endl;
     }
@@ -551,7 +553,7 @@ const Foam::dictionary& Foam::dictionary::optionalSubDict
     if (finder.found())
     {
         IOWarningInFunction(*this)
-            << "'" << keyword
+            << "Entry '" << keyword
             << "' found but not a sub-dictionary in dictionary "
             << name() << endl;
     }
@@ -639,7 +641,7 @@ Foam::entry* Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 
 
         IOWarningInFunction(*this)
-            << "problem replacing entry "<< entryPtr->keyword()
+            << "Problem replacing entry "<< entryPtr->keyword()
             << " in dictionary " << name() << endl;
 
         parent_type::remove(entryPtr);
@@ -665,9 +667,8 @@ Foam::entry* Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 
 
     IOWarningInFunction(*this)
-        << "attempt to add entry " << entryPtr->keyword()
-        << " which already exists in dictionary " << name()
-        << endl;
+        << "Attempt to add entry " << entryPtr->keyword()
+        << " which already exists in dictionary " << name() << endl;
 
     delete entryPtr;
     return nullptr;
@@ -772,7 +773,8 @@ bool Foam::dictionary::merge(const dictionary& dict)
     if (this == &dict)
     {
         FatalIOErrorInFunction(*this)
-            << "attempted merge to self for dictionary " << name()
+            << "Attempted merge to self for dictionary "
+            << name()
             << abort(FatalIOError);
     }
 
@@ -840,7 +842,8 @@ void Foam::dictionary::operator=(const dictionary& rhs)
     if (this == &rhs)
     {
         FatalIOErrorInFunction(*this)
-            << "attempted assignment to self for dictionary " << name()
+            << "Attempted assignment to self for dictionary "
+            << name()
             << abort(FatalIOError);
     }
 

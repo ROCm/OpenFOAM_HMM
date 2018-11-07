@@ -629,9 +629,8 @@ bool Foam::dictionary::changeKeyword
     if (iter()->keyword().isPattern())
     {
         FatalIOErrorInFunction(*this)
-            << "Old keyword "<< oldKeyword
-            << " is a pattern."
-            << "Pattern replacement not yet implemented."
+            << "Old keyword " << oldKeyword << " is a pattern." << nl
+            << "Pattern replacement is not supported." << nl
             << exit(FatalIOError);
     }
 
@@ -664,7 +663,7 @@ bool Foam::dictionary::changeKeyword
         else
         {
             IOWarningInFunction(*this)
-                << "cannot rename keyword "<< oldKeyword
+                << "Cannot rename keyword " << oldKeyword
                 << " to existing keyword " << newKeyword
                 << " in dictionary " << name() << endl;
             return false;

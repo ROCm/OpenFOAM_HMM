@@ -89,7 +89,7 @@ bool Foam::dictionary::read(Istream& is, bool keepHeader)
     if (!is.good())
     {
         FatalIOErrorInFunction(is)
-            << "Istream not OK for reading dictionary "
+            << "Istream not OK for reading dictionary " << name()
             << exit(FatalIOError);
 
         return false;
@@ -102,7 +102,7 @@ bool Foam::dictionary::read(Istream& is, bool keepHeader)
     if (currToken == token::END_BLOCK)
     {
         FatalIOErrorInFunction(is)
-            << "Dictionary input cannot start with '}'"
+            << "Dictionary input cannot start with '}'" << nl
             << exit(FatalIOError);
     }
     else if (currToken != token::BEGIN_BLOCK)
@@ -185,7 +185,7 @@ void Foam::dictionary::writeEntries(Ostream& os, const bool extraNewLine) const
         if (!os.good())
         {
             WarningInFunction
-                << "Can't write entry " << e.keyword()
+                << "Cannot write entry " << e.keyword()
                 << " for dictionary " << name()
                 << endl;
         }

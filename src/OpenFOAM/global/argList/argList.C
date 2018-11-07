@@ -213,7 +213,7 @@ void Foam::argList::checkITstream(const ITstream& is, const label index)
         std::cerr
             << nl
             << "--> FOAM WARNING:" << nl
-            << "argument " << index << " has "
+            << "Argument " << index << " has "
             << remaining << " excess tokens" << nl << nl;
     }
     else if (!is.size())
@@ -221,7 +221,7 @@ void Foam::argList::checkITstream(const ITstream& is, const label index)
         std::cerr
             << nl
             << "--> FOAM WARNING:" << nl
-            << "argument " << index << " had no tokens" << nl << nl;
+            << "Argument " << index << " had no tokens" << nl << nl;
     }
 }
 
@@ -235,7 +235,7 @@ void Foam::argList::checkITstream(const ITstream& is, const word& optName)
         std::cerr
             << nl
             << "--> FOAM WARNING:" << nl
-            << "option -" << optName << " has "
+            << "Option -" << optName << " has "
             << remaining << " excess tokens" << nl << nl;
     }
     else if (!is.size())
@@ -243,7 +243,7 @@ void Foam::argList::checkITstream(const ITstream& is, const word& optName)
         std::cerr
             << nl
             << "--> FOAM WARNING:" << nl
-            << "option -" << optName << " had no tokens" << nl << nl;
+            << "Option -" << optName << " had no tokens" << nl << nl;
     }
 }
 
