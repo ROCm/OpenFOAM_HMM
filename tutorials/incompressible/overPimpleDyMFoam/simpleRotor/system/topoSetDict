@@ -21,10 +21,7 @@ actions
         type    cellSet;
         action  new;
         source  regionToCell;
-        sourceInfo
-        {
-            insidePoints ((0.001 0.001 0.001));
-        }
+        insidePoints ((0.001 0.001 0.001));
     }
 
     {
@@ -32,10 +29,7 @@ actions
         type    cellSet;
         action  new;
         source  cellToCell;
-        sourceInfo
-        {
-            set c0;
-        }
+        set     c0;
     }
 
     {
@@ -51,10 +45,7 @@ actions
         type    cellSet;
         action  new;
         source  cellToCell;
-        sourceInfo
-        {
-            set c1;
-        }
+        set     c1;
     }
 
     {
@@ -62,10 +53,7 @@ actions
         type    cellSet;
         action  subset;
         source  boxToCell;
-        sourceInfo
-        {
-            box (0.0025 0.0045 -100)(0.0075 0.0055 100);
-        }
+        box     (0.0025 0.0045 -100)(0.0075 0.0055 100);
     }
 
     {

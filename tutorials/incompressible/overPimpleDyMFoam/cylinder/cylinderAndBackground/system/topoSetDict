@@ -21,10 +21,7 @@ actions
         type    cellSet;
         action  new;
         source  regionToCell;
-        sourceInfo
-        {
-            insidePoints ((-4.999 0 -3.999));
-        }
+        insidePoints ((-4.999 0 -3.999));
     }
 
     {
@@ -32,10 +29,7 @@ actions
         type    cellSet;
         action  new;
         source  cellToCell;
-        sourceInfo
-        {
-            set c0;
-        }
+        set     c0;
     }
 
     {

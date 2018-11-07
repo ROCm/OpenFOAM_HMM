@@ -21,10 +21,10 @@ actions
         type    cellSet;
         action  new;
         source  regionsToCell;
-        sourceInfo
-        {
-            insidePoints ((0.001 0.001 0.001));
-        }
+        insidePoints
+        (
+            (0.001 0.001 0.001)
+        );
     }
 
     {
@@ -32,10 +32,7 @@ actions
         type    cellSet;
         action  new;
         source  cellToCell;
-        sourceInfo
-        {
-            set c0;
-        }
+        set     c0;
     }
 
     {
@@ -49,11 +46,11 @@ actions
         type    cellSet;
         action  new;
         source  regionsToCell;
-        sourceInfo
-        {
-            insidePoints ((0.0076 0.00151 0.001));
-            set          c1;
-        }
+        set     c1;
+        insidePoints
+        (
+            (0.0076 0.00151 0.001)
+        );
     }
 
     {
@@ -61,10 +58,7 @@ actions
         type    cellSet;
         action  subtract;
         source  cellToCell;
-        sourceInfo
-        {
-            set c2;
-        }
+        set     c2;
     }
 
     // Select box to remove from region 1 and 2
@@ -74,10 +68,7 @@ actions
         type    cellSet;
         action  new;
         source  cellToCell;
-        sourceInfo
-        {
-            set c1;
-        }
+        set     c1;
     }
 
     {
@@ -85,10 +76,7 @@ actions
         type    cellSet;
         action  add;
         source  cellToCell;
-        sourceInfo
-        {
-            set c2;
-        }
+        set     c2;
     }
 
     {
@@ -96,15 +84,12 @@ actions
         type    cellSet;
         action  subset;
         source  boxToCell;
-        sourceInfo
-        {
-            boxes
-            (
-                (0.0025 0.0045 -100)(0.0075 0.0055 100)
-                (0.0085 0.0025 -100)(0.0095 0.0075 100)
-              //  (0.0104 0.0025 -100)(0.0115 0.0075 100)
-            );
-        }
+        boxes
+        (
+            (0.0025 0.0045 -100)(0.0075 0.0055 100)
+            (0.0085 0.0025 -100)(0.0095 0.0075 100)
+            // (0.0104 0.0025 -100)(0.0115 0.0075 100)
+        );
     }
 
     {

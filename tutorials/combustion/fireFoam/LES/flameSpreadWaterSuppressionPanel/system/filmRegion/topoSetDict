@@ -22,10 +22,7 @@ actions
         type    faceSet;
         action  new;
         source  boxToFace;
-        sourceInfo
-        {
-            box (-1 -0.00001 -0.00001) (1  1.00001  0.00001);
-        }
+        box     (-1 -0.00001 -0.00001) (1 1.00001 0.00001);
     }
 
 
@@ -34,32 +31,23 @@ actions
         type    faceSet;
         action  new;
         source  boxToFace;
-        sourceInfo
-        {
-            box  (-1  0.99999 -0.00001) (1  1.00001  2.00001);
-        }
+        box     (-1 0.99999 -0.00001) (1 1.00001 2.00001);
     }
 
-     {
+    {
         name    f2;
         type    faceSet;
         action  new;
         source  boxToFace;
-        sourceInfo
-        {
-            box (-1 -0.00001  1.99999) (1  1.00001  2.00001);
-        }
+        box     (-1 -0.00001 1.99999) (1 1.00001 2.00001);
     }
 
-     {
+    {
         name    f3;
         type    faceSet;
         action  new;
         source  boxToFace;
-        sourceInfo
-        {
-            box (-1  -0.00001  -0.00001) (1 0.00001  2.00001);
-        }
+        box     (-1 -0.00001 -0.00001) (1 0.00001 2.00001);
     }
 );
 

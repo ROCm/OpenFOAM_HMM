@@ -22,12 +22,9 @@ actions
         type cellSet;
         action new;
 
-        source sphereToCell;
-        sourceInfo
-        {
-            origin  (0.125 0.375 0.05);
-            radius  0.005;
-        }
+        source  sphereToCell;
+        origin  (0.125 0.375 0.05);
+        radius  0.005;
     }
 );
 

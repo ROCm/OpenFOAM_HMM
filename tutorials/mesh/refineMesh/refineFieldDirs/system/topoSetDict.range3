@@ -21,13 +21,10 @@ actions
         name    range1;
         type    cellSet;
         action  new;
-        source fieldToCell;
-        sourceInfo
-        {
-          field       radiusFieldXY;
-          min         3.67;
-          max         18.47;
-        }
+        source  fieldToCell;
+        field   radiusFieldXY;
+        min     3.67;
+        max     18.47;
     }
 );
 

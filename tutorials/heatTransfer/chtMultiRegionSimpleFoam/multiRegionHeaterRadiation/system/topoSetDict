@@ -23,30 +23,21 @@ actions
         type    cellSet;
         action  new;
         source  boxToCell;
-        sourceInfo
-        {
-            box (-0.01001    0 -100 )(0.01001 0.00999 100);
-        }
+        box     (-0.01001 0 -100 )(0.01001 0.00999 100);
     }
     {
         name    heaterCellSet;
         type    cellSet;
         action  add;
         source  boxToCell;
-        sourceInfo
-        {
-            box (-0.01001 -100 -0.01001)(0.01001 0.00999 0.01001);
-        }
+        box     (-0.01001 -100 -0.01001)(0.01001 0.00999 0.01001);
     }
     {
         name    heater;
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
-        sourceInfo
-        {
-            set heaterCellSet;
-        }
+        set     heaterCellSet;
     }
 
     // leftSolid
@@ -55,20 +46,14 @@ actions
         type    cellSet;
         action  new;
         source  boxToCell;
-        sourceInfo
-        {
-            box (-100 0 -100 )(-0.01001 0.00999 100);
-        }
+        box     (-100 0 -100)(-0.01001 0.00999 100);
     }
     {
         name    leftSolid;
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
-        sourceInfo
-        {
-            set leftSolidCellSet;
-        }
+        set     leftSolidCellSet;
     }
 
     // rightSolid
@@ -77,20 +62,14 @@ actions
         type    cellSet;
         action  new;
         source  boxToCell;
-        sourceInfo
-        {
-            box (0.01001 0 -100 )(100 0.00999 100);
-        }
+        box     (0.01001 0 -100 )(100 0.00999 100);
     }
     {
         name    rightSolid;
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
-        sourceInfo
-        {
-            set rightSolidCellSet;
-        }
+        set     rightSolidCellSet;
     }
 
     // topAir
@@ -99,20 +78,14 @@ actions
         type    cellSet;
         action  new;
         source  boxToCell;
-        sourceInfo
-        {
-            box (-100 0.00999 -100 )(100 100 100);
-        }
+        box     (-100 0.00999 -100 )(100 100 100);
     }
     {
         name    topAir;
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
-        sourceInfo
-        {
-            set topAirCellSet;
-        }
+        set     topAirCellSet;
     }
 
 
@@ -122,40 +95,28 @@ actions
         type    cellSet;
         action  new;
         source  cellToCell;
-        sourceInfo
-        {
-            set heaterCellSet;
-        }
+        set     heaterCellSet;
     }
     {
         name    bottomAirCellSet;
         type    cellSet;
         action  add;
         source  cellToCell;
-        sourceInfo
-        {
-            set leftSolidCellSet;
-        }
+        set     leftSolidCellSet;
     }
     {
         name    bottomAirCellSet;
         type    cellSet;
         action  add;
         source  cellToCell;
-        sourceInfo
-        {
-            set rightSolidCellSet;
-        }
+        set     rightSolidCellSet;
     }
     {
         name    bottomAirCellSet;
         type    cellSet;
         action  add;
         source  cellToCell;
-        sourceInfo
-        {
-            set topAirCellSet;
-        }
+        set     topAirCellSet;
     }
     {
         name    bottomAirCellSet;
@@ -167,10 +128,7 @@ actions
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
-        sourceInfo
-        {
-            set bottomAirCellSet;
-        }
+        set     bottomAirCellSet;
     }
 );
 

@@ -18,25 +18,19 @@ FoamFile
 actions
 (
     {
-        name        coupledPatch;
-        type        faceSet;
-        action      new;
-        source      patchToFace;
-        sourceInfo
-        {
-            patch   coupledPatch;
-        }
+        name    coupledPatch;
+        type    faceSet;
+        action  new;
+        source  patchToFace;
+        patch   coupledPatch;
     }
 
     {
-        name        panel;
-        type        faceZoneSet;
-        action      new;
-        source      setToFaceZone;
-        sourceInfo
-        {
-            faceSet coupledPatch;
-        }
+        name    panel;
+        type    faceZoneSet;
+        action  new;
+        source  setToFaceZone;
+        faceSet coupledPatch;
     }
 );
 

@@ -25,10 +25,7 @@ actions
         type    faceSet;
         action  new;
         source  patchToFace;
-        sourceInfo
-        {
-            patch   "AMI.*";
-        }
+        patch   "AMI.*";
     }
 );
 

@@ -24,10 +24,7 @@ actions
         type    cellSet;
         action  new;
         source  boxToCell;
-        sourceInfo
-        {
-            box (15.5  15.5 0)(24.5 24.5 9);
-        }
+        box     (15.5  15.5 0)(24.5 24.5 9);
     }
 
     // floor
@@ -36,21 +33,15 @@ actions
         type    cellSet;
         action  new;
         source  boxToCell;
-        sourceInfo
-        {
-            box (0  0 -2)(41 41 0);
-        }
+        box     (0  0 -2)(41 41 0);
     }
 
-     {
+    {
         name    floor;
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
-        sourceInfo
-        {
-           set floor;
-        }
+        set     floor;
     }
 
     //air
@@ -65,10 +56,7 @@ actions
         type    cellSet;
         action  subtract;
         source  cellToCell;
-        sourceInfo
-        {
-           set floor;
-        }
+        set     floor;
     }
 
     {
@@ -76,10 +64,7 @@ actions
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
-        sourceInfo
-        {
-            set solid;           // name of cellSet
-        }
+        set     solid;           // cellSet
     }
 
     {
@@ -87,10 +72,7 @@ actions
         type    cellSet;
         action  new;
         source  boxToCell;
-        sourceInfo
-        {
-            box (17  17 0)(23 23 7.5);
-        }
+        box     (17  17 0)(23 23 7.5);
     }
 
     //- Define again solid
@@ -99,10 +81,7 @@ actions
         type    cellSet;
         action  new;
         source  boxToCell;
-        sourceInfo
-        {
-            box (15.5  15.5 0)(24.5 24.5 9);
-        }
+        box     (15.5  15.5 0)(24.5 24.5 9);
     }
 
     {
@@ -110,10 +89,7 @@ actions
         type    cellSet;
         action  subtract;
         source  cellToCell;
-        sourceInfo
-        {
-           set cavity;
-        }
+        set     cavity;
     }
 
     {
@@ -121,10 +97,7 @@ actions
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
-        sourceInfo
-        {
-            set solid;           // name of cellSet
-        }
+        set     solid;           // cellSet
     }
 );
 

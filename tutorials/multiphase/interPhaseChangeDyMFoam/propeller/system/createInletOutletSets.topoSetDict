@@ -22,10 +22,7 @@ actions
         type    faceSet;
         action  new;
         source  patchToFace;
-        sourceInfo
-        {
-            patch   outerCylinder;
-        }
+        patch   outerCylinder;
     }
 
     {
@@ -33,10 +30,7 @@ actions
         type    faceSet;
         action  new;
         source  faceToFace;
-        sourceInfo
-        {
-            set boundaryFaces;
-        }
+        set     boundaryFaces;
     }
 
     {
@@ -44,10 +38,7 @@ actions
         type    faceSet;
         action  new;
         source  faceToFace;
-        sourceInfo
-        {
-            set boundaryFaces;
-        }
+        set     boundaryFaces;
     }
 
     {
@@ -55,11 +46,8 @@ actions
         type    faceSet;
         action  subset;
         source  normalToFace;
-        sourceInfo
-        {
-            normal  (0 -1 0);   // Vector
-            cos     0.3;        // Tolerance (max cos of angle)
-        }
+        normal  (0 -1 0);
+        cos     0.3;    // Tolerance (max cos of angle)
     }
 
     {
@@ -67,11 +55,8 @@ actions
         type    faceSet;
         action  subset;
         source  normalToFace;
-        sourceInfo
-        {
-            normal  (0 1 0);    // Vector
-            cos     0.3;        // Tolerance (max cos of angle)
-        }
+        normal  (0 1 0);
+        cos     0.3;    // Tolerance (max cos of angle)
     }
 );
 

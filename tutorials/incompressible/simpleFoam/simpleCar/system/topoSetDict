@@ -22,20 +22,14 @@ actions
         type    cellSet;
         action  new;
         source  boxToCell;
-        sourceInfo
-        {
-            box (2.05 0.4 -1) (2.1 0.85 1);
-        }
+        box     (2.05 0.4 -1) (2.1 0.85 1);
     }
     {
         name    porousZone;
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
-        sourceInfo
-        {
-            set porousCells;
-        }
+        set     porousCells;
     }
 );
 

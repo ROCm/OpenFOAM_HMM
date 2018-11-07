@@ -22,10 +22,7 @@ actions
         type    cellSet;
         action  new;
         source  zoneToCell;
-        sourceInfo
-        {
-            zone rotor;
-        }
+        zone    rotor;
     }
 );
 

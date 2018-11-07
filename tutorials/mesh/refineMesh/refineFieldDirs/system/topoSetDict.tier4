@@ -21,13 +21,10 @@ actions
         name    tier4;
         type    cellSet;
         action  new;
-        source fieldToCell;
-        sourceInfo
-        {
-          field       radiusFieldXY;
-          min         0.0;
-          max         3.67;
-        }
+        source  fieldToCell;
+        field   radiusFieldXY;
+        min     0;
+        max     3.67;
     }
 );
 

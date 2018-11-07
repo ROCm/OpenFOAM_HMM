@@ -22,10 +22,7 @@ actions
         type    faceSet;
         action  new;
         source  boxToFace;
-        sourceInfo
-        {
-            box (-0.201 -0.001 -0.201)(-0.199 0.031 0.201);
-        }
+        box     (-0.201 -0.001 -0.201)(-0.199 0.031 0.201);
     }
 
     {
@@ -33,20 +30,14 @@ actions
         type    faceZoneSet;
         action  new;
         source  setToFaceZone;
-        sourceInfo
-        {
-            faceSet slot_bottom;
-        }
+        faceSet slot_bottom;
     }
     {
         name    slot_top;
         type    faceSet;
         action  new;
         source  boxToFace;
-        sourceInfo
-        {
-            box (-0.201 0.369 -0.201)(-0.199 0.401 0.201);
-        }
+        box     (-0.201 0.369 -0.201)(-0.199 0.401 0.201);
     }
 
     {
@@ -54,10 +45,7 @@ actions
         type    faceZoneSet;
         action  new;
         source  setToFaceZone;
-        sourceInfo
-        {
-            faceSet slot_top;
-        }
+        faceSet slot_top;
     }
 
     {
@@ -65,10 +53,7 @@ actions
         type    faceSet;
         action  new;
         source  patchToFace;
-        sourceInfo
-        {
-            patch   inlet;
-        }
+        patch   inlet;
     }
 
     {
@@ -76,10 +61,7 @@ actions
         type    cellSet;
         action  new;
         source  boxToCell;
-        sourceInfo
-        {
-            box (-0.201 -0.001 -0.201)(0.201 0.401 0.201);
-        }
+        box     (-0.201 -0.001 -0.201)(0.201 0.401 0.201);
     }
 
     {
@@ -87,10 +69,7 @@ actions
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
-        sourceInfo
-        {
-            set compartment_fire;
-        }
+        set     compartment_fire;
     }
 
     {
@@ -98,10 +77,7 @@ actions
         type    faceSet;
         action  new;
         source  boxToFace;
-        sourceInfo
-        {
-            box (-0.2001 0.0301 -0.2001)(-0.1999 0.3701 0.2001);
-        }
+        box     (-0.2001 0.0301 -0.2001)(-0.1999 0.3701 0.2001);
     }
 
     {
@@ -109,10 +85,7 @@ actions
         type    faceZoneSet;
         action  new;
         source  setToFaceZone;
-        sourceInfo
-        {
-            faceSet internalWallPanel;
-        }
+        faceSet internalWallPanel;
     }
 
     {
@@ -120,21 +93,15 @@ actions
         type    faceSet;
         action  new;
         source  boxToFace;
-        sourceInfo
-        {
-            box (-0.2001 -0.0001 -0.2001)(0.2001 0.4001 -0.1999);
-        }
+        box     (-0.2001 -0.0001 -0.2001)(0.2001 0.4001 -0.1999);
     }
 
-{
+    {
         name    wallFaces_front;
         type    faceSet;
         action  new;
         source  boxToFace;
-        sourceInfo
-        {
-            box (-0.2001 -0.0001 0.1999)(0.2001 0.4001 0.2001);
-        }
+        box     (-0.2001 -0.0001 0.1999)(0.2001 0.4001 0.2001);
     }
 
     {
@@ -142,10 +109,7 @@ actions
         type    faceSet;
         action  new;
         source  boxToFace;
-        sourceInfo
-        {
-            box (-0.2001 0.3999 -0.2001)(0.2001 0.4001 0.2001);
-        }
+        box     (-0.2001 0.3999 -0.2001)(0.2001 0.4001 0.2001);
     }
 
     {
@@ -153,10 +117,7 @@ actions
         type    faceSet;
         action  new;
         source  boxToFace;
-        sourceInfo
-        {
-            box (0.1999 -0.0001 -0.2001)(0.2001 0.4001 0.2001);
-        }
+        box     (0.1999 -0.0001 -0.2001)(0.2001 0.4001 0.2001);
     }
 
     {
@@ -164,10 +125,7 @@ actions
         type    faceZoneSet;
         action  new;
         source  setToFaceZone;
-        sourceInfo
-        {
-            faceSet wallFaces_back;
-        }
+        faceSet wallFaces_back;
     }
 
     {
@@ -175,10 +133,7 @@ actions
         type    faceZoneSet;
         action  add;
         source  setToFaceZone;
-        sourceInfo
-        {
-            faceSet wallFaces_front;
-        }
+        faceSet wallFaces_front;
     }
 
     {
@@ -186,10 +141,7 @@ actions
         type    faceZoneSet;
         action  add;
         source  setToFaceZone;
-        sourceInfo
-        {
-            faceSet wallFaces_top;
-        }
+        faceSet wallFaces_top;
     }
 
     {
@@ -197,10 +149,7 @@ actions
         type    faceZoneSet;
         action  add;
         source  setToFaceZone;
-        sourceInfo
-        {
-            faceSet wallFaces_side;
-        }
+        faceSet wallFaces_side;
     }
 
     {
@@ -208,10 +157,7 @@ actions
         type    faceSet;
         action  new;
         source  boxToFace;
-        sourceInfo
-        {
-            box (-0.2001 -0.001 -0.2001)(0.2001 0.001 0.2001);
-        }
+        box     (-0.2001 -0.001 -0.2001)(0.2001 0.001 0.2001);
     }
 
     {
@@ -219,10 +165,7 @@ actions
         type    faceZoneSet;
         action  add;
         source  setToFaceZone;
-        sourceInfo
-        {
-            faceSet baseFace;
-        }
+        faceSet baseFace;
     }
 
     {
@@ -230,10 +173,7 @@ actions
         type    faceZoneSet;
         action  subtract;
         source  setToFaceZone;
-        sourceInfo
-        {
-            faceSet inletFace;
-        }
+        faceSet inletFace;
     }
 );
 

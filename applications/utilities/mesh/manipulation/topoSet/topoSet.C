@@ -251,8 +251,8 @@ int main(int argc, char *argv[])
              || action == topoSetSource::CLEAR
             )
             {
-                currentSet = topoSet::New(setType, mesh, setName, 10000);
-                Info<< "Created " << currentSet().type() << " "
+                currentSet = topoSet::New(setType, mesh, setName, 16384);
+                Info<< "Created " << currentSet().type() << ' '
                     << setName << endl;
             }
             else if (action == topoSetSource::REMOVE)
@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
                     setName,
                     IOobject::MUST_READ
                 );
-                Info<< "Read set " << currentSet().type() << " "
+                Info<< "Read set " << currentSet().type() << ' '
                     << setName << " with size "
                     << returnReduce(currentSet().size(), sumOp<label>())
                     << endl;
@@ -283,14 +283,14 @@ int main(int argc, char *argv[])
                 case topoSetSource::ADD:
                 case topoSetSource::SUBTRACT:
                 {
-                    const word sourceName(dict.get<word>("source"));
+                    const word sourceType(dict.get<word>("source"));
 
-                    Info<< "    Applying source " << sourceName << endl;
+                    Info<< "    Applying source " << sourceType << endl;
                     autoPtr<topoSetSource> source = topoSetSource::New
                     (
-                        sourceName,
+                        sourceType,
                         mesh,
-                        dict.subDict("sourceInfo")
+                        dict.optionalSubDict("sourceInfo")
                     );
 
                     source().applyToSet(action, currentSet());
@@ -308,14 +308,14 @@ int main(int argc, char *argv[])
 
                 case topoSetSource::SUBSET:
                 {
-                    const word sourceName(dict.get<word>("source"));
+                    const word sourceType(dict.get<word>("source"));
 
-                    Info<< "    Applying source " << sourceName << endl;
+                    Info<< "    Applying source " << sourceType << endl;
                     autoPtr<topoSetSource> source = topoSetSource::New
                     (
-                        sourceName,
+                        sourceType,
                         mesh,
-                        dict.subDict("sourceInfo")
+                        dict.optionalSubDict("sourceInfo")
                     );
 
                     // Backup current set.
@@ -385,7 +385,7 @@ int main(int argc, char *argv[])
             if (currentSet.valid())
             {
                 Info<< "    "
-                    << currentSet().type() << " "
+                    << currentSet().type() << ' '
                     << currentSet().name() << " now size "
                     << returnReduce(currentSet().size(), sumOp<label>())
                     << endl;

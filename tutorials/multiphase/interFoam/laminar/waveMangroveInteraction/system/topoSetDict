@@ -21,12 +21,10 @@ actions
         type    cellZoneSet;
         action  new;
         source  fieldToCell;
-        sourceInfo
-        {
-            field       MangrovesIndex;
-            min         0.5;
-            max         1.5;
-        }
+
+        field   MangrovesIndex;
+        min     0.5;
+        max     1.5;
     }
 );
 

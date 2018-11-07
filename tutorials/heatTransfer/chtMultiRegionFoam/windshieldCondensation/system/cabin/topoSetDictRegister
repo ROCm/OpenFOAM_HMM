@@ -22,22 +22,16 @@ actions
         type    faceSet;
         action  new;
         source  boxToFace;
-        sourceInfo
-        {
-            box     (-0.126 0.08665  0.2565) (0.02 0.090665 0.446);
-        }
+        box     (-0.126 0.08665  0.2565) (0.02 0.090665 0.446);
     }
 
-     {
+    {
         name    f1Zone;
         type    faceZoneSet;
         action  new;
         source  setAndNormalToFaceZone;
-        sourceInfo
-        {
-            faceSet     f1;
-            normal  (0 1 0);
-        }
+        faceSet f1;
+        normal  (0 1 0);
     }
 
     {
@@ -45,11 +39,8 @@ actions
         type    cellZoneSet;
         action  new;
         source  faceToCell;
-        sourceInfo
-        {
-            set     f1Zone;
-            option  neighbour;
-        }
+        set     f1Zone;
+        option  neighbour;
     }
 
     {
@@ -57,10 +48,7 @@ actions
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
-        sourceInfo
-        {
-            set c1;
-        }
+        set     c1;
     }
 );
 

@@ -22,20 +22,14 @@ actions
         type    faceSet;
         action  new;
         source  patchToFace;
-        sourceInfo
-        {
-            patch   filmWalls;
-        }
+        patch   filmWalls;
     }
     {
         name    wallFilmFaces;
         type    faceZoneSet;
         action  new;
         source  setToFaceZone;
-        sourceInfo
-        {
-            faceSet wallFilmFaceSet;
-        }
+        faceSet wallFilmFaceSet;
     }
 );
 

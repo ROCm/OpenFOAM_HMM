@@ -139,8 +139,8 @@ FoamFile
 //    source fieldToCell;
 //    {
 //        field   U;      // Note: uses mag(U) since volVectorField
-//        min         0.1;
-//        max         0.5;
+//        min     0.1;
+//        max     0.5;
 //    }
 //
 //    // Mesh region (non-face connected part of (subset of)mesh)
@@ -204,7 +204,7 @@ FoamFile
 //    // Faces with normal to within certain angle aligned with vector.
 //    source normalToFace;
 //    {
-//        normal (0 0 1);     // Vector
+//        normal  (0 0 1);    // Vector
 //        cos     0.01;       // Tolerance (max cos of angle)
 //    }
 //
@@ -222,15 +222,15 @@ FoamFile
 //    // Select based on cellSet
 //    source cellToPoint;
 //    {
-//        set c0;
-//        option all;         // all points of cell
+//        set     c0;
+//        option  all;        // all points of cell
 //    }
 //
 //    // Select based on faceSet
 //    source faceToPoint;
 //    {
-//        set f0;             // name of faceSet
-//        option all;         // all points of face
+//        set     f0;         // name of faceSet
+//        option  all;        // all points of face
 //    }
 //
 //    // Select by explicitly providing point labels
@@ -304,7 +304,7 @@ actions
         name    background;
         type    cellSet;
         action  new;
-        source surfaceToCell;
+        source  surfaceToCell;
         sourceInfo
         {
             file            "constant/triSurface/flange.obj";

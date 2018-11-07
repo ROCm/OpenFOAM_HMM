@@ -22,10 +22,7 @@ actions
         type    faceSet;
         action  new;
         source  patchToFace;
-        sourceInfo
-        {
-            patch   sides;
-        }
+        patch   sides;
     }
 
     {
@@ -33,10 +30,7 @@ actions
         type    faceZoneSet;
         action  new;
         source  setToFaceZone;
-        sourceInfo
-        {
-            faceSet f0;
-        }
+        faceSet f0;
     }
 );
 

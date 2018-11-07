@@ -22,10 +22,7 @@ actions
         type    cellSet;
         action  new;
         source  boxToCell;
-        sourceInfo
-        {
-            box (-1e10 -1e10 0.4) (1e10 1e10 0.6);
-        }
+        box     (-1e10 -1e10 0.4) (1e10 1e10 0.6);
     }
 );
 
