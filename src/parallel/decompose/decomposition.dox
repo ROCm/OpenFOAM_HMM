@@ -301,6 +301,13 @@ For example,
                     origin  (-2 -2 1);
                     radius  1;
                 }
+
+                arbitrary
+                {
+                    source  surface;
+                    surfaceType  triSurfaceMesh;
+                    surfaceName  blob.obj;
+                }
             }
         }
     }
