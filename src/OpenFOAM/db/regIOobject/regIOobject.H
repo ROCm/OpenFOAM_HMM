@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -176,12 +176,17 @@ public:
             //- Transfer ownership of the given object pointer to its registry
             //  and return reference to object.
             template<class Type>
-            inline static Type& store(Type*);
+            inline static Type& store(Type* p);
 
             //- Transfer ownership of the given object pointer to its registry
-            //  and return reference to object.
+            //- and return reference to object.
             template<class Type>
-            inline static Type& store(autoPtr<Type>&);
+            inline static Type& store(autoPtr<Type>& aptr);
+
+            //- Transfer ownership of the given object pointer to its registry
+            //- and return reference to object.
+            template<class Type>
+            inline static Type& store(autoPtr<Type>&& aptr);
 
             //- Release ownership of this object from its registry
             inline void release();
