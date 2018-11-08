@@ -59,10 +59,10 @@ namespace Foam
 //  Compare to List::null() which returns null pointer cast as list reference.
 //
 //  \deprecated This cast is disallowed with many modern compilers (JUL-2018)
-template<class Type>
-static const List<Type>& emptyList()
+template<class T>
+static const List<T>& emptyList()
 {
-    return *reinterpret_cast<const List<Type>*>(&emptyLabelList);
+    return *reinterpret_cast<const List<T>*>(&emptyLabelList);
 }
 
 
@@ -245,35 +245,51 @@ void inplaceUniqueSort
 );
 
 
-//- Extract elements of the input List when select is true.
+//- Extract elements of the input list when select is true.
 //
-//  \param select the bool-list selector, for which the operator[]
+//  \param[in] select the bool-list selector, for which the operator[]
 //      returns true or false.  A labelHashSet can also be used since
 //      it satisfies these requirements
-//  \param input the list input values. Cannot be a FixedList since
-//      it doesn't resize.
-//  \param invert set as true to invert the selection logic
+//  \param[in] input the list input values.
+//  \param[in] invert set as true to invert the selection logic
 //
 //  Eg, to extract all selected elements:
 //  \code
 //    subset<boolList, labelList>(selectedElems, list);
 //  \endcode
-template<class BoolListType, class ListType>
-ListType subset
+//
+//  \return The subsetted list
+template<class BoolListType, class T>
+List<T> subset
 (
     const BoolListType& select,
-    const ListType& input,
+    const UList<T>& input,
     const bool invert=false
 );
 
-//- Inplace extract elements of the input List when select is true.
+//- Extract elements of the input list when select is true.
 //
-//  \param select the bool-list selector, for which the operator[]
+//  \param[in] select the selection as a bitSet.
+//  \param[in] input the list input values.
+//  \param[in] invert set as true to invert the selection logic
+//
+//  \return The subsetted list
+template<class T>
+List<T> subset
+(
+    const bitSet& select,
+    const UList<T>& input,
+    const bool invert=false
+);
+
+//- Inplace extract elements of the input list when select is true.
+//
+//  \param[in] select the bool-list selector, for which the operator[]
 //      returns true or false.  A labelHashSet can also be used since
 //      it satisfies these requirements
-//  \param input the list input values. Cannot be a FixedList since
-//      it doesn't resize.
-//  \param invert set as true to invert the selection logic
+//  \param[in,out] input the list input values.
+//      Cannot be a FixedList since it doesn't resize.
+//  \param[in] invert set as true to invert the selection logic
 template<class BoolListType, class ListType>
 void inplaceSubset
 (
@@ -282,19 +298,42 @@ void inplaceSubset
     const bool invert=false
 );
 
+//- Inplace extract elements of the input list when select is true.
+//
+//  \param[in] select the selection as a bitSet.
+//  \param[in,out] input the list input values.
+//      Cannot be a FixedList since it doesn't resize.
+//  \param[in] invert set as true to invert the selection logic
+//
+//  \note Includes optimized handling of bitSet when invert=false.
+template<class ListType>
+void inplaceSubset
+(
+    const bitSet& select,
+    ListType& input,
+    const bool invert=false
+);
 
 //- Copy a subset of the input list when predicate is true.
-//  Do not use FixedList for the input list, since it doesn't resize.
-template<class ListType, class UnaryPredicate>
-ListType subsetList
+//
+//  \param[in,out] input the list input values.
+//  \param[in] pred the selection predicate
+//  \param[in] invert set as true to invert the selection logic
+template<class T, class UnaryPredicate>
+List<T> subsetList
 (
-    const ListType& input,
+    const UList<T>& input,
     const UnaryPredicate& pred,
     const bool invert=false
 );
 
+
 //- Inplace subset of the list when predicate is true.
-//  Do not use FixedList for the input list, since it doesn't resize.
+//
+//  \param[in,out] input the list input/output values.
+//       Cannot be a FixedList since it doesn't resize.
+//  \param[in] pred the selection predicate
+//  \param[in] invert set as true to invert the selection logic
 template<class ListType, class UnaryPredicate>
 void inplaceSubsetList
 (

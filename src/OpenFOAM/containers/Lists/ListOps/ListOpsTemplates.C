@@ -470,22 +470,22 @@ void Foam::inplaceUniqueSort
 }
 
 
-template<class BoolListType, class ListType>
-ListType Foam::subset
+template<class BoolListType, class T>
+Foam::List<T> Foam::subset
 (
     const BoolListType& select,
-    const ListType& input,
+    const UList<T>& input,
     const bool invert
 )
 {
+    // Note: select can have a different size (eg, labelHashSet)
+
     const label len = input.size();
 
-    // select can have a different size (eg, bitSet, labelHashSet)
-
-    ListType output(len);
-    output.resize(len);   // Consistent sizing (eg, DynamicList)
+    List<T> output(len);
 
     label count = 0;
+
     for (label i=0; i < len; ++i)
     {
         if (select[i] ? !invert : invert)
@@ -494,6 +494,55 @@ ListType Foam::subset
             ++count;
         }
     }
+
+    output.resize(count);
+
+    return output;
+}
+
+
+template<class T>
+Foam::List<T> Foam::subset
+(
+    const bitSet& select,
+    const UList<T>& input,
+    const bool invert
+)
+{
+    const label len = input.size();
+
+    List<T> output;
+
+    label count = 0;
+
+    if (!invert)
+    {
+        output.resize(select.count());
+
+        for (const label i : select)
+        {
+            if (i >= len) break; // Avoid out of bounds (when select is longer)
+
+            output[count] = input[i];
+            ++count;
+        }
+    }
+    else
+    {
+        const label outlen = (select.size() - select.count());
+        output.resize(outlen);
+
+        for (label i=0; i < len; ++i)
+        {
+            if (!select[i])
+            {
+                output[count] = input[i];
+                ++count;
+                if (count >= outlen) break;  // terminate early
+            }
+        }
+    }
+
     output.resize(count);
 
     return output;
@@ -508,11 +557,12 @@ void Foam::inplaceSubset
     const bool invert
 )
 {
+    // Note: select can have a different size (eg, labelHashSet)
+
     const label len = input.size();
 
-    // select can have a different size (eg, bitSet, labelHashSet)
-
     label count = 0;
+
     for (label i=0; i < len; ++i)
     {
         if (select[i] ? !invert : invert)
@@ -524,22 +574,75 @@ void Foam::inplaceSubset
             ++count;
         }
     }
+
     input.resize(count);
 }
 
 
-template<class ListType, class UnaryPredicate>
-ListType Foam::subsetList
+template<class ListType>
+void Foam::inplaceSubset
 (
-    const ListType& input,
+    const bitSet& select,
+    ListType& input,
+    const bool invert
+)
+{
+    label count = 0;
+
+    if (!invert)
+    {
+        // Normal selection
+
+        const label len = input.size();
+
+        for (const label i : select)
+        {
+            if (i >= len) break;
+
+            if (count != i)
+            {
+                input[count] = std::move(input[i]);
+            }
+            ++count;
+        }
+    }
+    else
+    {
+        // Inverted selection
+
+        const label outlen = (select.size() - select.count());
+
+        const label len = min(input.size(), select.size());
+
+        for (label i=0; i < len; ++i)
+        {
+            if (!select[i])
+            {
+                if (count != i)
+                {
+                    input[count] = std::move(input[i]);
+                }
+                ++count;
+                if (count >= outlen) break;  // terminate early
+            }
+        }
+    }
+
+    input.resize(count);
+}
+
+
+template<class T, class UnaryPredicate>
+Foam::List<T> Foam::subsetList
+(
+    const UList<T>& input,
     const UnaryPredicate& pred,
     const bool invert
 )
 {
     const label len = input.size();
 
-    ListType output(len);
-    output.resize(len);  // Consistent sizing (eg, DynamicList)
+    List<T> output(len);
 
     label count = 0;
     for (label i=0; i < len; ++i)
@@ -550,6 +653,7 @@ ListType Foam::subsetList
             ++count;
         }
     }
+
     output.resize(count);
 
     return output;
@@ -593,10 +697,8 @@ void Foam::invertManyToMany
     // The output list sizes
     labelList sizes(len, 0);
 
-    forAll(input, listi)
+    for (const InputIntListType& sublist : input)
     {
-        const InputIntListType& sublist = input[listi];
-
         forAll(sublist, idx)
         {
             sizes[sublist[idx]]++;
