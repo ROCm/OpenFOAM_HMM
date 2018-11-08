@@ -203,7 +203,7 @@ void Foam::polyMesh::setTopology
             // For all points
             forAll(curPoints, pointi)
             {
-                // dGget the list of cells sharing this point
+                // Get the list of cells sharing this point
                 const labelList& curNeighbours =
                     PointCells[curPoints[pointi]];
 
