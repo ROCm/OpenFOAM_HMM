@@ -34,12 +34,12 @@ namespace Foam
 {
 namespace decompositionConstraints
 {
-    defineTypeName(preserveBafflesConstraint);
+    defineTypeName(preserveBaffles);
 
     addToRunTimeSelectionTable
     (
         decompositionConstraint,
-        preserveBafflesConstraint,
+        preserveBaffles,
         dictionary
     );
 }
@@ -48,32 +48,31 @@ namespace decompositionConstraints
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::decompositionConstraints::preserveBafflesConstraint::
-preserveBafflesConstraint
+Foam::decompositionConstraints::preserveBaffles::preserveBaffles
 (
-    const dictionary& constraintsDict,
-    const word& modelType
+    const dictionary& dict
 )
 :
-    decompositionConstraint(constraintsDict, typeName)
+    decompositionConstraint(dict, typeName)
 {
     if (decompositionConstraint::debug)
     {
-        Info<< type() << " : setting constraints to preserve baffles"
+        Info<< type()
+            << " : setting constraints to preserve baffles"
             //<< returnReduce(bafflePairs.size(), sumOp<label>())
             << endl;
     }
 }
 
 
-Foam::decompositionConstraints::preserveBafflesConstraint::
-preserveBafflesConstraint()
+Foam::decompositionConstraints::preserveBaffles::preserveBaffles()
 :
     decompositionConstraint(dictionary(), typeName)
 {
     if (decompositionConstraint::debug)
     {
-        Info<< type() << " : setting constraints to preserve baffles"
+        Info<< type()
+            << " : setting constraints to preserve baffles"
             //<< returnReduce(bafflePairs.size(), sumOp<label>())
             << endl;
     }
@@ -82,7 +81,7 @@ preserveBafflesConstraint()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::decompositionConstraints::preserveBafflesConstraint::add
+void Foam::decompositionConstraints::preserveBaffles::add
 (
     const polyMesh& mesh,
     boolList& blockedFace,
@@ -177,7 +176,7 @@ void Foam::decompositionConstraints::preserveBafflesConstraint::add
 }
 
 
-void Foam::decompositionConstraints::preserveBafflesConstraint::apply
+void Foam::decompositionConstraints::preserveBaffles::apply
 (
     const polyMesh& mesh,
     const boolList& blockedFace,

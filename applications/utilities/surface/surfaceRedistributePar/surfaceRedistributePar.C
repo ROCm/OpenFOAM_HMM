@@ -33,8 +33,8 @@ Description
     processor has all triangles that overlap its mesh.
 
 Note
-    - best decomposition option is hierarchGeomDecomp since
-      guarantees square decompositions.
+    - best decomposition option is hierarchical since it guarantees
+      square decompositions.
     - triangles might be present on multiple processors.
     - merging uses geometric tolerance so take care with writing precision.
 

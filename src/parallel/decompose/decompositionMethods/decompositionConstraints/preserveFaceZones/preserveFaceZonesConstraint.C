@@ -33,12 +33,12 @@ namespace Foam
 {
 namespace decompositionConstraints
 {
-    defineTypeName(preserveFaceZonesConstraint);
+    defineTypeName(preserveFaceZones);
 
     addToRunTimeSelectionTable
     (
         decompositionConstraint,
-        preserveFaceZonesConstraint,
+        preserveFaceZones,
         dictionary
     );
 }
@@ -47,15 +47,13 @@ namespace decompositionConstraints
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::decompositionConstraints::preserveFaceZonesConstraint::
-preserveFaceZonesConstraint
+Foam::decompositionConstraints::preserveFaceZones::preserveFaceZones
 (
-    const dictionary& constraintsDict,
-    const word& modelType
+    const dictionary& dict
 )
 :
-    decompositionConstraint(constraintsDict, typeName),
-    zones_(coeffDict_.lookup("zones"))
+    decompositionConstraint(dict, typeName),
+    zones_(coeffDict_.get<wordRes>("zones"))
 {
     if (decompositionConstraint::debug)
     {
@@ -66,8 +64,7 @@ preserveFaceZonesConstraint
 }
 
 
-Foam::decompositionConstraints::preserveFaceZonesConstraint::
-preserveFaceZonesConstraint
+Foam::decompositionConstraints::preserveFaceZones::preserveFaceZones
 (
     const UList<wordRe>& zones
 )
@@ -86,7 +83,7 @@ preserveFaceZonesConstraint
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::decompositionConstraints::preserveFaceZonesConstraint::add
+void Foam::decompositionConstraints::preserveFaceZones::add
 (
     const polyMesh& mesh,
     boolList& blockedFace,
@@ -127,7 +124,7 @@ void Foam::decompositionConstraints::preserveFaceZonesConstraint::add
 }
 
 
-void Foam::decompositionConstraints::preserveFaceZonesConstraint::apply
+void Foam::decompositionConstraints::preserveFaceZones::apply
 (
     const polyMesh& mesh,
     const boolList& blockedFace,

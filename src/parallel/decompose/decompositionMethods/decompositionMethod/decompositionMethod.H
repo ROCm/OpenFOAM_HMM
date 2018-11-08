@@ -50,7 +50,14 @@ class decompositionMethod
 {
     // Private Member Functions
 
-        //- Set PtrList of constraints by reading decompositionDict_.
+        //- Check (and warn) about existence of old constraint syntax.
+        //  The syntax changed MAY-2014.
+        //
+        //  \return true if this model name was found in the decompDict_
+        //      but not previously added with the newer syntax.
+        bool constraintCompat(const word& modelType) const;
+
+        //- Set PtrList of constraints by reading decompDict_.
         void readConstraints();
 
         //- No copy construct
@@ -77,10 +84,10 @@ protected:
     // Protected data
 
         //- Top-level decomposition dictionary (eg, decomposeParDict)
-        const dictionary& decompositionDict_;
+        const dictionary& decompDict_;
 
         //- Region-specific decomposition dictionary information
-        const dictionary& decompositionRegionDict_;
+        const dictionary& decompRegionDict_;
 
         //- Number of domains for the decomposition
         label nDomains_;
@@ -238,14 +245,14 @@ public:
         ) const
         {
             NotImplemented;
-            return labelList(0);
+            return labelList();
         }
 
         //- Decompose with uniform weights on the points
         virtual labelList decompose(const pointField& points) const
         {
             NotImplemented;
-            return labelList(0);
+            return labelList();
         }
 
 

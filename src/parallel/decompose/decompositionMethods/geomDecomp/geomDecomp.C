@@ -30,7 +30,6 @@ License
 void Foam::geomDecomp::readCoeffs()
 {
     coeffsDict_.readIfPresent("delta", delta_);
-
     coeffsDict_.readEntry("n", n_);
 
     // Verify that the input makes sense
@@ -63,7 +62,7 @@ void Foam::geomDecomp::checkDecompositionDirections
     const Vector<label>& meshDirs
 ) const
 {
-    for (direction dir = 0; dir < Vector<label>::nComponents; dir++)
+    for (direction dir = 0; dir < Vector<label>::nComponents; ++dir)
     {
         if (n_[dir] > 1 && meshDirs[dir] == -1)
         {

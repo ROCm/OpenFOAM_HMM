@@ -71,8 +71,7 @@ Foam::label Foam::metisDecomp::decomposeSerial
     // k-way: multi-level k-way
     word method("recursive");
 
-    const dictionary* coeffsDictPtr =
-        decompositionDict_.findDict("metisCoeffs");
+    const dictionary* coeffsDictPtr = decompDict_.findDict("metisCoeffs");
 
     label numCells = xadj.size()-1;
 
@@ -133,7 +132,7 @@ Foam::label Foam::metisDecomp::decomposeSerial
             {
                 FatalErrorInFunction
                     << "Method " << method << " in metisCoeffs in dictionary : "
-                    << decompositionDict_.name()
+                    << decompDict_.name()
                     << " should be 'recursive' or 'k-way'"
                     << exit(FatalError);
             }
@@ -148,7 +147,7 @@ Foam::label Foam::metisDecomp::decomposeSerial
             {
                 FatalErrorInFunction
                     << "Number of options in metisCoeffs in dictionary : "
-                    << decompositionDict_.name()
+                    << decompDict_.name()
                     << " should be " << METIS_NOPTIONS
                     << exit(FatalError);
             }

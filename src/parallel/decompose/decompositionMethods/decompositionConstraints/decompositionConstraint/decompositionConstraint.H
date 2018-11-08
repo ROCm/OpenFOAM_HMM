@@ -25,6 +25,7 @@ Class
     Foam::decompositionConstraint
 
 Description
+    Abstract class for handling decomposition constraints.
 
 SourceFiles
     decompositionConstraint.C
@@ -35,10 +36,10 @@ SourceFiles
 #define decompositionConstraint_H
 
 #include "dictionary.H"
-#include "runTimeSelectionTables.H"
 #include "boolList.H"
 #include "labelList.H"
 #include "labelPair.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,19 +59,17 @@ protected:
 
     // Protected data
 
-        //- Model coefficients dictionary
+        //- Constraint coefficients dictionary
         dictionary coeffDict_;
 
-private:
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- No copy construct
         decompositionConstraint(const decompositionConstraint&) = delete;
 
         //- No copy assignment
         void operator=(const decompositionConstraint&) = delete;
-
 
 public:
 
@@ -86,20 +85,24 @@ public:
             decompositionConstraint,
             dictionary,
             (
-                const dictionary& constraintsDict,
-                const word& type
+                const dictionary& dict
             ),
-            (constraintsDict, type)
+            (dict)
         );
 
 
     // Constructors
 
-        //- Construct with generic dictionary with optional entry for type
+        //- Construct with constraint dictionary
+        explicit decompositionConstraint(const dictionary& constraintDict);
+
+        //- Construct with constraint dictionary and model type.
+        //  The model type could be used for defining a coefficients
+        //  sub-dictionary.
         decompositionConstraint
         (
-            const dictionary& constraintsDict,
-            const word& type
+            const dictionary& constraintDict,
+            const word& modelType
         );
 
 
@@ -108,8 +111,14 @@ public:
         //- Return a reference to the selected decompositionConstraint
         static autoPtr<decompositionConstraint> New
         (
-            const dictionary& constraintsDict,
-            const word& type
+            const dictionary& constraintDict
+        );
+
+        //- Return a reference to the selected decompositionConstraint
+        static autoPtr<decompositionConstraint> New
+        (
+            const dictionary& constraintDict,
+            const word& modelType
         );
 
 
@@ -119,7 +128,7 @@ public:
 
     // Member Functions
 
-        //- Add my constraints to list of constraints
+        //- Add this constraint to list of constraints
         virtual void add
         (
             const polyMesh& mesh,

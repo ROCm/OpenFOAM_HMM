@@ -22,10 +22,16 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::preserveBafflesConstraint
+    Foam::decompositionConstraints::preserveBaffles
 
 Description
     Detects baffles and keeps owner and neighbour on same processor.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        type        | preserveBaffles                   | yes   |
+    \endtable
 
 SourceFiles
     preserveBafflesConstraint.C
@@ -41,15 +47,14 @@ SourceFiles
 
 namespace Foam
 {
-
 namespace decompositionConstraints
 {
 
 /*---------------------------------------------------------------------------*\
-                Class preserveBafflesConstraint Declaration
+                       Class preserveBaffles Declaration
 \*---------------------------------------------------------------------------*/
 
-class preserveBafflesConstraint
+class preserveBaffles
 :
     public decompositionConstraint
 {
@@ -61,19 +66,15 @@ public:
 
     // Constructors
 
-        //- Construct with generic dictionary with optional entry for type
-        preserveBafflesConstraint
-        (
-            const dictionary& constraintsDict,
-            const word& type
-        );
+        //- Construct with constraint dictionary
+        explicit preserveBaffles(const dictionary& dict);
 
         //- Construct from components
-        preserveBafflesConstraint();
+        preserveBaffles();
 
 
     //- Destructor
-    virtual ~preserveBafflesConstraint() = default;
+    virtual ~preserveBaffles() = default;
 
 
     // Member Functions

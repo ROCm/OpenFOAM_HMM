@@ -34,6 +34,7 @@ License
 #include "BitOps.H"
 #include "FaceCellWave.H"
 
+// Compatibility (MAY-2014)
 #include "preserveBafflesConstraint.H"
 #include "preservePatchesConstraint.H"
 #include "preserveFaceZonesConstraint.H"
@@ -114,103 +115,106 @@ const Foam::dictionary& Foam::decompositionMethod::optionalRegionDict
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+bool Foam::decompositionMethod::constraintCompat(const word& modelType) const
+{
+    bool usable = decompDict_.found(modelType);
+    if (!usable)
+    {
+        return false;
+    }
+
+    for (const auto& item : constraints_)
+    {
+        if (modelType == item.type())
+        {
+            usable = false;
+            break;
+        }
+    }
+
+    if (usable)
+    {
+        Warning
+            << nl << "    Using '" << modelType
+            << "' constraint specification." << nl;
+    }
+    else
+    {
+        Warning
+            << nl << "    Ignoring '" << modelType
+            << "' constraint specification - was already specified." << nl;
+    }
+
+    // The syntax changed MAY-2014
+    error::warnAboutAge("constraint keyword", 1406);
+
+    return usable;
+}
+
+
 void Foam::decompositionMethod::readConstraints()
 {
     constraints_.clear();
 
-    // Read any constraints
-    wordList constraintTypes;
-
-    const dictionary* dictptr = decompositionDict_.findDict("constraints");
+    const dictionary* dictptr = decompDict_.findDict("constraints");
 
     if (dictptr)
     {
         for (const entry& dEntry : *dictptr)
         {
+            if (!dEntry.isDict())  // safety
+            {
+                // Ignore or warn
+                continue;
+            }
+
             const dictionary& dict = dEntry.dict();
 
-            constraintTypes.append(dict.get<word>("type"));
-
-            constraints_.append
-            (
-                decompositionConstraint::New
-                (
-                    dict,
-                    constraintTypes.last()
-                )
-            );
+            if (dict.lookupOrDefault("enabled", true))
+            {
+                constraints_.append(decompositionConstraint::New(dict));
+            }
         }
     }
 
-    // Backwards compatibility
-    if
-    (
-        decompositionDict_.found("preserveBaffles")
-     && !constraintTypes.found
-        (
-            decompositionConstraints::preserveBafflesConstraint::typeName
-        )
-    )
+    // Backwards compatibility (MAY-2014)
+    if (constraintCompat("preserveBaffles"))
     {
         constraints_.append
         (
-            new decompositionConstraints::preserveBafflesConstraint()
+            new decompositionConstraints::preserveBaffles()
         );
     }
 
-    if
-    (
-        decompositionDict_.found("preservePatches")
-     && !constraintTypes.found
-        (
-            decompositionConstraints::preservePatchesConstraint::typeName
-        )
-    )
+    if (constraintCompat("preservePatches"))
     {
-        const wordReList pNames(decompositionDict_.lookup("preservePatches"));
-
         constraints_.append
         (
-            new decompositionConstraints::preservePatchesConstraint(pNames)
-        );
-    }
-
-    if
-    (
-        decompositionDict_.found("preserveFaceZones")
-     && !constraintTypes.found
-        (
-            decompositionConstraints::preserveFaceZonesConstraint::typeName
-        )
-    )
-    {
-        const wordReList zNames(decompositionDict_.lookup("preserveFaceZones"));
-
-        constraints_.append
-        (
-            new decompositionConstraints::preserveFaceZonesConstraint(zNames)
-        );
-    }
-
-    if
-    (
-        decompositionDict_.found("singleProcessorFaceSets")
-     && !constraintTypes.found
-        (
-            decompositionConstraints::preserveFaceZonesConstraint::typeName
-        )
-    )
-    {
-        const List<Tuple2<word, label>> zNameAndProcs
-        (
-            decompositionDict_.lookup("singleProcessorFaceSets")
-        );
-
-        constraints_.append
-        (
-            new decompositionConstraints::singleProcessorFaceSetsConstraint
+            new decompositionConstraints::preservePatches
             (
-                zNameAndProcs
+                decompDict_.get<wordRes>("preservePatches")
+            )
+        );
+    }
+
+    if (constraintCompat("preserveFaceZones"))
+    {
+        constraints_.append
+        (
+            new decompositionConstraints::preserveFaceZones
+            (
+                decompDict_.get<wordRes>("preserveFaceZones")
+            )
+        );
+    }
+
+    if (constraintCompat("singleProcessorFaceSets"))
+    {
+        constraints_.append
+        (
+            new decompositionConstraints::singleProcessorFaceSets
+            (
+                decompDict_.lookup("singleProcessorFaceSets")
             )
         );
     }
@@ -268,14 +272,14 @@ const Foam::dictionary& Foam::decompositionMethod::findCoeffsDict
 
     if
     (
-        !decompositionRegionDict_.empty()
+        !decompRegionDict_.empty()
     &&
         (
-            (fnd = decompositionRegionDict_.csearch(coeffsName)).isDict()
+            (fnd = decompRegionDict_.csearch(coeffsName)).isDict()
          ||
             (
                 !(select & selectionType::EXACT)
-             && (fnd = decompositionRegionDict_.csearch(defaultName)).isDict()
+             && (fnd = decompRegionDict_.csearch(defaultName)).isDict()
             )
         )
     )
@@ -285,11 +289,11 @@ const Foam::dictionary& Foam::decompositionMethod::findCoeffsDict
 
     if
     (
-        (fnd = decompositionDict_.csearch(coeffsName)).isDict()
+        (fnd = decompDict_.csearch(coeffsName)).isDict()
      ||
         (
             !(select & selectionType::EXACT)
-         && (fnd = decompositionDict_.csearch(defaultName)).isDict()
+         && (fnd = decompDict_.csearch(defaultName)).isDict()
         )
     )
     {
@@ -301,7 +305,7 @@ const Foam::dictionary& Foam::decompositionMethod::findCoeffsDict
     {
         FatalIOError
             << "'" << coeffsName << "' dictionary not found in dictionary "
-            << decompositionDict_.name() << endl
+            << decompDict_.name() << endl
             << abort(FatalIOError);
     }
 
@@ -310,7 +314,7 @@ const Foam::dictionary& Foam::decompositionMethod::findCoeffsDict
         return dictionary::null;
     }
 
-    return decompositionDict_;
+    return decompDict_;
 }
 
 
@@ -321,8 +325,8 @@ Foam::decompositionMethod::decompositionMethod
     const dictionary& decompDict
 )
 :
-    decompositionDict_(decompDict),
-    decompositionRegionDict_(dictionary::null),
+    decompDict_(decompDict),
+    decompRegionDict_(dictionary::null),
     nDomains_(nDomains(decompDict))
 {
     readConstraints();
@@ -335,10 +339,10 @@ Foam::decompositionMethod::decompositionMethod
     const word& regionName
 )
 :
-    decompositionDict_(decompDict),
-    decompositionRegionDict_
+    decompDict_(decompDict),
+    decompRegionDict_
     (
-        optionalRegionDict(decompositionDict_, regionName)
+        optionalRegionDict(decompDict_, regionName)
     ),
     nDomains_(nDomains(decompDict, regionName))
 {
@@ -381,7 +385,6 @@ Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
 (
     const dictionary& decompDict,
     const word& regionName
-
 )
 {
     const dictionary& regionDict(optionalRegionDict(decompDict, regionName));
@@ -428,7 +431,7 @@ Foam::labelList Foam::decompositionMethod::decompose
     const pointField& points
 ) const
 {
-    scalarField weights(points.size(), 1.0);
+    scalarField weights(points.size(), scalar(1));
 
     return decompose(mesh, points, weights);
 }
@@ -482,7 +485,7 @@ Foam::labelList Foam::decompositionMethod::decompose
     const pointField& coarsePoints
 ) const
 {
-    scalarField weights(coarsePoints.size(), 1.0);
+    scalarField weights(coarsePoints.size(), scalar(1));
 
     return decompose
     (
@@ -500,7 +503,7 @@ Foam::labelList Foam::decompositionMethod::decompose
     const pointField& cc
 ) const
 {
-    scalarField weights(cc.size(), 1.0);
+    scalarField weights(cc.size(), scalar(1));
 
     return decompose(globalCellCells, cc, weights);
 }
@@ -565,7 +568,7 @@ void Foam::decompositionMethod::calcCellCells
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Number of faces per coarse cell
-    labelList nFacesPerCell(nLocalCoarse, 0);
+    labelList nFacesPerCell(nLocalCoarse, Zero);
 
     for (label facei = 0; facei < mesh.nInternalFaces(); ++facei)
     {
@@ -764,7 +767,7 @@ void Foam::decompositionMethod::calcCellCells
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Number of faces per coarse cell
-    labelList nFacesPerCell(nLocalCoarse, 0);
+    labelList nFacesPerCell(nLocalCoarse, Zero);
 
     for (label facei = 0; facei < mesh.nInternalFaces(); ++facei)
     {
@@ -1016,7 +1019,7 @@ Foam::labelList Foam::decompositionMethod::decompose
     // If we average the region centre instead, cyclics could cause
     // the average domain centre to be outside of domain.
 
-    scalarField regionWeights(localRegion.nLocalRegions(), 0.0);
+    scalarField regionWeights(localRegion.nLocalRegions(), Zero);
 
     pointField regionCentres(localRegion.nLocalRegions(), point::max);
 

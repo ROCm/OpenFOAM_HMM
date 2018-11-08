@@ -24,9 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "manualDecomp.H"
-#include "addToRunTimeSelectionTable.H"
-#include "IFstream.H"
 #include "labelIOList.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,7 +54,10 @@ namespace Foam
 Foam::manualDecomp::manualDecomp(const dictionary& decompDict)
 :
     decompositionMethod(decompDict),
-    dataFile_(findCoeffsDict(typeName + "Coeffs").lookup("dataFile"))
+    dataFile_
+    (
+        findCoeffsDict(typeName + "Coeffs").get<fileName>("dataFile")
+    )
 {}
 
 
@@ -66,7 +68,10 @@ Foam::manualDecomp::manualDecomp
 )
 :
     decompositionMethod(decompDict, regionName),
-    dataFile_(findCoeffsDict(typeName + "Coeffs").lookup("dataFile"))
+    dataFile_
+    (
+        findCoeffsDict(typeName + "Coeffs").get<fileName>("dataFile")
+    )
 {}
 
 

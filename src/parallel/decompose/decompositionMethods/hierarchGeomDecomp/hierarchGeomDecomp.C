@@ -59,7 +59,7 @@ void Foam::hierarchGeomDecomp::setDecompOrder()
     {
         if (order.size() != 3)
         {
-            FatalIOErrorInFunction(decompositionDict_)
+            FatalIOErrorInFunction(decompDict_)
                 << "number of characters in order (" << order << ") != 3"
                 << exit(FatalIOError);
         }
@@ -75,7 +75,7 @@ void Foam::hierarchGeomDecomp::setDecompOrder()
                 case 'z': decompOrder_[i] = 2; break;
 
                 default:
-                    FatalIOErrorInFunction(decompositionDict_)
+                    FatalIOErrorInFunction(decompDict_)
                         << "Illegal decomposition order " << order << nl
                         << "It should only contain x, y or z"
                         << exit(FatalError);
@@ -536,7 +536,7 @@ void Foam::hierarchGeomDecomp::sortComponent
 
     // Now evaluate local cumulative weights, based on the sorting.
     // Make one bigger than the nodes.
-    scalarField sortedWeightedSizes(current.size()+1, 0);
+    scalarField sortedWeightedSizes(current.size()+1, Zero);
     calculateSortedWeightedSizes
     (
         current,
@@ -719,7 +719,7 @@ Foam::labelList Foam::hierarchGeomDecomp::decompose
 ) const
 {
     // construct a list for the final result
-    labelList finalDecomp(points.size(), 0);
+    labelList finalDecomp(points.size(), Zero);
 
     // Start off with every point sorted onto itself.
     labelList slice(points.size());
@@ -759,8 +759,8 @@ Foam::labelList Foam::hierarchGeomDecomp::decompose
     const scalarField& weights
 ) const
 {
-    // construct a list for the final result
-    labelList finalDecomp(points.size(), 0);
+    // Construct a list for the final result
+    labelList finalDecomp(points.size(), Zero);
 
     // Start off with every point sorted onto itself.
     labelList slice(points.size());

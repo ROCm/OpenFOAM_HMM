@@ -22,11 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::preserveFaceZonesConstraint
+    Foam::decompositionConstraints::preserveFaceZones
 
 Description
     Constraint to keep/move owner and neighbour of faceZone onto same
     processor.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        type        | preserveFaceZones                 | yes   |
+        zones       | List of face zone names or regexs | yes   |
+    \endtable
 
 SourceFiles
     preserveFaceZonesConstraint.C
@@ -43,15 +50,14 @@ SourceFiles
 
 namespace Foam
 {
-
 namespace decompositionConstraints
 {
 
 /*---------------------------------------------------------------------------*\
-                Class preserveFaceZonesConstraint Declaration
+                      Class preserveFaceZones Declaration
 \*---------------------------------------------------------------------------*/
 
-class preserveFaceZonesConstraint
+class preserveFaceZones
 :
     public decompositionConstraint
 {
@@ -69,19 +75,15 @@ public:
 
     // Constructors
 
-        //- Construct with generic dictionary with optional entry for type
-        preserveFaceZonesConstraint
-        (
-            const dictionary& constraintsDict,
-            const word& type
-        );
+        //- Construct with constraint dictionary
+        explicit preserveFaceZones(const dictionary& dict);
 
         //- Construct from components
-        preserveFaceZonesConstraint(const UList<wordRe>& zones);
+        explicit preserveFaceZones(const UList<wordRe>& zones);
 
 
     //- Destructor
-    virtual ~preserveFaceZonesConstraint() = default;
+    virtual ~preserveFaceZones() = default;
 
 
     // Member Functions
