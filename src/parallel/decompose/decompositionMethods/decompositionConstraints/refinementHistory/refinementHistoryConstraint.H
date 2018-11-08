@@ -22,11 +22,17 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::refinementHistoryConstraint
+    Foam::decompositionConstraints::refinementHistory
 
 Description
     Constraint to keep all cells originating from refining the same cell
     onto the same processor. Reads polyMesh/refinementHistory.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        type        | refinementHistory                 | yes   |
+    \endtable
 
 SourceFiles
     refinementHistoryConstraint.C
@@ -42,12 +48,14 @@ SourceFiles
 
 namespace Foam
 {
+namespace decompositionConstraints
+{
 
 /*---------------------------------------------------------------------------*\
-                Class refinementHistoryConstraint Declaration
+                      Class refinementHistory Declaration
 \*---------------------------------------------------------------------------*/
 
-class refinementHistoryConstraint
+class refinementHistory
 :
     public decompositionConstraint
 {
@@ -59,24 +67,20 @@ public:
 
     // Constructors
 
-        //- Construct with generic dictionary with optional entry for type
-        refinementHistoryConstraint
-        (
-            const dictionary& constraintsDict,
-            const word& type
-        );
+        //- Construct with constraint dictionary
+        explicit refinementHistory(const dictionary& dict);
 
         //- Construct from components
-        refinementHistoryConstraint();
+        refinementHistory();
 
 
     //- Destructor
-    virtual ~refinementHistoryConstraint() = default;
+    virtual ~refinementHistory() = default;
 
 
     // Member Functions
 
-        //- Add my constraints to list of constraints
+        //- Add this constraint to list of constraints
         virtual void add
         (
             const polyMesh& mesh,
@@ -86,7 +90,7 @@ public:
             List<labelPair>& explicitConnections
         ) const;
 
-        //- Apply any additional post-decomposition constraints
+        //- Apply this constraint post-decomposition
         virtual void apply
         (
             const polyMesh& mesh,
@@ -101,6 +105,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace decompositionConstraints
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -111,11 +111,6 @@ public:
 
         //- Return for every coordinate the wanted processor number.
         //  Explicitly provided connectivity - does not use mesh_.
-        //  The connectivity is equal to mesh.cellCells() except for
-        //  - in parallel the cell numbers are global cell numbers (starting
-        //    from 0 at processor0 and then incrementing all through the
-        //    processors)
-        //  - the connections are across coupled patches
         virtual labelList decompose
         (
             const labelListList& globalCellCells,
@@ -124,7 +119,7 @@ public:
         ) const
         {
             NotImplemented;
-            return labelList(0);
+            return labelList();
         }
 
 };

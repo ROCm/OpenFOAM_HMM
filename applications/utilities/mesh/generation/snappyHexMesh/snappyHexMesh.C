@@ -43,7 +43,6 @@ Description
 #include "refinementFeatures.H"
 #include "shellSurfaces.H"
 #include "decompositionMethod.H"
-#include "noDecomp.H"
 #include "fvMeshDistribute.H"
 #include "wallPolyPatch.H"
 #include "refinementParameters.H"

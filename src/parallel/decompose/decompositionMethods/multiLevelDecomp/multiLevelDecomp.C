@@ -397,7 +397,7 @@ void Foam::multiLevelDecomp::decompose
             Pout<< "Decomposition at level " << currLevel << " :" << endl;
         }
 
-        for (label domainI = 0; domainI < nCurrDomains; domainI++)
+        for (label domainI = 0; domainI < nCurrDomains; ++domainI)
         {
             // Extract elements for current domain
             const labelList domainPoints(findIndices(dist, domainI));
@@ -505,12 +505,12 @@ void Foam::multiLevelDecomp::decompose
                 )
             );
 
-            for (label blockI = 0; blockI < nCurrDomains; blockI++)
+            for (label blockI = 0; blockI < nCurrDomains; ++blockI)
             {
                 // Count the number inbetween blocks of nNext size
 
                 label nPoints = 0;
-                labelList nOutsideConnections(nCurrDomains, 0);
+                labelList nOutsideConnections(nCurrDomains, Zero);
                 forAll(pointPoints, pointi)
                 {
                     if ((dist[pointi] / nNext) == blockI)
@@ -633,7 +633,7 @@ Foam::labelList Foam::multiLevelDecomp::decompose
     CompactListList<label> cellCells;
     calcCellCells(mesh, identity(cc.size()), cc.size(), true, cellCells);
 
-    labelList finalDecomp(cc.size(), 0);
+    labelList finalDecomp(cc.size(), Zero);
     labelList cellMap(identity(cc.size()));
 
     decompose
@@ -659,7 +659,7 @@ Foam::labelList Foam::multiLevelDecomp::decompose
     const scalarField& pointWeights
 ) const
 {
-    labelList finalDecomp(points.size(), 0);
+    labelList finalDecomp(points.size(), Zero);
     labelList pointMap(identity(points.size()));
 
     decompose

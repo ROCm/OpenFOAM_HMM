@@ -33,12 +33,12 @@ namespace Foam
 {
 namespace decompositionConstraints
 {
-    defineTypeName(preservePatchesConstraint);
+    defineTypeName(preservePatches);
 
     addToRunTimeSelectionTable
     (
         decompositionConstraint,
-        preservePatchesConstraint,
+        preservePatches,
         dictionary
     );
 }
@@ -47,15 +47,13 @@ namespace decompositionConstraints
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::decompositionConstraints::preservePatchesConstraint::
-preservePatchesConstraint
+Foam::decompositionConstraints::preservePatches::preservePatches
 (
-    const dictionary& constraintsDict,
-    const word& modelType
+    const dictionary& dict
 )
 :
-    decompositionConstraint(constraintsDict, typeName),
-    patches_(coeffDict_.lookup("patches"))
+    decompositionConstraint(dict, typeName),
+    patches_(coeffDict_.get<wordRes>("patches"))
 {
     if (decompositionConstraint::debug)
     {
@@ -66,8 +64,7 @@ preservePatchesConstraint
 }
 
 
-Foam::decompositionConstraints::preservePatchesConstraint::
-preservePatchesConstraint
+Foam::decompositionConstraints::preservePatches::preservePatches
 (
     const UList<wordRe>& patches
 )
@@ -86,7 +83,7 @@ preservePatchesConstraint
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::decompositionConstraints::preservePatchesConstraint::add
+void Foam::decompositionConstraints::preservePatches::add
 (
     const polyMesh& mesh,
     boolList& blockedFace,
@@ -97,7 +94,7 @@ void Foam::decompositionConstraints::preservePatchesConstraint::add
 {
     const polyBoundaryMesh& pbm = mesh.boundaryMesh();
 
-    blockedFace.setSize(mesh.nFaces(), true);
+    blockedFace.resize(mesh.nFaces(), true);
 
     const labelList patchIDs(pbm.patchSet(patches_).sortedToc());
 
@@ -129,7 +126,7 @@ void Foam::decompositionConstraints::preservePatchesConstraint::add
 }
 
 
-void Foam::decompositionConstraints::preservePatchesConstraint::apply
+void Foam::decompositionConstraints::preservePatches::apply
 (
     const polyMesh& mesh,
     const boolList& blockedFace,
@@ -177,7 +174,7 @@ void Foam::decompositionConstraints::preservePatchesConstraint::apply
 
         forAll(faceCells, i)
         {
-            label bFaceI = pp.start()+i-mesh.nInternalFaces();
+            const label bFaceI = pp.start()+i-mesh.nInternalFaces();
 
             if (decomposition[faceCells[i]] != destProc[bFaceI])
             {
