@@ -493,6 +493,10 @@ public:
 
     // Member Operators
 
+        //- Test value at specified position, same as test()
+        //  Enables use as a predicate
+        inline bool operator()(const label pos) const;
+
         //- Identical to get() - get value at index.
         //  Never auto-vivify entries.
         inline unsigned int operator[](const label i) const;
