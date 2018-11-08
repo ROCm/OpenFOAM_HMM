@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cylindricalCS.H"
+#include "cylindricalRotation.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -114,11 +115,37 @@ Foam::coordSystem::cylindrical::cylindrical
 Foam::coordSystem::cylindrical::cylindrical
 (
     const point& origin,
+    const vector& axis
+)
+:
+    cylindrical(word::null, origin, axis)
+{}
+
+
+Foam::coordSystem::cylindrical::cylindrical
+(
+    const word& name,
+    const point& origin,
+    const vector& axis
+)
+:
+    coordinateSystem
+    (
+        name,
+        origin,
+        coordinateRotations::cylindrical(axis)
+    )
+{}
+
+
+Foam::coordSystem::cylindrical::cylindrical
+(
+    const point& origin,
     const vector& axis,
     const vector& dirn
 )
 :
-    coordinateSystem(origin, axis, dirn)
+    cylindrical(word::null, origin, axis, dirn)
 {}
 
 

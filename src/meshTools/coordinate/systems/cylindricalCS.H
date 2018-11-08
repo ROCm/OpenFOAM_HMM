@@ -126,7 +126,13 @@ public:
         //- Construct from origin and rotation
         cylindrical(const point& origin, const coordinateRotation& crot);
 
-        //- Construct from origin and 2 axes
+        //- Construct from origin and single axis
+        cylindrical(const point& origin, const vector& axis);
+
+        //- Construct from origin and single axis
+        cylindrical(const word& name, const point& origin, const vector& axis);
+
+        //- Construct from origin and two axes
         cylindrical
         (
             const point& origin,
@@ -134,7 +140,7 @@ public:
             const vector& dirn
         );
 
-        //- Construct from origin and 2 axes
+        //- Construct from origin and two axes
         cylindrical
         (
             const word& name,
