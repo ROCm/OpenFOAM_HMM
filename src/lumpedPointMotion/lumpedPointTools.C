@@ -142,7 +142,7 @@ Foam::labelList Foam::lumpedPointTools::lumpedPointPatchList
     autoPtr<pointVectorField> displacePtr = loadPointField<pointVectorField>
     (
         pMesh,
-        objects0.lookup("pointDisplacement")
+        objects0.findObject("pointDisplacement")
     );
 
     if (!displacePtr.valid())

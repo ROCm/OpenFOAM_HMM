@@ -41,6 +41,11 @@ SourceFiles
 #include "regIOobject.H"
 #include "wordRes.H"
 
+// Historically included by objectRegistryTemplates (until NOV-2018),
+// but not used by objectRegistry directly.
+// Leave here for now to avoid a missing include in other bits of code.
+#include "stringListOps.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -77,19 +82,19 @@ class objectRegistry
         bool parentNotTime() const;
 
         //- Templated implementation for classes()
-        template<class UnaryMatchPredicate>
+        template<class MatchPredicate>
         static HashTable<wordHashSet> classesImpl
         (
             const objectRegistry& list,
-            const UnaryMatchPredicate& matcher
+            const MatchPredicate& matchName
         );
 
-        //- Templated implementation for names()
-        template<class Type, class UnaryMatchPredicate>
-        static wordList namesImpl
+        //- Templated implementation for names(), sortedNames()
+        template<class Type, class MatchPredicate>
+        static wordList namesTypeImpl
         (
             const objectRegistry& list,
-            const UnaryMatchPredicate& matcher,
+            const MatchPredicate& matchName,
             const bool doSort
         );
 
@@ -109,28 +114,21 @@ public:
 
     // Constructors
 
-        //- Construct the time objectRegistry given an initial estimate
-        //  for the number of entries
-        explicit objectRegistry
-        (
-            const Time& db,
-            const label nIoObjects = 128
-        );
+        //- Construct the time objectRegistry,
+        //- with estimated table capacity (default: 128)
+        explicit objectRegistry(const Time& db, const label nObjects=128);
 
-        //- Construct a sub-registry given an IObject to describe the registry
-        //  and an initial estimate for the number of entries
-        explicit objectRegistry
-        (
-            const IOobject& io,
-            const label nIoObjects = 128
-        );
+        //- Construct sub-registry given an IObject to describe the registry,
+        //- with estimated table capacity (default: 128)
+        explicit objectRegistry(const IOobject& io, const label nObjects=128);
 
 
-    //- Destructor
+    //- Destructor, performs a checkOut() for all objects that are
+    //- ownedByRegistry
     virtual ~objectRegistry();
 
 
-    // Member functions
+    // Member Functions
 
     // Access
 
@@ -161,71 +159,88 @@ public:
 
         //- A summary hash of classes used and their associated object names
         //- restricted to objects with names that satisfy the input matcher
-        HashTable<wordHashSet> classes(const wordRe& matcher) const;
+        HashTable<wordHashSet> classes(const wordRe& matchName) const;
 
         //- A summary hash of classes used and their associated object names
         //- restricted to objects with names that satisfy the input matcher
-        HashTable<wordHashSet> classes(const wordRes& matcher) const;
+        HashTable<wordHashSet> classes(const wordRes& matchName) const;
 
         //- A summary hash of classes used and their associated object names
         //- restricted to objects with names that satisfy the input matcher
-        HashTable<wordHashSet> classes(const wordHashSet& matcher) const;
+        HashTable<wordHashSet> classes(const wordHashSet& matchName) const;
 
 
     // Summary of names
 
-        //- A list of names of the objects
+        //- The names of the objects
         wordList names() const;
 
-        //- The names of objects with the given class name
+        //- The names of objects with the given class
         wordList names(const word& clsName) const;
 
-        //- The names of objects with the given type
+        //- The names of objects with a class satisfying \c isA\<Type\>.
+        //
+        //  \note If \a Type is \c void, no isA check is used (always true).
         template<class Type>
         wordList names() const;
 
-        //- The names of objects with the given type that also
-        //- have a name satisfying the input matcher
+        //- The names of objects with a class satisfying \c isA\<Type\>
+        //- that also have a name satisfying the input matcher
+        //
+        //  \note If \a Type is \c void, no isA check is used (always true).
         template<class Type>
-        wordList names(const wordRe& matcher) const;
+        wordList names(const wordRe& matchName) const;
 
-        //- The names of objects with the given type that also
-        //- have a name satisfying the input matcher
+        //- The names of objects with a class satisfying \c isA\<Type\>
+        //- that also have a name satisfying the input matcher
+        //
+        //  \note If \a Type is \c void, no isA check is used (always true).
         template<class Type>
-        wordList names(const wordRes& matcher) const;
+        wordList names(const wordRes& matchName) const;
 
-        //- The names of objects with the given type that also
-        //- have a name satisfying the input matcher
+        //- The names of objects with a class satisfying \c isA\<Type\>
+        //- that also have a name satisfying the input matcher
+        //
+        //  \note If \a Type is \c void, no isA check is used (always true).
         template<class Type>
-        wordList names(const wordHashSet& matcher) const;
+        wordList names(const wordHashSet& matchName) const;
 
 
     // Summary of names (sorted)
 
-        //- A sorted list of names of the objects
+        //- The sorted names of the objects
         wordList sortedNames() const;
 
-        //- The sorted names of objects with the given class name
+        //- The sorted names of objects with the given class
         wordList sortedNames(const word& clsName) const;
 
-        //- The sorted names of objects with the given type
+        //- The sorted names of objects with a class satisfying \c isA\<Type\>
+        //- that also have a name satisfying the input matcher
+        //
+        //  \note If \a Type is \c void, no isA check is used (always true).
         template<class Type>
         wordList sortedNames() const;
 
-        //- The sorted names of objects with the given type that also
-        //- have a name satisfying the input matcher
+        //- The sorted names of objects with a class satisfying \c isA\<Type\>
+        //- that also have a name satisfying the input matcher
+        //
+        //  \note If \a Type is \c void, no isA check is used (always true).
         template<class Type>
-        wordList sortedNames(const wordRe& matcher) const;
+        wordList sortedNames(const wordRe& matchName) const;
 
-        //- The sorted names of objects with the given type that also
-        //- have a name satisfying the input matcher
+        //- The sorted names of objects with a class satisfying \c isA\<Type\>
+        //- that also have a name satisfying the input matcher
+        //
+        //  \note If \a Type is \c void, no isA check is used (always true).
         template<class Type>
-        wordList sortedNames(const wordRes& matcher) const;
+        wordList sortedNames(const wordRes& matchName) const;
 
-        //- The sorted names of objects with the given type that also
-        //- have a name satisfying the input matcher
+        //- The sorted names of objects with a class satisfying \c isA\<Type\>
+        //- that also have a name satisfying the input matcher
+        //
+        //  \note If \a Type is \c void, no isA check is used (always true).
         template<class Type>
-        wordList sortedNames(const wordHashSet& matcher) const;
+        wordList sortedNames(const wordHashSet& matchName) const;
 
 
     // Lookup
@@ -242,11 +257,15 @@ public:
         ) const;
 
 
-        //- Lookup and return all objects of the given Type
+        //- Return all objects with a class satisfying \c isA\<Type\>
+        //
+        //  \param strict use \c isType\<Type\> instead of \c isA\<Type\>
         template<class Type>
         HashTable<const Type*> lookupClass(const bool strict = false) const;
 
-        //- Lookup and return all objects of the given Type
+        //- Return all objects with a class satisfying \c isA\<Type\>
+        //
+        //  \param strict use \c isType\<Type\> instead of \c isA\<Type\>
         template<class Type>
         HashTable<Type*> lookupClass(const bool strict = false);
 

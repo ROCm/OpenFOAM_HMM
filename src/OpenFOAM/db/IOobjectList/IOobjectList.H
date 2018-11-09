@@ -29,6 +29,7 @@ Description
 
 SourceFiles
     IOobjectList.C
+    IOobjectListTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,11 +46,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-class IOobjectList;
-Ostream& operator<<(Ostream& os, const IOobjectList& list);
-
-
 /*---------------------------------------------------------------------------*\
                         Class IOobjectList Declaration
 \*---------------------------------------------------------------------------*/
@@ -58,6 +54,53 @@ class IOobjectList
 :
     public HashPtrTable<IOobject>
 {
+    // Private Member Functions
+
+        //- Check name consistency on all processors
+        //
+        //  With syncPar = true, check that object names are the same on
+        //  all processors. Trigger FatalError if not.
+        //
+        //  When syncPar is used, the object names are sorted as a side-effect,
+        //  since this is required for consistent ordering across processors.
+        static bool checkNames(wordList& masterNames, const bool syncPar);
+
+        //- Templated implementation for classes()
+        template<class MatchPredicate>
+        static HashTable<wordHashSet> classesImpl
+        (
+            const IOobjectList& list,
+            const MatchPredicate& matchName
+        );
+
+        //- Templated implementation for names(), sortedNames()
+        template<class MatchPredicate>
+        static wordList namesImpl
+        (
+            const IOobjectList& list,
+            const word& matchClass,
+            const MatchPredicate& matchName,
+            const bool doSort
+        );
+
+        //- Templated implementation for lookup()
+        template<class MatchPredicate>
+        static IOobjectList lookupImpl
+        (
+            const IOobjectList& list,
+            const MatchPredicate& matchName
+        );
+
+        //- Templated implementation for lookupClass()
+        template<class MatchPredicate>
+        static IOobjectList lookupClassImpl
+        (
+            const IOobjectList& list,
+            const word& matchClass,
+            const MatchPredicate& matchName
+        );
+
+
 public:
 
     // Constructors
@@ -90,7 +133,7 @@ public:
     ~IOobjectList() = default;
 
 
-    // Member functions
+    // Member Functions
 
     // Basic methods
 
@@ -125,19 +168,23 @@ public:
         bool remove(const IOobject& io);
 
 
-    // Lookup
+    // Lookup single
 
-        //- Lookup a given name and return IOobject ptr if found else nullptr
-        IOobject* lookup(const word& name) const;
+        //- Lookup an object by name
+        //  \return IOobject ptr if found else nullptr
+        IOobject* findObject(const word& objName) const;
 
-        //- The list of all IOobjects with matching names
-        IOobjectList lookup(const wordRe& matcher) const;
 
-        //- The list of all IOobjects with matching names
-        IOobjectList lookup(const wordRes& matcher) const;
+    // Lookup multiple
 
         //- The list of all IOobjects with matching names
-        IOobjectList lookup(const wordHashSet& matcher) const;
+        IOobjectList lookup(const wordRe& matchName) const;
+
+        //- The list of all IOobjects with matching names
+        IOobjectList lookup(const wordRes& matchName) const;
+
+        //- The list of all IOobjects with matching names
+        IOobjectList lookup(const wordHashSet& matchName) const;
 
         //- The list of all IOobjects with the given class name
         IOobjectList lookupClass(const word& clsName) const;
@@ -212,40 +259,43 @@ public:
         //
         //  Of course, there are many other ways to use and manipulate the
         //  summary information.
+        //
+        //  \return HashTable of class-names for keys and wordHashSet of
+        //      of object-names for the values.
         HashTable<wordHashSet> classes() const;
 
-        //- A summary hash of classes used and their associated object names
-        //  restricted to objects with names that satisfy the input matcher
-        HashTable<wordHashSet> classes(const wordRe& matcher) const;
+        //- A summary hash of classes used and their associated object names,
+        //- restricted to objects with names that satisfy the input matcher
+        HashTable<wordHashSet> classes(const wordRe& matchName) const;
 
-        //- A summary hash of classes used and their associated object names
-        //  restricted to objects with names that satisfy the input matcher
-        HashTable<wordHashSet> classes(const wordRes& matcher) const;
+        //- A summary hash of classes used and their associated object names,
+        //- restricted to objects with names that satisfy the input matcher
+        HashTable<wordHashSet> classes(const wordRes& matchName) const;
 
-        //- A summary hash of classes used and their associated object names
-        //  restricted to objects with names that satisfy the input matcher
-        HashTable<wordHashSet> classes(const wordHashSet& matcher) const;
+        //- A summary hash of classes used and their associated object names,
+        //- restricted to objects with names that satisfy the input matcher
+        HashTable<wordHashSet> classes(const wordHashSet& matchName) const;
 
 
     // Summary of names
 
-        //- A list of names of the IOobjects
+        //- The names of the IOobjects
         wordList names() const;
 
-        //- The names of IOobjects with the given class name
+        //- The names of IOobjects with the given class
         wordList names(const word& clsName) const;
 
-        //- The names of IOobjects with the given class name that also
+        //- The names of IOobjects with the given class that also
         //- have a name satisfying the input matcher
-        wordList names(const word& clsName, const wordRe& matcher) const;
+        wordList names(const word& clsName, const wordRe& matchName) const;
 
-        //- The names of IOobjects with the given class name that also
+        //- The names of IOobjects with the given class that also
         //- have a name satisfying the input matcher
-        wordList names(const word& clsName, const wordRes& matcher) const;
+        wordList names(const word& clsName, const wordRes& matchName) const;
 
-        //- The names of IOobjects with the given class name that also
+        //- The names of IOobjects with the given class that also
         //- have a name satisfying the input matcher
-        wordList names(const word& clsName, const wordHashSet& matcher) const;
+        wordList names(const word& clsName, const wordHashSet& matchName) const;
 
 
         //- A sorted list of names of the IOobjects.
@@ -265,7 +315,7 @@ public:
         wordList names
         (
             const word& clsName,
-            const wordRe& matcher,
+            const wordRe& matchName,
             const bool syncPar
         ) const;
 
@@ -276,44 +326,52 @@ public:
         wordList names
         (
             const word& clsName,
-            const wordRes& matcher,
+            const wordRes& matchName,
             const bool syncPar
         ) const;
 
-        //- The sorted names of IOobjects with the given class name that also
+        //- The sorted names of IOobjects with the given class that also
         //- have a name satisfying the input matcher
         //  With syncPar = true, triggers FatalError if the names are
         //  not consistent on all processors.
         wordList names
         (
             const word& cls,
-            const wordHashSet& matcher,
+            const wordHashSet& matchName,
             const bool syncPar
         ) const;
 
 
     // Summary of names (sorted)
 
-        //- A sorted list of names of the IOobjects
+        //- The sorted names of the IOobjects
         wordList sortedNames() const;
 
-        //- The sorted names of IOobjects with the given class name
+        //- The sorted names of IOobjects with the given class
         wordList sortedNames(const word& clsName) const;
 
-        //- The sorted names of IOobjects with the given class name that also
-        //- have a name satisfying the input matcher
-        wordList sortedNames(const word& clsName, const wordRe& matcher) const;
-
-        //- The sorted names of IOobjects with the given class name that also
-        //- have a name satisfying the input matcher
-        wordList sortedNames(const word& clsName, const wordRes& matcher) const;
-
-        //- The sorted names of IOobjects with the given class name that also
+        //- The sorted names of IOobjects with the given class that also
         //- have a name satisfying the input matcher
         wordList sortedNames
         (
             const word& clsName,
-            const wordHashSet& matcher
+            const wordRe& matchName
+        ) const;
+
+        //- The sorted names of IOobjects with the given class that also
+        //- have a name satisfying the input matcher
+        wordList sortedNames
+        (
+            const word& clsName,
+            const wordRes& matchName
+        ) const;
+
+        //- The sorted names of IOobjects with the given class that also
+        //- have a name satisfying the input matcher
+        wordList sortedNames
+        (
+            const word& clsName,
+            const wordHashSet& matchName
         ) const;
 
 
@@ -326,15 +384,31 @@ public:
         void operator=(IOobjectList&& list);
 
 
-    // Ostream Operator
+    // Housekeeping
 
-        friend Ostream& operator<<(Ostream& os, const IOobjectList& list);
+        //- Deprecated(2018-11) Lookup an object by name
+        //  \return IOobject ptr if found else nullptr
+        //  \deprecated(2018-11) use findObject() for non-ambiguous resolution
+        IOobject* lookup(const word& objName) const
+        {
+            return findObject(objName);
+        }
 };
+
+
+// Ostream operator
+Ostream& operator<<(Ostream& os, const IOobjectList& list);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "IOobjectListTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

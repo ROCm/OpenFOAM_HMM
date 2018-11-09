@@ -24,17 +24,17 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "objectRegistry.H"
-#include "stringListOps.H"
 #include "predicates.H"
+#include <type_traits>
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Templated implementation for classes()
-template<class UnaryMatchPredicate>
+template<class MatchPredicate>
 Foam::HashTable<Foam::wordHashSet> Foam::objectRegistry::classesImpl
 (
     const objectRegistry& list,
-    const UnaryMatchPredicate& matcher
+    const MatchPredicate& matchName
 )
 {
     HashTable<wordHashSet> summary(2*list.size());
@@ -42,7 +42,7 @@ Foam::HashTable<Foam::wordHashSet> Foam::objectRegistry::classesImpl
     // Summary (key,val) = (class-name, object-names)
     forAllConstIters(list, iter)
     {
-        if (matcher(iter.key()))
+        if (matchName(iter.key()))
         {
             // Create entry (if needed) and insert
             summary(iter.object()->type()).insert(iter.key());
@@ -53,12 +53,12 @@ Foam::HashTable<Foam::wordHashSet> Foam::objectRegistry::classesImpl
 }
 
 
-// Templated implementation for names()
-template<class Type, class UnaryMatchPredicate>
-Foam::wordList Foam::objectRegistry::namesImpl
+// Templated implementation for names(), sortedNames()
+template<class Type, class MatchPredicate>
+Foam::wordList Foam::objectRegistry::namesTypeImpl
 (
     const objectRegistry& list,
-    const UnaryMatchPredicate& matcher,
+    const MatchPredicate& matchName,
     const bool doSort
 )
 {
@@ -67,14 +67,20 @@ Foam::wordList Foam::objectRegistry::namesImpl
     label count = 0;
     forAllConstIters(list, iter)
     {
-        if (isA<Type>(*iter()) && matcher(iter()->name()))
+        const regIOobject* obj = iter.object();
+
+        if
+        (
+            (std::is_void<Type>::value || isA<Type>(*obj))
+         && matchName(obj->name())
+        )
         {
             objNames[count] = iter()->name();
             ++count;
         }
     }
 
-    objNames.setSize(count);
+    objNames.resize(count);
 
     if (doSort)
     {
@@ -90,59 +96,59 @@ Foam::wordList Foam::objectRegistry::namesImpl
 template<class Type>
 Foam::wordList Foam::objectRegistry::names() const
 {
-    return namesImpl<Type>(*this, predicates::always(), false);
+    return namesTypeImpl<Type>(*this, predicates::always(), false);
 }
 
 
 template<class Type>
-Foam::wordList Foam::objectRegistry::names(const wordRe& matcher) const
+Foam::wordList Foam::objectRegistry::names(const wordRe& matchName) const
 {
-    return namesImpl<Type>(*this, matcher, false);
+    return namesTypeImpl<Type>(*this, matchName, false);
 }
 
 
 template<class Type>
-Foam::wordList Foam::objectRegistry::names(const wordRes& matcher) const
+Foam::wordList Foam::objectRegistry::names(const wordRes& matchName) const
 {
-    return namesImpl<Type>(*this, matcher, false);
+    return namesTypeImpl<Type>(*this, matchName, false);
 }
 
 
 template<class Type>
-Foam::wordList Foam::objectRegistry::names(const wordHashSet& matcher) const
+Foam::wordList Foam::objectRegistry::names(const wordHashSet& matchName) const
 {
-    return namesImpl<Type>(*this, matcher, false);
+    return namesTypeImpl<Type>(*this, matchName, false);
 }
 
 
 template<class Type>
 Foam::wordList Foam::objectRegistry::sortedNames() const
 {
-    return namesImpl<Type>(*this, predicates::always(), true);
+    return namesTypeImpl<Type>(*this, predicates::always(), true);
 }
 
 
 template<class Type>
-Foam::wordList Foam::objectRegistry::sortedNames(const wordRe& matcher) const
+Foam::wordList Foam::objectRegistry::sortedNames(const wordRe& matchName) const
 {
-    return namesImpl<Type>(*this, matcher, true);
+    return namesTypeImpl<Type>(*this, matchName, true);
 }
 
 
 template<class Type>
-Foam::wordList Foam::objectRegistry::sortedNames(const wordRes& matcher) const
+Foam::wordList Foam::objectRegistry::sortedNames(const wordRes& matchName) const
 {
-    return namesImpl<Type>(*this, matcher, true);
+    return namesTypeImpl<Type>(*this, matchName, true);
 }
 
 
 template<class Type>
 Foam::wordList Foam::objectRegistry::sortedNames
 (
-    const wordHashSet& matcher
+    const wordHashSet& matchName
 ) const
 {
-    return namesImpl<Type>(*this, matcher, true);
+    return namesTypeImpl<Type>(*this, matchName, true);
 }
 
 

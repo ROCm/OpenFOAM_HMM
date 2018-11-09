@@ -412,7 +412,7 @@ int main(int argc, char *argv[])
                 const word& fieldName = fieldIter.key();
                 const word& fieldType = fieldIter.object();
 
-                IOobject *fieldObject = cloudObjs.lookup(fieldName);
+                IOobject *fieldObject = cloudObjs.findObject(fieldName);
 
                 if (!fieldObject)
                 {

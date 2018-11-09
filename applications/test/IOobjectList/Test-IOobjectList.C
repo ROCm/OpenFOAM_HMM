@@ -49,10 +49,31 @@ void reportDetail(const IOobjectList& objects)
 
     for (const word& key : objects.sortedNames())
     {
-        IOobject* io = objects.lookup(key);
+        // Canonical method name (NOV-2018)
+        IOobject* io = objects.findObject(key);
+
+        label count = 0;
+
+        // Test deprecated alternatives
+        {
+            // (const char*)
+            IOobject* ptr = objects.lookup("SomeNonExistentName");
+            if (ptr) ++count;
+        }
+        {
+            // (const word&)
+            IOobject* ptr = objects.lookup(key);
+            if (ptr) ++count;
+        }
 
         Info<< key << " (" << io->headerClassName()
             << ") = addr " << long(io) << nl;
+
+        if (count != 1)
+        {
+            Warning
+                << key << " had incorrect lookup?" << nl;
+        }
     }
 
     Info<<"====" << nl;

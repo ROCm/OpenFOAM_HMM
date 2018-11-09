@@ -32,7 +32,7 @@ bool Foam::fieldOk(const IOobjectList& cloudObjs, const word& name)
 {
     IOobjectList objects(cloudObjs.lookupClass(IOField<Type>::typeName));
 
-    return (objects.lookup(name) != nullptr);
+    return (objects.findObject(name) != nullptr);
 }
 
 
@@ -45,7 +45,7 @@ Foam::tmp<Foam::Field<Type>> Foam::readParticleField
 {
     IOobjectList objects(cloudObjs.lookupClass(IOField<Type>::typeName));
 
-    const IOobject* obj = objects.lookup(name);
+    const IOobject* obj = objects.findObject(name);
     if (obj != nullptr)
     {
         IOField<Type> newField(*obj);
@@ -72,7 +72,7 @@ void Foam::readFields
 
     forAll(fieldNames, j)
     {
-        const IOobject* obj = objects.lookup(fieldNames[j]);
+        const IOobject* obj = objects.findObject(fieldNames[j]);
         if (obj != nullptr)
         {
             Info<< "        reading field " << fieldNames[j] << endl;
@@ -158,7 +158,7 @@ void Foam::processFields
         DynamicList<word> fieldNames(objects.size());
         forAll(userFieldNames, i)
         {
-            IOobject* obj = objects.lookup(userFieldNames[i]);
+            IOobject* obj = objects.findObject(userFieldNames[i]);
             if (obj != nullptr)
             {
                 fieldNames.append(obj->name());

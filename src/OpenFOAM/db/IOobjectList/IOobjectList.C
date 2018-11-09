@@ -25,169 +25,37 @@ License
 
 #include "IOobjectList.H"
 #include "Time.H"
-#include "OSspecific.H"
 #include "IOList.H"
 #include "predicates.H"
+#include "OSspecific.H"
 
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-namespace Foam
+bool Foam::IOobjectList::checkNames(wordList& masterNames, const bool syncPar)
 {
-    // Templated implementation for lookup() - file-scope
-    template<class UnaryMatchPredicate>
-    static IOobjectList lookupImpl
-    (
-        const IOobjectList& list,
-        const UnaryMatchPredicate& matcher
-    )
+    // Sort for consistent order on all processors
+    Foam::sort(masterNames);
+
+    if (syncPar && Pstream::parRun())
     {
-        IOobjectList results(list.size());
+        const wordList localNames(masterNames);
+        Pstream::scatter(masterNames);
 
-        forAllConstIters(list, iter)
+        if (localNames != masterNames)
         {
-            const word& key = iter.key();
-            const IOobject* io = iter.object();
+            FatalErrorInFunction
+                << "Objects not synchronised across processors." << nl
+                << "Master has " << flatOutput(masterNames) << nl
+                << "Processor " << Pstream::myProcNo()
+                << " has " << flatOutput(localNames)
+                << exit(FatalError);
 
-            if (matcher(key))
-            {
-                if (IOobject::debug)
-                {
-                    InfoInFunction << "Found " << key << endl;
-                }
-
-                results.set(key, new IOobject(*io));
-            }
+            return false;
         }
-
-        return results;
     }
 
-
-    // Templated implementation for lookupClass() - file-scope
-    template<class UnaryMatchPredicate>
-    static IOobjectList lookupClassImpl
-    (
-        const IOobjectList& list,
-        const word& clsName,
-        const UnaryMatchPredicate& matcher
-    )
-    {
-        IOobjectList results(list.size());
-
-        forAllConstIters(list, iter)
-        {
-            const word& key = iter.key();
-            const IOobject* io = iter.object();
-
-            if (clsName == io->headerClassName() && matcher(key))
-            {
-                if (IOobject::debug)
-                {
-                    InfoInFunction << "Found " << key << endl;
-                }
-
-                results.set(key, new IOobject(*io));
-            }
-        }
-
-        return results;
-    }
-
-
-    // Templated implementation for classes() - file-scope
-    template<class UnaryMatchPredicate>
-    static HashTable<wordHashSet> classesImpl
-    (
-        const IOobjectList& list,
-        const UnaryMatchPredicate& matcher
-    )
-    {
-        HashTable<wordHashSet> summary(2*list.size());
-
-        // Summary (key,val) = (class-name, object-names)
-        forAllConstIters(list, iter)
-        {
-            const word& key = iter.key();
-            const IOobject* io = iter.object();
-
-            if (matcher(key))
-            {
-                // Create entry (if needed) and insert
-                summary(io->headerClassName()).insert(key);
-            }
-        }
-
-        return summary;
-    }
-
-
-    // Templated implementation for names(), sortedNames() - file-scope
-    template<class UnaryMatchPredicate>
-    static wordList namesImpl
-    (
-        const IOobjectList& list,
-        const word& clsName,
-        const UnaryMatchPredicate& matcher,
-        const bool doSort
-    )
-    {
-        wordList objNames(list.size());
-
-        label count = 0;
-        forAllConstIters(list, iter)
-        {
-            const word& key = iter.key();
-            const IOobject* io = iter.object();
-
-            if (clsName == io->headerClassName() && matcher(key))
-            {
-                objNames[count] = key;
-                ++count;
-            }
-        }
-
-        objNames.resize(count);
-
-        if (doSort)
-        {
-            Foam::sort(objNames);
-        }
-
-        return objNames;
-    }
-
-
-    // With syncPar = true, check that object names are the same on
-    // all processors. Trigger FatalError if not.
-    //
-    // The object names are sorted as a side-effect, since this is
-    // required for consistent ordering across all processors.
-    static bool checkNames(wordList& masterNames, const bool syncPar)
-    {
-        Foam::sort(masterNames);
-
-        if (syncPar && Pstream::parRun())
-        {
-            const wordList localNames(masterNames);
-            Pstream::scatter(masterNames);
-
-            if (localNames != masterNames)
-            {
-                FatalErrorInFunction
-                    << "Objects not synchronised across processors." << nl
-                    << "Master has " << flatOutput(masterNames) << nl
-                    << "Processor " << Pstream::myProcNo()
-                    << " has " << flatOutput(localNames)
-                    << exit(FatalError);
-
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-} // End namespace Foam
+    return true;
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -354,15 +222,17 @@ bool Foam::IOobjectList::remove(const IOobject& io)
 }
 
 
-Foam::IOobject* Foam::IOobjectList::lookup(const word& name) const
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Foam::IOobject* Foam::IOobjectList::findObject(const word& objName) const
 {
-    const_iterator iter = cfind(name);
+    const_iterator iter = cfind(objName);
 
     if (iter.found())
     {
         if (IOobject::debug)
         {
-            InfoInFunction << "Found " << name << endl;
+            InfoInFunction << "Found " << objName << endl;
         }
 
         return const_cast<IOobject*>(*iter);
@@ -370,27 +240,30 @@ Foam::IOobject* Foam::IOobjectList::lookup(const word& name) const
 
     if (IOobject::debug)
     {
-        InfoInFunction << "Could not find " << name << endl;
+        InfoInFunction << "Could not find " << objName << endl;
     }
     return nullptr;
 }
 
 
-Foam::IOobjectList Foam::IOobjectList::lookup(const wordRe& matcher) const
+Foam::IOobjectList Foam::IOobjectList::lookup(const wordRe& matchName) const
 {
-    return lookupImpl(*this, matcher);
+    return lookupImpl(*this, matchName);
 }
 
 
-Foam::IOobjectList Foam::IOobjectList::lookup(const wordRes& matcher) const
+Foam::IOobjectList Foam::IOobjectList::lookup(const wordRes& matchName) const
 {
-    return lookupImpl(*this, matcher);
+    return lookupImpl(*this, matchName);
 }
 
 
-Foam::IOobjectList Foam::IOobjectList::lookup(const wordHashSet& matcher) const
+Foam::IOobjectList Foam::IOobjectList::lookup
+(
+    const wordHashSet& matchName
+) const
 {
-    return lookupImpl(*this, matcher);
+    return lookupImpl(*this, matchName);
 }
 
 
@@ -407,23 +280,23 @@ Foam::HashTable<Foam::wordHashSet> Foam::IOobjectList::classes() const
 
 
 Foam::HashTable<Foam::wordHashSet>
-Foam::IOobjectList::classes(const wordRe& matcher) const
+Foam::IOobjectList::classes(const wordRe& matchName) const
 {
-    return classesImpl(*this, matcher);
+    return classesImpl(*this, matchName);
 }
 
 
 Foam::HashTable<Foam::wordHashSet>
-Foam::IOobjectList::classes(const wordRes& matcher) const
+Foam::IOobjectList::classes(const wordRes& matchName) const
 {
-    return classesImpl(*this, matcher);
+    return classesImpl(*this, matchName);
 }
 
 
 Foam::HashTable<Foam::wordHashSet>
-Foam::IOobjectList::classes(const wordHashSet& matcher) const
+Foam::IOobjectList::classes(const wordHashSet& matchName) const
 {
-    return classesImpl(*this, matcher);
+    return classesImpl(*this, matchName);
 }
 
 
@@ -482,31 +355,31 @@ Foam::wordList Foam::IOobjectList::names
 Foam::wordList Foam::IOobjectList::names
 (
     const word& clsName,
-    const wordRe& matcher
+    const wordRe& matchName
 ) const
 {
-    return namesImpl(*this, clsName, matcher, false);
+    return namesImpl(*this, clsName, matchName, false);
 }
 
 
 Foam::wordList Foam::IOobjectList::sortedNames
 (
     const word& clsName,
-    const wordRe& matcher
+    const wordRe& matchName
 ) const
 {
-    return namesImpl(*this, clsName, matcher, true);
+    return namesImpl(*this, clsName, matchName, true);
 }
 
 
 Foam::wordList Foam::IOobjectList::names
 (
     const word& clsName,
-    const wordRe& matcher,
+    const wordRe& matchName,
     const bool syncPar
 ) const
 {
-    wordList objNames(namesImpl(*this, clsName, matcher, false));
+    wordList objNames(namesImpl(*this, clsName, matchName, false));
 
     checkNames(objNames, syncPar);
     return objNames;
@@ -516,31 +389,31 @@ Foam::wordList Foam::IOobjectList::names
 Foam::wordList Foam::IOobjectList::names
 (
     const word& clsName,
-    const wordRes& matcher
+    const wordRes& matchName
 ) const
 {
-    return namesImpl(*this, clsName, matcher, false);
+    return namesImpl(*this, clsName, matchName, false);
 }
 
 
 Foam::wordList Foam::IOobjectList::sortedNames
 (
     const word& clsName,
-    const wordRes& matcher
+    const wordRes& matchName
 ) const
 {
-    return namesImpl(*this, clsName, matcher, true);
+    return namesImpl(*this, clsName, matchName, true);
 }
 
 
 Foam::wordList Foam::IOobjectList::names
 (
     const word& clsName,
-    const wordRes& matcher,
+    const wordRes& matchName,
     const bool syncPar
 ) const
 {
-    wordList objNames(namesImpl(*this, clsName, matcher, false));
+    wordList objNames(namesImpl(*this, clsName, matchName, false));
 
     checkNames(objNames, syncPar);
     return objNames;
@@ -550,31 +423,31 @@ Foam::wordList Foam::IOobjectList::names
 Foam::wordList Foam::IOobjectList::names
 (
     const word& clsName,
-    const wordHashSet& matcher
+    const wordHashSet& matchName
 ) const
 {
-    return namesImpl(*this, clsName, matcher, false);
+    return namesImpl(*this, clsName, matchName, false);
 }
 
 
 Foam::wordList Foam::IOobjectList::sortedNames
 (
     const word& clsName,
-    const wordHashSet& matcher
+    const wordHashSet& matchName
 ) const
 {
-    return namesImpl(*this, clsName, matcher, true);
+    return namesImpl(*this, clsName, matchName, true);
 }
 
 
 Foam::wordList Foam::IOobjectList::names
 (
     const word& clsName,
-    const wordHashSet& matcher,
+    const wordHashSet& matchName,
     const bool syncPar
 ) const
 {
-    wordList objNames(namesImpl(*this, clsName, matcher, false));
+    wordList objNames(namesImpl(*this, clsName, matchName, false));
 
     checkNames(objNames, syncPar);
     return objNames;
