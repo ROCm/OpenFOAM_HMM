@@ -37,6 +37,24 @@ namespace Foam
 
 Foam::block::block
 (
+    const cellShape& bshape,
+    const pointField& vertices,
+    const blockEdgeList& edges,
+    const blockFaceList& faces,
+    const Vector<label>& density,
+    const UList<gradingDescriptors>& expand,
+    const word& zoneName
+)
+:
+    blockDescriptor(bshape, vertices, edges, faces, density, expand, zoneName)
+{
+    createPoints();
+    createBoundary();
+}
+
+
+Foam::block::block
+(
     const dictionary& dict,
     const label index,
     const pointField& vertices,
