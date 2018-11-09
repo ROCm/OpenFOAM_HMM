@@ -131,7 +131,7 @@ inline void Foam::UList<T>::checkStart(const label start) const
     {
         // Note: accept start=0 for zero-sized lists
         FatalErrorInFunction
-            << "start " << start << " out of range [0," << size_ << ")"
+            << "start " << start << " out of range [0," << size_ << "]"
             << abort(FatalError);
     }
 }
@@ -161,7 +161,7 @@ inline void Foam::UList<T>::checkIndex(const label i) const
     else if (i < 0 || i >= size_)
     {
         FatalErrorInFunction
-            << "index " << i << " out of range [0," << size_ << ")"
+            << "index " << i << " out of range [0," << size_ << "]"
             << abort(FatalError);
     }
 }
