@@ -26,6 +26,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "stringListOps.H"
+#include "FlatOutput.H"
 #include "IOstreams.H"
 #include "StringStream.H"
 
@@ -64,7 +65,10 @@ int main(int argc, char *argv[])
 
     matches = findStrings(reLst, strLst);
 
-    Info<< "matches found for " << reLst << nl << matches << nl;
+    Info<< "matching " << flatOutput(reLst) << " => "
+        << reLst.matching(strLst) << nl;
+    Info<< "matches found for " << flatOutput(reLst) << " => "
+        << matches << nl;
     forAll(matches, i)
     {
         Info<< " -> " << strLst[matches[i]] << nl;

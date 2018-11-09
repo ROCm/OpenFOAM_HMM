@@ -126,7 +126,7 @@ public:
         //
         //  \param literal Force literal match only.
         //  \return True if text matches ANY of the entries.
-        inline bool match(const std::string& text, bool literal = false) const;
+        inline bool match(const std::string& text, bool literal=false) const;
 
         //- Smart match in the list of matchers, returning the match type.
         //  It stops if there is a literal match, or continues to examine
@@ -134,6 +134,19 @@ public:
         //  \return LITERAL if a lteral match was found, REGEX if a regex
         //      match was found and UNKNOWN otherwise.
         inline wordRe::compOption matched(const std::string& text) const;
+
+        //- Extract list indices for all matches.
+        //
+        //  \param input  A list of string inputs to match against
+        //  \param invert invert the matching logic
+        //  \return The locations (indices) in the input list where match()
+        //      is true
+        template<class StringType>
+        inline labelList matching
+        (
+            const UList<StringType>& input,
+            const bool invert=false
+        ) const;
 
 
     // Member Operators

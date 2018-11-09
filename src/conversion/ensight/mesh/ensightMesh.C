@@ -146,7 +146,7 @@ void Foam::ensightMesh::correct()
             if (!matcher.empty())
             {
                 useAll = false;
-                matched = findStrings(matcher, patchNames);
+                matched = matcher.matching(patchNames);
             }
         }
 

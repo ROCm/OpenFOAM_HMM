@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "externalCoupled.H"
+#include "stringListOps.H"
 #include "addToRunTimeSelectionTable.H"
 #include "OSspecific.H"
 #include "Fstream.H"

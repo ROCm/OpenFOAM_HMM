@@ -96,7 +96,7 @@ void Foam::decompositionConstraints::preserveFaceZones::add
 
     const faceZoneMesh& fZones = mesh.faceZones();
 
-    const labelList zoneIDs(findStrings(zones_, fZones.names()));
+    const labelList zoneIDs(zones_.matching(fZones.names()));
 
     label nUnblocked = 0;
 
@@ -167,7 +167,7 @@ void Foam::decompositionConstraints::preserveFaceZones::apply
 
     const faceZoneMesh& fZones = mesh.faceZones();
 
-    const labelList zoneIDs(findStrings(zones_, fZones.names()));
+    const labelList zoneIDs(zones_.matching(fZones.names()));
 
     label nChanged = 0;
 

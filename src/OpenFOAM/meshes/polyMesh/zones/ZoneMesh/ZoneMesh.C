@@ -26,7 +26,6 @@ License
 #include "ZoneMesh.H"
 #include "entry.H"
 #include "demandDrivenData.H"
-#include "stringListOps.H"
 #include "Pstream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

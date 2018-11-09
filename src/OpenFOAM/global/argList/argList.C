@@ -1160,14 +1160,17 @@ void Foam::argList::parse
                 roots.resize(Pstream::nProcs()-1, fileName::null);
 
                 source = "-hostRoots";
-                ITstream is = this->lookup("hostRoots");
+                ITstream is(source, options_["hostRoots"]);
+
                 List<Tuple2<wordRe, fileName>> hostRoots(is);
                 checkITstream(is, "hostRoots");
 
                 for (const auto& hostRoot : hostRoots)
                 {
-                    const wordRe& re = hostRoot.first();
-                    labelList matched(findStrings(re, slaveMachine));
+                    labelList matched
+                    (
+                        findStrings(hostRoot.first(), slaveMachine)
+                    );
                     for (const label slavei : matched)
                     {
                         if (!roots[slavei].empty())

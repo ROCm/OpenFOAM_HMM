@@ -518,7 +518,8 @@ int main(int argc, char *argv[])
                 patchNames[patchi] = surf.patches()[patchi].name();
             }
 
-            labelList indices = findStrings(baffleSelect, patchNames);
+            labelList indices(baffleSelect.matching(patchNames));
+
             for (const label patchId : indices)
             {
                 surfBaffleRegions[patchId] = true;

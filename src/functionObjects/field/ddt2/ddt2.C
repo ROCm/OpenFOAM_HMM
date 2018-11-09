@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ddt2.H"
-
+#include "stringListOps.H"
 #include "volFields.H"
 #include "dictionary.H"
 #include "wordRes.H"

@@ -27,6 +27,12 @@ InNamspace
 Description
     Operations on lists of strings.
 
+Namespace
+    Foam::stringListOps
+
+Description
+    Various utility functions to work on lists of strings.
+
 SourceFiles
     stringListOpsTemplates.C
 
@@ -133,7 +139,7 @@ namespace Foam
     }
 
 
-  // Subsetting multi-string matches (similar to ListOp):
+    // Subsetting multi-string matches (similar to ListOp):
 
     //- Extract elements of StringList when regular expression matches
     //  optionally invert the match
@@ -306,6 +312,50 @@ namespace Foam
     }
 
 
+
+
+/*---------------------------------------------------------------------------*\
+                      Namespace stringListOps Declaration
+\*---------------------------------------------------------------------------*/
+
+namespace stringListOps
+{
+
+//- Functor to determine if a string is exists in a list of strings.
+//  For example,
+//
+//  \code
+//  reduce(text, stringListOps::foundOp<word>(myNames));
+//  \endcode
+template<class StringType>
+struct foundOp
+{
+    const UList<StringType>& values;
+
+    foundOp(const UList<StringType>& list)
+    :
+        values(list)
+    {}
+
+    bool operator()(const std::string& text) const
+    {
+        return values.found(text);
+    }
+};
+
+} // End namespace stringListOps
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Housekeeping
+
+namespace Foam
+{
     //- Find using C-string as a regex
     //  \deprecated (FEB-2018) Treating string as regex may be inefficient
     //      and lead to unintended results.
@@ -378,8 +428,7 @@ namespace Foam
         const bool invert=false
     ) = delete;
 
-}
-
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
