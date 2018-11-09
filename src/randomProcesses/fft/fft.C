@@ -180,10 +180,12 @@ void Foam::fft::transform
 )
 {
     // Copy field into fftw containers
-    // NB: this is not fully compliant, since array sizing is non-constexpr.
-    // However, cannot instantiate List with fftw_complex
     const label N = field.size();
-    fftw_complex in[N], out[N];
+
+    fftw_complex* inPtr =
+        static_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex)*N));
+    fftw_complex* outPtr =
+        static_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex)*N));
 
     // If reverse transform : renumber before transform
     if (dir == REVERSE_TRANSFORM)
@@ -193,8 +195,8 @@ void Foam::fft::transform
 
     forAll(field, i)
     {
-        in[i][0] = field[i].Re();
-        in[i][1] = field[i].Im();
+        inPtr[i][0] = field[i].Re();
+        inPtr[i][1] = field[i].Im();
     }
 
     // Create the plan
@@ -208,18 +210,21 @@ void Foam::fft::transform
     // Generic 1..3-D plan
     const label rank = nn.size();
     fftw_plan plan =
-        fftw_plan_dft(rank, nn.begin(), in, out, dir, FFTW_ESTIMATE);
+        fftw_plan_dft(rank, nn.begin(), inPtr, outPtr, dir, FFTW_ESTIMATE);
 
     // Compute the FFT
     fftw_execute(plan);
 
     forAll(field, i)
     {
-        field[i].Re() = out[i][0];
-        field[i].Im() = out[i][1];
+        field[i].Re() = outPtr[i][0];
+        field[i].Im() = outPtr[i][1];
     }
 
     fftw_destroy_plan(plan);
+
+    fftw_free(inPtr);
+    fftw_free(outPtr);
 
     // If forward transform : renumber after transform
     if (dir == FORWARD_TRANSFORM)
