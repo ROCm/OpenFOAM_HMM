@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "IOobjectList.H"
+#include "predicates.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -55,13 +56,14 @@ Foam::HashTable<Foam::wordHashSet> Foam::IOobjectList::classesImpl
 
 
 // Templated implementation for names(), sortedNames()
-template<class MatchPredicate>
+template<class MatchPredicate1, class MatchPredicate2>
 Foam::wordList Foam::IOobjectList::namesImpl
 (
     const IOobjectList& list,
-    const word& matchClass,
-    const MatchPredicate& matchName,
-    const bool doSort
+    const MatchPredicate1& matchClass,
+    const MatchPredicate2& matchName,
+    const bool doSort,
+    const bool syncPar
 )
 {
     wordList objNames(list.size());
@@ -85,6 +87,8 @@ Foam::wordList Foam::IOobjectList::namesImpl
     {
         Foam::sort(objNames);
     }
+
+    checkNames(objNames, syncPar);
 
     return objNames;
 }
@@ -121,12 +125,12 @@ Foam::IOobjectList Foam::IOobjectList::lookupImpl
 
 
 // Templated implementation for lookupClass()
-template<class MatchPredicate>
+template<class MatchPredicate1, class MatchPredicate2>
 Foam::IOobjectList Foam::IOobjectList::lookupClassImpl
 (
     const IOobjectList& list,
-    const word& matchClass,
-    const MatchPredicate& matchName
+    const MatchPredicate1& matchClass,
+    const MatchPredicate2& matchName
 )
 {
     IOobjectList results(list.size());
@@ -148,6 +152,89 @@ Foam::IOobjectList Foam::IOobjectList::lookupClassImpl
     }
 
     return results;
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class MatchPredicate>
+Foam::IOobjectList Foam::IOobjectList::lookup
+(
+    const MatchPredicate& matchName
+) const
+{
+    return lookupImpl(*this, matchName);
+}
+
+
+template<class MatchPredicate>
+Foam::IOobjectList Foam::IOobjectList::lookupClass
+(
+    const MatchPredicate& matchClass
+) const
+{
+    return lookupClassImpl(*this, matchClass, predicates::always());
+}
+
+
+template<class MatchPredicate>
+Foam::HashTable<Foam::wordHashSet>
+Foam::IOobjectList::classes
+(
+    const MatchPredicate& matchName
+) const
+{
+    return classesImpl(*this, matchName);
+}
+
+
+template<class MatchPredicate>
+Foam::wordList Foam::IOobjectList::names
+(
+    const word& clsName,
+    const MatchPredicate& matchName
+) const
+{
+    // sort/sync: false, false
+    return namesImpl(*this, clsName, matchName, false, false);
+}
+
+
+template<class MatchPredicate>
+Foam::wordList Foam::IOobjectList::names
+(
+    const word& clsName,
+    const MatchPredicate& matchName,
+    const bool syncPar
+) const
+{
+    // sort: false
+    return namesImpl(*this, clsName, matchName, false, syncPar);
+}
+
+
+template<class MatchPredicate>
+Foam::wordList Foam::IOobjectList::sortedNames
+(
+    const word& clsName,
+    const MatchPredicate& matchName
+) const
+{
+    // sort/sync: true, false
+    return namesImpl(*this, clsName, matchName, true, false);
+}
+
+
+template<class MatchPredicate>
+Foam::wordList Foam::IOobjectList::sortedNames
+(
+    const word& clsName,
+    const MatchPredicate& matchName,
+    const bool syncPar
+) const
+{
+    // sort: true
+    return namesImpl(*this, clsName, matchName, true, syncPar);
 }
 
 

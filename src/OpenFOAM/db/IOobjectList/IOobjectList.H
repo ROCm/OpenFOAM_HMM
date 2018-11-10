@@ -65,6 +65,9 @@ class IOobjectList
         //  since this is required for consistent ordering across processors.
         static bool checkNames(wordList& masterNames, const bool syncPar);
 
+        //- Combine names from all processors and sort
+        static void syncNames(wordList& objNames);
+
         //- Templated implementation for classes()
         template<class MatchPredicate>
         static HashTable<wordHashSet> classesImpl
@@ -74,13 +77,14 @@ class IOobjectList
         );
 
         //- Templated implementation for names(), sortedNames()
-        template<class MatchPredicate>
+        template<class MatchPredicate1, class MatchPredicate2>
         static wordList namesImpl
         (
             const IOobjectList& list,
-            const word& matchClass,
-            const MatchPredicate& matchName,
-            const bool doSort
+            const MatchPredicate1& matchClass,
+            const MatchPredicate2& matchName,
+            const bool doSort,
+            const bool syncPar
         );
 
         //- Templated implementation for lookup()
@@ -92,12 +96,12 @@ class IOobjectList
         );
 
         //- Templated implementation for lookupClass()
-        template<class MatchPredicate>
+        template<class MatchPredicate1, class MatchPredicate2>
         static IOobjectList lookupClassImpl
         (
             const IOobjectList& list,
-            const word& matchClass,
-            const MatchPredicate& matchName
+            const MatchPredicate1& matchClass,
+            const MatchPredicate2& matchName
         );
 
 
@@ -168,26 +172,25 @@ public:
         bool remove(const IOobject& io);
 
 
-    // Lookup single
+    // Lookup single item
 
-        //- Lookup an object by name
+        //- Locate an object by name
         //  \return IOobject ptr if found else nullptr
         IOobject* findObject(const word& objName) const;
 
 
-    // Lookup multiple
+    // Lookup multiple items
 
-        //- The list of all IOobjects with matching names
-        IOobjectList lookup(const wordRe& matchName) const;
+        //- The list of all IOobjects that have a matching object name.
+        template<class MatchPredicate>
+        IOobjectList lookup(const MatchPredicate& matchName) const;
 
-        //- The list of all IOobjects with matching names
-        IOobjectList lookup(const wordRes& matchName) const;
+        //- The list of all IOobjects with the given headerClassName
+        IOobjectList lookupClass(const char* clsName) const;
 
-        //- The list of all IOobjects with matching names
-        IOobjectList lookup(const wordHashSet& matchName) const;
-
-        //- The list of all IOobjects with the given class name
-        IOobjectList lookupClass(const word& clsName) const;
+        //- The list of all IOobjects with matching headerClassName
+        template<class MatchPredicate>
+        IOobjectList lookupClass(const MatchPredicate& matchClass) const;
 
 
     // Summary of classes
@@ -265,16 +268,9 @@ public:
         HashTable<wordHashSet> classes() const;
 
         //- A summary hash of classes used and their associated object names,
-        //- restricted to objects with names that satisfy the input matcher
-        HashTable<wordHashSet> classes(const wordRe& matchName) const;
-
-        //- A summary hash of classes used and their associated object names,
-        //- restricted to objects with names that satisfy the input matcher
-        HashTable<wordHashSet> classes(const wordRes& matchName) const;
-
-        //- A summary hash of classes used and their associated object names,
-        //- restricted to objects with names that satisfy the input matcher
-        HashTable<wordHashSet> classes(const wordHashSet& matchName) const;
+        //- restricted to objects that have a matching object name.
+        template<class MatchPredicate>
+        HashTable<wordHashSet> classes(const MatchPredicate& matchName) const;
 
 
     // Summary of names
@@ -282,62 +278,37 @@ public:
         //- The names of the IOobjects
         wordList names() const;
 
+        //- The names of the IOobjects.
+        //  With syncPar = true, sorts the names and triggers FatalError
+        //  if the names are not consistent on all processors.
+        wordList names(const bool syncPar) const;
+
         //- The names of IOobjects with the given class
         wordList names(const word& clsName) const;
 
-        //- The names of IOobjects with the given class that also
-        //- have a name satisfying the input matcher
-        wordList names(const word& clsName, const wordRe& matchName) const;
-
-        //- The names of IOobjects with the given class that also
-        //- have a name satisfying the input matcher
-        wordList names(const word& clsName, const wordRes& matchName) const;
-
-        //- The names of IOobjects with the given class that also
-        //- have a name satisfying the input matcher
-        wordList names(const word& clsName, const wordHashSet& matchName) const;
-
-
-        //- A sorted list of names of the IOobjects.
-        //  With syncPar = true, triggers FatalError if the names are
-        //  not consistent on all processors.
-        wordList names(const bool syncPar) const;
-
-        //- A sorted list of names of the IOobjects
-        //  With syncPar = true, triggers FatalError if the names are
-        //  not consistent on all processors.
+        //- The names of the IOobjects with the given headerClassName
+        //  With syncPar = true, sorts the names and triggers FatalError
+        //  if the names are not consistent on all processors.
         wordList names(const word& clsName, const bool syncPar) const;
 
-        //- The sorted names of IOobjects with the given class name that also
-        //- have a name satisfying the input matcher
-        //  With syncPar = true, triggers FatalError if the names are
-        //  not consistent on all processors.
+        //- The names of IOobjects with the given headerClassName
+        //- that also have a matching object name.
+        template<class MatchPredicate>
         wordList names
         (
             const word& clsName,
-            const wordRe& matchName,
-            const bool syncPar
+            const MatchPredicate& matchName
         ) const;
 
-        //- The sorted names of IOobjects with the given class name that also
-        //- have a name satisfying the input matcher
-        //  With syncPar = true, triggers FatalError if the names are
-        //  not consistent on all processors.
+        //- The names of the IOobjects with the given headerClassName
+        //- that also have a matching object name.
+        //  With syncPar = true, sorts the names and triggers FatalError
+        //  if the names are not consistent on all processors.
+        template<class MatchPredicate>
         wordList names
         (
             const word& clsName,
-            const wordRes& matchName,
-            const bool syncPar
-        ) const;
-
-        //- The sorted names of IOobjects with the given class that also
-        //- have a name satisfying the input matcher
-        //  With syncPar = true, triggers FatalError if the names are
-        //  not consistent on all processors.
-        wordList names
-        (
-            const word& cls,
-            const wordHashSet& matchName,
+            const MatchPredicate& matchName,
             const bool syncPar
         ) const;
 
@@ -347,31 +318,38 @@ public:
         //- The sorted names of the IOobjects
         wordList sortedNames() const;
 
-        //- The sorted names of IOobjects with the given class
+        //- The sorted names of the IOobjects
+        //  With syncPar = true, a FatalError is
+        //  triggered if the names are not consistent on all processors.
+        wordList sortedNames(const bool syncPar) const;
+
+        //- The sorted names of IOobjects with the given headerClassName
         wordList sortedNames(const word& clsName) const;
 
-        //- The sorted names of IOobjects with the given class that also
-        //- have a name satisfying the input matcher
+        //- The sorted names of the IOobjects with the given headerClassName
+        //  With syncPar = true, sorts the names and triggers FatalError
+        //  if the names are not consistent on all processors.
+        wordList sortedNames(const word& clsName, const bool syncPar) const;
+
+        //- The sorted names of IOobjects with the given headerClassName
+        //- that also have a matching object name.
+        template<class MatchPredicate>
         wordList sortedNames
         (
             const word& clsName,
-            const wordRe& matchName
+            const MatchPredicate& matchName
         ) const;
 
-        //- The sorted names of IOobjects with the given class that also
-        //- have a name satisfying the input matcher
+        //- The sorted names of the IOobjects with the given headerClassName
+        //- that also have a matching object name.
+        //  With syncPar = true, sorts the names and triggers FatalError
+        //  if the names are not consistent on all processors.
+        template<class MatchPredicate>
         wordList sortedNames
         (
             const word& clsName,
-            const wordRes& matchName
-        ) const;
-
-        //- The sorted names of IOobjects with the given class that also
-        //- have a name satisfying the input matcher
-        wordList sortedNames
-        (
-            const word& clsName,
-            const wordHashSet& matchName
+            const MatchPredicate& matchName,
+            const bool syncPar
         ) const;
 
 
@@ -386,8 +364,16 @@ public:
 
     // Housekeeping
 
-        //- Deprecated(2018-11) Lookup an object by name
-        //  \return IOobject ptr if found else nullptr
+        //- Deprecated(2018-11) Locate an object by name (c-string).
+        //- Disambiguated from multiple-lookup version by calling parameter.
+        //  \deprecated(2018-11) use findObject() for non-ambiguous resolution
+        IOobject* lookup(const char* objName) const
+        {
+            return findObject(objName);
+        }
+
+        //- Deprecated(2018-11) Locate an object by name (const word&).
+        //- Disambiguated from multiple-lookup version by calling parameter.
         //  \deprecated(2018-11) use findObject() for non-ambiguous resolution
         IOobject* lookup(const word& objName) const
         {

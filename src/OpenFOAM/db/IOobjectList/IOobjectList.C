@@ -58,6 +58,20 @@ bool Foam::IOobjectList::checkNames(wordList& masterNames, const bool syncPar)
 }
 
 
+void Foam::IOobjectList::syncNames(wordList& objNames)
+{
+    if (Pstream::parRun())
+    {
+        // Synchronize names
+        Pstream::combineGather(objNames, ListOps::uniqueEqOp<word>());
+        Pstream::combineScatter(objNames);
+    }
+
+    // Sort for consistent order on all processors
+    Foam::sort(objNames);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::IOobjectList::IOobjectList()
@@ -246,30 +260,10 @@ Foam::IOobject* Foam::IOobjectList::findObject(const word& objName) const
 }
 
 
-Foam::IOobjectList Foam::IOobjectList::lookup(const wordRe& matchName) const
+Foam::IOobjectList Foam::IOobjectList::lookupClass(const char* clsName) const
 {
-    return lookupImpl(*this, matchName);
-}
-
-
-Foam::IOobjectList Foam::IOobjectList::lookup(const wordRes& matchName) const
-{
-    return lookupImpl(*this, matchName);
-}
-
-
-Foam::IOobjectList Foam::IOobjectList::lookup
-(
-    const wordHashSet& matchName
-) const
-{
-    return lookupImpl(*this, matchName);
-}
-
-
-Foam::IOobjectList Foam::IOobjectList::lookupClass(const word& clsName) const
-{
-    return lookupClassImpl(*this, clsName, predicates::always());
+    // No nullptr check - only called with string literals
+    return lookupClass(static_cast<word>(clsName));
 }
 
 
@@ -279,36 +273,9 @@ Foam::HashTable<Foam::wordHashSet> Foam::IOobjectList::classes() const
 }
 
 
-Foam::HashTable<Foam::wordHashSet>
-Foam::IOobjectList::classes(const wordRe& matchName) const
-{
-    return classesImpl(*this, matchName);
-}
-
-
-Foam::HashTable<Foam::wordHashSet>
-Foam::IOobjectList::classes(const wordRes& matchName) const
-{
-    return classesImpl(*this, matchName);
-}
-
-
-Foam::HashTable<Foam::wordHashSet>
-Foam::IOobjectList::classes(const wordHashSet& matchName) const
-{
-    return classesImpl(*this, matchName);
-}
-
-
 Foam::wordList Foam::IOobjectList::names() const
 {
     return HashPtrTable<IOobject>::toc();
-}
-
-
-Foam::wordList Foam::IOobjectList::sortedNames() const
-{
-    return HashPtrTable<IOobject>::sortedToc();
 }
 
 
@@ -326,7 +293,37 @@ Foam::wordList Foam::IOobjectList::names
     const word& clsName
 ) const
 {
-    return namesImpl(*this, clsName, predicates::always(), false);
+    // sort/sync: false, false
+    return namesImpl(*this, clsName, predicates::always(), false, false);
+}
+
+
+Foam::wordList Foam::IOobjectList::names
+(
+    const word& clsName,
+    const bool syncPar
+) const
+{
+    // sort: false
+    return namesImpl(*this, clsName, predicates::always(), false, syncPar);
+}
+
+
+Foam::wordList Foam::IOobjectList::sortedNames() const
+{
+    return HashPtrTable<IOobject>::sortedToc();
+}
+
+
+Foam::wordList Foam::IOobjectList::sortedNames
+(
+    const bool syncPar
+) const
+{
+    wordList objNames(HashPtrTable<IOobject>::sortedToc());
+
+    checkNames(objNames, syncPar);
+    return objNames;
 }
 
 
@@ -335,122 +332,19 @@ Foam::wordList Foam::IOobjectList::sortedNames
     const word& clsName
 ) const
 {
-    return namesImpl(*this, clsName, predicates::always(), true);
-}
-
-
-Foam::wordList Foam::IOobjectList::names
-(
-    const word& clsName,
-    const bool syncPar
-) const
-{
-    wordList objNames(namesImpl(*this, clsName, predicates::always(), false));
-
-    checkNames(objNames, syncPar);
-    return objNames;
-}
-
-
-Foam::wordList Foam::IOobjectList::names
-(
-    const word& clsName,
-    const wordRe& matchName
-) const
-{
-    return namesImpl(*this, clsName, matchName, false);
+    // sort/sync: true, false
+    return namesImpl(*this, clsName, predicates::always(), true, false);
 }
 
 
 Foam::wordList Foam::IOobjectList::sortedNames
 (
     const word& clsName,
-    const wordRe& matchName
-) const
-{
-    return namesImpl(*this, clsName, matchName, true);
-}
-
-
-Foam::wordList Foam::IOobjectList::names
-(
-    const word& clsName,
-    const wordRe& matchName,
     const bool syncPar
 ) const
 {
-    wordList objNames(namesImpl(*this, clsName, matchName, false));
-
-    checkNames(objNames, syncPar);
-    return objNames;
-}
-
-
-Foam::wordList Foam::IOobjectList::names
-(
-    const word& clsName,
-    const wordRes& matchName
-) const
-{
-    return namesImpl(*this, clsName, matchName, false);
-}
-
-
-Foam::wordList Foam::IOobjectList::sortedNames
-(
-    const word& clsName,
-    const wordRes& matchName
-) const
-{
-    return namesImpl(*this, clsName, matchName, true);
-}
-
-
-Foam::wordList Foam::IOobjectList::names
-(
-    const word& clsName,
-    const wordRes& matchName,
-    const bool syncPar
-) const
-{
-    wordList objNames(namesImpl(*this, clsName, matchName, false));
-
-    checkNames(objNames, syncPar);
-    return objNames;
-}
-
-
-Foam::wordList Foam::IOobjectList::names
-(
-    const word& clsName,
-    const wordHashSet& matchName
-) const
-{
-    return namesImpl(*this, clsName, matchName, false);
-}
-
-
-Foam::wordList Foam::IOobjectList::sortedNames
-(
-    const word& clsName,
-    const wordHashSet& matchName
-) const
-{
-    return namesImpl(*this, clsName, matchName, true);
-}
-
-
-Foam::wordList Foam::IOobjectList::names
-(
-    const word& clsName,
-    const wordHashSet& matchName,
-    const bool syncPar
-) const
-{
-    wordList objNames(namesImpl(*this, clsName, matchName, false));
-
-    checkNames(objNames, syncPar);
-    return objNames;
+    // sort: true
+    return namesImpl(*this, clsName, predicates::always(), true, syncPar);
 }
 
 
