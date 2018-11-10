@@ -111,27 +111,6 @@ Foam::HashTable<Foam::wordHashSet> Foam::objectRegistry::classes() const
 }
 
 
-Foam::HashTable<Foam::wordHashSet>
-Foam::objectRegistry::classes(const wordRe& matchName) const
-{
-    return classesImpl(*this, matchName);
-}
-
-
-Foam::HashTable<Foam::wordHashSet>
-Foam::objectRegistry::classes(const wordRes& matchName) const
-{
-    return classesImpl(*this, matchName);
-}
-
-
-Foam::HashTable<Foam::wordHashSet>
-Foam::objectRegistry::classes(const wordHashSet& matchName) const
-{
-    return classesImpl(*this, matchName);
-}
-
-
 Foam::wordList Foam::objectRegistry::names() const
 {
     return HashTable<regIOobject*>::toc();
@@ -144,31 +123,17 @@ Foam::wordList Foam::objectRegistry::sortedNames() const
 }
 
 
-Foam::wordList Foam::objectRegistry::names(const word& clsName) const
+Foam::wordList Foam::objectRegistry::names(const char* clsName) const
 {
-    wordList objNames(size());
-
-    label count=0;
-    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
-    {
-        if (iter()->type() == clsName)
-        {
-            objNames[count++] = iter.key();
-        }
-    }
-
-    objNames.setSize(count);
-
-    return objNames;
+    // No nullptr check - only called with string literals
+    return names(static_cast<word>(clsName));
 }
 
 
-Foam::wordList Foam::objectRegistry::sortedNames(const word& clsName) const
+Foam::wordList Foam::objectRegistry::sortedNames(const char* clsName) const
 {
-    wordList objNames = names(clsName);
-    Foam::sort(objNames);
-
-    return objNames;
+    // No nullptr check - only called with string literals
+    return sortedNames(static_cast<word>(clsName));
 }
 
 
