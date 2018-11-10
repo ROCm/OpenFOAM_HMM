@@ -359,6 +359,16 @@ public:
         inline bool& globalObject();
 
 
+    // Checks
+
+        //- Test if headerClassName() equals the given class name
+        inline bool isHeaderClassName(const word& clsName) const;
+
+        //- Test if headerClassName() equals Type::typeName
+        template<class Type>
+        inline bool isHeaderClassName() const;
+
+
     // Read/write options
 
         //- The read option
@@ -486,6 +496,14 @@ public:
 
         void operator=(const IOobject& io);
 };
+
+
+//- Specialization for \c void always returns true (no headerClassName check).
+template<>
+inline bool IOobject::isHeaderClassName<void>() const
+{
+    return true;
+}
 
 
 template<>

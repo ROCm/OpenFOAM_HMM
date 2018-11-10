@@ -107,6 +107,21 @@ inline bool& Foam::IOobject::globalObject()
 }
 
 
+// Checks
+
+inline bool Foam::IOobject::isHeaderClassName(const word& clsName) const
+{
+    return (clsName == headerClassName_);
+}
+
+
+template<class Type>
+inline bool Foam::IOobject::isHeaderClassName() const
+{
+    return (Type::typeName == headerClassName_);
+}
+
+
 // Read/write options
 
 inline Foam::IOobject::readOption Foam::IOobject::readOpt() const
