@@ -89,7 +89,7 @@ public:
             NEW,                //!< Create a new set and ADD elemets to it
             REMOVE,             //!< Remove the set (from the file system)
             LIST,               //!< Print contents of the set
-            DELETE = SUBTRACT,  //!< \deprecated alias for SUBTRACT (OCT-2018)
+            DELETE = SUBTRACT,  //!< \deprecated(2018-10) Alias for SUBTRACT
         };
 
         //- The setActions text representations
@@ -175,8 +175,8 @@ public:
 
     // Static Functions
 
-        //- Convert string to action
-        //  \deprecated use direct access to actionNames (JUL-2018)
+        //- Deprecated(2018-07) convert string to action
+        //  \deprecated(2018-07) - use actionNames[] directly
         static setAction toAction(const word& actionName)
         {
             return actionNames[actionName];

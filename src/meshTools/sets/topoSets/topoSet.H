@@ -341,10 +341,6 @@ public:
         //- Subtract elements present in set.
         virtual void subtractSet(const topoSet& set);
 
-        //- Subtract elements present in set.
-        //  \deprecated use subtractSet instead (OCT-2018)
-        virtual void deleteSet(const topoSet& set);
-
         //- Sync set across coupled patches.
         virtual void sync(const polyMesh& mesh);
 
@@ -390,11 +386,17 @@ public:
         static void removeFiles(const polyMesh&);
 
 
-    // Member operators
+    // Member Operators
 
         //- Copy labelHashSet part only
         void operator=(const topoSet&);
 
+
+    // Housekeeping
+
+        //- Deprecated(2018-10) subtract elements present in set.
+        //  \deprecated(2018-10) - use subtractSet instead
+        virtual void deleteSet(const topoSet& set);
 };
 
 

@@ -198,16 +198,16 @@ public:
 
     // Housekeeping
 
-        //- Same as findObject
-        //  \deprecated use findObject (OCT-2018)
+        //- Deprecated(2018-10)
+        //  \deprecated(2018-10) - use findObject() method
         template<class ObjectType>
         const ObjectType* lookupObjectPtr(const word& fieldName) const
         {
             return this->cfindObject<ObjectType>(fieldName);
         }
 
-        //- Same as getObjectPtr
-        //  \deprecated use getObjectPtr (OCT-2018)
+        //- Deprecated(2018-10)
+        //  \deprecated(2018-10) - use getObjectPtr() method
         template<class ObjectType>
         ObjectType* lookupObjectRefPtr(const word& fieldName) const
         {

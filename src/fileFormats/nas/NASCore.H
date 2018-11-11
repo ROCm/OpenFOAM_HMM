@@ -81,8 +81,9 @@ public:
         //- Extract numbers from things like "-2.358-8" (same as "-2.358e-8")
         static scalar readNasScalar(const std::string& str);
 
-        //- Extract numbers from things like "-2.358-8" (same as "-2.358e-8")
-        // \deprecated use readNasScalar instead (deprecated Sep 2017)
+        //- Deprecated(2017-09)
+        //  Extract numbers from things like "-2.358-8" (same as "-2.358e-8")
+        //  \deprecated(2017-09) - use readNasScalar() method
         inline static scalar parseNASCoord(const std::string& str)
         {
             return readNasScalar(str);

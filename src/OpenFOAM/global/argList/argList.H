@@ -536,49 +536,49 @@ public:
 
     #ifdef Foam_argList_1712
 
-        //- Read a value from the argument at index.
+        //- Deprecated(2018-08) read a value from the argument at index.
         //  Index 1 is the first (non-option) argument.
-        //  \deprecated in favour of get() - AUG-2018
+        //  \deprecated(2018-08) - use get() method
         template<class T>
         inline T read(const label index) const
         {
             return this->get<T>(index);
         }
 
-        //- Read a value from the argument at index.
+        //- Deprecated(2018-01) read a value from the argument at index.
         //  Index 1 is the first (non-option) argument.
-        //  \deprecated in favour of read() - JAN-2018
+        //  \deprecated(2018-01) - use get() method
         template<class T>
         inline T argRead(const label index) const
         {
             return this->get<T>(index);
         }
 
-        //- Return true if the named option is found
-        //  \deprecated in favour of found() - JAN-2018
+        //- Deprecated(2018-01) return true if the named option is found
+        //  \deprecated(2018-01) - use found() method
         inline bool optionFound(const word& optName) const
         {
             return found(optName);
         }
 
-        //- Return an input stream from the named option
-        //  \deprecated in favour of lookup() - JAN-2018
+        //- Deprecated(2018-01) return an input stream from the named option
+        //  \deprecated(2018-01) - use lookup() method
         inline ITstream optionLookup(const word& optName) const
         {
             return lookup(optName);
         }
 
-        //- Read a value from the named option
-        //  \deprecated in favour of opt() - JAN-2018
+        //- Deprecated(2018-01) read a value from the named option
+        //  \deprecated(2018-01) - use opt() method
         template<class T>
         inline T optionRead(const word& optName) const
         {
             return opt<T>(optName);
         }
 
-        //- Read a value from the named option if present.
+        //- Deprecated(2018-01) read a value from the named option if present.
         //  Return true if the named option was found.
-        //  \deprecated in favour of readIfPresent() - JAN-2018
+        //  \deprecated(2018-01) - use readIfPresent() method
         template<class T>
         inline bool optionReadIfPresent
         (
@@ -589,10 +589,10 @@ public:
             return readIfPresent<T>(optName, val);
         }
 
-        //- Read a value from the named option if present.
+        //- Deprecated(2018-01) read a value from the named option if present.
         //  Return true if the named option was found, otherwise
         //  use the supplied default and return false.
-        //  \deprecated in favour of readIfPresent() - JAN-2018
+        //  \deprecated(2018-01) - use readIfPresent() method
         template<class T>
         inline bool optionReadIfPresent
         (
@@ -604,9 +604,9 @@ public:
             return readIfPresent<T>(optName, val, deflt);
         }
 
-        //- Read a value from the named option if present.
+        //- Deprecated(2018-01) read a value from the named option if present.
         //  Return supplied default otherwise.
-        //  \deprecated in favour of lookupOrDefault() - JAN-2018
+        //  \deprecated(2018-01) - use lookupOrDefault() method
         template<class T>
         inline T optionLookupOrDefault
         (
@@ -617,8 +617,8 @@ public:
             return lookupOrDefault<T>(optName, deflt);
         }
 
-        //- Read a List of values from the named option
-        //  \deprecated in favour of getList() - JAN-2018
+        //- Deprecated(2018-01) read a List of values from the named option
+        //  \deprecated(2018-01) - use getList() method
         template<class T>
         inline List<T> optionReadList(const word& optName) const
         {

@@ -222,15 +222,15 @@ public:
 
     // Housekeeping
 
-        //- Same as two-parameter get()
-        //  \deprecated Use two-parameter get() instead (OCT-2018)
+        //- Deprecated(2018-10) same as two-parameter get()
+        //  \deprecated(2018-10) - use two-parameter get() method
         inline EnumType lookup(const word& key, const dictionary& dict) const
         {
             return get(key, dict);
         }
 
-        //- Perform lookupOrDefault with warnings instead of error.
-        //  \deprecated use lookupOrDefault with failsafe option (OCT-2018)
+        //- Deprecated(2018-10) lookupOrDefault with warnings instead of error.
+        //  \deprecated(2018-10) - use lookupOrDefault() with failsafe option
         EnumType lookupOrFailsafe
         (
             const word& key,

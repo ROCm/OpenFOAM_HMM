@@ -206,8 +206,8 @@ public:
 
     // Housekeeping
 
-        //- A text representation of the Switch value
-        //  \deprecated - use c_str() instead (MAR-2018)
+        //- Deprecated(2018-03) text representation of the Switch value
+        //  \deprecated(2018-03) - use c_str() method
         inline const char* asText() const { return c_str(); };
 };
 

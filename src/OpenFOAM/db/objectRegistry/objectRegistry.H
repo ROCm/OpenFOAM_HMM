@@ -385,8 +385,8 @@ public:
 
     // Housekeeping
 
-        //- Same as findObject
-        //  \deprecated use findObject (OCT-2018)
+        //- Deprecated(2018-10) find object
+        //  \deprecated(2018-10) - use findObject() method
         template<class Type>
         const Type* lookupObjectPtr
         (
@@ -397,9 +397,8 @@ public:
             return this->cfindObject<Type>(name, recursive);
         }
 
-        //- Same as getObjectPtr
-        //
-        //  \deprecated use getObjectPtr (OCT-2018)
+        //- Deprecated(2018-10) get object pointer, ignoring constness
+        //  \deprecated(2018-10) - use getObjectPtr() method
         template<class Type>
         Type* lookupObjectRefPtr
         (

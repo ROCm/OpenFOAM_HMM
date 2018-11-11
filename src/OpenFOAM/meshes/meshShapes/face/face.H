@@ -198,8 +198,8 @@ public:
         //- The unit normal
         inline vector unitNormal(const UList<point>& p) const;
 
-        //- Legacy name for areaNormal.
-        //  \deprecated Deprecated for new use (JUN-2018)
+        //- Legacy name for areaNormal()
+        //  \deprecated(2018-06) Deprecated for new use
         inline vector normal(const UList<point>& p) const
         {
             return areaNormal(p); // Legacy definition
@@ -450,8 +450,9 @@ struct offsetOp<face>
 };
 
 
-//- Find the longest edge on a face. Face point labels index into pts.
-//  \deprecated use class method instead (APR-2017)
+//- Deprecated(2017-04) find the longest edge on a face.
+//- Face point labels index into pts.
+//  \deprecated(2017-04) use class method instead
 label longestEdge(const face& f, const UList<point>& pts);
 
 

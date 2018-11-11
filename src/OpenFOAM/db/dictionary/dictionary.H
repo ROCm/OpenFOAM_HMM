@@ -1103,16 +1103,16 @@ public:
 
     // Housekeeping
 
-        //- Find and return an entry data stream (identical to #lookup method).
+        //- Deprecated(2018-07) find and return an entry data stream
         //
-        //  \deprecated use lookup() method instead (JUL-2018)
+        //  \deprecated(2018-07) - use lookup() method
         ITstream& operator[](const word& keyword) const
         {
             return lookup(keyword);
         }
 
-        //- Find and return a T.
-        //  \deprecated - same as the get() method (OCT-2018)
+        //- Deprecated(2018-10) find and return a T.
+        //  \deprecated(2018-10) - use get() method
         template<class T>
         T lookupType
         (
@@ -1124,8 +1124,8 @@ public:
             return get<T>(keyword, matchOpt(recursive, patternMatch));
         }
 
-        //- Search dictionary for given keyword.
-        //  \deprecated - use keyType::option version instead (OCT-2018)
+        //- Deprecated(2018-10)
+        //  \deprecated(2018-10) - use keyType::option version
         bool found
         (
             const word& keyword,
@@ -1136,10 +1136,8 @@ public:
             return found(keyword, matchOpt(recursive, patternMatch));
         }
 
-        //- Find and return an entry pointer for manipulation if present,
-        //- or return a nullptr.
-        //
-        //  \deprecated - use keyType::option version instead (OCT-2018)
+        //- Deprecated(2018-10)
+        //  \deprecated(2018-10) - use keyType::option version
         entry* lookupEntryPtr
         (
             const word& keyword,
@@ -1150,8 +1148,8 @@ public:
             return findEntry(keyword, matchOpt(recursive, patternMatch));
         }
 
-        //- Find and return an entry pointer if present, or return a nullptr.
-        //  \deprecated - use keyType::option version instead (OCT-2018)
+        //- Deprecated(2018-10)
+        //  \deprecated(2018-10) - use keyType::option version
         const entry* lookupEntryPtr
         (
             const word& keyword,
@@ -1162,12 +1160,8 @@ public:
             return findEntry(keyword, matchOpt(recursive, patternMatch));
         }
 
-        //- Find and return an entry pointer if present, or return a nullptr.
-        //  Allows scoping using '.'.
-        //  Special handling for an absolute anchor (^) at start of the keyword
-        //  and for '..' to ascend into the parent dictionaries.
-        //
-        //  \deprecated - use keyType::option version instead (OCT-2018)
+        //- Deprecated(2018-10)
+        //  \deprecated(2018-10) - use keyType::option version
         const entry* lookupScopedEntryPtr
         (
             const word& keyword,
@@ -1178,27 +1172,30 @@ public:
             return findScoped(keyword, matchOpt(recursive, patternMatch));
         }
 
-        //- Find and return a sub-dictionary pointer if present
+        //- Deprecated(2018-10)
+        //  Find and return a sub-dictionary pointer if present
         //  (and a sub-dictionary) otherwise return nullptr.
         //
         //  Search type: non-recursive with patterns.
+        //  \deprecated(2018-10) - use findDict() method
         const dictionary* subDictPtr(const word& keyword) const
         {
             return findDict(keyword, keyType::REGEX);
         }
 
+        //- Deprecated(2018-10)
         //- Find and return a sub-dictionary pointer if present
         //  (and a sub-dictionary) otherwise return nullptr.
         //
         //  Search type: non-recursive with patterns.
+        //  \deprecated(2018-10) - use findDict() method
         dictionary* subDictPtr(const word& keyword)
         {
             return findDict(keyword, keyType::REGEX);
         }
 
-        //- Find and return an entry if present, otherwise FatalIOError.
-        //
-        //  \deprecated - use keyType::option version instead (OCT-2018)
+        //- Deprecated(2018-10)
+        //  \deprecated(2018-10) - use keyType::option version
         const entry& lookupEntry
         (
             const word& keyword,
@@ -1209,10 +1206,8 @@ public:
             return lookupEntry(keyword, matchOpt(recursive, patternMatch));
         }
 
-        //- Find and return an entry data stream.
-        //  Default search: non-recursive with patterns.
-        //
-        //  \deprecated - use keyType::option version instead (OCT-2018)
+        //- Deprecated(2018-10)
+        //  \deprecated(2018-10) - use keyType::option version
         ITstream& lookup
         (
             const word& keyword,
@@ -1223,10 +1218,8 @@ public:
             return lookup(keyword, matchOpt(recursive, patternMatch));
         }
 
-        //- Find and return a T, or return the given default value
-        //- FatalIOError if it is found and there are excess tokens.
-        //
-        //  \deprecated - use keyType::option version instead (OCT-2018)
+        //- Deprecated(2018-10)
+        //  \deprecated(2018-10) - use keyType::option version
         template<class T>
         T lookupOrDefault
         (
@@ -1241,11 +1234,8 @@ public:
                 (keyword, matchOpt(recursive, patternMatch));
         }
 
-        //- Find and return a T, or return the given default value
-        //- and add it to dictionary.
-        //- FatalIOError if it is found and there are excess tokens.
-        //
-        //  \deprecated - use keyType::option version instead (OCT-2018)
+        //- Deprecated(2018-10)
+        //  \deprecated(2018-10) - use keyType::option version
         template<class T>
         T lookupOrAddDefault
         (
@@ -1260,10 +1250,8 @@ public:
                 (keyword, deflt, matchOpt(recursive, patternMatch));
         }
 
-        //- Find an entry if present, and assign to T val.
-        //- FatalIOError if it is found and there are excess tokens.
-        //
-        //  \deprecated - use keyType::option version instead (OCT-2018)
+        //- Deprecated(2018-10)
+        //  \deprecated(2018-10) - use keyType::option version
         template<class T>
         bool readIfPresent
         (
@@ -1283,7 +1271,7 @@ public:
 
         #undef defineDictionaryGetter
         #define defineDictionaryGetter(Func, Type)                            \
-            /** Same as get\<Type\> */                                        \
+            /** \brief Same as get\<Type\>(const word&, keyType::option) */   \
             Type Func                                                         \
             (                                                                 \
                 const word& keyword,                                          \

@@ -145,8 +145,8 @@ public:
 
     // Housekeeping
 
-        //- Compatibility method
-        //  \deprecated use IOobject::selectIO directly (AUG-2018)
+        //- Deprecated(2018-08) compatibility method
+        //  \deprecated(2018-08) - use IOobject::selectIO directly
         static IOobject selectIO
         (
             const IOobject& io,

@@ -410,8 +410,8 @@ public:
 
     // Compatibility
 
-        //- Old method name and old parameter ordering.
-        //  \deprecated use setCellSubset instead (JUL-2018)
+        //- Deprecated(2018-07) old method name and old parameter ordering.
+        //  \deprecated(2018-07) - use setCellSubset() method
         inline void setLargeCellSubset
         (
             const labelUList& region,
@@ -433,8 +433,8 @@ public:
         }
 
 
-        //- Old method name.
-        //  \deprecated use setCellSubset instead (JUL-2018)
+        //- Deprecated(2018-07) old method name
+        //  \deprecated(2018-07) - use setCellSubset() method
         inline void setLargeCellSubset
         (
             const labelHashSet& globalCellMap,
@@ -449,9 +449,10 @@ public:
         }
 
 
-        //- For every exposed face (from getExposedFaces) use supplied
-        //- (existing!) patch ids
-        //  \deprecated use setCellSubset instead (JUL-2018)
+        //- Deprecated(2018-07) method
+        //  For every exposed face (from getExposedFaces) use supplied
+        //  (existing!) patch ids
+        //  \deprecated(2018-07) - use setCellSubset() method
         inline void setLargeCellSubset
         (
             const labelList& regions,

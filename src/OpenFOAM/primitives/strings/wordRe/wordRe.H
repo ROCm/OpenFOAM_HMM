@@ -99,7 +99,7 @@ public:
             LITERAL = 0, //!< String literal
             REGEX   = 1, //!< Regular expression
             ICASE   = 2, //!< Ignore case in regular expression
-            NOCASE  = 2, //!< \deprecated Alias for ICASE (deprecated APR-2018)
+            NOCASE  = 2, //!< \deprecated(2018-04) Alias for ICASE
             DETECT  = 4, //!< Detect if the string contains meta-characters
             UNKNOWN = 4, //!< Unknown content.
             REGEX_ICASE  = (REGEX|ICASE),   //!< Combined REGEX and ICASE

@@ -55,10 +55,10 @@ SourceFiles
 namespace Foam
 {
 
-//- Return reference to zero-sized list.
+//- Deprecated(2018-07) reference to zero-sized list.
 //  Compare to List::null() which returns null pointer cast as list reference.
 //
-//  \deprecated This cast is disallowed with many modern compilers (JUL-2018)
+//  \deprecated(2018-07) This cast is disallowed with many modern compilers
 template<class T>
 static const List<T>& emptyList()
 {
@@ -376,9 +376,9 @@ List<OutputIntListType> invertManyToMany
 //  Optionally with an alternative start index, so that (map[i] == i+start)
 labelList identity(const label len, label start=0);
 
-//- Linear search to find the first occurence of the given element.
+//- Deprecated(2017-10) search for first occurence of the given element.
 //  \return The index found or return -1 if not found.
-//  \deprecated prefer UList find/found methods (deprecated Oct 2017)
+//  \deprecated(2017-10) - use the UList find/found methods
 template<class ListType>
 label findIndex
 (

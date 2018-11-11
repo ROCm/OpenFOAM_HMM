@@ -67,7 +67,7 @@ public:
 
     // Constructors
 
-        //- Construct a zero time state, using the current time formattin
+        //- Construct a zero time state, using the current time formatting
         TimeState();
 
 
@@ -109,8 +109,8 @@ public:
             //- Return true if this is a write time
             inline bool writeTime() const;
 
-            //- Return true if this is a write time.
-            //  \deprecated in favour of writeTime() - MAY-2016
+            //- Deprecated(2016-05) return true if this is a write time.
+            //  \deprecated(2016-05) - use writeTime() method
             inline bool outputTime() const { return this->writeTime(); }
 };
 

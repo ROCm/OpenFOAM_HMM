@@ -356,8 +356,8 @@ struct foundOp
 
 namespace Foam
 {
-    //- Find using C-string as a regex
-    //  \deprecated (FEB-2018) Treating string as regex may be inefficient
+    //- Deprecated(2018-02) find using C-string as a regex
+    //  \deprecated(2018-02) Treating string as regex may be inefficient
     //      and lead to unintended results.
     //      Use regExp, keyType, wordRe instead, or findMatchingStrings()
     template<class StringType>
@@ -368,8 +368,8 @@ namespace Foam
         const bool invert=false
     ) = delete;
 
-    //- Find using string as a regex
-    //  \deprecated (FEB-2018) Treating string as regex may be inefficient
+    //- Deprecated(2018-02) find using string as a regex
+    //  \deprecated(2018-02) Treating string as regex may be inefficient
     //      and lead to unintended results.
     //      Use regExp, keyType, wordRe instead, or findMatchingStrings()
     template<class StringType>
@@ -380,8 +380,8 @@ namespace Foam
         const bool invert=false
     ) = delete;
 
-    //- Subset using C-string as a regex
-    //  \deprecated (FEB-2018) Treating string as regex may be inefficient
+    //- Deprecated(2018-02) subset using C-string as a regex
+    //  \deprecated(2018-02) Treating string as regex may be inefficient
     //      and lead to unintended results.
     //      Use regExp, keyType, wordRe instead, or subsetMatchingStrings()
     template<class StringListType>
@@ -392,8 +392,8 @@ namespace Foam
         const bool invert=false
     ) = delete;
 
-    //- Subset using string as a regex
-    //  \deprecated (FEB-2018) Treating string as regex may be inefficient
+    //- Deprecated(2018-02) subset using string as a regex
+    //  \deprecated(2018-02) Treating string as regex may be inefficient
     //      and lead to unintended results.
     //      Use regExp, keyType, wordRe instead, or subsetMatchingStrings()
     template<class StringListType>
@@ -404,8 +404,8 @@ namespace Foam
         const bool invert=false
     ) = delete;
 
-    //- Subset using C-string as a regex
-    //  \deprecated (FEB-2018) Treating string as regex may be inefficient
+    //- Deprecated(2018-02) subset using C-string as a regex
+    //  \deprecated(2018-02) Treating string as regex may be inefficient
     //      and lead to unintended results.
     //      Use regExp, keyType, wordRe instead, or inplaceSubsetMatchingStrings()
     template<class StringListType>
@@ -416,8 +416,8 @@ namespace Foam
         const bool invert=false
     ) = delete;
 
-    //- Subset using string as a regex
-    //  \deprecated (FEB-2018) Treating string as regex may be inefficient
+    //- Deprecated(2018-02) subset using string as a regex
+    //  \deprecated(2018-02) Treating string as regex may be inefficient
     //      and lead to unintended results.
     //      Use keyType, wordRe instead, or inplaceSubsetMatchingStrings()
     template<class StringListType>

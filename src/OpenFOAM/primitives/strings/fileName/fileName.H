@@ -251,9 +251,9 @@ public:
         //- Return basename, without extension
         inline word nameLessExt() const;
 
-        //- Return basename, optionally without extension
-        // \deprecated in favour of name() or nameLessExt() which describe
-        //  their behaviour more explicitly (MAR-2017).
+        //- Deprecated(2017-03) return basename, optionally without extension
+        //  \deprecated(2017-03) - use name() or nameLessExt() methods
+        //      which describe their behaviour explicitly
         word name(const bool noExt) const
         {
             return noExt ? this->nameLessExt() : this->name();

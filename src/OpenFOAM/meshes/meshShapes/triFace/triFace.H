@@ -129,8 +129,8 @@ public:
         //- The unit normal
         inline vector unitNormal(const UList<point>& points) const;
 
-        //- Legacy name for areaNormal.
-        //  \deprecated Deprecated for new use (JUN-2018)
+        //- Legacy name for areaNormal()
+        //  \deprecated(2018-06) Deprecated for new use
         inline vector normal(const UList<point>& points) const
         {
             return areaNormal(points); // Legacy definition

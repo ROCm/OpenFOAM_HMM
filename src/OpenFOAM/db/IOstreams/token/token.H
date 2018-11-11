@@ -558,16 +558,17 @@ public:
         //- Move assign from string
         inline void operator=(string&& str);
 
-        //- Transfer word pointer to the token
-        //  \deprecated in favour of using move assign from word
-        inline void operator=(word* wordPtr);
-
-        //- Transfer string pointer to the token
-        //  \deprecated in favour of using move assign from string
-        inline void operator=(string* stringPtr);
-
         //- Assign compound with reference counting to token
         inline void operator=(compound* compoundPtr);
+
+
+        //- Deprecated(2016-05) transfer word pointer to the token
+        //  \deprecated(2017-11) - use move assign from word
+        inline void operator=(word* wordPtr);
+
+        //- Deprecated(2017-11) transfer string pointer to the token
+        //  \deprecated(2017-11) - use move assign from string
+        inline void operator=(string* stringPtr);
 
 
     // Equality

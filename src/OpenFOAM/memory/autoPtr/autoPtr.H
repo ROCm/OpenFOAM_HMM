@@ -259,7 +259,7 @@ public:
     // Housekeeping
 
         //- No copy assignment from plain pointer
-        //  \deprecated Convenient, but uncontrolled access (FEB-2018)
+        //  \deprecated(2018-02) Convenient, but uncontrolled access
         void operator=(T* p) = delete;
 };
 
