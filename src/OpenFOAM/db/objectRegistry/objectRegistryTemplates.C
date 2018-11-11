@@ -55,6 +55,59 @@ Foam::HashTable<Foam::wordHashSet> Foam::objectRegistry::classesImpl
 }
 
 
+// Templated implementation for count()
+template<class MatchPredicate1, class MatchPredicate2>
+Foam::label Foam::objectRegistry::countImpl
+(
+    const objectRegistry& list,
+    const MatchPredicate1& matchClass,
+    const MatchPredicate2& matchName
+)
+{
+    label count = 0;
+
+    forAllConstIters(list, iter)
+    {
+        const regIOobject* obj = iter.object();
+
+        if (matchClass(obj->type()) && matchName(obj->name()))
+        {
+            ++count;
+        }
+    }
+
+    return count;
+}
+
+
+// Templated implementation for count()
+template<class Type, class MatchPredicate>
+Foam::label Foam::objectRegistry::countTypeImpl
+(
+    const objectRegistry& list,
+    const MatchPredicate& matchName
+)
+{
+    label count = 0;
+
+    forAllConstIters(list, iter)
+    {
+        const regIOobject* obj = iter.object();
+
+        if
+        (
+            (std::is_void<Type>::value || isA<Type>(*obj))
+         && matchName(obj->name())
+        )
+        {
+            ++count;
+        }
+    }
+
+    return count;
+}
+
+
 // Templated implementation for names(), sortedNames()
 template<class MatchPredicate1, class MatchPredicate2>
 Foam::wordList Foam::objectRegistry::namesImpl
@@ -138,6 +191,63 @@ Foam::objectRegistry::classes
 ) const
 {
     return classesImpl(*this, matchName);
+}
+
+
+template<class MatchPredicate>
+Foam::label Foam::objectRegistry::count
+(
+    const MatchPredicate& matchClass
+) const
+{
+    return countImpl(*this, matchClass, predicates::always());
+}
+
+
+template<class MatchPredicate1, class MatchPredicate2>
+Foam::label Foam::objectRegistry::count
+(
+    const MatchPredicate1& matchClass,
+    const MatchPredicate2& matchName
+) const
+{
+    return countImpl(*this, matchClass, matchName);
+}
+
+
+template<class Type, class MatchPredicate>
+Foam::label Foam::objectRegistry::count
+(
+    const MatchPredicate& matchName
+) const
+{
+    return countTypeImpl<Type>(*this, matchName);
+}
+
+
+template<class Type>
+Foam::label Foam::objectRegistry::count
+(
+    const bool strict
+) const
+{
+    label nObjects = 0;
+
+    forAllConstIters(*this, iter)
+    {
+        const regIOobject* obj = iter.object();
+
+        if
+        (
+            std::is_void<Type>::value
+         || (strict ? isType<Type>(*obj) : bool(isA<Type>(*obj)))
+        )
+        {
+            ++nObjects;
+        }
+    }
+
+    return nObjects;
 }
 
 
@@ -227,13 +337,11 @@ Foam::HashTable<const Type*> Foam::objectRegistry::lookupClass
 
     forAllConstIters(*this, iter)
     {
-        if (strict ? isType<Type>(*iter()) : bool(isA<Type>(*iter())))
+        const regIOobject* obj = iter.object();
+
+        if (strict ? isType<Type>(*obj) : bool(isA<Type>(*obj)))
         {
-            objectsOfClass.insert
-            (
-                iter()->name(),
-                dynamic_cast<const Type*>(iter())
-            );
+            objectsOfClass.insert(obj->name(), dynamic_cast<const Type*>(obj));
         }
     }
 
@@ -251,13 +359,11 @@ Foam::HashTable<Type*> Foam::objectRegistry::lookupClass
 
     forAllIters(*this, iter)
     {
-        if (strict ? isType<Type>(*iter()) : bool(isA<Type>(*iter())))
+        regIOobject* obj = iter.object();
+
+        if (strict ? isType<Type>(*obj) : bool(isA<Type>(*obj)))
         {
-            objectsOfClass.insert
-            (
-                iter()->name(),
-                dynamic_cast<Type*>(iter())
-            );
+            objectsOfClass.insert(obj->name(), dynamic_cast<Type*>(obj));
         }
     }
 

@@ -111,6 +111,13 @@ Foam::HashTable<Foam::wordHashSet> Foam::objectRegistry::classes() const
 }
 
 
+Foam::label Foam::objectRegistry::count(const char* clsName) const
+{
+    // No nullptr check - only called with string literals
+    return count(static_cast<word>(clsName));
+}
+
+
 Foam::wordList Foam::objectRegistry::names() const
 {
     return HashTable<regIOobject*>::toc();

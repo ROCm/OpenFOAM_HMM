@@ -81,6 +81,25 @@ class objectRegistry
         //  Used to terminate searching within the ancestors
         bool parentNotTime() const;
 
+        //- Templated implementation for count()
+        //  The number of items with a matching class
+        template<class MatchPredicate1, class MatchPredicate2>
+        static label countImpl
+        (
+            const objectRegistry& list,
+            const MatchPredicate1& matchClass,
+            const MatchPredicate2& matchName
+        );
+
+        //- Templated implementation for count()
+        //  The number of items with a matching class
+        template<class Type, class MatchPredicate>
+        static label countTypeImpl
+        (
+            const objectRegistry& list,
+            const MatchPredicate& matchName
+        );
+
         //- Templated implementation for classes()
         template<class MatchPredicate>
         static HashTable<wordHashSet> classesImpl
@@ -171,6 +190,45 @@ public:
         //- restricted to objects that have a matching object name.
         template<class MatchPredicate>
         HashTable<wordHashSet> classes(const MatchPredicate& matchName) const;
+
+
+    // Number of items
+
+        //- The number of objects of the given class name
+        //  \note uses the class type() method
+        label count(const char* clsName) const;
+
+        //- The number of objects of the given class name
+        //  \note uses the class type() method
+        template<class MatchPredicate>
+        label count(const MatchPredicate& matchClass) const;
+
+        //- The number of objects of the given class name
+        //  \note uses the class type() method
+        template<class MatchPredicate1, class MatchPredicate2>
+        label count
+        (
+            const MatchPredicate1& matchClass,
+            const MatchPredicate2& matchName
+        ) const;
+
+        //- The names of objects with a class satisfying \c isA\<Type\>
+        //
+        //  \param strict use \c isType\<Type\> instead of \c isA\<Type\>
+        //
+        //  \note The values of \c count\<Type\>() and \c count(Type::typeName)
+        //      may be inconsistent, since they use different mechanisms for
+        //      testing the class type.
+        //  \note If \a Type is \c void, no isA check is used (always true).
+        template<class Type>
+        label count(const bool strict = false) const;
+
+        //- The names of objects with a class satisfying \c isA\<Type\>
+        //- that also have a matching object name.
+        //
+        //  \note If \a Type is \c void, no isA check is used (always true).
+        template<class Type, class MatchPredicate>
+        label count(const MatchPredicate& matchName) const;
 
 
     // Summary of names
