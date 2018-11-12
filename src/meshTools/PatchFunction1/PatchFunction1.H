@@ -193,6 +193,12 @@ public:
             //- Return value as a function of (scalar) independent variable
             virtual tmp<Field<Type>> value(const scalar x) const;
 
+            //- Is value constant (i.e. independent of x)
+            virtual bool constant() const = 0;
+
+            //- Is value uniform (i.e. independent of coordinate)
+            virtual bool uniform() const = 0;
+
             //- Integrate between two (scalar) values
             virtual tmp<Field<Type>> integrate
             (

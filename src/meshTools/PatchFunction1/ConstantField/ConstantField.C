@@ -32,13 +32,17 @@ Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
 (
     const polyPatch& pp,
     const word& entryName,
-    const Field<Type>& value,
+    const bool isUniform,
+    const Type& uniformValue,
+    const Field<Type>& nonUniformValue,
     const dictionary& dict,
     const bool faceValues
 )
 :
     PatchFunction1<Type>(pp, entryName, dict, faceValues),
-    value_(value)
+    isUniform_(isUniform),
+    uniformValue_(uniformValue),
+    value_(nonUniformValue)
 {}
 
 
@@ -47,9 +51,14 @@ Foam::Field<Type> Foam::PatchFunction1Types::ConstantField<Type>::getValue
 (
     const word& keyword,
     const dictionary& dict,
-    const label len
+    const label len,
+    bool& isUniform,
+    Type& uniformValue
 )
 {
+    isUniform = true;
+    uniformValue = Zero;
+
     Field<Type> fld;
 
     if (len)
@@ -67,13 +76,16 @@ Foam::Field<Type> Foam::PatchFunction1Types::ConstantField<Type>::getValue
              || firstToken.wordToken() == "constant"
             )
             {
+                is >> uniformValue;
                 fld.setSize(len);
-                fld = pTraits<Type>(is);
+                fld = uniformValue;
             }
             else if (firstToken.wordToken() == "nonuniform")
             {
                 List<Type>& list = fld;
                 is >> list;
+                isUniform = false;
+
                 label currentSize = fld.size();
                 if (currentSize != len)
                 {
@@ -105,6 +117,7 @@ Foam::Field<Type> Foam::PatchFunction1Types::ConstantField<Type>::getValue
             }
             else
             {
+                isUniform = false;
                 FatalIOErrorInFunction(dict)
                     << "Expected keyword 'uniform', 'nonuniform' or 'constant'"
                     << ", found " << firstToken.wordToken()
@@ -113,10 +126,10 @@ Foam::Field<Type> Foam::PatchFunction1Types::ConstantField<Type>::getValue
         }
         else
         {
-            fld.setSize(len);
-
             is.putBack(firstToken);
-            fld = pTraits<Type>(is);
+            is >> uniformValue;
+            fld.setSize(len);
+            fld = uniformValue;
         }
     }
     return fld;
@@ -134,7 +147,7 @@ Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
 )
 :
     PatchFunction1<Type>(pp, entryName, dict, faceValues),
-    value_(getValue(entryName, dict, pp.size()))
+    value_(getValue(entryName, dict, pp.size(), isUniform_, uniformValue_))
 {}
 
 
@@ -145,6 +158,8 @@ Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
 )
 :
     PatchFunction1<Type>(cnst),
+    isUniform_(cnst.isUniform_),
+    uniformValue_(cnst.uniformValue_),
     value_(cnst.value_)
 {}
 
@@ -157,8 +172,17 @@ Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
 )
 :
     PatchFunction1<Type>(cnst, pp),
+    isUniform_(cnst.isUniform_),
+    uniformValue_(cnst.uniformValue_),
     value_(cnst.value_)
-{}
+{
+    // If different sizes do what?
+    value_.setSize(this->patch_.size());
+    if (isUniform_)
+    {
+        value_ = uniformValue_;
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -170,6 +194,12 @@ void Foam::PatchFunction1Types::ConstantField<Type>::autoMap
 )
 {
     value_.autoMap(mapper);
+
+    // If originating from single value override just to make sure
+    if (isUniform_)
+    {
+        value_ = uniformValue_;
+    }
 }
 
 

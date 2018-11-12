@@ -60,6 +60,12 @@ class ConstantField
 {
     // Private data
 
+        //- Is uniform?
+        bool isUniform_;
+
+        //- If uniform the uniformValue
+        Type uniformValue_;
+
         //- ConstantField value
         Field<Type> value_;
 
@@ -71,7 +77,9 @@ class ConstantField
         (
             const word& keyword,
             const dictionary& dict,
-            const label len
+            const label len,
+            bool& isUniform,
+            Type& uniformValue
         );
 
         //- No copy assignment
@@ -91,7 +99,9 @@ public:
         (
             const polyPatch& pp,
             const word& entryName,
-            const Field<Type>& value,
+            const bool isUniform,
+            const Type& uniformValue,
+            const Field<Type>& nonUniformValue,
             const dictionary& dict = dictionary::null,
             const bool faceValues = true
         );
@@ -141,7 +151,19 @@ public:
         // Evaluation
 
             //- Return constant value
-            virtual inline tmp<Field<Type>> value(const scalar) const;
+            virtual inline tmp<Field<Type>> value(const scalar x) const;
+
+            //- Is value constant (i.e. independent of x)
+            virtual inline bool constant() const
+            {
+                return true;
+            }
+
+            //- Is value uniform (i.e. independent of coordinate)
+            virtual inline bool uniform() const
+            {
+                return isUniform_ && PatchFunction1<Type>::uniform();
+            }
 
             //- Integrate between two values
             virtual inline tmp<Field<Type>> integrate

@@ -21,7 +21,6 @@ internalField   uniform 0.2;
 
 boundaryField
 {
-
     inlet
     {
         type            uniformFixedValue;

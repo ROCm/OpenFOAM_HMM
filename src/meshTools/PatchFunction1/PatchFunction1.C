@@ -113,6 +113,12 @@ Foam::tmp<Foam::Field<Type>> Foam::PatchFunction1<Type>::value
     return Field<Type>();
 }
 
+template<class Type>
+bool Foam::PatchFunction1<Type>::uniform() const
+{
+    return !coordSys_.active();
+}
+
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::PatchFunction1<Type>::integrate

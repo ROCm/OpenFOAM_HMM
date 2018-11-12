@@ -32,7 +32,6 @@ boundaryField
             (0.01  (0 -15 0))
             (100   (0 -15 0))
         );
-        value           $internalField;
     }
 
     outlet

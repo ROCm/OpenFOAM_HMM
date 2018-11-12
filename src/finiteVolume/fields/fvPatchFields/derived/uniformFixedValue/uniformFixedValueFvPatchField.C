@@ -63,7 +63,17 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
     fixedValueFvPatchField<Type>(p, iF, dict, false),
     uniformValue_(PatchFunction1<Type>::New(p.patch(), "uniformValue", dict))
 {
-    this->evaluate();
+    if (dict.found("value"))
+    {
+        fvPatchField<Type>::operator=
+        (
+            Field<Type>("value", dict, p.size())
+        );
+    }
+    else
+    {
+        this->evaluate();
+    }
 }
 
 
@@ -79,8 +89,16 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
     fixedValueFvPatchField<Type>(p, iF),   // Don't map
     uniformValue_(ptf.uniformValue_.clone(p.patch()))
 {
-    // Evaluate since value not mapped
-    this->evaluate();
+    if (mapper.direct() && !mapper.hasUnmapped())
+    {
+        // Use mapping instead of re-evaluation
+        this->map(ptf, mapper);
+    }
+    else
+    {
+        // Evaluate since value not mapped
+        this->evaluate();
+    }
 }
 
 
@@ -104,13 +122,7 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 :
     fixedValueFvPatchField<Type>(ptf, iF),
     uniformValue_(ptf.uniformValue_.clone(this->patch().patch()))
-{
-    // Evaluate the profile if defined
-    if (uniformValue_.valid())
-    {
-        this->evaluate();
-    }
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -123,6 +135,12 @@ void Foam::uniformFixedValueFvPatchField<Type>::autoMap
 {
     fixedValueFvPatchField<Type>::autoMap(mapper);
     uniformValue_().autoMap(mapper);
+
+    if (uniformValue_().constant())
+    {
+        // If mapper is not dependent on time we're ok to evaluate
+        this->evaluate();
+    }
 }
 
 

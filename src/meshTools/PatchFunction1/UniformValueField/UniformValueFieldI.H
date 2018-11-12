@@ -25,8 +25,17 @@ License
 
 #include "UniformValueField.H"
 #include "SubField.H"
+#include "Constant.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+inline bool
+Foam::PatchFunction1Types::UniformValueField<Type>::constant() const
+{
+    return uniformValuePtr_->type() == Function1Types::Constant<Type>::typeName;
+}
+
 
 template<class Type>
 inline Foam::tmp<Foam::Field<Type>>

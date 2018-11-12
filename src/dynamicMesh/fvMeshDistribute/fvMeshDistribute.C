@@ -2606,7 +2606,8 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                 mesh_,
                 domainMesh,
                 couples,
-                false           // no parallel comms
+                false,          // no parallel comms
+                true            // fake complete mapping
             );
 
             // Update mesh data: sourceFace,sourceProc for added
