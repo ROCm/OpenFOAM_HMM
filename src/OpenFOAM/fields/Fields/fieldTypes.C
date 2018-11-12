@@ -35,12 +35,12 @@ License
 
 const Foam::wordList Foam::fieldTypes::basic
 ({
-    Foam::labelIOField::typeName,
-    Foam::scalarIOField::typeName,
-    Foam::vectorIOField::typeName,
-    Foam::sphericalTensorIOField::typeName,
-    Foam::symmTensorIOField::typeName,
-    Foam::tensorIOField::typeName
+    Foam::labelIOField::typeName_(),
+    Foam::scalarIOField::typeName_(),
+    Foam::vectorIOField::typeName_(),
+    Foam::sphericalTensorIOField::typeName_(),
+    Foam::symmTensorIOField::typeName_(),
+    Foam::tensorIOField::typeName_()
 });
 
 

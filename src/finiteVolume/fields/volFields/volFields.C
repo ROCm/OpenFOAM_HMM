@@ -87,21 +87,21 @@ void GeometricField<scalar, fvPatchField, volMesh>::replace
 
 const Foam::wordList Foam::fieldTypes::internal
 ({
-    Foam::volScalarField::Internal::typeName,
-    Foam::volVectorField::Internal::typeName,
-    Foam::volSphericalTensorField::Internal::typeName,
-    Foam::volSymmTensorField::Internal::typeName,
-    Foam::volTensorField::Internal::typeName
+    Foam::volScalarField::Internal::typeName_(),
+    Foam::volVectorField::Internal::typeName_(),
+    Foam::volSphericalTensorField::Internal::typeName_(),
+    Foam::volSymmTensorField::Internal::typeName_(),
+    Foam::volTensorField::Internal::typeName_()
 });
 
 
 const Foam::wordList Foam::fieldTypes::volume
 ({
-    Foam::volScalarField::typeName,
-    Foam::volVectorField::typeName,
-    Foam::volSphericalTensorField::typeName,
-    Foam::volSymmTensorField::typeName,
-    Foam::volTensorField::typeName
+    Foam::volScalarField::typeName_(),
+    Foam::volVectorField::typeName_(),
+    Foam::volSphericalTensorField::typeName_(),
+    Foam::volSymmTensorField::typeName_(),
+    Foam::volTensorField::typeName_()
 });
 
 

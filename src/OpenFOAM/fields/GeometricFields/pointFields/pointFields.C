@@ -58,11 +58,11 @@ namespace Foam
 
 const Foam::wordList Foam::fieldTypes::point
 ({
-    Foam::pointScalarField::typeName,
-    Foam::pointVectorField::typeName,
-    Foam::pointSphericalTensorField::typeName,
-    Foam::pointSymmTensorField::typeName,
-    Foam::pointTensorField::typeName
+    Foam::pointScalarField::typeName_(),
+    Foam::pointVectorField::typeName_(),
+    Foam::pointSphericalTensorField::typeName_(),
+    Foam::pointSymmTensorField::typeName_(),
+    Foam::pointTensorField::typeName_()
 });
 
 

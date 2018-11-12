@@ -81,11 +81,11 @@ void GeometricField<scalar, faPatchField, areaMesh>::replace
 
 const Foam::wordList Foam::fieldTypes::area
 ({
-    Foam::areaScalarField::typeName,
-    Foam::areaVectorField::typeName,
-    Foam::areaSphericalTensorField::typeName,
-    Foam::areaSymmTensorField::typeName,
-    Foam::areaTensorField::typeName
+    Foam::areaScalarField::typeName_(),
+    Foam::areaVectorField::typeName_(),
+    Foam::areaSphericalTensorField::typeName_(),
+    Foam::areaSymmTensorField::typeName_(),
+    Foam::areaTensorField::typeName_()
 });
 
 
