@@ -33,7 +33,8 @@ License
 
 bool Foam::IOobjectList::checkNames(wordList& masterNames, const bool syncPar)
 {
-    // Sort for consistent order on all processors
+    // Sort for consistent order on all processors.
+    // Even do this for serial runs, for consistent behaviour
     Foam::sort(masterNames);
 
     if (syncPar && Pstream::parRun())
@@ -273,6 +274,13 @@ Foam::HashTable<Foam::wordHashSet> Foam::IOobjectList::classes() const
 }
 
 
+Foam::label Foam::IOobjectList::count(const char* clsName) const
+{
+    // No nullptr check - only called with string literals
+    return count(static_cast<word>(clsName));
+}
+
+
 Foam::wordList Foam::IOobjectList::names() const
 {
     return HashPtrTable<IOobject>::toc();
@@ -288,26 +296,25 @@ Foam::wordList Foam::IOobjectList::names(const bool syncPar) const
 }
 
 
-Foam::wordList Foam::IOobjectList::names
-(
-    const word& clsName
-) const
+Foam::wordList Foam::IOobjectList::names(const char* clsName) const
 {
-    // sort/sync: false, false
-    return namesImpl(*this, clsName, predicates::always(), false, false);
+    // No nullptr check - only called with string literals
+    return names(static_cast<word>(clsName));
 }
 
 
 Foam::wordList Foam::IOobjectList::names
 (
-    const word& clsName,
+    const char* clsName,
     const bool syncPar
 ) const
 {
-    // sort: false
-    return namesImpl(*this, clsName, predicates::always(), false, syncPar);
+    // No nullptr check - only called with string literals
+    return names(static_cast<word>(clsName), syncPar);
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Foam::wordList Foam::IOobjectList::sortedNames() const
 {
@@ -315,10 +322,7 @@ Foam::wordList Foam::IOobjectList::sortedNames() const
 }
 
 
-Foam::wordList Foam::IOobjectList::sortedNames
-(
-    const bool syncPar
-) const
+Foam::wordList Foam::IOobjectList::sortedNames(const bool syncPar) const
 {
     wordList objNames(HashPtrTable<IOobject>::sortedToc());
 
@@ -327,24 +331,56 @@ Foam::wordList Foam::IOobjectList::sortedNames
 }
 
 
-Foam::wordList Foam::IOobjectList::sortedNames
-(
-    const word& clsName
-) const
+Foam::wordList Foam::IOobjectList::sortedNames(const char* clsName) const
 {
-    // sort/sync: true, false
-    return namesImpl(*this, clsName, predicates::always(), true, false);
+    // No nullptr check - only called with string literals
+    return sortedNames(static_cast<word>(clsName));
 }
 
 
 Foam::wordList Foam::IOobjectList::sortedNames
 (
-    const word& clsName,
+    const char* clsName,
     const bool syncPar
 ) const
 {
-    // sort: true
-    return namesImpl(*this, clsName, predicates::always(), true, syncPar);
+    // No nullptr check - only called with string literals
+    return names(static_cast<word>(clsName), syncPar);
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Foam::label Foam::IOobjectList::prune_0()
+{
+    return
+        HashPtrTable<IOobject>::filterKeys
+        (
+            [](const word& k){ return k.endsWith("_0"); },
+            true  // prune
+        );
+}
+
+
+Foam::wordList Foam::IOobjectList::allNames() const
+{
+    wordList objNames(HashPtrTable<IOobject>::toc());
+
+    syncNames(objNames);
+    return objNames;
+}
+
+
+bool Foam::IOobjectList::checkNames(const bool syncPar) const
+{
+    if (syncPar && Pstream::parRun())
+    {
+        wordList objNames(HashPtrTable<IOobject>::toc());
+
+        return checkNames(objNames, syncPar);
+    }
+
+    return true;
 }
 
 

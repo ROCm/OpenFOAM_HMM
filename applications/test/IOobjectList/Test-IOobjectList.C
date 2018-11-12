@@ -32,6 +32,8 @@ Description
 #include "timeSelector.H"
 #include "IOobjectList.H"
 #include "hashedWordList.H"
+#include "labelIOList.H"
+#include "scalarIOList.H"
 
 using namespace Foam;
 
@@ -77,6 +79,67 @@ void reportDetail(const IOobjectList& objects)
     }
 
     Info<<"====" << nl;
+}
+
+
+template<class Type>
+void filterTest(const IOobjectList& objs, const wordRe& re)
+{
+    Info<< "Filter = " << re << nl;
+
+    const word& typeName = Type::typeName;
+
+    Info<< "    <" << typeName <<">(" << re << ") : "
+        << objs.count<Type>(re) << nl
+        << "    (" << typeName << "::typeName, " << re << ") : "
+        << objs.count(typeName, re) << nl;
+
+    Info<< "    <" << typeName << ">(" << re << ") : "
+        << flatOutput(objs.sortedNames<Type>(re)) << nl
+        // << flatOutput(objs.names<Type>(re)) << nl
+        << "    (" << typeName << "::typeName, " << re << ") : "
+        << flatOutput(objs.sortedNames(typeName, re)) << nl
+        //<< flatOutput(objs.names(typeName, re)) << nl
+        ;
+
+
+    wordRe reClass("vol.*Field", wordRe::REGEX);
+    wordRe re2(re, wordRe::REGEX_ICASE);
+
+    Info<< "General" << nl
+        << "    <void>(" << re << ") : "
+        << flatOutput(objs.sortedNames<void>(re)) << nl
+        << "    (" << reClass << ", " << re2 <<" ignore-case) : "
+        << flatOutput(objs.sortedNames(reClass, re2)) << nl
+        ;
+
+    Info<< nl;
+}
+
+
+void registryTests(const IOobjectList& objs)
+{
+    Info<< nl << "IOobjectList " << flatOutput(objs.sortedNames()) << nl;
+
+    Info<< "count" << nl
+        << "    <void>()    : " << objs.count<void>() << nl
+        << "    <labelList>()   : " << objs.count<labelIOList>() << nl
+        << "    <scalarList>()   : " << objs.count<scalarIOList>() << nl
+        << nl;
+    Info<< "    <volScalarField>()    : "
+        << objs.count<volScalarField>() << nl
+        << "    (volScalarField::typeName) : "
+        << objs.count(volScalarField::typeName) << nl;
+    Info<< "    <volVectorField>()    : "
+        << objs.count<volVectorField>() << nl
+        << "    (volVectorField::typeName) : "
+        << objs.count(volVectorField::typeName) << nl;
+
+
+    Info<< nl << "Filter on names:" << nl;
+    filterTest<volScalarField>(objs, wordRe("[p-z].*", wordRe::DETECT));
+
+    Info<< nl;
 }
 
 
@@ -164,6 +227,8 @@ int main(int argc, char *argv[])
         classes.erase(subsetTypes);
         Info<<"remove: " << flatOutput(subsetTypes) << nl;
         Info<<"Pruned: " << classes << nl;
+
+        registryTests(objects);
 
         // On last time
         if (timeI == timeDirs.size()-1)

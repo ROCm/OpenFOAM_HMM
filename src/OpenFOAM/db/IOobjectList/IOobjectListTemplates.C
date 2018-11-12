@@ -55,6 +55,55 @@ Foam::HashTable<Foam::wordHashSet> Foam::IOobjectList::classesImpl
 }
 
 
+// Templated implementation for count()
+template<class MatchPredicate1, class MatchPredicate2>
+Foam::label Foam::IOobjectList::countImpl
+(
+    const IOobjectList& list,
+    const MatchPredicate1& matchClass,
+    const MatchPredicate2& matchName
+)
+{
+    label count = 0;
+
+    forAllConstIters(list, iter)
+    {
+        const IOobject* io = iter.object();
+
+        if (matchClass(io->headerClassName()) && matchName(io->name()))
+        {
+            ++count;
+        }
+    }
+
+    return count;
+}
+
+
+// Templated implementation for count()
+template<class Type, class MatchPredicate>
+Foam::label Foam::IOobjectList::countTypeImpl
+(
+    const IOobjectList& list,
+    const MatchPredicate& matchName
+)
+{
+    label count = 0;
+
+    forAllConstIters(list, iter)
+    {
+        const IOobject* io = iter.object();
+
+        if (io->isHeaderClassName<Type>() && matchName(io->name()))
+        {
+            ++count;
+        }
+    }
+
+    return count;
+}
+
+
 // Templated implementation for names(), sortedNames()
 template<class MatchPredicate1, class MatchPredicate2>
 Foam::wordList Foam::IOobjectList::namesImpl
@@ -62,8 +111,7 @@ Foam::wordList Foam::IOobjectList::namesImpl
     const IOobjectList& list,
     const MatchPredicate1& matchClass,
     const MatchPredicate2& matchName,
-    const bool doSort,
-    const bool syncPar
+    const bool doSort
 )
 {
     wordList objNames(list.size());
@@ -81,14 +129,47 @@ Foam::wordList Foam::IOobjectList::namesImpl
         }
     }
 
-    objNames.setSize(count);
+    objNames.resize(count);
 
     if (doSort)
     {
         Foam::sort(objNames);
     }
 
-    checkNames(objNames, syncPar);
+    return objNames;
+}
+
+
+// Templated implementation for names(), sortedNames()
+template<class Type, class MatchPredicate>
+Foam::wordList Foam::IOobjectList::namesTypeImpl
+(
+    const IOobjectList& list,
+    const MatchPredicate& matchName,
+    const bool doSort
+)
+{
+    wordList objNames(list.size());
+
+    label count = 0;
+    forAllConstIters(list, iter)
+    {
+        const word& key = iter.key();
+        const IOobject* io = iter.object();
+
+        if (io->isHeaderClassName<Type>() && matchName(key))
+        {
+            objNames[count] = key;
+            ++count;
+        }
+    }
+
+    objNames.resize(count);
+
+    if (doSort)
+    {
+        Foam::sort(objNames);
+    }
 
     return objNames;
 }
@@ -155,6 +236,36 @@ Foam::IOobjectList Foam::IOobjectList::lookupClassImpl
 }
 
 
+// Templated implementation for lookupClass()
+template<class Type, class MatchPredicate>
+Foam::IOobjectList Foam::IOobjectList::lookupClassTypeImpl
+(
+    const IOobjectList& list,
+    const MatchPredicate& matchName
+)
+{
+    IOobjectList results(list.size());
+
+    forAllConstIters(list, iter)
+    {
+        const word& key = iter.key();
+        const IOobject* io = iter.object();
+
+        if (io->isHeaderClassName<Type>() && matchName(key))
+        {
+            if (IOobject::debug)
+            {
+                InfoInFunction << "Found " << key << endl;
+            }
+
+            results.set(key, new IOobject(*io));
+        }
+    }
+
+    return results;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class MatchPredicate>
@@ -177,6 +288,34 @@ Foam::IOobjectList Foam::IOobjectList::lookupClass
 }
 
 
+template<class MatchPredicate1, class MatchPredicate2>
+Foam::IOobjectList Foam::IOobjectList::lookupClass
+(
+    const MatchPredicate1& matchClass,
+    const MatchPredicate2& matchName
+) const
+{
+    return lookupClassImpl(*this, matchClass, matchName);
+}
+
+
+template<class Type>
+Foam::IOobjectList Foam::IOobjectList::lookupClass() const
+{
+    return lookupClassTypeImpl<Type>(*this, predicates::always());
+}
+
+
+template<class Type, class MatchPredicate>
+Foam::IOobjectList Foam::IOobjectList::lookupClass
+(
+    const MatchPredicate& matchName
+) const
+{
+    return lookupClassImpl<Type>(*this, matchName);
+}
+
+
 template<class MatchPredicate>
 Foam::HashTable<Foam::wordHashSet>
 Foam::IOobjectList::classes
@@ -189,52 +328,283 @@ Foam::IOobjectList::classes
 
 
 template<class MatchPredicate>
-Foam::wordList Foam::IOobjectList::names
+Foam::label Foam::IOobjectList::count
 (
-    const word& clsName,
+    const MatchPredicate& matchClass
+) const
+{
+    return countImpl(*this, matchClass, predicates::always());
+}
+
+
+template<class MatchPredicate1, class MatchPredicate2>
+Foam::label Foam::IOobjectList::count
+(
+    const MatchPredicate1& matchClass,
+    const MatchPredicate2& matchName
+) const
+{
+    return countImpl(*this, matchClass, matchName);
+}
+
+
+template<class Type>
+Foam::label Foam::IOobjectList::count() const
+{
+    return countTypeImpl<Type>(*this, predicates::always());
+}
+
+
+template<class Type, class MatchPredicate>
+Foam::label Foam::IOobjectList::count
+(
     const MatchPredicate& matchName
 ) const
 {
-    // sort/sync: false, false
-    return namesImpl(*this, clsName, matchName, false, false);
+    return countTypeImpl<Type>(*this, matchName);
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class MatchPredicate>
+Foam::wordList Foam::IOobjectList::names
+(
+    const MatchPredicate& matchClass
+) const
+{
+    return namesImpl(*this, matchClass, predicates::always(), false);
 }
 
 
 template<class MatchPredicate>
 Foam::wordList Foam::IOobjectList::names
 (
-    const word& clsName,
+    const MatchPredicate& matchClass,
+    const bool syncPar
+) const
+{
+    wordList objNames
+    (
+        namesImpl(*this, matchClass, predicates::always(), false)
+    );
+
+    checkNames(objNames, syncPar);
+    return objNames;
+}
+
+
+template<class MatchPredicate1, class MatchPredicate2>
+Foam::wordList Foam::IOobjectList::names
+(
+    const MatchPredicate1& matchClass,
+    const MatchPredicate2& matchName
+) const
+{
+    return namesImpl(*this, matchClass, matchName, false);
+}
+
+
+template<class MatchPredicate1, class MatchPredicate2>
+Foam::wordList Foam::IOobjectList::names
+(
+    const MatchPredicate1& matchClass,
+    const MatchPredicate2& matchName,
+    const bool syncPar
+) const
+{
+    wordList objNames(namesImpl(*this, matchClass, matchName, false));
+
+    checkNames(objNames, syncPar);
+    return objNames;
+}
+
+
+template<class Type>
+Foam::wordList Foam::IOobjectList::names() const
+{
+    return namesTypeImpl<Type>(*this, predicates::always(), false);
+}
+
+
+template<class Type>
+Foam::wordList Foam::IOobjectList::names(const bool syncPar) const
+{
+    wordList objNames(namesTypeImpl<Type>(*this, predicates::always(), false));
+
+    checkNames(objNames, syncPar);
+    return objNames;
+}
+
+
+template<class Type, class MatchPredicate>
+Foam::wordList Foam::IOobjectList::names
+(
+    const MatchPredicate& matchName
+) const
+{
+    return namesTypeImpl<Type>(*this, matchName, false);
+}
+
+
+template<class Type, class MatchPredicate>
+Foam::wordList Foam::IOobjectList::names
+(
     const MatchPredicate& matchName,
     const bool syncPar
 ) const
 {
-    // sort: false
-    return namesImpl(*this, clsName, matchName, false, syncPar);
+    wordList objNames(namesTypeImpl<Type>(*this, matchName, false));
+
+    checkNames(objNames, syncPar);
+    return objNames;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class MatchPredicate>
+Foam::wordList Foam::IOobjectList::sortedNames
+(
+    const MatchPredicate& matchClass
+) const
+{
+    return namesImpl(*this, matchClass, predicates::always(), true);
 }
 
 
 template<class MatchPredicate>
 Foam::wordList Foam::IOobjectList::sortedNames
 (
-    const word& clsName,
-    const MatchPredicate& matchName
+    const MatchPredicate& matchClass,
+    const bool syncPar
 ) const
 {
-    // sort/sync: true, false
-    return namesImpl(*this, clsName, matchName, true, false);
+    wordList objNames
+    (
+        namesImpl(*this, matchClass, predicates::always(), true)
+    );
+
+    checkNames(objNames, syncPar);
+    return objNames;
 }
 
 
-template<class MatchPredicate>
+template<class MatchPredicate1, class MatchPredicate2>
 Foam::wordList Foam::IOobjectList::sortedNames
 (
-    const word& clsName,
+    const MatchPredicate1& matchClass,
+    const MatchPredicate2& matchName
+) const
+{
+    return namesImpl(*this, matchClass, matchName, true);
+}
+
+template<class MatchPredicate1, class MatchPredicate2>
+Foam::wordList Foam::IOobjectList::sortedNames
+(
+    const MatchPredicate1& matchClass,
+    const MatchPredicate2& matchName,
+    const bool syncPar
+) const
+{
+    wordList objNames(namesImpl(*this, matchClass, matchName, true));
+
+    checkNames(objNames, syncPar);
+    return objNames;
+}
+
+
+template<class Type>
+Foam::wordList Foam::IOobjectList::sortedNames() const
+{
+    return namesTypeImpl<Type>(*this, predicates::always(), true);
+}
+
+
+template<class Type>
+Foam::wordList Foam::IOobjectList::sortedNames(const bool syncPar) const
+{
+    wordList objNames(namesTypeImpl<Type>(*this, predicates::always(), true));
+
+    checkNames(objNames, syncPar);
+    return objNames;
+}
+
+
+template<class Type, class MatchPredicate>
+Foam::wordList Foam::IOobjectList::sortedNames
+(
+    const MatchPredicate& matchName
+) const
+{
+    return namesTypeImpl<Type>(*this, matchName, true);
+}
+
+
+template<class Type, class MatchPredicate>
+Foam::wordList Foam::IOobjectList::sortedNames
+(
     const MatchPredicate& matchName,
     const bool syncPar
 ) const
 {
-    // sort: true
-    return namesImpl(*this, clsName, matchName, true, syncPar);
+    return namesTypeImpl<Type>(*this, matchName, true, syncPar);
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class UnaryPredicate>
+Foam::label Foam::IOobjectList::filterClasses
+(
+    const UnaryPredicate& pred,
+    const bool pruning
+)
+{
+//    return HashPtrTable<IOobject>::filterValues
+//    (
+//        [&](const IOobject* io){ return pred(io->headerClassName()); },
+//        pruning
+//    );
+
+    label changed = 0;
+
+    for (iterator iter = begin(); iter != end(); ++iter)
+    {
+        // Matches? either prune (pruning) or keep (!pruning)
+        if
+        (
+            (pred(iter.object()->headerClassName()) ? pruning : !pruning)
+         && erase(iter)
+        )
+        {
+            ++changed;
+        }
+    }
+
+    return changed;
+}
+
+
+template<class UnaryPredicate>
+Foam::label Foam::IOobjectList::filterObjects
+(
+    const UnaryPredicate& pred,
+    const bool pruning
+)
+{
+    return HashPtrTable<IOobject>::filterKeys(pred, pruning);
+}
+
+
+template<class Type>
+Foam::wordList Foam::IOobjectList::allNames() const
+{
+    wordList objNames(namesTypeImpl<Type>(*this, predicates::always(), false));
+
+    syncNames(objNames);
+    return objNames;
 }
 
 

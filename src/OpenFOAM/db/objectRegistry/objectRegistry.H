@@ -81,12 +81,41 @@ class objectRegistry
         //  Used to terminate searching within the ancestors
         bool parentNotTime() const;
 
+        //- Templated implementation for count()
+        //  The number of items with a matching class
+        template<class MatchPredicate1, class MatchPredicate2>
+        static label countImpl
+        (
+            const objectRegistry& list,
+            const MatchPredicate1& matchClass,
+            const MatchPredicate2& matchName
+        );
+
+        //- Templated implementation for count()
+        //  The number of items with a matching class
+        template<class Type, class MatchPredicate>
+        static label countTypeImpl
+        (
+            const objectRegistry& list,
+            const MatchPredicate& matchName
+        );
+
         //- Templated implementation for classes()
         template<class MatchPredicate>
         static HashTable<wordHashSet> classesImpl
         (
             const objectRegistry& list,
             const MatchPredicate& matchName
+        );
+
+        //- Templated implementation for names(), sortedNames()
+        template<class MatchPredicate1, class MatchPredicate2>
+        static wordList namesImpl
+        (
+            const objectRegistry& list,
+            const MatchPredicate1& matchClass,
+            const MatchPredicate2& matchName,
+            const bool doSort
         );
 
         //- Templated implementation for names(), sortedNames()
@@ -157,26 +186,74 @@ public:
         //  Behaviour and usage as per IOobjectList::classes
         HashTable<wordHashSet> classes() const;
 
-        //- A summary hash of classes used and their associated object names
-        //- restricted to objects with names that satisfy the input matcher
-        HashTable<wordHashSet> classes(const wordRe& matchName) const;
+        //- A summary hash of classes used and their associated object names,
+        //- restricted to objects that have a matching object name.
+        template<class MatchPredicate>
+        HashTable<wordHashSet> classes(const MatchPredicate& matchName) const;
 
-        //- A summary hash of classes used and their associated object names
-        //- restricted to objects with names that satisfy the input matcher
-        HashTable<wordHashSet> classes(const wordRes& matchName) const;
 
-        //- A summary hash of classes used and their associated object names
-        //- restricted to objects with names that satisfy the input matcher
-        HashTable<wordHashSet> classes(const wordHashSet& matchName) const;
+    // Number of items
+
+        //- The number of objects of the given class name
+        //  \note uses the class type() method
+        label count(const char* clsName) const;
+
+        //- The number of objects of the given class name
+        //  \note uses the class type() method
+        template<class MatchPredicate>
+        label count(const MatchPredicate& matchClass) const;
+
+        //- The number of objects of the given class name
+        //  \note uses the class type() method
+        template<class MatchPredicate1, class MatchPredicate2>
+        label count
+        (
+            const MatchPredicate1& matchClass,
+            const MatchPredicate2& matchName
+        ) const;
+
+        //- The names of objects with a class satisfying \c isA\<Type\>
+        //
+        //  \param strict use \c isType\<Type\> instead of \c isA\<Type\>
+        //
+        //  \note The values of \c count\<Type\>() and \c count(Type::typeName)
+        //      may be inconsistent, since they use different mechanisms for
+        //      testing the class type.
+        //  \note If \a Type is \c void, no isA check is used (always true).
+        template<class Type>
+        label count(const bool strict = false) const;
+
+        //- The names of objects with a class satisfying \c isA\<Type\>
+        //- that also have a matching object name.
+        //
+        //  \note If \a Type is \c void, no isA check is used (always true).
+        template<class Type, class MatchPredicate>
+        label count(const MatchPredicate& matchName) const;
 
 
     // Summary of names
 
-        //- The names of the objects
+        //- The names of all objects
         wordList names() const;
 
-        //- The names of objects with the given class
-        wordList names(const word& clsName) const;
+        //- The names of objects with the given class name.
+        //  \note uses the class type() method
+        wordList names(const char* clsName) const;
+
+        //- The names of objects with a matching class name
+        //  \note uses the class type() method
+        template<class MatchPredicate>
+        wordList names(const MatchPredicate& matchClass) const;
+
+        //- The names of objects with a matching class name
+        //- that also have a matching object name.
+        //  \note uses the class type() method
+        template<class MatchPredicate1, class MatchPredicate2>
+        wordList names
+        (
+            const MatchPredicate1& matchClass,
+            const MatchPredicate2& matchName
+        ) const;
 
         //- The names of objects with a class satisfying \c isA\<Type\>.
         //
@@ -185,62 +262,49 @@ public:
         wordList names() const;
 
         //- The names of objects with a class satisfying \c isA\<Type\>
-        //- that also have a name satisfying the input matcher
+        //- that also have a matching object name.
         //
         //  \note If \a Type is \c void, no isA check is used (always true).
-        template<class Type>
-        wordList names(const wordRe& matchName) const;
-
-        //- The names of objects with a class satisfying \c isA\<Type\>
-        //- that also have a name satisfying the input matcher
-        //
-        //  \note If \a Type is \c void, no isA check is used (always true).
-        template<class Type>
-        wordList names(const wordRes& matchName) const;
-
-        //- The names of objects with a class satisfying \c isA\<Type\>
-        //- that also have a name satisfying the input matcher
-        //
-        //  \note If \a Type is \c void, no isA check is used (always true).
-        template<class Type>
-        wordList names(const wordHashSet& matchName) const;
+        template<class Type, class MatchPredicate>
+        wordList names(const MatchPredicate& matchName) const;
 
 
     // Summary of names (sorted)
 
-        //- The sorted names of the objects
+        //- The sorted names of all objects
         wordList sortedNames() const;
 
-        //- The sorted names of objects with the given class
-        wordList sortedNames(const word& clsName) const;
+        //- The sorted names of objects with the given class name.
+        //  \note uses the class type() method
+        wordList sortedNames(const char* clsName) const;
+
+        //- The sorted names objects with a matching class name
+        //  \note uses the class type() method
+        template<class MatchPredicate>
+        wordList sortedNames(const MatchPredicate& matchClass) const;
+
+        //- The sorted names of objects with a matching class name
+        //- that also have a matching object name.
+        //  \note uses the class type() method
+        template<class MatchPredicate1, class MatchPredicate2>
+        wordList sortedNames
+        (
+            const MatchPredicate1& matchClass,
+            const MatchPredicate2& matchName
+        ) const;
 
         //- The sorted names of objects with a class satisfying \c isA\<Type\>
-        //- that also have a name satisfying the input matcher
         //
         //  \note If \a Type is \c void, no isA check is used (always true).
         template<class Type>
         wordList sortedNames() const;
 
         //- The sorted names of objects with a class satisfying \c isA\<Type\>
-        //- that also have a name satisfying the input matcher
+        //- that also have a matching object name.
         //
         //  \note If \a Type is \c void, no isA check is used (always true).
-        template<class Type>
-        wordList sortedNames(const wordRe& matchName) const;
-
-        //- The sorted names of objects with a class satisfying \c isA\<Type\>
-        //- that also have a name satisfying the input matcher
-        //
-        //  \note If \a Type is \c void, no isA check is used (always true).
-        template<class Type>
-        wordList sortedNames(const wordRes& matchName) const;
-
-        //- The sorted names of objects with a class satisfying \c isA\<Type\>
-        //- that also have a name satisfying the input matcher
-        //
-        //  \note If \a Type is \c void, no isA check is used (always true).
-        template<class Type>
-        wordList sortedNames(const wordHashSet& matchName) const;
+        template<class Type, class MatchPredicate>
+        wordList sortedNames(const MatchPredicate& matchName) const;
 
 
     // Lookup
