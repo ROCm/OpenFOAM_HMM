@@ -33,7 +33,8 @@ License
 
 bool Foam::IOobjectList::checkNames(wordList& masterNames, const bool syncPar)
 {
-    // Sort for consistent order on all processors
+    // Sort for consistent order on all processors.
+    // Even do this for serial runs, for consistent behaviour
     Foam::sort(masterNames);
 
     if (syncPar && Pstream::parRun())
@@ -273,6 +274,13 @@ Foam::HashTable<Foam::wordHashSet> Foam::IOobjectList::classes() const
 }
 
 
+Foam::label Foam::IOobjectList::count(const char* clsName) const
+{
+    // No nullptr check - only called with string literals
+    return count(static_cast<word>(clsName));
+}
+
+
 Foam::wordList Foam::IOobjectList::names() const
 {
     return HashPtrTable<IOobject>::toc();
@@ -345,6 +353,41 @@ Foam::wordList Foam::IOobjectList::sortedNames
 {
     // sort: true
     return namesImpl(*this, clsName, predicates::always(), true, syncPar);
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Foam::label Foam::IOobjectList::prune_0()
+{
+    return
+        HashPtrTable<IOobject>::filterKeys
+        (
+            [](const word& k){ return k.endsWith("_0"); },
+            true  // prune
+        );
+}
+
+
+Foam::wordList Foam::IOobjectList::allNames() const
+{
+    wordList objNames(HashPtrTable<IOobject>::toc());
+
+    syncNames(objNames);
+    return objNames;
+}
+
+
+bool Foam::IOobjectList::checkNames(const bool syncPar) const
+{
+    if (syncPar && Pstream::parRun())
+    {
+        wordList objNames(HashPtrTable<IOobject>::toc());
+
+        return checkNames(objNames, syncPar);
+    }
+
+    return true;
 }
 
 

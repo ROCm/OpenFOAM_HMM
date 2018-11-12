@@ -76,6 +76,24 @@ class IOobjectList
             const MatchPredicate& matchName
         );
 
+        //- Templated implementation for count()
+        //  The number of items with a matching class
+        template<class MatchPredicate1, class MatchPredicate2>
+        static label countImpl
+        (
+            const IOobjectList& list,
+            const MatchPredicate1& matchClass,
+            const MatchPredicate2& matchName
+        );
+
+        //- Templated implementation for count()
+        template<class Type, class MatchPredicate>
+        static label countTypeImpl
+        (
+            const IOobjectList& list,
+            const MatchPredicate& matchName
+        );
+
         //- Templated implementation for names(), sortedNames()
         template<class MatchPredicate1, class MatchPredicate2>
         static wordList namesImpl
@@ -85,6 +103,15 @@ class IOobjectList
             const MatchPredicate2& matchName,
             const bool doSort,
             const bool syncPar
+        );
+
+        //- Templated implementation for names(), sortedNames()
+        template<class Type, class MatchPredicate>
+        static wordList namesTypeImpl
+        (
+            const IOobjectList& list,
+            const MatchPredicate& matchName,
+            const bool doSort
         );
 
         //- Templated implementation for lookup()
@@ -102,6 +129,14 @@ class IOobjectList
             const IOobjectList& list,
             const MatchPredicate1& matchClass,
             const MatchPredicate2& matchName
+        );
+
+        //- Templated implementation for lookupClass()
+        template<class Type, class MatchPredicate>
+        static IOobjectList lookupClassTypeImpl
+        (
+            const IOobjectList& list,
+            const MatchPredicate& matchName
         );
 
 
@@ -181,16 +216,37 @@ public:
 
     // Lookup multiple items
 
-        //- The list of all IOobjects that have a matching object name.
+        //- The list of IOobjects that have a matching object name.
         template<class MatchPredicate>
         IOobjectList lookup(const MatchPredicate& matchName) const;
 
-        //- The list of all IOobjects with the given headerClassName
+        //- The list of IOobjects with the given headerClassName
         IOobjectList lookupClass(const char* clsName) const;
 
-        //- The list of all IOobjects with matching headerClassName
+        //- The list of IOobjects with matching headerClassName
         template<class MatchPredicate>
         IOobjectList lookupClass(const MatchPredicate& matchClass) const;
+
+        //- The list of IOobjects with matching headerClassName
+        //- that also have a matching object name.
+        template<class MatchPredicate1, class MatchPredicate2>
+        IOobjectList lookupClass
+        (
+            const MatchPredicate1& matchClass,
+            const MatchPredicate2& matchName
+        ) const;
+
+        //- The list of IOobjects with headerClassName == Type::typeName
+        //
+        //  \note If \a Type is \c void, no headerClassName check is used
+        //      (always true).
+        template<class Type>
+        IOobjectList lookupClass() const;
+
+        //- The list of IOobjects with headerClassName == Type::typeName
+        //- that also have a matching object name.
+        template<class Type, class MatchPredicate>
+        IOobjectList lookupClass(const MatchPredicate& matchName) const;
 
 
     // Summary of classes
@@ -273,6 +329,41 @@ public:
         HashTable<wordHashSet> classes(const MatchPredicate& matchName) const;
 
 
+    // Number of items
+
+        //- The number of objects of the given headerClassName
+        //  \note uses the class type() method
+        label count(const char* clsName) const;
+
+        //- The number of objects of the given headerClassName
+        template<class MatchPredicate>
+        label count
+        (
+            const MatchPredicate& matchClass
+        ) const;
+
+        //- The number of objects of the given headerClassName
+        //- that also have a matching object name.
+        template<class MatchPredicate1, class MatchPredicate2>
+        label count
+        (
+            const MatchPredicate1& matchClass,
+            const MatchPredicate2& matchName
+        ) const;
+
+        //- The number of objects with headerClassName == Type::typeName
+        template<class Type>
+        label count() const;
+
+        //- The number of objects with headerClassName == Type::typeName
+        //- that also have a matching object name.
+        //
+        //  \note If \a Type is \c void, no headerClassName check is used
+        //      (always true).
+        template<class Type, class MatchPredicate>
+        label count(const MatchPredicate& matchName) const;
+
+
     // Summary of names
 
         //- The names of the IOobjects
@@ -351,6 +442,47 @@ public:
             const MatchPredicate& matchName,
             const bool syncPar
         ) const;
+
+
+    // Edit
+
+        //- Filter to retain or prune given classes
+        //  \return The number of items changed (removed)
+        template<class UnaryPredicate>
+        label filterClasses
+        (
+            const UnaryPredicate& pred,
+            const bool pruning = false
+        );
+
+        //- Filter to retain or prune given object names
+        //  \return The number of items changed (removed)
+        template<class UnaryPredicate>
+        label filterObjects
+        (
+            const UnaryPredicate& pred,
+            const bool pruning = false
+        );
+
+        //- Remove objects with names ending with "_0" (restart fields)
+        //  \return The number of items changed (removed)
+        label prune_0();
+
+
+    // Parallel
+
+        //- The sorted names of all objects (synchronised across processors)
+        wordList allNames() const;
+
+        //- The sorted names of all objects (synchronised across processors)
+        //- with headerClassName == Type::typeName
+        template<class Type>
+        wordList allNames() const;
+
+        //- Verify that object names are synchronised across processors
+        //  Triggers FatalError if the names are not consistent on all
+        //  processors.
+        bool checkNames(const bool syncPar = true) const;
 
 
     // Member Operators
