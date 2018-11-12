@@ -128,7 +128,16 @@ public:
         // Evaluation
 
             //- Return UniformValueField value
-            virtual inline tmp<Field<Type>> value(const scalar) const;
+            virtual inline tmp<Field<Type>> value(const scalar x) const;
+
+            //- Is value constant (i.e. independent of x)
+            virtual inline bool constant() const;
+
+            //- Is value uniform (i.e. independent of coordinate)
+            virtual inline bool uniform() const
+            {
+                return PatchFunction1<Type>::uniform();
+            }
 
             //- Integrate between two values
             virtual inline tmp<Field<Type>> integrate

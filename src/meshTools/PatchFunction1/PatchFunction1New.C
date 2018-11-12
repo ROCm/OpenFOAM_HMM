@@ -67,7 +67,9 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
         {
             // Backwards-compatibility for reading straight fields
             is.putBack(firstToken);
-            const Field<Type> value(pp.size(), pTraits<Type>(is));
+
+            const Type uniformValue = pTraits<Type>(is);
+            const Field<Type> value(pp.size(), uniformValue);
 
             return autoPtr<PatchFunction1<Type>>
             (
@@ -75,6 +77,8 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
                 (
                     pp,
                     entryName,
+                    true,           // uniform
+                    uniformValue,   // uniform value
                     value,          // Supply value
                     dict,
                     faceValues

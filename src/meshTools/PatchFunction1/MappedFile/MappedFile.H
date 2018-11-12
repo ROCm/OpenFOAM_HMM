@@ -178,6 +178,18 @@ public:
             //- Return MappedFile value
             virtual tmp<Field<Type>> value(const scalar) const;
 
+            //- Is value constant (i.e. independent of x)
+            virtual bool constant() const
+            {
+                return sampleTimes_.size() == 1;
+            }
+
+            //- Is value uniform (i.e. independent of coordinate)
+            virtual bool uniform() const
+            {
+                return PatchFunction1<Type>::uniform();
+            }
+
             //- Integrate between two values
             virtual tmp<Field<Type>> integrate
             (

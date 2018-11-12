@@ -185,7 +185,19 @@ public:
         // Evaluation
 
             //- Return sampled value
-            virtual tmp<Field<Type>> value(const scalar) const;
+            virtual tmp<Field<Type>> value(const scalar x) const;
+
+            //- Is value constant (i.e. independent of x)
+            virtual inline bool constant() const
+            {
+                return false;
+            }
+
+            //- Is value uniform (i.e. independent of coordinate)
+            virtual inline bool uniform() const
+            {
+                return false;
+            }
 
             //- Integrate between two values
             virtual tmp<Field<Type>> integrate
