@@ -21,23 +21,43 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Application
+    Test-fieldTypes
+
+Description
+    Print fieldTypes
+
 \*---------------------------------------------------------------------------*/
 
+#include "fvCFD.H"
+#include "argList.H"
+#include "IOobject.H"
+#include "IOstreams.H"
+
+#include "areaFields.H"
 #include "fieldTypes.H"
+#include "pointFields.H"
+#include "volFields.H"
 
-// * * * * * * * * * * * * * * * * Global Data * * * * * * * * * * * * * * * //
-
-// Note hard-coded values are more reliable than other alternatives
-
-const Foam::wordList Foam::fieldTypes::basic
-({
-    "labelField",               //< labelIOField
-    "scalarField",              //< scalarIOField
-    "vectorField",              //< vectorOField
-    "sphericalTensorField",     //< sphericalTensorIOField
-    "symmTensorField",          //< symmTensorIOField
-    "tensorField"               //< tensorIOField
-});
-
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Main program:
+
+int main(int argc, char *argv[])
+{
+    argList::noParallel();
+
+    Info<< "basic:    " << flatOutput(fieldTypes::basic) << nl
+        << "area:     " << flatOutput(fieldTypes::area) << nl
+        << "volume:   " << flatOutput(fieldTypes::volume) << nl
+        << "internal: " << flatOutput(fieldTypes::internal) << nl
+        << "point:    " << flatOutput(fieldTypes::point) << nl
+        << endl;
+
+    Info<< "\nEnd\n" << endl;
+    return 0;
+}
+
+
+// ************************************************************************* //

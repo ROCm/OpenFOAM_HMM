@@ -56,13 +56,15 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Global Data * * * * * * * * * * * * * * * //
 
+// Note hard-coded values are more reliable than other alternatives
+
 const Foam::wordList Foam::fieldTypes::point
 ({
-    Foam::pointScalarField::typeName_(),
-    Foam::pointVectorField::typeName_(),
-    Foam::pointSphericalTensorField::typeName_(),
-    Foam::pointSymmTensorField::typeName_(),
-    Foam::pointTensorField::typeName_()
+    "pointScalarField",
+    "pointVectorField",
+    "pointSphericalTensorField",
+    "pointSymmTensorField",
+    "pointTensorField"
 });
 
 

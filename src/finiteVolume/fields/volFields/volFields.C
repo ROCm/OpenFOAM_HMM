@@ -85,23 +85,25 @@ void GeometricField<scalar, fvPatchField, volMesh>::replace
 
 // * * * * * * * * * * * * * * * * Global Data * * * * * * * * * * * * * * * //
 
+// Note hard-coded values are more reliable than other alternatives
+
 const Foam::wordList Foam::fieldTypes::internal
 ({
-    Foam::volScalarField::Internal::typeName_(),
-    Foam::volVectorField::Internal::typeName_(),
-    Foam::volSphericalTensorField::Internal::typeName_(),
-    Foam::volSymmTensorField::Internal::typeName_(),
-    Foam::volTensorField::Internal::typeName_()
+    "volScalarField::Internal",
+    "volVectorField::Internal",
+    "volSphericalTensorField::Internal",
+    "volSymmTensorField::Internal",
+    "volTensorField::Internal"
 });
 
 
 const Foam::wordList Foam::fieldTypes::volume
 ({
-    Foam::volScalarField::typeName_(),
-    Foam::volVectorField::typeName_(),
-    Foam::volSphericalTensorField::typeName_(),
-    Foam::volSymmTensorField::typeName_(),
-    Foam::volTensorField::typeName_()
+    "volScalarField",
+    "volVectorField",
+    "volSphericalTensorField",
+    "volSymmTensorField",
+    "volTensorField"
 });
 
 

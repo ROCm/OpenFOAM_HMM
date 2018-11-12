@@ -79,13 +79,15 @@ void GeometricField<scalar, faPatchField, areaMesh>::replace
 
 // * * * * * * * * * * * * * * * * Global Data * * * * * * * * * * * * * * * //
 
+// Note hard-coded values are more reliable than other alternatives
+
 const Foam::wordList Foam::fieldTypes::area
 ({
-    Foam::areaScalarField::typeName_(),
-    Foam::areaVectorField::typeName_(),
-    Foam::areaSphericalTensorField::typeName_(),
-    Foam::areaSymmTensorField::typeName_(),
-    Foam::areaTensorField::typeName_()
+    "areaScalarField",
+    "areaVectorField",
+    "areaSphericalTensorField",
+    "areaSymmTensorField",
+    "areaTensorField"
 });
 
 
