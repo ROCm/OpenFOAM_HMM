@@ -296,26 +296,25 @@ Foam::wordList Foam::IOobjectList::names(const bool syncPar) const
 }
 
 
-Foam::wordList Foam::IOobjectList::names
-(
-    const word& clsName
-) const
+Foam::wordList Foam::IOobjectList::names(const char* clsName) const
 {
-    // sort/sync: false, false
-    return namesImpl(*this, clsName, predicates::always(), false, false);
+    // No nullptr check - only called with string literals
+    return names(static_cast<word>(clsName));
 }
 
 
 Foam::wordList Foam::IOobjectList::names
 (
-    const word& clsName,
+    const char* clsName,
     const bool syncPar
 ) const
 {
-    // sort: false
-    return namesImpl(*this, clsName, predicates::always(), false, syncPar);
+    // No nullptr check - only called with string literals
+    return names(static_cast<word>(clsName), syncPar);
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Foam::wordList Foam::IOobjectList::sortedNames() const
 {
@@ -323,10 +322,7 @@ Foam::wordList Foam::IOobjectList::sortedNames() const
 }
 
 
-Foam::wordList Foam::IOobjectList::sortedNames
-(
-    const bool syncPar
-) const
+Foam::wordList Foam::IOobjectList::sortedNames(const bool syncPar) const
 {
     wordList objNames(HashPtrTable<IOobject>::sortedToc());
 
@@ -335,24 +331,21 @@ Foam::wordList Foam::IOobjectList::sortedNames
 }
 
 
-Foam::wordList Foam::IOobjectList::sortedNames
-(
-    const word& clsName
-) const
+Foam::wordList Foam::IOobjectList::sortedNames(const char* clsName) const
 {
-    // sort/sync: true, false
-    return namesImpl(*this, clsName, predicates::always(), true, false);
+    // No nullptr check - only called with string literals
+    return sortedNames(static_cast<word>(clsName));
 }
 
 
 Foam::wordList Foam::IOobjectList::sortedNames
 (
-    const word& clsName,
+    const char* clsName,
     const bool syncPar
 ) const
 {
-    // sort: true
-    return namesImpl(*this, clsName, predicates::always(), true, syncPar);
+    // No nullptr check - only called with string literals
+    return names(static_cast<word>(clsName), syncPar);
 }
 
 

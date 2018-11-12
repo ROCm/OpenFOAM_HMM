@@ -101,8 +101,7 @@ class IOobjectList
             const IOobjectList& list,
             const MatchPredicate1& matchClass,
             const MatchPredicate2& matchName,
-            const bool doSort,
-            const bool syncPar
+            const bool doSort
         );
 
         //- Templated implementation for names(), sortedNames()
@@ -374,31 +373,74 @@ public:
         //  if the names are not consistent on all processors.
         wordList names(const bool syncPar) const;
 
-        //- The names of IOobjects with the given class
-        wordList names(const word& clsName) const;
+        //- The names of IOobjects with the given headerClassName
+        wordList names(const char* clsName) const;
 
         //- The names of the IOobjects with the given headerClassName
         //  With syncPar = true, sorts the names and triggers FatalError
         //  if the names are not consistent on all processors.
-        wordList names(const word& clsName, const bool syncPar) const;
+        wordList names(const char* clsName, const bool syncPar) const;
 
         //- The names of IOobjects with the given headerClassName
-        //- that also have a matching object name.
+        template<class MatchPredicate>
+        wordList names(const MatchPredicate& matchClass) const;
+
+        //- The names of the IOobjects with the given headerClassName
+        //  With syncPar = true, sorts the names and triggers FatalError
+        //  if the names are not consistent on all processors.
         template<class MatchPredicate>
         wordList names
         (
-            const word& clsName,
-            const MatchPredicate& matchName
+            const MatchPredicate& matchClass,
+            const bool syncPar
+        ) const;
+
+        //- The names of IOobjects with the given headerClassName
+        //- that also have a matching object name.
+        template<class MatchPredicate1, class MatchPredicate2>
+        wordList names
+        (
+            const MatchPredicate1& matchClass,
+            const MatchPredicate2& matchName
         ) const;
 
         //- The names of the IOobjects with the given headerClassName
         //- that also have a matching object name.
         //  With syncPar = true, sorts the names and triggers FatalError
         //  if the names are not consistent on all processors.
-        template<class MatchPredicate>
+        template<class MatchPredicate1, class MatchPredicate2>
         wordList names
         (
-            const word& clsName,
+            const MatchPredicate1& matchClass,
+            const MatchPredicate2& matchName,
+            const bool syncPar
+        ) const;
+
+
+        //- The names of objects with headerClassName == Type::typeName
+        template<class Type>
+        wordList names() const;
+
+        //- The names of objects with headerClassName == Type::typeName
+        //  With syncPar = true, sorts the names and triggers FatalError
+        //  if the names are not consistent on all processors.
+        template<class Type>
+        wordList names(bool syncPar) const;
+
+        //- The names of objects with headerClassName == Type::typeName
+        //- that also have a matching object name.
+        //  With syncPar = true, sorts the names and triggers FatalError
+        //  if the names are not consistent on all processors.
+        template<class Type, class MatchPredicate>
+        wordList names(const MatchPredicate& matchName) const;
+
+        //- The names of objects with headerClassName == Type::typeName
+        //- that also have a matching object name.
+        //  With syncPar = true, sorts the names and triggers FatalError
+        //  if the names are not consistent on all processors.
+        template<class Type, class MatchPredicate>
+        wordList names
+        (
             const MatchPredicate& matchName,
             const bool syncPar
         ) const;
@@ -409,36 +451,79 @@ public:
         //- The sorted names of the IOobjects
         wordList sortedNames() const;
 
-        //- The sorted names of the IOobjects
-        //  With syncPar = true, a FatalError is
-        //  triggered if the names are not consistent on all processors.
+        //- The sorted names of the IOobjects.
+        //  With syncPar = true, sorts the names and triggers FatalError
+        //  if the names are not consistent on all processors.
         wordList sortedNames(const bool syncPar) const;
 
         //- The sorted names of IOobjects with the given headerClassName
-        wordList sortedNames(const word& clsName) const;
+        wordList sortedNames(const char* clsName) const;
 
         //- The sorted names of the IOobjects with the given headerClassName
         //  With syncPar = true, sorts the names and triggers FatalError
         //  if the names are not consistent on all processors.
-        wordList sortedNames(const word& clsName, const bool syncPar) const;
+        wordList sortedNames(const char* clsName, const bool syncPar) const;
 
         //- The sorted names of IOobjects with the given headerClassName
-        //- that also have a matching object name.
+        template<class MatchPredicate>
+        wordList sortedNames(const MatchPredicate& matchClass) const;
+
+        //- The sorted names of the IOobjects with the given headerClassName
+        //  With syncPar = true, sorts the names and triggers FatalError
+        //  if the names are not consistent on all processors.
         template<class MatchPredicate>
         wordList sortedNames
         (
-            const word& clsName,
-            const MatchPredicate& matchName
+            const MatchPredicate& matchClass,
+            const bool syncPar
+        ) const;
+
+        //- The sorted names of IOobjects with the given headerClassName
+        //- that also have a matching object name.
+        template<class MatchPredicate1, class MatchPredicate2>
+        wordList sortedNames
+        (
+            const MatchPredicate1& matchClass,
+            const MatchPredicate2& matchName
         ) const;
 
         //- The sorted names of the IOobjects with the given headerClassName
         //- that also have a matching object name.
         //  With syncPar = true, sorts the names and triggers FatalError
         //  if the names are not consistent on all processors.
-        template<class MatchPredicate>
+        template<class MatchPredicate1, class MatchPredicate2>
         wordList sortedNames
         (
-            const word& clsName,
+            const MatchPredicate1& matchClass,
+            const MatchPredicate2& matchName,
+            const bool syncPar
+        ) const;
+
+
+        //- The sorted names of objects with headerClassName == Type::typeName
+        template<class Type>
+        wordList sortedNames() const;
+
+        //- The sorted names of objects with headerClassName == Type::typeName
+        //  With syncPar = true, sorts the names and triggers FatalError
+        //  if the names are not consistent on all processors.
+        template<class Type>
+        wordList sortedNames(bool syncPar) const;
+
+        //- The sorted names of objects with headerClassName == Type::typeName
+        //- that also have a matching object name.
+        //  With syncPar = true, sorts the names and triggers FatalError
+        //  if the names are not consistent on all processors.
+        template<class Type, class MatchPredicate>
+        wordList sortedNames(const MatchPredicate& matchName) const;
+
+        //- The sorted names of objects with headerClassName == Type::typeName
+        //- that also have a matching object name.
+        //  With syncPar = true, sorts the names and triggers FatalError
+        //  if the names are not consistent on all processors.
+        template<class Type, class MatchPredicate>
+        wordList sortedNames
+        (
             const MatchPredicate& matchName,
             const bool syncPar
         ) const;
