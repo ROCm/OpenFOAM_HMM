@@ -27,7 +27,7 @@ Class
 Description
     Base class of a source for a topoSet.
 
-    Implementer has to modify the given set (see applyToSet) according to
+    Implementer must modify the given set (see applyToSet) according to
     its function and the setAction (one of add/delete/new)
 
 SourceFiles
@@ -81,12 +81,12 @@ public:
         //- Enumeration defining the valid actions
         enum setAction
         {
-            ADD,                //!< Adds elements to the set
-            SUBTRACT,           //!< Removes elements from the set
+            ADD,                //!< Add elements to the set
+            SUBTRACT,           //!< Remove elements from the set
             SUBSET,             //!< Subset with elements in the set
             INVERT,             //!< Invert the elements in the set
             CLEAR,              //!< Clear the set, possibly creating it
-            NEW,                //!< Create a new set and ADD elemets to it
+            NEW,                //!< Create a new set and ADD elements to it
             REMOVE,             //!< Remove the set (from the file system)
             LIST,               //!< Print contents of the set
             DELETE = SUBTRACT,  //!< \deprecated(2018-10) Alias for SUBTRACT
