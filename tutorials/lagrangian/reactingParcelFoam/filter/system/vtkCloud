@@ -6,6 +6,9 @@ cloudWrite
     libs    ("liblagrangianFunctionObjects.so");
     log     true;
 
+    // Nothing happens before this anyhow
+    timeStart 0.5;
+
     writeControl    writeTime;
 
     // cloud   reactingCloud1;
@@ -15,16 +18,68 @@ cloudWrite
     fields  ( U T d "Y.*" );
 
     //- Output format (ascii | binary) - default = binary
-    // format  binary;
+    // format  ascii;
 
-    // format   ascii;
-    // writePrecision 12;
+    // precision   12;
 
-    //- Suppress writing of empty clouds - default = false
-    // prune   true;
+    // Suppress writing of empty clouds - default = false
+    prune   true;
 
-    //- Output directory name - default = "VTK"
+    //- Output directory name - Default postProcessing
     // directory       "VTK";
+
+    selection
+    {
+        all
+        {
+            action  all;
+        }
+
+        none
+        {
+            action  clear;
+        }
+
+        // Reduced number of output parcels
+        stride
+        {
+            action  add;
+            source  stride;
+            stride  4;
+        }
+
+        T
+        {
+            action  subset;
+            source  field;
+            field   T;
+            accept  (greater 280) and (less 300);
+        }
+
+        YH2O
+        {
+            action  subset;
+            source  field;
+            field   YH2O(l);
+            accept  (greater 0.5);
+        }
+
+        diameter
+        {
+            action  subset;
+            source  field;
+            field   d;
+            accept  (greater 1e-10);
+        }
+
+        Umin
+        {
+            action  subtract;
+            source  field;
+            field   U;
+            accept  (less 0.1);
+        }
+    }
 }
 
 

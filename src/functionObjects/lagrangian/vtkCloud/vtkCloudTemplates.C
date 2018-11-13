@@ -88,7 +88,14 @@ Foam::wordList Foam::functionObjects::vtkCloud::writeFields
             }
         }
 
-        vtk::writeListParallel(format.ref(), values);
+        if (applyFilter_)
+        {
+            vtk::writeListParallel(format.ref(), values, parcelAddr_);
+        }
+        else
+        {
+            vtk::writeListParallel(format.ref(), values);
+        }
 
         if (Pstream::master())
         {

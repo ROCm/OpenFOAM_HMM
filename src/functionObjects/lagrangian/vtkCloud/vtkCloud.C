@@ -132,9 +132,23 @@ bool Foam::functionObjects::vtkCloud::writeCloud
         return false;
     }
 
+    applyFilter_ = calculateFilter(obrTmp, log);
+    reduce(applyFilter_, orOp<bool>());
+
+
+    // Number of parcels (locally)
+    label nParcels = (applyFilter_ ? parcelAddr_.count() : pointsPtr->size());
+
     // Total number of parcels on all processes
-    const label nTotParcels =
-        returnReduce(pointsPtr->size(), sumOp<label>());
+    const label nTotParcels = returnReduce(nParcels, sumOp<label>());
+
+    if (applyFilter_ && log)
+    {
+        // Report filtered/unfiltered count
+        Log << "After filtering using " << nTotParcels << '/'
+            << (returnReduce(pointsPtr->size(), sumOp<label>()))
+            << " parcels" << nl;
+    }
 
     if (pruneEmpty_ && !nTotParcels)
     {
@@ -216,7 +230,14 @@ bool Foam::functionObjects::vtkCloud::writeCloud
     }
 
 
-    vtk::writeListParallel(format.ref(), *pointsPtr);
+    if (applyFilter_)
+    {
+        vtk::writeListParallel(format.ref(), *pointsPtr, parcelAddr_);
+    }
+    else
+    {
+        vtk::writeListParallel(format.ref(), *pointsPtr);
+    }
 
 
     if (Pstream::master())
@@ -333,6 +354,7 @@ Foam::functionObjects::vtkCloud::vtkCloud
     printf_(),
     useVerts_(false),
     pruneEmpty_(false),
+    applyFilter_(false),
     selectClouds_(),
     selectFields_(),
     directory_(),
@@ -404,7 +426,6 @@ bool Foam::functionObjects::vtkCloud::read(const dictionary& dict)
     useVerts_ = dict.lookupOrDefault<bool>("cellData", false);
     pruneEmpty_ = dict.lookupOrDefault<bool>("prune", false);
 
-
     selectClouds_.clear();
     dict.readIfPresent("clouds", selectClouds_);
 
@@ -417,7 +438,10 @@ bool Foam::functionObjects::vtkCloud::read(const dictionary& dict)
 
     selectFields_.clear();
     dict.readIfPresent("fields", selectFields_);
+    selectFields_.uniq();
 
+    // Actions to define selection
+    parcelSelect_ = dict.subOrEmptyDict("selection");
 
     // Output directory
 

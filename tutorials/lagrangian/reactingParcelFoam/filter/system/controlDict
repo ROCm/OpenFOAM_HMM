@@ -54,6 +54,7 @@ maxDeltaT       1;
 functions
 {
     #include "vtkCloud"
+    #include "vtkWrite"
 }
 
 // ************************************************************************* //
