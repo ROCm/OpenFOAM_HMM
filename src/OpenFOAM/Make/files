@@ -123,6 +123,8 @@ $(strings)/parsing/parsing.C
 ops = primitives/ops
 $(ops)/flipOp.C
 
+primitives/predicates/scalar/scalarPredicates.C
+
 primitives/hashes/Hasher/Hasher.C
 
 sha1 = primitives/hashes/SHA1

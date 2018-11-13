@@ -1,0 +1,332 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+#include "scalarPredicates.H"
+#include "HashSet.H"
+#include "FlatOutput.H"
+#include "Tuple2.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const Foam::Enum
+<
+    Foam::predicates::scalars::opType
+>
+Foam::predicates::scalars::opNames
+({
+    { opType::EQUAL, "eq" },
+    { opType::EQUAL, "equal" },
+    { opType::NOT_EQUAL,  "neq" },
+    { opType::NOT_EQUAL,  "notEqual" },
+    { opType::LESS, "lt" },
+    { opType::LESS, "less" },
+    { opType::LESS_EQ, "le" },
+    { opType::LESS_EQ, "lessEq" },
+    { opType::GREATER, "gt" },
+    { opType::GREATER, "greater" },
+    { opType::GREATER_EQ, "ge" },
+    { opType::GREATER_EQ, "greaterEq" },
+});
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+std::function<bool(Foam::scalar)> Foam::predicates::scalars::operation
+(
+    const enum predicates::scalars::opType op,
+    const Foam::scalar opVal,
+    const Foam::scalar tol
+)
+{
+    switch (op)
+    {
+        case opType::EQUAL:
+            return equalOp(opVal, tol);
+            break;
+        case opType::NOT_EQUAL:
+            return notEqualOp(opVal, tol);
+            break;
+        case opType::LESS:
+            return lessOp(opVal);
+            break;
+        case opType::LESS_EQ:
+            return lessEqOp(opVal);
+            break;
+        case opType::GREATER:
+            return greaterOp(opVal);
+            break;
+        case opType::GREATER_EQ:
+            return greaterEqOp(opVal);
+            break;
+        case opType::ALWAYS:
+            return trueOp();
+            break;
+        default:
+            break;
+    }
+
+    return falseOp();
+}
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    // Check for bad/unknown operations
+    template<class Container, class Get0>
+    static bool hasBadEntries
+    (
+        const Container& entries,
+        const Get0& get0
+    )
+    {
+        for (const auto& entry : entries)
+        {
+            if (!Foam::predicates::scalars::opNames.found(get0(entry)))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    // Print bad/unknown operations
+    template<class Error, class Container, class Get0, class Get1>
+    static Error& printBadEntries
+    (
+        Error& err,
+        const Container& entries,
+        const Get0& get0,
+        const Get1& get1
+    )
+    {
+        labelHashSet badIndices;
+
+        label idx = 0;
+
+        for (const auto& entry : entries)
+        {
+            if (!Foam::predicates::scalars::opNames.found(get0(entry)))
+            {
+                badIndices.insert(idx);
+            }
+            ++idx;
+        }
+
+        err
+            << "Entries with unknown operations:" << nl
+            << idx << nl
+            << '(' << nl;
+
+        idx = 0;
+        for (const auto& entry : entries)
+        {
+            const bool bad = badIndices.found(idx);
+            ++idx;
+
+            if (bad)
+            {
+                err << ">>> ";
+            }
+            else
+            {
+                err << "    ";
+            }
+            err << '(' << get0(entry) << ' ' << get1(entry) << ')';
+
+            if (bad)
+            {
+                err << " <<<";
+            }
+            err << nl;
+        }
+
+        err << ')' << nl;
+
+        return err;
+    }
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::predicates::scalars::scalars
+(
+    std::initializer_list<std::pair<word, scalar>> entries
+)
+:
+    List<unary>(entries.size())
+{
+    // Access
+    const auto get0 =
+        [](const std::pair<word,scalar>& entry) { return entry.first; };
+    const auto get1 =
+        [](const std::pair<word,scalar>& entry) { return entry.second; };
+
+    // Check for bad/unknown operations
+    if (hasBadEntries(entries, get0))
+    {
+        printBadEntries(FatalErrorInFunction, entries, get0, get1)
+            << exit(FatalError);
+    }
+
+    // Appears to be good
+    auto& list = *this;
+    label idx = 0;
+    for (const auto& entry : entries)
+    {
+        list[idx] = predicates::scalars::operation(entry);
+        ++idx;
+    }
+}
+
+
+Foam::predicates::scalars::scalars
+(
+    const UList<Tuple2<word, scalar>>& entries
+)
+:
+    List<unary>(entries.size())
+{
+    // Access
+    const auto get0 =
+        [](const Tuple2<word,scalar>& entry) { return entry.first(); };
+    const auto get1 =
+        [](const Tuple2<word,scalar>& entry) { return entry.second(); };
+
+    // Check for bad/unknown operations
+    if (hasBadEntries(entries, get0))
+    {
+        printBadEntries(FatalErrorInFunction, entries, get0, get1)
+            << exit(FatalError);
+    }
+
+    // Appears to be good
+    auto& list = *this;
+    label idx = 0;
+    for (const auto& entry : entries)
+    {
+        list[idx] = predicates::scalars::operation(entry);
+        ++idx;
+    }
+}
+
+
+Foam::predicates::scalars::scalars(Istream& is)
+:
+    List<unary>()
+{
+    is >> *this;
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::label Foam::predicates::scalars::find
+(
+    const scalar& value,
+    const label start
+) const
+{
+    const label len = this->size();
+
+    if (start >= 0 && len)
+    {
+        // auto iter = this->cbegin();
+
+        for (label i = start; i < len; ++i)
+        {
+            if ((*this)[i](value))
+            {
+                return i;
+            }
+        }
+    }
+
+    return -1;
+}
+
+
+Foam::label Foam::predicates::scalars::rfind
+(
+    const scalar& value,
+    const label pos
+) const
+{
+    const label len1 = (this->size()-1);
+
+    // pos == -1 has same meaning as std::string::npos - search from end
+    for (label i = ((pos >= 0 && pos < len1) ? pos : len1); i >= 0; --i)
+    {
+        if ((*this)[i](value))
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+Foam::Istream& Foam::operator>>(Istream& is, Foam::predicates::scalars& list)
+{
+    // Read tuples
+    List<Tuple2<word, scalar>> entries(is);
+
+    // Access
+    const auto get0 =
+        [](const Tuple2<word,scalar>& entry) { return entry.first(); };
+    const auto get1 =
+        [](const Tuple2<word,scalar>& entry) { return entry.second(); };
+
+
+    // Check for bad/unknown operations
+    if (hasBadEntries(entries, get0))
+    {
+        printBadEntries(FatalIOErrorInFunction(is), entries, get0, get1)
+            << exit(FatalIOError);
+    }
+
+    // Appears to be good
+    list.resize(entries.size());
+
+    label idx = 0;
+    for (const Tuple2<word, scalar>& entry : entries)
+    {
+        list[idx] = predicates::scalars::operation(entry);
+        ++idx;
+    }
+
+    return is;
+}
+
+
+// ************************************************************************* //
