@@ -189,9 +189,9 @@ void Foam::sixDoFRigidBodyMotionSolver::solve()
 
     dimensionedVector g("g", dimAcceleration, Zero);
 
-    if (db().foundObject<uniformDimensionedVectorField>("g"))
+    if (db().time().foundObject<uniformDimensionedVectorField>("g"))
     {
-        g = db().lookupObject<uniformDimensionedVectorField>("g");
+        g = db().time().lookupObject<uniformDimensionedVectorField>("g");
     }
     else
     {

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,7 @@ License
 #include "solidificationMeltingSource.H"
 #include "fvMatrices.H"
 #include "basicThermo.H"
-#include "uniformDimensionedFields.H"
+#include "gravityMeshObject.H"
 #include "zeroGradientFvPatchFields.H"
 #include "extrapolatedCalculatedFvPatchFields.H"
 #include "addToRunTimeSelectionTable.H"
@@ -117,19 +117,6 @@ Foam::fv::solidificationMeltingSource::Cp() const
     }
 
     return nullptr;
-}
-
-
-Foam::vector Foam::fv::solidificationMeltingSource::g() const
-{
-    if (mesh_.foundObject<uniformDimensionedVectorField>("g"))
-    {
-        const uniformDimensionedVectorField& value =
-            mesh_.lookupObject<uniformDimensionedVectorField>("g");
-        return value.value();
-    }
-
-    return coeffs_.get<vector>("g");
 }
 
 
@@ -276,7 +263,7 @@ void Foam::fv::solidificationMeltingSource::addSup
 
     update(Cp);
 
-    vector g = this->g();
+    const vector& g = meshObjects::gravity::New(mesh_.time()).value();
 
     scalarField& Sp = eqn.diag();
     vectorField& Su = eqn.source();

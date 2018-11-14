@@ -174,7 +174,7 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
 
     if (lookupGravity_ < 0)
     {
-        if (db().foundObject<uniformDimensionedVectorField>("g"))
+        if (db().time().foundObject<uniformDimensionedVectorField>("g"))
         {
             if (lookupGravity_ == -2)
             {
@@ -225,7 +225,7 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
     if (lookupGravity_ == 1)
     {
         uniformDimensionedVectorField g =
-            db().lookupObject<uniformDimensionedVectorField>("g");
+            db().time().lookupObject<uniformDimensionedVectorField>("g");
 
         g_ = g.value();
     }

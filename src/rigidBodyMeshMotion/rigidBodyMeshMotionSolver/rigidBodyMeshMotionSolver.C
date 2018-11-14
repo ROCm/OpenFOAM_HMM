@@ -189,10 +189,9 @@ void Foam::rigidBodyMeshMotionSolver::solve()
         curTimeIndex_ = this->db().time().timeIndex();
     }
 
-    if (db().foundObject<uniformDimensionedVectorField>("g"))
+    if (t.foundObject<uniformDimensionedVectorField>("g"))
     {
-        model_.g() =
-            db().lookupObject<uniformDimensionedVectorField>("g").value();
+        model_.g() = t.lookupObject<uniformDimensionedVectorField>("g").value();
     }
 
     if (test_)

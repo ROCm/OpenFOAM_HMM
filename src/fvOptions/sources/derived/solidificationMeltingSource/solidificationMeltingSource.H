@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -179,9 +179,6 @@ private:
 
         //- Return the specific heat capacity field
         tmp<volScalarField> Cp() const;
-
-        //- Return the gravity vector
-        vector g() const;
 
         //- Update the model
         void update(const volScalarField& Cp);

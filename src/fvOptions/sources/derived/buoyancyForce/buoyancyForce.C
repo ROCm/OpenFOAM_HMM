@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 #include "buoyancyForce.H"
 #include "fvMatrices.H"
 #include "addToRunTimeSelectionTable.H"
+#include "gravityMeshObject.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -56,17 +57,7 @@ Foam::fv::buoyancyForce::buoyancyForce
 )
 :
     option(sourceName, modelType, dict, mesh),
-    g_
-    (
-        IOobject
-        (
-            "g",
-            mesh.time().constant(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    )
+    g_(meshObjects::gravity::New(mesh.time()))
 {
     coeffs_.readEntry("fields", fieldNames_);
 

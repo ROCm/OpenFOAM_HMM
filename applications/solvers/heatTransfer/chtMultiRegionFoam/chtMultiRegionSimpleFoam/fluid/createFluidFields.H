@@ -3,7 +3,6 @@ PtrList<rhoThermo> thermoFluid(fluidRegions.size());
 PtrList<volScalarField> rhoFluid(fluidRegions.size());
 PtrList<volVectorField> UFluid(fluidRegions.size());
 PtrList<surfaceScalarField> phiFluid(fluidRegions.size());
-PtrList<uniformDimensionedVectorField> gFluid(fluidRegions.size());
 PtrList<uniformDimensionedScalarField> hRefFluid(fluidRegions.size());
 PtrList<volScalarField> ghFluid(fluidRegions.size());
 PtrList<surfaceScalarField> ghfFluid(fluidRegions.size());
@@ -21,6 +20,8 @@ PtrList<dimensionedScalar> rhoMin(fluidRegions.size());
 
 PtrList<IOMRFZoneList> MRFfluid(fluidRegions.size());
 PtrList<fv::options> fluidFvOptions(fluidRegions.size());
+
+const uniformDimensionedVectorField& g = meshObjects::gravity::New(runTime);
 
 // Populate fluid field pointer lists
 forAll(fluidRegions, i)
@@ -91,23 +92,6 @@ forAll(fluidRegions, i)
         )
     );
 
-    Info<< "    Adding to gFluid\n" << endl;
-    gFluid.set
-    (
-        i,
-        new uniformDimensionedVectorField
-        (
-            IOobject
-            (
-                "g",
-                runTime.constant(),
-                fluidRegions[i],
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            )
-        )
-    );
-
     Info<< "    Adding to hRefFluid\n" << endl;
     hRefFluid.set
     (
@@ -128,10 +112,9 @@ forAll(fluidRegions, i)
 
     dimensionedScalar ghRef
     (
-        mag(gFluid[i].value()) > SMALL
-      ? gFluid[i]
-          & (cmptMag(gFluid[i].value())/mag(gFluid[i].value()))*hRefFluid[i]
-      : dimensionedScalar("ghRef", gFluid[i].dimensions()*dimLength, 0)
+        mag(g.value()) > SMALL
+      ? g & (cmptMag(g.value())/mag(g.value()))*hRefFluid[i]
+      : dimensionedScalar("ghRef", g.dimensions()*dimLength, 0)
     );
 
     Info<< "    Adding to ghFluid\n" << endl;
@@ -141,7 +124,7 @@ forAll(fluidRegions, i)
         new volScalarField
         (
             "gh",
-            (gFluid[i] & fluidRegions[i].C()) - ghRef
+            (g & fluidRegions[i].C()) - ghRef
         )
     );
 
@@ -152,7 +135,7 @@ forAll(fluidRegions, i)
         new surfaceScalarField
         (
             "ghf",
-            (gFluid[i] & fluidRegions[i].Cf()) - ghRef
+            (g & fluidRegions[i].Cf()) - ghRef
         )
     );
 

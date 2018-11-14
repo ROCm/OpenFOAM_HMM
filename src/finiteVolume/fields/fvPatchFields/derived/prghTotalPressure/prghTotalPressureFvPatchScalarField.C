@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,12 +28,11 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "uniformDimensionedFields.H"
+#include "gravityMeshObject.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::prghTotalPressureFvPatchScalarField::
-prghTotalPressureFvPatchScalarField
+Foam::prghTotalPressureFvPatchScalarField::prghTotalPressureFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -47,8 +46,7 @@ prghTotalPressureFvPatchScalarField
 {}
 
 
-Foam::prghTotalPressureFvPatchScalarField::
-prghTotalPressureFvPatchScalarField
+Foam::prghTotalPressureFvPatchScalarField::prghTotalPressureFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -75,8 +73,7 @@ prghTotalPressureFvPatchScalarField
 }
 
 
-Foam::prghTotalPressureFvPatchScalarField::
-prghTotalPressureFvPatchScalarField
+Foam::prghTotalPressureFvPatchScalarField::prghTotalPressureFvPatchScalarField
 (
     const prghTotalPressureFvPatchScalarField& ptf,
     const fvPatch& p,
@@ -92,8 +89,7 @@ prghTotalPressureFvPatchScalarField
 {}
 
 
-Foam::prghTotalPressureFvPatchScalarField::
-prghTotalPressureFvPatchScalarField
+Foam::prghTotalPressureFvPatchScalarField::prghTotalPressureFvPatchScalarField
 (
     const prghTotalPressureFvPatchScalarField& ptf
 )
@@ -106,8 +102,7 @@ prghTotalPressureFvPatchScalarField
 {}
 
 
-Foam::prghTotalPressureFvPatchScalarField::
-prghTotalPressureFvPatchScalarField
+Foam::prghTotalPressureFvPatchScalarField::prghTotalPressureFvPatchScalarField
 (
     const prghTotalPressureFvPatchScalarField& ptf,
     const DimensionedField<scalar, volMesh>& iF
@@ -165,7 +160,7 @@ void Foam::prghTotalPressureFvPatchScalarField::updateCoeffs()
         patch().lookupPatchField<volVectorField, vector>(UName_);
 
     const uniformDimensionedVectorField& g =
-        db().lookupObject<uniformDimensionedVectorField>("g");
+        meshObjects::gravity::New(db().time());
 
     const uniformDimensionedScalarField& hRef =
         db().lookupObject<uniformDimensionedScalarField>("hRef");

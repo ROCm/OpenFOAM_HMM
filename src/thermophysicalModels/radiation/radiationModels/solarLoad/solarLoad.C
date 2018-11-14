@@ -28,7 +28,7 @@ License
 #include "vectorList.H"
 #include "addToRunTimeSelectionTable.H"
 #include "boundaryRadiationProperties.H"
-#include "uniformDimensionedFields.H"
+#include "gravityMeshObject.H"
 #include "cyclicAMIPolyPatch.H"
 #include "mappedPatchBase.H"
 #include "wallPolyPatch.H"
@@ -298,10 +298,10 @@ void Foam::radiation::solarLoad::initialise(const dictionary& coeffs)
     {
          verticalDir_.normalise();
     }
-    else if (mesh_.foundObject<uniformDimensionedVectorField>("g"))
+    else
     {
         const uniformDimensionedVectorField& g =
-            mesh_.lookupObject<uniformDimensionedVectorField>("g");
+            meshObjects::gravity::New(mesh_.time());
         verticalDir_ = (-g/mag(g)).value();
     }
 

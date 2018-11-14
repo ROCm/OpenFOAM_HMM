@@ -26,7 +26,7 @@ License
 #include "waveModel.H"
 #include "fvMesh.H"
 #include "polyPatch.H"
-#include "uniformDimensionedFields.H"
+#include "gravityMeshObject.H"
 #include "volFields.H"
 #include "fvPatchFields.H"
 
@@ -261,7 +261,7 @@ Foam::waveModel::waveModel
     ),
     mesh_(mesh),
     patch_(patch),
-    g_(mesh.lookupObject<uniformDimensionedVectorField>("g").value()),
+    g_(meshObjects::gravity::New(mesh.time()).value()),
     UName_("U"),
     alphaName_("alpha"),
     Rgl_(tensor::I),

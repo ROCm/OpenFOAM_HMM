@@ -41,10 +41,10 @@ void Foam::fv::tabulatedAccelerationSource::addSup
     Vector<vector> acceleration(motion_.acceleration());
 
     // If gravitational force is present combine with the linear acceleration
-    if (mesh_.foundObject<uniformDimensionedVectorField>("g"))
+    if (mesh_.time().foundObject<uniformDimensionedVectorField>("g"))
     {
         uniformDimensionedVectorField& g =
-            mesh_.lookupObjectRef<uniformDimensionedVectorField>("g");
+            mesh_.time().lookupObjectRef<uniformDimensionedVectorField>("g");
 
         const uniformDimensionedScalarField& hRef =
             mesh_.lookupObject<uniformDimensionedScalarField>("hRef");

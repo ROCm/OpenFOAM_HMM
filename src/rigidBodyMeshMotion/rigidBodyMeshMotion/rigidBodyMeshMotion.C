@@ -241,10 +241,10 @@ void Foam::rigidBodyMeshMotion::solve()
 
     const scalar ramp = ramp_->value(t.value());
 
-    if (db().foundObject<uniformDimensionedVectorField>("g"))
+    if (t.foundObject<uniformDimensionedVectorField>("g"))
     {
         model_.g() =
-            ramp*db().lookupObject<uniformDimensionedVectorField>("g").value();
+            ramp*t.lookupObject<uniformDimensionedVectorField>("g").value();
     }
 
     if (test_)

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ License
 
 #include "KocamustafaogullariIshii.H"
 #include "addToRunTimeSelectionTable.H"
-#include "uniformDimensionedFields.H"
+#include "gravityMeshObject.H"
 #include "compressibleTurbulenceModel.H"
 #include "ThermalDiffusivity.H"
 #include "PhaseCompressibleTurbulenceModel.H"
@@ -87,7 +87,7 @@ KocamustafaogullariIshii::dDeparture
 {
     // Gravitational acceleration
     const uniformDimensionedVectorField& g =
-        liquid.mesh().lookupObject<uniformDimensionedVectorField>("g");
+        meshObjects::gravity::New(liquid.mesh().time());
 
     const fvPatchScalarField& rhoLiquid =
         liquid.turbulence().rho().boundaryField()[patchi];
