@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,18 +45,14 @@ const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
     const Mesh& mesh
 )
 {
-    if
+    const Type* ptr = mesh.thisDb().objectRegistry::template cfindObject<Type>
     (
-        mesh.thisDb().objectRegistry::template foundObject<Type>
-        (
-            Type::typeName
-        )
-    )
+        Type::typeName
+    );
+
+    if (ptr)
     {
-        return mesh.thisDb().objectRegistry::template lookupObject<Type>
-        (
-            Type::typeName
-        );
+        return *ptr;
     }
     else
     {
@@ -84,18 +80,14 @@ const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
     const Data1& d
 )
 {
-    if
+    const Type* ptr = mesh.thisDb().objectRegistry::template cfindObject<Type>
     (
-        mesh.thisDb().objectRegistry::template foundObject<Type>
-        (
-            Type::typeName
-        )
-    )
+        Type::typeName
+    );
+
+    if (ptr)
     {
-        return mesh.thisDb().objectRegistry::template lookupObject<Type>
-        (
-            Type::typeName
-        );
+        return *ptr;
     }
     else
     {
@@ -124,18 +116,14 @@ const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
     const Data2& d2
 )
 {
-    if
+    const Type* ptr = mesh.thisDb().objectRegistry::template cfindObject<Type>
     (
-        mesh.thisDb().objectRegistry::template foundObject<Type>
-        (
-            Type::typeName
-        )
-    )
+        Type::typeName
+    );
+
+    if (ptr)
     {
-        return mesh.thisDb().objectRegistry::template lookupObject<Type>
-        (
-            Type::typeName
-        );
+        return *ptr;
     }
     else
     {
@@ -167,18 +155,14 @@ const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
     const Data3& d3
 )
 {
-    if
+    const Type* ptr = mesh.thisDb().objectRegistry::template cfindObject<Type>
     (
-        mesh.thisDb().objectRegistry::template foundObject<Type>
-        (
-            Type::typeName
-        )
-    )
+        Type::typeName
+    );
+
+    if (ptr)
     {
-        return mesh.thisDb().objectRegistry::template lookupObject<Type>
-        (
-            Type::typeName
-        );
+        return *ptr;
     }
     else
     {
@@ -208,18 +192,14 @@ const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
     const Data4& d4
 )
 {
-    if
+    const Type* ptr = mesh.thisDb().objectRegistry::template cfindObject<Type>
     (
-        mesh.thisDb().objectRegistry::template foundObject<Type>
-        (
-            Type::typeName
-        )
-    )
+        Type::typeName
+    );
+
+    if (ptr)
     {
-        return mesh.thisDb().objectRegistry::template lookupObject<Type>
-        (
-            Type::typeName
-        );
+        return *ptr;
     }
     else
     {
@@ -243,13 +223,12 @@ const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
 template<class Mesh, template<class> class MeshObjectType, class Type>
 bool Foam::MeshObject<Mesh, MeshObjectType, Type>::Delete(const Mesh& mesh)
 {
-    if
+    const Type* ptr = mesh.thisDb().objectRegistry::template findObject<Type>
     (
-        mesh.thisDb().objectRegistry::template foundObject<Type>
-        (
-            Type::typeName
-        )
-    )
+        Type::typeName
+    );
+
+    if (ptr)
     {
         if (meshObject::debug)
         {
@@ -257,16 +236,7 @@ bool Foam::MeshObject<Mesh, MeshObjectType, Type>::Delete(const Mesh& mesh)
                 << Type::typeName << endl;
         }
 
-        return mesh.thisDb().checkOut
-        (
-            const_cast<Type&>
-            (
-                mesh.thisDb().objectRegistry::template lookupObject<Type>
-                (
-                    Type::typeName
-                )
-            )
-        );
+        return mesh.thisDb().checkOut(const_cast<Type&>(*ptr));
     }
     else
     {
