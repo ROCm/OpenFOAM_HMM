@@ -27,6 +27,93 @@ License
 #include "polyMesh.H"
 #include "Time.H"
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+// Update stored cell numbers using map.
+// Do in two passes to prevent allocation if nothing changed.
+void Foam::topoBoolSet::updateLabels(const labelUList& map)
+{
+    boolList& labels = selected_;
+
+    // Iterate over map to see if anything changed
+    // Must iterate over ALL elements, to properly trap bounds errors
+
+    bool changed = false;
+
+    forAll(labels, oldId)
+    {
+        if (!labels.test(oldId))
+        {
+            continue;
+        }
+
+        if (oldId >= map.size())
+        {
+            FatalErrorInFunction
+                << "Illegal content " << oldId << " of set:" << name()
+                << " of type " << type() << nl
+                << "Value should be between [0," << map.size() << ')'
+                << endl
+                << abort(FatalError);
+        }
+
+        const label newId = map[oldId];
+
+        if (newId != oldId)
+        {
+            changed = true;
+            #ifdef FULLDEBUG
+            continue;  // Check all elements in FULLDEBUG mode
+            #endif
+            break;
+        }
+    }
+
+    if (!changed)
+    {
+        return;
+    }
+
+
+    // Relabel. Use second boolList to prevent overlapping.
+
+    // The new length is given by the map
+    const label len = map.size();
+
+    boolList newLabels(len, false);
+
+    forAll(labels, oldId)
+    {
+        const label newId = map[oldId];
+
+        if (newId >= 0)
+        {
+            newLabels.set(newId);  // Ignores -ve indices
+        }
+    }
+
+    labels.transfer(newLabels);
+}
+
+
+void Foam::topoBoolSet::check(const label maxSize)
+{
+    const boolList& labels = selected_;
+
+    const label oldId = labels.rfind(true);
+
+    if (oldId >= maxSize)
+    {
+        FatalErrorInFunction
+            << "Illegal content " << oldId << " of set:" << name()
+            << " of type " << type() << nl
+            << "Value should be between [0," << maxSize << ')'
+            << endl
+            << abort(FatalError);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::topoBoolSet::topoBoolSet

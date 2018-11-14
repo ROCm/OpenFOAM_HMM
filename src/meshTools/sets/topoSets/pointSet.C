@@ -126,38 +126,33 @@ Foam::pointSet::pointSet
 
 void Foam::pointSet::sync(const polyMesh& mesh)
 {
+    labelHashSet& labels = *this;
+
     // Convert to boolList
+    // TBD: could change to using bitSet for the synchronization
 
-    boolList contents(mesh.nPoints(), false);
+    const label len = mesh.nPoints();
 
-    const labelHashSet& labels = *this;
+    boolList contents(len, false);
 
     for (const label pointi : labels)
     {
-        contents[pointi] = true;
+        contents.set(pointi);
     }
 
-    syncTools::syncPointList
-    (
-        mesh,
-        contents,
-        orEqOp<bool>(),
-        false           // null value
-    );
+    // The nullValue = 'false'
+    syncTools::syncPointList(mesh, contents, orEqOp<bool>(), false);
 
-    // Convert back to labelHashSet
 
-    labelHashSet newContents(size());
+    // Update labelHashSet
 
-    forAll(contents, pointi)
+    for (label pointi=0; pointi < len; ++pointi)
     {
-        if (contents[pointi])
+        if (contents.test(pointi))
         {
-            newContents.set(pointi);
+            labels.set(pointi);
         }
     }
-
-    transfer(newContents);
 }
 
 
@@ -175,34 +170,41 @@ void Foam::pointSet::updateMesh(const mapPolyMesh& morphMap)
 
 void Foam::pointSet::distribute(const mapDistributePolyMesh& map)
 {
-    boolList inSet(map.nOldPoints());
+    labelHashSet& labels = *this;
 
-    const labelHashSet& labels = *this;
+    boolList contents(map.nOldPoints(), false);
 
     for (const label pointi : labels)
     {
-        inSet[pointi] = true;
+        contents.set(pointi);
     }
 
-    map.distributePointData(inSet);
+    map.distributePointData(contents);
 
-    // Count
+    // The new length
+    const label len = contents.size();
+
+    // Count - as per BitOps::count(contents)
     label n = 0;
-    forAll(inSet, pointi)
+    for (label i=0; i < len; ++i)
     {
-        if (inSet[pointi])
+        if (contents.test(i))
         {
             ++n;
         }
     }
 
-    clear();
-    resize(n);
-    forAll(inSet, pointi)
+
+    // Update labelHashSet
+
+    labels.clear();
+    labels.resize(2*n);
+
+    for (label i=0; i < len; ++i)
     {
-        if (inSet[pointi])
+        if (contents.test(i))
         {
-            this->set(pointi);
+            labels.set(i);
         }
     }
 }
@@ -217,5 +219,6 @@ void Foam::pointSet::writeDebug
 {
     topoSet::writeDebug(os, mesh.points(), maxLen);
 }
+
 
 // ************************************************************************* //

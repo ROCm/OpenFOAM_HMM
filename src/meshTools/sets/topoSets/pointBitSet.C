@@ -25,6 +25,9 @@ License
 
 #include "pointBitSet.H"
 #include "polyMesh.H"
+#include "mapPolyMesh.H"
+#include "syncTools.H"
+#include "mapDistributePolyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -70,9 +73,35 @@ Foam::pointBitSet::pointBitSet
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::pointBitSet::sync(const polyMesh& mesh)
+{
+    // The nullValue = '0u'
+    syncTools::syncPointList(mesh, selected_, orEqOp<unsigned int>(), 0u);
+}
+
+
 Foam::label Foam::pointBitSet::maxSize(const polyMesh& mesh) const
 {
     return mesh.nPoints();
+}
+
+
+void Foam::pointBitSet::updateMesh(const mapPolyMesh& morphMap)
+{
+    updateLabels(morphMap.reversePointMap());
+}
+
+
+void Foam::pointBitSet::distribute(const mapDistributePolyMesh& map)
+{
+    bitSet& labels = selected_;
+
+    boolList contents(labels.values());
+
+    map.distributePointData(contents);
+
+    // The new length is contents.size();
+    labels.assign(contents);
 }
 
 

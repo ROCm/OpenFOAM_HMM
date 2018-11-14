@@ -497,7 +497,7 @@ void Foam::faceZoneSet::updateMesh(const mapPolyMesh& morphMap)
 {
     // faceZone
     labelList newAddressing(addressing_.size());
-    boolList newFlipMap(flipMap_.size());
+    boolList newFlipMap(flipMap_.size(), false);
 
     label n = 0;
     forAll(addressing_, i)

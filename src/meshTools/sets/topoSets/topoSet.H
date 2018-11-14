@@ -70,12 +70,12 @@ protected:
 
     // Protected Member Functions
 
-        //- Update map from map. Used to update cell/face labels
-        //  after morphing
-        void updateLabels(const labelList& map);
+        //- Update map from map.
+        //  Used to update cell/face labels after morphing
+        virtual void updateLabels(const labelUList& map);
 
-        //- Check validity of contents.
-        void check(const label maxLabel);
+        //- Check limits on addressable range.
+        virtual void check(const label maxSize);
 
         //- Write part of contents nicely formatted. Prints labels only.
         void writeDebug
@@ -106,12 +106,6 @@ protected:
         ) const;
 
 
-        //- No copy construct
-        topoSet(const topoSet&) = delete;
-
-
-protected:
-
         //- Helper for constructor - return IOobject in the polyMesh/sets
         static IOobject findIOobject
         (
@@ -129,6 +123,10 @@ protected:
             readOption r,
             writeOption w
         );
+
+
+        //- No copy construct
+        topoSet(const topoSet&) = delete;
 
 
 public:

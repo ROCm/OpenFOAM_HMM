@@ -131,9 +131,6 @@ public:
         //- Update any stored data for new labels
         virtual void updateMesh(const mapPolyMesh& morphMap);
 
-        //- Update any stored data for new labels
-        //virtual void updateMesh(const polyTopoChange& meshMod);
-
         //- Update any stored data for mesh redistribution.
         virtual void distribute(const mapDistributePolyMesh&);
 

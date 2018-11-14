@@ -276,17 +276,16 @@ void Foam::pointZoneSet::updateMesh(const mapPolyMesh& morphMap)
     labelList newAddressing(addressing_.size());
 
     label n = 0;
-    forAll(addressing_, i)
+    for (const label pointi : addressing_)
     {
-        label pointi = addressing_[i];
-        label newPointi = morphMap.reversePointMap()[pointi];
+        const label newPointi = morphMap.reversePointMap()[pointi];
         if (newPointi >= 0)
         {
             newAddressing[n] = newPointi;
             ++n;
         }
     }
-    newAddressing.setSize(n);
+    newAddressing.resize(n);
 
     addressing_.transfer(newAddressing);
 

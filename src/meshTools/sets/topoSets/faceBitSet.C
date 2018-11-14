@@ -25,6 +25,9 @@ License
 
 #include "faceBitSet.H"
 #include "polyMesh.H"
+#include "mapPolyMesh.H"
+#include "syncTools.H"
+#include "mapDistributePolyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -70,9 +73,34 @@ Foam::faceBitSet::faceBitSet
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::faceBitSet::sync(const polyMesh& mesh)
+{
+    syncTools::syncFaceList(mesh, selected_, orEqOp<unsigned int>());
+}
+
+
 Foam::label Foam::faceBitSet::maxSize(const polyMesh& mesh) const
 {
     return mesh.nFaces();
+}
+
+
+void Foam::faceBitSet::updateMesh(const mapPolyMesh& morphMap)
+{
+    updateLabels(morphMap.reverseFaceMap());
+}
+
+
+void Foam::faceBitSet::distribute(const mapDistributePolyMesh& map)
+{
+    bitSet& labels = selected_;
+
+    boolList contents(labels.values());
+
+    map.distributeFaceData(contents);
+
+    // The new length is contents.size();
+    labels.assign(contents);
 }
 
 

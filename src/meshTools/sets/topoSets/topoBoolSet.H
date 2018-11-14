@@ -60,6 +60,14 @@ protected:
 
     // Protected Member Functions
 
+        //- Update map from map.
+        //  Used to update cell/face labels after morphing
+        virtual void updateLabels(const labelUList& map);
+
+        //- Check limits on addressable range.
+        virtual void check(const label maxSize);
+
+
         //- Construct with empty selection
         topoBoolSet(const polyMesh& mesh, const word& setName);
 

@@ -24,8 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "faceSet.H"
-#include "mapPolyMesh.H"
 #include "polyMesh.H"
+#include "mapPolyMesh.H"
 #include "syncTools.H"
 #include "mapDistributePolyMesh.H"
 #include "addToRunTimeSelectionTable.H"
@@ -126,42 +126,31 @@ Foam::faceSet::faceSet
 
 void Foam::faceSet::sync(const polyMesh& mesh)
 {
-    boolList set(mesh.nFaces(), false);
+    labelHashSet& labels = *this;
 
-    const labelHashSet& labels = *this;
+    // Convert to boolList
+    // TBD: could change to using bitSet for the synchronization
+
+    const label len = mesh.nFaces();
+
+    boolList contents(len, false);
 
     for (const label facei : labels)
     {
-        set[facei] = true;
+        contents.set(facei);
     }
 
-    syncTools::syncFaceList(mesh, set, orEqOp<bool>());
+    syncTools::syncFaceList(mesh, contents, orEqOp<bool>());
 
-    label nAdded = 0;
 
-    forAll(set, facei)
+    // Update labelHashSet
+
+    for (label i=0; i < len; ++i)
     {
-        if (set[facei])
+        if (contents.test(i))
         {
-            if (this->set(facei))
-            {
-                ++nAdded;
-            }
+            labels.set(i);
         }
-        else if (found(facei))
-        {
-            FatalErrorInFunction
-                << "Problem : syncing removed faces from set."
-                << abort(FatalError);
-        }
-    }
-
-    reduce(nAdded, sumOp<label>());
-    if (debug && nAdded > 0)
-    {
-        Info<< "Added an additional " << nAdded
-            << " faces on coupled patches. "
-            << "(processorPolyPatch, cyclicPolyPatch)" << endl;
     }
 }
 
@@ -180,34 +169,40 @@ void Foam::faceSet::updateMesh(const mapPolyMesh& morphMap)
 
 void Foam::faceSet::distribute(const mapDistributePolyMesh& map)
 {
-    boolList inSet(map.nOldFaces());
+    labelHashSet& labels = *this;
 
-    const labelHashSet& labels = *this;
+    boolList contents(map.nOldFaces(), false);
 
     for (const label facei : labels)
     {
-        inSet[facei] = true;
+        contents.set(facei);
     }
 
-    map.distributeFaceData(inSet);
+    map.distributeFaceData(contents);
 
-    // Count
+    // The new length
+    const label len = contents.size();
+
+    // Count - as per BitOps::count(contents)
     label n = 0;
-    forAll(inSet, facei)
+    for (label i=0; i < len; ++i)
     {
-        if (inSet[facei])
+        if (contents.test(i))
         {
             ++n;
         }
     }
 
-    clear();
-    resize(n);
-    forAll(inSet, facei)
+    // Update labelHashSet
+
+    labels.clear();
+    labels.resize(2*n);
+
+    for (label i=0; i < len; ++i)
     {
-        if (inSet[facei])
+        if (contents.test(i))
         {
-            this->set(facei);
+            labels.set(i);
         }
     }
 }

@@ -190,34 +190,40 @@ void Foam::cellSet::updateMesh(const mapPolyMesh& morphMap)
 
 void Foam::cellSet::distribute(const mapDistributePolyMesh& map)
 {
-    boolList inSet(map.nOldCells());
+    labelHashSet& labels = *this;
 
-    const labelHashSet& labels = *this;
+    boolList contents(map.nOldCells(), false);
 
     for (const label celli : labels)
     {
-        inSet[celli] = true;
+        contents.set(celli);
     }
 
-    map.distributeCellData(inSet);
+    map.distributeCellData(contents);
+
+    // The new length
+    const label len = contents.size();
 
     // Count
     label n = 0;
-    forAll(inSet, celli)
+    for (label i=0; i < len; ++i)
     {
-        if (inSet[celli])
+        if (contents.test(i))
         {
             ++n;
         }
     }
 
-    clear();
-    resize(n);
-    forAll(inSet, celli)
+    // Update labelHashSet
+
+    labels.clear();
+    labels.resize(2*n);
+
+    for (label i=0; i < len; ++i)
     {
-        if (inSet[celli])
+        if (contents.test(i))
         {
-            insert(celli);
+            labels.set(i);
         }
     }
 }

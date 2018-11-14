@@ -79,19 +79,16 @@ public:
     // Member Functions
 
         //- Sync pointBitSet across coupled patches.
-        virtual void sync(const polyMesh& mesh)
-        {}
+        virtual void sync(const polyMesh& mesh);
 
         //- Return max index+1.
         virtual label maxSize(const polyMesh& mesh) const;
 
         //- Update any stored data for new labels.
-        virtual void updateMesh(const mapPolyMesh& morphMap)
-        {}
+        virtual void updateMesh(const mapPolyMesh& morphMap);
 
         //- Update any stored data for mesh redistribution.
-        virtual void distribute(const mapDistributePolyMesh& map)
-        {}
+        virtual void distribute(const mapDistributePolyMesh& map);
 
         //- Write maxLen items with label and coordinates.
         virtual void writeDebug

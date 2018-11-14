@@ -45,7 +45,7 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::topoSet> Foam::topoSet::New
 (
@@ -122,6 +122,8 @@ Foam::autoPtr<Foam::topoSet> Foam::topoSet::New
 }
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
 Foam::fileName Foam::topoSet::localPath
 (
     const polyMesh& mesh,
@@ -136,21 +138,23 @@ Foam::fileName Foam::topoSet::localPath
 
 // Update stored cell numbers using map.
 // Do in two passes to prevent allocation if nothing changed.
-void Foam::topoSet::updateLabels(const labelList& map)
+void Foam::topoSet::updateLabels(const labelUList& map)
 {
-    // Iterate over map to see if anything changed
-    bool changed = false;
+    labelHashSet& labels = *this;
 
-    const labelHashSet& labels = *this;
+    // Iterate over map to see if anything changed
+
+    bool changed = false;
 
     for (const label oldId : labels)
     {
-        if (oldId < 0 || oldId > map.size())
+        if (oldId < 0 || oldId >= map.size())
         {
             FatalErrorInFunction
                 << "Illegal content " << oldId << " of set:" << name()
-                << " of type " << type() << endl
+                << " of type " << type() << nl
                 << "Value should be between [0," << map.size() << ')'
+                << endl
                 << abort(FatalError);
         }
 
@@ -159,42 +163,50 @@ void Foam::topoSet::updateLabels(const labelList& map)
         if (newId != oldId)
         {
             changed = true;
+            #ifdef FULLDEBUG
+            continue;  // Check all elements in FULLDEBUG mode
+            #endif
             break;
         }
     }
 
-    // Relabel (use second Map to prevent overlapping)
-    if (changed)
+    if (!changed)
     {
-        labelHashSet newSet(2*size());
-
-        for (const label oldId : labels)
-        {
-            const label newId = map[oldId];
-
-            if (newId >= 0)
-            {
-                newSet.set(newId);
-            }
-        }
-
-        transfer(newSet);
+        return;
     }
+
+
+    // Relabel. Use second labelHashSet to prevent overlapping.
+
+    labelHashSet newLabels(2*labels.size());
+
+    for (const label oldId : labels)
+    {
+        const label newId = map[oldId];
+
+        if (newId >= 0)
+        {
+            newLabels.set(newId);
+        }
+    }
+
+    labels.transfer(newLabels);
 }
 
 
-void Foam::topoSet::check(const label maxLabel)
+void Foam::topoSet::check(const label maxSize)
 {
     const labelHashSet& labels = *this;
 
     for (const label oldId : labels)
     {
-        if (oldId < 0 || oldId > maxLabel)
+        if (oldId < 0 || oldId >= maxSize)
         {
             FatalErrorInFunction
                 << "Illegal content " << oldId << " of set:" << name()
                 << " of type " << type() << nl
-                << "Value should be between [0," << maxLabel << ']'
+                << "Value should be between [0," << maxSize << ')'
+                << endl
                 << abort(FatalError);
         }
     }

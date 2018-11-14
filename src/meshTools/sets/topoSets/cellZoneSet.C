@@ -276,9 +276,8 @@ void Foam::cellZoneSet::updateMesh(const mapPolyMesh& morphMap)
     labelList newAddressing(addressing_.size());
 
     label n = 0;
-    forAll(addressing_, i)
+    for (const label celli : addressing_)
     {
-        label celli = addressing_[i];
         label newCelli = morphMap.reverseCellMap()[celli];
         if (newCelli >= 0)
         {
@@ -286,7 +285,7 @@ void Foam::cellZoneSet::updateMesh(const mapPolyMesh& morphMap)
             ++n;
         }
     }
-    newAddressing.setSize(n);
+    newAddressing.resize(n);
 
     addressing_.transfer(newAddressing);
 

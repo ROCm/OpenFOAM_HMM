@@ -25,7 +25,9 @@ License
 
 #include "faceBoolSet.H"
 #include "polyMesh.H"
-#include "Time.H"
+#include "mapPolyMesh.H"
+#include "syncTools.H"
+#include "mapDistributePolyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -71,9 +73,27 @@ Foam::faceBoolSet::faceBoolSet
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::faceBoolSet::sync(const polyMesh& mesh)
+{
+    syncTools::syncFaceList(mesh, selected_, orEqOp<bool>());
+}
+
+
 Foam::label Foam::faceBoolSet::maxSize(const polyMesh& mesh) const
 {
     return mesh.nFaces();
+}
+
+
+void Foam::faceBoolSet::updateMesh(const mapPolyMesh& morphMap)
+{
+    updateLabels(morphMap.reverseFaceMap());
+}
+
+
+void Foam::faceBoolSet::distribute(const mapDistributePolyMesh& map)
+{
+    map.distributeFaceData(selected_);
 }
 
 

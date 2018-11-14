@@ -27,6 +27,84 @@ License
 #include "polyMesh.H"
 #include "Time.H"
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+// Update stored cell numbers using map.
+// Do in two passes to prevent allocation if nothing changed.
+void Foam::topoBitSet::updateLabels(const labelUList& map)
+{
+    bitSet& labels = selected_;
+
+    {
+        const label oldId = labels.find_last();
+
+        if (oldId >= map.size())
+        {
+            FatalErrorInFunction
+                << "Illegal content " << oldId << " of set:" << name()
+                << " of type " << type() << nl
+                << "Value should be between [0," << map.size() << ')'
+                << endl
+                << abort(FatalError);
+        }
+    }
+
+    // Iterate over map to see if anything changed
+
+    bool changed = false;
+
+    for (const label oldId : labels)
+    {
+        const label newId = map[oldId];
+
+        if (newId != oldId)
+        {
+            changed = true;
+            break;
+        }
+    }
+
+    if (!changed)
+    {
+        return;
+    }
+
+
+    // Relabel. Use second bitSet to prevent overlapping.
+
+    // The new length is given by the map
+    const label len = map.size();
+
+    bitSet newLabels(len);
+
+    for (const label oldId : labels)
+    {
+        const label newId = map[oldId];
+        newLabels.set(newId);  // Ignores -ve indices
+    }
+
+    labels.transfer(newLabels);
+}
+
+
+void Foam::topoBitSet::check(const label maxSize)
+{
+    const bitSet& labels = selected_;
+
+    const label oldId = labels.find_last();
+
+    if (oldId >= maxSize)
+    {
+        FatalErrorInFunction
+            << "Illegal content " << oldId << " of set:" << name()
+            << " of type " << type() << nl
+            << "Value should be between [0," << maxSize << ')'
+            << endl
+            << abort(FatalError);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::topoBitSet::topoBitSet
