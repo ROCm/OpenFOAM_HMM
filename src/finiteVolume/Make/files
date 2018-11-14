@@ -431,6 +431,7 @@ $(general)/bound/bound.C
 $(general)/CorrectPhi/correctUphiBCs.C
 $(general)/pressureControl/pressureControl.C
 $(general)/levelSet/levelSet.C
+$(general)/meshObjects/gravity/gravityMeshObject.C
 
 coupling = $(general)/coupling
 $(coupling)/externalFileCoupler.C
