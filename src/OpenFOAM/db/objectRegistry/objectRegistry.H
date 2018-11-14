@@ -161,6 +161,12 @@ public:
 
     // Access
 
+        //- Return the object registry
+        const objectRegistry& thisDb() const
+        {
+            return *this;
+        }
+
         //- Return time
         const Time& time() const
         {
