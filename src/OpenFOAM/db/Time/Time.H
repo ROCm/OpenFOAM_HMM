@@ -277,6 +277,9 @@ public:
 
         // Database functions
 
+            //- Return name from objectRegistry and not TimePaths
+            using objectRegistry::name;
+
             //- Return root path
             using TimePaths::rootPath;
 
