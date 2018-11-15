@@ -210,7 +210,7 @@ Foam::label Foam::hexRef8::addInternalFace
                 nei,                        // neighbour
                 -1,                         // master point
                 -1,                         // master edge
-                meshFacei,                  // master face for addition
+                -1,                         // master face for addition
                 false,                      // flux flip
                 -1,                         // patch for face
                 -1,                         // zone for face

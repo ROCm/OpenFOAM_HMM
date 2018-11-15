@@ -571,6 +571,13 @@ const Foam::lduAddressing& Foam::fvMesh::lduAddr() const
 {
     if (!lduPtr_)
     {
+        if (debug)
+        {
+            InfoInFunction
+                << " calculating fvMeshLduAddressing from nFaces:"
+                << nFaces() << endl;
+        }
+
         lduPtr_ = new fvMeshLduAddressing(*this);
     }
 
@@ -820,6 +827,9 @@ void Foam::fvMesh::updateMesh(const mapPolyMesh& mpm)
 {
     // Update polyMesh. This needs to keep volume existent!
     polyMesh::updateMesh(mpm);
+
+    // Our slice of the addressing is no longer valid
+    deleteDemandDrivenData(lduPtr_);
 
     if (VPtr_)
     {
