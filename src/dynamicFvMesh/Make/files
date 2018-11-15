@@ -5,7 +5,6 @@ dynamicMotionSolverFvMesh/dynamicMotionSolverFvMesh.C
 dynamicMultiMotionSolverFvMesh/dynamicMultiMotionSolverFvMesh.C
 dynamicInkJetFvMesh/dynamicInkJetFvMesh.C
 dynamicRefineFvMesh/dynamicRefineFvMesh.C
-dynamicRefineBalancedFvMesh/dynamicRefineBalancedFvMesh.C
 dynamicMotionSolverListFvMesh/dynamicMotionSolverListFvMesh.C
 
 simplifiedDynamicFvMesh/simplifiedDynamicFvMeshes.C

@@ -46,7 +46,7 @@ namespace Foam
 
 Foam::label Foam::dynamicRefineFvMesh::count
 (
-    const PackedBoolList& l,
+    const bitSet& l,
     const unsigned int val
 )
 {
@@ -72,7 +72,7 @@ Foam::label Foam::dynamicRefineFvMesh::count
 
 void Foam::dynamicRefineFvMesh::calculateProtectedCells
 (
-    PackedBoolList& unrefineableCell
+    bitSet& unrefineableCell
 ) const
 {
     if (protectedCell_.empty())
@@ -470,7 +470,7 @@ Foam::dynamicRefineFvMesh::refine
     // Update numbering of protectedCell_
     if (protectedCell_.size())
     {
-        PackedBoolList newProtectedCell(nCells());
+        bitSet newProtectedCell(nCells());
 
         forAll(newProtectedCell, celli)
         {
@@ -648,7 +648,7 @@ Foam::dynamicRefineFvMesh::unrefine
     // Update numbering of protectedCell_
     if (protectedCell_.size())
     {
-        PackedBoolList newProtectedCell(nCells());
+        bitSet newProtectedCell(nCells());
 
         forAll(newProtectedCell, celli)
         {
@@ -751,7 +751,7 @@ void Foam::dynamicRefineFvMesh::selectRefineCandidates
     const scalar lowerRefineLevel,
     const scalar upperRefineLevel,
     const scalarField& vFld,
-    PackedBoolList& candidateCell
+    bitSet& candidateCell
 ) const
 {
     // Get error per cell. Is -1 (not to be refined) to >0 (to be refined,
@@ -784,7 +784,7 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectRefineCells
 (
     const label maxCells,
     const label maxRefinement,
-    const PackedBoolList& candidateCell
+    const bitSet& candidateCell
 ) const
 {
     // Every refined cell causes 7 extra cells
@@ -794,7 +794,7 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectRefineCells
 
     // Mark cells that cannot be refined since they would trigger refinement
     // of protected cells (since 2:1 cascade)
-    PackedBoolList unrefineableCell;
+    bitSet unrefineableCell;
     calculateProtectedCells(unrefineableCell);
 
     // Count current selection
@@ -871,7 +871,7 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectRefineCells
 Foam::labelList Foam::dynamicRefineFvMesh::selectUnrefinePoints
 (
     const scalar unrefineLevel,
-    const PackedBoolList& markedCell,
+    const bitSet& markedCell,
     const scalarField& pFld
 ) const
 {
@@ -884,7 +884,7 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectUnrefinePoints
     // If we have any protected cells make sure they also are not being
     // unrefined
 
-    PackedBoolList protectedPoint(nPoints());
+    bitSet protectedPoint(nPoints());
 
     if (protectedCell_.size())
     {
@@ -976,7 +976,7 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectUnrefinePoints
 
 void Foam::dynamicRefineFvMesh::extendMarkedCells
 (
-    PackedBoolList& markedCell
+    bitSet& markedCell
 ) const
 {
     // Mark faces using any marked cell
@@ -1018,7 +1018,7 @@ void Foam::dynamicRefineFvMesh::extendMarkedCells
 
 void Foam::dynamicRefineFvMesh::checkEightAnchorPoints
 (
-    PackedBoolList& protectedCell,
+    bitSet& protectedCell,
     label& nProtected
 ) const
 {
@@ -1343,7 +1343,7 @@ bool Foam::dynamicRefineFvMesh::update()
             refineDict.get<label>("nBufferLayers");
 
         // Cells marked for refinement or otherwise protected from unrefinement.
-        PackedBoolList refineCell(nCells());
+        bitSet refineCell(nCells());
 
         // Determine candidates for refinement (looking at field only)
         selectRefineCandidates
@@ -1384,7 +1384,7 @@ bool Foam::dynamicRefineFvMesh::update()
                     const labelList& cellMap = map().cellMap();
                     const labelList& reverseCellMap = map().reverseCellMap();
 
-                    PackedBoolList newRefineCell(cellMap.size());
+                    bitSet newRefineCell(cellMap.size());
 
                     forAll(cellMap, celli)
                     {
@@ -1471,7 +1471,8 @@ bool Foam::dynamicRefineFvMesh::writeObject
 (
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,
-    IOstream::compressionType cmp
+    IOstream::compressionType cmp,
+    const bool valid
 ) const
 {
     // Force refinement data to go to the current time directory.
@@ -1479,8 +1480,8 @@ bool Foam::dynamicRefineFvMesh::writeObject
 
     bool writeOk =
     (
-        dynamicFvMesh::writeObject(fmt, ver, cmp)
-     && meshCutter_.write()
+        dynamicFvMesh::writeObject(fmt, ver, cmp, valid)
+     && meshCutter_.write(valid)
     );
 
     if (dumpLevel_)
