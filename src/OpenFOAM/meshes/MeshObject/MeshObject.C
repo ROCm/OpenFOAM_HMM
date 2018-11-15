@@ -40,181 +40,36 @@ Foam::MeshObject<Mesh, MeshObjectType, Type>::MeshObject(const Mesh& mesh)
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 template<class Mesh, template<class> class MeshObjectType, class Type>
-const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
-(
-    const Mesh& mesh
-)
-{
-    const Type* ptr = mesh.thisDb().objectRegistry::template cfindObject<Type>
-    (
-        Type::typeName
-    );
-
-    if (ptr)
-    {
-        return *ptr;
-    }
-    else
-    {
-        if (meshObject::debug)
-        {
-            Pout<< "MeshObject::New(const " << Mesh::typeName
-                << "&) : constructing " << Type::typeName
-                << " for region " << mesh.name() << endl;
-        }
-
-        Type* objectPtr = new Type(mesh);
-
-        regIOobject::store(static_cast<MeshObjectType<Mesh>*>(objectPtr));
-
-        return *objectPtr;
-    }
-}
-
-
-template<class Mesh, template<class> class MeshObjectType, class Type>
-template<class Data1>
+template<class... Args>
 const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
 (
     const Mesh& mesh,
-    const Data1& d
+    Args&&... args
 )
 {
-    const Type* ptr = mesh.thisDb().objectRegistry::template cfindObject<Type>
-    (
-        Type::typeName
-    );
+    const Type* ptr =
+        mesh.thisDb().objectRegistry::template cfindObject<Type>
+        (
+            Type::typeName
+        );
 
     if (ptr)
     {
         return *ptr;
     }
-    else
+
+    if (meshObject::debug)
     {
-        if (meshObject::debug)
-        {
-           Pout<< "MeshObject::New(const " << Mesh::typeName
-                << "&, const Data1&) : constructing " << Type::typeName
-                << " for region " << mesh.name() << endl;
-        }
-
-        Type* objectPtr = new Type(mesh, d);
-
-        regIOobject::store(static_cast<MeshObjectType<Mesh>*>(objectPtr));
-
-        return *objectPtr;
+        Pout<< "MeshObject::New(const " << Mesh::typeName
+            << "&, ...) : constructing " << Type::typeName
+            << " for region " << mesh.name() << endl;
     }
-}
 
+    Type* objectPtr = new Type(mesh, std::forward<Args>(args)...);
 
-template<class Mesh, template<class> class MeshObjectType, class Type>
-template<class Data1, class Data2>
-const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
-(
-    const Mesh& mesh,
-    const Data1& d1,
-    const Data2& d2
-)
-{
-    const Type* ptr = mesh.thisDb().objectRegistry::template cfindObject<Type>
-    (
-        Type::typeName
-    );
+    regIOobject::store(static_cast<MeshObjectType<Mesh>*>(objectPtr));
 
-    if (ptr)
-    {
-        return *ptr;
-    }
-    else
-    {
-        if (meshObject::debug)
-        {
-           Pout<< "MeshObject::New(const " << Mesh::typeName
-                << "&, const Data[1-2]&) : constructing " << Type::typeName
-                << " for region " << mesh.name() << endl;
-        }
-
-        Type* objectPtr = new Type(mesh, d1, d2);
-
-        // Make sure to register the top level regIOobject for if Type itself
-        // is a regIOobject
-        regIOobject::store(static_cast<MeshObjectType<Mesh>*>(objectPtr));
-
-        return *objectPtr;
-    }
-}
-
-
-template<class Mesh, template<class> class MeshObjectType, class Type>
-template<class Data1, class Data2, class Data3>
-const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
-(
-    const Mesh& mesh,
-    const Data1& d1,
-    const Data2& d2,
-    const Data3& d3
-)
-{
-    const Type* ptr = mesh.thisDb().objectRegistry::template cfindObject<Type>
-    (
-        Type::typeName
-    );
-
-    if (ptr)
-    {
-        return *ptr;
-    }
-    else
-    {
-        if (meshObject::debug)
-        {
-           Pout<< "MeshObject::New(const " << Mesh::typeName
-                << "&, const Data[1-3]&) : constructing " << Type::typeName
-                << " for region " << mesh.name() << endl;
-        }
-        Type* objectPtr = new Type(mesh, d1, d2, d3);
-
-        regIOobject::store(static_cast<MeshObjectType<Mesh>*>(objectPtr));
-
-        return *objectPtr;
-    }
-}
-
-
-template<class Mesh, template<class> class MeshObjectType, class Type>
-template<class Data1, class Data2, class Data3, class Data4>
-const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
-(
-    const Mesh& mesh,
-    const Data1& d1,
-    const Data2& d2,
-    const Data3& d3,
-    const Data4& d4
-)
-{
-    const Type* ptr = mesh.thisDb().objectRegistry::template cfindObject<Type>
-    (
-        Type::typeName
-    );
-
-    if (ptr)
-    {
-        return *ptr;
-    }
-    else
-    {
-        if (meshObject::debug)
-        {
-            Pout<< "MeshObject::New(const " << Mesh::typeName
-                << "&, const Data[1-4]&) : constructing " << Type::typeName
-                << " for region " << mesh.name() << endl;
-        }
-        Type* objectPtr = new Type(mesh, d1, d2, d3, d4);
-
-        regIOobject::store(static_cast<MeshObjectType<Mesh>*>(objectPtr));
-
-        return *objectPtr;
-    }
+    return *objectPtr;
 }
 
 
@@ -223,10 +78,11 @@ const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
 template<class Mesh, template<class> class MeshObjectType, class Type>
 bool Foam::MeshObject<Mesh, MeshObjectType, Type>::Delete(const Mesh& mesh)
 {
-    const Type* ptr = mesh.thisDb().objectRegistry::template findObject<Type>
-    (
-        Type::typeName
-    );
+    Type* ptr =
+        mesh.thisDb().objectRegistry::template getObjectPtr<Type>
+        (
+            Type::typeName
+        );
 
     if (ptr)
     {
@@ -236,12 +92,10 @@ bool Foam::MeshObject<Mesh, MeshObjectType, Type>::Delete(const Mesh& mesh)
                 << Type::typeName << endl;
         }
 
-        return mesh.thisDb().checkOut(const_cast<Type&>(*ptr));
+        return mesh.thisDb().checkOut(*ptr);
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -267,20 +121,19 @@ void Foam::meshObject::movePoints(objectRegistry& obr)
             << " meshObjects for region " << obr.name() << endl;
     }
 
-    forAllIter
-    (
-        typename HashTable<GeometricMeshObject<Mesh>*>,
-        meshObjects,
-        iter
-    )
+    forAllIters(meshObjects, iter)
     {
-        if (isA<MoveableMeshObject<Mesh>>(*iter()))
+        // Same as (isA<MoveableMeshObject<Mesh>>(*iter()))
+
+        auto* objectPtr = dynamic_cast<MoveableMeshObject<Mesh>*>(iter());
+
+        if (objectPtr)
         {
             if (meshObject::debug)
             {
                 Pout<< "    Moving " << iter()->name() << endl;
             }
-            dynamic_cast<MoveableMeshObject<Mesh>*>(iter())->movePoints();
+            objectPtr->movePoints();
         }
         else
         {
@@ -309,20 +162,19 @@ void Foam::meshObject::updateMesh(objectRegistry& obr, const mapPolyMesh& mpm)
             << " meshObjects for region " << obr.name() << endl;
     }
 
-    forAllIter
-    (
-        typename HashTable<GeometricMeshObject<Mesh>*>,
-        meshObjects,
-        iter
-    )
+    forAllIters(meshObjects, iter)
     {
-        if (isA<UpdateableMeshObject<Mesh>>(*iter()))
+        // Same as (isA<UpdateableMeshObject<Mesh>>(*iter()))
+
+        auto* objectPtr = dynamic_cast<UpdateableMeshObject<Mesh>*>(iter());
+
+        if (objectPtr)
         {
             if (meshObject::debug)
             {
                 Pout<< "    Updating " << iter()->name() << endl;
             }
-            dynamic_cast<UpdateableMeshObject<Mesh>*>(iter())->updateMesh(mpm);
+            objectPtr->updateMesh(mpm);
         }
         else
         {
@@ -351,7 +203,7 @@ void Foam::meshObject::clear(objectRegistry& obr)
             << " meshObjects for region " << obr.name() << endl;
     }
 
-    forAllIter(typename HashTable<MeshObjectType<Mesh>*>, meshObjects, iter)
+    forAllIters(meshObjects, iter)
     {
         if (meshObject::debug)
         {
@@ -382,7 +234,7 @@ void Foam::meshObject::clearUpto(objectRegistry& obr)
             << " meshObjects for region " << obr.name() << endl;
     }
 
-    forAllIter(typename HashTable<FromType<Mesh>*>, meshObjects, iter)
+    forAllIters(meshObjects, iter)
     {
         if (!isA<ToType<Mesh>>(*iter()))
         {

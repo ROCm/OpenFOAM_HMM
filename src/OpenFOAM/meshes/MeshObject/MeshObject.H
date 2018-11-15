@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -100,47 +100,17 @@ public:
 
         explicit MeshObject(const Mesh& mesh);
 
-        static const Type& New(const Mesh& mesh);
+    // Selectors
 
-        template<class Data1>
-        static const Type& New
-        (
-            const Mesh& mesh,
-            const Data1& d
-        );
-
-        template<class Data1, class Data2>
-        static const Type& New
-        (
-            const Mesh& mesh,
-            const Data1&,
-            const Data2&
-        );
-
-        template<class Data1, class Data2, class Data3>
-        static const Type& New
-        (
-            const Mesh& mesh,
-            const Data1&,
-            const Data2&,
-            const Data3&
-        );
-
-        template<class Data1, class Data2, class Data3, class Data4>
-        static const Type& New
-        (
-            const Mesh& mesh,
-            const Data1&,
-            const Data2&,
-            const Data3&,
-            const Data4&
-        );
+        //- Get existing or create a new MeshObject
+        template<class... Args>
+        static const Type& New(const Mesh& mesh, Args&&... args);
 
 
-    // Destructor
+    //- Destructor
+    virtual ~MeshObject();
 
-        virtual ~MeshObject();
-
+        //- Static destructor
         static bool Delete(const Mesh& mesh);
 
 
