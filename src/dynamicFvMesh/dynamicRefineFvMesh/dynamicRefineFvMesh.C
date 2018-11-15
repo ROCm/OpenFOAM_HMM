@@ -46,7 +46,7 @@ namespace Foam
 
 Foam::label Foam::dynamicRefineFvMesh::count
 (
-    const bitSet& l,
+    const PackedBoolList& l,
     const unsigned int val
 )
 {
@@ -58,9 +58,9 @@ Foam::label Foam::dynamicRefineFvMesh::count
             n++;
         }
 
-        // debug also serves to get-around Clang compiler trying to optimise
+        // debug also serves to get-around Clang compiler trying to optimsie
         // out this forAll loop under O3 optimisation
-        if (debug)
+        if (debug & 128)
         {
             Info<< "n=" << n << endl;
         }
@@ -72,7 +72,7 @@ Foam::label Foam::dynamicRefineFvMesh::count
 
 void Foam::dynamicRefineFvMesh::calculateProtectedCells
 (
-    bitSet& unrefineableCell
+    PackedBoolList& unrefineableCell
 ) const
 {
     if (protectedCell_.empty())
@@ -86,7 +86,7 @@ void Foam::dynamicRefineFvMesh::calculateProtectedCells
     unrefineableCell = protectedCell_;
 
     // Get neighbouring cell level
-    labelList neiLevel(nBoundaryFaces());
+    labelList neiLevel(nFaces()-nInternalFaces());
 
     for (label facei = nInternalFaces(); facei < nFaces(); facei++)
     {
@@ -103,10 +103,9 @@ void Foam::dynamicRefineFvMesh::calculateProtectedCells
         forAll(faceNeighbour(), facei)
         {
             label own = faceOwner()[facei];
+            bool ownProtected = unrefineableCell.get(own);
             label nei = faceNeighbour()[facei];
-
-            bool ownProtected = unrefineableCell.test(own);
-            bool neiProtected = unrefineableCell.test(nei);
+            bool neiProtected = unrefineableCell.get(nei);
 
             if (ownProtected && (cellLevel[nei] > cellLevel[own]))
             {
@@ -120,7 +119,7 @@ void Foam::dynamicRefineFvMesh::calculateProtectedCells
         for (label facei = nInternalFaces(); facei < nFaces(); facei++)
         {
             label own = faceOwner()[facei];
-            bool ownProtected = unrefineableCell.test(own);
+            bool ownProtected = unrefineableCell.get(own);
             if
             (
                 ownProtected
@@ -142,14 +141,16 @@ void Foam::dynamicRefineFvMesh::calculateProtectedCells
             if (seedFace[facei])
             {
                 label own = faceOwner()[facei];
-                if (unrefineableCell.set(own))
+                if (unrefineableCell.get(own) == 0)
                 {
+                    unrefineableCell.set(own, 1);
                     hasExtended = true;
                 }
 
                 label nei = faceNeighbour()[facei];
-                if (unrefineableCell.set(nei))
+                if (unrefineableCell.get(nei) == 0)
                 {
+                    unrefineableCell.set(nei, 1);
                     hasExtended = true;
                 }
             }
@@ -159,8 +160,9 @@ void Foam::dynamicRefineFvMesh::calculateProtectedCells
             if (seedFace[facei])
             {
                 label own = faceOwner()[facei];
-                if (unrefineableCell.set(own))
+                if (unrefineableCell.get(own) == 0)
                 {
+                    unrefineableCell.set(own, 1);
                     hasExtended = true;
                 }
             }
@@ -205,63 +207,27 @@ void Foam::dynamicRefineFvMesh::readDict()
 }
 
 
-// Refines cells, maps fields and recalculates (an approximate) flux
-Foam::autoPtr<Foam::mapPolyMesh>
-Foam::dynamicRefineFvMesh::refine
-(
-    const labelList& cellsToRefine
-)
+void Foam::dynamicRefineFvMesh::mapFields(const mapPolyMesh& mpm)
 {
-    // Mesh changing engine.
-    polyTopoChange meshMod(*this);
-
-    // Play refinement commands into mesh changer.
-    meshCutter_.setRefinement(cellsToRefine, meshMod);
-
-    // Create mesh (with inflation), return map from old to new mesh.
-    autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(*this, false);
-    mapPolyMesh& map = *mapPtr;
-
-    Info<< "Refined from "
-        << returnReduce(map.nOldCells(), sumOp<label>())
-        << " to " << globalData().nTotalCells() << " cells." << endl;
-
-    if (debug)
-    {
-        // Check map.
-        for (label facei = 0; facei < nInternalFaces(); facei++)
-        {
-            label oldFacei = map.faceMap()[facei];
-
-            if (oldFacei >= nInternalFaces())
-            {
-                FatalErrorInFunction
-                    << "New internal face:" << facei
-                    << " fc:" << faceCentres()[facei]
-                    << " originates from boundary oldFace:" << oldFacei
-                    << abort(FatalError);
-            }
-        }
-    }
-
-    //    // Remove the stored tet base points
-    //    tetBasePtIsPtr_.clear();
-    //    // Remove the cell tree
-    //    cellTreePtr_.clear();
-
-    // Update fields
-    updateMesh(map);
-
+    dynamicFvMesh::mapFields(mpm);
     // Correct the flux for modified/added faces. All the faces which only
     // have been renumbered will already have been handled by the mapping.
     {
-        const labelList& faceMap = map.faceMap();
-        const labelList& reverseFaceMap = map.reverseFaceMap();
+        const labelList& faceMap = mpm.faceMap();
+        const labelList& reverseFaceMap = mpm.reverseFaceMap();
 
         // Storage for any master faces. These will be the original faces
         // on the coarse cell that get split into four (or rather the
         // master face gets modified and three faces get added from the master)
-        labelHashSet masterFaces(4*cellsToRefine.size());
+        // Estimate number of faces created
+        labelHashSet masterFaces
+        (
+            max
+            (
+                mag(nFaces()-mpm.nOldFaces())/4,
+                nFaces()/100
+            )
+        );
 
         forAll(faceMap, facei)
         {
@@ -393,8 +359,10 @@ Foam::dynamicRefineFvMesh::refine
             }
 
             // Update master faces
-            for (const label facei : masterFaces)
+            forAllConstIter(labelHashSet, masterFaces, iter)
             {
+                label facei = iter.key();
+
                 if (isInternalFace(facei))
                 {
                     phi[facei] = phiU[facei];
@@ -415,6 +383,86 @@ Foam::dynamicRefineFvMesh::refine
         }
     }
 
+    // Correct the flux for injected faces - these are the faces which have
+    // no correspondence to the old mesh (i.e. added without a masterFace, edge
+    // or point). An example is the internal faces from hexRef8.
+    {
+        const labelList& faceMap = mpm.faceMap();
+
+        mapNewInternalFaces<scalar>(this->Sf(), this->magSf(), faceMap);
+        mapNewInternalFaces<vector>(this->Sf(), this->magSf(), faceMap);
+
+        // No oriented fields of more complex type
+        mapNewInternalFaces<sphericalTensor>(faceMap);
+        mapNewInternalFaces<symmTensor>(faceMap);
+        mapNewInternalFaces<tensor>(faceMap);
+    }
+}
+
+
+// Refines cells, maps fields and recalculates (an approximate) flux
+Foam::autoPtr<Foam::mapPolyMesh>
+Foam::dynamicRefineFvMesh::refine
+(
+    const labelList& cellsToRefine
+)
+{
+    // Mesh changing engine.
+    polyTopoChange meshMod(*this);
+
+    // Play refinement commands into mesh changer.
+    meshCutter_.setRefinement(cellsToRefine, meshMod);
+
+    // Create mesh (with inflation), return map from old to new mesh.
+    //autoPtr<mapPolyMesh> map = meshMod.changeMesh(*this, true);
+    autoPtr<mapPolyMesh> map = meshMod.changeMesh(*this, false);
+
+    Info<< "Refined from "
+        << returnReduce(map().nOldCells(), sumOp<label>())
+        << " to " << globalData().nTotalCells() << " cells." << endl;
+
+    if (debug)
+    {
+        // Check map.
+        for (label facei = 0; facei < nInternalFaces(); facei++)
+        {
+            label oldFacei = map().faceMap()[facei];
+
+            if (oldFacei >= nInternalFaces())
+            {
+                FatalErrorInFunction
+                    << "New internal face:" << facei
+                    << " fc:" << faceCentres()[facei]
+                    << " originates from boundary oldFace:" << oldFacei
+                    << abort(FatalError);
+            }
+        }
+    }
+
+    //    // Remove the stored tet base points
+    //    tetBasePtIsPtr_.clear();
+    //    // Remove the cell tree
+    //    cellTreePtr_.clear();
+
+    // Update fields
+    updateMesh(map);
+
+
+    // Move mesh
+    /*
+    pointField newPoints;
+    if (map().hasMotionPoints())
+    {
+        newPoints = map().preMotionPoints();
+    }
+    else
+    {
+        newPoints = points();
+    }
+    movePoints(newPoints);
+    */
+
+
 
     // Update numbering of cells/vertices.
     meshCutter_.updateMesh(map);
@@ -422,12 +470,12 @@ Foam::dynamicRefineFvMesh::refine
     // Update numbering of protectedCell_
     if (protectedCell_.size())
     {
-        bitSet newProtectedCell(nCells());
+        PackedBoolList newProtectedCell(nCells());
 
         forAll(newProtectedCell, celli)
         {
-            const label oldCelli = map.cellMap()[celli];
-            newProtectedCell.set(celli, protectedCell_.test(oldCelli));
+            label oldCelli = map().cellMap()[celli];
+            newProtectedCell.set(celli, protectedCell_.get(oldCelli));
         }
         protectedCell_.transfer(newProtectedCell);
     }
@@ -435,7 +483,7 @@ Foam::dynamicRefineFvMesh::refine
     // Debug: Check refinement levels (across faces only)
     meshCutter_.checkRefinementLevels(-1, labelList(0));
 
-    return mapPtr;
+    return map;
 }
 
 
@@ -482,21 +530,36 @@ Foam::dynamicRefineFvMesh::unrefine
 
 
     // Change mesh and generate map.
-    autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(*this, false);
-    mapPolyMesh& map = *mapPtr;
+    //autoPtr<mapPolyMesh> map = meshMod.changeMesh(*this, true);
+    autoPtr<mapPolyMesh> map = meshMod.changeMesh(*this, false);
 
     Info<< "Unrefined from "
-        << returnReduce(map.nOldCells(), sumOp<label>())
+        << returnReduce(map().nOldCells(), sumOp<label>())
         << " to " << globalData().nTotalCells() << " cells."
         << endl;
 
     // Update fields
     updateMesh(map);
 
+
+    // Move mesh
+    /*
+    pointField newPoints;
+    if (map().hasMotionPoints())
+    {
+        newPoints = map().preMotionPoints();
+    }
+    else
+    {
+        newPoints = points();
+    }
+    movePoints(newPoints);
+    */
+
     // Correct the flux for modified faces.
     {
-        const labelList& reversePointMap = map.reversePointMap();
-        const labelList& reverseFaceMap = map.reverseFaceMap();
+        const labelList& reversePointMap = map().reversePointMap();
+        const labelList& reverseFaceMap = map().reverseFaceMap();
 
         HashTable<surfaceScalarField*> fluxes
         (
@@ -585,14 +648,14 @@ Foam::dynamicRefineFvMesh::unrefine
     // Update numbering of protectedCell_
     if (protectedCell_.size())
     {
-        bitSet newProtectedCell(nCells());
+        PackedBoolList newProtectedCell(nCells());
 
         forAll(newProtectedCell, celli)
         {
-            label oldCelli = map.cellMap()[celli];
+            label oldCelli = map().cellMap()[celli];
             if (oldCelli >= 0)
             {
-                newProtectedCell.set(celli, protectedCell_.test(oldCelli));
+                newProtectedCell.set(celli, protectedCell_.get(oldCelli));
             }
         }
         protectedCell_.transfer(newProtectedCell);
@@ -601,7 +664,7 @@ Foam::dynamicRefineFvMesh::unrefine
     // Debug: Check refinement levels (across faces only)
     meshCutter_.checkRefinementLevels(-1, labelList(0));
 
-    return mapPtr;
+    return map;
 }
 
 
@@ -688,7 +751,7 @@ void Foam::dynamicRefineFvMesh::selectRefineCandidates
     const scalar lowerRefineLevel,
     const scalar upperRefineLevel,
     const scalarField& vFld,
-    bitSet& candidateCell
+    PackedBoolList& candidateCell
 ) const
 {
     // Get error per cell. Is -1 (not to be refined) to >0 (to be refined,
@@ -711,7 +774,7 @@ void Foam::dynamicRefineFvMesh::selectRefineCandidates
     {
         if (cellError[celli] > 0)
         {
-            candidateCell.set(celli);
+            candidateCell.set(celli, 1);
         }
     }
 }
@@ -721,7 +784,7 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectRefineCells
 (
     const label maxCells,
     const label maxRefinement,
-    const bitSet& candidateCell
+    const PackedBoolList& candidateCell
 ) const
 {
     // Every refined cell causes 7 extra cells
@@ -731,7 +794,7 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectRefineCells
 
     // Mark cells that cannot be refined since they would trigger refinement
     // of protected cells (since 2:1 cascade)
-    bitSet unrefineableCell;
+    PackedBoolList unrefineableCell;
     calculateProtectedCells(unrefineableCell);
 
     // Count current selection
@@ -748,8 +811,11 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectRefineCells
             if
             (
                 cellLevel[celli] < maxRefinement
-             && candidateCell.test(celli)
-             && !unrefineableCell.test(celli)
+             && candidateCell.get(celli)
+             && (
+                    unrefineableCell.empty()
+                 || !unrefineableCell.get(celli)
+                )
             )
             {
                 candidates.append(celli);
@@ -766,8 +832,11 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectRefineCells
                 if
                 (
                     cellLevel[celli] == level
-                 && candidateCell.test(celli)
-                 && !unrefineableCell.test(celli)
+                 && candidateCell.get(celli)
+                 && (
+                        unrefineableCell.empty()
+                     || !unrefineableCell.get(celli)
+                    )
                 )
                 {
                     candidates.append(celli);
@@ -802,7 +871,7 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectRefineCells
 Foam::labelList Foam::dynamicRefineFvMesh::selectUnrefinePoints
 (
     const scalar unrefineLevel,
-    const bitSet& markedCell,
+    const PackedBoolList& markedCell,
     const scalarField& pFld
 ) const
 {
@@ -815,7 +884,7 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectUnrefinePoints
     // If we have any protected cells make sure they also are not being
     // unrefined
 
-    bitSet protectedPoint(nPoints());
+    PackedBoolList protectedPoint(nPoints());
 
     if (protectedCell_.size())
     {
@@ -828,9 +897,9 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectUnrefinePoints
             {
                 label cellI = pCells[pCellI];
 
-                if (protectedCell_.test(cellI))
+                if (protectedCell_[cellI])
                 {
-                    protectedPoint.set(pointI);
+                    protectedPoint[pointI] = true;
                     break;
                 }
             }
@@ -870,7 +939,7 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectUnrefinePoints
 
             forAll(pCells, pCelli)
             {
-                if (markedCell.test(pCells[pCelli]))
+                if (markedCell.get(pCells[pCelli]))
                 {
                     hasMarked = true;
                     break;
@@ -907,7 +976,7 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectUnrefinePoints
 
 void Foam::dynamicRefineFvMesh::extendMarkedCells
 (
-    bitSet& markedCell
+    PackedBoolList& markedCell
 ) const
 {
     // Mark faces using any marked cell
@@ -915,7 +984,7 @@ void Foam::dynamicRefineFvMesh::extendMarkedCells
 
     forAll(markedCell, celli)
     {
-        if (markedCell.test(celli))
+        if (markedCell.get(celli))
         {
             const cell& cFaces = cells()[celli];
 
@@ -933,15 +1002,15 @@ void Foam::dynamicRefineFvMesh::extendMarkedCells
     {
         if (markedFace[facei])
         {
-            markedCell.set(faceOwner()[facei]);
-            markedCell.set(faceNeighbour()[facei]);
+            markedCell.set(faceOwner()[facei], 1);
+            markedCell.set(faceNeighbour()[facei], 1);
         }
     }
     for (label facei = nInternalFaces(); facei < nFaces(); facei++)
     {
         if (markedFace[facei])
         {
-            markedCell.set(faceOwner()[facei]);
+            markedCell.set(faceOwner()[facei], 1);
         }
     }
 }
@@ -949,7 +1018,7 @@ void Foam::dynamicRefineFvMesh::extendMarkedCells
 
 void Foam::dynamicRefineFvMesh::checkEightAnchorPoints
 (
-    bitSet& protectedCell,
+    PackedBoolList& protectedCell,
     label& nProtected
 ) const
 {
@@ -971,7 +1040,7 @@ void Foam::dynamicRefineFvMesh::checkEightAnchorPoints
                 // Check if cell has already 8 anchor points -> protect cell
                 if (nAnchorPoints[celli] == 8)
                 {
-                    if (protectedCell.set(celli))
+                    if (protectedCell.set(celli, true))
                     {
                         nProtected++;
                     }
@@ -988,9 +1057,9 @@ void Foam::dynamicRefineFvMesh::checkEightAnchorPoints
 
     forAll(protectedCell, celli)
     {
-        if (!protectedCell.test(celli) && nAnchorPoints[celli] != 8)
+        if (!protectedCell[celli] && nAnchorPoints[celli] != 8)
         {
-            protectedCell.set(celli);
+            protectedCell.set(celli, true);
             nProtected++;
         }
     }
@@ -1005,7 +1074,7 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
     meshCutter_(*this),
     dumpLevel_(false),
     nRefinementIterations_(0),
-    protectedCell_(nCells(), false)
+    protectedCell_(nCells(), 0)
 {
     // Read static part of dictionary
     readDict();
@@ -1034,7 +1103,7 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
         {
             label celli = pCells[i];
 
-            if (!protectedCell_.test(celli))
+            if (!protectedCell_.get(celli))
             {
                 if (pointLevel[pointi] <= cellLevel[celli])
                 {
@@ -1042,7 +1111,7 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
 
                     if (nAnchors[celli] > 8)
                     {
-                        protectedCell_.set(celli);
+                        protectedCell_.set(celli, 1);
                         nProtected++;
                     }
                 }
@@ -1105,9 +1174,9 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
         {
             if (protectedFace[facei])
             {
-                protectedCell_.set(faceOwner()[facei]);
+                protectedCell_.set(faceOwner()[facei], 1);
                 nProtected++;
-                protectedCell_.set(faceNeighbour()[facei]);
+                protectedCell_.set(faceNeighbour()[facei], 1);
                 nProtected++;
             }
         }
@@ -1115,7 +1184,7 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
         {
             if (protectedFace[facei])
             {
-                protectedCell_.set(faceOwner()[facei]);
+                protectedCell_.set(faceOwner()[facei], 1);
                 nProtected++;
             }
         }
@@ -1127,7 +1196,7 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
 
             if (cFaces.size() < 6)
             {
-                if (protectedCell_.set(celli))
+                if (protectedCell_.set(celli, 1))
                 {
                     nProtected++;
                 }
@@ -1138,7 +1207,7 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
                 {
                     if (faces()[cFaces[cFacei]].size() < 4)
                     {
-                        if (protectedCell_.set(celli))
+                        if (protectedCell_.set(celli, 1))
                         {
                             nProtected++;
                         }
@@ -1158,6 +1227,7 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
     }
     else
     {
+
         cellSet protectedCells(*this, "protectedCells", nProtected);
         forAll(protectedCell_, celli)
         {
@@ -1188,9 +1258,9 @@ Foam::dynamicRefineFvMesh::~dynamicRefineFvMesh()
 
 bool Foam::dynamicRefineFvMesh::update()
 {
-    // Re-read dictionary. Usually small so takes trivial amount of time
-    // compared to actual refinement. Also very useful to be able to modify
-    // on-the-fly.
+    // Re-read dictionary. Choosen since usually -small so trivial amount
+    // of time compared to actual refinement. Also very useful to be able
+    // to modify on-the-fly.
     dictionary refineDict
     (
         IOdictionary
@@ -1264,18 +1334,16 @@ bool Foam::dynamicRefineFvMesh::update()
             refineDict.get<scalar>("lowerRefineLevel");
         const scalar upperRefineLevel =
             refineDict.get<scalar>("upperRefineLevel");
-
         const scalar unrefineLevel = refineDict.lookupOrDefault<scalar>
         (
             "unrefineLevel",
             GREAT
         );
-
         const label nBufferLayers =
             refineDict.get<label>("nBufferLayers");
 
         // Cells marked for refinement or otherwise protected from unrefinement.
-        bitSet refineCell(nCells());
+        PackedBoolList refineCell(nCells());
 
         // Determine candidates for refinement (looking at field only)
         selectRefineCandidates
@@ -1316,7 +1384,7 @@ bool Foam::dynamicRefineFvMesh::update()
                     const labelList& cellMap = map().cellMap();
                     const labelList& reverseCellMap = map().reverseCellMap();
 
-                    bitSet newRefineCell(cellMap.size());
+                    PackedBoolList newRefineCell(cellMap.size());
 
                     forAll(cellMap, celli)
                     {
@@ -1324,15 +1392,15 @@ bool Foam::dynamicRefineFvMesh::update()
 
                         if (oldCelli < 0)
                         {
-                            newRefineCell.set(celli);
+                            newRefineCell.set(celli, 1);
                         }
                         else if (reverseCellMap[oldCelli] != celli)
                         {
-                            newRefineCell.set(celli);
+                            newRefineCell.set(celli, 1);
                         }
                         else
                         {
-                            newRefineCell.set(celli, refineCell.test(oldCelli));
+                            newRefineCell.set(celli, refineCell.get(oldCelli));
                         }
                     }
                     refineCell.transfer(newRefineCell);
@@ -1380,7 +1448,7 @@ bool Foam::dynamicRefineFvMesh::update()
 
         if ((nRefinementIterations_ % 10) == 0)
         {
-            // Compact refinement history occasionally (how often?).
+            // Compact refinement history occassionally (how often?).
             // Unrefinement causes holes in the refinementHistory.
             const_cast<refinementHistory&>(meshCutter().history()).compact();
         }
@@ -1403,8 +1471,7 @@ bool Foam::dynamicRefineFvMesh::writeObject
 (
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
-    const bool valid
+    IOstream::compressionType cmp
 ) const
 {
     // Force refinement data to go to the current time directory.
@@ -1412,8 +1479,8 @@ bool Foam::dynamicRefineFvMesh::writeObject
 
     bool writeOk =
     (
-        dynamicFvMesh::writeObject(fmt, ver, cmp, valid)
-     && meshCutter_.write(valid)
+        dynamicFvMesh::writeObject(fmt, ver, cmp)
+     && meshCutter_.write()
     );
 
     if (dumpLevel_)
@@ -1430,7 +1497,7 @@ bool Foam::dynamicRefineFvMesh::writeObject
                 false
             ),
             *this,
-            dimensionedScalar(dimless, Zero)
+            dimensionedScalar("level", dimless, 0)
         );
 
         const labelList& cellLevel = meshCutter_.cellLevel();

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,6 +56,7 @@ Description
             (rho*phi none)   //none)
             (ghf none)  //NaN)   //none)
         );
+
         // Write the refinement level as a volScalarField
         dumpLevel       true;
 
@@ -117,10 +118,10 @@ protected:
 
 
         //- Refine cells. Update mesh and fields.
-        autoPtr<mapPolyMesh> refine(const labelList&);
+        virtual autoPtr<mapPolyMesh> refine(const labelList&);
 
         //- Unrefine cells. Gets passed in centre points of cells to combine.
-        autoPtr<mapPolyMesh> unrefine(const labelList&);
+        virtual autoPtr<mapPolyMesh> unrefine(const labelList&);
 
 
         // Selection of cells to un/refine
@@ -185,6 +186,32 @@ protected:
                 label& nProtected
             ) const;
 
+            //- Map single non-flux surface<Type>Field
+            //  for new internal faces (e.g. AMR refine). This currently
+            //  interpolates values from surrounding faces (faces on
+            //  neighbouring cells) that do have a value.
+            template <class T>
+            void mapNewInternalFaces
+            (
+                const labelList& faceMap,
+                GeometricField<T, fvsPatchField, surfaceMesh>&
+            );
+
+            //- Correct surface fields for new faces
+            template <class T>
+            void mapNewInternalFaces(const labelList& faceMap);
+
+            //- Correct surface fields for new faces. Converts any oriented
+            //  fields into non-oriented (i.e. phi -> Uf) before mapping
+            template <class T>
+            void mapNewInternalFaces
+            (
+                const surfaceVectorField& Sf,
+                const surfaceScalarField& magSf,
+                const labelList& faceMap
+            );
+
+
 private:
 
         //- No copy construct
@@ -232,6 +259,9 @@ public:
         //- Update the mesh for both mesh motion and topology change
         virtual bool update();
 
+        //- Map all fields in time using given map.
+        virtual void mapFields(const mapPolyMesh& mpm);
+
 
     // Writing
 
@@ -243,13 +273,17 @@ public:
             IOstream::compressionType cmp,
             const bool valid
         ) const;
-
 };
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "dynamicRefineFvMeshTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
