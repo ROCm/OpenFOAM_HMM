@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018 IH-Cantabria
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,20 +22,63 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::waveMakerPistonPointPatchVectorField
+    Foam::waveMakerPointPatchVectorField
 
 Description
-    Foam::waveMakerPistonPointPatchVectorField
+    Point motion boundary condition to generate waves based on either piston
+    or flap motions.
+
+    Based on the reference
+    \verbatim
+        Hughes, S.A. (1993).
+        Physical Models And Laboratory Techniques In Coastal Engineering.
+        Advanced Series On Ocean Engineering, volume 7
+    \endverbatim
+
+Usage
+    Example patch specification
+    \verbatim
+    leftwall
+    {
+        type            waveMaker; 
+        motionType      flap;
+        n               (1 0 0);
+        initialDepth    0.25;
+        wavePeriod      2.0;
+        waveHeight      0.06;
+        wavePhase       0;
+        rampTime        2.0;
+    }
+    \endverbatim
+
+    where
+    \table
+        Property     | Description                  | Required | Default value
+        motionType   | See motion types below       | yes      |
+        x0           | Reference point on patch     | yes      |
+        n            | Direction of motion          | yes      |
+        initialDepth | Initial depth                | yes      |
+        wavePeriod   | wave period                  | yes      |
+        waveHeight   | Wave height                  | yes      |
+        wavePhase    | wave phase                   | yes      |
+        rampTime     | Time to reach maximum motion | yes      |
+        secondOrder  | Second order calculation     | no       | no
+    \endtable
+
+    Available motion types include:
+    - piston
+    - flap
 
 SourceFiles
-    waveMakerPistonPointPatchVectorField.C
+    waveMakerPointPatchVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef waveMakerPistonPointPatchVectorField_H
-#define waveMakerPistonPointPatchVectorField_H
+#ifndef waveMakerPointPatchVectorField_H
+#define waveMakerPointPatchVectorField_H
 
 #include "fixedValuePointPatchField.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,67 +86,89 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-        Class waveMakerPistonPointPatchVectorField Declaration
+               Class waveMakerPointPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
-class waveMakerPistonPointPatchVectorField
+class waveMakerPointPatchVectorField
 :
     public fixedValuePointPatchField<vector>
 {
+    public:
+
+        enum motionTypes
+        {
+            piston,
+            flap
+        };
+
+        //- Names for motion types
+        static const Enum<motionTypes> motionTypeNames;
+
+
     // Private data
 
-	//inital water depth
+        //- Motion type
+        motionTypes motionType_;
+
+        //- Patch normal direction
+        //  Note: cannot use patch normal of the initial patch unless it is
+        //  in its neutral position (flap mode)
+        vector n_;
+
+        //- Vertical direction
+        vector gHat_;
+
+        //- Inital water depth
         scalar initialDepth_;
 
-	//wave period
+        //- Wave period
         scalar wavePeriod_;
 
-	//wave heigth
-        scalar waveHeigth_;
+        //- Wave height
+        scalar waveHeight_;
 
-	//wavelength
-        scalar waveLength_;
-
-	//wave phase
+        //- Wave phase
         scalar wavePhase_;
 
-	//wave number
-        scalar waveNumber_;
+        //- Wave length
+        scalar waveLength_;
 
-	//ramp time
+        //- Ramp time
         scalar rampTime_;
 
-	// gravity vector
-        vector g_;
-
-	//on/off second order generation
+        //- On/off second order calculation switch
         scalar secondOrder_;
+
 
     // Protected Member Functions
 
-        // Dispersion equation
-            virtual scalar waveLength(const scalar h, const scalar T);
+        //- Return the gravitational acceleration
+        const vector& g();
+
+        //- Dispersion equation
+        virtual scalar waveLength(const scalar h, const scalar T);
 
         //- Return the time scaling coefficient
-            virtual scalar timeCoeff(const scalar t) const;
+        virtual scalar timeCoeff(const scalar t) const;
+
 
 public:
 
     //- Runtime type information
-    TypeName("waveMakerPiston");
+    TypeName("waveMaker");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        waveMakerPistonPointPatchVectorField
+        waveMakerPointPatchVectorField
         (
             const pointPatch&,
             const DimensionedField<vector, pointMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        waveMakerPistonPointPatchVectorField
+        waveMakerPointPatchVectorField
         (
             const pointPatch&,
             const DimensionedField<vector, pointMesh>&,
@@ -111,9 +176,9 @@ public:
         );
 
         //- Construct by mapping given patchField<vector> onto a new patch
-        waveMakerPistonPointPatchVectorField
+        waveMakerPointPatchVectorField
         (
-            const waveMakerPistonPointPatchVectorField&,
+            const waveMakerPointPatchVectorField&,
             const pointPatch&,
             const DimensionedField<vector, pointMesh>&,
             const pointPatchFieldMapper&
@@ -124,7 +189,7 @@ public:
         {
             return autoPtr<pointPatchField<vector>>
             (
-                new waveMakerPistonPointPatchVectorField
+                new waveMakerPointPatchVectorField
                 (
                     *this
                 )
@@ -132,9 +197,9 @@ public:
         }
 
         //- Construct as copy setting internal field reference
-        waveMakerPistonPointPatchVectorField
+        waveMakerPointPatchVectorField
         (
-            const waveMakerPistonPointPatchVectorField&,
+            const waveMakerPointPatchVectorField&,
             const DimensionedField<vector, pointMesh>&
         );
 
@@ -146,7 +211,7 @@ public:
         {
             return autoPtr<pointPatchField<vector>>
             (
-                new waveMakerPistonPointPatchVectorField
+                new waveMakerPointPatchVectorField
                 (
                     *this,
                     iF

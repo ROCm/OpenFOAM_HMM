@@ -1,21 +1,20 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  2.1.1                                 |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  v1806                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    location    "0";
-    object      U;
+    class       pointVectorField;
+    object      pointDisplacement;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 -1 0 0 0 0];
+dimensions      [0 1 0 0 0 0 0];
 
 internalField   uniform (0 0 0);
 
@@ -23,8 +22,7 @@ boundaryField
 {
     bottom1
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        type            zeroGradient;
     }
     bottom2
     {
@@ -33,8 +31,17 @@ boundaryField
     }
     leftwall
     {
-        type            movingWallVelocity;
+        type            waveMaker; 
         value           uniform (0 0 0);
+
+        motionType      flap;
+        x0              (0 0 0);
+        n               (1 0 0);
+        waveHeight      0.06;
+        initialDepth    0.25;
+        wavePeriod      2.0;
+        rampTime        2.0;
+        wavePhase       0;
     }
     back
     {
@@ -46,14 +53,14 @@ boundaryField
     }
     rightwall
     {
-        type            waveVelocity;
+        type            fixedValue;
         value           uniform (0 0 0);
     }
     top
     {
-          type          pressureInletOutletVelocity;
-          value         uniform (0 0 0);
+        type            zeroGradient;
     }
 }
+
 
 // ************************************************************************* //

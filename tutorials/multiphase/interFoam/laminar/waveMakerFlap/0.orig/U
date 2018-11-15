@@ -1,54 +1,58 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5-dev                               |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|  \\    /   O peration     | Version:  v1806                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      alpha.water;
+    class       volVectorField;
+    location    "0";
+    object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 0 0 0 0 0];
+dimensions      [0 1 -1 0 0 0 0];
 
-internalField   uniform 0;
+internalField   uniform (0 0 0);
 
 boundaryField
 {
     bottom1
     {
-        type            zeroGradient;
+        type            fixedValue;
+        value           uniform (0 0 0);
     }
     bottom2
     {
-        type            zeroGradient;
+        type            fixedValue;
+        value           uniform (0 0 0);
     }
-    front
+    leftwall
     {
-        type            empty;
+        type            movingWallVelocity;
+        value           uniform (0 0 0);
     }
     back
     {
         type            empty;
     }
-    leftwall
+    front
     {
-        type            zeroGradient;
+        type            empty;
     }
     rightwall
     {
-        type            zeroGradient;
+        type            waveVelocity;
+        value           uniform (0 0 0);
     }
     top
     {
-        type            inletOutlet;
-        inletValue      uniform 0;
-        value           uniform 0;
+          type          pressureInletOutletVelocity;
+          value         uniform (0 0 0);
     }
 }
 
