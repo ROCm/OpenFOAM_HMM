@@ -228,7 +228,7 @@ Arm*)     # Arm system compilers
 esac
 
 # Clear prior to sourcing
-unset gcc_version gmp_version mpfr_version mpc_version
+unset gcc_version gmp_version mpfr_version mpc_version clang_version
 unset GMP_ARCH_PATH MPFR_ARCH_PATH
 
 # Load pre-defined compiler versions

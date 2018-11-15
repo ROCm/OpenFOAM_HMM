@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -22,7 +22,9 @@ usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
-usage: ${0##*/}
+usage: ${0##*/} options
+
+Basic
   -foamInstall DIR        specify installation directory (eg, /opt)
   -foamVersion VER        specify project version (eg, 1612)
   -projectName NAME       specify project directory name (eg, openfoam1612)
@@ -30,13 +32,27 @@ usage: ${0##*/}
   -SP | -float32          specify 'WM_PRECISION_OPTION'
   -DP | -float64          specify 'WM_PRECISION_OPTION'
   -int32 | -int64         specify 'WM_LABEL_SIZE'
+
+Compiler
   -system NAME            specify 'system' compiler to use (eg, Gcc, Icc,...)
   -third  NAME            specify 'ThirdParty' compiler to use (eg, Clang40,...)
+  -gcc VER                specify 'gcc_version' for ThirdParty Gcc
+  -clang VER              specify 'clang_version' for ThirdParty Clang
+  gmp-VERSION             for ThirdParty gcc (gmp-system for system library)
+  mpfr-VERSION            for ThirdParty gcc (mpfr-system for system library)
+  mpc-VERSION             for ThirdParty gcc (mpc-system for system library)
+
+MPI
+  -mpi NAME               specify 'WM_MPLIB' type (eg, INTELMPI, etc)
+  -openmpi VER            use ThirdParty openmpi, with version for 'FOAM_MPI'
+  -openmpi-system         use system openmpi
+  -openmpi-third          use ThirdParty openmpi (using default version)
+
+Components
   -boost VER              specify 'boost_version'
   -boost-path DIR         specify 'BOOST_ARCH_PATH'
   -cgal ver               specify 'cgal_version'
   -cgal-path DIR          specify 'CGAL_ARCH_PATH'
-  -clang VER              specify 'clang_version' for ThirdParty Clang
   -cmake VER              specify 'cmake_version'
   -fftw VER               specify 'fffw_version'
   -fftw-path DIR          specify 'FFTW_ARCH_PATH'
@@ -44,20 +60,17 @@ usage: ${0##*/}
   -kahip-path DIR         specify 'KAHIP_ARCH_PATH'
   -metis ver              specify 'METIS_VERSION'
   -metis-path DIR         specify 'METIS_ARCH_PATH'
+
+Graphics
   -paraview VER           specify 'ParaView_VERSION' (eg, 5.4.1)
   -paraview-path DIR      specify 'ParaView_DIR' (eg, /opt/ParaView-5.4.1)
-  -mpi NAME               specify 'WM_MPLIB' type (eg, FJMPI, INTELMPI, etc)
-  -openmpi VER            specify ThirdParty openmpi version for 'FOAM_MPI'
-  -openmpi-system         activate system openmpi
-  -openmpi-third          activate ThirdParty openmpi (using default version)
   -scotch VER             specify 'SCOTCH_VERSION' (eg, scotch_6.0.4)
   -scotch-path DIR        specify 'SCOTCH_ARCH_PATH' (eg, /opt/OpenFOAM-scotch_6.0.4)
   -vtk  VER               specify 'vtk_version' (eg, VTK-7.1.0)
   -mesa VER               specify 'mesa_version' (eg, mesa-13.0.1)
+
+Misc
   -sigfpe | -no-sigfpe    [defunct - now under etc/controlDict]
-  gmp-VERSION             for ThirdParty gcc (gmp-system for system library)
-  mpfr-VERSION            for ThirdParty gcc (mpfr-system for system library)
-  mpc-VERSION             for ThirdParty gcc (mpc-system for system library)
 
 * Adjust hardcoded versions and installation paths (for bash, POSIX shell).
 
@@ -76,11 +89,6 @@ USAGE
     exit 1
 }
 
-# Check that it appears to be an OpenFOAM installation
-[ -f etc/bashrc -a -d etc/config.sh ] || \
-    usage "Please run from top-level directory of installation"
-
-
 # Report error and exit
 die()
 {
@@ -93,6 +101,12 @@ die()
     echo
     exit 1
 }
+
+# -----------------------------------------------------------------------------
+
+# Check that it appears to be an OpenFOAM installation
+[ -f etc/bashrc -a -d etc/config.sh ] || \
+    usage "Please run from top-level directory of installation"
 
 
 # Check if argument matches the expected input. Respects case.
@@ -178,6 +192,8 @@ do
         # Discard empty arguments
         ;;
 
+## Basic ##
+
     -foamInstall | --foamInstall)
         # Replace FOAM_INST_DIR=...
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
@@ -260,6 +276,25 @@ do
         adjusted=true
         ;;
 
+
+## Compiler ##
+
+    -clang)
+        # Replace clang_version=...
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        replace etc/config.sh/compiler  clang_version "$2"
+        adjusted=true
+        shift
+        ;;
+
+    -gcc)
+        # Replace gcc_version=...
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        replace etc/config.sh/compiler  gcc_version "$2"
+        adjusted=true
+        shift
+        ;;
+
     -system)
         # Replace WM_COMPILER_TYPE=... and WM_COMPILER=...
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
@@ -275,6 +310,71 @@ do
         adjusted=true
         shift
         ;;
+
+    gmp-[4-9]* | gmp-system)
+        # gcc-related package
+        replace etc/config.sh/compiler  gmp_version "$1"
+        adjusted=true
+        ;;
+
+    mpfr-[2-9]* | mpfr-system)
+        # gcc-related package
+        replace etc/config.sh/compiler  mpfr_version "$1"
+        adjusted=true
+        ;;
+
+    mpc-[0-9]* | mpc-system)
+        # gcc-related package
+        replace etc/config.sh/compiler  mpc_version "$1"
+        adjusted=true
+        ;;
+
+
+## MPI ##
+
+    -mpi)
+        # Explicitly set WM_MPLIB=...
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        replace etc/bashrc  WM_MPLIB "$2"
+        optMpi=system
+        adjusted=true
+        shift
+        ;;
+
+    -openmpi)
+        # Replace FOAM_MPI=openmpi-<digits>.. and set to use third-party
+        #  The edit is slightly fragile, but works
+        expected="openmpi-[1-9][.0-9]*"
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        optMpi="$2"
+        _matches "$optMpi" "$expected" || die "'$1' option has bad value: '$optMpi'"
+
+        _inlineSed etc/config.sh/mpi \
+            "FOAM_MPI=$expected" \
+            "FOAM_MPI=$optMpi" \
+            "Replaced 'FOAM_MPI=$expected' setting by 'FOAM_MPI=$optMpi'"
+
+        replace etc/bashrc  WM_MPLIB OPENMPI
+        adjusted=true
+        shift
+        ;;
+
+    -openmpi-system)
+        # Explicitly set WM_MPLIB=SYSTEMOPENMPI
+        replace etc/bashrc  WM_MPLIB SYSTEMOPENMPI
+        optMpi=system
+        adjusted=true
+        ;;
+
+    -openmpi-third)
+        # Explicitly set WM_MPLIB=OPENMPI, using default setting for openmpi
+        replace etc/bashrc  WM_MPLIB OPENMPI
+        optMpi=third
+        adjusted=true
+        ;;
+
+
+## Components ##
 
     -boost)
         # Replace boost_version=...
@@ -324,78 +424,10 @@ do
         shift
         ;;
 
-    -clang)
-        # Replace clang_version=...
-        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
-        replace etc/config.sh/compiler  clang_version "$2"
-        adjusted=true
-        shift
-        ;;
-
     -cmake)
         # Replace cmake_version=...
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         replace etc/config.sh/paraview  cmake_version "$2"
-        adjusted=true
-        shift
-        ;;
-
-    -mpi)
-        # Explicitly set WM_MPLIB=...
-        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
-        replace etc/bashrc  WM_MPLIB "$2"
-        optMpi=system
-        adjusted=true
-        shift
-        ;;
-
-    -openmpi)
-        # Replace FOAM_MPI=openmpi-<digits>.. and set to use third-party
-        #  The edit is slightly fragile, but works
-        expected="openmpi-[1-9][.0-9]*"
-        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
-        optMpi="$2"
-        _matches "$optMpi" "$expected" || die "'$1' option has bad value: '$optMpi'"
-
-        _inlineSed etc/config.sh/mpi \
-            "FOAM_MPI=$expected" \
-            "FOAM_MPI=$optMpi" \
-            "Replaced 'FOAM_MPI=$expected' setting by 'FOAM_MPI=$optMpi'"
-
-        replace etc/bashrc  WM_MPLIB OPENMPI
-        adjusted=true
-        shift
-        ;;
-
-    -openmpi-system)
-        # Explicitly set WM_MPLIB=SYSTEMOPENMPI
-        replace etc/bashrc  WM_MPLIB SYSTEMOPENMPI
-        optMpi=system
-        adjusted=true
-        ;;
-
-    -openmpi-third)
-        # Explicitly set WM_MPLIB=OPENMPI, using default setting for openmpi
-        replace etc/bashrc  WM_MPLIB OPENMPI
-        optMpi=third
-        adjusted=true
-        ;;
-
-    -paraview | -paraviewVersion | --paraviewVersion)
-        # Replace ParaView_VERSION=...
-        expected="[5-9][.0-9]*"
-        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
-        _matches "$2" "$expected" || die "'$1' option has bad value: '$2'"
-
-        replace etc/config.sh/paraview  ParaView_VERSION "$2"
-        adjusted=true
-        shift
-        ;;
-
-    -paraview-path | -paraviewInstall | --paraviewInstall)
-        # Replace ParaView_DIR=...
-        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
-        replace etc/config.sh/paraview  ParaView_DIR "$2"
         adjusted=true
         shift
         ;;
@@ -448,6 +480,28 @@ do
         shift
         ;;
 
+
+## Graphics ##
+
+    -paraview | -paraviewVersion | --paraviewVersion)
+        # Replace ParaView_VERSION=...
+        expected="[5-9][.0-9]*"
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        _matches "$2" "$expected" || die "'$1' option has bad value: '$2'"
+
+        replace etc/config.sh/paraview  ParaView_VERSION "$2"
+        adjusted=true
+        shift
+        ;;
+
+    -paraview-path | -paraviewInstall | --paraviewInstall)
+        # Replace ParaView_DIR=...
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        replace etc/config.sh/paraview  ParaView_DIR "$2"
+        adjusted=true
+        shift
+        ;;
+
     -vtk)
         # Replace vtk_version=...
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
@@ -464,23 +518,8 @@ do
         shift
         ;;
 
-    gmp-[4-9]* | gmp-system)
-        # gcc-related package
-        replace etc/config.sh/compiler  gmp_version "$1"
-        adjusted=true
-        ;;
 
-    mpfr-[2-9]* | mpfr-system)
-        # gcc-related package
-        replace etc/config.sh/compiler  mpfr_version "$1"
-        adjusted=true
-        ;;
-
-    mpc-[0-9]* | mpc-system)
-        # gcc-related package
-        replace etc/config.sh/compiler  mpc_version "$1"
-        adjusted=true
-        ;;
+## Misc ##
 
     -sigfpe | -no-sigfpe)
         echo "Enable/disable FOAM_SIGFPE now via controlDict" 1>&2
