@@ -84,18 +84,18 @@ Foam::fileName Foam::functionObjects::writeFile::baseTimeDir() const
 
 Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::createFile
 (
-    const word& name
+    const word& name,
+    const scalar time
 ) const
 {
     autoPtr<OFstream> osPtr;
 
     if (Pstream::master() && writeToFile_)
     {
-        const scalar startTime = fileObr_.time().startTime().value();
-        const scalar userStartTime = fileObr_.time().timeToUserTime(startTime);
-        const word startTimeName = Time::timeName(userStartTime);
+        const scalar userTime = fileObr_.time().timeToUserTime(time);
+        const word timeName = Time::timeName(userTime);
 
-        fileName outputDir(baseFileDir()/prefix_/startTimeName);
+        fileName outputDir(baseFileDir()/prefix_/timeName);
 
         mkDir(outputDir);
 
@@ -105,7 +105,7 @@ Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::createFile
         IFstream is(outputDir/(fName + ".dat"));
         if (is.good())
         {
-            fName = fName + "_" + startTimeName;
+            fName = fName + "_" + timeName;
         }
 
         osPtr.reset(new OFstream(outputDir/(fName + ".dat")));
@@ -120,6 +120,16 @@ Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::createFile
     }
 
     return osPtr;
+}
+
+
+Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::createFile
+(
+    const word& name
+) const
+{
+    return createFile(name, startTime_);
+
 }
 
 
@@ -153,7 +163,8 @@ Foam::functionObjects::writeFile::writeFile
     filePtr_(),
     writePrecision_(IOstream::defaultPrecision()),
     writeToFile_(true),
-    writtenHeader_(false)
+    writtenHeader_(false),
+    startTime_(obr.time().startTime().value())
 {}
 
 
@@ -171,7 +182,8 @@ Foam::functionObjects::writeFile::writeFile
     filePtr_(),
     writePrecision_(IOstream::defaultPrecision()),
     writeToFile_(true),
-    writtenHeader_(false)
+    writtenHeader_(false),
+    startTime_(obr.time().startTime().value())
 {
     read(dict);
 
@@ -180,12 +192,6 @@ Foam::functionObjects::writeFile::writeFile
         filePtr_ = createFile(fileName_);
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::writeFile::~writeFile()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
