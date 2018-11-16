@@ -29,8 +29,8 @@ Group
 
 Description
     Transforms a user-specified selection of fields from global Cartesian
-    coordinates to a local coordinate system.  The fields are run-time
-    modifiable.
+    coordinates to a local Cartesian coordinate system.
+    The fields are run-time modifiable.
 
 Usage
     Example of function object specification:
@@ -62,10 +62,10 @@ Usage
 
     Where the entries comprise:
     \table
-        Property     | Description             | Required    | Default value
+        Property     | Description                          | Required | Default value
         type         | type name: fieldCoordinateSystemTransform | yes |
-        fields       | list of fields to be transformed |yes |
-        coordinateSystem | local coordinate system | yes    |
+        fields       | list of fields to be transformed     | yes |
+        coordinateSystem | local coordinate system          | yes    |
     \endtable
 
 See also

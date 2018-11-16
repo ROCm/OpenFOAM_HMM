@@ -64,7 +64,7 @@ fieldCoordinateSystemTransform
     read(dict);
 
     Info<< type() << " " << name << ":" << nl
-        << "   Applying transformation from global Cartesian to local "
+        << "   Applying uniform transformation from global Cartesian to local "
         << *csysPtr_ << nl << endl;
 }
 

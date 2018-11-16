@@ -41,7 +41,7 @@ void Foam::functionObjects::fieldCoordinateSystemTransform::transformField
     store
     (
         transFieldName,
-        Foam::transform(dimensionedTensor(csysPtr_->R()), field)
+        Foam::invTransform(dimensionedTensor(csysPtr_->R()), field)
     );
 }
 
