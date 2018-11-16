@@ -26,7 +26,7 @@ License
 #include "dynamicMultiMotionSolverFvMesh.H"
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
-#include "boolList.H"
+#include "bitSet.H"
 #include "syncTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -69,7 +69,10 @@ Foam::dynamicMultiMotionSolverFvMesh::dynamicMultiMotionSolverFvMesh
     zoneIDs_.setSize(dynamicMeshCoeffs.size());
     motionPtr_.setSize(dynamicMeshCoeffs.size());
     pointIDs_.setSize(dynamicMeshCoeffs.size());
-    label zoneI = 0;
+
+    label zonei = 0;
+
+    bitSet movePts;
 
     for (const entry& dEntry : dynamicMeshCoeffs)
     {
@@ -79,9 +82,9 @@ Foam::dynamicMultiMotionSolverFvMesh::dynamicMultiMotionSolverFvMesh
 
             const word zoneName(subDict.get<word>("cellZone"));
 
-            zoneIDs_[zoneI] = cellZones().findZoneID(zoneName);
+            zoneIDs_[zonei] = cellZones().findZoneID(zoneName);
 
-            if (zoneIDs_[zoneI] == -1)
+            if (zoneIDs_[zonei] == -1)
             {
                 FatalIOErrorInFunction(dynamicMeshCoeffs)
                     << "Cannot find cellZone named " << zoneName
@@ -94,7 +97,7 @@ Foam::dynamicMultiMotionSolverFvMesh::dynamicMultiMotionSolverFvMesh
 
             motionPtr_.set
             (
-                zoneI,
+                zonei,
                 motionSolver::New
                 (
                     *this,
@@ -102,57 +105,39 @@ Foam::dynamicMultiMotionSolverFvMesh::dynamicMultiMotionSolverFvMesh
                 )
             );
 
+
             // Collect points of cell zone.
-            const cellZone& cz = cellZones()[zoneIDs_[zoneI]];
 
-            boolList movePts(nPoints(), false);
+            movePts.reset();
+            movePts.resize(nPoints());
 
-            forAll(cz, i)
+            for (const label celli : cellZones()[zoneIDs_[zonei]])
             {
-                label cellI = cz[i];
-                const cell& c = cells()[cellI];
-                forAll(c, j)
+                for (const label facei : cells()[celli])
                 {
-                    const face& f = faces()[c[j]];
-                    forAll(f, k)
-                    {
-                        label pointI = f[k];
-                        movePts[pointI] = true;
-                    }
+                    movePts.set(faces()[facei]);  // set multiple points
                 }
             }
 
-            syncTools::syncPointList(*this, movePts, orEqOp<bool>(), false);
+            syncTools::syncPointList
+            (
+                *this, movePts, orEqOp<unsigned int>(), 0u
+            );
 
-            DynamicList<label> ptIDs(nPoints());
-            forAll(movePts, i)
-            {
-                if (movePts[i])
-                {
-                    ptIDs.append(i);
-                }
-            }
+            pointIDs_[zonei] = movePts.sortedToc();
 
-            pointIDs_[zoneI].transfer(ptIDs);
-
-            Info<< "Applying motionSolver " << motionPtr_[zoneI].type()
+            Info<< "Applying motionSolver " << motionPtr_[zonei].type()
                 << " to "
-                << returnReduce(pointIDs_[zoneI].size(), sumOp<label>())
+                << returnReduce(pointIDs_[zonei].size(), sumOp<label>())
                 << " points of cellZone " << zoneName << endl;
 
-            zoneI++;
+            ++zonei;
         }
     }
-    zoneIDs_.setSize(zoneI);
-    motionPtr_.setSize(zoneI);
-    pointIDs_.setSize(zoneI);
+    zoneIDs_.setSize(zonei);
+    motionPtr_.setSize(zonei);
+    pointIDs_.setSize(zonei);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::dynamicMultiMotionSolverFvMesh::~dynamicMultiMotionSolverFvMesh()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -161,16 +146,14 @@ bool Foam::dynamicMultiMotionSolverFvMesh::update()
 {
     pointField transformedPts(points());
 
-    forAll(motionPtr_, zoneI)
+    forAll(motionPtr_, zonei)
     {
-        tmp<pointField> tnewPoints(motionPtr_[zoneI].newPoints());
+        tmp<pointField> tnewPoints(motionPtr_[zonei].newPoints());
         const pointField& newPoints = tnewPoints();
 
-        const labelList& zonePoints = pointIDs_[zoneI];
-        forAll(zonePoints, i)
+        for (const label pointi : pointIDs_[zonei])
         {
-            label pointI = zonePoints[i];
-            transformedPts[pointI] = newPoints[pointI];
+            transformedPts[pointi] = newPoints[pointi];
         }
     }
 
@@ -178,9 +161,11 @@ bool Foam::dynamicMultiMotionSolverFvMesh::update()
 
     static bool hasWarned = false;
 
-    if (foundObject<volVectorField>("U"))
+    volVectorField* Uptr = getObjectPtr<volVectorField>("U");
+
+    if (Uptr)
     {
-        lookupObjectRef<volVectorField>("U").correctBoundaryConditions();
+        Uptr->correctBoundaryConditions();
     }
     else if (!hasWarned)
     {
