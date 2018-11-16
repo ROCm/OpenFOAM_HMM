@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,63 +48,157 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-void transform(Field<Type>&, const tensorField&, const Field<Type>&);
+// transform()
 
 template<class Type>
-tmp<Field<Type>> transform(const tensorField&, const Field<Type>&);
+void transform
+(
+    Field<Type>& result,
+    const tensor& rot,
+    const Field<Type>& fld
+);
 
 template<class Type>
-tmp<Field<Type>> transform(const tensorField&, const tmp<Field<Type>>&);
+void transform
+(
+    Field<Type>& result,
+    const tensorField& rot,
+    const Field<Type>& fld
+);
+
 
 template<class Type>
-tmp<Field<Type>> transform(const tmp<tensorField>&, const Field<Type>&);
+tmp<Field<Type>> transform
+(
+    const tensorField& rot,
+    const Field<Type>& fld
+);
 
 template<class Type>
-tmp<Field<Type>> transform(const tmp<tensorField>&, const tmp<Field<Type>>&);
+tmp<Field<Type>> transform
+(
+    const tensorField& rot,
+    const tmp<Field<Type>>& tfld
+);
+
+template<class Type>
+tmp<Field<Type>> transform
+(
+    const tmp<tensorField>& trot,
+    const Field<Type>& fld
+);
+
+template<class Type>
+tmp<Field<Type>> transform
+(
+    const tmp<tensorField>& trot,
+    const tmp<Field<Type>>& tfld
+);
 
 
 template<class Type>
-void transform(Field<Type>&, const tensor&, const Field<Type>&);
+tmp<Field<Type>> transform
+(
+    const tensor& rot,
+    const Field<Type>& fld
+);
 
 template<class Type>
-tmp<Field<Type>> transform(const tensor&, const Field<Type>&);
+tmp<Field<Type>> transform
+(
+    const tensor& rot,
+    const tmp<Field<Type>>& tfld
+);
+
+
+// invTransform()
 
 template<class Type>
-tmp<Field<Type>> transform(const tensor&, const tmp<Field<Type>>&);
+void invTransform
+(
+    Field<Type>& result,
+    const tensor& rot,
+    const Field<Type>& fld
+);
+
+template<class Type>
+void invTransform
+(
+    Field<Type>& result,
+    const tensorField& rot,
+    const Field<Type>& fld
+);
+
+
+template<class Type>
+tmp<Field<Type>> invTransform
+(
+    const tensorField& rot,
+    const Field<Type>& fld
+);
+
+template<class Type>
+tmp<Field<Type>> invTransform
+(
+    const tensorField& rot,
+    const tmp<Field<Type>>& tfld
+);
+
+template<class Type>
+tmp<Field<Type>> invTransform
+(
+    const tmp<tensorField>& trot,
+    const Field<Type>& fld
+);
+
+template<class Type>
+tmp<Field<Type>> invTransform
+(
+    const tmp<tensorField>& trot,
+    const tmp<Field<Type>>& tfld
+);
+
+
+template<class Type>
+tmp<Field<Type>> invTransform
+(
+    const tensor& rot,
+    const Field<Type>& fld
+);
+
+template<class Type>
+tmp<Field<Type>> invTransform
+(
+    const tensor& rot,
+    const tmp<Field<Type>>& tfld
+);
+
 
 
 template<class Type1, class Type2>
-tmp<Field<Type1>> transformFieldMask(const Field<Type2>&);
+tmp<Field<Type1>> transformFieldMask(const Field<Type2>& fld);
 
 template<class Type1, class Type2>
-tmp<Field<Type1>> transformFieldMask(const tmp<Field<Type2>>&);
+tmp<Field<Type1>> transformFieldMask(const tmp<Field<Type2>>& tfld);
 
 
-template<>
-tmp<Field<symmTensor>> transformFieldMask<symmTensor>
-(
-    const tensorField&
-);
+// Specializations
 
 template<>
-tmp<Field<symmTensor>> transformFieldMask<symmTensor>
-(
-    const tmp<tensorField>&
-);
-
+tmp<Field<symmTensor>>
+transformFieldMask<symmTensor>(const tensorField&);
 
 template<>
-tmp<Field<sphericalTensor>> transformFieldMask<sphericalTensor>
-(
-    const tensorField&
-);
+tmp<Field<symmTensor>>
+transformFieldMask<symmTensor>(const tmp<tensorField>&);
 
 template<>
-tmp<Field<sphericalTensor>> transformFieldMask<sphericalTensor>
-(
-    const tmp<tensorField>&
-);
+tmp<Field<sphericalTensor>>
+transformFieldMask<sphericalTensor>(const tensorField&);
+
+template<>
+tmp<Field<sphericalTensor>>
+transformFieldMask<sphericalTensor>(const tmp<tensorField>&);
 
 
 //- Rotate given vectorField with the given quaternion

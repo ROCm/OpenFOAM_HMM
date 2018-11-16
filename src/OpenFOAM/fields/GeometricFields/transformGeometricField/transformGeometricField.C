@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,169 +29,328 @@ Description
 #include "transformGeometricField.H"
 #include "transformField.H"
 #include "transformFieldField.H"
+#include "GeometricField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * global functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Transform Global Functions  * * * * * * * * * * * //
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-void transform
+void Foam::transform
 (
-    GeometricField<Type, PatchField, GeoMesh>& rtf,
-    const GeometricField<tensor, PatchField, GeoMesh>& trf,
-    const GeometricField<Type, PatchField, GeoMesh>& tf
+    GeometricField<Type, PatchField, GeoMesh>& result,
+    const dimensionedTensor& rot,
+    const GeometricField<Type, PatchField, GeoMesh>& fld
 )
 {
     transform
     (
-        rtf.primitiveFieldRef(),
-        trf.primitiveField(),
-        tf.primitiveField()
+        result.primitiveFieldRef(),
+        rot.value(),
+        fld.primitiveField()
     );
     transform
     (
-        rtf.boundaryFieldRef(),
-        trf.boundaryField(),
-        tf.boundaryField()
+        result.boundaryFieldRef(),
+        rot.value(),
+        fld.boundaryField()
     );
 }
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-tmp<GeometricField<Type, PatchField, GeoMesh>> transform
+void Foam::transform
 (
-    const GeometricField<tensor, PatchField, GeoMesh>& trf,
-    const GeometricField<Type, PatchField, GeoMesh>& tf
+    GeometricField<Type, PatchField, GeoMesh>& result,
+    const GeometricField<tensor, PatchField, GeoMesh>& rot,
+    const GeometricField<Type, PatchField, GeoMesh>& fld
 )
 {
-    tmp<GeometricField<Type, PatchField, GeoMesh>> tranf
+    transform
     (
-        new GeometricField<Type, PatchField, GeoMesh>
-        (
-            IOobject
-            (
-                "transform(" + trf.name() + ',' + tf.name() + ')',
-                tf.instance(),
-                tf.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            tf.mesh(),
-            tf.dimensions()
-        )
+        result.primitiveFieldRef(),
+        rot.primitiveField(),
+        fld.primitiveField()
     );
-
-    transform(tranf.ref(), trf, tf);
-
-    return tranf;
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-tmp<GeometricField<Type, PatchField, GeoMesh>> transform
-(
-    const GeometricField<tensor, PatchField, GeoMesh>& trf,
-    const tmp<GeometricField<Type, PatchField, GeoMesh>>& ttf
-)
-{
-    tmp<GeometricField<Type, PatchField, GeoMesh>> tranf =
-        transform(trf, ttf());
-    ttf.clear();
-    return tranf;
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-tmp<GeometricField<Type, PatchField, GeoMesh>> transform
-(
-    const tmp<GeometricField<tensor, PatchField, GeoMesh>>& ttrf,
-    const GeometricField<Type, PatchField, GeoMesh>& tf
-)
-{
-    tmp<GeometricField<Type, PatchField, GeoMesh>> tranf =
-        transform(ttrf(), tf);
-    ttrf.clear();
-    return tranf;
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-tmp<GeometricField<Type, PatchField, GeoMesh>> transform
-(
-    const tmp<GeometricField<tensor, PatchField, GeoMesh>>& ttrf,
-    const tmp<GeometricField<Type, PatchField, GeoMesh>>& ttf
-)
-{
-    tmp<GeometricField<Type, PatchField, GeoMesh>> tranf =
-        transform(ttrf(), ttf());
-    ttf.clear();
-    ttrf.clear();
-    return tranf;
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-void transform
-(
-    GeometricField<Type, PatchField, GeoMesh>& rtf,
-    const dimensionedTensor& t,
-    const GeometricField<Type, PatchField, GeoMesh>& tf
-)
-{
-    transform(rtf.primitiveFieldRef(), t.value(), tf.primitiveField());
-    transform(rtf.boundaryFieldRef(), t.value(), tf.boundaryField());
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-tmp<GeometricField<Type, PatchField, GeoMesh>> transform
-(
-    const dimensionedTensor& t,
-    const GeometricField<Type, PatchField, GeoMesh>& tf
-)
-{
-    tmp<GeometricField<Type, PatchField, GeoMesh>> tranf
+    transform
     (
-        new GeometricField<Type, PatchField, GeoMesh>
-        (
-            IOobject
-            (
-                "transform(" + t.name() + ',' + tf.name() + ')',
-                tf.instance(),
-                tf.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            tf.mesh(),
-            tf.dimensions()
-        )
+        result.boundaryFieldRef(),
+        rot.boundaryField(),
+        fld.boundaryField()
     );
-
-    transform(tranf.ref(), t, tf);
-
-    return tranf;
 }
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-tmp<GeometricField<Type, PatchField, GeoMesh>> transform
+Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>> 
+Foam::transform
 (
-    const dimensionedTensor& t,
-    const tmp<GeometricField<Type, PatchField, GeoMesh>>& ttf
+    const GeometricField<tensor, PatchField, GeoMesh>& rot,
+    const GeometricField<Type, PatchField, GeoMesh>& fld
 )
 {
-    tmp<GeometricField<Type, PatchField, GeoMesh>> tranf =
-        transform(t, ttf());
-    ttf.clear();
-    return tranf;
+    auto tresult = tmp<GeometricField<Type, PatchField, GeoMesh>>::New
+    (
+        IOobject
+        (
+            "transform(" + rot.name() + ',' + fld.name() + ')',
+            fld.instance(),
+            fld.db(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        fld.mesh(),
+        fld.dimensions()
+    );
+
+    transform(tresult.ref(), rot, fld);
+
+    return tresult;
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
+Foam::transform
+(
+    const GeometricField<tensor, PatchField, GeoMesh>& rot,
+    const tmp<GeometricField<Type, PatchField, GeoMesh>>& tfld
+)
+{
+    auto tresult = transform(rot, tfld());
+    tfld.clear();
+    return tresult;
+}
 
-} // End namespace Foam
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
+Foam::transform
+(
+    const tmp<GeometricField<tensor, PatchField, GeoMesh>>& trot,
+    const GeometricField<Type, PatchField, GeoMesh>& fld
+)
+{
+    auto tresult = transform(trot(), fld);
+    trot.clear();
+    return tresult;
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
+Foam::transform
+(
+    const tmp<GeometricField<tensor, PatchField, GeoMesh>>& trot,
+    const tmp<GeometricField<Type, PatchField, GeoMesh>>& tfld
+)
+{
+    auto tresult = transform(trot(), tfld());
+    tfld.clear();
+    trot.clear();
+    return tresult;
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
+Foam::transform
+(
+    const dimensionedTensor& rot,
+    const GeometricField<Type, PatchField, GeoMesh>& fld
+)
+{
+    auto tresult = tmp<GeometricField<Type, PatchField, GeoMesh>>::New
+    (
+        IOobject
+        (
+            "transform(" + rot.name() + ',' + fld.name() + ')',
+            fld.instance(),
+            fld.db(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        fld.mesh(),
+        fld.dimensions()
+    );
+
+    transform(tresult.ref(), rot, fld);
+
+    return tresult;
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
+Foam::transform
+(
+    const dimensionedTensor& rot,
+    const tmp<GeometricField<Type, PatchField, GeoMesh>>& tfld
+)
+{
+    auto tresult = transform(rot, tfld());
+    tfld.clear();
+    return tresult;
+}
+
+
+// * * * * * * * * * * * invTransform Global Functions * * * * * * * * * * * //
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::invTransform
+(
+    GeometricField<Type, PatchField, GeoMesh>& result,
+    const dimensionedTensor& rot,
+    const GeometricField<Type, PatchField, GeoMesh>& fld
+)
+{
+    invTransform
+    (
+        result.primitiveFieldRef(),
+        rot.value(),
+        fld.primitiveField()
+    );
+    invTransform
+    (
+        result.boundaryFieldRef(),
+        rot.value(),
+        fld.boundaryField()
+    );
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::invTransform
+(
+    GeometricField<Type, PatchField, GeoMesh>& result,
+    const GeometricField<tensor, PatchField, GeoMesh>& rot,
+    const GeometricField<Type, PatchField, GeoMesh>& fld
+)
+{
+    invTransform
+    (
+        result.primitiveFieldRef(),
+        rot.primitiveField(),
+        fld.primitiveField()
+    );
+    invTransform
+    (
+        result.boundaryFieldRef(),
+        rot.boundaryField(),
+        fld.boundaryField()
+    );
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
+Foam::invTransform
+(
+    const GeometricField<tensor, PatchField, GeoMesh>& rot,
+    const GeometricField<Type, PatchField, GeoMesh>& fld
+)
+{
+    auto tresult = tmp<GeometricField<Type, PatchField, GeoMesh>>::New
+    (
+        IOobject
+        (
+            "invTransform(" + rot.name() + ',' + fld.name() + ')',
+            fld.instance(),
+            fld.db(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        fld.mesh(),
+        fld.dimensions()
+    );
+
+    invTransform(tresult.ref(), rot, fld);
+
+    return tresult;
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
+Foam::invTransform
+(
+    const GeometricField<tensor, PatchField, GeoMesh>& rot,
+    const tmp<GeometricField<Type, PatchField, GeoMesh>>& tfld
+)
+{
+    auto tresult = invTransform(rot, tfld());
+    tfld.clear();
+    return tresult;
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
+Foam::invTransform
+(
+    const tmp<GeometricField<tensor, PatchField, GeoMesh>>& trot,
+    const GeometricField<Type, PatchField, GeoMesh>& fld
+)
+{
+    auto tresult = invTransform(trot(), fld);
+    trot.clear();
+    return tresult;
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
+Foam::invTransform
+(
+    const tmp<GeometricField<tensor, PatchField, GeoMesh>>& trot,
+    const tmp<GeometricField<Type, PatchField, GeoMesh>>& tfld
+)
+{
+    auto tresult = invTransform(trot(), tfld());
+    tfld.clear();
+    trot.clear();
+    return tresult;
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
+Foam::invTransform
+(
+    const dimensionedTensor& rot,
+    const GeometricField<Type, PatchField, GeoMesh>& fld
+)
+{
+    auto tresult = tmp<GeometricField<Type, PatchField, GeoMesh>>::New
+    (
+        IOobject
+        (
+            "invTransform(" + rot.name() + ',' + fld.name() + ')',
+            fld.instance(),
+            fld.db(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        fld.mesh(),
+        fld.dimensions()
+    );
+
+    invTransform(tresult.ref(), rot, fld);
+
+    return tresult;
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
+Foam::invTransform
+(
+    const dimensionedTensor& rot,
+    const tmp<GeometricField<Type, PatchField, GeoMesh>>& tfld
+)
+{
+    auto tresult = invTransform(rot, tfld());
+    tfld.clear();
+    return tresult;
+}
+
 
 // ************************************************************************* //

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,145 +26,269 @@ License
 #include "transformField.H"
 #include "FieldM.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * global functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void transform
+void Foam::transform
 (
-    Field<Type>& rtf,
-    const tensorField& trf,
-    const Field<Type>& tf
+    Field<Type>& result,
+    const tensor& rot,
+    const Field<Type>& fld
 )
 {
-    if (trf.size() == 1)
+    TFOR_ALL_F_OP_FUNC_S_F
+    (
+        Type, result, =, transform, tensor, rot, Type, fld
+    );
+}
+
+
+template<class Type>
+void Foam::transform
+(
+    Field<Type>& result,
+    const tensorField& rot,
+    const Field<Type>& fld
+)
+{
+    if (rot.size() == 1)
     {
-        return transform(rtf, trf[0], tf);
+        return transform(result, rot.first(), fld);
     }
-    else
+
+    TFOR_ALL_F_OP_FUNC_F_F
+    (
+        Type, result, =, transform, tensor, rot, Type, fld
+    );
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>>
+Foam::transform
+(
+    const tensorField& rot,
+    const Field<Type>& fld
+)
+{
+    auto tresult = tmp<Field<Type>>::New(fld.size());
+    transform(tresult.ref(), rot, fld);
+    return tresult;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>>
+Foam::transform
+(
+    const tensorField& rot,
+    const tmp<Field<Type>>& tfld
+)
+{
+    tmp<Field<Type>> tresult = New(tfld);
+    transform(tresult.ref(), rot, tfld());
+    tfld.clear();
+    return tresult;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>>
+Foam::transform
+(
+    const tmp<tensorField>& trot,
+    const Field<Type>& fld
+)
+{
+    auto tresult = tmp<Field<Type>>::New(fld.size());
+    transform(tresult.ref(), trot(), fld);
+    trot.clear();
+    return tresult;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>>
+Foam::transform
+(
+    const tmp<tensorField>& trot,
+    const tmp<Field<Type>>& tfld
+)
+{
+    tmp<Field<Type>> tresult = New(tfld);
+    transform(tresult.ref(), trot(), tfld());
+    trot.clear();
+    tfld.clear();
+    return tresult;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>>
+Foam::transform
+(
+    const tensor& rot,
+    const Field<Type>& fld
+)
+{
+    auto tresult = tmp<Field<Type>>::New(fld.size());
+    transform(tresult.ref(), rot, fld);
+    return tresult;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>>
+Foam::transform
+(
+    const tensor& rot,
+    const tmp<Field<Type>>& tfld
+)
+{
+    tmp<Field<Type>> tresult = New(tfld);
+    transform(tresult.ref(), rot, tfld());
+    tfld.clear();
+    return tresult;
+}
+
+
+template<class Type>
+void Foam::invTransform
+(
+    Field<Type>& result,
+    const tensor& rot,
+    const Field<Type>& fld
+)
+{
+    TFOR_ALL_F_OP_FUNC_S_F
+    (
+        Type, result, =, invTransform, tensor, rot, Type, fld
+    );
+}
+
+
+template<class Type>
+void Foam::invTransform
+(
+    Field<Type>& result,
+    const tensorField& rot,
+    const Field<Type>& fld
+)
+{
+    if (rot.size() == 1)
     {
-        TFOR_ALL_F_OP_FUNC_F_F
-        (
-            Type, rtf, =, transform, tensor, trf, Type, tf
-        )
+        return invTransform(result, rot.first(), fld);
     }
+
+    TFOR_ALL_F_OP_FUNC_F_F
+    (
+        Type, result, =, invTransform, tensor, rot, Type, fld
+    );
 }
 
 
 template<class Type>
-tmp<Field<Type>> transform
+Foam::tmp<Foam::Field<Type>>
+Foam::invTransform
 (
-    const tensorField& trf,
-    const Field<Type>& tf
+    const tensorField& rot,
+    const Field<Type>& fld
 )
 {
-    tmp<Field<Type>> tranf(new Field<Type> (tf.size()));
-    transform(tranf.ref(), trf, tf);
-    return tranf;
+    auto tresult = tmp<Field<Type>>::New(fld.size());
+    invTransform(tresult.ref(), rot, fld);
+    return tresult;
 }
 
 
 template<class Type>
-tmp<Field<Type>> transform
+Foam::tmp<Foam::Field<Type>>
+Foam::invTransform
 (
-    const tensorField& trf,
-    const tmp<Field<Type>>& ttf
+    const tensorField& rot,
+    const tmp<Field<Type>>& tfld
 )
 {
-    tmp<Field<Type>> tranf = New(ttf);
-    transform(tranf.ref(), trf, ttf());
-    ttf.clear();
-    return tranf;
+    tmp<Field<Type>> tresult = New(tfld);
+    invTransform(tresult.ref(), rot, tfld());
+    tfld.clear();
+    return tresult;
 }
 
 
 template<class Type>
-tmp<Field<Type>> transform
+Foam::tmp<Foam::Field<Type>>
+Foam::invTransform
 (
-    const tmp<tensorField>& ttrf,
-    const Field<Type>& tf
+    const tmp<tensorField>& trot,
+    const Field<Type>& fld
 )
 {
-    tmp<Field<Type>> tranf(new Field<Type> (tf.size()));
-    transform(tranf.ref(), ttrf(), tf);
-    ttrf.clear();
-    return tranf;
+    auto tresult = tmp<Field<Type>>::New(fld.size());
+    invTransform(tresult.ref(), trot(), fld);
+    trot.clear();
+    return tresult;
 }
 
 
 template<class Type>
-tmp<Field<Type>> transform
+Foam::tmp<Foam::Field<Type>>
+Foam::invTransform
 (
-    const tmp<tensorField>& ttrf,
-    const tmp<Field<Type>>& ttf
+    const tmp<tensorField>& trot,
+    const tmp<Field<Type>>& tfld
 )
 {
-    tmp<Field<Type>> tranf = New(ttf);
-    transform(tranf.ref(), ttrf(), ttf());
-    ttf.clear();
-    ttrf.clear();
-    return tranf;
+    tmp<Field<Type>> tresult = New(tfld);
+    invTransform(tresult.ref(), trot(), tfld());
+    trot.clear();
+    tfld.clear();
+    return tresult;
 }
 
 
 template<class Type>
-void transform
+Foam::tmp<Foam::Field<Type>>
+Foam::invTransform
 (
-    Field<Type>& rtf,
-    const tensor& t,
-    const Field<Type>& tf
+    const tensor& rot,
+    const Field<Type>& fld
 )
 {
-    TFOR_ALL_F_OP_FUNC_S_F(Type, rtf, =, transform, tensor, t, Type, tf)
+    auto tresult = tmp<Field<Type>>::New(fld.size());
+    invTransform(tresult.ref(), rot, fld);
+    return tresult;
 }
 
 
 template<class Type>
-tmp<Field<Type>> transform
+Foam::tmp<Foam::Field<Type>>
+Foam::invTransform
 (
-    const tensor& t,
-    const Field<Type>& tf
+    const tensor& rot,
+    const tmp<Field<Type>>& tfld
 )
 {
-    tmp<Field<Type>> tranf(new Field<Type>(tf.size()));
-    transform(tranf.ref(), t, tf);
-    return tranf;
-}
-
-
-template<class Type>
-tmp<Field<Type>> transform
-(
-    const tensor& t,
-    const tmp<Field<Type>>& ttf
-)
-{
-    tmp<Field<Type>> tranf = New(ttf);
-    transform(tranf.ref(), t, ttf());
-    ttf.clear();
-    return tranf;
+    tmp<Field<Type>> tresult = New(tfld);
+    invTransform(tresult.ref(), rot, tfld());
+    tfld.clear();
+    return tresult;
 }
 
 
 template<class Type1, class Type2>
-tmp<Field<Type1>> transformFieldMask(const Field<Type2>& f)
+Foam::tmp<Foam::Field<Type1>>
+Foam::transformFieldMask(const Field<Type2>& fld)
 {
-    return f;
+    return fld;
 }
 
 template<class Type1, class Type2>
-tmp<Field<Type1>> transformFieldMask(const tmp<Field<Type2>>& tf)
+Foam::tmp<Foam::Field<Type1>>
+Foam::transformFieldMask(const tmp<Field<Type2>>& tfld)
 {
-    return tmp<Field<Type1>>(tf.ptr());
+    return tmp<Field<Type1>>(tfld.ptr());
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
