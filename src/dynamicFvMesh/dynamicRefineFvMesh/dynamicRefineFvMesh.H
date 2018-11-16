@@ -29,7 +29,8 @@ Description
 
     Determines which cells to refine/unrefine and does all in update().
 
-
+    \verbatim
+    {
         // How often to refine
         refineInterval  1;
         // Field to be refinement on
@@ -59,6 +60,8 @@ Description
 
         // Write the refinement level as a volScalarField
         dumpLevel       true;
+    }
+    \endverbatim
 
 
 SourceFiles
@@ -91,23 +94,20 @@ protected:
         //- Mesh cutting engine
         hexRef8 meshCutter_;
 
-        //- Dump cellLevel for post-processing
-        bool dumpLevel_;
-
         //- Fluxes to map
         HashTable<word> correctFluxes_;
-
-        //- Number of refinement/unrefinement steps done so far.
-        label nRefinementIterations_;
 
         //- Protected cells (usually since not hexes)
         bitSet protectedCell_;
 
+        //- Number of refinement/unrefinement steps done so far.
+        label nRefinementIterations_;
+
+        //- Dump cellLevel for post-processing
+        bool dumpLevel_;
+
 
     // Protected Member Functions
-
-        //- Count set/unset elements in packedlist.
-        static label count(const bitSet&, const unsigned int);
 
         //- Calculate cells that cannot be refined since would trigger
         //  refinement of protectedCell_ (since 2:1 refinement cascade)
@@ -180,11 +180,7 @@ protected:
             void extendMarkedCells(bitSet& markedCell) const;
 
             //- Check all cells have 8 anchor points
-            void checkEightAnchorPoints
-            (
-                bitSet& protectedCell,
-                label& nProtected
-            ) const;
+            void checkEightAnchorPoints(bitSet& protectedCell) const;
 
             //- Map single non-flux surface<Type>Field
             //  for new internal faces (e.g. AMR refine). This currently
@@ -233,7 +229,7 @@ public:
 
 
     //- Destructor
-    virtual ~dynamicRefineFvMesh();
+    virtual ~dynamicRefineFvMesh() = default;
 
 
     // Member Functions
