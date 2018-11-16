@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,15 +44,15 @@ void Foam::motionSmootherAlgo::checkConstraints
 
     const polyBoundaryMesh& bm = mesh.boundaryMesh();
 
-    // first count the total number of patch-patch points
+    // First count the total number of patch-patch points
 
     label nPatchPatchPoints = 0;
 
-    forAll(bm, patchi)
+    for (const polyPatch& pp : bm)
     {
-        if (!isA<emptyPolyPatch>(bm[patchi]))
+        if (!isA<emptyPolyPatch>(pp))
         {
-            nPatchPatchPoints += bm[patchi].boundaryPoints().size();
+            nPatchPatchPoints += pp.boundaryPoints().size();
         }
     }
 
@@ -110,9 +110,9 @@ void Foam::motionSmootherAlgo::checkConstraints
             const labelList& bp = bm[patchi].boundaryPoints();
             const labelList& meshPoints = bm[patchi].meshPoints();
 
-            forAll(bp, pointi)
+            for (const label pointi : bp)
             {
-                label ppp = meshPoints[bp[pointi]];
+                const label ppp = meshPoints[pointi];
 
                 const Type& savedVal = boundaryPointValues[nPatchPatchPoints++];
 
@@ -141,24 +141,21 @@ Foam::motionSmootherAlgo::avg
     const scalarField& edgeWeight
 ) const
 {
-    tmp<GeometricField<Type, pointPatchField, pointMesh>> tres
+    auto tres = tmp<GeometricField<Type, pointPatchField, pointMesh>>::New
     (
-        new GeometricField<Type, pointPatchField, pointMesh>
+        IOobject
         (
-            IOobject
-            (
-                "avg("+fld.name()+')',
-                fld.time().timeName(),
-                fld.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            fld.mesh(),
-            dimensioned<Type>(fld.dimensions(), Zero)
-        )
+            "avg("+fld.name()+')',
+            fld.time().timeName(),
+            fld.db(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        fld.mesh(),
+        dimensioned<Type>(fld.dimensions(), Zero)
     );
-    GeometricField<Type, pointPatchField, pointMesh>& res = tres.ref();
+    auto& res = tres.ref();
 
     const polyMesh& mesh = fld.mesh()();
 
@@ -169,23 +166,20 @@ Foam::motionSmootherAlgo::avg
     // Note: on coupled edges use only one edge (through isMasterEdge)
     // This is done so coupled edges do not get counted double.
 
-    scalarField sumWeight(mesh.nPoints(), 0.0);
+    scalarField sumWeight(mesh.nPoints(), Zero);
 
     const edgeList& edges = mesh.edges();
 
-    forAll(edges, edgeI)
+    for (const label edgei : isMasterEdge_)
     {
-        if (isMasterEdge_.get(edgeI) == 1)
-        {
-            const edge& e = edges[edgeI];
-            const scalar w = edgeWeight[edgeI];
+        const edge& e = edges[edgei];
+        const scalar w = edgeWeight[edgei];
 
-            res[e[0]] += w*fld[e[1]];
-            sumWeight[e[0]] += w;
+        res[e[0]] += w*fld[e[1]];
+        sumWeight[e[0]] += w;
 
-            res[e[1]] += w*fld[e[0]];
-            sumWeight[e[1]] += w;
-        }
+        res[e[1]] += w*fld[e[0]];
+        sumWeight[e[1]] += w;
     }
 
 
@@ -244,7 +238,7 @@ void Foam::motionSmootherAlgo::smooth
 
     forAll(fld, pointi)
     {
-        if (isInternalPoint(pointi))
+        if (isInternalPoint_.test(pointi))
         {
             newFld[pointi] = 0.5*fld[pointi] + 0.5*avgFld[pointi];
         }

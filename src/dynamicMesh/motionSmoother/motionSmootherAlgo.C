@@ -92,22 +92,6 @@ void Foam::motionSmootherAlgo::checkFld(const pointScalarField& fld)
 
 Foam::labelHashSet Foam::motionSmootherAlgo::getPoints
 (
-    const labelUList& faceLabels
-) const
-{
-    labelHashSet usedPoints(mesh_.nPoints()/100);
-
-    for (const label faceId : faceLabels)
-    {
-        usedPoints.insert(mesh_.faces()[faceId]);
-    }
-
-    return usedPoints;
-}
-
-
-Foam::labelHashSet Foam::motionSmootherAlgo::getPoints
-(
     const labelHashSet& faceLabels
 ) const
 {
@@ -129,12 +113,12 @@ Foam::tmp<Foam::scalarField> Foam::motionSmootherAlgo::calcEdgeWeights
 {
     const edgeList& edges = mesh_.edges();
 
-    tmp<scalarField> twght(new scalarField(edges.size()));
-    scalarField& wght = twght.ref();
+    auto twght = tmp<scalarField>::New(edges.size());
+    auto& wght = twght.ref();
 
-    forAll(edges, edgeI)
+    forAll(edges, edgei)
     {
-        wght[edgeI] = 1.0/(edges[edgeI].mag(points)+SMALL);
+        wght[edgei] = 1.0/(edges[edgei].mag(points)+SMALL);
     }
     return twght;
 }
@@ -157,9 +141,8 @@ void Foam::motionSmootherAlgo::minSmooth
     );
     const pointScalarField& avgFld = tavgFld();
 
-    forAll(meshPoints, i)
+    for (const label pointi : meshPoints)
     {
-        label pointi = meshPoints[i];
         if (isAffectedPoint.test(pointi))
         {
             newFld[pointi] = min
@@ -193,7 +176,7 @@ void Foam::motionSmootherAlgo::minSmooth
 
     forAll(fld, pointi)
     {
-        if (isAffectedPoint.test(pointi) && isInternalPoint(pointi))
+        if (isAffectedPoint.test(pointi) && isInternalPoint_.test(pointi))
         {
             newFld[pointi] = min
             (
@@ -203,7 +186,7 @@ void Foam::motionSmootherAlgo::minSmooth
         }
     }
 
-   // Single and multi-patch constraints
+    // Single and multi-patch constraints
     pointConstraints::New(pMesh()).constrain(newFld, false);
 
 }
@@ -219,7 +202,7 @@ void Foam::motionSmootherAlgo::scaleField
 {
     for (const label pointi : pointLabels)
     {
-        if (isInternalPoint(pointi))
+        if (isInternalPoint_.test(pointi))
         {
             fld[pointi] *= scale;
         }
@@ -259,7 +242,7 @@ void Foam::motionSmootherAlgo::subtractField
 {
     for (const label pointi : pointLabels)
     {
-        if (isInternalPoint(pointi))
+        if (isInternalPoint_.test(pointi))
         {
             fld[pointi] = max(0.0, fld[pointi]-f);
         }
@@ -279,21 +262,13 @@ void Foam::motionSmootherAlgo::subtractField
     pointScalarField& fld
 ) const
 {
-    forAll(meshPoints, i)
+    for (const label pointi : meshPoints)
     {
-        label pointi = meshPoints[i];
-
         if (pointLabels.found(pointi))
         {
             fld[pointi] = max(0.0, fld[pointi]-f);
         }
     }
-}
-
-
-bool Foam::motionSmootherAlgo::isInternalPoint(const label pointi) const
-{
-    return isInternalPoint_.test(pointi);
 }
 
 
@@ -306,8 +281,8 @@ void Foam::motionSmootherAlgo::getAffectedFacesAndPoints
     bitSet& isAffectedPoint
 ) const
 {
+    isAffectedPoint.reset();
     isAffectedPoint.resize(mesh_.nPoints());
-    isAffectedPoint = false;
 
     faceSet nbrFaces(mesh_, "checkFaces", wrongFaces);
 
@@ -318,17 +293,13 @@ void Foam::motionSmootherAlgo::getAffectedFacesAndPoints
 
     for (label i = 0; i < nPointIter; i++)
     {
-        pointSet nbrPoints(mesh_, "grownPoints", getPoints(nbrFaces.toc()));
+        pointSet nbrPoints(mesh_, "grownPoints", getPoints(nbrFaces));
 
         for (const label pointi : nbrPoints)
         {
-            const labelList& pCells = mesh_.pointCells(pointi);
-
-            forAll(pCells, pCelli)
+            for (const label celli : mesh_.pointCells(pointi))
             {
-                const cell& cFaces = mesh_.cells()[pCells[pCelli]];
-
-                nbrFaces.insert(cFaces);
+                nbrFaces.set(mesh_.cells()[celli]); // set multiple
             }
         }
         nbrFaces.sync(mesh_);
@@ -337,8 +308,7 @@ void Foam::motionSmootherAlgo::getAffectedFacesAndPoints
         {
             for (const label facei : nbrFaces)
             {
-                const face& f = mesh_.faces()[facei];
-                isAffectedPoint.set(f);
+                isAffectedPoint.set(mesh_.faces()[facei]);  // set multiple
             }
         }
     }
@@ -436,10 +406,8 @@ void Foam::motionSmootherAlgo::setDisplacementPatchFields
 
     // Adapt the fixedValue bc's (i.e. copy internal point data to
     // boundaryField for all affected patches)
-    forAll(patchIDs, i)
+    for (const label patchi : patchIDs)
     {
-        label patchi = patchIDs[i];
-
         displacementBf[patchi] ==
             displacementBf[patchi].patchInternalField();
     }
@@ -455,7 +423,7 @@ void Foam::motionSmootherAlgo::setDisplacementPatchFields
 
     forAll(patchSchedule, patchEvalI)
     {
-        label patchi = patchSchedule[patchEvalI].patch;
+        const label patchi = patchSchedule[patchEvalI].patch;
 
         if (!adaptPatchSet.found(patchi))
         {
@@ -478,12 +446,9 @@ void Foam::motionSmootherAlgo::setDisplacementPatchFields
     // Adapt the fixedValue bc's (i.e. copy internal point data to
     // boundaryField for all affected patches) to take the changes caused
     // by multi-corner constraints into account.
-    forAll(patchIDs, i)
+    for (const label patchi : patchIDs)
     {
-        label patchi = patchIDs[i];
-
-        displacementBf[patchi] ==
-            displacementBf[patchi].patchInternalField();
+        displacementBf[patchi] == displacementBf[patchi].patchInternalField();
     }
 }
 
@@ -523,14 +488,14 @@ void Foam::motionSmootherAlgo::setDisplacement
             mesh,
             isPatchPoint,
             maxEqOp<unsigned int>(),
-            0
+            0u
         );
-        forAll(cppMeshPoints, i)
+
+        for (const label pointi : cppMeshPoints)
         {
-            label pointI = cppMeshPoints[i];
-            if (isPatchPoint[pointI])
+            if (isPatchPoint.test(pointi))
             {
-                displacement[pointI] = Zero;
+                displacement[pointi] = Zero;
             }
         }
     }
@@ -611,7 +576,7 @@ void Foam::motionSmootherAlgo::correctBoundaryConditions
     // 1. evaluate on adaptPatches
     forAll(patchSchedule, patchEvalI)
     {
-        label patchi = patchSchedule[patchEvalI].patch;
+        const label patchi = patchSchedule[patchEvalI].patch;
 
         if (adaptPatchSet.found(patchi))
         {
@@ -632,7 +597,7 @@ void Foam::motionSmootherAlgo::correctBoundaryConditions
     // 2. evaluate on non-AdaptPatches
     forAll(patchSchedule, patchEvalI)
     {
-        label patchi = patchSchedule[patchEvalI].patch;
+        const label patchi = patchSchedule[patchEvalI].patch;
 
         if (!adaptPatchSet.found(patchi))
         {
@@ -686,9 +651,10 @@ void Foam::motionSmootherAlgo::modifyMotionPoints(pointField& newPoints) const
         const labelList& neIndices = twoDCorrector.normalEdgeIndices();
         const vector& pn = twoDCorrector.planeNormal();
 
+        for (const label edgei : neIndices)
         forAll(neIndices, i)
         {
-            const edge& e = edges[neIndices[i]];
+            const edge& e = edges[edgei];
 
             point& pStart = newPoints[e.start()];
 
@@ -964,7 +930,6 @@ bool Foam::motionSmootherAlgo::scaleMesh
         usedPoints.sync(mesh_);
 
 
-
         // Grow a few layers to determine
         // - points to be smoothed
         // - faces to be checked in next iteration
@@ -999,7 +964,7 @@ bool Foam::motionSmootherAlgo::scaleMesh
 
         scalarField eWeights(calcEdgeWeights(oldPoints_));
 
-        for (label i = 0; i < nSmoothScale; i++)
+        for (label i = 0; i < nSmoothScale; ++i)
         {
             if (adaptPatchIDs_.size())
             {
@@ -1051,10 +1016,8 @@ void Foam::motionSmootherAlgo::updateMesh()
     const pointBoundaryMesh& patches = pMesh_.boundary();
 
     // Check whether displacement has fixed value b.c. on adaptPatchID
-    forAll(adaptPatchIDs_, i)
+    for (const label patchi : adaptPatchIDs_)
     {
-        label patchi = adaptPatchIDs_[i];
-
         if
         (
            !isA<fixedValuePointPatchVectorField>
@@ -1078,12 +1041,7 @@ void Foam::motionSmootherAlgo::updateMesh()
     // Determine internal points. Note that for twoD there are no internal
     // points so we use the points of adaptPatchIDs instead
 
-    const labelList& meshPoints = pp_.meshPoints();
-
-    forAll(meshPoints, i)
-    {
-        isInternalPoint_.unset(meshPoints[i]);
-    }
+    isInternalPoint_.unset(pp_.meshPoints());  // unset multiple
 
     // Calculate master edge addressing
     isMasterEdge_ = syncTools::getMasterEdges(mesh_);
