@@ -46,6 +46,23 @@ void Foam::functionObjects::fieldCoordinateSystemTransform::transformField
 }
 
 
+template<class FieldType, class RotationFieldType>
+void Foam::functionObjects::fieldCoordinateSystemTransform::transformField
+(
+    const RotationFieldType& rot,
+    const FieldType& field
+)
+{
+    word transFieldName(transformFieldName(field.name()));
+
+    store
+    (
+        transFieldName,
+        Foam::invTransform(rot, field)
+    );
+}
+
+
 template<class Type>
 void Foam::functionObjects::fieldCoordinateSystemTransform::transform
 (
@@ -55,16 +72,31 @@ void Foam::functionObjects::fieldCoordinateSystemTransform::transform
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
 
+    // Scalar quantities (bool, label, scalar) and sphericalTensor quantities
+    // are transform invariant. Use (pTraits<Type>::nComponents == 1) to avoid
+    // avoid generating a tensor field for a non-uniform transformation.
+
     if (foundObject<VolFieldType>(fieldName))
     {
         DebugInfo
             << type() << ": Field " << fieldName << " already in database"
             << endl;
 
-        transformField<VolFieldType>
-        (
-            lookupObject<VolFieldType>(fieldName)
-        );
+        if (csysPtr_->uniform() || pTraits<Type>::nComponents == 1)
+        {
+            transformField<VolFieldType>
+            (
+                lookupObject<VolFieldType>(fieldName)
+            );
+        }
+        else
+        {
+            transformField<VolFieldType>
+            (
+                vrotTensor(),
+                lookupObject<VolFieldType>(fieldName)
+            );
+        }
     }
     else if (foundObject<SurfaceFieldType>(fieldName))
     {
@@ -72,10 +104,21 @@ void Foam::functionObjects::fieldCoordinateSystemTransform::transform
             << type() << ": Field " << fieldName << " already in database"
             << endl;
 
-        transformField<SurfaceFieldType>
-        (
-            lookupObject<SurfaceFieldType>(fieldName)
-        );
+        if (csysPtr_->uniform() || pTraits<Type>::nComponents == 1)
+        {
+            transformField<SurfaceFieldType>
+            (
+                lookupObject<SurfaceFieldType>(fieldName)
+            );
+        }
+        else
+        {
+            transformField<SurfaceFieldType>
+            (
+                srotTensor(),
+                lookupObject<SurfaceFieldType>(fieldName)
+            );
+        }
     }
     else
     {
@@ -94,10 +137,21 @@ void Foam::functionObjects::fieldCoordinateSystemTransform::transform
                 << type() << ": Field " << fieldName << " read from file"
                 << endl;
 
-            transformField<VolFieldType>
-            (
-                lookupObject<VolFieldType>(fieldName)
-            );
+            if (csysPtr_->uniform() || pTraits<Type>::nComponents == 1)
+            {
+                transformField<VolFieldType>
+                (
+                    lookupObject<VolFieldType>(fieldName)
+                );
+            }
+            else
+            {
+                transformField<VolFieldType>
+                (
+                    vrotTensor(),
+                    lookupObject<VolFieldType>(fieldName)
+                );
+            }
         }
         else if (fieldHeader.typeHeaderOk<SurfaceFieldType>(true, true, false))
         {
@@ -105,10 +159,21 @@ void Foam::functionObjects::fieldCoordinateSystemTransform::transform
                 << type() << ": Field " << fieldName << " read from file"
                 << endl;
 
-            transformField<SurfaceFieldType>
-            (
-                lookupObject<SurfaceFieldType>(fieldName)
-            );
+            if (csysPtr_->uniform() || pTraits<Type>::nComponents == 1)
+            {
+                transformField<SurfaceFieldType>
+                (
+                    lookupObject<SurfaceFieldType>(fieldName)
+                );
+            }
+            else
+            {
+                transformField<SurfaceFieldType>
+                (
+                    srotTensor(),
+                    lookupObject<SurfaceFieldType>(fieldName)
+                );
+            }
         }
     }
 }

@@ -29,7 +29,7 @@ Group
 
 Description
     Transforms a user-specified selection of fields from global Cartesian
-    coordinates to a local Cartesian coordinate system.
+    coordinates to a local coordinate system.
     The fields are run-time modifiable.
 
 Usage
@@ -37,15 +37,10 @@ Usage
     \verbatim
     fieldCoordinateSystemTransform1
     {
-        type        fieldCoordinateSystemTransform;
-        libs        ("libfieldFunctionObjects.so");
+        type    fieldCoordinateSystemTransform;
+        libs    ("libfieldFunctionObjects.so");
         ...
-        fields
-        (
-            U
-            UMean
-            UPrime2Mean
-        );
+        fields  ( U UMean UPrime2Mean );
 
         coordinateSystem
         {
@@ -102,7 +97,7 @@ class fieldCoordinateSystemTransform
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Fields to transform
         volFieldSelection fieldSet_;
@@ -110,15 +105,38 @@ protected:
         //- Coordinate system to transform to
         autoPtr<coordinateSystem> csysPtr_;
 
+        //- Demand-driven non-uniform rotation field (surface fields)
+        //  Eg, for cylindrical coordinates
+        mutable autoPtr<surfaceTensorField> rotTensorSurface_;
+
+        //- Demand-driven non-uniform rotation field (volume fields)
+        //  Eg, for cylindrical coordinates
+        mutable autoPtr<volTensorField> rotTensorVolume_;
+
 
     // Protected Member Functions
 
         //- Return the name of the transformed field
         word transformFieldName(const word& fieldName) const;
 
+        //- Demand-driven non-uniform rotation field for surface fields
+        const surfaceTensorField& srotTensor() const;
+
+        //- Demand-driven non-uniform rotation field for volume fields
+        const volTensorField& vrotTensor() const;
+
+
         //- Transform the given field
         template<class FieldType>
         void transformField(const FieldType& field);
+
+        //- Transform the given field
+        template<class FieldType, class RotationFieldType>
+        void transformField
+        (
+            const RotationFieldType& rot,
+            const FieldType& field
+        );
 
         //- Transform the given field if has the specified element type
         template<class Type>
