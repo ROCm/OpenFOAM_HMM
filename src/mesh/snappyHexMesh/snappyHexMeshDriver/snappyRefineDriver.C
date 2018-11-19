@@ -2221,7 +2221,7 @@ Foam::label Foam::snappyRefineDriver::directionalSmooth
                         baseMesh,
                         sumOther,
                         plusEqOp<scalar>(),
-                        0.0
+                        scalar(0.0)
                     );
                     syncTools::syncPointList
                     (
