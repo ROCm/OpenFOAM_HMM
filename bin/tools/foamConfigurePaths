@@ -60,12 +60,12 @@ Components
   -kahip-path DIR         specify 'KAHIP_ARCH_PATH'
   -metis ver              specify 'METIS_VERSION'
   -metis-path DIR         specify 'METIS_ARCH_PATH'
+  -scotch VER             specify 'SCOTCH_VERSION' (eg, scotch_6.0.4)
+  -scotch-path DIR        specify 'SCOTCH_ARCH_PATH' (eg, /opt/OpenFOAM-scotch_6.0.4)
 
 Graphics
   -paraview VER           specify 'ParaView_VERSION' (eg, 5.4.1)
   -paraview-path DIR      specify 'ParaView_DIR' (eg, /opt/ParaView-5.4.1)
-  -scotch VER             specify 'SCOTCH_VERSION' (eg, scotch_6.0.4)
-  -scotch-path DIR        specify 'SCOTCH_ARCH_PATH' (eg, /opt/OpenFOAM-scotch_6.0.4)
   -vtk  VER               specify 'vtk_version' (eg, VTK-7.1.0)
   -mesa VER               specify 'mesa_version' (eg, mesa-13.0.1)
 
