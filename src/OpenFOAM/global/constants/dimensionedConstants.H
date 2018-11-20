@@ -72,9 +72,13 @@ T dimensionedConstant
     if (unitDict.found(group))
     {
         dictionary& groupDict = unitDict.subDict(group);
+
+        // Leaner version of dictionary lookupOrAddDefault()
+        // without writeOptionalEntries
+
         if (groupDict.found(varName))
         {
-            return pTraits<T>(groupDict.lookup(varName));
+            return groupDict.get<T>(varName);
         }
         else
         {
@@ -113,15 +117,14 @@ T dimensionedConstant
                     Name                                                       \
                 )                                                              \
             );                                                                 \
-            Foam::dimensionedScalar& s = const_cast<Foam::dimensionedScalar&> \
+            Foam::dimensionedScalar& s = const_cast<Foam::dimensionedScalar&>  \
             (                                                                  \
                 Switch                                                         \
             );                                                                 \
             s.dimensions().reset(ds.dimensions());                             \
             s = ds;                                                            \
         }                                                                      \
-        virtual ~add##Tag##ToDimensionedConstant()                             \
-        {}                                                                     \
+        virtual ~add##Tag##ToDimensionedConstant() = default;                  \
         virtual void readData(Foam::Istream& is)                               \
         {                                                                      \
             const_cast<Foam::dimensionedScalar&>(Switch) =                     \
@@ -162,15 +165,14 @@ T dimensionedConstant
                     Foam::dimensionedScalar(Name,DefaultExpr)                  \
                 )                                                              \
             );                                                                 \
-            Foam::dimensionedScalar& s = const_cast<Foam::dimensionedScalar&> \
+            Foam::dimensionedScalar& s = const_cast<Foam::dimensionedScalar&>  \
             (                                                                  \
                 Switch                                                         \
             );                                                                 \
             s.dimensions().reset(ds.dimensions());                             \
             s = ds;                                                            \
         }                                                                      \
-        virtual ~add##Tag##ToDimensionedConstantWithDefault()                  \
-        {}                                                                     \
+        virtual ~add##Tag##ToDimensionedConstantWithDefault() = default;       \
         virtual void readData(Foam::Istream& is)                               \
         {                                                                      \
             const_cast<Foam::dimensionedScalar&>(Switch) =                     \
