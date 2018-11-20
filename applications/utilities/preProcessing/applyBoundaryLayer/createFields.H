@@ -57,7 +57,7 @@ y.correctBoundaryConditions();
 
 
 // Set the mean boundary-layer thickness
-dimensionedScalar ybl("ybl", dimLength, 0);
+dimensionedScalar ybl("ybl", dimLength, Zero);
 
 if (args.found("ybl"))
 {

@@ -4,7 +4,7 @@
     {
         // Calculate volume of ignition kernel
         dimensionedScalar Vk("Vk", dimVolume, gSum(c*mesh.V().field()));
-        dimensionedScalar Ak("Ak", dimArea, 0.0);
+        dimensionedScalar Ak("Ak", dimArea, Zero);
 
         if (Vk.value() > SMALL)
         {
@@ -39,7 +39,7 @@
                     // Assume it is part-circular
                     dimensionedScalar thickness
                     (
-                        combustionProperties.lookup("ignitionThickness")
+                        "ignitionThickness", dimLength, combustionProperties
                     );
 
                     scalar circleFraction
@@ -67,7 +67,7 @@
                     // Assume it is plane or two planes
                     Ak = dimensionedScalar
                     (
-                        combustionProperties.lookup("ignitionKernelArea")
+                        "ignitionKernelArea", dimArea, combustionProperties
                     );
                 break;
             }

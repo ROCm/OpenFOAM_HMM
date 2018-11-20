@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,13 +108,11 @@ void Foam::fixedPressureCompressibleDensityFvPatchScalarField::updateCoeffs()
     const dictionary& thermoProps =
         db().lookupObject<IOdictionary>("thermodynamicProperties");
 
-    const scalar rholSat =
-        dimensionedScalar(thermoProps.lookup("rholSat")).value();
+    const scalar rholSat = dimensionedScalar("rholSat", thermoProps).value();
 
-    const scalar pSat =
-        dimensionedScalar(thermoProps.lookup("pSat")).value();
+    const scalar pSat = dimensionedScalar("pSat", thermoProps).value();
 
-    const scalar psil = dimensionedScalar(thermoProps.lookup("psil")).value();
+    const scalar psil = dimensionedScalar("psil", thermoProps).value();
 
     operator==(rholSat + psil*(pp - pSat));
 

@@ -10,32 +10,12 @@ IOdictionary transportProperties
     )
 );
 
-dimensionedScalar mug
-(
-    transportProperties.lookup("mug")
-);
+dimensionedScalar mug("mug", dimViscosity, transportProperties);
+dimensionedScalar mul("mul", dimViscosity, transportProperties);
 
-dimensionedScalar mul
-(
-    transportProperties.lookup("mul")
-);
+dimensionedScalar rhog("rhog", dimDensity, transportProperties);
+dimensionedScalar rhol("rhol", dimDensity, transportProperties);
 
-dimensionedScalar sigma
-(
-    transportProperties.lookup("sigma")
-);
+dimensionedScalar sigma("sigma", dimMass/sqr(dimTime), transportProperties);
 
-dimensionedScalar rhol
-(
-    transportProperties.lookup("rhol")
-);
-
-dimensionedScalar rhog
-(
-    transportProperties.lookup("rhog")
-);
-
-dimensionedScalar h0
-(
-    transportProperties.lookup("h0")
-);
+dimensionedScalar h0("h0", dimLength, transportProperties);

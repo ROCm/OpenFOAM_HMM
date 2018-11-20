@@ -54,7 +54,7 @@ Foam::laminarFlameSpeedModels::constant::constant
 :
     laminarFlameSpeed(dict, ct),
 
-    Su_(dict.lookup("Su"))
+    Su_("Su", dimVelocity, dict)
 {}
 
 

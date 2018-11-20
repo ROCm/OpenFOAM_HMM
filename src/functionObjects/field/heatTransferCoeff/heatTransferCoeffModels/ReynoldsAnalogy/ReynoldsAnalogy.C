@@ -141,7 +141,7 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::devReff() const
         const dictionary& transportProperties =
             mesh_.lookupObject<dictionary>("transportProperties");
 
-        dimensionedScalar nu(transportProperties.lookup("nu"));
+        dimensionedScalar nu("nu", dimViscosity, transportProperties);
 
         const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
 

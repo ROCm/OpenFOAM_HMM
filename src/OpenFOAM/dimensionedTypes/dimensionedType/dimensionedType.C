@@ -30,13 +30,12 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::dimensioned<Type>::initialize(Istream& is)
+void Foam::dimensioned<Type>::initialize(Istream& is, bool checkDims)
 {
     token nextToken(is);
     is.putBack(nextToken);
 
-    // Check if the original format is used in which the name is provided
-    // and reset the name to that read
+    // Optional name found - use it
     if (nextToken.isWord())
     {
         is >> name_;
@@ -44,26 +43,27 @@ void Foam::dimensioned<Type>::initialize(Istream& is)
         is.putBack(nextToken);
     }
 
-    // If the dimensions are provided compare with the argument
-    scalar multiplier = 1.0;
+    scalar mult(1.0);
 
     if (nextToken == token::BEGIN_SQR)
     {
-        dimensionSet dims(dimless);
-        dims.read(is, multiplier);
+        // Optional dimensions found - use them
+        const dimensionSet curr(dimensions_);
+        dimensions_.read(is, mult);
 
-        if (dims != dimensions_)
+        if (checkDims && curr != dimensions_)
         {
             FatalIOErrorInFunction(is)
-                << "The dimensions " << dims
-                << " provided do not match the required dimensions "
-                << dimensions_
+                << "The dimensions " << dimensions_
+                << " provided do not match the expected dimensions "
+                << curr << endl
                 << abort(FatalIOError);
         }
     }
 
+    // Read value
     is >> value_;
-    value_ *= multiplier;
+    value_ *= mult;
 }
 
 
@@ -124,10 +124,7 @@ Foam::dimensioned<Type>::dimensioned
 
 
 template<class Type>
-Foam::dimensioned<Type>::dimensioned
-(
-    Istream& is
-)
+Foam::dimensioned<Type>::dimensioned(Istream& is)
 :
     dimensions_(dimless)
 {
@@ -145,10 +142,13 @@ Foam::dimensioned<Type>::dimensioned
     name_(name),
     dimensions_(dimless)
 {
-    scalar multiplier;
-    dimensions_.read(is, multiplier);
+    // Read dimensionSet + multiplier
+    scalar mult(1.0);
+    dimensions_.read(is, mult);
+
+    // Read value
     is >> value_;
-    value_ *= multiplier;
+    value_ *= mult;
 }
 
 
@@ -164,7 +164,7 @@ Foam::dimensioned<Type>::dimensioned
     dimensions_(dims),
     value_(Zero)
 {
-    initialize(is);
+    initialize(is, true);  // checkDims
 }
 
 
@@ -172,15 +172,32 @@ template<class Type>
 Foam::dimensioned<Type>::dimensioned
 (
     const word& name,
-    const dimensionSet& dims,
     const dictionary& dict
+)
+:
+    dimensioned<Type>(name, dimless, dict, false)  // no checkDims
+{}
+
+
+template<class Type>
+Foam::dimensioned<Type>::dimensioned
+(
+    const word& name,
+    const dimensionSet& dims,
+    const dictionary& dict,
+    const bool checkDims
 )
 :
     name_(name),
     dimensions_(dims),
     value_(Zero)
 {
-    initialize(dict.lookup(name));
+    // Like dictionary::lookup(), but in two stages to detect input errors
+    const entry& e = dict.lookupEntry(name, keyType::REGEX);
+    ITstream& is = e.stream();
+
+    initialize(is, checkDims);
+    e.checkITstream(is);
 }
 
 
@@ -195,12 +212,13 @@ Foam::dimensioned<Type> Foam::dimensioned<Type>::lookupOrDefault
     const Type& defaultValue
 )
 {
-    if (dict.found(name))
-    {
-        return dimensioned<Type>(name, dims, dict.get<Type>(name));
-    }
-
-    return dimensioned<Type>(name, dims, defaultValue);
+    return
+        dimensioned<Type>
+        (
+            name,
+            dims,
+            dict.lookupOrDefault<Type>(name, defaultValue)
+        );
 }
 
 
@@ -326,6 +344,25 @@ bool Foam::dimensioned<Type>::readIfPresent(const dictionary& dict)
 
 
 template<class Type>
+Foam::Istream& Foam::dimensioned<Type>::read(Istream& is)
+{
+    // Read name
+    is >> name_;
+
+    // Read dimensionSet + multiplier
+    scalar mult(1.0);
+    dimensions_.read(is, mult);
+
+    // Read value
+    is >> value_;
+    value_ *= mult;
+
+    is.check(FUNCTION_NAME);
+    return is;
+}
+
+
+template<class Type>
 Foam::Istream&
 Foam::dimensioned<Type>::read(Istream& is, const dictionary& readSet)
 {
@@ -333,7 +370,7 @@ Foam::dimensioned<Type>::read(Istream& is, const dictionary& readSet)
     is >> name_;
 
     // Read dimensionSet + multiplier
-    scalar mult;
+    scalar mult(1.0);
     dimensions_.read(is, mult, readSet);
 
     // Read value
@@ -356,27 +393,8 @@ Foam::Istream& Foam::dimensioned<Type>::read
     is >> name_;
 
     // Read dimensionSet + multiplier
-    scalar mult;
+    scalar mult(1.0);
     dimensions_.read(is, mult, readSet);
-
-    // Read value
-    is >> value_;
-    value_ *= mult;
-
-    is.check(FUNCTION_NAME);
-    return is;
-}
-
-
-template<class Type>
-Foam::Istream& Foam::dimensioned<Type>::read(Istream& is)
-{
-    // Read name
-    is >> name_;
-
-    // Read dimensionSet + multiplier
-    scalar mult;
-    dimensions_.read(is, mult);
 
     // Read value
     is >> value_;
@@ -574,29 +592,7 @@ Foam::dimensioned<Type> Foam::min
 template<class Type>
 Foam::Istream& Foam::operator>>(Istream& is, dimensioned<Type>& dt)
 {
-    token nextToken(is);
-    is.putBack(nextToken);
-
-    // Check if the original format is used in which the name is provided
-    // and reset the name to that read
-    if (nextToken.isWord())
-    {
-        is >> dt.name_;
-        is >> nextToken;
-        is.putBack(nextToken);
-    }
-
-    // If the dimensions are provided reset the dimensions to those read
-    scalar multiplier = 1.0;
-    if (nextToken == token::BEGIN_SQR)
-    {
-        dt.dimensions_.read(is, multiplier);
-    }
-
-    // Read the value
-    is >> dt.value_;
-    dt.value_ *= multiplier;
-
+    dt.initialize(is, false);  // no checkDims
     is.check(FUNCTION_NAME);
     return is;
 }
@@ -609,7 +605,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const dimensioned<Type>& dt)
     os << dt.name() << token::SPACE;
 
     // Write the dimensions
-    scalar mult;
+    scalar mult(1.0);
     dt.dimensions().write(os, mult);
 
     os << token::SPACE;

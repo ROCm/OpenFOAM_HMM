@@ -69,7 +69,7 @@ public:
 
 
     //- Destructor
-    virtual ~noScatter();
+    virtual ~noScatter() = default;
 
 
     // Member Functions

@@ -54,14 +54,8 @@ Foam::radiation::constantScatter::constantScatter
 :
     scatterModel(dict, mesh),
     coeffsDict_(dict.optionalSubDict(typeName + "Coeffs")),
-    sigma_(coeffsDict_.lookup("sigma")),
-    C_(coeffsDict_.lookup("C"))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::radiation::constantScatter::~constantScatter()
+    sigma_("sigma", dimless/dimLength, coeffsDict_),
+    C_("C", dimless, coeffsDict_)
 {}
 
 

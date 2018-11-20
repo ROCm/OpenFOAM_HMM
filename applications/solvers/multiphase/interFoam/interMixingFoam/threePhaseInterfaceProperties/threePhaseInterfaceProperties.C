@@ -160,8 +160,8 @@ Foam::threePhaseInterfaceProperties::threePhaseInterfaceProperties
             mixture_.alpha1().name()
         ).get<scalar>("cAlpha")
     ),
-    sigma12_("sigma12", dimensionSet(1, 0, -2, 0, 0), mixture),
-    sigma13_("sigma13", dimensionSet(1, 0, -2, 0, 0), mixture),
+    sigma12_("sigma12", dimMass/sqr(dimTime), mixture),
+    sigma13_("sigma13", dimMass/sqr(dimTime), mixture),
 
     deltaN_
     (

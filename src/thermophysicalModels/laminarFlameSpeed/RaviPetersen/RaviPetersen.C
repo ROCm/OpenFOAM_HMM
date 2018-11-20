@@ -313,7 +313,7 @@ Foam::laminarFlameSpeedModels::RaviPetersen::operator()() const
         EqR =
             dimensionedScalar
             (
-                psiuReactionThermo_.lookup("stoichiometricAirFuelMassRatio")
+                "stoichiometricAirFuelMassRatio", dimless, psiuReactionThermo_
             )*ft/max(1 - ft, SMALL);
     }
     else

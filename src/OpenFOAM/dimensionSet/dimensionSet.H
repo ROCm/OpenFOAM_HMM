@@ -229,6 +229,9 @@ public:
 
     // Constructors
 
+        //- Construct null (dimensionless).
+        dimensionSet();
+
         //- Construct from exponents for the first five or all seven dimensions
         dimensionSet
         (
@@ -254,7 +257,7 @@ public:
         }
 
         //- Construct from Istream
-        dimensionSet(Istream& is);
+        explicit dimensionSet(Istream& is);
 
 
     // Member functions
@@ -377,48 +380,48 @@ public:
 
     // Friend operators
 
-        friend dimensionSet operator-(const dimensionSet&);
+        friend dimensionSet operator-(const dimensionSet& ds);
 
         friend dimensionSet operator+
         (
-            const dimensionSet&,
-            const dimensionSet&
+            const dimensionSet& ds1,
+            const dimensionSet& ds2
         );
 
         friend dimensionSet operator-
         (
-            const dimensionSet&,
-            const dimensionSet&
+            const dimensionSet& ds1,
+            const dimensionSet& ds2
         );
 
         friend dimensionSet operator*
         (
-            const dimensionSet&,
-            const dimensionSet&
+            const dimensionSet& ds1,
+            const dimensionSet& ds2
         );
 
         friend dimensionSet operator/
         (
-            const dimensionSet&,
-            const dimensionSet&
+            const dimensionSet& ds1,
+            const dimensionSet& ds2
         );
 
         friend dimensionSet operator&
         (
-            const dimensionSet&,
-            const dimensionSet&
+            const dimensionSet& ds1,
+            const dimensionSet& ds2
         );
 
         friend dimensionSet operator^
         (
-            const dimensionSet&,
-            const dimensionSet&
+            const dimensionSet& ds1,
+            const dimensionSet& ds2
         );
 
         friend dimensionSet operator&&
         (
-            const dimensionSet&,
-            const dimensionSet&
+            const dimensionSet& ds1,
+            const dimensionSet& ds2
         );
 
 

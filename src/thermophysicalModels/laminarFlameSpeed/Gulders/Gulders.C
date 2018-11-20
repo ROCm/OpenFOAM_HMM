@@ -222,7 +222,7 @@ Foam::laminarFlameSpeedModels::Gulders::operator()() const
             psiuReactionThermo_.Tu(),
             dimensionedScalar
             (
-                psiuReactionThermo_.lookup("stoichiometricAirFuelMassRatio")
+                "stoichiometricAirFuelMassRatio", dimless, psiuReactionThermo_
             )*ft/max(1 - ft, SMALL)
         );
     }

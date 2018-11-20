@@ -49,8 +49,8 @@ Foam::XiGModels::instabilityG::instabilityG
 )
 :
     XiGModel(XiGProperties, thermo, turbulence, Su),
-    GIn_(XiGModelCoeffs_.lookup("GIn")),
-    lambdaIn_(XiGModelCoeffs_.lookup("lambdaIn")),
+    GIn_("GIn", dimless/dimTime, XiGModelCoeffs_),
+    lambdaIn_("lambdaIn", dimLength, XiGModelCoeffs_),
     XiGModel_(XiGModel::New(XiGModelCoeffs_, thermo, turbulence, Su))
 {}
 

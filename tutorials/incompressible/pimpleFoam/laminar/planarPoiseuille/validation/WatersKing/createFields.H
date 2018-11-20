@@ -15,7 +15,7 @@ const scalar nu2 =
     (
         "nu",
         dimViscosity,
-        transportProperties.lookup("nu")
+        transportProperties
     ).value();
 
 Info<< "Reading viscoelastic properties\n" << endl;

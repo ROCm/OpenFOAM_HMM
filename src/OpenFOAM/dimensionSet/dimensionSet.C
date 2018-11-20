@@ -25,18 +25,24 @@ License
 
 #include "dimensionSet.H"
 #include "dimensionedScalar.H"
-#include "StringStream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-defineTypeNameAndDebug(dimensionSet, 1);
-const scalar dimensionSet::smallExponent = SMALL;
+    defineTypeNameAndDebug(dimensionSet, 1);
 }
+
+const Foam::scalar Foam::dimensionSet::smallExponent = SMALL;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::dimensionSet::dimensionSet()
+:
+    exponents_(Zero)
+{}
+
 
 Foam::dimensionSet::dimensionSet
 (
@@ -48,6 +54,8 @@ Foam::dimensionSet::dimensionSet
     const scalar current,
     const scalar luminousIntensity
 )
+:
+    exponents_()
 {
     exponents_[MASS] = mass;
     exponents_[LENGTH] = length;
@@ -66,9 +74,9 @@ Foam::dimensionSet::dimensionSet(const FixedList<scalar,7>& dims)
 
 
 Foam::dimensionSet::dimensionSet(const dimensionSet& ds)
-{
-    reset(ds);
-}
+:
+    exponents_(ds.exponents_)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

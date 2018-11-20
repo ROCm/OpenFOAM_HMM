@@ -408,7 +408,7 @@ Foam::laminarFlameSpeedModels::SCOPE::Ma() const
         (
             dimensionedScalar
             (
-                psiuReactionThermo_.lookup("stoichiometricAirFuelMassRatio")
+                "stoichiometricAirFuelMassRatio", dimless, psiuReactionThermo_
             )*ft/(scalar(1) - ft)
         );
     }
@@ -449,7 +449,7 @@ Foam::laminarFlameSpeedModels::SCOPE::operator()() const
             psiuReactionThermo_.Tu(),
             dimensionedScalar
             (
-                psiuReactionThermo_.lookup("stoichiometricAirFuelMassRatio")
+                "stoichiometricAirFuelMassRatio", dimless, psiuReactionThermo_
             )*ft/(scalar(1) - ft)
         );
     }

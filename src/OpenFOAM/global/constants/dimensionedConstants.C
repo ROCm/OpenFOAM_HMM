@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,16 +25,17 @@ License
 
 #include "dimensionedConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    dictionary* dimensionedConstantsPtr_(nullptr);
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dictionary* dimensionedConstantsPtr_(nullptr);
-
-dictionary& dimensionedConstants()
+Foam::dictionary& Foam::dimensionedConstants()
 {
     return debug::switchSet
     (
@@ -44,7 +45,7 @@ dictionary& dimensionedConstants()
 }
 
 
-dimensionedScalar dimensionedConstant
+Foam::dimensionedScalar Foam::dimensionedConstant
 (
     const word& group,
     const word& varName
@@ -57,28 +58,24 @@ dimensionedScalar dimensionedConstant
 
     if (!dict.found("unitSet"))
     {
-        std::cerr<< "Cannot find unitSet in dictionary " << dict.name()
+        std::cerr
+            << "Cannot find unitSet in dictionary " << dict.name()
             << std::endl;
     }
 
     const word unitSetCoeffs(dict.get<word>("unitSet") + "Coeffs");
 
-    if (!dict.found(unitSetCoeffs))
+    const dictionary* unitDictPtr = dict.findDict(unitSetCoeffs);
+
+    if (!unitDictPtr)
     {
-        std::cerr<< "Cannot find " << unitSetCoeffs << " in dictionary "
+        std::cerr
+            << "Cannot find " << unitSetCoeffs << " in dictionary "
             << dict.name() << std::endl;
     }
 
-    dictionary& unitDict = dict.subDict(unitSetCoeffs);
-
-    dictionary& groupDict = unitDict.subDict(group);
-
-    return dimensionedScalar(groupDict.lookup(varName));
+    return dimensionedScalar(varName, unitDictPtr->subDict(group));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

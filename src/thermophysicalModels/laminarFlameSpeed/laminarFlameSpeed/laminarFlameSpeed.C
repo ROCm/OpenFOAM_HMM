@@ -50,7 +50,7 @@ Foam::laminarFlameSpeed::laminarFlameSpeed
     if (!psiuReactionThermo_.composition().contains("ft"))
     {
         equivalenceRatio_ =
-            dimensionedScalar(dict.lookup("equivalenceRatio")).value();
+            dimensionedScalar("equivalenceRatio", dimless, dict).value();
     }
 }
 

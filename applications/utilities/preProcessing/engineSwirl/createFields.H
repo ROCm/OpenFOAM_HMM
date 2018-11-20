@@ -12,35 +12,17 @@ IOdictionary engineGeometry
     )
 );
 
-vector swirlAxis
-(
-    engineGeometry.lookup("swirlAxis")
-);
+vector swirlAxis(engineGeometry.get<vector>("swirlAxis"));
 
-vector swirlCenter
-(
-    engineGeometry.lookup("swirlCenter")
-);
+vector swirlCenter(engineGeometry.get<vector>("swirlCenter"));
 
-dimensionedScalar swirlRPMRatio
-(
-    engineGeometry.lookup("swirlRPMRatio")
-);
+dimensionedScalar swirlRPMRatio("swirlRPMRatio", engineGeometry);
 
-dimensionedScalar swirlProfile
-(
-    engineGeometry.lookup("swirlProfile")
-);
+dimensionedScalar swirlProfile("swirlProfile", engineGeometry);
 
-dimensionedScalar bore
-(
-    engineGeometry.lookup("bore")
-);
+dimensionedScalar bore("bore", dimLength, engineGeometry);
 
-dimensionedScalar rpm
-(
-    engineGeometry.lookup("rpm")
-);
+dimensionedScalar rpm("rpm", dimless/dimTime, engineGeometry);
 
 
 Info<< "Reading field U\n" << endl;

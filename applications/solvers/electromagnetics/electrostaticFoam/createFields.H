@@ -14,12 +14,16 @@
 
     dimensionedScalar epsilon0
     (
-        physicalProperties.lookup("epsilon0")
+        "epsilon0",
+        dimensionSet(-1, -3, 4, 0, 0, 2, 0),
+        physicalProperties
     );
 
     dimensionedScalar k
     (
-        physicalProperties.lookup("k")
+        "k",
+        dimensionSet(-1, 0, 2, 0, 0, 1, 0),
+        physicalProperties
     );
 
 

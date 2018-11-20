@@ -85,7 +85,7 @@ public:
 
 
     //- Destructor
-    virtual ~constantScatter();
+    virtual ~constantScatter() = default;
 
 
     // Member Functions

@@ -72,10 +72,7 @@ dimensionedScalar rhocValue
 (
     IOobject::groupName("rho", continuousPhaseName),
     dimDensity,
-    continuousPhaseTransport.lookup
-    (
-        IOobject::groupName("rho", continuousPhaseName)
-    )
+    continuousPhaseTransport
 );
 
 volScalarField rhoc

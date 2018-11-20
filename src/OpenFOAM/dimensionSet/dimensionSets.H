@@ -119,7 +119,7 @@ public:
         }
 
         //- (if valid) obtain set of coefficients of unitNames
-        void coefficients(scalarField&) const;
+        void coefficients(scalarField& exponents) const;
 
 };
 

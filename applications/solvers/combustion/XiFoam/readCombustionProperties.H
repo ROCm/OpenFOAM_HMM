@@ -12,34 +12,34 @@
         )
     );
 
-    word SuModel
+    const word SuModel
     (
-        combustionProperties.lookup("SuModel")
+        combustionProperties.get<word>("SuModel")
     );
 
     dimensionedScalar sigmaExt
     (
-        combustionProperties.lookup("sigmaExt")
+        "sigmaExt", dimless/dimTime, combustionProperties
     );
 
-    word XiModel
+    const word XiModel
     (
-        combustionProperties.lookup("XiModel")
+        combustionProperties.get<word>("XiModel")
     );
 
     dimensionedScalar XiCoef
     (
-        combustionProperties.lookup("XiCoef")
+        "XiCoef", dimless, combustionProperties
     );
 
     dimensionedScalar XiShapeCoef
     (
-        combustionProperties.lookup("XiShapeCoef")
+        "XiShapeCoef", dimless, combustionProperties
     );
 
     dimensionedScalar uPrimeCoef
     (
-        combustionProperties.lookup("uPrimeCoef")
+        "uPrimeCoef", dimless, combustionProperties
     );
 
     ignition ign(combustionProperties, runTime, mesh);

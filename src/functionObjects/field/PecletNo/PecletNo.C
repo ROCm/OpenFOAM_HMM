@@ -93,7 +93,7 @@ bool Foam::functionObjects::PecletNo::calc()
                     IOobject::NO_WRITE
                 ),
                 mesh_,
-                dimensionedScalar(model.lookup("nu"))
+                dimensionedScalar("nu", dimViscosity, model)
             );
         }
         else

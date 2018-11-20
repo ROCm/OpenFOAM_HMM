@@ -226,7 +226,7 @@ Foam::laminarFlameSpeedModels::GuldersEGR::operator()() const
             psiuReactionThermo_.Tu(),
             dimensionedScalar
             (
-                psiuReactionThermo_.lookup("stoichiometricAirFuelMassRatio")
+                "stoichiometricAirFuelMassRatio", dimless, psiuReactionThermo_
             )/
             (
                 scalar(1)/psiuReactionThermo_.composition().Y("ft")
