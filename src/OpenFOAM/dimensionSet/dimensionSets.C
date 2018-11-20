@@ -109,20 +109,29 @@ const HashTable<dimensionedScalar>& unitSet()
 
         const word unitSetCoeffs(dict.get<word>("unitSet") + "Coeffs");
 
-        if (!dict.found(unitSetCoeffs))
+        const dictionary* unitDictPtr = dict.findDict(unitSetCoeffs);
+
+        if (!unitDictPtr)
         {
             FatalIOErrorInFunction(dict)
                 << "Cannot find " << unitSetCoeffs << " in dictionary "
-                << dict.name() << exit(FatalIOError);
+                << dict.name() << nl
+                << exit(FatalIOError);
         }
 
-        const dictionary& unitDict = dict.subDict(unitSetCoeffs);
+        const dictionary& unitDict = *unitDictPtr;
 
-        unitSetPtr_ = new HashTable<dimensionedScalar>(unitDict.size());
+        unitSetPtr_ = new HashTable<dimensionedScalar>(2*unitDict.size());
+
+        wordList writeUnitNames;
 
         for (const entry& dEntry : unitDict)
         {
-            if (dEntry.keyword() != "writeUnits")
+            if ("writeUnits" == dEntry.keyword())
+            {
+                dEntry.readEntry(writeUnitNames);
+            }
+            else
             {
                 dimensionedScalar dt;
                 dt.read(dEntry.stream(), unitDict);
@@ -138,17 +147,6 @@ const HashTable<dimensionedScalar>& unitSet()
             }
         }
 
-        wordList writeUnitNames
-        (
-            unitDict.lookupOrDefault<wordList>
-            (
-                "writeUnits",
-                wordList(0)
-            )
-        );
-
-        writeUnitSetPtr_ = new dimensionSets(*unitSetPtr_, writeUnitNames);
-
         if (writeUnitNames.size() != 0 && writeUnitNames.size() != 7)
         {
             FatalIOErrorInFunction(dict)
@@ -156,6 +154,9 @@ const HashTable<dimensionedScalar>& unitSet()
                 << " or it is not a wordList of size 7"
                 << exit(FatalIOError);
         }
+
+        writeUnitSetPtr_ = new dimensionSets(*unitSetPtr_, writeUnitNames);
+
     }
     return *unitSetPtr_;
 }

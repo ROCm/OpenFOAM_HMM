@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,6 @@ Description
 SourceFiles
     dimensionSet.C
     dimensionSetIO.C
-    dimensionSets.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -56,63 +55,6 @@ namespace Foam
 
 class dimensionSet;
 class dimensionSets;
-
-// Friend functions
-
-dimensionSet max(const dimensionSet&, const dimensionSet&);
-dimensionSet min(const dimensionSet&, const dimensionSet&);
-dimensionSet cmptMultiply(const dimensionSet&, const dimensionSet&);
-dimensionSet cmptDivide(const dimensionSet&, const dimensionSet&);
-
-dimensionSet pow(const dimensionSet&, const scalar);
-dimensionSet pow(const dimensionSet&, const dimensionedScalar&);
-dimensionSet pow(const dimensionedScalar&, const dimensionSet&);
-
-dimensionSet sqr(const dimensionSet&);
-dimensionSet pow3(const dimensionSet&);
-dimensionSet pow4(const dimensionSet&);
-dimensionSet pow5(const dimensionSet&);
-dimensionSet pow6(const dimensionSet&);
-dimensionSet pow025(const dimensionSet&);
-
-dimensionSet sqrt(const dimensionSet&);
-dimensionSet cbrt(const dimensionSet&);
-dimensionSet magSqr(const dimensionSet&);
-dimensionSet mag(const dimensionSet&);
-dimensionSet sign(const dimensionSet&);
-dimensionSet pos(const dimensionSet&);
-dimensionSet pos0(const dimensionSet&);
-dimensionSet neg(const dimensionSet&);
-dimensionSet neg0(const dimensionSet&);
-dimensionSet posPart(const dimensionSet&);
-dimensionSet negPart(const dimensionSet&);
-dimensionSet inv(const dimensionSet&);
-
-// Function to check the argument is dimensionless
-//  for transcendental functions
-dimensionSet trans(const dimensionSet&);
-
-dimensionSet atan2(const dimensionSet&, const dimensionSet&);
-
-// Return the argument; transformations do not change the dimensions
-dimensionSet transform(const dimensionSet&);
-
-// Friend operators
-
-dimensionSet operator-(const dimensionSet&);
-dimensionSet operator+(const dimensionSet&, const dimensionSet&);
-dimensionSet operator-(const dimensionSet&, const dimensionSet&);
-dimensionSet operator*(const dimensionSet&, const dimensionSet&);
-dimensionSet operator/(const dimensionSet&, const dimensionSet&);
-dimensionSet operator&(const dimensionSet&, const dimensionSet&);
-dimensionSet operator^(const dimensionSet&, const dimensionSet&);
-dimensionSet operator&&(const dimensionSet&, const dimensionSet&);
-
-// IOstream operators
-
-Istream& operator>>(Istream&, dimensionSet&);
-Ostream& operator<<(Ostream&, const dimensionSet&);
-
 
 /*---------------------------------------------------------------------------*\
                         Class dimensionSet Declaration
@@ -260,7 +202,7 @@ public:
         explicit dimensionSet(Istream& is);
 
 
-    // Member functions
+    // Member Functions
 
         //- Return true if it is dimensionless
         bool dimensionless() const;
@@ -274,7 +216,7 @@ public:
         void reset(const dimensionSet& ds);
 
 
-    // I/O
+    // IO
 
         //- Read using provided units. Used only in initial parsing
         Istream& read
@@ -315,7 +257,7 @@ public:
         ) const;
 
 
-    // Member operators
+    // Member Operators
 
         scalar operator[](const dimensionType) const;
         scalar& operator[](const dimensionType);
@@ -332,104 +274,81 @@ public:
         bool operator-=(const dimensionSet&) const;
         bool operator*=(const dimensionSet&);
         bool operator/=(const dimensionSet&);
-
-
-    // Friend functions
-
-        friend dimensionSet max(const dimensionSet&, const dimensionSet&);
-        friend dimensionSet min(const dimensionSet&, const dimensionSet&);
-        friend dimensionSet cmptMultiply
-        (
-            const dimensionSet&,
-            const dimensionSet&
-        );
-        friend dimensionSet cmptDivide
-        (
-            const dimensionSet&,
-            const dimensionSet&
-        );
-
-        friend dimensionSet pow(const dimensionSet&, const scalar);
-        friend dimensionSet pow(const dimensionSet&, const dimensionedScalar&);
-        friend dimensionSet pow(const dimensionedScalar&, const dimensionSet&);
-
-        friend dimensionSet sqr(const dimensionSet&);
-        friend dimensionSet pow3(const dimensionSet&);
-        friend dimensionSet pow4(const dimensionSet&);
-        friend dimensionSet pow5(const dimensionSet&);
-        friend dimensionSet pow6(const dimensionSet&);
-        friend dimensionSet pow025(const dimensionSet&);
-
-        friend dimensionSet sqrt(const dimensionSet&);
-        friend dimensionSet magSqr(const dimensionSet&);
-        friend dimensionSet mag(const dimensionSet&);
-        friend dimensionSet sign(const dimensionSet&);
-        friend dimensionSet pos0(const dimensionSet&);
-        friend dimensionSet neg(const dimensionSet&);
-        friend dimensionSet inv(const dimensionSet&);
-
-        //- Function to check the argument is dimensionless
-        //  for transcendental functions
-        friend dimensionSet trans(const dimensionSet&);
-
-        friend dimensionSet atan2(const dimensionSet&, const dimensionSet&);
-
-        //- Return the argument; transformations do not change the dimensions
-        friend dimensionSet transform(const dimensionSet&);
-
-
-    // Friend operators
-
-        friend dimensionSet operator-(const dimensionSet& ds);
-
-        friend dimensionSet operator+
-        (
-            const dimensionSet& ds1,
-            const dimensionSet& ds2
-        );
-
-        friend dimensionSet operator-
-        (
-            const dimensionSet& ds1,
-            const dimensionSet& ds2
-        );
-
-        friend dimensionSet operator*
-        (
-            const dimensionSet& ds1,
-            const dimensionSet& ds2
-        );
-
-        friend dimensionSet operator/
-        (
-            const dimensionSet& ds1,
-            const dimensionSet& ds2
-        );
-
-        friend dimensionSet operator&
-        (
-            const dimensionSet& ds1,
-            const dimensionSet& ds2
-        );
-
-        friend dimensionSet operator^
-        (
-            const dimensionSet& ds1,
-            const dimensionSet& ds2
-        );
-
-        friend dimensionSet operator&&
-        (
-            const dimensionSet& ds1,
-            const dimensionSet& ds2
-        );
-
-
-    // IOstream operators
-
-        friend Istream& operator>>(Istream&, dimensionSet&);
-        friend Ostream& operator<<(Ostream&, const dimensionSet&);
 };
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// IOstream Operators
+
+Istream& operator>>(Istream& is, dimensionSet& ds);
+Ostream& operator<<(Ostream& os, const dimensionSet& ds);
+
+
+// Global Functions
+
+dimensionSet min(const dimensionSet& ds1, const dimensionSet& ds2);
+dimensionSet max(const dimensionSet& ds1, const dimensionSet& ds2);
+
+dimensionSet cmptMultiply(const dimensionSet& ds1, const dimensionSet& ds2);
+dimensionSet cmptDivide(const dimensionSet& ds1, const dimensionSet& ds2);
+
+
+dimensionSet pow(const dimensionSet& ds, const scalar p);
+dimensionSet pow(const dimensionSet& ds, const dimensionedScalar& dS);
+dimensionSet pow(const dimensionedScalar& dS, const dimensionSet& ds);
+
+dimensionSet sqr(const dimensionSet& ds);
+dimensionSet pow2(const dimensionSet& ds);
+dimensionSet pow3(const dimensionSet& ds);
+dimensionSet pow4(const dimensionSet& ds);
+dimensionSet pow5(const dimensionSet& ds);
+dimensionSet pow6(const dimensionSet& ds);
+dimensionSet pow025(const dimensionSet& ds);
+
+dimensionSet sqrt(const dimensionSet& ds);
+dimensionSet cbrt(const dimensionSet& ds);
+
+dimensionSet magSqr(const dimensionSet& ds);
+dimensionSet mag(const dimensionSet& ds);
+dimensionSet sign(const dimensionSet&);
+dimensionSet pos(const dimensionSet&);
+dimensionSet pos0(const dimensionSet&);
+dimensionSet neg(const dimensionSet&);
+dimensionSet neg0(const dimensionSet&);
+dimensionSet posPart(const dimensionSet&);
+dimensionSet negPart(const dimensionSet&);
+
+//- The dimensionSet inverted
+dimensionSet inv(const dimensionSet& ds);
+
+//- Check the argument is dimensionless (for transcendental functions)
+dimensionSet trans(const dimensionSet& ds);
+
+//- Check that the arguments have the same dimensions
+dimensionSet atan2(const dimensionSet& ds1, const dimensionSet& ds2);
+
+//- Return the argument; transformations do not change the dimensions
+dimensionSet transform(const dimensionSet& ds);
+
+//- Return the argument; transformations do not change the dimensions
+dimensionSet invTransform(const dimensionSet& ds);
+
+
+// Global Operators
+
+//- The dimensionSet inverted
+dimensionSet operator~(const dimensionSet& ds);
+
+//- Unary negation.
+dimensionSet operator-(const dimensionSet& ds);
+
+dimensionSet operator+(const dimensionSet& ds1, const dimensionSet& ds2);
+dimensionSet operator-(const dimensionSet& ds1, const dimensionSet& ds2);
+dimensionSet operator*(const dimensionSet& ds1, const dimensionSet& ds2);
+dimensionSet operator/(const dimensionSet& ds1, const dimensionSet& ds2);
+dimensionSet operator&(const dimensionSet& ds1, const dimensionSet& ds2);
+dimensionSet operator^(const dimensionSet& ds1, const dimensionSet& ds2);
+dimensionSet operator&&(const dimensionSet& ds1, const dimensionSet& ds2);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
