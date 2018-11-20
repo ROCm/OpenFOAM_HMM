@@ -248,6 +248,11 @@ public:
         //- using units from table
         Istream& read(Istream& is, const HashTable<dimensionedScalar>& readSet);
 
+        //- Write as a dictionary entry with keyword.
+        //  The name is not written when it is identical to keyword.
+        //  The dimensions are always written.
+        void writeEntry(const word& keyword, Ostream& os) const;
+
 
     // Member Operators
 

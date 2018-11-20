@@ -405,6 +405,32 @@ Foam::Istream& Foam::dimensioned<Type>::read
 }
 
 
+template<class Type>
+void Foam::dimensioned<Type>::writeEntry
+(
+    const word& keyword,
+    Ostream& os
+) const
+{
+    os.writeKeyword(keyword);
+
+    if (keyword != name_)
+    {
+        // The name, only if different from keyword
+        os << name_ << token::SPACE;
+    }
+
+    // The dimensions
+    scalar mult(1.0);
+    dimensions_.write(os, mult);
+
+    // The value
+    os << token::SPACE << value_/mult << token::END_STATEMENT << endl;
+
+    os.check(FUNCTION_NAME);
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Type>
