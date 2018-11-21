@@ -55,9 +55,17 @@ echo_hypre()
 have_hypre()
 {
     local header library static label settings warn
-    # warn="==> skip hypre"
+    warn="==> skip hypre"
 
-    # Basic setup/checks
+    # Basic setup/checks. Prefer current environment value? (TDB)
+    if [ ! -d "$HYPRE_ARCH_PATH" ]
+    then
+        settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/hypre) || {
+            [ -n "$warn" ] && echo "$warn (no config.sh/hypre settings)"
+            return 1
+        }
+        . $settings
+    fi
     if isNone "$HYPRE_ARCH_PATH"
     then
         [ -n "$warn" ] && echo "$warn (not available)"

@@ -68,6 +68,7 @@ have_fftw()
     # Header/library names
     header="fftw3.h"
     library="libfftw3$extLibso"
+    static="libfftw3$extLiba"
 
 
     if hasAbsdir "$FFTW_ARCH_PATH"
@@ -77,7 +78,9 @@ have_fftw()
         # FOAM_EXT_LIBBIN is allowed to be unset
         library=$(findFirstFile \
             $FOAM_EXT_LIBBIN/$library \
+            $FFTW_ARCH_PATH/lib/$static \
             $FFTW_ARCH_PATH/lib/$library \
+            $FFTW_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/$static \
             $FFTW_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/$library \
         )
     elif isSystem "$FFTW_ARCH_PATH"
