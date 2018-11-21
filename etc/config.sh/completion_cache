@@ -289,6 +289,6 @@ _of_complete_cache_[XiDyMFoam]="-case -decomposeParDict -fileHandler -hostRoots 
 _of_complete_cache_[XiEngineFoam]="-case -decomposeParDict -fileHandler -hostRoots -listScalarBCs -listVectorBCs -roots | -listFunctionObjects -listFvOptions -listRegisteredSwitches -listSwitches -listTurbulenceModels -listUnsetSwitches -noFunctionObjects -parallel -postProcess -doc -doc-source -help"
 _of_complete_cache_[XiFoam]="-case -decomposeParDict -fileHandler -hostRoots -listScalarBCs -listVectorBCs -roots | -dry-run -dry-run-write -listFunctionObjects -listFvOptions -listRegisteredSwitches -listSwitches -listTurbulenceModels -listUnsetSwitches -noFunctionObjects -parallel -postProcess -doc -doc-source -help"
 _of_complete_cache_[zipUpMesh]="-case -decomposeParDict -fileHandler -hostRoots -region -roots | -listFunctionObjects -listRegisteredSwitches -listSwitches -listUnsetSwitches -noFunctionObjects -parallel -doc -doc-source -help"
-_of_complete_cache_[paraFoam]="-case -region | -block -touch -touch-all -touch-proc -vtk"
+_of_complete_cache_[paraFoam]="-case -region | -block -touch -touch-all -touch-proc -vtk -help"
 
 #------------------------------------------------------------------------------
