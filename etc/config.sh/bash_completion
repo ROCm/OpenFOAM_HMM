@@ -98,7 +98,7 @@ foamAddCompletion()
 # The respective options are generated on-the-fly from the application's
 # -help-full output and cached to the _of_complete_cache_ global associative
 # array with entries formatted as "argOpts.. | boolOpts ..".
-# The '|' character separates options with and without arguments.
+# The '|' character separates options with/without arguments.
 #
 unset -f _of_complete_ 2>/dev/null
 _of_complete_()
@@ -134,12 +134,22 @@ _of_complete_()
         choices="${_of_complete_cache_[$appName]}"
 
         # Not in cache, obtain by parsing application -help-full
+        # Extract all options of the format
+        #   -opt1         descrip
+        #   -opt2 <arg>   descrip
+        #   -help-full
+        # Terminate parsing on first appearance of -help-full
+        # - options with '=' (eg, -mode=ugo) are not handled very well at all.
+        # - alternatives (eg, -a, -all) are not handled nicely either,
+        #   for these treat ',' like a space to catch the worst of them.
         if [ -z "$choices" ]
         then
-            # Treat ',' like space so '-a, -all' parses like '-a | -all'
-            # Options with '=' (Eg, -mode=ugo) are not handled very well.
             local helpText=$($appName -help-full 2>/dev/null | \
-                sed -ne 's/,/ /g' -e 's/=.*$/=/' -e '/^  *-/p')
+                sed -ne 's/^ *//; /^$/d; /^[^-]/d; /^--/d;' \
+                    -e 'y/,/ /; s/=.*$/=/;' \
+                    -e '/^-[^ ]* </{ s/^\(-[^ ]* <\).*$/\1/; p; d }' \
+                    -e 's/^\(-[^ ]*\).*$/\1/; p; /^-help-full/q;' \
+                    )
 
             if [ -z "$helpText" ]
             then
@@ -147,10 +157,10 @@ _of_complete_()
                 choices="false"  # Mark failure to prevent repeating again
             else
                 # Array of options with args
-                local argOpts=($(awk '/^ {0,4}-[a-z]/ && /</ {print $1}' <<< "$helpText"))
+                local argOpts=($(awk '/</ {print $1}' <<< "$helpText"))
 
                 # Array of options without args
-                local boolOpts=($(awk '/^ {0,4}-[a-z]/ && !/</ {print $1}' <<< "$helpText"))
+                local boolOpts=($(awk '!/</ {print $1}' <<< "$helpText"))
 
                 choices="${argOpts[@]} | ${boolOpts[@]}"
             fi

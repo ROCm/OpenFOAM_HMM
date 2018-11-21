@@ -133,14 +133,26 @@ HEADER
 
 #-------------------------------------------------------------------------------
 
-# Scans the output of the application -help to detect options with/without
+# Scans the output of the application -help-full to detect options with/without
 # arguments.  Dispatch via _of_complete_
 #
+# Extract all options of the format
+#   -opt1         descrip
+#   -opt2 <arg>   descrip
+#   -help-full
+# Terminate parsing on first appearance of -help-full
+# - options with '=' (eg, -mode=ugo) are not handled very well at all.
+# - alternatives (eg, -a, -all) are not handled nicely either,
+#   for these treat ',' like a space to catch the worst of them.
 extractOptions()
 {
     local appName="$1"
     local helpText=$($appName -help-full 2>/dev/null | \
-        sed -n -e 's/,/ /g' -e 's/=.*$/=/' -e '/^  *-/p')
+        sed -ne 's/^ *//; /^$/d; /^[^-]/d; /^--/d;' \
+            -e 'y/,/ /; s/=.*$/=/;' \
+            -e '/^-[^ ]* </{ s/^\(-[^ ]* <\).*$/\1/; p; d }' \
+            -e 's/^\(-[^ ]*\).*$/\1/; p; /^-help-full/q;' \
+            )
 
     [ -n "$helpText" ] || {
         echo "Error calling $appName" 1>&2
@@ -148,11 +160,11 @@ extractOptions()
     }
 
     # Array of options with args
-    local argOpts=($(awk '/^ {0,4}-[a-z]/ && /</ {print $1}' <<< "$helpText"))
+    local argOpts=($(awk '/</ {print $1}' <<< "$helpText"))
 
     # Array of options without args, but skip the following:
     #     -help-compat -help-full
-    local boolOpts=($(awk '/^ {0,4}-[a-z]/ && !/</ && !/help-(compat|full)/ {print $1}' <<< "$helpText"))
+    local boolOpts=($(awk '!/</ && !/help-(compat|full)/ {print $1}' <<< "$helpText"))
 
     appName="${appName##*/}"
     echo "$appName" 1>&2
