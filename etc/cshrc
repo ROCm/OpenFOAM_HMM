@@ -216,6 +216,10 @@ _foamEtc -config  ensight
 _foamEtc -config  CGAL
 _foamEtc -config  FFTW
 
+if ( -d "$WM_PROJECT_DIR/doc/man1" ) then
+    _foamAddMan "$WM_PROJECT_DIR/doc"
+endif
+
 # Interactive shell
 if ($?prompt) then
     _foamEtc -config  aliases

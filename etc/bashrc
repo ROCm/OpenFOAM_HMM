@@ -180,6 +180,11 @@ _foamEtc -config  CGAL
 _foamEtc -config  scotch
 _foamEtc -config  FFTW
 
+if [ -d "$WM_PROJECT_DIR/doc/man1" ]
+then
+    _foamAddMan "$WM_PROJECT_DIR/doc"
+fi
+
 # Interactive shell
 if /usr/bin/tty -s 2>/dev/null
 then
