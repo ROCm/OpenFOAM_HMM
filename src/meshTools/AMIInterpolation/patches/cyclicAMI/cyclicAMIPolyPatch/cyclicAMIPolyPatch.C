@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -403,21 +403,18 @@ void Foam::cyclicAMIPolyPatch::initGeometry(PstreamBuffers& pBufs)
     AMIPtr_.clear();
 
     polyPatch::initGeometry(pBufs);
+
+    // Early calculation of transforms so e.g. cyclicACMI can use them.
+    // Note: also triggers primitiveMesh face centre. Note that cell
+    // centres should -not- be calculated
+    // since e.g. cyclicACMI override face areas
+    calcTransforms();
 }
 
 
 void Foam::cyclicAMIPolyPatch::calcGeometry(PstreamBuffers& pBufs)
 {
-    calcGeometry
-    (
-        *this,
-        faceCentres(),
-        faceAreas(),
-        faceCellCentres(),
-        neighbPatch().faceCentres(),
-        neighbPatch().faceAreas(),
-        neighbPatch().faceCellCentres()
-    );
+    // All geometry done inside initGeometry
 }
 
 
@@ -434,6 +431,9 @@ void Foam::cyclicAMIPolyPatch::initMovePoints
 
     // See below. Clear out any local geometry
     primitivePatch::movePoints(p);
+
+    // Early calculation of transforms. See above.
+    calcTransforms();
 }
 
 
@@ -445,7 +445,7 @@ void Foam::cyclicAMIPolyPatch::movePoints
 {
     polyPatch::movePoints(pBufs, p);
 
-    calcTransforms();
+    // All transformation tensors already done in initMovePoints
 }
 
 
@@ -962,16 +962,7 @@ void Foam::cyclicAMIPolyPatch::calcGeometry
     const vectorField& nbrAreas,
     const pointField& nbrCc
 )
-{
-    calcTransforms
-    (
-        referPatch,
-        thisCtrs,
-        thisAreas,
-        nbrCtrs,
-        nbrAreas
-    );
-}
+{}
 
 
 void Foam::cyclicAMIPolyPatch::initOrder
