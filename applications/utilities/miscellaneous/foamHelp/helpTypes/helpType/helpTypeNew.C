@@ -32,30 +32,34 @@ Foam::autoPtr<Foam::helpType> Foam::helpType::New
     const word& helpTypeName
 )
 {
-    Info<< "Selecting helpType " << helpTypeName << endl;
-
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(helpTypeName);
 
     if (!cstrIter.found())
     {
         // special treatment for -help
         // exit without stack trace
-        if (helpTypeName == "-help")
+        if (helpTypeName.startsWith("-help"))
         {
             FatalErrorInFunction
-                << "Valid helpType selections are:" << nl
-                << dictionaryConstructorTablePtr_->sortedToc() << nl
+                << "Valid helpType selections:" << nl
+                << "    "
+                << flatOutput(dictionaryConstructorTablePtr_->sortedToc())
+                << endl
                 << exit(FatalError);
         }
         else
         {
             FatalErrorInFunction
-                << "Unknown helpType type " << helpTypeName << nl
-                << "Valid helpType selections are:" << nl
-                << dictionaryConstructorTablePtr_->sortedToc() << nl
+                << "Unknown helpType type '" << helpTypeName << "'" << nl << nl
+                << "Valid helpType selections:" << nl
+                << "    "
+                << flatOutput(dictionaryConstructorTablePtr_->sortedToc())
+                << endl
                 << abort(FatalError);
         }
     }
+
+    Info<< "Selecting helpType '" << helpTypeName << "'" << endl;
 
     return autoPtr<helpType>(cstrIter()());
 }

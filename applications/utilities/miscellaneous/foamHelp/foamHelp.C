@@ -44,24 +44,36 @@ int main(int argc, char *argv[])
     #include "addRegionOption.H"
     #include "addToolOption.H"
 
-    // Intercept request for help
-    if ((argc > 1) && (strcmp(argv[1], "-help") == 0))
+    // Intercept request for any -option (eg, -doc, -help)
+    // when it is the first argument
+    if (argc > 1 && '-' == *argv[1])
     {
         #include "setRootCase.H"
     }
-
-    if (argc < 2)
+    else if (argc < 2)
     {
         FatalError
             << "No help utility has been supplied" << nl
             << exit(FatalError);
     }
 
-    word utilityName = argv[1];
-    Foam::autoPtr<Foam::helpType> utility
-    (
-        helpType::New(utilityName)
-    );
+    word utilityName(argv[1]);
+    autoPtr<helpType> utility;
+
+    const bool throwing = FatalError.throwExceptions();
+    try
+    {
+        utility.reset(helpType::New(utilityName));
+    }
+    catch (Foam::error& err)
+    {
+        utility.clear();
+
+        FatalError
+            << err.message().c_str() << nl
+            << exit(FatalError);
+    }
+    FatalError.throwExceptions(throwing);
 
     utility().init();
 
@@ -71,7 +83,7 @@ int main(int argc, char *argv[])
 
     utility().execute(args, mesh);
 
-    Info<< "End\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

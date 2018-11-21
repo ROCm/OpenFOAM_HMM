@@ -1,10 +1,12 @@
 argList::addArgument("tool");
-const wordList opts(helpType::dictionaryConstructorTablePtr_->sortedToc());
 
-string note = "Valid <tool> options include:";
-forAll(opts, i)
+argList::notes.append("Valid <tool> options include:");
+for (const word& tool : helpType::dictionaryConstructorTablePtr_->sortedToc())
 {
-    note = note + ' ' + opts[i];
+    argList::notes.append("    " + tool);
 }
 
-argList::notes.append(note);
+argList::notes.append
+(
+    "\nNOTE the <tool> must actually appear *before* any options"
+);
