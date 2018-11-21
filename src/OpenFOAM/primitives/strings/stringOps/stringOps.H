@@ -49,6 +49,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+class OSstream;
+
 /*---------------------------------------------------------------------------*\
                         Namespace stringOps Declaration
 \*---------------------------------------------------------------------------*/
@@ -382,6 +385,22 @@ namespace stringOps
         const StringType& str
     );
 
+    //- Output string with text wrapping.
+    //  Always includes a trailing newline, unless the string itself is empty.
+    //
+    //  \param os the output stream
+    //  \param str the text to be output
+    //  \param width the max-width before wrapping
+    //  \param indent indentation for continued lines
+    //  \param escape escape any backslashes on output
+    void writeWrapped
+    (
+        OSstream& os,
+        const std::string& str,
+        const std::string::size_type width,
+        const std::string::size_type indent = 0,
+        const bool escape = false
+    );
 
 } // End namespace stringOps
 

@@ -25,9 +25,10 @@ License
 
 #include "stringOps.H"
 #include "typeInfo.H"
-#include "OSspecific.H"
 #include "etcFiles.H"
 #include "StringStream.H"
+#include "OSstream.H"
+#include "OSspecific.H"
 #include <cctype>
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
@@ -80,7 +81,7 @@ static void expandLeadingTag(std::string& s, const char b, const char e)
     }
     else if (tag == "case")
     {
-        s = fileName(getEnv("FOAM_CASE"))/file;
+        s = fileName(Foam::getEnv("FOAM_CASE"))/file;
     }
     else if (tag == "constant" || tag == "system")
     {
@@ -1086,6 +1087,111 @@ void Foam::stringOps::inplaceUpper(std::string& s)
         (
             std::toupper(static_cast<unsigned char>(*iter))
         );
+    }
+}
+
+
+void Foam::stringOps::writeWrapped
+(
+    OSstream& os,
+    const std::string& str,
+    const std::string::size_type width,
+    const std::string::size_type indent,
+    const bool escape
+)
+{
+    const auto len = str.length();
+
+    std::string::size_type pos = 0;
+
+    // Handle leading newlines
+    while (str[pos] == '\n' && pos < len)
+    {
+        os << '\n';
+        ++pos;
+    }
+
+    while (pos < len)
+    {
+        // Potential end point and next point
+        std::string::size_type end  = pos + width - 1;
+        std::string::size_type eol  = str.find('\n', pos);
+        std::string::size_type next = string::npos;
+
+        if (end >= len)
+        {
+            // No more wrapping needed
+            end = len;
+
+            if (std::string::npos != eol && eol <= end)
+            {
+                // Manual '\n' break, next follows it (default behaviour)
+                end = eol;
+            }
+        }
+        else if (std::string::npos != eol && eol <= end)
+        {
+            // Manual '\n' break, next follows it (default behaviour)
+            end = eol;
+        }
+        else if (isspace(str[end]))
+        {
+            // Ended on a space - can use this directly
+            next = str.find_first_not_of(" \t\n", end);     // Next non-space
+        }
+        else if (isspace(str[end+1]))
+        {
+            // The next one is a space - so we are okay
+            ++end;  // Otherwise the length is wrong
+            next = str.find_first_not_of(" \t\n", end);     // Next non-space
+        }
+        else
+        {
+            // Line break will be mid-word
+            auto prev = str.find_last_of(" \t\n", end);     // Prev word break
+
+            if (std::string::npos != prev && prev > pos)
+            {
+                end = prev;
+                next = prev + 1;  // Continue from here
+            }
+        }
+
+        // The next position to continue from
+        if (std::string::npos == next)
+        {
+            next = end + 1;
+        }
+
+        // Has a length
+        if (end > pos)
+        {
+            // Indent following lines.
+            // The first one was already done prior to calling this routine.
+            if (pos)
+            {
+                for (std::string::size_type i = 0; i < indent; ++i)
+                {
+                    os <<' ';
+                }
+            }
+
+            while (pos < end)
+            {
+                const char c = str[pos];
+
+                if (escape && c == '\\')
+                {
+                    os << '\\';
+                }
+                os << c;
+
+                ++pos;
+            }
+            os << nl;
+        }
+
+        pos = next;
     }
 }
 

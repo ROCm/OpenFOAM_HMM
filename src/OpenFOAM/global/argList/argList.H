@@ -507,6 +507,9 @@ public:
         //- Print usage
         void printUsage(bool full=true) const;
 
+        //- Print usage as nroff-man format (Experimental)
+        void printMan() const;
+
         //- Display documentation in browser
         //  Optionally display the application source code
         void displayDoc(bool source=false) const;

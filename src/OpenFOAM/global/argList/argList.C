@@ -436,9 +436,7 @@ void Foam::argList::printOptionUsage
     const string& str
 )
 {
-    const auto strLen = str.length();
-
-    if (!strLen)
+    if (str.empty())
     {
         Info<< nl;
         return;
@@ -456,84 +454,7 @@ void Foam::argList::printOptionUsage
         ++start;
     }
 
-    const std::string::size_type textWidth = (usageMax - usageMin);
-
-    // Output with text wrapping
-    for (std::string::size_type pos = 0;  pos < strLen; /*ni*/)
-    {
-        // Potential end point and next point
-        std::string::size_type end  = pos + textWidth - 1;
-        std::string::size_type eol  = str.find('\n', pos);
-        std::string::size_type next = string::npos;
-
-        if (end >= strLen)
-        {
-            // No more wrapping needed
-            end = strLen;
-
-            if (std::string::npos != eol && eol <= end)
-            {
-                end = eol;
-                next = str.find_first_not_of(" \t\n", end); // Next non-space
-            }
-        }
-        else if (std::string::npos != eol && eol <= end)
-        {
-            // Embedded '\n' char
-            end = eol;
-            next = str.find_first_not_of(" \t\n", end);     // Next non-space
-        }
-        else if (isspace(str[end]))
-        {
-            // Ended on a space - can use this directly
-            next = str.find_first_not_of(" \t\n", end);     // Next non-space
-        }
-        else if (isspace(str[end+1]))
-        {
-            // The next one is a space - so we are okay
-            ++end;  // Otherwise the length is wrong
-            next = str.find_first_not_of(" \t\n", end);     // Next non-space
-        }
-        else
-        {
-            // Line break will be mid-word
-            auto prev = str.find_last_of(" \t\n", end);     // Prev word break
-
-            if (std::string::npos != prev && prev > pos)
-            {
-                end = prev;
-                next = prev + 1;  // Continue from here
-            }
-        }
-
-        // The next position to continue from
-        if (std::string::npos == next)
-        {
-            next = end + 1;
-        }
-
-        // Has a length
-        if (end > pos)
-        {
-            // Indent following lines. The first one was already done.
-            if (pos)
-            {
-                for (std::string::size_type i = 0; i < usageMin; ++i)
-                {
-                    Info<<' ';
-                }
-            }
-
-            while (pos < end)
-            {
-                Info<< str[pos];
-                ++pos;
-            }
-            Info<< nl;
-        }
-
-        pos = next;
-    }
+    stringOps::writeWrapped(Info, str, (usageMax-usageMin), usageMin);
 }
 
 
@@ -958,6 +879,11 @@ void Foam::argList::parse
         else if (options_.found("help"))
         {
             printUsage(false);
+            quickExit = true;
+        }
+        else if (options_.found("help-man"))
+        {
+            printMan();
             quickExit = true;
         }
 
@@ -1584,13 +1510,21 @@ bool Foam::argList::unsetOption(const word& optName)
 
 void Foam::argList::printNotes() const
 {
-    // Output notes directly - no automatic text wrapping
+    // Output notes with automatic text wrapping
     if (!notes.empty())
     {
         Info<< nl;
-        forAllConstIters(notes, iter)
+
+        for (const std::string& note : notes)
         {
-            Info<< iter().c_str() << nl;
+            if (note.empty())
+            {
+                Info<< nl;
+            }
+            else
+            {
+                stringOps::writeWrapped(Info, note, usageMax);
+            }
         }
     }
 }
@@ -1610,10 +1544,10 @@ void Foam::argList::printUsage(bool full) const
         }
 
         label i = 0;
-        forAllConstIters(validArgs, iter)
+        for (const std::string& argName : validArgs)
         {
             if (i++) Info<< ' ';
-            Info<< '<' << iter().c_str() << '>';
+            Info<< '<' << argName.c_str() << '>';
         }
 
         if (!argsMandatory_)
@@ -1675,6 +1609,12 @@ void Foam::argList::printUsage(bool full) const
     {
         Info<< "  -help-compat";
         printOptionUsage(14, "Display compatibility options and exit");
+    }
+
+    if (full)
+    {
+        Info<< "  -help-man";
+        printOptionUsage(11, "Display full help (manpage format) and exit");
     }
 
     Info<< "  -help-full";

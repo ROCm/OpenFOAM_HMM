@@ -2,6 +2,7 @@ global/global.Cver
 /* global/constants/constants.C in global.Cver */
 /* global/constants/dimensionedConstants.C in global.Cver */
 global/argList/argList.C
+global/argList/argListHelp.C
 global/clock/clock.C
 global/profiling/profiling.C
 global/profiling/profilingInformation.C
