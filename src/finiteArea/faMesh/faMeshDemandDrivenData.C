@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           |
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
 -------------------------------------------------------------------------------
@@ -1065,7 +1065,7 @@ void Foam::faMesh::calcPointAreaNormals() const
     // Processor patch points correction
     for (const faPatch& fap : boundary())
     {
-        if (isA<processorFaPatch>(fap))
+        if (Pstream::parRun() && isA<processorFaPatch>(fap))
         {
             const processorFaPatch& procPatch =
                 refCast<const processorFaPatch>(fap);
@@ -1347,7 +1347,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
     {
         const faPatch& fap = boundary()[patchI];
 
-        if (isA<processorFaPatch>(fap))
+        if (Pstream::parRun() && isA<processorFaPatch>(fap))
         {
             const processorFaPatch& procPatch =
                 refCast<const processorFaPatch>(boundary()[patchI]);
@@ -1415,7 +1415,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
 
     for (const faPatch& fap : boundary())
     {
-        if (isA<processorFaPatch>(fap))
+        if (Pstream::parRun() && isA<processorFaPatch>(fap))
         {
             const processorFaPatch& procPatch =
                 refCast<const processorFaPatch>(fap);

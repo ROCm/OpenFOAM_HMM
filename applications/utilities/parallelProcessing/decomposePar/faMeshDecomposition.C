@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           |
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
 -------------------------------------------------------------------------------
@@ -345,7 +345,11 @@ void Foam::faMeshDecomposition::decomposeMesh()
 
             for(int eI=0; eI<size; eI++)
             {
-                edgesHash.insert(patch.edges()[boundary()[patchI][eI]], ++edgeI);
+                edgesHash.insert
+                (
+                    patch.edges()[boundary()[patchI][eI]],
+                    ++edgeI
+                );
             }
         }
 
@@ -900,13 +904,13 @@ void Foam::faMeshDecomposition::decomposeMesh()
                     if (faceToProc_[owner[curEdgesIter()]] == procI)
                     {
                         curProcEdgeAddressing[nEdges] = curEdgesIter();
-//                         curProcEdgeAddressing[nEdges] = curEdgesIter() + 1;
+//                      curProcEdgeAddressing[nEdges] = curEdgesIter() + 1;
                     }
                     else
                     {
                         // turning edge
                         curProcEdgeAddressing[nEdges] = curEdgesIter();
-//                         curProcEdgeAddressing[nEdges] = -(curEdgesIter() + 1);
+//                      curProcEdgeAddressing[nEdges] = -(curEdgesIter() + 1);
                     }
 
                     // increment the size
@@ -952,7 +956,9 @@ void Foam::faMeshDecomposition::decomposeMesh()
 
         forAll(oldPatchSizes, patchI)
         {
-            if (oldPatchSizes[patchI] > 0)
+            //- Do not suppress zero sized patches since make parallel
+            //  actions inside patches near impossible.
+            //if (oldPatchSizes[patchI] > 0)
             {
                 curBoundaryAddressing[nPatches] = patchI;
 
