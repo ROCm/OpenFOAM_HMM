@@ -29,7 +29,6 @@ License
 #include "Ostream.H"
 #include "OSspecific.H"
 
-
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 // file-scope function
@@ -59,8 +58,8 @@ Foam::Ostream& Foam::profilingSysInfo::write
     os.writeEntry("date",       Foam::clock::dateTime());
 
     // compile-time information
-    os.writeEntry("version",    std::string(FOAMversion));
-    os.writeEntry("build",      std::string(FOAMbuild));
+    os.writeEntry("version",    std::string(foamVersion::version));
+    os.writeEntry("build",      std::string(foamVersion::build));
 
     printEnv(os, "arch",         "WM_ARCH");
     printEnv(os, "compilerType", "WM_COMPILER_TYPE");

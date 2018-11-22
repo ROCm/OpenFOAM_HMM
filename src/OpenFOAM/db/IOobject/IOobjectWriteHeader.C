@@ -48,7 +48,7 @@ Foam::Ostream& Foam::IOobject::writeBanner(Ostream& os, bool noHint)
     if (!*paddedVersion)
     {
         // Populate: like strncpy but without trailing '\0'
-        const char *p = Foam::FOAMversion;
+        const char *p = foamVersion::version;
 
         memset(paddedVersion, ' ', 38);
         for (int i = 0; *p && i < 38; ++i)
@@ -130,7 +130,7 @@ bool Foam::IOobject::writeHeader(Ostream& os, const word& type) const
 
     if (os.format() == IOstream::BINARY)
     {
-        os  << "    arch        " << Foam::FOAMbuildArch << ";\n";
+        os  << "    arch        " << foamVersion::buildArch << ";\n";
     }
 
     if (!note().empty())

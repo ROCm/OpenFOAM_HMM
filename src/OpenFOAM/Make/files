@@ -9,6 +9,7 @@ global/profiling/profilingInformation.C
 global/profiling/profilingSysInfo.C
 global/profiling/profilingTrigger.C
 global/etcFiles/etcFiles.C
+global/version/foamVersion.C
 
 fileOps = global/fileOperations
 $(fileOps)/fileOperation/fileOperation.C

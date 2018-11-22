@@ -211,7 +211,7 @@ void Foam::decomposedBlockData::writeHeader
     /*
     if (os.format() == IOstream::BINARY)
     {
-        os  << "    arch        " << Foam::FOAMbuildArch << ";\n";
+        os  << "    arch        " << foamVersion::buildArch << ";\n";
     }
     */
 

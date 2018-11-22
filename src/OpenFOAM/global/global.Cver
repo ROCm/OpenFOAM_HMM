@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,6 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #include "foamVersion.H"
 #include "endian.H"
 #include "label.H"
@@ -39,11 +38,11 @@ Description
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* const Foam::FOAMversion = "VERSION_STRING";
-const char* const Foam::FOAMbuild = "BUILD_STRING";
+const char* const Foam::foamVersion::version = "VERSION_STRING";
+const char* const Foam::foamVersion::build = "BUILD_STRING";
 
 // Information about machine endian, label and scalar sizes
-const std::string Foam::FOAMbuildArch =
+const std::string Foam::foamVersion::buildArch
 (
 #ifdef WM_LITTLE_ENDIAN
     "LSB"

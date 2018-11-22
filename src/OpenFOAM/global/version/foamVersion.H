@@ -21,24 +21,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Global
-    Foam::FOAMversion
+Namespace
+    Foam::foamVersion
 
 Description
-    OpenFOAM version number as a static string.
-
-Global
-    Foam::FOAMbuild
-
-Description
-    OpenFOAM build information as a static string
-
-Global
-    Foam::FOAMbuildArch
-
-Description
-    OpenFOAM build architecture information (endian, label/scalar sizes)
-    as a static string
+    Namespace for OpenFOAM version information
 
 Note
     Compile-time version information is conveyed by the \b OPENFOAM define
@@ -48,6 +35,7 @@ Note
     The OPENFOAM_PLUS define was last used for 1712.
 
 SourceFiles
+    foamVersion.C
     global.Cver
 
 \*---------------------------------------------------------------------------*/
@@ -65,12 +53,40 @@ SourceFiles
 
 namespace Foam
 {
-    extern const char* const FOAMversion;
-    extern const char* const FOAMbuild;
-    extern const std::string FOAMbuildArch;
+    //- Version information
+    namespace foamVersion
+    {
+        //- OpenFOAM version (number or name) as a static c-string.
+        extern const char* const version;
+
+        //- OpenFOAM build information as a static c-string
+        extern const char* const build;
+
+        //- OpenFOAM build architecture information
+        //- (machine endian, label/scalar sizes) as a static std::string
+        extern const std::string buildArch;
+
+        //- Print information about version, build, arch to Info
+        //
+        //  \verbatim
+        //  Using: OpenFOAM-<VERSION> (see www.OpenFOAM.com)
+        //  Build: <BUILD> (OPENFOAM=<API_LEVEL>)
+        //  Arch:  "<ARCH_INFO>"
+        //  \endverbatim
+        //
+        //  \param full includes Arch information
+        void printBuildInfo(const bool full=true);
+    }
 }
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Compatibility names (1806 and earlier)
+
+#define FOAMversion     foamVersion::version
+#define FOAMbuild       foamVersion::build
+#define FOAMbuildArch   foamVersion::buildArch
 
 #endif
 

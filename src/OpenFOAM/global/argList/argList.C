@@ -181,24 +181,6 @@ static void printHostsSubscription(const UList<string>& slaveProcs)
     Info<< ")" << nl;
 }
 
-
-// Print information about version, build, arch
-static void printBuildInfo(const bool full=true)
-{
-    Info<<"Using: OpenFOAM-" << Foam::FOAMversion
-        << " (see www.OpenFOAM.com)" << nl
-        << "Build: " << Foam::FOAMbuild
-        #if OPENFOAM
-        << " (OPENFOAM=" << OPENFOAM << ')'
-        #endif
-        << nl;
-
-    if (full)
-    {
-        Info << "Arch:  " << Foam::FOAMbuildArch.c_str() << nl;
-    }
-}
-
 } // End namespace Foam
 
 
@@ -776,7 +758,7 @@ Foam::argList::argList
                 ++argi;
                 if (argi >= args_.size())
                 {
-                    printBuildInfo(false);
+                    foamVersion::printBuildInfo(false);
 
                     Info<<nl
                         <<"Error: option '-" << optName
@@ -903,7 +885,7 @@ void Foam::argList::parse
     // Print the collected error messages and exit if check fails
     if (!check(checkArgs, checkOpts))
     {
-        printBuildInfo(false);
+        foamVersion::printBuildInfo(false);
         FatalError.write(Info, false);
 
         Pstream::exit(1); // works for serial and parallel
@@ -918,12 +900,12 @@ void Foam::argList::parse
         if (Pstream::master() && bannerEnabled())
         {
             IOobject::writeBanner(Info, true)
-                << "Build  : " << Foam::FOAMbuild
+                << "Build  : " << foamVersion::build
                 #if OPENFOAM
                 << " (OPENFOAM=" << OPENFOAM << ')'
                 #endif
                 << nl
-                << "Arch   : " << Foam::FOAMbuildArch << nl
+                << "Arch   : " << foamVersion::buildArch << nl
                 << "Exec   : " << commandLine_.c_str() << nl
                 << "Date   : " << dateString.c_str() << nl
                 << "Time   : " << timeString.c_str() << nl
@@ -934,7 +916,7 @@ void Foam::argList::parse
         jobInfo.add("startDate", dateString);
         jobInfo.add("startTime", timeString);
         jobInfo.add("userName", userName());
-        jobInfo.add("foamVersion", word(Foam::FOAMversion));
+        jobInfo.add("foamVersion", word(foamVersion::version));
         jobInfo.add("code", executable_);
         jobInfo.add("argList", commandLine_);
         jobInfo.add("currentDir", cwd());
@@ -943,8 +925,8 @@ void Foam::argList::parse
 
         // Add build information - only use the first word
         {
-            std::string build(Foam::FOAMbuild);
-            std::string::size_type space = build.find(' ');
+            std::string build(foamVersion::build);
+            const auto space = build.find(' ');
             if (space != std::string::npos)
             {
                 build.resize(space);
@@ -1004,10 +986,10 @@ void Foam::argList::parse
                 proci++;
 
                 // Verify that all processors are running the same build
-                if (slaveBuild != Foam::FOAMbuild)
+                if (slaveBuild != foamVersion::build)
                 {
                     FatalErrorIn(executable())
-                        << "Master is running version " << Foam::FOAMbuild
+                        << "Master is running version " << foamVersion::build
                         << "; slave " << proci << " is running version "
                         << slaveBuild
                         << exit(FatalError);
@@ -1021,7 +1003,7 @@ void Foam::argList::parse
                 Pstream::commsTypes::scheduled,
                 Pstream::masterNo()
             );
-            toMaster << string(Foam::FOAMbuild) << hostName() << pid();
+            toMaster << string(foamVersion::build) << hostName() << pid();
         }
     }
 
@@ -1623,7 +1605,7 @@ void Foam::argList::printUsage(bool full) const
     printNotes();
 
     Info<< nl;
-    printBuildInfo();
+    foamVersion::printBuildInfo(true);
     Info<< endl;
 }
 
@@ -1771,7 +1753,12 @@ void Foam::argList::displayDoc(bool source) const
 
     CStringList command(stringOps::splitSpace(docBrowser));
 
-    Info<<"OpenFOAM-" << Foam::FOAMversion << " documentation:" << nl
+    Info
+        << "OpenFOAM"
+        #if OPENFOAM
+        << ' ' << OPENFOAM
+        #endif
+        << " documentation:" << nl
         << "    " << command << nl << endl;
 
     Foam::system(command, true);

@@ -106,12 +106,12 @@ void Foam::ensightSetWriter<Type>::write
 
     // Write .mesh file
     {
-        string desc = string("written by OpenFOAM-") + Foam::FOAMversion;
+        string desc("Written by OpenFOAM-" + string(foamVersion::version));
         OFstream os(meshFile);
         os.setf(ios_base::scientific, ios_base::floatfield);
         os.precision(5);
 
-        os  << "EnSight Geometry File" << nl
+        os  << "Ensight Geometry File" << nl
             << desc.c_str() << nl
             << "node id assign" << nl
             << "element id assign" << nl
@@ -223,11 +223,11 @@ void Foam::ensightSetWriter<Type>::write
 
     // Write .mesh file
     {
-        string desc = string("written by OpenFOAM-") + Foam::FOAMversion;
+        string desc("Written by OpenFOAM-" + string(foamVersion::version));
         OFstream os(meshFile);
         os.setf(ios_base::scientific, ios_base::floatfield);
         os.precision(5);
-        os  << "EnSight Geometry File" << nl
+        os  << "Ensight Geometry File" << nl
             << desc.c_str() << nl
             << "node id assign" << nl
             << "element id assign" << nl;

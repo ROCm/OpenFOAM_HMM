@@ -1,8 +1,8 @@
-/*---------------------------------------------------------------------------*\
+/*-------------------------------*- C++ -*-----------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,27 +21,30 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Application
-    foamVersionString.C
-
-Description
-    Print the OpenFOAM version strings.
-
-    Simultaneously the smallest possible program to use a minimal bit of
-    the OpenFOAM library
-
 \*---------------------------------------------------------------------------*/
 
-#include <iostream>
 #include "foamVersion.H"
+#include "messageStream.H"
 
-int main()
+// Static data members are constructed in global.Cver
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+void Foam::foamVersion::printBuildInfo(const bool full)
 {
-    std::cout
-        << "version " << Foam::FOAMversion << "\n"
-        << "build   " << Foam::FOAMbuild << "\n";
+    Info<<"Using: OpenFOAM-" << foamVersion::version
+        << " (see www.OpenFOAM.com)" << nl
+        << "Build: " << foamVersion::build
+        #if OPENFOAM
+        << " (OPENFOAM=" << OPENFOAM << ')'
+        #endif
+        << nl;
 
-    return 0;
+    if (full)
+    {
+        Info<< "Arch:  " << foamVersion::buildArch.c_str() << nl;
+    }
 }
+
 
 // ************************************************************************* //

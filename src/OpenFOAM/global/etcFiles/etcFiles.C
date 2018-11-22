@@ -102,7 +102,7 @@ Foam::fileNameList searchEtc
     // User resource directories
     if (userResourceDir(dir))
     {
-        candidate = dir/Foam::FOAMversion/name;
+        candidate = dir/foamVersion::version/name;
         if (accept(candidate))
         {
             list.append(std::move(candidate));
@@ -126,7 +126,7 @@ Foam::fileNameList searchEtc
     // Group resource directories
     if (groupResourceDir(dir))
     {
-        candidate = dir/Foam::FOAMversion/name;
+        candidate = dir/foamVersion::version/name;
         if (accept(candidate))
         {
             list.append(std::move(candidate));
