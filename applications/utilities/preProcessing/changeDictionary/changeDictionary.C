@@ -99,6 +99,11 @@ HashTable<wordList> extractPatchGroups(const dictionary& boundaryDict)
 
     for (const entry& dEntry : boundaryDict)
     {
+        if (!dEntry.isDict())
+        {
+            continue;
+        }
+
         const word& patchName = dEntry.keyword();
         const dictionary& patchDict = dEntry.dict();
 
@@ -552,7 +557,10 @@ int main(int argc, char *argv[])
         dictionary fieldDict;
         for (const entry& e : dictList)
         {
-            fieldDict.add(e.keyword(), e.dict());
+            if (e.isDict())
+            {
+                fieldDict.add(e.keyword(), e.dict());
+            }
         }
 
         if (dictList.size())
@@ -584,6 +592,12 @@ int main(int argc, char *argv[])
 
         for (const entry& replaceEntry : replaceDicts)
         {
+            if (!replaceEntry.isDict())
+            {
+                // Could also warn
+                continue;
+            }
+
             const word& fieldName = replaceEntry.keyword();
             const dictionary& replaceDict = replaceEntry.dict();
 
