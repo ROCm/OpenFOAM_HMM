@@ -21,12 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    Foam
-
-Description
-    Namespace for OpenFOAM
-
 Global
     Foam::FOAMversion
 
@@ -61,6 +55,7 @@ SourceFiles
 #ifndef foamVersion_H
 #define foamVersion_H
 
+#include "stdFoam.H"
 #include <string>
 
 // The directory name for user-resources (located in the HOME directory)
@@ -73,12 +68,6 @@ namespace Foam
     extern const char* const FOAMversion;
     extern const char* const FOAMbuild;
     extern const std::string FOAMbuildArch;
-
-    //- Implementation details of various OpenFOAM classes
-    namespace Detail {}
-
-    //- Additional OpenFOAM modules
-    namespace Module {}
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
