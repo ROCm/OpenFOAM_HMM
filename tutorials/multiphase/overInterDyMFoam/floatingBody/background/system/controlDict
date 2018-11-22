@@ -16,13 +16,6 @@ FoamFile
 
 libs            ("liboverset.so");
 
-DebugSwitches
-{
-    overset                 0;
-    dynamicOversetFvMesh    0;
-    cellVolumeWeight        1;
-}
-
 application     overInterDyMFoam ;
 
 startFrom       latestTime;
