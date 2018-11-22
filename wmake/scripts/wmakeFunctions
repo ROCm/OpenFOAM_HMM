@@ -30,7 +30,7 @@ checkEnv()
     for check in WM_PROJECT_DIR WM_OPTIONS WM_DIR
     do
         eval test "\$$check" || {
-            echo "$Script error: environment variable \$$check not set" 1>&2
+            echo "$Script error: Environment variable \$$check not set" 1>&2
             exit 1
         }
     done

@@ -30,8 +30,8 @@ echo "  ${WM_OPTIONS}, with ${WM_MPLIB} ${FOAM_MPI}"
 echo "========================================"
 echo
 
-# Compile wmake tools
-(cd "${WM_DIR:-wmake}/src" && make)
+# Compile tools for wmake
+"${WM_DIR:?}"/src/Allmake
 
 # Compile ThirdParty libraries and applications
 if [ -d "$WM_THIRD_PARTY_DIR" ]

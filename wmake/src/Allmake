@@ -1,0 +1,9 @@
+#!/bin/sh
+cd "${0%/*}" || exit 1                      # Run from this directory
+[ -d "${WM_DIR:?}" ] || exit 1              # Require WM_DIR
+
+# Compile tools for wmake
+
+make
+
+#------------------------------------------------------------------------------
