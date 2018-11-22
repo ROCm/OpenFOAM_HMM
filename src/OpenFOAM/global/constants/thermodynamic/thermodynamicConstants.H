@@ -43,13 +43,13 @@ namespace thermodynamic
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    //- Universal gas constant (default in [J/(kmol K)])
+    //- Universal gas constant: default in [J/(kmol K)]
     extern const scalar RR;
 
-    //- Standard pressure (default in [Pa])
+    //- Standard pressure: default in [Pa]
     extern const scalar Pstd;
 
-    //- Standard temperature (default in [K])
+    //- Standard temperature: default in [K]
     extern const scalar Tstd;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
