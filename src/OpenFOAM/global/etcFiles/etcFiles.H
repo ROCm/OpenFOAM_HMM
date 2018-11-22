@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,54 +45,53 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Search for directories from user/group/other directories.
-//
-// \note Uses search hierarchy as per findEtcFiles().
+//  Uses search hierarchy as per findEtcFiles().
 //
 //  \return The list of full paths of all the matching directories or
-//  an empty list if the name cannot be found.
-//  Optionally stop search after the first directory has been found.
+//      an empty list if the name cannot be found.
 fileNameList findEtcDirs
 (
-    const fileName& name = fileName::null,
-    const bool findFirst = false
+    const fileName& name=fileName::null, //!< the file to search for
+    const bool findFirst=false  //!< stop when the first file has been found
 );
 
 
 //- Search for files from user/group/other directories.
 //
-//  \note
-//  The following search hierarchy is also used by the foamEtcFile shell
-//  script, which allows for version-specific and version-independent files:
-//  - \b user settings:
-//    - ~/.OpenFOAM/\<VERSION\>
+//  The search hierarchy corresponds to that of the foamEtcFile script,
+//  which allows for version-specific and version-independent files:
+//  -# \b user settings
+//    - ~/.OpenFOAM/$WM_PROJECT_VERSION
 //    - ~/.OpenFOAM/
-//  - \b group settings (when $WM_PROJECT_SITE is set):
-//    - $WM_PROJECT_SITE/\<VERSION\>
-//    - $WM_PROJECT_SITE
-//  - \b group settings (when $WM_PROJECT_SITE is not set):
-//    - $WM_PROJECT_INST_DIR/site/\<VERSION\>
-//    - $WM_PROJECT_INST_DIR/site/
-//  - \b other (shipped) settings:
+//  -# \b group settings
+//    - $WM_PROJECT_SITE/$WM_PROJECT_VERSION
+//    - $WM_PROJECT_SITE/
+//  -# \b other (shipped) settings
 //    - $WM_PROJECT_DIR/etc/
 //
+//  \note Treatment of empty or undefined variables
+//  - \b \$WM_PROJECT_VERSION : Use compile-time value of OPENFOAM
+//  - \b \$WM_PROJECT_SITE : Use $WM_PROJECT_INST_DIR/site
+//
 //  \return The list of full paths of all the matching files or
-//  an empty list if the name cannot be found.
-//  Optionally abort if the file cannot be found.
-//  Optionally stop search after the first file has been found.
+//      an empty list if the name cannot be found.
 fileNameList findEtcFiles
 (
-    const fileName& name,
-    const bool mandatory = false,
-    const bool findFirst = false
+    const fileName& name,       //!< the file to search for
+    const bool mandatory=false, //!< abort if the file cannot be found
+    const bool findFirst=false  //!< stop when the first file has been found
 );
 
 
 //- Search for a single file using findEtcFiles().
 //
 //  \return The full path name of the first file found in the
-//  search hierarchy or an empty fileName if the name cannot be found.
-//  Optionally abort if the file cannot be found but is mandatory.
-fileName findEtcFile(const fileName& name, const bool mandatory=false);
+//      search hierarchy or an empty fileName if the name cannot be found.
+fileName findEtcFile
+(
+    const fileName& name,       //!< the file to search for
+    const bool mandatory=false  //!< abort if the file cannot be found
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

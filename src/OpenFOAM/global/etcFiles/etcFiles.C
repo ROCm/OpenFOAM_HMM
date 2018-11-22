@@ -24,8 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "etcFiles.H"
-#include "OSspecific.H"
 #include "foamVersion.H"
+#include "macros.H"
+#include "OSspecific.H"
 
 // * * * * * * * * * * * * * * Static Functions  * * * * * * * * * * * * * * //
 
@@ -64,7 +65,8 @@ static inline bool groupResourceDir(Foam::fileName& queried)
         return Foam::isDir(queried);
     }
 
-    // When WM_PROJECT_SITE is unset:
+    // Fallback when WM_PROJECT_SITE is unset
+
     queried = Foam::getEnv("WM_PROJECT_INST_DIR")/"site";
     return (queried.size() > 4 && Foam::isDir(queried));
 
@@ -96,13 +98,26 @@ Foam::fileNameList searchEtc
     bool (*accept)(const Foam::fileName&)
 )
 {
+    Foam::fileName version(Foam::getEnv("WM_PROJECT_VERSION"));
+
+    // Fallback when WM_PROJECT_VERSION is unset
+    if (version.empty())
+    {
+        #if OPENFOAM
+        version = STRING_QUOTE(OPENFOAM);
+        #else
+        version = foamVersion::version;
+        #endif
+    }
+
     Foam::fileNameList list;
     Foam::fileName dir, candidate;
+
 
     // User resource directories
     if (userResourceDir(dir))
     {
-        candidate = dir/foamVersion::version/name;
+        candidate = dir/version/name;
         if (accept(candidate))
         {
             list.append(std::move(candidate));
@@ -126,7 +141,7 @@ Foam::fileNameList searchEtc
     // Group resource directories
     if (groupResourceDir(dir))
     {
-        candidate = dir/foamVersion::version/name;
+        candidate = dir/version/name;
         if (accept(candidate))
         {
             list.append(std::move(candidate));
@@ -177,7 +192,7 @@ Foam::fileNameList Foam::findEtcDirs
         (
             name,
             findFirst,
-            [](const fileName& f){ return isDir(f); }
+            [](const fileName& f){ return Foam::isDir(f); }
         );
 }
 
@@ -198,7 +213,7 @@ Foam::fileNameList Foam::findEtcFiles
         (
             name,
             findFirst,
-            [](const fileName& f){ return isFile(f); }
+            [](const fileName& f){ return Foam::isFile(f); }
         );
     }
 
