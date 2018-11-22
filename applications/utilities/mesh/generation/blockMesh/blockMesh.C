@@ -150,6 +150,31 @@ int main(int argc, char *argv[])
     }
 
 
+    // Instance for resulting mesh
+    bool useTime = false;
+    word meshInstance(runTime.constant());
+
+    if
+    (
+        args.readIfPresent("time", meshInstance)
+     && runTime.constant() != meshInstance
+    )
+    {
+        // Verify that the value is actually good
+        scalar timeValue;
+
+        useTime = readScalar(meshInstance, timeValue);
+        if (!useTime)
+        {
+            FatalErrorInFunction
+                << "Bad input value: " << meshInstance
+                << "Should be a scalar or 'constant'"
+                << nl << endl
+                << exit(FatalError);
+        }
+    }
+
+
     // Locate appropriate blockMeshDict
     #include "findBlockMeshDict.H"
 
@@ -203,13 +228,13 @@ int main(int argc, char *argv[])
 
 
     // Instance for resulting mesh
-    word meshInstance(runTime.constant());
-    if (args.readIfPresent("time", meshInstance))
+    if (useTime)
     {
         Info<< "Writing polyMesh to " << meshInstance << nl << endl;
+
         // Make sure that the time is seen to be the current time. This
         // is the logic inside regIOobject which resets the instance to the
-        // current time before writting
+        // current time before writing
         runTime.setTime(instant(meshInstance), 0);
     }
 
