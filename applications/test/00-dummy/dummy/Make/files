@@ -1,0 +1,3 @@
+dummyLib.C
+
+LIB = $(FOAM_LIBBIN)/libOpenFOAM-dummy
