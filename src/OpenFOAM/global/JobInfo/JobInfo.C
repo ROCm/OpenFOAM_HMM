@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,10 +30,21 @@ License
 #include "Pstream.H"
 #include "foamVersion.H"
 
+// Fallback for job-control directory is in the user-directory
+// ~/.OpenFOAM/jobControl
+
+#ifndef FOAM_RESOURCE_USER_CONFIG_DIRNAME
+#define FOAM_RESOURCE_USER_CONFIG_DIRNAME ".OpenFOAM"
+#elif defined FULLDEBUG
+    #warning FOAM_RESOURCE_USER_CONFIG_DIRNAME \
+    is undefined (was this intentional?)
+#endif
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 bool Foam::JobInfo::writeJobInfo(Foam::debug::infoSwitch("writeJobInfo", 0));
 Foam::JobInfo Foam::jobInfo;
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -51,10 +62,8 @@ bool Foam::JobInfo::write(Ostream& os) const
             return false;
         }
     }
-    else
-    {
-        return true;
-    }
+
+    return true;
 }
 
 
@@ -92,11 +101,10 @@ Foam::JobInfo::JobInfo()
 
     if (writeJobInfo && Pstream::master())
     {
-        string jobDir = getEnv("FOAM_JOB_DIR");
+        string jobDir = Foam::getEnv("FOAM_JOB_DIR");
         if (jobDir.empty())
         {
-            // Fallback: ~/.OpenFOAM/jobControl
-            jobDir = home()/WM_USER_RESOURCE_DIRNAME/"jobControl";
+            jobDir = home()/FOAM_RESOURCE_USER_CONFIG_DIRNAME/"jobControl";
         }
 
         jobFileName_ = hostName() + '.' + Foam::name(pid());
@@ -106,19 +114,19 @@ Foam::JobInfo::JobInfo()
         if (!isDir(jobDir) && !mkDir(jobDir))
         {
             FatalErrorInFunction
-                << "No JobInfo directory:  FOAM_JOB_DIR=" << jobDir
+                << "No JobInfo directory: " << jobDir
                 << Foam::exit(FatalError);
         }
         if (!isDir(runningDir_) && !mkDir(runningDir_))
         {
             FatalErrorInFunction
-                << "No JobInfo directory:  " << runningDir_
+                << "No JobInfo directory: " << runningDir_
                 << Foam::exit(FatalError);
         }
         if (!isDir(finishedDir_) && !mkDir(finishedDir_))
         {
             FatalErrorInFunction
-                << "No JobInfo directory:  " << finishedDir_
+                << "No JobInfo directory: " << finishedDir_
                 << Foam::exit(FatalError);
         }
     }

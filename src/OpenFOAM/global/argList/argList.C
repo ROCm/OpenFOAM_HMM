@@ -900,7 +900,7 @@ void Foam::argList::parse
         if (Pstream::master() && bannerEnabled())
         {
             IOobject::writeBanner(Info, true)
-                << "Build  : " << foamVersion::build
+                << "Build  : " << foamVersion::build.c_str()
                 #if OPENFOAM
                 << " (OPENFOAM=" << OPENFOAM << ')'
                 #endif
@@ -1003,7 +1003,7 @@ void Foam::argList::parse
                 Pstream::commsTypes::scheduled,
                 Pstream::masterNo()
             );
-            toMaster << string(foamVersion::build) << hostName() << pid();
+            toMaster << foamVersion::build << hostName() << pid();
         }
     }
 

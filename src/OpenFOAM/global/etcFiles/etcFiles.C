@@ -25,7 +25,6 @@ License
 
 #include "etcFiles.H"
 #include "foamVersion.H"
-#include "macros.H"
 #include "OSspecific.H"
 
 // * * * * * * * * * * * * * * Static Functions  * * * * * * * * * * * * * * //
@@ -45,8 +44,21 @@ namespace
 //   - ~/.OpenFOAM
 static inline bool userResourceDir(Foam::fileName& queried)
 {
-    queried = Foam::home()/WM_USER_RESOURCE_DIRNAME;
-    return Foam::isDir(queried);
+    #ifdef FOAM_RESOURCE_USER_CONFIG_DIRNAME
+    queried = Foam::home()/FOAM_RESOURCE_USER_CONFIG_DIRNAME;
+    if (Foam::isDir(queried))
+    {
+        // If home() fails, it will have actually queried "./.OpenFOAM"
+        // instead.
+        // But we would have worse problems elsewhere if that were the case.
+        return true;
+    }
+    #elif defined FULLDEBUG
+        #warning FOAM_RESOURCE_USER_CONFIG_DIRNAME \
+        is undefined (was this intentional?)
+    #endif
+
+    return false;
 }
 
 
@@ -59,22 +71,31 @@ static inline bool userResourceDir(Foam::fileName& queried)
 //   - $WM_PROJECT_INST_DIR/site
 static inline bool groupResourceDir(Foam::fileName& queried)
 {
-    queried = Foam::getEnv("WM_PROJECT_SITE");
+    #ifdef FOAM_RESOURCE_SITE_ENVNAME
+    queried = Foam::getEnv(FOAM_RESOURCE_SITE_ENVNAME);
     if (queried.size())
     {
         return Foam::isDir(queried);
     }
+    #elif defined FULLDEBUG
+        #warning FOAM_RESOURCE_SITE_ENVNAME \
+        is undefined (was this intentional?)
+    #endif
 
     // Fallback when WM_PROJECT_SITE is unset
 
-    queried = Foam::getEnv("WM_PROJECT_INST_DIR")/"site";
-    return (queried.size() > 4 && Foam::isDir(queried));
+    #ifdef FOAM_RESOURCE_SITE_FALLBACK_ENVNAME
+    queried = Foam::getEnv(FOAM_RESOURCE_SITE_FALLBACK_ENVNAME)/"site";
+    if (queried.size() > 4)
+    {
+        return Foam::isDir(queried);
+    }
+    #elif defined FULLDEBUG
+        #warning FOAM_RESOURCE_SITE_FALLBACK_ENVNAME \
+        is undefined (was this intentional?)
+    #endif
 
-    // NOTE: this alternative bit of code corresponds to how we patch things
-    // for spack (and EasyBuild?) to avoid leaking out to the parent directory
-    //
-    // queried = Foam::getEnv("WM_PROJECT_DIR")/"site";
-    // return (queried.size() > 4 && Foam::isDir(queried));
+    return false;
 }
 
 
@@ -104,11 +125,12 @@ Foam::fileNameList searchEtc
     if (version.empty())
     {
         #if OPENFOAM
-        version = STRING_QUOTE(OPENFOAM);
+        version.assign(std::to_string(OPENFOAM));
         #else
-        version = foamVersion::version;
+        version.assign(foamVersion::version);
         #endif
     }
+
 
     Foam::fileNameList list;
     Foam::fileName dir, candidate;
@@ -180,7 +202,6 @@ Foam::fileNameList searchEtc
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
 Foam::fileNameList Foam::findEtcDirs
 (
     const fileName& name,
@@ -233,15 +254,14 @@ Foam::fileNameList Foam::findEtcFiles
 
 Foam::fileName Foam::findEtcFile(const fileName& name, const bool mandatory)
 {
-    fileName file;
-
     fileNameList list(findEtcFiles(name, mandatory, true));
+
     if (list.size())
     {
-        file = std::move(list.first());
+        return list.first();
     }
 
-    return file;
+    return fileName();
 }
 
 

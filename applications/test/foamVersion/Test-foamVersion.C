@@ -29,34 +29,48 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include <iostream>
+#include <typeinfo>
 #include "foamVersion.H"
+#include "IOstreams.H"
 
 using namespace Foam;
 
 int main()
 {
-    std::cout
-        << "\nVersion information (macros)\n"
-        << "version   " << Foam::FOAMversion << '\n'
-        << "build     " << Foam::FOAMbuild << '\n'
-        << "buildArch " << Foam::FOAMbuildArch << '\n';
+    Info
+        << "\nVersion information (function)" << nl;
+    foamVersion::printBuildInfo();
 
-    std::cout
-        << "\nVersion information (namespace)\n"
-        << "version   " << foamVersion::version << '\n'
-        << "build     " << foamVersion::build << '\n'
-        << "buildArch " << foamVersion::buildArch << '\n';
+    Info
+        << "\nVersion information (macros)" << nl
+        << "version   " << Foam::FOAMversion << nl
+        << "build     " << Foam::FOAMbuild << nl
+        << "buildArch " << Foam::FOAMbuildArch << nl;
 
-    std::cout
-        << "\nVerify memory addesses are identical:\n"
-        << "macro     " << long(&(Foam::FOAMversion)) << '\n'
-        << "namespace " << long(&(foamVersion::version)) << '\n';
+    Info
+        << "\nVersion information (namespace)" << nl
+        << "api       " << foamVersion::api << nl
+        << "version   " << foamVersion::version << nl
+        << "build     " << foamVersion::build << nl
+        << "buildArch " << foamVersion::buildArch << nl;
+    Info
+        << "\nTypes" << nl
+        << "version   " << typeid(foamVersion::version).name() << nl
+        << "build     " << typeid(foamVersion::build).name() << nl
+        << "buildArch " << typeid(foamVersion::buildArch).name() << nl
+        << "FOAMversion " << typeid(Foam::FOAMversion).name() << nl
+        << "FOAMbuild   " << typeid(Foam::FOAMbuild).name() << nl;
 
-    std::cout
-        << "\nEnd\n";
+    Info
+        << "\nVerify memory addesses are identical:" << nl
+        << "macro     " << long(Foam::FOAMversion) << nl
+        << "namespace " << long(&(foamVersion::version[0])) << nl;
+
+    Info
+        << "\nEnd\n" << endl;
 
     return 0;
 }
+
 
 // ************************************************************************* //

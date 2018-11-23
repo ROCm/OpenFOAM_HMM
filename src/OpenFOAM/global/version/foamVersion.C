@@ -32,9 +32,12 @@ License
 
 void Foam::foamVersion::printBuildInfo(const bool full)
 {
-    Info<<"Using: OpenFOAM-" << foamVersion::version
+    // Can use #if OPENFOAM directly
+
+    Info<<"Using: OpenFOAM-" << foamVersion::version.c_str()
         << " (see www.OpenFOAM.com)" << nl
-        << "Build: " << foamVersion::build
+        << "Build: " << foamVersion::build.c_str()
+        // The same as using foamVersion::api
         #if OPENFOAM
         << " (OPENFOAM=" << OPENFOAM << ')'
         #endif

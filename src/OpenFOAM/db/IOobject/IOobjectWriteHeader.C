@@ -48,13 +48,15 @@ Foam::Ostream& Foam::IOobject::writeBanner(Ostream& os, bool noHint)
     if (!*paddedVersion)
     {
         // Populate: like strncpy but without trailing '\0'
-        const char *p = foamVersion::version;
 
-        memset(paddedVersion, ' ', 38);
-        for (int i = 0; *p && i < 38; ++i)
+        std::size_t len = foamVersion::version.length();
+        if (len > 38)
         {
-            paddedVersion[i] = *p++;
+            len = 38;
         }
+
+        std::memset(paddedVersion, ' ', 38);
+        std::memcpy(paddedVersion, foamVersion::version.c_str(), len);
         paddedVersion[38] = '\0';
     }
 

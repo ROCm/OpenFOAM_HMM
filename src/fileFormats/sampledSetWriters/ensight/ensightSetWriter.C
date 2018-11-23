@@ -28,7 +28,6 @@ License
 #include "OFstream.H"
 #include "addToRunTimeSelectionTable.H"
 #include "IOmanip.H"
-#include "foamVersion.H"
 #include "ensightPTraits.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -106,7 +105,7 @@ void Foam::ensightSetWriter<Type>::write
 
     // Write .mesh file
     {
-        string desc("Written by OpenFOAM-" + string(foamVersion::version));
+        string desc("Written by OpenFOAM");
         OFstream os(meshFile);
         os.setf(ios_base::scientific, ios_base::floatfield);
         os.precision(5);
@@ -223,7 +222,7 @@ void Foam::ensightSetWriter<Type>::write
 
     // Write .mesh file
     {
-        string desc("Written by OpenFOAM-" + string(foamVersion::version));
+        string desc("Written by OpenFOAM");
         OFstream os(meshFile);
         os.setf(ios_base::scientific, ios_base::floatfield);
         os.precision(5);

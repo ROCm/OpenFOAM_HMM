@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ensightGeoFile.H"
-#include "foamVersion.H"
 #include "macros.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -39,9 +38,9 @@ void Foam::ensightGeoFile::initialize()
 
     // Description line 2
     #if OPENFOAM
-    write("Written by OpenFOAM-" STRING_QUOTE(OPENFOAM));
+    write("Written by OpenFOAM " STRING_QUOTE(OPENFOAM));
     #else
-    write(string("Written by OpenFOAM-" + string(foamVersion::version)));
+    write("Written by OpenFOAM");
     #endif
     newline();
 

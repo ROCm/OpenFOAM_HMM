@@ -455,7 +455,7 @@ Foam::string Foam::stringOps::getVariable
     }
     else if (allowEnvVars)
     {
-        value = getEnv(name);
+        value = Foam::getEnv(name);
 
         if (value.empty() && !name.empty())
         {
@@ -468,7 +468,7 @@ Foam::string Foam::stringOps::getVariable
 
             if (altType)
             {
-                value = getEnv
+                value = Foam::getEnv
                 (
                     // var-name
                     word(name.substr(0, altPos), false)
@@ -872,7 +872,7 @@ void Foam::stringOps::inplaceExpand
                     );
                 }
 
-                const string varValue = getEnv(varName);
+                const string varValue = Foam::getEnv(varName);
                 if (varValue.size())
                 {
                     if (altPos != std::string::npos && altType == '+')
@@ -948,7 +948,7 @@ bool Foam::stringOps::inplaceReplaceVar(std::string& s, const word& varName)
         return false;
     }
 
-    const string content(getEnv(varName));
+    const string content(Foam::getEnv(varName));
     if (content.empty())
     {
         return false;

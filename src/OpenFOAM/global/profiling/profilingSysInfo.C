@@ -29,9 +29,12 @@ License
 #include "Ostream.H"
 #include "OSspecific.H"
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-// file-scope function
+namespace
+{
+
+// Write environment entry
 inline static void printEnv
 (
     Foam::Ostream& os,
@@ -46,6 +49,8 @@ inline static void printEnv
     }
 }
 
+} // End anonymous namespace
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -58,8 +63,8 @@ Foam::Ostream& Foam::profilingSysInfo::write
     os.writeEntry("date",       Foam::clock::dateTime());
 
     // compile-time information
-    os.writeEntry("version",    std::string(foamVersion::version));
-    os.writeEntry("build",      std::string(foamVersion::build));
+    os.writeEntry("version",    foamVersion::version);
+    os.writeEntry("build",      foamVersion::build);
 
     printEnv(os, "arch",         "WM_ARCH");
     printEnv(os, "compilerType", "WM_COMPILER_TYPE");
