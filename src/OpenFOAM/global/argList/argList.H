@@ -155,13 +155,6 @@ class argList
         //- Helper for resolving ignored options
         static int optionIgnore(const word& optName);
 
-        //- Helper function for printUsage
-        static void printOptionUsage
-        (
-            std::string::size_type start,
-            const string& str
-        );
-
         //- Check after reading if the input token stream has unconsumed
         //- tokens remaining or if there were no tokens in the first place.
         //  Emits Warning

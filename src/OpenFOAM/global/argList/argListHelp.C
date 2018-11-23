@@ -24,7 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "foamVersion.H"
 #include "stringOps.H"
+#include "IOmanip.H"
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
@@ -42,15 +44,16 @@ static inline void printManFooter()
 }
 
 
+// Regular option
 static void printManOption(const word& optName)
 {
-    Info<< ".TP" << nl << ".B \\-" << optName;
+    Info<< ".TP\n\\fB\\-" << optName << "\\fR";
 
     // Option has arg?
     const auto optIter = argList::validOptions.cfind(optName);
     if (optIter().size())
     {
-        Info<< " <" << optIter().c_str() << '>';
+        Info<< " \\fI" << optIter().c_str() << "\\fR";
     }
     Info<< nl;
 
@@ -65,6 +68,56 @@ static void printManOption(const word& optName)
     {
         Info<< nl;
     }
+}
+
+
+// Simple, hard-coded option
+static inline void printManOption(const char* optName, const char* optUsage)
+{
+    Info<< ".TP\n\\fB\\-" << optName << "\\fR" << nl
+        << optUsage << nl;
+}
+
+
+static void printOptionUsage
+(
+    std::string::size_type start,
+    const string& str
+)
+{
+    if (str.empty())
+    {
+        Info<< nl;
+        return;
+    }
+
+    // Indent the first line. Min 2 spaces between option and usage
+    if (start + 2 > argList::usageMin)
+    {
+        Info<< nl;
+        start = 0;
+    }
+    while (start < argList::usageMin)
+    {
+        Info<<' ';
+        ++start;
+    }
+
+    stringOps::writeWrapped
+    (
+        Info,
+        str,
+        (argList::usageMax - argList::usageMin),
+        argList::usageMin
+    );
+}
+
+
+// Simple, hard-coded option
+static inline void printOption(const char* optName, const char* optUsage)
+{
+    Info<< "  -" << optName;
+    printOptionUsage(3 + strlen(optName), optUsage);
 }
 
 } // End namespace Foam
@@ -94,7 +147,7 @@ void Foam::argList::printMan() const
     Info
         << ".SH \"NAME\"" << nl
         << executable_
-        << " \\- part of OpenFOAM (The Open Source CFD Toolbox)."
+        << " \\- part of \\fBOpenFOAM\\fR (The Open Source CFD Toolbox)."
         << nl;
 
 
@@ -103,7 +156,7 @@ void Foam::argList::printMan() const
 
     Info
         << ".SH \"SYNOPSIS\"" << nl
-        << ".B " << executable_ << " [OPTIONS]";
+        << "\\fB" << executable_ << "\\fR [\\fIOPTIONS\\fR]";
 
     if (validArgs.size())
     {
@@ -118,7 +171,7 @@ void Foam::argList::printMan() const
         for (const std::string& argName : validArgs)
         {
             if (i++) Info<< ' ';
-            Info << '<' << argName.c_str() << '>';
+            Info << "\\fI" << argName.c_str() << "\\fR";
         }
 
         if (!argsMandatory_)
@@ -138,7 +191,7 @@ void Foam::argList::printMan() const
 
         if (notes.empty())
         {
-            Info<<"No description available\n";
+            Info<< "No description available\n";
         }
         else
         {
@@ -174,17 +227,10 @@ void Foam::argList::printMan() const
 
     // Standard documentation/help options
 
-    Info<< ".TP" << nl << ".B \\-" << "doc" << nl
-        <<"Display documentation in browser" << nl;
-
-    Info<< ".TP" << nl << ".B \\-" << "doc-source" << nl
-        << "Display source code in browser" << nl;
-
-    Info<< ".TP" << nl << ".B \\-" << "help" << nl
-        << "Display short help and exit" << nl;
-
-    Info<< ".TP" << nl << ".B \\-" << "help-full" << nl
-        << "Display full help and exit" << nl;
+    printManOption("doc", "Display documentation in browser");
+    printManOption("doc-source", "Display source code in browser");
+    printManOption("help", "Display short help and exit");
+    printManOption("help-full", "Display full help and exit");
 
 
     // .SH "ADVANCED OPTIONS"
@@ -207,15 +253,203 @@ void Foam::argList::printMan() const
       + argList::ignoreOptionsCompat.size()
     )
     {
-        Info<< ".TP" << nl << ".B \\-" << "help-compat" << nl
-            << "Display compatibility options and exit" << nl;
+        printManOption("help-compat", "Display compatibility options and exit");
     }
 
-    Info<< ".TP" << nl << ".B \\-" << "help-man" << nl
-        << "Display full help (manpage format) and exit" << nl;
+    printManOption("help-man", "Display full help (manpage format) and exit");
 
     // Footer
     printManFooter();
+}
+
+
+void Foam::argList::printUsage(bool full) const
+{
+    Info<< "\nUsage: " << executable_ << " [OPTIONS]";
+
+    if (validArgs.size())
+    {
+        Info<< ' ';
+
+        if (!argsMandatory_)
+        {
+            Info<< '[';
+        }
+
+        label i = 0;
+        for (const std::string& argName : validArgs)
+        {
+            if (i++) Info<< ' ';
+            Info<< '<' << argName.c_str() << '>';
+        }
+
+        if (!argsMandatory_)
+        {
+            Info<< ']';
+        }
+    }
+
+    Info<< "\noptions:\n";
+
+    for (const word& optName : validOptions.sortedToc())
+    {
+        // Suppress advanced options for regular -help.
+        if (advancedOptions.found(optName) && !full)
+        {
+            continue;
+        }
+
+        Info<< "  -" << optName;
+
+        // Length includes leading '  -'
+        label len = optName.size() + 3;
+
+        const auto optIter = validOptions.cfind(optName);
+        if (optIter().size())
+        {
+            // Length includes space between option/param and '<>'
+            len += optIter().size() + 3;
+            Info<< " <" << optIter().c_str() << '>';
+        }
+
+        const auto usageIter = optionUsage.cfind(optName);
+        if (usageIter.found())
+        {
+            printOptionUsage(len, usageIter());
+        }
+        else
+        {
+            Info<< nl;
+        }
+    }
+
+
+    // Place documentation/help options at the end
+
+    printOption("doc", "Display documentation in browser");
+    printOption("doc-source", "Display source code in browser");
+    printOption("help", "Display short help and exit");
+
+    if
+    (
+        argList::validOptionsCompat.size()
+      + argList::ignoreOptionsCompat.size()
+    )
+    {
+        printOption("help-compat", "Display compatibility options and exit");
+    }
+
+    if (full)
+    {
+        printOption("help-man", "Display full help (manpage format) and exit");
+    }
+
+    printOption("help-full", "Display full help and exit");
+
+    printNotes();
+
+    Info<< nl;
+    foamVersion::printBuildInfo(true);
+    Info<< endl;
+}
+
+
+void Foam::argList::printNotes() const
+{
+    // Output notes with automatic text wrapping
+    if (!notes.empty())
+    {
+        Info<< nl;
+
+        for (const std::string& note : notes)
+        {
+            if (note.empty())
+            {
+                Info<< nl;
+            }
+            else
+            {
+                stringOps::writeWrapped(Info, note, usageMax);
+            }
+        }
+    }
+}
+
+
+void Foam::argList::printCompat() const
+{
+    const label nopt
+    (
+        argList::validOptionsCompat.size()
+      + argList::ignoreOptionsCompat.size()
+    );
+
+    Info<< nopt << " compatibility options for " << executable_ << nl;
+    if (nopt)
+    {
+        Info<< setf(ios_base::left) << setw(34) << "old option"
+            << setf(ios_base::left) << setw(32) << "new option"
+            << "version" << nl
+            << setf(ios_base::left) << setw(34) << "=========="
+            << setf(ios_base::left) << setw(32) << "=========="
+            << "=======" << nl;
+
+        for (const word& k : argList::validOptionsCompat.sortedToc())
+        {
+            const auto& iter = *argList::validOptionsCompat.cfind(k);
+
+            Info<< "  -"
+                << setf(ios_base::left) << setw(32) << k
+                << " -"
+                << setf(ios_base::left) << setw(30) << iter.first << ' ';
+
+            if (iter.second > 0)
+            {
+                Info<< (iter.second);
+            }
+            else if (iter.second < 0)
+            {
+                Info<< (-iter.second);
+            }
+            else
+            {
+                Info<< '-';
+            }
+            Info<< nl;
+        }
+
+        for (const word& k : argList::ignoreOptionsCompat.sortedToc())
+        {
+            const auto& iter = *argList::ignoreOptionsCompat.cfind(k);
+
+            if (iter.first)
+            {
+                Info<< "  -"
+                    << setf(ios_base::left) << setw(32)
+                    << (k + " <arg>").c_str();
+            }
+            else
+            {
+                Info<< "  -"
+                    << setf(ios_base::left) << setw(32) << k;
+            }
+
+            Info<< setf(ios_base::left) << setw(32) << " removed" << ' ';
+            if (iter.second > 0)
+            {
+                Info<< (iter.second);
+            }
+            else if (iter.second < 0)
+            {
+                Info<< (-iter.second);
+            }
+            else
+            {
+                Info<< '-';
+            }
+            Info<< nl;
+        }
+    }
 }
 
 
