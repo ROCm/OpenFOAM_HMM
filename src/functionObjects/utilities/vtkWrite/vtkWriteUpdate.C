@@ -157,8 +157,8 @@ bool Foam::functionObjects::vtkWrite::update()
     if
     (
         meshState_ == polyMesh::UNCHANGED
-     && !meshSubsets_.empty()
-     && !vtuMappings_.empty()
+     && (meshes_.size() == meshSubsets_.size())
+     && (meshes_.size() == vtuMappings_.size())
     )
     {
         return false;
@@ -174,7 +174,7 @@ bool Foam::functionObjects::vtkWrite::update()
 
         if (meshSubsets_.set(regioni))
         {
-            meshSubsets_.clear();
+            meshSubsets_[regioni].clear();
         }
         else
         {
@@ -200,9 +200,12 @@ bool Foam::functionObjects::vtkWrite::update()
         ++regioni;
     }
 
+    regioni = 0;
     for (auto& subsetter : meshSubsets_)
     {
         updateSubset(subsetter);
+        vtuMappings_[regioni].reset(subsetter.mesh());
+        ++regioni;
     }
 
     meshState_ = polyMesh::UNCHANGED;

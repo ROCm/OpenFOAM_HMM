@@ -56,7 +56,7 @@ Description
             dome
             {
                 action  add;
-                shape   sphere;
+                source  sphere;
                 origin  (-0.1 -0.01 -0.1);
                 radius  0.25;
             }
@@ -98,7 +98,7 @@ Description
         directory   | The output directory name     | no | postProcessing/NAME
         width       | Padding width for file name           | no  | 8
         decompose   | Decompose polyhedral cells            | no  | false
-        writeIds    | Write cell/patch ids as field         | no  | true
+        writeIds    | Write cell/patch ids as field         | no  | false
     \endtable
 
     \heading Output Selection

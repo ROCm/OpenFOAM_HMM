@@ -607,19 +607,24 @@ int main(int argc, char *argv[])
 
     if (Pstream::master())
     {
+        // Overwrite or create the VTK/regionName directories.
+        // For the default region, this is simply "VTK/"
+
+        fileName regionDir;
         for (const word& regionName : regionNames)
         {
-            // VTK/regionName  directory in the case
-
-            fileName regionDir;
             if (regionName != polyMesh::defaultRegion)
             {
                 regionDir = outputDir / regionName;
             }
+            else
+            {
+                regionDir = outputDir;
+            }
 
             if (args.found("overwrite") && isDir(regionDir))
             {
-                Info<< "Deleting old VTK files in "
+                Info<< "Removing old directory "
                     << regionDir.relative(runTime.globalPath())
                     << nl << endl;
                 rmDir(regionDir);
