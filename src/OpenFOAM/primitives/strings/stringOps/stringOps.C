@@ -26,6 +26,7 @@ License
 #include "stringOps.H"
 #include "typeInfo.H"
 #include "etcFiles.H"
+#include "Pstream.H"
 #include "StringStream.H"
 #include "OSstream.H"
 #include "OSspecific.H"
@@ -92,8 +93,8 @@ static void expandLeadingTag(std::string& s, const char b, const char e)
 
 // Expand a leading tilde
 //   ~/        => home directory
-//   ~OpenFOAM => user/group/other OpenFOAM directory
 //   ~user     => home directory for specified user
+//   Deprecated ~OpenFOAM => <etc> instead
 static void expandLeadingTilde(std::string& s)
 {
     if (s[0] != '~')
@@ -121,6 +122,24 @@ static void expandLeadingTilde(std::string& s)
 
     if (user == "OpenFOAM")
     {
+        // Compat Warning
+        const int version(1806);
+
+        // Single warning (on master) with guard to avoid Pstream::master()
+        // when Pstream has not yet been initialized
+        if (Pstream::parRun() ? Pstream::master() : true)
+        {
+            std::cerr
+                << nl
+                << "--> FOAM Warning :" << nl
+                << "    Found [v" << version << "] '"
+                << "~OpenFOAM" << "' string expansion instead of '"
+                << "<etc>" << "' in string\n\"" << s << "\"\n" << nl
+                << std::endl;
+
+            error::warnAboutAge("expansion", version);
+        }
+
         s = findEtcFile(file);
     }
     else

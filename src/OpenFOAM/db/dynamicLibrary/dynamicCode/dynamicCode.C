@@ -162,7 +162,7 @@ bool Foam::dynamicCode::resolveTemplates
             }
         }
 
-        // Not found - fallback to ~OpenFOAM expansion
+        // Not found - fallback to <etc> expansion
         if (file.empty())
         {
             file = findEtcFile(codeTemplateDirName/templateName);
@@ -423,7 +423,7 @@ bool Foam::dynamicCode::copyOrCreateFiles(const bool verbose) const
             << "Could not find the code template(s): "
             << badFiles << nl
             << "Under the $" << codeTemplateEnvName
-            << " directory or via via the ~OpenFOAM/"
+            << " directory or via via the <etc>/"
             << codeTemplateDirName << " expansion"
             << exit(FatalError);
     }

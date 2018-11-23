@@ -228,7 +228,6 @@ namespace stringOps
     //  -# tilde expansion
     //    - leading "~/" : home directory
     //    - leading "~user" : home directory for specified user
-    //    - leading "~OpenFOAM" : user/group/other OpenFOAM directory
     //
     //  Supports default and alternative values as per the POSIX shell.
     //  \code
@@ -244,6 +243,9 @@ namespace stringOps
     //  - Any unknown entries are removed silently, if allowEmpty is true.
     //  - Malformed entries (eg, brace mismatch, sigil followed by bad chars)
     //  are left as is.
+    //
+    //  \note Deprecated(2018-11) Use "<etc>" instead of the rarely used
+    //      "~OpenFOAM" expansion
     //
     //  \sa
     //  Foam::findEtcFile
@@ -268,7 +270,6 @@ namespace stringOps
     //  -# tilde expansion
     //    - leading "~/" : home directory
     //    - leading "~user" : home directory for specified user
-    //    - leading "~OpenFOAM" : user/group/other OpenFOAM directory
     //
     //  Supports default and alternative values as per the POSIX shell.
     //  \code
@@ -284,6 +285,9 @@ namespace stringOps
     //  - Any unknown entries are removed silently if allowEmpty is true.
     //  - Malformed entries (eg, brace mismatch, sigil followed by bad chars)
     //  are left as is.
+    //
+    //  \note Deprecated(2018-11) Use "<etc>" instead of the rarely used
+    //      "~OpenFOAM" expansion
     //
     //  \sa
     //  Foam::findEtcFile

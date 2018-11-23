@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     argList::addNote
     (
         "Locate user/group/other file with semantics similar to the "
-        "~OpenFOAM/fileName expansion."
+        "<etc>/fileName expansion."
     );
 
     argList args(argc, argv, false, true);

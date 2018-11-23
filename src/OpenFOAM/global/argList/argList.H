@@ -76,7 +76,7 @@ Description
 Note
     - The document browser used is defined by the \b FOAM_DOC_BROWSER
       environment variable or the <tt>Documentation/docBrowser</tt> entry
-      in the <tt>~OpenFOAM/controlDict</tt> file.
+      in the <tt>\<etc\>/controlDict</tt> file.
       The \%f token is used as a placeholder for the file name.
     - The valid (mandatory) arguments can be adjusted
       via the addArgument static method instead of directly
