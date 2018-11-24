@@ -41,6 +41,7 @@ Foam::Detail::parcelSelection::actionNames
     { actionType::ALL, "all" },
     { actionType::CLEAR, "clear" },
     { actionType::INVERT, "invert" },
+    { actionType::USE, "use" },
     { actionType::ADD, "add" },
     { actionType::SUBTRACT, "subtract" },
     { actionType::SUBSET, "subset" },
@@ -90,7 +91,14 @@ namespace Foam
         switch (action)
         {
             case actionType::ADD:
+            case actionType::USE:
             {
+                if (actionType::USE == action)
+                {
+                    // USE = CLEAR + ADD  (ie, only use this selection)
+                    selection = false;
+                }
+
                 for (label parceli = 0; parceli < len; ++parceli)
                 {
                     if (accept(aop(list[parceli])))

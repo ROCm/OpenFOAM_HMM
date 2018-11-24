@@ -35,7 +35,7 @@ Description
         stride
         {
             // every 10th parcelId
-            action  add;
+            action  use;
             source  stride;
             stride  10;
         }
@@ -69,7 +69,7 @@ Description
     \heading Entry type
     \table
         Property    | Description                           | Required | Default
-        action      | all/clear/invert add/subtract/subset/ignore | yes |
+        action      | all/clear/invert/ignore add/subtract/subset/use | yes |
         source      | field/stride                          | mostly  |
     \endtable
 
@@ -149,6 +149,7 @@ public:
         ADD,                //!< "add" - parcel selection
         SUBTRACT,           //!< "subtract" - remove parcel selection
         SUBSET,             //!< "subset" - subset parcel selection
+        USE,                //!< "use" - same as clear + add
         IGNORE,             //!< "ignore" - dummy no-op
     };
 

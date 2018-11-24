@@ -23,7 +23,7 @@ dataCloud
         // Reduced number of output parcels
         stride
         {
-            action  add;
+            action  use;
             source  stride;
             stride  4;
         }
