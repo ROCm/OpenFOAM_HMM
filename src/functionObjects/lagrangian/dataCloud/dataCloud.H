@@ -43,19 +43,34 @@ Description
     }
     \endverbatim
 
-Usage
+    \heading Basic Usage
     \table
         Property     | Description                      | Required | Default
         type         | Type name: dataCloud             | yes   |
-        cloud        |                                  | no    | defaultCloud
-        clouds       | wordRe list of clouds            | no    |
+        clouds       | List of clouds (name or regex)   | no  |
+        cloud        | Cloud name                       | no  | defaultCloud
         field        | Name of the field                | yes   |
-        directory    | The output directory name     | no | postProcessing/NAME
-        width        | Padding width for file name      | no    | 8
+        selection    | Parcel selection control         | no  | empty-dict
     \endtable
 
+    \heading Output Options
+    \table
+        Property     | Description                      | Required | Default
+        precision    | The write precision              | no  | same as IOstream
+        directory    | The output directory name    | no | postProcessing/NAME
+        width        | Padding width for file name      | no  | 8
+        writeControl | Output control                   | recommended | timeStep
+    \endtable
+
+Note
+    See Foam::functionObjects::vtkCloud and Foam::Detail::parcelSelection
+    for more details about the parcel selection mechanism.
+
 See also
+    Foam::Detail::parcelSelection
     Foam::functionObjects::vtkCloud
+    Foam::functionObjects::fvMeshFunctionObject
+    Foam::functionObjects::timeControl
 
 SourceFiles
     dataCloud.C
@@ -67,6 +82,7 @@ SourceFiles
 #define functionObjects_dataCloud_H
 
 #include "fvMeshFunctionObject.H"
+#include "parcelSelectionDetail.H"
 #include "vectorField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -82,12 +98,19 @@ namespace functionObjects
 
 class dataCloud
 :
-    public fvMeshFunctionObject
+    public fvMeshFunctionObject,
+    public Foam::Detail::parcelSelection
 {
     // Private data
 
         //- The printf format for zero-padding names
         string printf_;
+
+        //- The output precision
+        unsigned precision_;
+
+        //- Apply output filter (for the current cloud)
+        bool applyFilter_;
 
         //- Requested names of clouds to process
         wordRes selectClouds_;
@@ -101,12 +124,47 @@ class dataCloud
 
     // Private Member Functions
 
+        //- Output (point,value) combination on a single line
         template<class Type>
-        static void writeField
+        static void writePointValue
+        (
+            Ostream& os,
+            const vector& pt,
+            const Type& val
+        );
+
+        template<class Type>
+        static void writeList
         (
             Ostream& os,
             const vectorField& points,
-            const Field<Type>& field
+            const List<Type>& field
+        );
+
+        template<class Type>
+        static void writeListParallel
+        (
+            Ostream& os,
+            const vectorField& points,
+            const List<Type>& field
+        );
+
+        template<class Type>
+        static void writeList
+        (
+            Ostream& os,
+            const vectorField& points,
+            const List<Type>& field,
+            const bitSet& selected
+        );
+
+        template<class Type>
+        static void writeListParallel
+        (
+            Ostream& os,
+            const vectorField& points,
+            const List<Type>& field,
+            const bitSet& selected
         );
 
         //- Write to disk

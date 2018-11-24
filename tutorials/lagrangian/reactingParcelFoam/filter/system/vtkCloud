@@ -28,6 +28,7 @@ cloudWrite
     //- Output directory name - Default postProcessing
     // directory       "VTK";
 
+    // Optional selection mechanism
     selection
     {
         all

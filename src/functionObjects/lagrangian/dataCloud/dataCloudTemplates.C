@@ -25,33 +25,141 @@ License
 
 #include "IOField.H"
 #include "OFstream.H"
+#include "ListOps.H"
 #include "pointField.H"
 #include "vectorField.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void Foam::functionObjects::dataCloud::writeField
+void Foam::functionObjects::dataCloud::writePointValue
+(
+    Ostream& os,
+    const vector& pt,
+    const Type& val
+)
+{
+    os << pt.x() << ' ' << pt.y() << ' ' << pt.z();
+
+    for (direction cmpt=0; cmpt < pTraits<Type>::nComponents; ++cmpt)
+    {
+        os << ' ' << component(val, cmpt);
+    }
+    os << nl;
+}
+
+
+template<class Type>
+void Foam::functionObjects::dataCloud::writeList
 (
     Ostream& os,
     const vectorField& points,
-    const Field<Type>& field
+    const List<Type>& field
 )
 {
     const label len = field.size();
 
     for (label pointi=0; pointi<len; ++pointi)
     {
-        const point& pt = points[pointi];
-        const Type& val = field[pointi];
+        writePointValue(os, points[pointi], field[pointi]);
+    }
+}
 
-        os << pt.x() << ' ' << pt.y() << ' ' << pt.z();
 
-        for (direction cmpt=0; cmpt < pTraits<Type>::nComponents; ++cmpt)
+template<class Type>
+void Foam::functionObjects::dataCloud::writeListParallel
+(
+    Ostream& os,
+    const vectorField& points,
+    const List<Type>& field
+)
+{
+    if (Pstream::master())
+    {
+        writeList(os, points, field);
+
+        vectorField recvPoints;
+        Field<Type> recvField;
+
+        // Receive and write
+        for (int slave=1; slave<Pstream::nProcs(); ++slave)
         {
-            os << ' ' << component(val, cmpt);
+            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+
+            fromSlave >> recvPoints >> recvField;
+
+            writeList(os, recvPoints, recvField);
         }
-        os << nl;
+    }
+    else
+    {
+        // Send to master
+        OPstream toMaster
+        (
+            Pstream::commsTypes::blocking,
+            Pstream::masterNo()
+        );
+
+        toMaster
+            << points << field;
+    }
+}
+
+
+template<class Type>
+void Foam::functionObjects::dataCloud::writeList
+(
+    Ostream& os,
+    const vectorField& points,
+    const List<Type>& field,
+    const bitSet& selected
+)
+{
+    for (const label pointi : selected)
+    {
+        writePointValue(os, points[pointi], field[pointi]);
+    }
+}
+
+
+template<class Type>
+void Foam::functionObjects::dataCloud::writeListParallel
+(
+    Ostream& os,
+    const vectorField& points,
+    const List<Type>& field,
+    const bitSet& selected
+)
+{
+    if (Pstream::master())
+    {
+        writeList(os, points, field, selected);
+
+        vectorField recvPoints;
+        Field<Type> recvField;
+
+        // Receive and write
+        for (int slave=1; slave<Pstream::nProcs(); ++slave)
+        {
+            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+
+            fromSlave >> recvPoints >> recvField;
+
+            writeList(os, recvPoints, recvField);
+        }
+    }
+    else
+    {
+        // Send to master
+        OPstream toMaster
+        (
+            Pstream::commsTypes::blocking,
+            Pstream::masterNo()
+        );
+
+        toMaster
+            << subset(selected, points)
+            << subset(selected, field);
     }
 }
 
@@ -63,16 +171,6 @@ bool Foam::functionObjects::dataCloud::writeField
     const objectRegistry& obrTmp
 ) const
 {
-    // Fields are not always on all processors (eg, multi-component parcels).
-    // Thus need to resolve between all processors.
-
-    const auto* fldPtr = obrTmp.findObject<IOField<Type>>(fieldName_);
-
-    if (!returnReduce((fldPtr != nullptr), orOp<bool>()))
-    {
-        return false;
-    }
-
     const auto* pointsPtr = obrTmp.findObject<vectorField>("position");
 
     if (!pointsPtr)
@@ -81,46 +179,35 @@ bool Foam::functionObjects::dataCloud::writeField
         return false;
     }
 
+    // Fields are not always on all processors (eg, multi-component parcels).
+    // Thus need to resolve between all processors.
+
+    const List<Type>* fldPtr = obrTmp.findObject<IOField<Type>>(fieldName_);
+    const List<Type>& values = (fldPtr ? *fldPtr : List<Type>());
+
+    if (!returnReduce((fldPtr != nullptr), orOp<bool>()))
+    {
+        return false;
+    }
+
+    autoPtr<OFstream> osPtr;
+
     if (Pstream::master())
     {
-        OFstream os(outputName);
+        osPtr.reset(new OFstream(outputName));
+        osPtr->precision(precision_);
 
-        os << "# x y z " << fieldName_ << nl;
+        *(osPtr) << "# x y z " << fieldName_ << nl;
+    }
 
-        // Master
-        if (fldPtr)
-        {
-            writeField(os, *pointsPtr, *fldPtr);
-        }
 
-        // Slaves - recv
-        for (int slave=1; slave<Pstream::nProcs(); ++slave)
-        {
-            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
-            vectorField points(fromSlave);
-            Field<Type> fld(fromSlave);
-
-            writeField(os, points, fld);
-        }
+    if (applyFilter_)
+    {
+        writeListParallel(osPtr.ref(), *pointsPtr, values, parcelAddr_);
     }
     else
     {
-        // Slaves
-
-        OPstream toMaster(Pstream::commsTypes::blocking, Pstream::masterNo());
-
-        if (fldPtr)
-        {
-            toMaster
-                << *pointsPtr
-                << *fldPtr;
-        }
-        else
-        {
-            toMaster
-                << vectorField()
-                << Field<Type>();
-        }
+        writeListParallel(osPtr.ref(), *pointsPtr, values);
     }
 
     return true;

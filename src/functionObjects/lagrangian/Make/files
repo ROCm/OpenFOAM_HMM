@@ -1,9 +1,9 @@
+common/parcelSelectionDetail.C
 dataCloud/dataCloud.C
 cloudInfo/cloudInfo.C
 icoUncoupledKinematicCloud/icoUncoupledKinematicCloud.C
 dsmcFields/dsmcFields.C
 
 vtkCloud/vtkCloud.C
-vtkCloud/parcelSelectionDetail.C
 
 LIB = $(FOAM_LIBBIN)/liblagrangianFunctionObjects

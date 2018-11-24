@@ -78,12 +78,6 @@ Foam::functionObjects::cloudInfo::cloudInfo
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::cloudInfo::~cloudInfo()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::cloudInfo::read(const dictionary& dict)
@@ -96,10 +90,10 @@ bool Foam::functionObjects::cloudInfo::read(const dictionary& dict)
         if (writeToFile() && names().size())
         {
             Info<< "applying to clouds:" << nl;
-            forAll(names(), i)
+            forAll(names(), cloudi)
             {
-                Info<< "    " << names()[i] << nl;
-                writeFileHeader(files(i));
+                Info<< "    " << names()[cloudi] << nl;
+                writeFileHeader(files(cloudi));
             }
             Info<< endl;
         }
@@ -107,8 +101,6 @@ bool Foam::functionObjects::cloudInfo::read(const dictionary& dict)
         {
             Info<< "no clouds to be processed" << nl << endl;
         }
-
-        return true;
     }
 
     return true;
@@ -123,24 +115,26 @@ bool Foam::functionObjects::cloudInfo::execute()
 
 bool Foam::functionObjects::cloudInfo::write()
 {
-    forAll(names(), i)
+    forAll(names(), cloudi)
     {
-        const word& cloudName = names()[i];
+        const word& cloudName = names()[cloudi];
 
         const kinematicCloud& cloud =
             obr_.lookupObject<kinematicCloud>(cloudName);
 
-        label nParcels = returnReduce(cloud.nParcels(), sumOp<label>());
-        scalar massInSystem =
+        const label nTotParcels =
+            returnReduce(cloud.nParcels(), sumOp<label>());
+
+        const scalar totMass =
             returnReduce(cloud.massInSystem(), sumOp<scalar>());
 
-        scalar Dmax = cloud.Dmax();
-        scalar D10 = cloud.Dij(1, 0);
-        scalar D32 = cloud.Dij(3, 2);
+        const scalar Dmax = cloud.Dmax();
+        const scalar D10 = cloud.Dij(1, 0);
+        const scalar D32 = cloud.Dij(3, 2);
 
         Log << type() << " " << name() <<  " write:" << nl
-            << "    number of parcels : " << nParcels << nl
-            << "    mass in system    : " << massInSystem << nl
+            << "    number of parcels : " << nTotParcels << nl
+            << "    mass in system    : " << totMass << nl
             << "    maximum diameter  : " << Dmax << nl
             << "    D10 diameter      : " << D10 << nl
             << "    D32 diameter      : " << D32 << nl
@@ -148,14 +142,15 @@ bool Foam::functionObjects::cloudInfo::write()
 
         if (writeToFile())
         {
-            writeTime(files(i));
-            files(i)
-                << token::TAB
-                << nParcels << token::TAB
-                << massInSystem << token::TAB
-                << Dmax << token::TAB
-                << D10 << token::TAB
-                << D32 << token::TAB
+            auto& os = files(cloudi);
+
+            writeTime(os);
+            os
+                << token::TAB << nTotParcels
+                << token::TAB << totMass
+                << token::TAB << Dmax
+                << token::TAB << D10
+                << token::TAB << D32
                 << endl;
         }
     }
