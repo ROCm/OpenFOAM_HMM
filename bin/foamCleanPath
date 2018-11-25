@@ -226,12 +226,25 @@ done
 
 IFS="$oldIFS"       # Restore initial IFS
 
+# Output:
+#
+# For eval mode, add quotes around the argument.
+# - eg,  <. PATH="path1;path2;...">
+#
+# With regular output, any quoting would be done on the caller side.
+# - eg,  <cleaned="($foamClean -env=PATH foo)
+
 printDebug "output>$dirList<"
 if [ -n "$optVerbose" ]
 then
     echo "output: \"$dirList\"" 1>&2
 fi
 
-echo "$shellOutput\"$dirList\""
+if [ -n "$shellOutput" ]
+then
+    echo "$shellOutput\"$dirList\""
+else
+    echo "$dirList"
+fi
 
 #------------------------------------------------------------------------------
