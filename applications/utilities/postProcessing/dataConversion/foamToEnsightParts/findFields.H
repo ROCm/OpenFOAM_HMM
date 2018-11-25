@@ -31,7 +31,7 @@ if (timeDirs.size())
     // Now check for lagrangian/<cloudName>
     //
     fileNameList cloudDirs;
-    if (!noLagrangian)
+    if (doLagrangian)
     {
         cloudDirs = readDir
         (

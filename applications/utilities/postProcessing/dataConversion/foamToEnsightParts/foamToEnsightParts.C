@@ -48,10 +48,10 @@ Usage
         Ignore the time index contained in the time file and use a
         simple indexing when creating the \c Ensight/data/######## files.
 
-      - \par -noLagrangian
+      - \par -no-lagrangian
         Suppress writing lagrangian positions and fields.
 
-      - \par -noMesh
+      - \par -no-mesh
         Suppress writing the geometry. Can be useful for converting partial
         results for a static geometry.
 
@@ -104,25 +104,29 @@ int main(int argc, char *argv[])
     (
         "index",
         "start",
-        "Ignore the time index contained in the uniform/time file "
-        "and use simple indexing when creating the files"
+        "Ignore the time index contained in the uniform/time file"
+        " and use simple indexing when creating files"
     );
     argList::addBoolOption
     (
-        "noLagrangian",
+        "no-lagrangian", // noLagrangian
         "Suppress writing lagrangian positions and fields"
     );
+    argList::addOptionCompat("no-lagrangian", {"noLagrangian", 1806});
+
     argList::addBoolOption
     (
-        "noMesh",
-        "Suppress writing the geometry. "
-        "Can be useful for converting partial results for a static geometry"
+        "no-mesh", // noMesh
+        "Suppress writing the geometry."
+        " Can be useful for converting partial results for a static geometry"
     );
+    argList::addOptionCompat("no-mesh", {"noMesh", 1806});
+
     argList::addOption
     (
         "name",
         "subdir",
-        "Sub-directory name for ensight output (default: 'Ensight')"
+        "Sub-directory name for Ensight output (default: 'Ensight')"
     );
     argList::addOption
     (
@@ -213,10 +217,10 @@ int main(int argc, char *argv[])
     // Control for renumbering iterations
     label indexingNumber = 0;
     const bool optIndex = args.readIfPresent("index", indexingNumber);
-    const bool noLagrangian = args.found("noLagrangian");
+    const bool doLagrangian = !args.found("no-lagrangian");
 
-    // Always write the geometry, unless the -noMesh option is specified
-    bool optNoMesh = args.found("noMesh");
+    // Write the geometry, unless otherwise specified
+    bool doGeometry = !args.found("no-mesh");
 
 
     // Construct the list of ensight parts for the entire mesh
@@ -237,10 +241,10 @@ int main(int argc, char *argv[])
     #include "checkMeshMoving.H"
     #include "findFields.H"
 
-    if (meshMoving && optNoMesh)
+    if (meshMoving && !doGeometry)
     {
-        Info<< "mesh is moving: ignoring '-noMesh' option" << endl;
-        optNoMesh = false;
+        Info<< "mesh is moving: ignoring '-no-mesh' option" << endl;
+        doGeometry = true;
     }
 
 
@@ -264,7 +268,7 @@ int main(int argc, char *argv[])
                 partsList.recalculate(mesh);
             }
 
-            if (!optNoMesh)
+            if (doGeometry)
             {
                 autoPtr<ensightGeoFile> os = ensCase.newGeometry(meshMoving);
                 partsList.write(os.ref());
