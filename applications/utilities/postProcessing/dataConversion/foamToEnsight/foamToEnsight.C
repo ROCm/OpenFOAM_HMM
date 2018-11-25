@@ -39,8 +39,15 @@ Usage
       - \par -ascii
         Write Ensight data in ASCII format instead of "C Binary"
 
-      - \par -noZero
-        Exclude the often incomplete initial conditions.
+      - \par -fields \<fields\>
+        Specify single or multiple fields to write (all by default)
+        For example,
+        \verbatim
+          -fields T
+          -fields '(p T U \"alpha.*\")'
+        \endverbatim
+        The quoting is required to avoid shell expansions and to pass the
+        information as a single argument.
 
       - \par -no-boundary
         Suppress writing any patches.
@@ -60,6 +67,12 @@ Usage
       - \par -cellZone zoneName
         Specify single cellZone to write (not lagrangian)
 
+      - \par -noZero
+        Exclude the often incomplete initial conditions.
+
+      - \par -name \<subdir\>
+        Define sub-directory name to use for Ensight data (default: "EnSight")
+
       - \par -width \<n\>
         Width of Ensight data subdir (default: 8)
 
@@ -78,11 +91,10 @@ Note
 #include "HashOps.H"
 
 #include "fvc.H"
+#include "fieldTypes.H"
 #include "volFields.H"
-#include "labelIOField.H"
 #include "scalarIOField.H"
-#include "tensorIOField.H"
-#include "IOobjectList.H"
+#include "vectorIOField.H"
 
 // file-format/conversion
 #include "ensightCase.H"
@@ -372,7 +384,7 @@ int main(int argc, char *argv[])
 
     ensCase.write();
 
-    Info<< "End: "
+    Info<< "\nEnd: "
         << timer.elapsedCpuTime() << " s, "
         << mem.update().peak() << " kB (peak)" << nl << endl;
 

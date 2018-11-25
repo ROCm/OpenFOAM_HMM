@@ -46,7 +46,7 @@ template<class Type>
 label writeDimFields
 (
     ensightCase& ensCase,
-    ensightMesh& ensMesh,
+    const ensightMesh& ensMesh,
     const fvMeshSubsetProxy& proxy,
     const IOobjectList& objects,
     const bool nodeValues
@@ -79,6 +79,7 @@ label writeDimFields
             )
         )
         {
+            Info<< ' ' << fieldName;
             ++count;
         }
     }
@@ -90,7 +91,7 @@ label writeDimFields
 label writeAllDimFields
 (
     ensightCase& ensCase,
-    ensightMesh& ensMesh,
+    const ensightMesh& ensMesh,
     const fvMeshSubsetProxy& proxy,
     const IOobjectList& objects,
     const bool nodeValues
