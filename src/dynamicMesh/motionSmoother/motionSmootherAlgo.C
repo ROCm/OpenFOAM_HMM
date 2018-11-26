@@ -328,7 +328,8 @@ Foam::motionSmootherAlgo::motionSmootherAlgo
     pointScalarField& scale,
     pointField& oldPoints,
     const labelList& adaptPatchIDs,
-    const dictionary& paramDict
+    const dictionary& paramDict,
+    const bool dryRun
 )
 :
     mesh_(mesh),
@@ -339,6 +340,7 @@ Foam::motionSmootherAlgo::motionSmootherAlgo
     oldPoints_(oldPoints),
     adaptPatchIDs_(adaptPatchIDs),
     paramDict_(paramDict),
+    dryRun_(dryRun),
     isInternalPoint_(mesh_.nPoints(), true)
 {
     updateMesh();
@@ -856,9 +858,14 @@ bool Foam::motionSmootherAlgo::scaleMesh
         }
     }
 
-    const scalar errorReduction = paramDict.get<scalar>("errorReduction");
-    const label nSmoothScale = paramDict.get<label>("nSmoothScale");
-
+    const scalar errorReduction = get<scalar>
+    (
+        paramDict, "errorReduction", dryRun_, keyType::REGEX_RECURSIVE
+    );
+    const label nSmoothScale = get<label>
+    (
+        paramDict, "nSmoothScale", dryRun_, keyType::REGEX_RECURSIVE
+    );
 
     // Note: displacement_ should already be synced already from setDisplacement
     // but just to make sure.
@@ -885,7 +892,16 @@ bool Foam::motionSmootherAlgo::scaleMesh
 
     // Check. Returns parallel number of incorrect faces.
     faceSet wrongFaces(mesh_, "wrongFaces", mesh_.nFaces()/100+100);
-    checkMesh(false, mesh_, meshQualityDict, checkFaces, baffles, wrongFaces);
+    checkMesh
+    (
+        false,
+        mesh_,
+        meshQualityDict,
+        checkFaces,
+        baffles,
+        wrongFaces,
+        dryRun_
+    );
 
     if (returnReduce(wrongFaces.size(), sumOp<label>()) <= nAllowableErrors)
     {

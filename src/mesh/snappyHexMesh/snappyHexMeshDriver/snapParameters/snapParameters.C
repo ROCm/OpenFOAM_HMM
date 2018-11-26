@@ -24,17 +24,30 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "snapParameters.H"
+#include "meshRefinement.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from dictionary
-Foam::snapParameters::snapParameters(const dictionary& dict)
+Foam::snapParameters::snapParameters(const dictionary& dict, const bool dryRun)
 :
-    nSmoothPatch_(dict.get<label>("nSmoothPatch")),
+    nSmoothPatch_
+    (
+        meshRefinement::get<label>(dict, "nSmoothPatch", dryRun)
+    ),
     nSmoothInternal_(dict.lookupOrDefault("nSmoothInternal", 0)),
-    snapTol_(dict.get<scalar>("tolerance")),
-    nSmoothDispl_(dict.get<label>("nSolveIter")),
-    nSnap_(dict.get<label>("nRelaxIter")),
+    snapTol_
+    (
+        meshRefinement::get<scalar>(dict, "tolerance", dryRun)
+    ),
+    nSmoothDispl_
+    (
+        meshRefinement::get<label>(dict, "nSolveIter", dryRun)
+    ),
+    nSnap_
+    (
+        meshRefinement::get<label>(dict, "nRelaxIter", dryRun)
+    ),
     nFeatureSnap_(dict.lookupOrDefault("nFeatureSnapIter", -1)),
     explicitFeatureSnap_(dict.lookupOrDefault("explicitFeatureSnap", true)),
     implicitFeatureSnap_(dict.lookupOrDefault("implicitFeatureSnap", false)),
@@ -60,7 +73,8 @@ Foam::snapParameters::snapParameters(const dictionary& dict)
         dict.lookupOrDefault("nFaceSplitInterval", labelMin)
     ),
     concaveAngle_(dict.lookupOrDefault("concaveAngle", 45)),
-    minAreaRatio_(dict.lookupOrDefault("minAreaRatio", 0.3))
+    minAreaRatio_(dict.lookupOrDefault("minAreaRatio", 0.3)),
+    dryRun_(dryRun)
 {}
 
 

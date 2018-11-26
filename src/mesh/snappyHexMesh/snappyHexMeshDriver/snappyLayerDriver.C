@@ -2648,7 +2648,8 @@ Foam::label Foam::snappyLayerDriver::checkAndUnmark
         meshQualityDict,
         identity(newMesh.nFaces()),
         baffles,
-        wrongFaces
+        wrongFaces,
+        false           // dryRun_
     );
     Info<< "Detected " << returnReduce(wrongFaces.size(), sumOp<label>())
         << " illegal faces"
@@ -3215,12 +3216,14 @@ Foam::snappyLayerDriver::snappyLayerDriver
 (
     meshRefinement& meshRefiner,
     const labelList& globalToMasterPatch,
-    const labelList& globalToSlavePatch
+    const labelList& globalToSlavePatch,
+    const bool dryRun
 )
 :
     meshRefiner_(meshRefiner),
     globalToMasterPatch_(globalToMasterPatch),
-    globalToSlavePatch_(globalToSlavePatch)
+    globalToSlavePatch_(globalToSlavePatch),
+    dryRun_(dryRun)
 {}
 
 
@@ -3894,6 +3897,40 @@ void Foam::snappyLayerDriver::addLayers
                 internalBaffles,
                 displacement
             );
+
+
+            if (dryRun_)
+            {
+                string errorMsg(FatalError.message());
+                string IOerrorMsg(FatalIOError.message());
+
+                if (errorMsg.size() || IOerrorMsg.size())
+                {
+                    //errorMsg = "[dryRun] " + errorMsg;
+                    //errorMsg.replaceAll("\n", "\n[dryRun] ");
+                    //IOerrorMsg = "[dryRun] " + IOerrorMsg;
+                    //IOerrorMsg.replaceAll("\n", "\n[dryRun] ");
+
+                    IOWarningInFunction(combinedDict)
+                        << nl
+                        << "Missing/incorrect required dictionary entries:"
+                        << nl << nl
+                        << IOerrorMsg.c_str() << nl
+                        << errorMsg.c_str() << nl << nl
+                        << "Exiting dry-run" << nl << endl;
+
+                    if (Pstream::parRun())
+                    {
+                        Perr<< "\nFOAM parallel run exiting\n" << endl;
+                        Pstream::exit(0);
+                    }
+                    else
+                    {
+                        Perr<< "\nFOAM exiting\n" << endl;
+                        ::exit(0);
+                    }
+                }
+            }
         }
 
 
@@ -4691,7 +4728,7 @@ void Foam::snappyLayerDriver::doLayers
         // Check initial mesh
         Info<< "Checking initial mesh ..." << endl;
         labelHashSet wrongFaces(mesh.nFaces()/100);
-        motionSmoother::checkMesh(false, mesh, motionDict, wrongFaces);
+        motionSmoother::checkMesh(false, mesh, motionDict, wrongFaces, dryRun_);
         const label nInitErrors = returnReduce
         (
             wrongFaces.size(),

@@ -98,6 +98,9 @@ class refinementSurfaces
         //- From global region number to patchType
         PtrList<dictionary> patchInfo_;
 
+        //- Are we operating in test mode?
+        const bool dryRun_;
+
 
     // Private Member Functions
 
@@ -127,7 +130,8 @@ public:
         (
             const searchableSurfaces& allGeometry,
             const dictionary&,
-            const label gapLevelIncrement
+            const label gapLevelIncrement,
+            const bool dryRun
         );
 
         //- Construct from components
@@ -142,7 +146,8 @@ public:
             const labelList& maxLevel,
             const labelList& gapLevel,
             const scalarField& perpendicularAngle,
-            PtrList<dictionary>& patchInfo
+            PtrList<dictionary>& patchInfo,
+            const bool dryRun
         );
 
 

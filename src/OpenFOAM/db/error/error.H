@@ -114,6 +114,9 @@ public:
 
         string message() const;
 
+        //- Clear any messages
+        void clear() const;
+
         inline const string& functionName() const
         {
             return functionName_;

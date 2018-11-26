@@ -156,8 +156,11 @@ class motionSmootherAlgo
             // displacement on.
             const labelList adaptPatchIDs_;
 
-            // Smoothing and checking parameters
+            //- Smoothing and checking parameters
             dictionary paramDict_;
+
+            //- In test/dry-run mode?
+            const bool dryRun_;
 
             //- Is mesh point on boundary or not
             bitSet isInternalPoint_;
@@ -303,7 +306,8 @@ public:
             pointScalarField& scale,
             pointField& oldPoints,
             const labelList& adaptPatchIDs,     // patches forming 'outside'
-            const dictionary& paramDict
+            const dictionary& paramDict,
+            const bool dryRun = false
         );
 
 
@@ -442,7 +446,8 @@ public:
                 const bool report,
                 const polyMesh& mesh,
                 const dictionary& dict,
-                labelHashSet& wrongFaces
+                labelHashSet& wrongFaces,
+                const bool dryRun = false
             );
 
             //- Check (subset of mesh) with mesh settings in dict.
@@ -454,7 +459,8 @@ public:
                 const polyMesh& mesh,
                 const dictionary& dict,
                 const labelList& checkFaces,
-                labelHashSet& wrongFaces
+                labelHashSet& wrongFaces,
+                const bool dryRun = false
             );
 
             //- Check (subset of mesh including baffles) with mesh settings
@@ -467,7 +473,8 @@ public:
                 const dictionary& dict,
                 const labelList& checkFaces,
                 const List<labelPair>& baffles,
-                labelHashSet& wrongFaces
+                labelHashSet& wrongFaces,
+                const bool dryRun = false
             );
 
             //- Check part of mesh with mesh settings in dict.
@@ -480,7 +487,8 @@ public:
                 const polyMeshGeometry&,
                 const pointField&,
                 const labelList& checkFaces,
-                labelHashSet& wrongFaces
+                labelHashSet& wrongFaces,
+                const bool dryRun = false
             );
 
             //- Check part of mesh including baffles with mesh settings in dict.
@@ -494,7 +502,8 @@ public:
                 const pointField&,
                 const labelList& checkFaces,
                 const List<labelPair>& baffles,
-                labelHashSet& wrongFaces
+                labelHashSet& wrongFaces,
+                const bool dryRun = false
             );
 
             // Helper functions to manipulate displacement vector.
@@ -508,6 +517,28 @@ public:
                     const scalarField& edgeWeight,
                     GeometricField<Type, pointPatchField, pointMesh>& newFld
                 ) const;
+
+            //- Wrapper around dictionary::get which does not exit
+            template<class Type>
+            static Type get
+            (
+                const dictionary& dict,
+                const word& keyword,
+                const bool noExit,
+                enum keyType::option matchOpt,
+                const Type& defaultValue = Zero
+            );
+//
+//            //- Wrapper around dictionary::get which does not exit
+//            template<class Type>
+//            static Type get
+//            (
+//                const dictionary& dict,
+//                const word& keyword,
+//                const bool noExit,
+//                bool recursive,
+//                bool patternMatch
+//            );
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -62,7 +62,7 @@ Description
 #include "fvMeshTools.H"
 #include "profiling.H"
 #include "processorMeshes.H"
-#include "vtkSetWriter.H"
+#include "snappyVoxelMeshDriver.H"
 
 using namespace Foam;
 
@@ -325,7 +325,8 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
             maxLevel,
             gapLevel,
             scalarField(nRegions, -GREAT),  //perpendicularAngle,
-            patchInfo
+            patchInfo,
+            false                           //dryRun
         )
     );
 
@@ -537,8 +538,61 @@ void extractSurface
 }
 
 
+label checkAlignment(const polyMesh& mesh, const scalar tol, Ostream& os)
+{
+    // Check all edges aligned with one of the coordinate axes
+    const faceList& faces = mesh.faces();
+    const pointField& points = mesh.points();
+
+    label nUnaligned = 0;
+
+    forAll(faces, facei)
+    {
+        const face& f = faces[facei];
+        forAll(f, fp)
+        {
+            label fp1 = f.fcIndex(fp);
+            const linePointRef e(edge(f[fp], f[fp1]).line(points));
+            const vector v(e.vec());
+            const scalar magV(mag(v));
+            if (magV > ROOTVSMALL)
+            {
+                for
+                (
+                    direction dir = 0;
+                    dir < pTraits<vector>::nComponents;
+                    ++dir
+                )
+                {
+                    const scalar s(mag(v[dir]));
+                    if (s > magV*tol && s < magV*(1-tol))
+                    {
+                        ++nUnaligned;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    reduce(nUnaligned, sumOp<label>());
+
+    if (nUnaligned)
+    {
+        os << "Initial mesh has " << nUnaligned
+            << " edges unaligned with any of the coordinate axes" << nl << endl;
+    }
+    return nUnaligned;
+}
+
+
 // Check writing tolerance before doing any serious work
-scalar getMergeDistance(const polyMesh& mesh, const scalar mergeTol)
+scalar getMergeDistance
+(
+    const polyMesh& mesh,
+    const scalar mergeTol,
+    const bool dryRun
+)
 {
     const boundBox& meshBb = mesh.bounds();
     scalar mergeDist = mergeTol * meshBb.mag();
@@ -550,7 +604,7 @@ scalar getMergeDistance(const polyMesh& mesh, const scalar mergeTol)
         << endl;
 
     // check writing tolerance
-    if (mesh.time().writeFormat() == IOstream::ASCII)
+    if (mesh.time().writeFormat() == IOstream::ASCII && !dryRun)
     {
         const scalar writeTol = std::pow
         (
@@ -690,6 +744,11 @@ int main(int argc, char *argv[])
         "checkGeometry",
         "Check all surface geometry for quality"
     );
+    argList::addBoolOption
+    (
+        "dry-run",
+        "Check case set-up only using a single time step"
+    );
     argList::addOption
     (
         "surfaceSimplify",
@@ -718,45 +777,30 @@ int main(int argc, char *argv[])
     const bool overwrite = args.found("overwrite");
     const bool checkGeometry = args.found("checkGeometry");
     const bool surfaceSimplify = args.found("surfaceSimplify");
+    const bool dryRun = args.optionFound("dry-run");
 
-    autoPtr<fvMesh> meshPtr;
-
+    if (dryRun)
     {
-        word regionName = fvMesh::defaultRegion;
-        if (args.readIfPresent("region", regionName))
-        {
-            Info<< "Create mesh " << regionName << " for time = "
-                << runTime.timeName() << nl << endl;
-        }
-        else
-        {
-            Info<< "Create mesh for time = "
-                << runTime.timeName() << nl << endl;
-        }
-
-        meshPtr.reset
-        (
-            new fvMesh
-            (
-                IOobject
-                (
-                    regionName,
-                    runTime.timeName(),
-                    runTime,
-                    IOobject::MUST_READ
-                )
-            )
-        );
+        Info<< "Operating in dry-run mode to detect set-up errors"
+            << nl << endl;
     }
 
-    fvMesh& mesh = meshPtr();
 
+
+    #include "createNamedMesh.H"
     Info<< "Read mesh in = "
         << runTime.cpuTimeIncrement() << " s" << endl;
 
     // Check patches and faceZones are synchronised
     mesh.boundaryMesh().checkParallelSync(true);
     meshRefinement::checkCoupledFaceZones(mesh);
+
+    if (dryRun)
+    {
+        // Check if mesh aligned with cartesian axes
+        checkAlignment(mesh, 1e-6, Pout);   //FatalIOError);
+    }
+
 
 
     // Read meshing dictionary
@@ -766,25 +810,36 @@ int main(int argc, char *argv[])
 
 
     // all surface geometry
-    const dictionary& geometryDict = meshDict.subDict("geometry");
+    const dictionary& geometryDict =
+        meshRefinement::subDict(meshDict, "geometry", dryRun);
 
     // refinement parameters
-    const dictionary& refineDict = meshDict.subDict("castellatedMeshControls");
+    const dictionary& refineDict =
+        meshRefinement::subDict(meshDict, "castellatedMeshControls", dryRun);
 
     // mesh motion and mesh quality parameters
-    const dictionary& motionDict = meshDict.subDict("meshQualityControls");
+    const dictionary& motionDict =
+        meshRefinement::subDict(meshDict, "meshQualityControls", dryRun);
 
     // snap-to-surface parameters
-    const dictionary& snapDict = meshDict.subDict("snapControls");
+    const dictionary& snapDict =
+        meshRefinement::subDict(meshDict, "snapControls", dryRun);
 
     // layer addition parameters
-    const dictionary& layerDict = meshDict.subDict("addLayersControls");
+    const dictionary& layerDict =
+        meshRefinement::subDict(meshDict, "addLayersControls", dryRun);
 
     // absolute merge distance
     const scalar mergeDist = getMergeDistance
     (
         mesh,
-        meshDict.get<scalar>("mergeTolerance")
+        meshRefinement::get<scalar>
+        (
+            meshDict,
+            "mergeTolerance",
+            dryRun
+        ),
+        dryRun
     );
 
     const bool keepPatches(meshDict.lookupOrDefault("keepPatches", false));
@@ -975,7 +1030,7 @@ int main(int argc, char *argv[])
         const scalar defaultCellSize =
             motionDict.get<scalar>("defaultCellSize");
 
-        const scalar initialCellSize = ::pow(meshPtr().V()[0], 1.0/3.0);
+        const scalar initialCellSize = ::pow(mesh.V()[0], 1.0/3.0);
 
         //Info<< "Wanted cell size  = " << defaultCellSize << endl;
         //Info<< "Current cell size = " << initialCellSize << endl;
@@ -1001,8 +1056,14 @@ int main(int argc, char *argv[])
             new refinementSurfaces
             (
                 allGeometry,
-                refineDict.subDict("refinementSurfaces"),
-                refineDict.lookupOrDefault("gapLevelIncrement", 0)
+                meshRefinement::subDict
+                (
+                    refineDict,
+                    "refinementSurfaces",
+                    dryRun
+                ),
+                refineDict.lookupOrDefault("gapLevelIncrement", 0),
+                dryRun
             )
         );
 
@@ -1017,6 +1078,8 @@ int main(int argc, char *argv[])
 
     if (checkGeometry)
     {
+        // Check geometry amongst itself (e.g. intersection, size differences)
+
         // Extract patchInfo
         List<wordList> patchTypes(allGeometry.size());
 
@@ -1035,7 +1098,14 @@ int main(int argc, char *argv[])
                 if (patchInfo.set(globalRegioni))
                 {
                     patchTypes[geomi][regioni] =
-                        patchInfo[globalRegioni].get<word>("type");
+                        meshRefinement::get<word>
+                        (
+                            patchInfo[globalRegioni],
+                            "type",
+                            dryRun,
+                            keyType::REGEX,
+                            word::null
+                        );
                 }
                 else
                 {
@@ -1058,8 +1128,47 @@ int main(int argc, char *argv[])
             true
         );
 
-        return 0;
+        if (!dryRun)
+        {
+            return 0;
+        }
     }
+
+
+    if (dryRun)
+    {
+        // Check geometry to mesh bounding box
+        Info<< "Checking for geometry size relative to mesh." << endl;
+        const boundBox& meshBb = mesh.bounds();
+        forAll(allGeometry, geomi)
+        {
+            const searchableSurface& s = allGeometry[geomi];
+            const boundBox& bb = s.bounds();
+
+            scalar ratio = bb.mag() / meshBb.mag();
+            if (ratio > 100.0 || ratio < 1.0/100.0)
+            {
+                Warning
+                    << "    " << allGeometry.names()[geomi]
+                    << " bounds differ from mesh"
+                    << " by more than a factor 100:" << nl
+                    << "        bounding box      : " << bb << nl
+                    << "        mesh bounding box : " << meshBb
+                    << endl;
+            }
+            if (!meshBb.contains(bb))
+            {
+                Warning
+                    << "    " << allGeometry.names()[geomi]
+                    << " bounds not fully contained in mesh" << nl
+                    << "        bounding box      : " << bb << nl
+                    << "        mesh bounding box : " << meshBb
+                    << endl;
+            }
+        }
+        Info<< endl;
+    }
+
 
 
 
@@ -1070,7 +1179,8 @@ int main(int argc, char *argv[])
     shellSurfaces shells
     (
         allGeometry,
-        refineDict.subDict("refinementRegions")
+        meshRefinement::subDict(refineDict, "refinementRegions", dryRun),
+        dryRun
     );
     Info<< "Read refinement shells in = "
         << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
@@ -1093,13 +1203,36 @@ int main(int argc, char *argv[])
         Info<< "Reading limit shells." << endl;
     }
 
-    shellSurfaces limitShells(allGeometry, limitDict);
+    shellSurfaces limitShells(allGeometry, limitDict, dryRun);
 
     if (!limitDict.empty())
     {
         Info<< "Read limit shells in = "
             << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
     }
+
+    if (dryRun)
+    {
+        // Check for use of all geometry
+        const wordList& allGeomNames = allGeometry.names();
+
+        labelHashSet unusedGeometries(identity(allGeomNames.size()));
+        unusedGeometries.erase(surfaces.surfaces());
+        unusedGeometries.erase(shells.shells());
+        unusedGeometries.erase(limitShells.shells());
+
+        if (unusedGeometries.size())
+        {
+            IOWarningInFunction(geometryDict)
+                << "The following geometry entries are not used:" << nl;
+            for (const label geomi : unusedGeometries)
+            {
+                Info<< "    " << allGeomNames[geomi] << nl;
+            }
+            Info<< endl;
+        }
+    }
+
 
 
 
@@ -1110,11 +1243,32 @@ int main(int argc, char *argv[])
     refinementFeatures features
     (
         mesh,
-        refineDict.lookup("features")
+        meshRefinement::lookup(refineDict, "features", dryRun),
+        dryRun
     );
     Info<< "Read features in = "
         << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
 
+
+    if (dryRun)
+    {
+        // Check geometry to mesh bounding box
+        Info<< "Checking for line geometry size relative to surface geometry."
+            << endl;
+
+        OStringStream os;
+        bool hasErrors = features.checkSizes
+        (
+            100.0,  //const scalar maxRatio,
+            mesh.bounds(),
+            true,   //const bool report,
+            os //FatalIOError
+        );
+        if (hasErrors)
+        {
+            Warning<< os.str() << endl;
+        }
+    }
 
 
     // Refinement engine
@@ -1134,10 +1288,17 @@ int main(int argc, char *argv[])
         surfaces,           // for surface intersection refinement
         features,           // for feature edges/point based refinement
         shells,             // for volume (inside/outside) refinement
-        limitShells         // limit of volume refinement
+        limitShells,        // limit of volume refinement
+        labelList(),        // initial faces to test
+        dryRun
     );
-    Info<< "Calculated surface intersections in = "
-        << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
+
+    if (!dryRun)
+    {
+        meshRefiner.updateIntersections(identity(mesh.nFaces()));
+        Info<< "Calculated surface intersections in = "
+            << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
+    }
 
     // Some stats
     meshRefiner.printMeshInfo(debugLevel, "Initial mesh");
@@ -1151,10 +1312,10 @@ int main(int argc, char *argv[])
 
 
     // Refinement parameters
-    const refinementParameters refineParams(refineDict);
+    const refinementParameters refineParams(refineDict, dryRun);
 
     // Snap parameters
-    const snapParameters snapParams(snapDict);
+    const snapParameters snapParams(snapDict, dryRun);
 
 
 
@@ -1464,9 +1625,46 @@ int main(int argc, char *argv[])
     // Now do the real work -refinement -snapping -layers
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    const bool wantRefine(meshDict.get<bool>("castellatedMesh"));
-    const bool wantSnap(meshDict.get<bool>("snap"));
-    const bool wantLayers(meshDict.get<bool>("addLayers"));
+    const bool wantRefine
+    (
+        meshRefinement::get<bool>(meshDict, "castellatedMesh", dryRun)
+    );
+    const bool wantSnap
+    (
+        meshRefinement::get<bool>(meshDict, "snap", dryRun)
+    );
+    const bool wantLayers
+    (
+        meshRefinement::get<bool>(meshDict, "addLayers", dryRun)
+    );
+
+    if (dryRun)
+    {
+        string errorMsg(FatalError.message());
+        string IOerrorMsg(FatalIOError.message());
+
+        if (errorMsg.size() || IOerrorMsg.size())
+        {
+            //errorMsg = "[dryRun] " + errorMsg;
+            //errorMsg.replaceAll("\n", "\n[dryRun] ");
+            //IOerrorMsg = "[dryRun] " + IOerrorMsg;
+            //IOerrorMsg.replaceAll("\n", "\n[dryRun] ");
+
+            Warning
+                << nl
+                << "Missing/incorrect required dictionary entries:" << nl
+                << nl
+                << IOerrorMsg.c_str() << nl
+                << errorMsg.c_str() << nl << nl
+                << "Exiting dry-run" << nl << endl;
+
+            FatalError.clear();
+            FatalIOError.clear();
+
+            return 0;
+        }
+    }
+
 
     const bool mergePatchFaces
     (
@@ -1492,7 +1690,8 @@ int main(int argc, char *argv[])
             distributor,
             globalToMasterPatch,
             globalToSlavePatch,
-            setFormatter
+            setFormatter,
+            dryRun
         );
 
 
@@ -1518,13 +1717,16 @@ int main(int argc, char *argv[])
             fvMeshTools::removeEmptyPatches(mesh, true);
         }
 
-        writeMesh
-        (
-            "Refined mesh",
-            meshRefiner,
-            debugLevel,
-            meshRefinement::writeLevel()
-        );
+        if (!dryRun)
+        {
+            writeMesh
+            (
+                "Refined mesh",
+                meshRefiner,
+                debugLevel,
+                meshRefinement::writeLevel()
+            );
+        }
 
         Info<< "Mesh refined in = "
             << timer.cpuTimeIncrement() << " s." << endl;
@@ -1540,7 +1742,8 @@ int main(int argc, char *argv[])
         (
             meshRefiner,
             globalToMasterPatch,
-            globalToSlavePatch
+            globalToSlavePatch,
+            dryRun
         );
 
         if (!overwrite && !debugLevel)
@@ -1568,13 +1771,16 @@ int main(int argc, char *argv[])
             fvMeshTools::removeEmptyPatches(mesh, true);
         }
 
-        writeMesh
-        (
-            "Snapped mesh",
-            meshRefiner,
-            debugLevel,
-            meshRefinement::writeLevel()
-        );
+        if (!dryRun)
+        {
+            writeMesh
+            (
+                "Snapped mesh",
+                meshRefiner,
+                debugLevel,
+                meshRefinement::writeLevel()
+            );
+        }
 
         Info<< "Mesh snapped in = "
             << timer.cpuTimeIncrement() << " s." << endl;
@@ -1587,13 +1793,19 @@ int main(int argc, char *argv[])
         cpuTime timer;
 
         // Layer addition parameters
-        const layerParameters layerParams(layerDict, mesh.boundaryMesh());
+        const layerParameters layerParams
+        (
+            layerDict,
+            mesh.boundaryMesh(),
+            dryRun
+        );
 
         snappyLayerDriver layerDriver
         (
             meshRefiner,
             globalToMasterPatch,
-            globalToSlavePatch
+            globalToSlavePatch,
+            dryRun
         );
 
         // Use the maxLocalCells from the refinement parameters
@@ -1626,13 +1838,16 @@ int main(int argc, char *argv[])
             fvMeshTools::removeEmptyPatches(mesh, true);
         }
 
-        writeMesh
-        (
-            "Layer mesh",
-            meshRefiner,
-            debugLevel,
-            meshRefinement::writeLevel()
-        );
+        if (!dryRun)
+        {
+            writeMesh
+            (
+                "Layer mesh",
+                meshRefiner,
+                debugLevel,
+                meshRefinement::writeLevel()
+            );
+        }
 
         Info<< "Layers added in = "
             << timer.cpuTimeIncrement() << " s." << endl;
@@ -1647,7 +1862,7 @@ int main(int argc, char *argv[])
         // Check final mesh
         Info<< "Checking final mesh ..." << endl;
         faceSet wrongFaces(mesh, "wrongFaces", mesh.nFaces()/100);
-        motionSmoother::checkMesh(false, mesh, motionDict, wrongFaces);
+        motionSmoother::checkMesh(false, mesh, motionDict, wrongFaces, dryRun);
         const label nErrors = returnReduce
         (
             wrongFaces.size(),
@@ -1735,6 +1950,34 @@ int main(int argc, char *argv[])
 
     Info<< "Finished meshing in = "
         << runTime.elapsedCpuTime() << " s." << endl;
+
+
+    if (dryRun)
+    {
+        string errorMsg(FatalError.message());
+        string IOerrorMsg(FatalIOError.message());
+
+        if (errorMsg.size() || IOerrorMsg.size())
+        {
+            //errorMsg = "[dryRun] " + errorMsg;
+            //errorMsg.replaceAll("\n", "\n[dryRun] ");
+            //IOerrorMsg = "[dryRun] " + IOerrorMsg;
+            //IOerrorMsg.replaceAll("\n", "\n[dryRun] ");
+
+            Perr<< nl
+                << "Missing/incorrect required dictionary entries:" << nl
+                << nl
+                << IOerrorMsg.c_str() << nl
+                << errorMsg.c_str() << nl << nl
+                << "Exiting dry-run" << nl << endl;
+
+            FatalError.clear();
+            FatalIOError.clear();
+
+            return 0;
+        }
+    }
+
 
     Info<< "End\n" << endl;
 

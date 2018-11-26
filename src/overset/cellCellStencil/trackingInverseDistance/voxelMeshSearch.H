@@ -122,12 +122,40 @@ public:
 
         //Voxel helper functions
 
+            //- Voxel indices to combined voxel index
+            static label index
+            (
+                const labelVector& nDivs,
+                const labelVector& voxel
+            );
+
+            //- Change in combined voxel index for change in components
+            static labelVector offset
+            (
+                const labelVector& nDivs
+            );
+
+            //- Combined voxel index to individual indices
+            static labelVector index3
+            (
+                const labelVector& nDivs,
+                const label voxeli
+            );
+
             //- Coordinate to voxel indices
             static labelVector index3
             (
                 const boundBox& bb,
                 const labelVector& nDivs,
                 const point& p
+            );
+
+            //- Voxel index to voxel centre
+            static point centre
+            (
+                const boundBox& bb,
+                const labelVector& nDivs,
+                const labelVector& voxel
             );
 
             //- Coordinate to combined voxel index. If clip makes sure
@@ -140,14 +168,6 @@ public:
                 const bool clip
             );
 
-            //- Voxel index to voxel centre
-            static point centre
-            (
-                const boundBox& bb,
-                const labelVector& nDivs,
-                const labelVector& voxel
-            );
-
             //- Fill voxels indicated by bounding box
             template<class Container, class Type>
             static void fill
@@ -157,6 +177,18 @@ public:
                 const labelVector& nDivs,
                 const boundBox& subBb,
                 const Type val
+            );
+
+            //- Fill voxels indicated by bounding box
+            template<class Container, class Type, class CombineOp>
+            static void fill
+            (
+                Container& elems,
+                const boundBox& bb,
+                const labelVector& nDivs,
+                const boundBox& subBb,
+                const Type val,
+                const CombineOp& cop = eqOp<Type>()
             );
 
             //- Check if any voxel inside bounding box is set to val or

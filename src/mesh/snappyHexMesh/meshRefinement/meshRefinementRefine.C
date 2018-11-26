@@ -913,9 +913,11 @@ Foam::labelList Foam::meshRefinement::getRefineCandidateFaces
 
     label nTest = 0;
 
-    forAll(surfaceIndex_, faceI)
+    const labelList& surfIndex = surfaceIndex();
+
+    forAll(surfIndex, faceI)
     {
-        if (surfaceIndex_[faceI] != -1)
+        if (surfIndex[faceI] != -1)
         {
             label own = mesh_.faceOwner()[faceI];
 

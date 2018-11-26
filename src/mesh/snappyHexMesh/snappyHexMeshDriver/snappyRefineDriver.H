@@ -39,6 +39,8 @@ SourceFiles
 #include "scalarField.H"
 #include "Tuple2.H"
 #include "writer.H"
+#include "DynamicList.H"
+#include "labelVector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,8 +82,26 @@ class snappyRefineDriver
         //- How to write lines. Used e.g. when writing leak-paths
         const writer<scalar>& setFormatter_;
 
+        //- Are we operating in test mode?
+        const bool dryRun_;
+
 
     // Private Member Functions
+
+        void addNeighbours
+        (
+            const labelVector& n,
+            const labelList& cellLevel,
+            const labelVector& voxel,
+            const label voxeli,
+            DynamicList<labelVector>& front
+        ) const;
+
+        //- Rough estimate of cell size and cell count
+        void estimateCellSizeAndCount
+        (
+            const refinementParameters& refineParams
+        ) const;
 
         //- Refine all cells pierced by explicit feature edges
         label featureEdgeRefine
@@ -225,7 +245,8 @@ public:
             fvMeshDistribute& distributor,
             const labelUList& globalToMasterPatch,
             const labelUList& globalToSlavePatch,
-            const writer<scalar>& setFormatter
+            const writer<scalar>& setFormatter,
+            const bool dryRun = false
         );
 
 

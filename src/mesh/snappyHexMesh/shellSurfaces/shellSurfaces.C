@@ -569,10 +569,12 @@ void Foam::shellSurfaces::findLevel
 Foam::shellSurfaces::shellSurfaces
 (
     const searchableSurfaces& allGeometry,
-    const dictionary& shellsDict
+    const dictionary& shellsDict,
+    const bool dryRun
 )
 :
-    allGeometry_(allGeometry)
+    allGeometry_(allGeometry),
+    dryRun_(dryRun)
 {
     // Wilcard specification : loop over all surfaces and try to find a match.
 

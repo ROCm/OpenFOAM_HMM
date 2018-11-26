@@ -132,6 +132,9 @@ private:
 
         word meshShrinker_;
 
+        //- In dry-run mode?
+        const bool dryRun_;
+
 
     // Private Member Functions
 
@@ -155,7 +158,12 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        layerParameters(const dictionary& dict, const polyBoundaryMesh&);
+        layerParameters
+        (
+            const dictionary& dict,
+            const polyBoundaryMesh&,
+            const bool dryRun = false
+        );
 
 
     // Member Functions

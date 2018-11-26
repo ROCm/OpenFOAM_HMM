@@ -86,13 +86,16 @@ class snapParameters
 
 
         //- How often needs face splitting be run
-        label nFaceSplitInterval_;
+        const label nFaceSplitInterval_;
 
         //- When is angle too concave too split
-        scalar concaveAngle_;
+        const scalar concaveAngle_;
 
         //- When is face-split not sufficiently diagonal
-        scalar minAreaRatio_;
+        const scalar minAreaRatio_;
+
+        //- in dry-run mode
+        const bool dryRun_;
 
 
     // Private Member Functions
@@ -109,7 +112,7 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        snapParameters(const dictionary& dict);
+        snapParameters(const dictionary& dict, const bool dryRun = false);
 
 
     // Member Functions

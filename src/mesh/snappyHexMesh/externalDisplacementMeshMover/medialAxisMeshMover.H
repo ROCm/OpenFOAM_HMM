@@ -207,7 +207,8 @@ public:
         (
             const dictionary& dict,
             const List<labelPair>& baffles,
-            pointVectorField& pointDisplacement
+            pointVectorField& pointDisplacement,
+            const bool dryRun
         );
 
 

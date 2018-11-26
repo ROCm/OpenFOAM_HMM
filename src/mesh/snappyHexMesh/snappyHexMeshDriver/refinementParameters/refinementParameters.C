@@ -29,14 +29,28 @@ License
 #include "globalIndex.H"
 #include "Tuple2.H"
 #include "wallPolyPatch.H"
+#include "meshRefinement.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::refinementParameters::refinementParameters(const dictionary& dict)
+Foam::refinementParameters::refinementParameters
+(
+    const dictionary& dict,
+    const bool dryRun
+)
 :
-    maxGlobalCells_(dict.get<label>("maxGlobalCells")),
-    maxLocalCells_(dict.get<label>("maxLocalCells")),
-    minRefineCells_(dict.get<label>("minRefinementCells")),
+    maxGlobalCells_
+    (
+        meshRefinement::get<label>(dict, "maxGlobalCells", dryRun)
+    ),
+    maxLocalCells_
+    (
+        meshRefinement::get<label>(dict, "maxLocalCells", dryRun)
+    ),
+    minRefineCells_
+    (
+        meshRefinement::get<label>(dict, "minRefinementCells", dryRun)
+    ),
     planarAngle_
     (
         dict.lookupOrDefault
@@ -45,7 +59,10 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
             dict.get<scalar>("resolveFeatureAngle")
         )
     ),
-    nBufferLayers_(dict.get<label>("nCellsBetweenLevels")),
+    nBufferLayers_
+    (
+        meshRefinement::get<label>(dict, "nCellsBetweenLevels", dryRun)
+    ),
     locationsOutsideMesh_
     (
         dict.lookupOrDefault
@@ -55,7 +72,10 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
         )
     ),
     faceZoneControls_(dict.subOrEmptyDict("faceZoneControls")),
-    allowFreeStandingZoneFaces_(dict.lookup("allowFreeStandingZoneFaces")),
+    allowFreeStandingZoneFaces_
+    (
+        meshRefinement::get<bool>(dict, "allowFreeStandingZoneFaces", dryRun)
+    ),
     useTopologicalSnapDetection_
     (
         dict.lookupOrDefault("useTopologicalSnapDetection", true)
@@ -69,9 +89,11 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
     (
         dict.lookupOrDefault<Switch>("interfaceRefine", true)
     ),
-    nErodeCellZone_(dict.lookupOrDefault<label>("nCellZoneErodeIter", 0))
+    nErodeCellZone_(dict.lookupOrDefault<label>("nCellZoneErodeIter", 0)),
+    dryRun_(dryRun)
 {
     point locationInMesh;
+    List<Tuple2<point, word>> pointsToZone;
     if (dict.readIfPresent("locationInMesh", locationInMesh))
     {
         locationsInMesh_.append(locationInMesh);
@@ -84,7 +106,7 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
                 << exit(FatalIOError);
         }
     }
-    else
+    else if (dict.readIfPresent("locationsInMesh", pointsToZone))
     {
         List<Tuple2<point, word>> pointsToZone(dict.lookup("locationsInMesh"));
         label nZones = locationsInMesh_.size();
@@ -102,9 +124,18 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
             nZones++;
         }
     }
+    else
+    {
+        IOWarningInFunction(dict)
+            << "No 'locationInMesh' or 'locationsInMesh' provided"
+            << endl;
+    }
 
 
-    const scalar featAngle(dict.get<scalar>("resolveFeatureAngle"));
+    const scalar featAngle
+    (
+        meshRefinement::get<scalar>(dict, "resolveFeatureAngle", dryRun)
+    );
 
     if (featAngle < 0 || featAngle > 180)
     {

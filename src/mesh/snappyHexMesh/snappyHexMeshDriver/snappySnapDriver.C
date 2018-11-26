@@ -757,12 +757,14 @@ Foam::snappySnapDriver::snappySnapDriver
 (
     meshRefinement& meshRefiner,
     const labelList& globalToMasterPatch,
-    const labelList& globalToSlavePatch
+    const labelList& globalToSlavePatch,
+    const bool dryRun
 )
 :
     meshRefiner_(meshRefiner),
     globalToMasterPatch_(globalToMasterPatch),
-    globalToSlavePatch_(globalToSlavePatch)
+    globalToSlavePatch_(globalToSlavePatch),
+    dryRun_(dryRun)
 {}
 
 
@@ -2606,7 +2608,11 @@ void Foam::snappySnapDriver::doSnap
     if (snapParams.nFeatureSnap() > 0)
     {
         doFeatures = true;
-        nFeatIter = snapParams.nFeatureSnap();
+
+        if (!dryRun_)
+        {
+            nFeatIter = snapParams.nFeatureSnap();
+        }
 
         Info<< "Snapping to features in " << nFeatIter
             << " iterations ..." << endl;
@@ -2652,7 +2658,8 @@ void Foam::snappySnapDriver::doSnap
                     pointMesh::New(mesh),
                     adaptPatchIDs
                 ),
-                motionDict
+                motionDict,
+                dryRun_
             )
         );
 
@@ -2660,7 +2667,7 @@ void Foam::snappySnapDriver::doSnap
         // Check initial mesh
         Info<< "Checking initial mesh ..." << endl;
         labelHashSet wrongFaces(mesh.nFaces()/100);
-        motionSmoother::checkMesh(false, mesh, motionDict, wrongFaces);
+        motionSmoother::checkMesh(false, mesh, motionDict, wrongFaces, dryRun_);
         const label nInitErrors = returnReduce
         (
             wrongFaces.size(),
@@ -2934,7 +2941,8 @@ void Foam::snappySnapDriver::doSnap
                             pointMesh::New(mesh),
                             adaptPatchIDs
                         ),
-                        motionDict
+                        motionDict,
+                        dryRun_
                     )
                 );
 

@@ -32,6 +32,8 @@ License
 #include "searchableSurfacesQueries.H"
 #include "UPtrList.H"
 #include "volumeType.H"
+// For dictionary::get wrapper
+#include "meshRefinement.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -124,14 +126,16 @@ Foam::refinementSurfaces::refinementSurfaces
 (
     const searchableSurfaces& allGeometry,
     const dictionary& surfacesDict,
-    const label gapLevelIncrement
+    const label gapLevelIncrement,
+    const bool dryRun
 )
 :
     allGeometry_(allGeometry),
     surfaces_(surfacesDict.size()),
     names_(surfacesDict.size()),
     surfZones_(surfacesDict.size()),
-    regionOffset_(surfacesDict.size())
+    regionOffset_(surfacesDict.size()),
+    dryRun_(dryRun)
 {
     // Wildcard specification : loop over all surface, all regions
     // and try to find a match.
@@ -195,7 +199,18 @@ Foam::refinementSurfaces::refinementSurfaces
             names_[surfI] = geomName;
             surfaces_[surfI] = geomI;
 
-            const labelPair refLevel(dict.lookup("level"));
+            const labelPair refLevel
+            (
+                meshRefinement::get<labelPair>
+                (
+                    dict,
+                    "level",
+                    dryRun_,
+                    keyType::REGEX,
+                    labelPair(0, 0)
+                )
+            );
+
             globalMinLevel[surfI] = refLevel[0];
             globalMaxLevel[surfI] = refLevel[1];
             globalLevelIncr[surfI] = dict.lookupOrDefault
@@ -281,7 +296,18 @@ Foam::refinementSurfaces::refinementSurfaces
                             regionNames[regionI]
                         );
 
-                        const labelPair refLevel(regionDict.lookup("level"));
+                        const labelPair refLevel
+                        (
+                            meshRefinement::get<labelPair>
+                            (
+                                regionDict,
+                                "level",
+                                dryRun_,
+                                keyType::REGEX,
+                                labelPair(0, 0)
+                            )
+                        );
+
 
                         regionMinLevel[surfI].insert(regionI, refLevel[0]);
                         regionMaxLevel[surfI].insert(regionI, refLevel[1]);
@@ -476,7 +502,8 @@ Foam::refinementSurfaces::refinementSurfaces
     const labelList& maxLevel,
     const labelList& gapLevel,
     const scalarField& perpendicularAngle,
-    PtrList<dictionary>& patchInfo
+    PtrList<dictionary>& patchInfo,
+    const bool dryRun
 )
 :
     allGeometry_(allGeometry),
@@ -488,7 +515,8 @@ Foam::refinementSurfaces::refinementSurfaces
     maxLevel_(maxLevel),
     gapLevel_(gapLevel),
     perpendicularAngle_(perpendicularAngle),
-    patchInfo_(patchInfo.size())
+    patchInfo_(patchInfo.size()),
+    dryRun_(dryRun)
 {
     forAll(patchInfo_, pI)
     {

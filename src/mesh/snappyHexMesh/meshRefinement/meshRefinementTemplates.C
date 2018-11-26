@@ -325,4 +325,35 @@ void Foam::meshRefinement::weightedSum
 }
 
 
+template<class Type>
+Type Foam::meshRefinement::get
+(
+    const dictionary& dict,
+    const word& keyword,
+    const bool noExit,
+    enum keyType::option matchOpt,
+    const Type& defaultValue
+)
+{
+    Type val(defaultValue);
+
+    if
+    (
+       !dict.readEntry
+        (
+            keyword,
+            val,
+            matchOpt,
+            !noExit
+        )
+    )
+    {
+        FatalIOError
+            << "Entry '" << keyword << "' not found in dictionary "
+            << dict.name() << endl;
+    }
+    return val;
+}
+
+
 // ************************************************************************* //

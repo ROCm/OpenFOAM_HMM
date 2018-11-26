@@ -42,6 +42,43 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+Foam::labelVector Foam::voxelMeshSearch::offset
+(
+    const labelVector& nDivs
+)
+{
+    return labelVector(1, nDivs.x(), nDivs.x()*nDivs.y());
+}
+
+
+Foam::label Foam::voxelMeshSearch::index
+(
+    const labelVector& nDivs,
+    const labelVector& voxel
+)
+{
+    return voxel.x()+voxel.y()*nDivs.x()+voxel.z()*nDivs.x()*nDivs.y();
+}
+
+
+Foam::labelVector Foam::voxelMeshSearch::index3
+(
+    const labelVector& nDivs,
+    label voxeli
+)
+{
+    const label nxy = nDivs.x()*nDivs.y();
+
+    labelVector voxel;
+    voxel.z() = voxeli/nxy;
+    voxeli = voxeli % nxy;
+    voxel.y() = voxeli/nDivs.x();
+    voxel.x() = voxeli%nDivs.x();
+
+    return voxel;
+}
+
+
 Foam::labelVector Foam::voxelMeshSearch::index3
 (
     const boundBox& bb,
@@ -98,7 +135,7 @@ Foam::label Foam::voxelMeshSearch::index
         return -1;
     }
 
-    return v[0] + g[0]*v[1] + g[1]*g.y()*v[2];
+    return index(g, v);
 }
 
 
