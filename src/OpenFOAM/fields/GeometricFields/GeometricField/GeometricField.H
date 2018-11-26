@@ -266,7 +266,7 @@ private:
     // Private Member Functions
 
         //- Read the field from the dictionary
-        void readFields(const dictionary&);
+        void readFields(const dictionary& dict);
 
         //- Read the field - create the field dictionary on-the-fly
         void readFields();
@@ -475,30 +475,39 @@ public:
     // Member Functions
 
         //- Return a reference to the dimensioned internal field
-        //  Note: this increments the event counter and checks the
-        //  old-time fields; avoid in loops.
-        Internal& ref();
+        //  \param updateAccessTime update event counter and check
+        //      old-time fields
+        //
+        //  \note Should avoid using updateAccessTime = true within loops.
+        Internal& ref(const bool updateAccessTime = true);
 
         //- Return a const-reference to the dimensioned internal field
         inline const Internal& internalField() const;
 
         //- Return a const-reference to the dimensioned internal field
-        //  of a "vol" field.  Useful in the formulation of source-terms
-        //  for FV equations
+        //- of a "vol" field.
+        //  Useful in the formulation of source-terms for FV equations
         inline const Internal& v() const;
 
         //- Return a reference to the internal field
-        //  Note: this increments the event counter and checks the
-        //  old-time fields; avoid in loops.
-        typename Internal::FieldType& primitiveFieldRef();
+        //  \param updateAccessTime update event counter and check
+        //      old-time fields
+        //
+        //  \note Should avoid using updateAccessTime = true within loops.
+        typename Internal::FieldType& primitiveFieldRef
+        (
+            const bool updateAccessTime = true
+        );
 
         //- Return a const-reference to the  internal field
         inline const typename Internal::FieldType& primitiveField() const;
 
         //- Return a reference to the boundary field
-        //  Note: this increments the event counter and checks the
-        //  old-time fields; avoid in loops.
-        Boundary& boundaryFieldRef();
+        //  \param updateAccessTime update event counter and check
+        //      old-time fields
+        //
+        //  \note Should avoid using updateAccessTime = true within loops.
+        Boundary& boundaryFieldRef(const bool updateAccessTime = true);
 
         //- Return const-reference to the boundary field
         inline const Boundary& boundaryField() const;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -719,10 +719,16 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::~GeometricField()
 template<class Type, template<class> class PatchField, class GeoMesh>
 typename
 Foam::GeometricField<Type, PatchField, GeoMesh>::Internal&
-Foam::GeometricField<Type, PatchField, GeoMesh>::ref()
+Foam::GeometricField<Type, PatchField, GeoMesh>::ref
+(
+    const bool updateAccessTime
+)
 {
-    this->setUpToDate();
-    storeOldTimes();
+    if (updateAccessTime)
+    {
+        this->setUpToDate();
+        storeOldTimes();
+    }
     return *this;
 }
 
@@ -730,10 +736,16 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::ref()
 template<class Type, template<class> class PatchField, class GeoMesh>
 typename
 Foam::GeometricField<Type, PatchField, GeoMesh>::Internal::FieldType&
-Foam::GeometricField<Type, PatchField, GeoMesh>::primitiveFieldRef()
+Foam::GeometricField<Type, PatchField, GeoMesh>::primitiveFieldRef
+(
+    const bool updateAccessTime
+)
 {
-    this->setUpToDate();
-    storeOldTimes();
+    if (updateAccessTime)
+    {
+        this->setUpToDate();
+        storeOldTimes();
+    }
     return *this;
 }
 
@@ -741,10 +753,16 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::primitiveFieldRef()
 template<class Type, template<class> class PatchField, class GeoMesh>
 typename
 Foam::GeometricField<Type, PatchField, GeoMesh>::Boundary&
-Foam::GeometricField<Type, PatchField, GeoMesh>::boundaryFieldRef()
+Foam::GeometricField<Type, PatchField, GeoMesh>::boundaryFieldRef
+(
+    const bool updateAccessTime
+)
 {
-    this->setUpToDate();
-    storeOldTimes();
+    if (updateAccessTime)
+    {
+        this->setUpToDate();
+        storeOldTimes();
+    }
     return boundaryField_;
 }
 
@@ -796,10 +814,8 @@ Foam::label Foam::GeometricField<Type, PatchField, GeoMesh>::nOldTimes() const
     {
         return field0Ptr_->nOldTimes() + 1;
     }
-    else
-    {
-        return 0;
-    }
+
+    return 0;
 }
 
 
