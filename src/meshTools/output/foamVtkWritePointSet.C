@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,53 +23,209 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "foamVtkWritePointSet.H"
-#include "foamVtkOutputOptions.H"
-#include "OFstream.H"
-#include "primitiveMesh.H"
+#include <fstream>
+#include "foamVtkWriteTopoSet.H"
+#include "polyMesh.H"
 #include "pointSet.H"
+#include "globalIndex.H"
+#include "OSspecific.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-void Foam::vtk::writePointSet
+bool Foam::vtk::writePointSet
 (
-    const primitiveMesh& mesh,
+    const polyMesh& mesh,
     const pointSet& set,
-    const fileName& baseName,
-    const vtk::outputOptions outOpts
+    const vtk::outputOptions opts,
+    const fileName& file,
+    bool parallel
 )
 {
-    outputOptions opts(outOpts);
-    opts.legacy(true);  // Legacy only, no xml, no append
+    vtk::outputOptions opts_(opts);
+    opts_.append(false);  // Do not support append
 
-    const bool legacy_(opts.legacy());
+    const bool legacy = opts_.legacy();
 
-    std::ofstream os(baseName + (legacy_ ? ".vtk" : ".vtp"));
+    // Only allow parallel if really is a parallel run.
+    parallel = parallel && Pstream::parRun();
 
-    autoPtr<vtk::formatter> format = opts.newFormatter(os);
 
-    if (legacy_)
+    std::ofstream os_;
+    autoPtr<vtk::formatter> format;
+
+    // Open a file and attach a formatter
+    // - on master (always)
+    // - on slave if not parallel
+    //
+    // This means we can always check if format_ is defined to know if output
+    // is desired on any particular process.
+
+    if (Pstream::master() || !parallel)
     {
-        legacy::fileHeader(format(), set.name(), vtk::fileTag::POLY_DATA);
+        mkDir(file.path());
+
+        // Extension is inappropriate. Legacy instead of xml, or vice versa.
+        const word ext = vtk::fileExtension[vtk::fileTag::POLY_DATA];
+
+        if (file.hasExt(ext))
+        {
+            // Extension is correct
+            os_.open(file);
+        }
+        else if
+        (
+            legacy
+          ? file.hasExt(ext)
+          : file.hasExt(vtk::legacy::fileExtension)
+        )
+        {
+            // Extension is inappropriate. Legacy instead of xml, or vice versa.
+            os_.open(file.lessExt() + "." + ext);
+        }
+        else
+        {
+            // Extension added automatically
+            os_.open(file + "." + ext);
+        }
+
+        format = opts_.newFormatter(os_);
     }
+
 
     //-------------------------------------------------------------------------
 
-    const labelList pointLabels(set.sortedToc());
+    const globalIndex pointIdOffset(mesh.nPoints());
 
-    // Write points
-    legacy::beginPoints(os, pointLabels.size());
+    labelField pointLabels(set.sortedToc());
 
-    vtk::writeList(format(), mesh.points(), pointLabels);
-    format().flush();
+    label numberOfPoints = pointLabels.size();
 
-    // Write data - pointID
-    legacy::dataHeader(os, vtk::fileTag::POINT_DATA, pointLabels.size(), 1);
+    if (parallel)
+    {
+        reduce(numberOfPoints, sumOp<label>());
+    }
 
-    os << "pointID 1 " << pointLabels.size() << " int" << nl;
+    if (format)
+    {
+        const auto& title = set.name();
 
-    vtk::writeList(format(), pointLabels);
-    format().flush();
+        if (legacy)
+        {
+            // beginFile:
+
+            legacy::fileHeader<vtk::fileTag::POLY_DATA>(format(), title);
+
+            // beginPoints:
+
+            legacy::beginPoints(os_, numberOfPoints);
+        }
+        else
+        {
+            // XML (inline)
+
+            // beginFile:
+
+            format()
+                .xmlHeader()
+                .xmlComment(title)
+                .beginVTKFile<vtk::fileTag::POLY_DATA>();
+
+            // beginPiece:
+            format()
+                .tag
+                (
+                    vtk::fileTag::PIECE,
+                    vtk::fileAttr::NUMBER_OF_POINTS, numberOfPoints
+                );
+
+            // beginPoints:
+            const uint64_t payLoad = vtk::sizeofData<float,3>(numberOfPoints);
+
+            format()
+                .tag(vtk::fileTag::POINTS)
+                .beginDataArray<float,3>(vtk::dataArrayAttr::POINTS);
+            format().writeSize(payLoad);
+        }
+    }
+
+
+    //-------------------------------------------------------------------------
+
+    // pointLabels are the addressing for an indirect list
+
+    if (parallel)
+    {
+        vtk::writeListParallel(format(), mesh.points(), pointLabels);
+    }
+    else
+    {
+        vtk::writeList(format(), mesh.points(), pointLabels);
+    }
+
+    if (format)
+    {
+        format().flush();
+        format().endDataArray();
+
+        if (!legacy)
+        {
+            format()
+                .endTag(vtk::fileTag::POINTS);
+        }
+
+
+        // beginPointData:
+        if (legacy)
+        {
+            legacy::beginPointData(format(), numberOfPoints, 1); // 1 field
+        }
+        else
+        {
+            format().beginPointData();
+        }
+    }
+
+    if (format)
+    {
+        // pointID
+
+        if (legacy)
+        {
+            // 1 component
+            legacy::intField<1>(format(), "pointID", numberOfPoints);
+        }
+        else
+        {
+            const uint64_t payLoad = vtk::sizeofData<label>(numberOfPoints);
+
+            format().beginDataArray<label>("pointID");
+            format().writeSize(payLoad);
+        }
+    }
+
+
+    if (parallel)
+    {
+        vtk::writeListParallel(format.ref(), pointLabels, pointIdOffset);
+    }
+    else
+    {
+        vtk::writeList(format(), pointLabels);
+    }
+
+
+    if (format)
+    {
+        format().flush();
+        format().endDataArray();
+        format().endPointData();
+        format().endPiece();
+
+        format().endTag(vtk::fileTag::POLY_DATA)
+            .endVTKFile();
+    }
+
+    return true;
 }
 
 

@@ -80,11 +80,10 @@ const char* Foam::vtk::legacyRawFormatter::encoding() const
 }
 
 
-void Foam::vtk::legacyRawFormatter::writeSize
-(
-    const uint64_t ignored
-)
-{/*nop*/}
+bool Foam::vtk::legacyRawFormatter::writeSize(const uint64_t)
+{
+    return false;
+}
 
 
 void Foam::vtk::legacyRawFormatter::write

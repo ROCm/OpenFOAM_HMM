@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,17 @@ Class
     Foam::vtk::patchWriter
 
 Description
-    Write patch fields
+    Write OpenFOAM patches and patch fields in VTP or legacy vtk format.
+
+    The file output states are managed by the Foam::vtk::fileWriter class.
+    FieldData (eg, TimeValue) must appear before any geometry pieces.
+
+Note
+    Parallel output is combined into a single Piece without point merging,
+    which is similar to using multi-piece data sets, but allows more
+    convenient creation as a streaming process.
+    In the future, the duplicate points at processor connections
+    may be addressed using ghost points.
 
 SourceFiles
     foamVtkPatchWriter.C
@@ -36,66 +46,71 @@ SourceFiles
 #ifndef foamVtkPatchWriter_H
 #define foamVtkPatchWriter_H
 
-#include "pointMesh.H"
-#include "OFstream.H"
+#include "foamVtkFileWriter.H"
 #include "volFields.H"
 #include "pointFields.H"
-#include "indirectPrimitivePatch.H"
 #include "PrimitivePatchInterpolation.H"
-#include "foamVtkOutputOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-class volPointInterpolation;
+
+// Forward declarations
+class globalIndex;
 
 namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class patchWriter Declaration
+                      Class vtk::patchWriter Declaration
 \*---------------------------------------------------------------------------*/
 
 class patchWriter
+:
+    public vtk::fileWriter
 {
     // Private Member Data
 
         //- Reference to the OpenFOAM mesh (or subset)
         const fvMesh& mesh_;
 
-        //- Commonly used query
-        const bool legacy_;
+        //- The selected patch ids
+        labelList patchIDs_;
 
-        autoPtr<vtk::formatter> format_;
+        //- Use internal field value instead of patch value
+        bool useNearCellValue_;
 
-        const bool nearCellValue_;
+        //- The numer of field points for the current Piece
+        label numberOfPoints_;
 
-        const labelList patchIDs_;
+        //- The numer of field cells (faces) for the current Piece
+        label numberOfCells_;
 
-        std::ofstream os_;
+        //- Local number of points
+        label nLocalPoints_;
 
-        label nPoints_;
+        //- Local number of faces
+        label nLocalFaces_;
 
-        label nFaces_;
+        //- Local face vertices (connectivity) count. Sum of face sizes.
+        label nLocalVerts_;
 
 
     // Private Member Functions
 
-        //- Begin piece
+        //- Determing sizes (nLocalPoints_, nLocalFaces_, nLocalVerts_),
+        //- and begin piece.
         void beginPiece();
 
         //- Write patch points
         void writePoints();
 
-        //- Write patch faces
-        void writePolysLegacy();
+        //- Write patch faces, legacy format
+        void writePolysLegacy(const globalIndex& pointOffsets);
 
         //- Write patch faces
-        void writePolys();
-
-        //- Write mesh topology
-        void writeMesh();
+        void writePolys(const globalIndex& pointOffsets);
 
 
         //- No copy construct
@@ -109,104 +124,137 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from components (default format INLINE_BASE64)
+        //  \param useNearCellValue to use cell instead of patch values
         patchWriter
         (
             const fvMesh& mesh,
-            const fileName& baseName,
-            const vtk::outputOptions outOpts,
-            const bool nearCellValue,
-            const labelList& patchIDs
+            const labelList& patchIDs,
+            const vtk::outputOptions opts = vtk::formatType::INLINE_BASE64,
+            const bool useNearCellValue = false
+        );
+
+        //- Construct from components (default format INLINE_BASE64),
+        //- and open the file for writing.
+        //  The file name is with/without an extension.
+        patchWriter
+        (
+            const fvMesh& mesh,
+            const labelList& patchIDs,
+            const fileName& file,
+            bool parallel = Pstream::parRun()
+        );
+
+        //- Construct from components (default format INLINE_BASE64),
+        //- Construct from components and open the file for writing.
+        //  The file name is with/without an extension.
+        patchWriter
+        (
+            const fvMesh& mesh,
+            const labelList& patchIDs,
+            const vtk::outputOptions opts,
+            const fileName& file,
+            bool parallel = Pstream::parRun()
+        );
+
+        //- Construct from components and open the file for writing.
+        //  The file name is with/without an extension.
+        //  \param useNearCellValue to use cell instead of patch values
+        patchWriter
+        (
+            const fvMesh& mesh,
+            const labelList& patchIDs,
+            const vtk::outputOptions opts,
+            const bool useNearCellValue,
+            const fileName& file,
+            bool parallel = Pstream::parRun()
         );
 
 
     //- Destructor
-    ~patchWriter();
+    virtual ~patchWriter() = default;
 
 
     // Member Functions
 
-        inline std::ofstream& os()
+        //- File extension for current format type.
+        using vtk::fileWriter::ext;
+
+        //- File extension for given output type
+        inline static word ext(vtk::outputOptions opts)
         {
-            return os_;
+            return opts.ext(vtk::fileTag::POLY_DATA);
         }
 
-        inline vtk::formatter& format()
+        //- The patch IDs
+        inline const labelList& patchIDs() const
         {
-            return *format_;
+            return patchIDs_;
         }
 
-        inline label nPoints() const
-        {
-            return nPoints_;
-        }
+        //- Write file header (non-collective)
+        //  \note Expected calling states: (OPENED).
+        virtual bool beginFile(std::string title = "");
 
-        inline label nFaces() const
-        {
-            return nFaces_;
-        }
+        //- Write patch topology
+        //  Also writes the file header if not previously written.
+        //  \note Must be called prior to writing CellData or PointData
+        virtual bool writeGeometry();
 
-        //- Open write for CellData of count fields.
-        //  The parameters are only used for the legacy format.
-        void beginCellData(label nFields);
+        //- Begin CellData output section for specified number of fields.
+        //  Must be called prior to writing any cell data fields.
+        //  \param nFields is for legacy format only.
+        //      When nFields=0, this a no-op for legacy format.
+        //  \note Expected calling states: (PIECE | POINT_DATA).
+        //
+        //  \return True if the state changed
+        virtual bool beginCellData(label nFields = 0);
 
-        //- Close write for CellData
-        void endCellData();
+        //- Begin PointData for specified number of fields.
+        //  Must be called prior to writing any point data fields.
+        //  \param nFields is for legacy format only.
+        //      When nFields=0, this a no-op for legacy format.
+        //  \note Expected calling states: (PIECE | CELL_DATA).
+        //
+        //  \return True if the state changed
+        virtual bool beginPointData(label nFields = 0);
 
-        //- Open write for PointData of count fields
-        //  The parameters are only used for the legacy format.
-        void beginPointData(label nFields);
 
-        //- Close write for PointData
-        void endPointData();
-
-        //- Write cellIDs
+        //- Write patch ids as CellData.
+        //  Must be called within the CELL_DATA state.
         void writePatchIDs();
 
-        //- Write file footer
-        void writeFooter();
 
+    // Write
 
-      // Write fields (individually)
+        //- Write point field
+        template<class Type, template<class> class PatchField>
+        void write
+        (
+            const GeometricField<Type, PatchField, pointMesh>& field
+        );
 
         //- Write volume field
         template<class Type, template<class> class PatchField>
-        void write(const GeometricField<Type, PatchField, volMesh>& field);
+        void write
+        (
+            const GeometricField<Type, PatchField, volMesh>& field
+        );
 
-        //- Write point fields
-        template<class Type, template<class> class PatchField>
-        void write(const GeometricField<Type, PatchField, pointMesh>& field);
-
-        //- Write point-interpolated volume field
+        //- Write volume field with point interpolation
         template<class Type>
         void write
         (
-            const PrimitivePatchInterpolation<primitivePatch>& pInterp,
-            const GeometricField<Type, fvPatchField, volMesh>& field
+            const GeometricField<Type, fvPatchField, volMesh>& field,
+            const PrimitivePatchInterpolation<primitivePatch>& pInterp
         );
 
-
-      // Write fields (collectively)
-
-        //- Write multiple volume/point fields
-        template<class Type, template<class> class PatchField, class GeoMesh>
-        void write
-        (
-            const UPtrList
-            <
-                const GeometricField<Type, PatchField, GeoMesh>
-            >& flds
-        );
-
-        //- Write multiple point-interpolated volume fields
+        //- Write volume field with point interpolation
         template<class Type>
         void write
         (
-            const PrimitivePatchInterpolation<primitivePatch>& pInterp,
-            const UPtrList
-            <
-                const GeometricField<Type, fvPatchField, volMesh>
-            >& flds
+            const GeometricField<Type, fvPatchField, volMesh>& field,
+            const PrimitivePatchInterpolation<primitivePatch>* pInterp
         );
 };
 

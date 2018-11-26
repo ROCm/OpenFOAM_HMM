@@ -97,6 +97,9 @@ public:
         //- The output format type
         inline formatType fmt() const;
 
+        //- The file extension (legacy or xml) for the given content-type
+        inline word ext(vtk::fileTag contentType) const;
+
         //- True if writer uses legacy file format
         inline bool legacy() const;
 

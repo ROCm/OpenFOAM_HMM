@@ -66,6 +66,12 @@ Foam::ensightMesh::ensightMesh
 }
 
 
+Foam::ensightMesh::ensightMesh(const fvMesh& mesh)
+:
+    ensightMesh(mesh, IOstream::streamFormat::BINARY)
+{}
+
+
 Foam::ensightMesh::ensightMesh
 (
     const fvMesh& mesh,
@@ -103,7 +109,7 @@ bool Foam::ensightMesh::expire()
 {
     clear();
 
-    // already marked as expired
+    // Already marked as expired
     if (needsUpdate_)
     {
         return false;
@@ -118,12 +124,25 @@ void Foam::ensightMesh::correct()
 {
     clear();
 
-    // First see if patches are allowed/disallowed
-    // and if only particular patches should be selected
+    // Part number
+    label nParts = 0;
 
-    label nParts = 1;  // provisionally (for internalMesh)
+    if (useInternalMesh())
+    {
+        meshCells_.index() = nParts++;
+        meshCells_.classify(mesh_);
 
-    if (option().usePatches())
+        // Determine parallel shared points
+        globalPointsPtr_ = mesh_.globalData().mergePoints
+        (
+            pointToGlobal_,
+            uniquePointMap_
+        );
+    }
+    meshCells_.reduce();
+
+
+    if (useBoundaryMesh())
     {
         // Patches are output. Check that they are synced.
         mesh_.boundaryMesh().checkParallelSync(true);
@@ -132,55 +151,42 @@ void Foam::ensightMesh::correct()
         if (Pstream::parRun())
         {
             // Do not include processor patches in matching
-            patchNames.setSize(mesh_.boundaryMesh().nNonProcessor());
+            patchNames.resize(mesh_.boundaryMesh().nNonProcessor());
         }
 
-        labelList matched;
-
-        bool useAll = true;
         const wordRes& matcher = option().patchSelection();
-        if (notNull(matcher))
-        {
-            nParts = 0; // no internalMesh
 
-            if (!matcher.empty())
-            {
-                useAll = false;
-                matched = matcher.matching(patchNames);
-            }
-        }
+        const labelList patchIds =
+        (
+            matcher.empty()
+          ? identity(patchNames.size())         // Use all
+          : findStrings(matcher, patchNames)    // Use specified names
+        );
 
-        if (useAll)
-        {
-            matched = identity(patchNames.size());
-        }
-
-        for (const label patchId : matched)
+        for (const label patchId : patchIds)
         {
             const word& patchName = patchNames[patchId];
 
-            // use fvPatch (not polyPatch) to automatically remove empty patches
+            // Use fvPatch (not polyPatch) to automatically remove empty patches
             const fvPatch& p = mesh_.boundary()[patchId];
 
-            // yes we most likely want this patch.
-            // - can use insert or set, since hash was cleared before
-            boundaryPatchFaces_.set(patchName, ensightFaces());
-            ensightFaces& ensFaces = boundaryPatchFaces_[patchName];
+            ensightFaces& ensFaces = boundaryPatchFaces_(patchName);
+            ensFaces.clear();
 
             if (p.size())
             {
-                // use local face addressing (offset = 0),
-                // since this is what we'll need later when writing fields
+                // Local face addressing (offset = 0),
+                // - this is what we'll need later when writing fields
                 ensFaces.classify(p.patch());
             }
             else
             {
-                // patch is empty (on this processor)
+                // The patch is empty (on this processor)
                 // or the patch is 'empty' (as fvPatch type)
                 ensFaces.clear();
             }
 
-            // finalize
+            // Finalize
             ensFaces.reduce();
 
             if (ensFaces.total())
@@ -199,26 +205,11 @@ void Foam::ensightMesh::correct()
         // * boundaryPatchFaces_ is a lookup by name for the faces elements
     }
 
-    if (useInternalMesh())
-    {
-        meshCells_.index() = 0;
-        meshCells_.classify(mesh_);
 
-        // Determine parallel shared points
-        globalPointsPtr_ = mesh_.globalData().mergePoints
-        (
-            pointToGlobal_,
-            uniquePointMap_
-        );
-    }
-
-    meshCells_.reduce();
-
-    // faceZones
     if (option().useFaceZones())
     {
         // Mark boundary faces to be excluded from export
-        bitSet excludeFace(mesh_.nFaces()); // all false
+        bitSet excludeFace(mesh_.nFaces());     // all false
 
         for (const polyPatch& pp : mesh_.boundaryMesh())
         {
@@ -228,32 +219,22 @@ void Foam::ensightMesh::correct()
              && !refCast<const processorPolyPatch>(pp).owner()
             )
             {
-                label bFaceI = pp.start();
-                forAll(pp, i)
-                {
-                    excludeFace.set(bFaceI++);
-                }
+                excludeFace.set(pp.range());
             }
         }
 
-        const wordRes& matcher = option().faceZoneSelection();
-
-        wordList selectZones = mesh_.faceZones().names();
-        subsetMatchingStrings(matcher, selectZones);
-
-        // have same order as later with sortedToc()
-        Foam::sort(selectZones);
+        // Use sorted order for later consistency
+        const wordList zoneNames =
+            mesh_.faceZones().sortedNames(option().faceZoneSelection());
 
         // Count face types in each selected faceZone
-        for (const word& zoneName : selectZones)
+        for (const word& zoneName : zoneNames)
         {
             const label zoneID = mesh_.faceZones().findZoneID(zoneName);
             const faceZone& fz = mesh_.faceZones()[zoneID];
 
-            // yes we most likely want this zone
-            // - can use insert or set, since hash was cleared before
-            faceZoneFaces_.set(zoneName, ensightFaces());
-            ensightFaces& ensFaces = faceZoneFaces_[zoneName];
+            ensightFaces& ensFaces = faceZoneFaces_(zoneName);
+            ensFaces.clear();
 
             if (fz.size())
             {
@@ -266,7 +247,7 @@ void Foam::ensightMesh::correct()
                 );
             }
 
-            // finalize
+            // Finalize
             ensFaces.reduce();
 
             if (ensFaces.total())
@@ -286,9 +267,12 @@ void Foam::ensightMesh::correct()
 
 void Foam::ensightMesh::write(ensightGeoFile& os) const
 {
+    //
+    // Write internalMesh
+    //
     if (useInternalMesh())
     {
-        label nPoints = globalPoints().size();
+        const label nPoints = globalPoints().size();
 
         const pointField uniquePoints(mesh_.points(), uniquePointMap_);
 
@@ -308,11 +292,9 @@ void Foam::ensightMesh::write(ensightGeoFile& os) const
 
 
     //
-    // write patches
-    // use sortedToc for extra safety
+    // Write patches - sorted by Id
     //
-    const labelList patchIds = patchLookup_.sortedToc();
-    for (const label patchId : patchIds)
+    for (const label patchId : patchLookup_.sortedToc())
     {
         const word& patchName = patchLookup_[patchId];
         const ensightFaces& ensFaces = boundaryPatchFaces_[patchName];
@@ -353,10 +335,9 @@ void Foam::ensightMesh::write(ensightGeoFile& os) const
 
 
     //
-    // write faceZones, if requested
+    // Write faceZones, if requested
     //
-    const wordList zoneNames = faceZoneFaces_.sortedToc();
-    for (const word& zoneName : zoneNames)
+    for (const word& zoneName : faceZoneFaces_.sortedToc())
     {
         const ensightFaces& ensFaces = faceZoneFaces_[zoneName];
 

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,11 +28,8 @@ Group
     grpUtilitiesFunctionObjects
 
 Description
-    This functionObject writes objects registered to the database in VTK format.
-
-    Currently only supports writing of the cell-values of volFields but
-    support for other field types, patch fields, Lagrangian data etc. will be
-    added.
+    Writes fields in VTK (xml or legacy) format.
+    Writes cell-values or point-interpolated values for volFields.
 
     Example of function object specification:
     \verbatim
@@ -47,21 +44,79 @@ Description
         decompose       false;
         ...
         fields          (U p);
+
+        selection
+        {
+            box
+            {
+                action  add;
+                source  box;
+                box     (-0.1 -0.01 -0.1) (0.1 0.30 0.1);
+            }
+            dome
+            {
+                action  add;
+                source  sphere;
+                origin  (-0.1 -0.01 -0.1);
+                radius  0.25;
+            }
+            centre
+            {
+                action  subtract;
+                source  sphere;
+                origin  (-0.1 -0.01 -0.1);
+                radius  0.1;
+            }
+            blob
+            {
+                action  add;
+                source  surface;
+                surface triSurfaceMesh;
+                name    blob.stl;
+            }
+        }
     }
     \endverbatim
 
-Usage
+    \heading Basic Usage
     \table
-        Property     | Description                      | Required    | Default
-        type         | Type name: vtkWrite              | yes         |
-        fields       | Fields to output                 | yes         |
-        writeControl | Output control                   | recommended | timeStep
-        directory    | The output directory name        | no          | "VTK"
-        format       | ASCII or binary format           | no          | binary
-        legacy       | Legacy VTK output                | no          | false
-        decompose    | decompose polyhedra              | no          | false
-        writeIds     | Write cell ids as field          | no          | true
+        Property    | Description                           | Required | Default
+        type        | Type name: vtkWrite                   | yes |
+        fields      | Fields to output (wordRe list)        | yes |
+        boundary    | Convert boundary fields               | no  | true
+        internal    | Convert internal fields               | no  | true
+        single      | Combine patches into a single boundary | no | false
+        interpolate | Interpolate for point values          | no  | false
     \endtable
+
+    \heading Output Options
+    \table
+        Property    | Description                           | Required | Default
+        format      | ascii or binary format                | no  | binary
+        legacy      | Legacy VTK output                     | no  | false
+        precision   | Write precision in ascii         | no | same as IOstream
+        directory   | The output directory name     | no | postProcessing/NAME
+        width       | Padding width for file name           | no  | 8
+        decompose   | Decompose polyhedral cells            | no  | false
+        writeIds    | Write cell/patch ids as field         | no  | false
+    \endtable
+
+    \heading Output Selection
+    \table
+        Property    | Description                           | Required | Default
+        region      | Name for a single region              | no  | region0
+        regions     | List of regions (wordRe list)         | no  |
+        patches     | Limit to listed patches (wordRe list) | no  |
+        selection   | Cell selection (topoSet actions)      | no  | empty dict
+    \endtable
+
+Note
+    The region of interest is defined by the selection dictionary
+    as a set of actions (add,subtract,subset,invert).
+    Omitting the selection dictionary is the same as specifying the
+    conversion of all cells (in the selected regions).
+    Omitting the patches entry is the same as specifying the conversion of all
+    patches.
 
 See also
     Foam::functionObjects::ensightWrite
@@ -77,10 +132,12 @@ SourceFiles
 #ifndef functionObjects_vtkWrite_H
 #define functionObjects_vtkWrite_H
 
-#include "fvMeshFunctionObject.H"
+#include "functionObject.H"
 #include "foamVtkInternalWriter.H"
-#include "foamVtkSurfaceMeshWriter.H"
-#include "wordRes.H"
+#include "foamVtkPatchWriter.H"
+#include "foamVtkSeriesWriter.H"
+#include "fvMeshSubsetProxy.H"
+#include "searchableSurfaces.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -95,18 +152,36 @@ namespace functionObjects
 
 class vtkWrite
 :
-    public fvMeshFunctionObject
+    public functionObject
 {
-    // Private data
+    // Private Data
+
+        //- Reference to the time database
+        const Time& time_;
+
+        //- The output directory
+        fileName outputDir_;
+
+        //- The printf format for zero-padding names
+        string printf_;
 
         //- VTK output options
         vtk::outputOptions writeOpts_;
 
-        //- Name of fields to process
-        wordRes selectFields_;
+        //- Verbose output
+        bool verbose_;
 
-        //- Output directory name
-        fileName dirName_;
+        //- Convert internal mesh
+        bool doInternal_;
+
+        //- Convert boundary mesh
+        bool doBoundary_;
+
+        //- Combine patches into a single file
+        bool oneBoundary_;
+
+        //- Interpolate cell to point values
+        bool interpolate_;
 
         //- Decompose polyhedra
         bool decompose_;
@@ -114,29 +189,99 @@ class vtkWrite
         //- Write cell ids field
         bool writeIds_;
 
+        //- Track changes in mesh geometry
+        enum polyMesh::readUpdateState meshState_;
+
+        //- Requested names of regions to process
+        wordRes selectRegions_;
+
+        //- Requested names of patches to process
+        wordRes selectPatches_;
+
+        //- Requested names of fields to process
+        wordRes selectFields_;
+
+        //- Dictionary of volume selections
+        dictionary selection_;
+
+        //- Pointers to the requested mesh regions
+        HashTable<const fvMesh*> meshes_;
+
+        //- Subsetting for meshes.
+        //  Access index according to sorted mesh names.
+        PtrList<fvMeshSubset> meshSubsets_;
+
+        //- Storage for VTU cells, sizing.
+        //  Access index according to sorted mesh names.
+        PtrList<vtk::vtuCells> vtuMappings_;
+
+        //- VTK file series
+        HashTable<vtk::seriesWriter, fileName> series_;
+
 
     // Private Member Functions
 
-        //- Count number of selected fields for GeoField type.
-        //  Only needed for legacy vtk format.
-        template<class GeoField>
-        label countFields() const;
+        //- Update mesh subset according to zones, geometry, bounds
+        bool updateSubset(fvMeshSubset& subsetter) const;
 
-        //- Write selected fields for GeoField type.
-        template<class GeoField>
-        label writeFields
+        //- Get patchIds selected in list
+        labelList getSelectedPatches(const polyBoundaryMesh& patches) const;
+
+        //- Read information for selections
+        bool readSelection(const dictionary& dict);
+
+        //- Update meshes, subMeshes etc.
+        bool update();
+
+
+    // Write
+
+        //- Write all volume fields
+        label writeAllVolFields
         (
-            vtk::internalWriter& writer,
-            bool verbose=true
+            autoPtr<vtk::internalWriter>& internalWriter,
+            UPtrList<vtk::patchWriter>& patchWriters,
+            const fvMeshSubset& proxy,
+            const wordHashSet& acceptField
         ) const;
 
-
-        //- Write selected fields for GeoField type.
-        template<class GeoField>
-        label writeFields
+        //- Write all volume fields with point interpolation
+        label writeAllVolFields
         (
-            vtk::surfaceMeshWriter& writer,
-            bool verbose=true
+            autoPtr<vtk::internalWriter>& internalWriter,
+            const autoPtr<volPointInterpolation>& pInterp,
+            UPtrList<vtk::patchWriter>& patchWriters,
+            const UPtrList
+            <
+                PrimitivePatchInterpolation<primitivePatch>
+            >& patchInterps,
+            const fvMeshSubset& proxy,
+            const wordHashSet& acceptField
+        ) const;
+
+        //- Write selected GeoField fields.
+        template<class GeoField>
+        label writeVolFields
+        (
+            autoPtr<vtk::internalWriter>& internalWriter,
+            UPtrList<vtk::patchWriter>& patchWriters,
+            const fvMeshSubset& proxy,
+            const wordHashSet& acceptField
+        ) const;
+
+        //- Write selected GeoField fields with point interpolation
+        template<class GeoField>
+        label writeVolFields
+        (
+            autoPtr<vtk::internalWriter>& internalWriter,
+            const autoPtr<volPointInterpolation>& pInterp,
+            UPtrList<vtk::patchWriter>& patchWriters,
+            const UPtrList
+            <
+                PrimitivePatchInterpolation<primitivePatch>
+            >& patchInterps,
+            const fvMeshSubset& proxy,
+            const wordHashSet& acceptField
         ) const;
 
 
@@ -173,11 +318,20 @@ public:
         //- Read the vtkWrite specification
         virtual bool read(const dictionary& dict);
 
-        //- Execute, currently does nothing
+        //- Execute - does nothing
         virtual bool execute();
 
         //- Write fields
         virtual bool write();
+
+        //- On end - provide feedback about disconnecting from catatyst.
+        virtual bool end();
+
+        //- Update for changes of mesh
+        virtual void updateMesh(const mapPolyMesh& mpm);
+
+        //- Update for mesh point-motion
+        virtual void movePoints(const polyMesh& mesh);
 };
 
 

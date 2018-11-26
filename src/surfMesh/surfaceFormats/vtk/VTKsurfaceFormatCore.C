@@ -63,11 +63,10 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeHeader
     const UList<point>& pts
 )
 {
-    vtk::legacy::fileHeader
+    vtk::legacy::fileHeader<vtk::fileTag::POLY_DATA>
     (
         format,
-        ("surface written " + clock::dateTime()),
-        vtk::fileTag::POLY_DATA
+        ("surface written " + clock::dateTime())
     );
 
     vtk::legacy::beginPoints(format.os(), pts.size());
@@ -92,21 +91,8 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeCellData
         nFaces += z.size();
     }
 
-    vtk::legacy::dataHeader
-    (
-        format.os(),
-        vtk::fileTag::CELL_DATA,
-        nFaces,
-        1  // Only one field
-    );
-
-    vtk::legacy::intField
-    (
-        format.os(),
-        "region",
-        1, // nComponent
-        nFaces
-    );
+    vtk::legacy::beginCellData(format, nFaces, 1);      // 1 field
+    vtk::legacy::intField<1>(format, "region", nFaces); // 1 component
 
     label zoneId = 0;
     for (const surfZone& zone : zones)
@@ -132,21 +118,8 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeCellData
     // Number of faces
     const label nFaces = zoneIds.size();
 
-    vtk::legacy::dataHeader
-    (
-        format.os(),
-        vtk::fileTag::CELL_DATA,
-        nFaces,
-        1  // Only one field
-    );
-
-    vtk::legacy::intField
-    (
-        format.os(),
-        "region",
-        1, // nComponent
-        nFaces
-    );
+    vtk::legacy::beginCellData(format, nFaces, 1);      // 1 field
+    vtk::legacy::intField<1>(format, "region", nFaces); // 1 component
 
     vtk::writeList(format, zoneIds);
     format.flush();

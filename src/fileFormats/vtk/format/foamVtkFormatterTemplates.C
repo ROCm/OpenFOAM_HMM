@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,75 +26,66 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::vtk::formatter&
-Foam::vtk::formatter::writeAttribute
+template<class Type, Foam::direction nComp, int nTuple>
+Foam::vtk::formatter& Foam::vtk::formatter::beginDataArray
 (
-    const word& k,
-    const Type& v,
-    const char quote
+    const word& dataName,
+    uint64_t payLoad,
+    bool leaveOpen
 )
 {
-    if (!inTag_)
-    {
-        WarningInFunction
-            << "xml attribute '" << k << "' but not within a tag!"
-            << endl;
-    }
-
-    os_ << ' ' << k << '=' << quote << v << quote;
-
-    return *this;
-}
-
-
-template<class Type, int nComp>
-Foam::vtk::formatter&
-Foam::vtk::formatter::openDataArray
-(
-    const word& dataName
-)
-{
-    openTag("DataArray");
+    openTag(vtk::fileTag::DATA_ARRAY);
     xmlAttr("type", vtkPTraits<Type>::typeName);
     xmlAttr("Name", dataName);
+
     if (nComp > 1)
     {
-        xmlAttr(fileAttr::NUMBER_OF_COMPONENTS, nComp);
+        xmlAttr(fileAttr::NUMBER_OF_COMPONENTS, int(nComp));
+    }
+    if (nTuple > 0)
+    {
+        xmlAttr(fileAttr::NUMBER_OF_TUPLES, nTuple);
     }
     xmlAttr("format", name());
 
+    if (formatter::npos != payLoad)
+    {
+        uint64_t off = offset(payLoad);
+        if (formatter::npos != off)
+        {
+            xmlAttr("offset", off);
+        }
+    }
+
+    if (!leaveOpen)
+    {
+        closeTag();
+    }
+
     return *this;
 }
 
 
-template<class Type, int nComp>
-Foam::vtk::formatter&
-Foam::vtk::formatter::openDataArray
-(
-    const vtk::dataArrayAttr& attrEnum
-)
-{
-    return openDataArray<Type, nComp>(vtk::dataArrayAttrNames[attrEnum]);
-}
-
-
-template<class Type, int nComp>
-Foam::vtk::formatter&
-Foam::vtk::formatter::PDataArray
+template<class Type, Foam::direction nComp, int nTuple>
+Foam::vtk::formatter& Foam::vtk::formatter::PDataArray
 (
     const word& dataName
 )
 {
     openTag("PDataArray");
     xmlAttr("type", vtkPTraits<Type>::typeName);
+
     if (dataName.size())
     {
         xmlAttr("Name", dataName);
     }
     if (nComp > 1)
     {
-        xmlAttr(fileAttr::NUMBER_OF_COMPONENTS, nComp);
+        xmlAttr(fileAttr::NUMBER_OF_COMPONENTS, int(nComp));
+    }
+    if (nTuple > 0)
+    {
+        xmlAttr(fileAttr::NUMBER_OF_TUPLES, nTuple);
     }
 
     closeTag(true);

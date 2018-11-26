@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,13 +58,13 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class polyMesh;
 
 namespace vtk
 {
-// Forward declaration of classes
-    class outputOptions;
+// Forward declarations
+class outputOptions;
 
 /*---------------------------------------------------------------------------*\
                      Class Foam::vtk::vtuCells Declaration
@@ -76,7 +76,7 @@ class vtuCells
 {
     // Private Member Data
 
-      // Requested output types
+    // Requested output types
 
         //- Output content type
         contentType output_;
@@ -84,7 +84,8 @@ class vtuCells
         //- Bookkeeping for polyhedral cell decomposition
         bool decomposeRequest_;
 
-      // Storage of output
+
+    // Storage of output
 
         //- Cell types (including added cells) in vtk numbering
         //  Range is 1-255
@@ -108,6 +109,10 @@ class vtuCells
 
     // Private Member Functions
 
+        //- Create the geometry using the previously requested output and
+        //  decomposition types.
+        void repopulate(const polyMesh& mesh);
+
         //- No copy construct
         vtuCells(const vtuCells&) = delete;
 
@@ -128,7 +133,7 @@ public:
         );
 
         //- Construct from components and create the output information
-        //  immediately
+        //- immediately
         vtuCells
         (
             const polyMesh& mesh,
@@ -140,27 +145,27 @@ public:
         //  Optionally with polyhedral decomposition.
         vtuCells
         (
-            const vtk::outputOptions outOpts,
+            const vtk::outputOptions opts,
             const bool decompose = false
         );
 
-        //- Construct from components and create the output information
-        //  immediately
+        //- Construct from components, and create the output information
+        //- immediately
         vtuCells
         (
             const polyMesh& mesh,
-            const vtk::outputOptions outOpts,
+            const vtk::outputOptions opts,
             const bool decompose = false
         );
 
 
     //- Destructor
-    ~vtuCells();
+    ~vtuCells() = default;
 
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- The output content type
         inline enum contentType content() const;
@@ -175,17 +180,17 @@ public:
         inline label size() const;
 
 
-      // Edit
+    // Edit
 
         //- Reset all sizes to zero.
         void clear();
 
         //- Create the geometry using the previously requested output and
-        //  decomposition types.
+        //- decomposition types.
         void reset(const polyMesh& mesh);
 
         //- Respecify requested output and decomposition type prior to
-        //  creating the geometry
+        //- creating the geometry
         void reset
         (
             const polyMesh& mesh,
@@ -200,7 +205,7 @@ public:
         void renumberPoints(const labelUList& mapping);
 
 
-      // Storage Access
+    // Storage Access
 
         //- Values for "types" (XML) and "CELL_TYPES" (legacy)
         inline const List<uint8_t>& cellTypes() const;

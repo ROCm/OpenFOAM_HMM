@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class appendRawFormatter Declaration
+                   Class vtk::appendRawFormatter Declaration
 \*---------------------------------------------------------------------------*/
 
 class appendRawFormatter
@@ -57,6 +57,9 @@ class appendRawFormatter
         static const char* name_;
         static const char* encoding_;
         static const outputOptions opts_;
+
+        //- The current offset for append data.
+        uint64_t offset_;
 
 
     // Private Member Functions
@@ -99,9 +102,16 @@ public:
         //- Output name for append encoding type ("raw")
         virtual const char* encoding() const;
 
+        //- Increase the append data offset by numbytes and sizeof(uint64_t).
+        //  The additional (uint64_t) size information is consistent with
+        //  writeSize()
+        //
+        //  \return The previous data offset
+        virtual uint64_t offset(const uint64_t numbytes);
 
         //- Write leading size for binary output
-        virtual void writeSize(const uint64_t nBytes);
+        //  \return True - format uses this information
+        virtual bool writeSize(const uint64_t numbytes);
 
         virtual void write(const uint8_t val);
         virtual void write(const label val);

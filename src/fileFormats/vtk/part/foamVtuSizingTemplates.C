@@ -263,7 +263,9 @@ void Foam::vtk::vtuSizing::populateArrays
     // the per-cell vertLabels entries, and the faceOffset contains the *size*
     // associated with the per-cell faceLabels.
 
-    forAll(shapes, celli)
+    const label len = shapes.size();
+
+    for (label celli=0; celli < len; ++celli)
     {
         const cellShape& shape = shapes[celli];
         const cellModel& model = shape.model();
@@ -282,9 +284,9 @@ void Foam::vtk::vtuSizing::populateArrays
                 vertLabels[nVertLabels++] = shape.size();
             }
 
-            forAll(shape, i)
+            for (const label cpi : shape)
             {
-                vertLabels[nVertLabels++] = shape[i];
+                vertLabels[nVertLabels++] = cpi;
             }
         }
         else if (model == pyr)
@@ -299,9 +301,9 @@ void Foam::vtk::vtuSizing::populateArrays
                 vertLabels[nVertLabels++] = shape.size();
             }
 
-            forAll(shape, i)
+            for (const label cpi : shape)
             {
-                vertLabels[nVertLabels++] = shape[i];
+                vertLabels[nVertLabels++] = cpi;
             }
         }
         else if (model == hex)
@@ -316,9 +318,9 @@ void Foam::vtk::vtuSizing::populateArrays
                 vertLabels[nVertLabels++] = shape.size();
             }
 
-            forAll(shape, i)
+            for (const label cpi : shape)
             {
-                vertLabels[nVertLabels++] = shape[i];
+                vertLabels[nVertLabels++] = cpi;
             }
         }
         else if (model == prism)
@@ -403,10 +405,11 @@ void Foam::vtk::vtuSizing::populateArrays
             bool first = true;
 
             const labelList& cFaces = mesh.cells()[celli];
-            forAll(cFaces, cFaceI)
+
+            for (const label facei : cFaces)
             {
-                const face& f = mesh.faces()[cFaces[cFaceI]];
-                const bool isOwner = (owner[cFaces[cFaceI]] == celli);
+                const face& f = mesh.faces()[facei];
+                const bool isOwner = (owner[facei] == celli);
 
                 // Count triangles/quads in decomposition
                 label nTria = 0, nQuad = 0;
@@ -418,10 +421,10 @@ void Foam::vtk::vtuSizing::populateArrays
                 nTria = 0, nQuad = 0;
                 f.trianglesQuads(mesh.points(), nTria, nQuad, faces3, faces4);
 
-                forAll(faces4, fci)
+                for (const face& quad : faces4)
                 {
                     // Quad becomes a pyramid
-                    const face& quad = faces4[fci];
+
                     const label nShapePoints = 5;  // pyr (5 vertices)
 
                     label celLoc, vrtLoc;
@@ -466,13 +469,14 @@ void Foam::vtk::vtuSizing::populateArrays
                         vertLabels[vrtLoc++] = quad[3];
                     }
 
-                    vertLabels[vrtLoc++] = newVertexLabel; // apex
+                    // The apex
+                    vertLabels[vrtLoc++] = newVertexLabel;
                 }
 
-                forAll(faces3, fci)
+                for (const face& tria : faces3)
                 {
                     // Triangle becomes a tetrahedral
-                    const face& tria = faces3[fci];
+
                     const label nShapePoints = 4;  // tet (4 vertices)
 
                     label celLoc, vrtLoc;
@@ -516,7 +520,9 @@ void Foam::vtk::vtuSizing::populateArrays
                         vertLabels[vrtLoc++] = tria[1];
                         vertLabels[vrtLoc++] = tria[2];
                     }
-                    vertLabels[vrtLoc++] = newVertexLabel; // apex
+
+                    // The apex
+                    vertLabels[vrtLoc++] = newVertexLabel;
                 }
             }
         }
@@ -540,14 +546,14 @@ void Foam::vtk::vtuSizing::populateArrays
 
             faceOutput[faceIndexer++] = cFaces.size();
 
-            forAll(cFaces, cFaceI)
+            for (const label facei : cFaces)
             {
-                const face& f = mesh.faces()[cFaces[cFaceI]];
-                const bool isOwner = (owner[cFaces[cFaceI]] == celli);
+                const face& f = mesh.faces()[facei];
+                const bool isOwner = (owner[facei] == celli);
 
                 hashUniqId.insert(f);
 
-                // number of labels for this face
+                // The number of labels for this face
                 faceOutput[faceIndexer++] = f.size();
 
                 if (isOwner)
@@ -586,9 +592,9 @@ void Foam::vtk::vtuSizing::populateArrays
                 }
 
                 const labelList uniq = hashUniqId.sortedToc();
-                forAll(uniq, i)
+                for (const label fpi : uniq)
                 {
-                    vertLabels[nVertLabels++] = uniq[i];
+                    vertLabels[nVertLabels++] = fpi;
                 }
             }
         }
@@ -660,6 +666,34 @@ void Foam::vtk::vtuSizing::populateArrays
         }
     }
 }
+
+
+//unused template<class LabelType, class LabelType2>
+//unused void Foam::vtk::vtuSizing::renumberVertLabelsInternalImpl
+//unused (
+//unused     UList<uint8_t>& cellTypes,
+//unused     UList<LabelType>& vertLabels,
+//unused     const LabelType2 globalPointOffset
+//unused )
+//unused {
+//unused     // INTERNAL vertLabels = "connectivity" contain
+//unused     // [nLabels, vertex labels...]
+//unused
+//unused     auto iter = vertLabels.begin();
+//unused     const auto last = vertLabels.end();
+//unused
+//unused     while (iter < last)
+//unused     {
+//unused         LabelType nLabels = *iter;
+//unused         ++iter;
+//unused
+//unused         while (nLabels--)
+//unused         {
+//unused             *iter += globalPointOffset;
+//unused             ++iter;
+//unused         }
+//unused     }
+//unused }
 
 
 // ************************************************************************* //

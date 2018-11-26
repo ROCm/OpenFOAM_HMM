@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ Description
 #define foamVtkPTraits_H
 
 #include <cstdint>
+#include <string>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,13 +48,10 @@ class endian;
 \*---------------------------------------------------------------------------*/
 
 template<class PrimitiveType>
-class vtkPTraits
+struct vtkPTraits
 {
-public:
-
     // Static data members
-
-        static const char* const typeName;
+    static const char* const typeName;
 };
 
 
@@ -80,6 +78,9 @@ const char* const vtkPTraits<double>::typeName;   // Float64
 
 template<>
 const char* const vtkPTraits<Foam::endian>::typeName; // (Big|Little)Endian
+
+template<>
+const char* const vtkPTraits<std::string>::typeName; // String
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

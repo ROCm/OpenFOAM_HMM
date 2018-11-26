@@ -79,15 +79,28 @@ bool Foam::functionObjects::dataCloud::writeCloud
         return false;
     }
 
+    applyFilter_ = calculateFilter(obrTmp, log);
+    reduce(applyFilter_, orOp<bool>());
+
+
+    // Number of parcels (locally)
+    label nParcels = (applyFilter_ ? parcelAddr_.count() : pointsPtr->size());
+
     // Total number of parcels on all processes
-    label nTotParcels = pointsPtr->size();
-    reduce(nTotParcels, sumOp<label>());
+    const label nTotParcels = returnReduce(nParcels, sumOp<label>());
+
+    if (applyFilter_ && log)
+    {
+        // Report filtered/unfiltered count
+        Log << "After filtering using " << nTotParcels << '/'
+            << (returnReduce(pointsPtr->size(), sumOp<label>()))
+            << " parcels" << nl;
+    }
 
     if (!nTotParcels)
     {
         return false;
     }
-
 
     if (Pstream::master())
     {
@@ -113,6 +126,9 @@ Foam::functionObjects::dataCloud::dataCloud
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
+    printf_(),
+    precision_(IOstream::defaultPrecision()),
+    applyFilter_(false),
     selectClouds_(),
     fieldName_(),
     directory_()
@@ -139,6 +155,9 @@ bool Foam::functionObjects::dataCloud::read(const dictionary& dict)
         printf_ = "%0" + std::to_string(padWidth) + "d";
     }
 
+    precision_ =
+        dict.lookupOrDefault("precision", IOstream::defaultPrecision());
+
 
     selectClouds_.clear();
     dict.readIfPresent("clouds", selectClouds_);
@@ -151,6 +170,9 @@ bool Foam::functionObjects::dataCloud::read(const dictionary& dict)
     }
 
     dict.readEntry("field", fieldName_);
+
+    // Actions to define selection
+    parcelSelect_ = dict.subOrEmptyDict("selection");
 
     // Output directory
 

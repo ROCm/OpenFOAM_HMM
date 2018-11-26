@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,9 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "foamVtkSurfaceMeshWriter.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
@@ -36,28 +34,33 @@ Foam::vtk::surfaceMeshWriter::getFaceField
 {
     const polyBoundaryMesh& patches = sfld.mesh().boundaryMesh();
 
-    tmp<Field<Type>> tfld(new Field<Type>(pp_.size()));
-    Field<Type>& fld = tfld.ref();
+    const labelList& faceAddr = this->patch().addressing();
 
-    forAll(pp_.addressing(), i)
+    auto tfld = tmp<Field<Type>>::New(faceAddr.size());
+    auto iter = tfld.ref().begin();
+
+    for (const label facei : faceAddr)
     {
-        const label facei = pp_.addressing()[i];
         const label patchi = patches.whichPatch(facei);
 
         if (patchi == -1)
         {
-            fld[i] = sfld[facei];
+            *iter = sfld[facei];
         }
         else
         {
             const label localFacei = facei - patches[patchi].start();
-            fld[i] = sfld.boundaryField()[patchi][localFacei];
+            *iter = sfld.boundaryField()[patchi][localFacei];
         }
+
+        ++iter;
     }
 
     return tfld;
 }
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 void Foam::vtk::surfaceMeshWriter::write
@@ -65,27 +68,16 @@ void Foam::vtk::surfaceMeshWriter::write
     const GeometricField<Type, fvsPatchField, surfaceMesh>& field
 )
 {
-    const int nCmpt(pTraits<Type>::nComponents);
-    const uint64_t payLoad(pp_.size() * nCmpt * sizeof(float));
-
-    if (legacy_)
+    if (notState(outputState::CELL_DATA))
     {
-        legacy::floatField(os(), field.name(), nCmpt, pp_.size());
-    }
-    else
-    {
-        format().openDataArray<float, nCmpt>(field.name()).closeTag();
+        FatalErrorInFunction
+            << "Bad writer state (" << stateNames[state_]
+            << ") - should be (" << stateNames[outputState::CELL_DATA]
+            << ") for field " << field.name() << nl << endl
+            << exit(FatalError);
     }
 
-    format().writeSize(payLoad);
-    vtk::writeList(format(), getFaceField(field)());
-
-    format().flush();
-
-    if (!legacy_)
-    {
-        format().endDataArray();
-    }
+    this->indirectPatchWriter::write(field.name(), getFaceField(field)());
 }
 
 
@@ -95,59 +87,16 @@ void Foam::vtk::surfaceMeshWriter::write
     const GeometricField<Type, faPatchField, areaMesh>& field
 )
 {
-    const int nCmpt(pTraits<Type>::nComponents);
-    const uint64_t payLoad(pp_.size() * nCmpt * sizeof(float));
-
-    if (legacy_)
+    if (notState(outputState::CELL_DATA))
     {
-        legacy::floatField(os(), field.name(), nCmpt, pp_.size());
-    }
-    else
-    {
-        format().openDataArray<float, nCmpt>(field.name()).closeTag();
+        FatalErrorInFunction
+            << "Bad writer state (" << stateNames[state_]
+            << ") - should be (" << stateNames[outputState::CELL_DATA]
+            << ") for field " << field.name() << nl << endl
+            << exit(FatalError);
     }
 
-    format().writeSize(payLoad);
-    vtk::writeList(format(), field.primitiveField());
-
-    format().flush();
-
-    if (!legacy_)
-    {
-        format().endDataArray();
-    }
-}
-
-
-template<class Type>
-void Foam::vtk::surfaceMeshWriter::write
-(
-    const UPtrList
-    <
-        const GeometricField<Type, fvsPatchField, surfaceMesh>
-    >& sflds
-)
-{
-    for (const auto& field : sflds)
-    {
-        write(field);
-    }
-}
-
-
-template<class Type>
-void Foam::vtk::surfaceMeshWriter::write
-(
-    const UPtrList
-    <
-        const GeometricField<Type, faPatchField, areaMesh>
-    >& sflds
-)
-{
-    for (const auto& field : sflds)
-    {
-        write(field);
-    }
+    this->indirectPatchWriter::write(field.name(), field.primitiveField());
 }
 
 

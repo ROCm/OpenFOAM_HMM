@@ -43,9 +43,7 @@ Description
 #include "topoSetSource.H"
 #include "Fstream.H"
 #include "demandDrivenData.H"
-#include "foamVtkWriteCellSetFaces.H"
-#include "foamVtkWriteFaceSet.H"
-#include "foamVtkWritePointSet.H"
+#include "foamVtkWriteTopoSet.H"
 #include "IOobjectList.H"
 #include "cellZoneSet.H"
 #include "faceZoneSet.H"
@@ -70,47 +68,26 @@ using namespace Foam;
 void writeVTK
 (
     const polyMesh& mesh,
-    const topoSet& currentSet,
-    const fileName& vtkBaseName
+    const topoSet& currSet,
+    const fileName& outputName
 )
 {
-    if (isA<faceSet>(currentSet))
-    {
-        // Faces of set with OpenFOAM faceID as value
-        vtk::writeFaceSet
+    if
+    (
+        !vtk::writeTopoSet
         (
             mesh,
-            dynamicCast<const faceSet&>(currentSet),
-            mesh.time().path()/vtkBaseName,
-            vtk::formatType::LEGACY_BINARY
-        );
-    }
-    else if (isA<cellSet>(currentSet))
-    {
-        // External faces of cellset with OpenFOAM cellID as value
-        vtk::writeCellSetFaces
-        (
-            mesh,
-            dynamicCast<const cellSet&>(currentSet),
-            mesh.time().path()/vtkBaseName,
-            vtk::formatType::LEGACY_BINARY
-        );
-    }
-    else if (isA<pointSet>(currentSet))
-    {
-        vtk::writePointSet
-        (
-            mesh,
-            dynamicCast<const pointSet&>(currentSet),
-            mesh.time().path()/vtkBaseName,
-            vtk::formatType::LEGACY_BINARY
-        );
-    }
-    else
+            currSet,
+            vtk::formatType::INLINE_BASE64,     // XML-binary
+            // vtk::formatType::LEGACY_BINARY,
+            outputName,
+            false // Not parallel
+        )
+    )
     {
         WarningInFunction
-            << "Don't know how to handle set of type " << currentSet.type()
-            << endl;
+            << "Don't know how to handle set of type "
+            << currSet.type() << nl;
     }
 }
 
@@ -502,35 +479,35 @@ bool doCommand
                 if (!noSync) currentSet.sync(mesh);
 
                 // Write
+                Info<< "    Writing " << currentSet.name()
+                    << " (size "
+                    << returnReduce(currentSet.size(), sumOp<label>())
+                    << ") to "
+                    << (
+                          currentSet.instance()/currentSet.local()
+                        / currentSet.name()
+                       );
+
+
                 if (writeVTKFile)
                 {
-                    mkDir(mesh.time().path()/"VTK"/currentSet.name());
-
-                    fileName vtkName
+                    fileName outputName
                     (
-                        "VTK"/currentSet.name()/currentSet.name()
-                      + "_"
-                      + name(mesh.time().timeIndex())
+                        mesh.time().path()/"VTK"/currentSet.name()
+                      / currentSet.name() + "_"
+                      + Foam::name(mesh.time().timeIndex())
                     );
+                    mkDir(outputName.path());
 
-                    Info<< "    Writing " << currentSet.name()
-                        << " (size "
-                        << returnReduce(currentSet.size(), sumOp<label>())
-                        << ") to "
-                        << currentSet.instance()/currentSet.local()
-                           /currentSet.name()
-                        << " and to vtk file " << vtkName << endl << endl;
+                    Info<< " and to vtk file "
+                        << outputName.relative(mesh.time().path())
+                        << nl << nl;
 
-                    writeVTK(mesh, currentSet, vtkName);
+                    writeVTK(mesh, currentSet, outputName);
                 }
                 else
                 {
-                    Info<< "    Writing " << currentSet.name()
-                        << " (size "
-                        << returnReduce(currentSet.size(), sumOp<label>())
-                        << ") to "
-                        << currentSet.instance()/currentSet.local()
-                           /currentSet.name() << endl << endl;
+                    Info<< nl << nl;
                 }
 
                 if (writeCurrentTime)

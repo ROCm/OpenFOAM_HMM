@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class asciiFormatter Declaration
+                     Class vtk::asciiFormatter Declaration
 \*---------------------------------------------------------------------------*/
 
 class asciiFormatter
@@ -108,7 +108,8 @@ public:
 
 
         //- Write leading size - this is a no-op for ascii output
-        virtual void writeSize(const uint64_t ignored);
+        //  \return False - never used by this format
+        virtual bool writeSize(const uint64_t ignored);
 
         virtual void write(const uint8_t val);
         virtual void write(const label val);
@@ -119,6 +120,7 @@ public:
         virtual void flush();
 
         //- The encoded length for ascii output is not applicable.
+        //  \return 0
         virtual std::size_t encodedLength(std::size_t ignored) const;
 
 };

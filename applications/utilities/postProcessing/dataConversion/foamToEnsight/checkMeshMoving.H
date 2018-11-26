@@ -8,9 +8,9 @@ if (timeDirs.size() > 1 && Pstream::master())
     // See if any other "polyMesh/points" files exist too.
 
     Info<< "Search for moving mesh ... " << flush;
-    forAll(timeDirs, timeI)
+    for (const instant& inst : timeDirs)
     {
-        const word& timeName = timeDirs[timeI].name();
+        const word& timeName = inst.name();
 
         meshMoving =
         (

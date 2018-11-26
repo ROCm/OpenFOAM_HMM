@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,7 +41,8 @@ Foam::vtk::appendBase64Formatter::appendBase64Formatter
     std::ostream& os
 )
 :
-    foamVtkBase64Layer(os)
+    foamVtkBase64Layer(os),
+    offset_(0)
 {}
 
 
@@ -65,6 +66,18 @@ Foam::vtk::appendBase64Formatter::opts() const
 const char* Foam::vtk::appendBase64Formatter::name() const
 {
     return name_;
+}
+
+
+uint64_t Foam::vtk::appendBase64Formatter::offset(const uint64_t numbytes)
+{
+    uint64_t prev = offset_;
+
+    if (formatter::npos != numbytes)
+    {
+        offset_ += this->encodedLength(sizeof(uint64_t) + numbytes);
+    }
+    return prev;
 }
 
 

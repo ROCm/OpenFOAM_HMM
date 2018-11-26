@@ -79,9 +79,7 @@ Note
 #include "ensightGeoFile.H"
 #include "ensightParts.H"
 #include "ensightSerialOutput.H"
-
-// local files
-#include "ensightOutputSerialCloud.H"
+#include "ensightOutputCloud.H"
 
 #include "memInfo.H"
 
@@ -398,13 +396,19 @@ int main(int argc, char *argv[])
 
             Info<< "Write " << cloudName << " (" << flush;
 
-            ensightSerialCloud::writePositions
-            (
-                mesh,
-                cloudName,
-                ensCase.newCloud(cloudName)
-            );
-            Info<< " positions";
+            {
+                auto os = ensCase.newCloud(cloudName);
+
+                ensightCloud::writePositions
+                (
+                    mesh,
+                    cloudName,
+                    cloudExists,
+                    os
+                );
+
+                Info<< " positions";
+            }
 
 
             forAllConstIters(theseCloudFields, fieldIter)
@@ -425,26 +429,38 @@ int main(int argc, char *argv[])
                 bool wrote = false;
                 if (fieldType == scalarIOField::typeName)
                 {
-                    wrote = ensightSerialCloud::writeCloudField<scalar>
+                    auto os =
+                        ensCase.newCloudData<scalar>(cloudName, fieldName);
+
+                    wrote = ensightCloud::writeCloudField<scalar>
                     (
                         *fieldObject,
-                        ensCase.newCloudData<scalar>(cloudName, fieldName)
+                        true, // field exists
+                        os
                     );
                 }
                 else if (fieldType == vectorIOField::typeName)
                 {
-                    wrote = ensightSerialCloud::writeCloudField<vector>
+                    auto os =
+                        ensCase.newCloudData<vector>(cloudName, fieldName);
+
+                    wrote = ensightCloud::writeCloudField<vector>
                     (
                         *fieldObject,
-                        ensCase.newCloudData<vector>(cloudName, fieldName)
+                        true, // field exists
+                        os
                     );
                 }
                 else if (fieldType == tensorIOField::typeName)
                 {
-                    wrote = ensightSerialCloud::writeCloudField<tensor>
+                    auto os =
+                        ensCase.newCloudData<tensor>(cloudName, fieldName);
+
+                    wrote = ensightCloud::writeCloudField<tensor>
                     (
                         *fieldObject,
-                        ensCase.newCloudData<tensor>(cloudName, fieldName)
+                        true, // field exists
+                        os
                     );
                 }
 

@@ -23,65 +23,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Time.H"
 #include "ensightOutput.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-int Foam::functionObjects::ensightWrite::writeVolField
+Foam::label Foam::functionObjects::ensightWrite::writeVolFields
 (
-    const word& inputName,
-    int& state
+    const fvMeshSubset& proxy,
+    const wordHashSet& acceptField
 )
 {
-    // State: return 0 (not-processed), -1 (skip), +1 ok
-    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
+    typedef GeometricField<Type, fvPatchField, volMesh> GeoField;
 
-    // Already done
-    if (state)
+    const fvMesh& baseMesh = proxy.baseMesh();
+
+    label count = 0;
+
+    for (const word& fieldName : baseMesh.sortedNames<GeoField>(acceptField))
     {
-        return state;
-    }
+        const auto* fieldptr = baseMesh.findObject<GeoField>(fieldName);
 
-    const VolFieldType* fldPtr = findObject<VolFieldType>(inputName);
+        if (!fieldptr)
+        {
+            continue;
+        }
 
-    // Not available
-    if (!fldPtr)
-    {
-        return state;
-    }
+        auto tfield = fvMeshSubsetProxy::interpolate(proxy, *fieldptr);
+        const auto& field = tfield();
 
-    autoPtr<ensightFile> os = ensCase().newData<Type>(inputName);
-
-
-    if (meshSubset_.valid())
-    {
-        tmp<VolFieldType> tfield = meshSubset_->interpolate(*fldPtr);
+        autoPtr<ensightFile> os = ensCase().newData<Type>(fieldName);
 
         ensightOutput::writeField<Type>
         (
-            tfield(),
+            field,
             ensMesh(),
             os,
             caseOpts_.nodeValues()
         );
-    }
-    else
-    {
-        ensightOutput::writeField<Type>
-        (
-            *fldPtr,
-            ensMesh(),
-            os,
-            caseOpts_.nodeValues()
-        );
+
+        Log << ' ' << fieldName;
+
+        ++count;
     }
 
-    Log << " " << inputName;
-
-    state = +1;
-    return state;
+    return count;
 }
 
 

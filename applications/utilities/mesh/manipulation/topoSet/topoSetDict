@@ -81,6 +81,14 @@ FoamFile
 //        //option all;       // cell with all faces in faceSet
 //    }
 //
+//    // All cells on boundaries
+//    source boundaryToCell;
+//
+//    // Select cells associated with patch
+//    source  patchToCell;
+//    patches ("patch.*")
+//    patch   somePatch;
+//
 //    // Select based on pointSet
 //    source pointToCell;
 //    sourceInfo
@@ -144,7 +152,7 @@ FoamFile
 //    source surfaceToCell;
 //    sourceInfo
 //    {
-//        file            "www.avl.com-geometry.stl";
+//        file            "geometry.stl";
 //        useSurfaceOrientation false;  // use closed surface inside/outside
 //                                      // test (ignores includeCut,
 //                                      // outsidePoints)
@@ -235,9 +243,6 @@ FoamFile
 //
 //    // All boundary faces
 //    source boundaryToFace;
-//    sourceInfo
-//    {
-//    }
 //
 //    // All faces of faceZone
 //    source zoneToFace;

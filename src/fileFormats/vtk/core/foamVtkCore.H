@@ -35,6 +35,7 @@ SourceFiles
 #ifndef foamVtkCore_H
 #define foamVtkCore_H
 
+#include <cstdint>
 #include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -59,21 +60,28 @@ namespace vtk
 
     //- The output format type for file contents.
     //  Upper bits for output type, lower bits for the format itself.
-    enum class formatType
+    enum class formatType : uint8_t
     {
-        /** XML inline ASCII, using the asciiFormatter */
-        INLINE_ASCII  = 0,
-        /** XML inline base64, using the base64Formatter */
-        INLINE_BASE64 = 0x01,
-        /** XML append base64, using the appendBase64Formatter */
-        APPEND_BASE64 = 0x11,
-        /** XML append raw binary, using the appendRawFormatter */
-        APPEND_BINARY = 0x12,
-        /** Legacy ASCII, using the legacyAsciiFormatter */
-        LEGACY_ASCII  = 0x20,
-        /** Legacy raw binary, using the legacyRawFormatter */
-        LEGACY_BINARY = 0x22,
+        INLINE_ASCII  = 0,    //!< XML inline ASCII, asciiFormatter
+        INLINE_BASE64 = 0x01, //!< XML inline base64, base64Formatter
+        APPEND_BASE64 = 0x11, //!< XML append base64, appendBase64Formatter
+        APPEND_BINARY = 0x12, //!< XML append raw binary, appendRawFormatter
+        LEGACY_ASCII  = 0x20, //!< Legacy ASCII, legacyAsciiFormatter
+        LEGACY_BINARY = 0x22, //!< Legacy raw binary, legacyRawFormatter
     };
+
+    //- Test for XML append format
+    inline bool isAppend(enum formatType fmt)
+    {
+        return (uint8_t(fmt) & 0x10);
+    }
+
+    //- Test for vtk legacy format
+    inline bool isLegacy(enum formatType fmt)
+    {
+        return (uint8_t(fmt) & 0x20);
+    }
+
 
     //- Equivalent to enumeration in "vtkCellType.h"
     enum cellType
@@ -104,6 +112,7 @@ namespace vtk
     {
         VTK_FILE,               //!< "VTKFile"
         DATA_ARRAY,             //!< "DataArray"
+        BLOCK,                  //!< "Block"
         PIECE,                  //!< "Piece"
         DATA_SET,               //!< "DataSet"
         POINTS,                 //!< "Points"
@@ -113,12 +122,19 @@ namespace vtk
         LINES,                  //!< "Lines"
         CELL_DATA,              //!< "CellData"
         POINT_DATA,             //!< "PointData"
+        FIELD_DATA,             //!< "FieldData"
         POLY_DATA,              //!< "PolyData"
         UNSTRUCTURED_GRID,      //!< "UnstructuredGrid"
         MULTI_BLOCK,            //!< "vtkMultiBlockDataSet"
     };
 
-    //- Strings corresponding to the vtk xml tags
+    //- File extension (without ".") for some vtk XML file content types
+    extern const Foam::Enum<fileTag> fileExtension;
+
+    //- Version string for some vtk XML file content types
+    extern const Foam::Enum<fileTag> fileContentVersions;
+
+    //- Strings corresponding to the vtk XML tags
     extern const Foam::Enum<fileTag> fileTagNames;
 
     //- Some common XML attributes for vtk files
@@ -126,6 +142,7 @@ namespace vtk
     {
         OFFSET,                 //!< "offset"
         NUMBER_OF_COMPONENTS,   //!< "NumberOfComponents"
+        NUMBER_OF_TUPLES,       //!< "NumberOfTuples"
         NUMBER_OF_POINTS,       //!< "NumberOfPoints"
         NUMBER_OF_CELLS,        //!< "NumberOfCells"
         NUMBER_OF_POLYS,        //!< "NumberOfPolys"
@@ -133,10 +150,10 @@ namespace vtk
         NUMBER_OF_LINES,        //!< "NumberOfLines"
     };
 
-    //- Strings corresponding to the vtk xml attributes
+    //- Strings corresponding to the vtk XML attributes
     extern const Foam::Enum<fileAttr> fileAttrNames;
 
-    //- Some common names for XML data arrays
+    //- Some common names for XML DataArray entries
     enum class dataArrayAttr
     {
         POINTS,                 //!< "Points"
@@ -147,8 +164,27 @@ namespace vtk
         FACEOFFSETS,            //!< "faceoffsets"
     };
 
-    //- Strings corresponding to the vtk xml attributes
+    //- Strings corresponding to the vtk XML DataArray attributes
     extern const Foam::Enum<dataArrayAttr> dataArrayAttrNames;
+
+
+/*---------------------------------------------------------------------------*\
+                               Namespace legacy
+\*---------------------------------------------------------------------------*/
+
+namespace legacy
+{
+
+    //- Legacy file extension ("vtk")
+    extern const word fileExtension;
+
+    //- Legacy content names (POLYDATA, UNSTRUCTURED_GRID)
+    extern const Foam::Enum<vtk::fileTag> contentNames;
+
+    //- Legacy data type names (CELL_DATA, POINT_DATA)
+    extern const Foam::Enum<vtk::fileTag> dataTypeNames;
+
+} // End namespace legacy
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

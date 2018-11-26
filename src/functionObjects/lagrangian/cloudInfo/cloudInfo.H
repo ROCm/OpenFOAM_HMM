@@ -52,9 +52,9 @@ Usage
 
     Where the entries comprise:
     \table
-        Property     | Description             | Required    | Default value
-        type         | type name: cloudInfo    | yes         |
-        clouds       | list of clouds names to process |yes  |
+        Property     | Description                          | Required | Default
+        type         | type name: cloudInfo                 | yes |
+        clouds       | list of clouds names to process      | yes |
     \endtable
 
     The output data of each cloud is written to a file named \<cloudName\>.dat
@@ -108,10 +108,6 @@ protected:
         virtual void writeFileHeader(Ostream& os) const;
 
 
-private:
-
-    // Private member functions
-
         //- No copy construct
         cloudInfo(const cloudInfo&) = delete;
 
@@ -137,13 +133,13 @@ public:
 
 
     //- Destructor
-    virtual ~cloudInfo();
+    virtual ~cloudInfo() = default;
 
 
     // Member Functions
 
         //- Read the controls
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Execute, currently does nothing
         virtual bool execute();

@@ -1,3 +1,4 @@
+common/parcelSelectionDetail.C
 dataCloud/dataCloud.C
 cloudInfo/cloudInfo.C
 icoUncoupledKinematicCloud/icoUncoupledKinematicCloud.C

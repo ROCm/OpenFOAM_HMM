@@ -113,8 +113,10 @@ const char* Foam::vtk::asciiFormatter::encoding() const
 }
 
 
-void Foam::vtk::asciiFormatter::writeSize(const uint64_t ignored)
-{/*nop*/}
+bool Foam::vtk::asciiFormatter::writeSize(const uint64_t)
+{
+    return false;
+}
 
 
 void Foam::vtk::asciiFormatter::write(const uint8_t val)
@@ -163,8 +165,7 @@ void Foam::vtk::asciiFormatter::flush()
 }
 
 
-std::size_t
-Foam::vtk::asciiFormatter::encodedLength(std::size_t ignored) const
+std::size_t Foam::vtk::asciiFormatter::encodedLength(std::size_t) const
 {
     return 0;
 }

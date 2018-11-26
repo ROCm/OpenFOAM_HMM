@@ -295,7 +295,7 @@ bool Foam::ensightOutput::writeField
         {
             const ensightFaces& ensFaces = zoneFaces[zoneName];
 
-            // field (local size)
+            // Field (local size)
             Field<Type> values(ensFaces.size());
 
             // Loop over face ids to store the needed field values
@@ -303,7 +303,7 @@ bool Foam::ensightOutput::writeField
             // - boundary faces use the corresponding patch value
             forAll(ensFaces, i)
             {
-                label faceId = ensFaces[i];
+                const label faceId = ensFaces[i];
                 values[i] =
                 (
                     mesh.isInternalFace(faceId)
