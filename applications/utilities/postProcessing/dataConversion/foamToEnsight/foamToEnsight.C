@@ -39,27 +39,42 @@ Usage
       - \par -ascii
         Write Ensight data in ASCII format instead of "C Binary"
 
-      - \par -noZero
-        Exclude the often incomplete initial conditions.
+      - \par -fields \<fields\>
+        Specify single or multiple fields to write (all by default)
+        For example,
+        \verbatim
+          -fields T
+          -fields '(p T U \"alpha.*\")'
+        \endverbatim
+        The quoting is required to avoid shell expansions and to pass the
+        information as a single argument.
 
-      - \par -noLagrangian
-        Suppress writing lagrangian positions and fields.
-
-      - \par -noPatches
+      - \par -no-boundary
         Suppress writing any patches.
 
-      - \par -patches patchList
-        Specify particular patches to write.
-        Specifying an empty list suppresses writing the internalMesh.
+      - \par -no-internal
+        Suppress writing the internal mesh.
 
-      - \par -faceZones zoneList
+      - \par -no-lagrangian
+        Suppress writing lagrangian positions and fields.
+
+      - \par -patches patch or patch list
+        Specify particular patches to write.
+
+      - \par -faceZones patch or zone list
         Specify faceZones to write, with wildcards
 
       - \par -cellZone zoneName
         Specify single cellZone to write (not lagrangian)
 
+      - \par -noZero
+        Exclude the often incomplete initial conditions.
+
+      - \par -name \<subdir\>
+        Define sub-directory name to use for Ensight data (default: "EnSight")
+
       - \par -width \<n\>
-        Width of EnSight data subdir (default: 8)
+        Width of Ensight data subdir (default: 8)
 
 Note
     Writes to \a EnSight directory to avoid collisions with
@@ -76,11 +91,10 @@ Note
 #include "HashOps.H"
 
 #include "fvc.H"
+#include "fieldTypes.H"
 #include "volFields.H"
-#include "labelIOField.H"
 #include "scalarIOField.H"
-#include "tensorIOField.H"
-#include "IOobjectList.H"
+#include "vectorIOField.H"
 
 // file-format/conversion
 #include "ensightCase.H"
@@ -124,42 +138,47 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "nodeValues",
-        "Write values in nodes"
+        "Write values at nodes"
     );
     argList::addBoolOption
     (
-        "noLagrangian",
-        "Suppress writing lagrangian positions and fields"
-    );
-    argList::addBoolOption
-    (
-        "noInternal",
-        "Do not generate file for mesh, only for patches"
-    );
-    argList::addBoolOption
-    (
-        "noBoundary",
+        "no-boundary",  // noPatches
         "Suppress writing any patches"
     );
-    argList::addOptionCompat("noBoundary", {"noPatches", 1806});
+    argList::addOptionCompat("no-boundary", {"noPatches", 1806});
+
+    argList::addBoolOption
+    (
+        "no-internal",
+        "Suppress writing the internal mesh"
+    );
+    argList::addBoolOption
+    (
+        "no-lagrangian",  // noLagrangian
+        "Suppress writing lagrangian positions and fields"
+    );
+    argList::addOptionCompat("no-lagrangian", {"noLagrangian", 1806});
 
     argList::addOption
     (
         "patches",
         "wordRes",
-        "Specify particular patches to write - eg '(outlet \"inlet.*\")'."
+        "Specify single patch or multiple patches to write\n"
+        "Eg, 'inlet' or '(outlet \"inlet.*\")'"
     );
     argList::addOption
     (
         "faceZones",
         "wordRes",
-        "Specify faceZones to write - eg '( slice \"mfp-.*\" )'."
+        "Specify single or multiple faceZones to write\n"
+        "Eg, 'cells' or '( slice \"mfp-.*\" )'."
     );
     argList::addOption
     (
         "fields",
         "wordRes",
-        "Specify fields to export (all by default) - eg '( \"U.*\" )'."
+        "Specify single or multiple fields to write (all by default)\n"
+        "Eg, 'T' or '( \"U.*\" )'"
     );
     argList::addOption
     (
@@ -171,13 +190,13 @@ int main(int argc, char *argv[])
     (
         "name",
         "subdir",
-        "Sub-directory name for ensight output (default: 'EnSight')"
+        "Sub-directory name for Ensight output (default: 'EnSight')"
     );
     argList::addOption
     (
         "width",
         "n",
-        "Width of ensight data subdir"
+        "Width of Ensight data subdir"
     );
 
     #include "setRootCase.H"
@@ -235,8 +254,9 @@ int main(int argc, char *argv[])
     // Output configuration (geometry related)
     //
     ensightMesh::options writeOpts(format);
-    writeOpts.useInternalMesh(!args.found("noInternal"));
-    writeOpts.useBoundaryMesh(!args.found("noBoundary"));
+    writeOpts.useBoundaryMesh(!args.found("no-boundary"));
+    writeOpts.useInternalMesh(!args.found("no-internal"));
+    const bool doLagrangian = !args.found("no-lagrangian");
 
     if (args.found("patches"))
     {
@@ -248,9 +268,8 @@ int main(int argc, char *argv[])
     }
 
     //
-    // output configuration (field related)
+    // Output configuration (field related)
     //
-    const bool doLagrangian = !args.found("noLagrangian");
 
     wordRes fieldPatterns;
     args.readListIfPresent<wordRe>("fields", fieldPatterns);
@@ -365,7 +384,7 @@ int main(int argc, char *argv[])
 
     ensCase.write();
 
-    Info<< "End: "
+    Info<< "\nEnd: "
         << timer.elapsedCpuTime() << " s, "
         << mem.update().peak() << " kB (peak)" << nl << endl;
 

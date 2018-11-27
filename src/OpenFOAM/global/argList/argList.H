@@ -184,6 +184,9 @@ class argList
         //  return true if any "(" ... ")" sequences were captured
         bool regroupArgv(int& argc, char**& argv);
 
+        //- Print option compatibility
+        void printManCompat() const;
+
 
 public:
 

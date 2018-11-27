@@ -34,7 +34,7 @@ Description
     - Handles volFields, pointFields, surfaceScalarField, surfaceVectorField
       fields.
     - Mesh topo changes.
-    - Both ascii and binary.
+    - Output legacy or xml VTK format in ascii or binary.
     - Single time step writing.
     - Write subset only.
     - Optional decomposition of cells.
@@ -50,9 +50,11 @@ Usage
         Write VTK data in legacy format instead of XML format
 
       - \par -fields \<fields\>
-        Convert selected fields only. For example,
+        Specify single or multiple fields to write (all by default)
+        For example,
         \verbatim
-          -fields '( p T U )'
+          -fields T
+          -fields '(p T U \"alpha.*\")'
         \endverbatim
         The quoting is required to avoid shell expansions and to pass the
         information as a single argument.
@@ -71,32 +73,37 @@ Usage
       - \par -nearCellValue
         Output cell value on patches instead of patch value itself
 
-      - \par -noBoundary
+      - \par -no-boundary
         Suppress output for all boundary patches
 
-      - \par -noInternal
+      - \par -no-internal
         Suppress output for internal (volume) mesh
 
-      - \par -noLagrangian
+      - \par -no-lagrangian
         Suppress writing Lagrangian positions and fields.
 
-      - \par -noPointValues
-        No pointFields
+      - \par -no-point-data
+        Suppress conversion of pointFields. No interpolated PointData.
 
       - \par -noFaceZones
-        No faceZones
+        Suppress conversion of surface fields on faceZones
 
       - \par -poly-decomp
         Decompose polyhedral cells into tets/pyramids
 
-      - \par -allPatches
+      - \par -one-boundary
         Combine all patches into a single boundary file
 
-      - \par -patch \<patchNames\>
-        Specify which patch or patches (name or regex) to convert.
+      - \par -patches NAME | LIST
+        Specify single patch or multiple patches (name or regex) to write
+        For example,
+        \verbatim
+          -patches top
+          -patches '( front \".*back\" )'
+        \endverbatim
 
-      - \par -excludePatches \<patchNames\>
-        Specify which patch or patches (name or regex) not to convert.
+      - \par -excludePatches NAME | LIST
+        Specify single or multiple patches (name or regex) not to convert.
         For example,
         \verbatim
           -excludePatches '( inlet_1 inlet_2 "proc.*")'
@@ -306,8 +313,8 @@ int main(int argc, char *argv[])
     (
         "fields",
         "wordRes",
-        "Only convert specified fields\n"
-        "Eg, '(p T U \"alpha.*\")'"
+        "Specify single or multiple fields to write (all by default)\n"
+        "Eg, 'T' or '(p T U \"alpha.*\")'"
     );
 
     argList::addBoolOption
@@ -330,30 +337,35 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
-        "noBoundary",  // no-boundary
+        "no-boundary",
         "Suppress output for boundary patches"
     );
     argList::addBoolOption
     (
-        "noInternal",  // no-internal
+        "no-internal",
         "Suppress output for internal volume mesh"
     );
     argList::addBoolOption
     (
-        "noLagrangian",  // no-lagrangian
+        "no-lagrangian",  // noLagrangian
         "Suppress writing lagrangian positions and fields"
     );
+    argList::addOptionCompat("no-lagrangian", {"noLagrangian", 1806});
+
     argList::addBoolOption
     (
-        "noPointValues",  // no-point-data
-        "No pointFields and no interpolated PointData"
+        "no-point-data",  // noPointValues
+        "Suppress conversion of pointFields. No interpolated PointData."
     );
+    argList::addOptionCompat("no-point-data", {"noPointValues", 1806});
+
     argList::addBoolOption
     (
-        "allPatches",  // one-boundary
+        "one-boundary",  // allPatches
         "Combine all patches into a single file",
         true  // mark as an advanced option
     );
+    argList::addOptionCompat("one-boundary", {"allPatches", 1806});
 
     #include "addRegionOption.H"
 
@@ -374,21 +386,22 @@ int main(int argc, char *argv[])
     (
         "patches",
         "wordRes",
-        "A list of patches to include.\n"
-        "Eg, '( front \".*back\" )'"
+        "Specify single patch or multiple patches to write\n"
+        "Eg, 'top' or '( front \".*back\" )'"
     );
     argList::addOption
     (
         "excludePatches",
         "wordRes",
-        "A list of patches to exclude\n"
-        "Eg, '( inlet \".*Wall\" )'"
+        "Specify single patch or multiple patches to exclude from writing."
+        " Eg, 'outlet' or '( inlet \".*Wall\" )'",
+        true  // mark as an advanced option
     );
 
     argList::addBoolOption
     (
         "noFaceZones",
-        "No faceZones",
+        "Suppress conversion of surface fields on faceZones",
         true  // mark as an advanced option
     );
     argList::ignoreOptionCompat
@@ -416,14 +429,14 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
 
     const bool decomposePoly = args.found("poly-decomp");
-    const bool doBoundary    = !args.found("noBoundary");
-    const bool doInternal    = !args.found("noInternal");
-    const bool doLagrangian  = !args.found("noLagrangian");
+    const bool doBoundary    = !args.found("no-boundary");
+    const bool doInternal    = !args.found("no-internal");
+    const bool doLagrangian  = !args.found("no-lagrangian");
     const bool doFiniteArea  = args.found("finiteAreaFields");
     const bool doSurfaceFields = args.found("surfaceFields");
 
     const bool doFaceZones   = !args.found("noFaceZones") && doInternal;
-    const bool oneBoundary   = args.found("allPatches") && doBoundary;
+    const bool oneBoundary   = args.found("one-boundary") && doBoundary;
     const bool nearCellValue = args.found("nearCellValue") && doBoundary;
     const bool allRegions    = args.found("allRegions");
 
@@ -435,11 +448,11 @@ int main(int argc, char *argv[])
             << nl << endl;
     }
 
-    const bool noPointValues = args.found("noPointValues");
+    const bool noPointValues = args.found("no-point-data");
     if (noPointValues)
     {
-        Info<< "Outputting cell values only."
-            << " Point fields disabled by '-noPointValues' option"
+        Info<< "Point fields and interpolated point data"
+            << " disabled with the '-no-point-data' option"
             << nl;
     }
 
@@ -478,7 +491,7 @@ int main(int argc, char *argv[])
 
         if (regionNames.empty())
         {
-            Info<<"Warning: "
+            Info<< "Warning: "
                 << "No regionProperties - assuming default region"
                 << nl << endl;
 
@@ -500,9 +513,10 @@ int main(int argc, char *argv[])
         }
         else if
         (
-            selectRegions.size() == 1 && !selectRegions.first().isPattern()
+            selectRegions.size() == 1 && selectRegions.first().isLiteral()
         )
         {
+            // Identical to -region NAME
             regionNames.resize(1);
             regionNames.first() = selectRegions.first();
         }
@@ -513,7 +527,7 @@ int main(int argc, char *argv[])
 
             if (regionNames.empty())
             {
-                Info<<"Warning: "
+                Info<< "Warning: "
                     << "No regionProperties - assuming default region"
                     << nl << endl;
 

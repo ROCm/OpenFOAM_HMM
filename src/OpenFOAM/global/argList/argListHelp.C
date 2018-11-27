@@ -51,7 +51,8 @@ static void printManOption(const word& optName)
 
     // Option has arg?
     const auto optIter = argList::validOptions.cfind(optName);
-    if (optIter().size())
+
+    if (optIter.found() && optIter().size())
     {
         Info<< " \\fI" << optIter().c_str() << "\\fR";
     }
@@ -67,6 +68,10 @@ static void printManOption(const word& optName)
     else
     {
         Info<< nl;
+    }
+    if (argList::validParOptions.found(optName))
+    {
+        Info<< "\\fB[Parallel option]\\fR" << nl;
     }
 }
 
@@ -110,6 +115,34 @@ static void printOptionUsage
         (argList::usageMax - argList::usageMin),
         argList::usageMin
     );
+}
+
+
+// Regular option
+static void printOption(const word& optName)
+{
+    Info<< "  -" << optName;
+
+    // Length includes leading '  -'
+    label len = optName.size() + 3;
+
+    const auto optIter = argList::validOptions.cfind(optName);
+    if (optIter.found() && optIter().size())
+    {
+        // Length includes space between option/param and '<>'
+        len += optIter().size() + 3;
+        Info<< " <" << optIter().c_str() << '>';
+    }
+
+    const auto usageIter = argList::optionUsage.cfind(optName);
+    if (usageIter.found())
+    {
+        printOptionUsage(len, usageIter());
+    }
+    else
+    {
+        Info<< nl;
+    }
 }
 
 
@@ -218,7 +251,7 @@ void Foam::argList::printMan() const
 
     for (const word& optName : validOptions.sortedToc())
     {
-        // Normal options
+        // Normal (non-advanced) options
         if (!advancedOptions.found(optName))
         {
             printManOption(optName);
@@ -246,17 +279,21 @@ void Foam::argList::printMan() const
         }
     }
 
-    // Compatibility information
-    if
+
+    const bool hasCompat =
     (
-        argList::validOptionsCompat.size()
-      + argList::ignoreOptionsCompat.size()
-    )
+        !argList::validOptionsCompat.empty()
+     || !argList::ignoreOptionsCompat.empty()
+    );
+
+    if (hasCompat)
     {
         printManOption("help-compat", "Display compatibility options and exit");
     }
 
     printManOption("help-man", "Display full help (manpage format) and exit");
+
+    printManCompat();
 
     // Footer
     printManFooter();
@@ -294,32 +331,9 @@ void Foam::argList::printUsage(bool full) const
     for (const word& optName : validOptions.sortedToc())
     {
         // Suppress advanced options for regular -help.
-        if (advancedOptions.found(optName) && !full)
+        if (full || !advancedOptions.found(optName))
         {
-            continue;
-        }
-
-        Info<< "  -" << optName;
-
-        // Length includes leading '  -'
-        label len = optName.size() + 3;
-
-        const auto optIter = validOptions.cfind(optName);
-        if (optIter().size())
-        {
-            // Length includes space between option/param and '<>'
-            len += optIter().size() + 3;
-            Info<< " <" << optIter().c_str() << '>';
-        }
-
-        const auto usageIter = optionUsage.cfind(optName);
-        if (usageIter.found())
-        {
-            printOptionUsage(len, usageIter());
-        }
-        else
-        {
-            Info<< nl;
+            printOption(optName);
         }
     }
 
@@ -376,6 +390,63 @@ void Foam::argList::printNotes() const
 }
 
 
+void Foam::argList::printManCompat() const
+{
+    if
+    (
+        argList::validOptionsCompat.empty()
+     && argList::ignoreOptionsCompat.empty()
+    )
+    {
+        return;
+    }
+
+
+    // .SH "COMPATIBILITY OPTIONS"
+    Info
+        << ".SH \"COMPATIBILITY OPTIONS\"" << nl;
+
+    for (const word& k : argList::validOptionsCompat.sortedToc())
+    {
+        const auto& iter = *argList::validOptionsCompat.cfind(k);
+
+        const word& optName = iter.first;
+        const int until = abs(iter.second);
+
+        Info<< ".TP\n\\fB\\-" << k
+            << "\\fR (now \\fB\\-" << optName << "\\fR)" << nl;
+
+        if (until)
+        {
+            Info<< "The option was last used in " << until << "." << nl;
+        }
+    }
+
+    for (const word& k : argList::ignoreOptionsCompat.sortedToc())
+    {
+        const auto& iter = *argList::ignoreOptionsCompat.cfind(k);
+
+        const bool hasArg = iter.first;
+        const int until = abs(iter.second);
+
+        Info<< ".TP\n\\fB\\-" << k << "\\fR";
+
+        if (hasArg)
+        {
+            Info<< " \\fIarg\\fR";
+        }
+
+        Info<< nl << "This option is ignored";
+
+        if (until)
+        {
+            Info<< " after " << until << ".";
+        }
+        Info<< nl;
+    }
+}
+
+
 void Foam::argList::printCompat() const
 {
     const label nopt
@@ -385,71 +456,77 @@ void Foam::argList::printCompat() const
     );
 
     Info<< nopt << " compatibility options for " << executable_ << nl;
-    if (nopt)
+
+    if (!nopt)
     {
-        Info<< setf(ios_base::left) << setw(34) << "old option"
-            << setf(ios_base::left) << setw(32) << "new option"
-            << "version" << nl
-            << setf(ios_base::left) << setw(34) << "=========="
-            << setf(ios_base::left) << setw(32) << "=========="
-            << "=======" << nl;
-
-        for (const word& k : argList::validOptionsCompat.sortedToc())
-        {
-            const auto& iter = *argList::validOptionsCompat.cfind(k);
-
-            Info<< "  -"
-                << setf(ios_base::left) << setw(32) << k
-                << " -"
-                << setf(ios_base::left) << setw(30) << iter.first << ' ';
-
-            if (iter.second > 0)
-            {
-                Info<< (iter.second);
-            }
-            else if (iter.second < 0)
-            {
-                Info<< (-iter.second);
-            }
-            else
-            {
-                Info<< '-';
-            }
-            Info<< nl;
-        }
-
-        for (const word& k : argList::ignoreOptionsCompat.sortedToc())
-        {
-            const auto& iter = *argList::ignoreOptionsCompat.cfind(k);
-
-            if (iter.first)
-            {
-                Info<< "  -"
-                    << setf(ios_base::left) << setw(32)
-                    << (k + " <arg>").c_str();
-            }
-            else
-            {
-                Info<< "  -"
-                    << setf(ios_base::left) << setw(32) << k;
-            }
-
-            Info<< setf(ios_base::left) << setw(32) << " removed" << ' ';
-            if (iter.second > 0)
-            {
-                Info<< (iter.second);
-            }
-            else if (iter.second < 0)
-            {
-                Info<< (-iter.second);
-            }
-            else
-            {
-                Info<< '-';
-            }
-            Info<< nl;
-        }
+        return;
     }
+
+    const int col1(32), col2(32);
+
+    Info<< nl
+        << "|" << setf(ios_base::left) << setw(col1) << " Old option"
+        << "|" << setf(ios_base::left) << setw(col2) << " New option"
+        << "| Comment" << nl;
+
+    Info<< setfill('-');
+    Info<< "|" << setf(ios_base::left) << setw(col1) << ""
+        << "|" << setf(ios_base::left) << setw(col2) << ""
+        << "|------------" << nl;
+
+    Info<< setfill(token::SPACE);
+
+    for (const word& k : argList::validOptionsCompat.sortedToc())
+    {
+        const auto& iter = *argList::validOptionsCompat.cfind(k);
+
+        const word& optName = iter.first;
+        const int until = abs(iter.second);
+
+        Info<< "| -" << setf(ios_base::left) << setw(col1-2) << k
+            << "| -" << setf(ios_base::left) << setw(col2-2) << optName
+            << "|";
+
+        if (until)
+        {
+            Info<< " until " << until;
+        }
+        Info<< nl;
+    }
+
+    for (const word& k : argList::ignoreOptionsCompat.sortedToc())
+    {
+        const auto& iter = *argList::ignoreOptionsCompat.cfind(k);
+
+        const bool hasArg = iter.first;
+        const int until = abs(iter.second);
+
+        Info<< "| -" << setf(ios_base::left) << setw(col1-2);
+
+        if (hasArg)
+        {
+            Info<< (k + " <arg>").c_str();
+        }
+        else
+        {
+            Info<< k;
+        }
+
+        Info<< "| ";
+        Info<< setf(ios_base::left) << setw(col2-1) << "ignored" << "|";
+        if (until)
+        {
+            Info<< " after " << until;
+        }
+        Info<< nl;
+    }
+
+    Info<< setfill('-');
+    Info<< "|" << setf(ios_base::left) << setw(col1) << ""
+        << "|" << setf(ios_base::left) << setw(col2) << ""
+        << "|------------" << nl;
+
+    Info<< setfill(token::SPACE);
 }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -180,18 +180,25 @@ public:
             //- Add newline and flush stream
             virtual void endl();
 
+            //- Get the current padding character
+            virtual char fill() const;
+
+            //- Set padding character for formatted field up to field width
+            //  \return previous padding character
+            virtual char fill(const char fillch);
+
             //- Get width of output field
             virtual int width() const;
 
             //- Set width of output field
-            // \return previous width
+            //  \return previous width
             virtual int width(const int w);
 
             //- Get precision of output field
             virtual int precision() const;
 
             //- Set precision of output field
-            // \return old precision
+            //  \return old precision
             virtual int precision(const int p);
 
 

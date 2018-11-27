@@ -38,8 +38,15 @@ Usage
       - \par -ascii
         Write Ensight data in ASCII format instead of "C Binary"
 
-      - \par -name \<subdir\>
-        Define sub-directory name to use for Ensight data (default: "Ensight")
+      - \par -fields \<fields\>
+        Specify single or multiple fields to write (all by default)
+        For example,
+        \verbatim
+          -fields T
+          -fields '(p T U \"alpha.*\")'
+        \endverbatim
+        The quoting is required to avoid shell expansions and to pass the
+        information as a single argument.
 
       - \par -noZero
         Exclude the often incomplete initial conditions.
@@ -48,12 +55,18 @@ Usage
         Ignore the time index contained in the time file and use a
         simple indexing when creating the \c Ensight/data/######## files.
 
-      - \par -noLagrangian
+      - \par -no-lagrangian
         Suppress writing lagrangian positions and fields.
 
-      - \par -noMesh
+      - \par -no-mesh
         Suppress writing the geometry. Can be useful for converting partial
         results for a static geometry.
+
+      - \par -noZero
+        Exclude the often incomplete initial conditions.
+
+      - \par -name \<subdir\>
+        Define sub-directory name to use for Ensight data (default: "Ensight")
 
       - \par -width \<n\>
         Width of Ensight data subdir
@@ -66,13 +79,16 @@ Note
 
 #include "argList.H"
 #include "timeSelector.H"
-
-#include "volFields.H"
-#include "OFstream.H"
-#include "IOmanip.H"
 #include "IOobjectList.H"
+#include "IOmanip.H"
+#include "OFstream.H"
+#include "PstreamCombineReduceOps.H"
+#include "HashOps.H"
+
+#include "fieldTypes.H"
+#include "volFields.H"
 #include "scalarIOField.H"
-#include "tensorIOField.H"
+#include "vectorIOField.H"
 
 // file-format/conversion
 #include "ensightCase.H"
@@ -80,6 +96,12 @@ Note
 #include "ensightParts.H"
 #include "ensightSerialOutput.H"
 #include "ensightOutputCloud.H"
+#include "fvMeshSubsetProxy.H"
+
+// local files
+#include "readFields.H"
+#include "writeVolFields.H"
+#include "writeDimFields.H"
 
 #include "memInfo.H"
 
@@ -87,13 +109,14 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
 int main(int argc, char *argv[])
 {
     // Enable -constant
     // Probably don't need -withZero though, since the fields are vetted
     // afterwards anyhow
     timeSelector::addOptions(true, false);
+    #include "addRegionOption.H"
+
     argList::noParallel();
     argList::addBoolOption
     (
@@ -104,25 +127,37 @@ int main(int argc, char *argv[])
     (
         "index",
         "start",
-        "Ignore the time index contained in the uniform/time file "
-        "and use simple indexing when creating the files"
+        "Ignore the time index contained in the uniform/time file"
+        " and use simple indexing when creating files"
     );
     argList::addBoolOption
     (
-        "noLagrangian",
+        "no-lagrangian", // noLagrangian
         "Suppress writing lagrangian positions and fields"
     );
+    argList::addOptionCompat("no-lagrangian", {"noLagrangian", 1806});
+
     argList::addBoolOption
     (
-        "noMesh",
-        "Suppress writing the geometry. "
-        "Can be useful for converting partial results for a static geometry"
+        "no-mesh", // noMesh
+        "Suppress writing the geometry."
+        " Can be useful for converting partial results for a static geometry"
     );
+    argList::addOptionCompat("no-mesh", {"noMesh", 1806});
+
+    argList::addOption
+    (
+        "fields",
+        "wordRes",
+        "Specify single or multiple fields to write (all by default)\n"
+        "Eg, 'T' or '( \"U.*\" )'"
+    );
+
     argList::addOption
     (
         "name",
         "subdir",
-        "Sub-directory name for ensight output (default: 'Ensight')"
+        "Sub-directory name for Ensight output (default: 'Ensight')"
     );
     argList::addOption
     (
@@ -130,24 +165,6 @@ int main(int argc, char *argv[])
         "n",
         "Width of Ensight data subdir"
     );
-
-    // The volume field types that we handle
-    const wordHashSet volFieldTypes
-    {
-        volScalarField::typeName,
-        volVectorField::typeName,
-        volSphericalTensorField::typeName,
-        volSymmTensorField::typeName,
-        volTensorField::typeName
-    };
-
-    // The lagrangian field types that we handle
-    const wordHashSet cloudFieldTypes
-    {
-        scalarIOField::typeName,
-        vectorIOField::typeName,
-        tensorIOField::typeName
-    };
 
     #include "setRootCase.H"
 
@@ -207,20 +224,27 @@ int main(int argc, char *argv[])
 
 
     //
-    // Miscellaneous output configuration
+    // Output configuration
     //
 
     // Control for renumbering iterations
     label indexingNumber = 0;
     const bool optIndex = args.readIfPresent("index", indexingNumber);
-    const bool noLagrangian = args.found("noLagrangian");
+    const bool doLagrangian = !args.found("no-lagrangian");
 
-    // Always write the geometry, unless the -noMesh option is specified
-    bool optNoMesh = args.found("noMesh");
+    // Write the geometry, unless otherwise specified
+    bool doGeometry = !args.found("no-mesh");
+
+    //
+    // Output configuration (field related)
+    //
+
+    wordRes fieldPatterns;
+    args.readListIfPresent<wordRe>("fields", fieldPatterns);
 
 
     // Construct the list of ensight parts for the entire mesh
-    ensightParts partsList(mesh);
+    ensightParts ensParts(mesh);
 
     // Write summary information
     if (Pstream::master())
@@ -231,22 +255,56 @@ int main(int argc, char *argv[])
 
         info
             << "// summary of ensight parts" << nl << nl;
-        partsList.writeSummary(info);
+        ensParts.writeSummary(info);
     }
 
     #include "checkMeshMoving.H"
-    #include "findFields.H"
-
-    if (meshMoving && optNoMesh)
-    {
-        Info<< "mesh is moving: ignoring '-noMesh' option" << endl;
-        optNoMesh = false;
-    }
-
+    #include "findCloudFields.H"
 
     Info<< "Startup in "
         << timer.cpuTimeIncrement() << " s, "
         << mem.update().size() << " kB" << nl << endl;
+
+
+    // Initially all possible objects that are available at the final time
+    wordHashSet testedObjectNames;
+    {
+        IOobjectList objects(mesh, timeDirs.last().name());
+
+        if (!fieldPatterns.empty())
+        {
+            objects.filterObjects(fieldPatterns);
+        }
+
+        // Remove "*_0" restart fields
+        objects.prune_0();
+
+        // Only retain volume and dimensioned fields.
+        objects.filterClasses
+        (
+            [](const word& clsName){
+                return
+                (
+                    fieldTypes::volume.found(clsName)
+                 || fieldTypes::internal.found(clsName)
+                );
+            }
+        );
+
+        wordList objectNames(objects.sortedNames());
+
+        // Check availability for all times...
+        checkData(mesh, timeDirs, objectNames);
+
+        testedObjectNames = objectNames;
+    }
+
+    if (meshMoving && !doGeometry)
+    {
+        Info<< "mesh is moving: ignoring '-no-mesh' option" << endl;
+        doGeometry = true;
+    }
+
 
     forAll(timeDirs, timeI)
     {
@@ -257,221 +315,33 @@ int main(int argc, char *argv[])
 
         ensCase.setTime(timeDirs[timeI], timeIndex);
 
+        Info<< "Time [" << timeIndex << "] = " << runTime.timeName() << nl;
+
         if (timeI == 0 || mesh.moving())
         {
             if (mesh.moving())
             {
-                partsList.recalculate(mesh);
+                ensParts.recalculate(mesh);
             }
 
-            if (!optNoMesh)
+            if (doGeometry)
             {
                 autoPtr<ensightGeoFile> os = ensCase.newGeometry(meshMoving);
-                partsList.write(os.ref());
+                ensParts.write(os.ref());
             }
         }
 
-        Info<< "Write volume field (" << flush;
+        // Objects at this time
+        IOobjectList objects(mesh, runTime.timeName());
 
-        forAllConstIters(volumeFields, fieldIter)
-        {
-            const word& fieldName = fieldIter.key();
-            const word& fieldType = fieldIter.object();
+        // Restrict to objects that are available for all times
+        objects.filterObjects(testedObjectNames);
 
-            IOobject fieldObject
-            (
-                fieldName,
-                mesh.time().timeName(),
-                mesh,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            );
+        // Volume, internal fields
+        #include "convertVolumeFields.H"
 
-            bool wrote = false;
-            if (fieldType == volScalarField::typeName)
-            {
-                autoPtr<ensightFile> os = ensCase.newData<scalar>
-                (
-                    fieldName
-                );
-
-                volScalarField vf(fieldObject, mesh);
-                wrote = ensightSerialOutput::writeField<scalar>
-                (
-                    vf, partsList, os
-                );
-            }
-            else if (fieldType == volVectorField::typeName)
-            {
-                autoPtr<ensightFile> os = ensCase.newData<vector>
-                (
-                    fieldName
-                );
-
-                volVectorField vf(fieldObject, mesh);
-                wrote = ensightSerialOutput::writeField<vector>
-                (
-                    vf, partsList, os
-                );
-            }
-            else if (fieldType == volSphericalTensorField::typeName)
-            {
-                autoPtr<ensightFile> os = ensCase.newData<sphericalTensor>
-                (
-                    fieldName
-                );
-
-                volSphericalTensorField vf(fieldObject, mesh);
-                wrote = ensightSerialOutput::writeField<sphericalTensor>
-                (
-                    vf, partsList, os
-                );
-            }
-            else if (fieldType == volSymmTensorField::typeName)
-            {
-                autoPtr<ensightFile> os = ensCase.newData<symmTensor>
-                (
-                    fieldName
-                );
-
-                volSymmTensorField vf(fieldObject, mesh);
-                wrote = ensightSerialOutput::writeField<symmTensor>
-                (
-                    vf, partsList, os
-                );
-            }
-            else if (fieldType == volTensorField::typeName)
-            {
-                autoPtr<ensightFile> os = ensCase.newData<tensor>
-                (
-                    fieldName
-                );
-
-                volTensorField vf(fieldObject, mesh);
-                wrote = ensightSerialOutput::writeField<tensor>
-                (
-                    vf, partsList, os
-                );
-            }
-
-            if (wrote)
-            {
-                Info<< " " << fieldObject.name() << flush;
-            }
-        }
-        Info<< " )" << endl;
-
-        // Check for clouds
-        forAllConstIters(cloudFields, cloudIter)
-        {
-            const word& cloudName = cloudIter.key();
-            const HashTable<word>& theseCloudFields = cloudIter.object();
-
-            const fileName cloudPrefix(regionPrefix/cloud::prefix);
-
-            if (!isDir(runTime.timePath()/cloudPrefix/cloudName))
-            {
-                continue;
-            }
-
-            IOobjectList cloudObjs
-            (
-                mesh,
-                runTime.timeName(),
-                cloudPrefix/cloudName
-            );
-
-            // Clouds require "coordinates".
-            // The "positions" are for v1706 and lower.
-            const bool cloudExists =
-            (
-                cloudObjs.found("coordinates")
-             || cloudObjs.found("positions")
-            );
-
-            if (!cloudExists)
-            {
-                continue;
-            }
-
-            Info<< "Write " << cloudName << " (" << flush;
-
-            {
-                auto os = ensCase.newCloud(cloudName);
-
-                ensightCloud::writePositions
-                (
-                    mesh,
-                    cloudName,
-                    cloudExists,
-                    os
-                );
-
-                Info<< " positions";
-            }
-
-
-            forAllConstIters(theseCloudFields, fieldIter)
-            {
-                const word& fieldName = fieldIter.key();
-                const word& fieldType = fieldIter.object();
-
-                IOobject *fieldObject = cloudObjs.findObject(fieldName);
-
-                if (!fieldObject)
-                {
-                    Info<< "missing "
-                        << runTime.timeName()/cloudPrefix/cloudName/fieldName
-                        << endl;
-                    continue;
-                }
-
-                bool wrote = false;
-                if (fieldType == scalarIOField::typeName)
-                {
-                    auto os =
-                        ensCase.newCloudData<scalar>(cloudName, fieldName);
-
-                    wrote = ensightCloud::writeCloudField<scalar>
-                    (
-                        *fieldObject,
-                        true, // field exists
-                        os
-                    );
-                }
-                else if (fieldType == vectorIOField::typeName)
-                {
-                    auto os =
-                        ensCase.newCloudData<vector>(cloudName, fieldName);
-
-                    wrote = ensightCloud::writeCloudField<vector>
-                    (
-                        *fieldObject,
-                        true, // field exists
-                        os
-                    );
-                }
-                else if (fieldType == tensorIOField::typeName)
-                {
-                    auto os =
-                        ensCase.newCloudData<tensor>(cloudName, fieldName);
-
-                    wrote = ensightCloud::writeCloudField<tensor>
-                    (
-                        *fieldObject,
-                        true, // field exists
-                        os
-                    );
-                }
-
-                if (wrote)
-                {
-                    Info<< " " << fieldObject->name();
-                }
-            }
-
-            Info<< " )" << endl;
-        }
+        // Lagrangian fields
+        #include "convertLagrangian.H"
 
         Info<< "Wrote in "
             << timer.cpuTimeIncrement() << " s, "

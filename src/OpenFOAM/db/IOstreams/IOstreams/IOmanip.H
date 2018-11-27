@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ Description
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 template<class T> class Smanip;
 template<class T> class Imanip;
@@ -160,12 +160,15 @@ inline Ostream& operator<<(Ostream& os, const Omanip<T>& m)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline Smanip<ios_base::fmtflags> setf
-(
-    const ios_base::fmtflags flags
-)
+inline Smanip<ios_base::fmtflags> setf(const ios_base::fmtflags flags)
 {
     return Smanip<ios_base::fmtflags>(&IOstream::setf, flags);
+}
+
+
+inline Omanip<char> setfill(char fillch)
+{
+    return Omanip<char>(&Ostream::fill, fillch);
 }
 
 

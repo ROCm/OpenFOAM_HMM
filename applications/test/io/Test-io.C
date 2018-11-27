@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,9 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    test
+    Test-io
 
 Description
+    Test basic stream functionality
 
 \*---------------------------------------------------------------------------*/
 
@@ -51,7 +52,25 @@ int main(void)
 
     Info<< hex << 255 << endl;
 
+
+    Info<< nl << "Formatted fields" << nl;
+
+    const char oldfill = static_cast<OSstream&>(Info).fill();
+
+    Info<< setfill('-');
+    Info<< "|" << setf(ios_base::left) << setw(32) << " foo " << "|" << nl;
+    Info<< "|" << setf(ios_base::left) << setw(10) << " bar " << "|" << nl;
+    Info<< "|" << setf(ios_base::left) << setw(10) << "" << "|" << nl;
+
+    Info<< "resetting fill from (0x" << hex << int(oldfill) << ")" << nl;
+    Info<< setfill(oldfill);
+    Info<< "|" << setf(ios_base::left) << setw(10) << " bar " << "|" << nl;
+
+    Info<< nl << nl;
+
     Info.operator Foam::OSstream&() << "stop" << endl;
+
+    static_cast<OSstream&>(Info) << "\nEnd\n" << nl;
 }
 
 // ************************************************************************* //

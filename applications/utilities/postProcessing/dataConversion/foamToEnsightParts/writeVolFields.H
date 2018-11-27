@@ -25,7 +25,7 @@ InNamespace
     Foam
 
 Description
-    Read volume fields from disk and write with ensightMesh
+    Read volume fields from disk and write with ensightParts
 
 SourceFiles
     writeVolFields.H
@@ -36,7 +36,7 @@ SourceFiles
 #define writeVolFields_H
 
 #include "readFields.H"
-#include "fvMeshSubsetProxy.H"
+#include "fvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,10 +47,9 @@ template<class Type>
 bool writeVolField
 (
     ensightCase& ensCase,
-    const ensightMesh& ensMesh,
-    const fvMeshSubsetProxy& proxy,
-    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tfield,
-    const bool nodeValues
+    const ensightParts& ensParts,
+    const fvMesh& mesh,
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tfield
 )
 {
     if (!tfield.valid())
@@ -62,12 +61,11 @@ bool writeVolField
 
     autoPtr<ensightFile> os = ensCase.newData<Type>(field.name());
 
-    bool wrote = ensightOutput::writeField<Type>
+    bool wrote = ensightSerialOutput::writeField<Type>
     (
         field,
-        ensMesh,
-        os,
-        nodeValues
+        ensParts,
+        os
     );
 
     tfield.clear();
@@ -79,10 +77,9 @@ template<class Type>
 label writeVolFields
 (
     ensightCase& ensCase,
-    const ensightMesh& ensMesh,
-    const fvMeshSubsetProxy& proxy,
-    const IOobjectList& objects,
-    const bool nodeValues
+    const ensightParts& ensParts,
+    const fvMesh& mesh,
+    const IOobjectList& objects
 )
 {
     typedef GeometricField<Type, fvPatchField, volMesh> GeoField;
@@ -96,10 +93,9 @@ label writeVolFields
             writeVolField<Type>
             (
                 ensCase,
-                ensMesh,
-                proxy,
-                getField<GeoField>(objects.findObject(fieldName), proxy),
-                nodeValues
+                ensParts,
+                mesh,
+                getField<GeoField>(objects.findObject(fieldName), mesh)
             )
         )
         {
@@ -115,20 +111,18 @@ label writeVolFields
 label writeAllVolFields
 (
     ensightCase& ensCase,
-    const ensightMesh& ensMesh,
-    const fvMeshSubsetProxy& proxy,
-    const IOobjectList& objects,
-    const bool nodeValues
+    const ensightParts& ensParts,
+    const fvMesh& mesh,
+    const IOobjectList& objects
 )
 {
     #undef  foamToEnsight_WRITE_FIELD
     #define foamToEnsight_WRITE_FIELD(PrimitiveType)    \
         writeVolFields<PrimitiveType>                   \
         (                                               \
-            ensCase, ensMesh,                           \
-            proxy,                                      \
-            objects,                                    \
-            nodeValues                                  \
+            ensCase, ensParts,                          \
+            mesh,                                       \
+            objects                                     \
         )
 
     label count = 0;
