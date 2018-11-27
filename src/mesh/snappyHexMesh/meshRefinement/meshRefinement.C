@@ -57,6 +57,10 @@ License
 #include "motionSmoother.H"
 #include "faceSet.H"
 
+// Leak path
+#include "shortestPathSet.H"
+#include "meshSearch.H"
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -2220,8 +2224,10 @@ Foam::label Foam::meshRefinement::findRegions
     const vector& perturbVec,
     const pointField& locationsInMesh,
     const pointField& locationsOutsideMesh,
+    const writer<scalar>& leakPathFormatter,
     const label nRegions,
-    labelList& cellRegion
+    labelList& cellRegion,
+    const boolList& blockedFace
 )
 {
     bitSet insideCell(mesh.nCells());
@@ -2273,11 +2279,170 @@ Foam::label Foam::meshRefinement::findRegions
             label index = insideRegions.find(regioni);
             if (index != -1)
             {
+                const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+
+                fileName outputDir;
+                if (Pstream::master())
+                {
+                    outputDir =
+                        mesh.time().path()
+                      / (Pstream::parRun() ? ".." : "")
+                      / functionObject::outputPrefix
+                      / mesh.pointsInstance();
+                    outputDir.clean();
+                    mkDir(outputDir);
+                }
+
+
+                // Write the leak path
+
+                meshSearch searchEngine(mesh);
+                shortestPathSet leakPath
+                (
+                    "leakPath",
+                    mesh,
+                    searchEngine,
+                    coordSet::coordFormatNames[coordSet::coordFormat::DISTANCE],
+                    false,  //true,
+                    50,     // tbd. Number of iterations
+                    pbm.groupPatchIDs()["wall"],
+                    locationsInMesh,
+                    locationsOutsideMesh,
+                    blockedFace
+                );
+
+                // Split leak path according to segment. Note: segment index
+                // is global (= index in locationsInsideMesh)
+                List<pointList> segmentPoints;
+                List<scalarList> segmentDist;
+                {
+                    label nSegments = 0;
+                    if (leakPath.segments().size())
+                    {
+                        nSegments = max(leakPath.segments())+1;
+                    }
+                    reduce(nSegments, maxOp<label>());
+
+                    labelList nElemsPerSegment(nSegments, 0);
+                    for (label segmenti : leakPath.segments())
+                    {
+                        nElemsPerSegment[segmenti]++;
+                    }
+                    segmentPoints.setSize(nElemsPerSegment.size());
+                    segmentDist.setSize(nElemsPerSegment.size());
+                    forAll(nElemsPerSegment, i)
+                    {
+                        segmentPoints[i].setSize(nElemsPerSegment[i]);
+                        segmentDist[i].setSize(nElemsPerSegment[i]);
+                    }
+                    nElemsPerSegment = 0;
+
+                    forAll(leakPath, elemi)
+                    {
+                        label segmenti = leakPath.segments()[elemi];
+                        pointList& points = segmentPoints[segmenti];
+                        scalarList& dist = segmentDist[segmenti];
+                        label& n = nElemsPerSegment[segmenti];
+
+                        points[n] = leakPath[elemi];
+                        dist[n] = leakPath.curveDist()[elemi];
+                        n++;
+                    }
+                }
+
+                PtrList<coordSet> allLeakPaths(segmentPoints.size());
+                forAll(allLeakPaths, segmenti)
+                {
+                    // Collect data from all processors
+                    List<pointList> gatheredPts(Pstream::nProcs());
+                    gatheredPts[Pstream::myProcNo()] =
+                        std::move(segmentPoints[segmenti]);
+                    Pstream::gatherList(gatheredPts);
+
+                    List<scalarList> gatheredDist(Pstream::nProcs());
+                    gatheredDist[Pstream::myProcNo()] =
+                        std::move(segmentDist[segmenti]);
+                    Pstream::gatherList(gatheredDist);
+
+                    // Combine processor lists into one big list.
+                    pointList allPts
+                    (
+                        ListListOps::combine<pointList>
+                        (
+                            gatheredPts, accessOp<pointList>()
+                        )
+                    );
+                    scalarList allDist
+                    (
+                        ListListOps::combine<scalarList>
+                        (
+                            gatheredDist, accessOp<scalarList>()
+                        )
+                    );
+
+                    // Sort according to curveDist
+                    labelList indexSet;
+                    Foam::sortedOrder(allDist, indexSet);
+
+                    allLeakPaths.set
+                    (
+                        segmenti,
+                        new coordSet
+                        (
+                            leakPath.name(),
+                            leakPath.axis(),
+                            pointList(allPts, indexSet),
+                            //scalarList(allDist, indexSet)
+                            scalarList(allPts.size(), scalar(segmenti))
+                        )
+                    );
+                }
+
+                fileName fName;
+                if (Pstream::master())
+                {
+                    List<List<scalarField>> allLeakData(1);
+                    List<scalarField>& varData = allLeakData[0];
+                    varData.setSize(allLeakPaths.size());
+                    forAll(allLeakPaths, segmenti)
+                    {
+                        varData[segmenti] = allLeakPaths[segmenti].curveDist();
+                    }
+
+                    const wordList valueSetNames(1, "leakPath");
+
+                    fName =
+                        outputDir
+                       /leakPathFormatter.getFileName
+                        (
+                            allLeakPaths[0],
+                            valueSetNames
+                        );
+
+                    // Note scope to force writing to finish before
+                    // FatalError exit
+                    OFstream ofs(fName);
+                    if (ofs.opened())
+                    {
+                        leakPathFormatter.write
+                        (
+                            true,               // write tracks
+                            allLeakPaths,
+                            valueSetNames,
+                            allLeakData,
+                            ofs
+                        );
+                    }
+                }
+
+                Pstream::scatter(fName);
+
                 FatalErrorInFunction
                     << "Location in mesh " << locationsInMesh[index]
                     << " is inside same mesh region " << regioni
-                    << " as location outside mesh "
-                    << locationsOutsideMesh[i]
+                    << " as one of the locations outside mesh "
+                    << locationsOutsideMesh
+                    << nl << "    Dumped leak path to " << fName
                     << exit(FatalError);
             }
         }
@@ -2309,7 +2474,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
     const labelList& globalToMasterPatch,
     const labelList& globalToSlavePatch,
     const pointField& locationsInMesh,
-    const pointField& locationsOutsideMesh
+    const pointField& locationsOutsideMesh,
+    const writer<scalar>& leakPathFormatter
 )
 {
     // Force calculation of face decomposition (used in findCell)
@@ -2329,8 +2495,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
         mergeDistance_ * vector::one,   // perturbVec
         locationsInMesh,
         locationsOutsideMesh,
+        leakPathFormatter,
         cellRegion.nRegions(),
-        cellRegion
+        cellRegion,
+        blockedFace
     );
 
     // Subset

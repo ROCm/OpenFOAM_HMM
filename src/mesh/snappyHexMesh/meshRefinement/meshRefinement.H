@@ -56,6 +56,7 @@ SourceFiles
 #include "surfaceZonesInfo.H"
 #include "volumeType.H"
 #include "DynamicField.H"
+#include "writer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -1090,7 +1091,8 @@ public:
                 const labelList& globalToSlavePatch,
                 const pointField& locationsInMesh,
                 const wordList& regionsInMesh,
-                const pointField& locationsOutsideMesh
+                const pointField& locationsOutsideMesh,
+                const writer<scalar>& leakPathFormatter
             );
 
             //- Merge free-standing baffles
@@ -1106,7 +1108,8 @@ public:
                 const labelList& globalToMasterPatch,
                 const labelList& globalToSlavePatch,
                 const pointField& locationsInMesh,
-                const pointField& locationsOutsideMesh
+                const pointField& locationsOutsideMesh,
+                const writer<scalar>& leakPathFormatter
             );
 
             //- Split off (with optional buffer layers) unreachable areas
@@ -1120,7 +1123,8 @@ public:
 
                 const pointField& locationsInMesh,
                 const wordList& regionsInMesh,
-                const pointField& locationsOutsideMesh
+                const pointField& locationsOutsideMesh,
+                const writer<scalar>& leakPathFormatter
             );
 
             //- Remove cells from limitRegions if level -1
@@ -1278,8 +1282,10 @@ public:
                 const vector& perturbVec,
                 const pointField& locationsInMesh,
                 const pointField& locationsOutsideMesh,
+                const writer<scalar>& leakPathFormatter,
                 const label nRegions,
-                labelList& cellRegion
+                labelList& cellRegion,
+                const boolList& blockedFace
             );
 
             //- Split mesh. Keep part containing point. Return empty map if
@@ -1289,7 +1295,8 @@ public:
                 const labelList& globalToMasterPatch,
                 const labelList& globalToSlavePatch,
                 const pointField& locationsInMesh,
-                const pointField& locationsOutsideMesh
+                const pointField& locationsOutsideMesh,
+                const writer<scalar>& leakPathFormatter
             );
 
             //- Split faces into two

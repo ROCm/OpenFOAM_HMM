@@ -60,14 +60,16 @@ Foam::snappyRefineDriver::snappyRefineDriver
     decompositionMethod& decomposer,
     fvMeshDistribute& distributor,
     const labelUList& globalToMasterPatch,
-    const labelUList& globalToSlavePatch
+    const labelUList& globalToSlavePatch,
+    const writer<scalar>& setFormatter
 )
 :
     meshRefiner_(meshRefiner),
     decomposer_(decomposer),
     distributor_(distributor),
     globalToMasterPatch_(globalToMasterPatch),
-    globalToSlavePatch_(globalToSlavePatch)
+    globalToSlavePatch_(globalToSlavePatch),
+    setFormatter_(setFormatter)
 {}
 
 
@@ -1386,7 +1388,8 @@ void Foam::snappyRefineDriver::removeInsideCells
         globalToSlavePatch_,
         refineParams.locationsInMesh(),
         refineParams.zonesInMesh(),
-        refineParams.locationsOutsideMesh()
+        refineParams.locationsOutsideMesh(),
+        setFormatter_
     );
 
     if (debug&meshRefinement::MESH)
@@ -2353,7 +2356,8 @@ void Foam::snappyRefineDriver::baffleAndSplitMesh
         globalToSlavePatch_,
         refineParams.locationsInMesh(),
         refineParams.zonesInMesh(),
-        refineParams.locationsOutsideMesh()
+        refineParams.locationsOutsideMesh(),
+        setFormatter_
     );
 
 
@@ -2371,7 +2375,8 @@ void Foam::snappyRefineDriver::baffleAndSplitMesh
             globalToMasterPatch_,
             globalToSlavePatch_,
             refineParams.locationsInMesh(),
-            refineParams.locationsOutsideMesh()
+            refineParams.locationsOutsideMesh(),
+            setFormatter_
         );
     }
 }
@@ -2481,7 +2486,8 @@ void Foam::snappyRefineDriver::splitAndMergeBaffles
         globalToSlavePatch_,
         refineParams.locationsInMesh(),
         refineParams.zonesInMesh(),
-        refineParams.locationsOutsideMesh()
+        refineParams.locationsOutsideMesh(),
+        setFormatter_
     );
 
     // Merge free-standing baffles always
@@ -2497,7 +2503,8 @@ void Foam::snappyRefineDriver::splitAndMergeBaffles
         globalToMasterPatch_,
         globalToSlavePatch_,
         refineParams.locationsInMesh(),
-        refineParams.locationsOutsideMesh()
+        refineParams.locationsOutsideMesh(),
+        setFormatter_
     );
 
     if (debug)
@@ -2536,7 +2543,8 @@ void Foam::snappyRefineDriver::splitAndMergeBaffles
             globalToMasterPatch_,
             globalToSlavePatch_,
             refineParams.locationsInMesh(),
-            refineParams.locationsOutsideMesh()
+            refineParams.locationsOutsideMesh(),
+            setFormatter_
         );
 
         if (debug)
