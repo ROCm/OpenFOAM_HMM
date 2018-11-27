@@ -32,8 +32,9 @@ Description
 
     \heading Dictionary parameters
     \table
-        Property    | Description                       | Required  | Default
-        type        | The cell model type (hex, ..)     | yes   |
+        Property    | Description                           | Required | Default
+        shape       | The cell model (hex, ..)              | yes |
+        type        | Older specification for 'shape'       | no  |
     \endtable
 
 SourceFiles
@@ -65,8 +66,8 @@ class shapeToCell
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Name of cell type
-        word type_;
+        //- Name of cell shape/type
+        word shape_;
 
 
     // Private Member Functions

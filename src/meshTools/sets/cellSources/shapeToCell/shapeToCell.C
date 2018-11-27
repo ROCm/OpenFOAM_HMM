@@ -59,7 +59,7 @@ Foam::scalar Foam::shapeToCell::featureCos = Foam::cos(degToRad(10.0));
 
 void Foam::shapeToCell::combine(topoSet& set, const bool add) const
 {
-    if (type_ == "splitHex")
+    if (shape_ == "splitHex")
     {
         for (label celli = 0; celli < mesh_.nCells(); ++celli)
         {
@@ -73,7 +73,7 @@ void Foam::shapeToCell::combine(topoSet& set, const bool add) const
     }
     else
     {
-        const cellModel& wantedModel = cellModel::ref(type_);
+        const cellModel& wantedModel = cellModel::ref(shape_);
 
         const cellShapeList& cellShapes = mesh_.cellShapes();
 
@@ -97,12 +97,12 @@ Foam::shapeToCell::shapeToCell
 )
 :
     topoSetCellSource(mesh),
-    type_(shapeName)
+    shape_(shapeName)
 {
-    if (!cellModel::ptr(type_) && type_ != "splitHex")
+    if (!cellModel::ptr(shape_) && shape_ != "splitHex")
     {
         FatalErrorInFunction
-            << "Illegal cell type " << type_ << exit(FatalError);
+            << "Illegal cell shape " << shape_ << exit(FatalError);
     }
 }
 
@@ -113,7 +113,7 @@ Foam::shapeToCell::shapeToCell
     const dictionary& dict
 )
 :
-    shapeToCell(mesh, dict.get<word>("type"))
+    shapeToCell(mesh, dict.getCompat<word>("shape", {{"type", 1806}}))
 {}
 
 
@@ -124,12 +124,12 @@ Foam::shapeToCell::shapeToCell
 )
 :
     topoSetCellSource(mesh),
-    type_(checkIs(is))
+    shape_(checkIs(is))
 {
-    if (!cellModel::ptr(type_) && type_ != "splitHex")
+    if (!cellModel::ptr(shape_) && shape_ != "splitHex")
     {
         FatalErrorInFunction
-            << "Illegal cell type " << type_ << exit(FatalError);
+            << "Illegal cell shape " << shape_ << exit(FatalError);
     }
 }
 
@@ -146,8 +146,7 @@ void Foam::shapeToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding all cells of type " << type_
-                << " ..." << endl;
+            Info<< "    Adding all " << shape_ << " cells ..." << endl;
         }
 
         combine(set, true);
@@ -156,8 +155,7 @@ void Foam::shapeToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Removing all cells of type " << type_
-                << " ..." << endl;
+            Info<< "    Removing all " << shape_ << " cells ..." << endl;
         }
 
         combine(set, false);
