@@ -10,7 +10,6 @@ vtkWrite
     writeControl    writeTime;
     writeInterval   1;
 
-    // Fields to output (words or regex)
     regions (".*");
 
     internal    true;

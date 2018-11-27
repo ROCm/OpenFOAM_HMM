@@ -15,6 +15,6 @@ runApplication blockMesh
 
 runApplication decomposePar -dry-run -cellDist
 
-runApplication foamToVTK -noBoundary
+runApplication foamToVTK -no-boundary
 
 #------------------------------------------------------------------------------
