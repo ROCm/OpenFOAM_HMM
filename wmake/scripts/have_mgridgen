@@ -81,9 +81,8 @@ have_mgridgen()
     then
         header=$(findFirstFile $MGRIDGEN_ARCH_PATH/include/$header)
 
-        # FOAM_EXT_LIBBIN is allowed to be unset
         library=$(findFirstFile \
-            $FOAM_EXT_LIBBIN/$library \
+            "$(thirdExtLib $library)" \
             $MGRIDGEN_ARCH_PATH/lib/$static \
             $MGRIDGEN_ARCH_PATH/lib/$library \
             $MGRIDGEN_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/$static \

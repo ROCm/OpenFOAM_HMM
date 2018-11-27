@@ -21,6 +21,7 @@
 #     isSystem
 #     isAbsdir, hasAbsdir
 #     findFirstFile
+#     thirdExtLib
 #
 # Variables provided
 #     extLiba
@@ -104,6 +105,26 @@ then
         return 2
     }
 
+    # Check for existence of file in FOAM_EXT_LIBBIN,
+    # but not if either file or FOAM_EXT_LIBBIN are empty or
+    # if the FOAM_EXT_LIBBIN is not located in the ThirdParty directory
+    #
+    # On success, echoes the resolved file and returns 0, otherwise returns 2
+    thirdExtLib()
+    {
+        local file="$FOAM_EXT_LIBBIN/$1"
+
+        if  [ -n "$1" ] && \
+            [ -n "$FOAM_EXT_LIBBIN" ] && \
+            [ -n "$WM_THIRD_PARTY_DIR" ] && \
+            [ -f "$file" -a -r "$file" ] && \
+            [ "${FOAM_EXT_LIBBIN#$WM_THIRD_PARTY_DIR}" != "$FOAM_EXT_LIBBIN" ]
+        then
+            echo "$file"
+        else
+            return 2
+        fi
+    }
 fi
 
 
