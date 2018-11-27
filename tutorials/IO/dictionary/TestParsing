@@ -4,22 +4,22 @@ cd ${0%/*} || exit 1                        # Run from this directory
 
 echo "dictionary input tests"
 
-verbose=true
+verbose=false
 npass=0
 nwarn=0
 nfail=0
+
+# Increase verbosity on demand, with the -verbose flag
+for i in "$@"
+do
+    case "$i" in (-verbose*) verbose=true ;; esac
+done
+
 
 foamDictionary -help > /dev/null 2>&1 || {
     echo "Error: non-functional foamDictionary"
     exit 2
 }
-
-
-# Reduced verbosity in test mode?
-if isTest "$@"
-then
-    verbose=false
-fi
 
 
 for dict in \
@@ -104,6 +104,7 @@ then
     echo End
     echo
 else
+    echo "Found $nfail FatalErrors"
     exit 1
 fi
 
