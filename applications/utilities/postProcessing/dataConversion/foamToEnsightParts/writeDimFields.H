@@ -64,7 +64,7 @@ label writeDimFields
 
     for (const word& fieldName : objects.sortedNames<DimField>())
     {
-        IOobject* io = objects.findObject(fieldName);
+        const IOobject* io = objects.findObject(fieldName);
 
         if
         (

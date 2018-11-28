@@ -62,7 +62,7 @@ tmp<GeoField> getField(const IOobject* io, const fvMesh& mesh)
 //- Get internal field and make it a zero-gradient volume field with subsetting
 template<class GeoField>
 tmp<GeoField>
-getZeroGradField(IOobject* io, const fvMesh& mesh)
+getZeroGradField(const IOobject* io, const fvMesh& mesh)
 {
     if (io)
     {

@@ -61,7 +61,7 @@ tmp<GeoField> getField(const IOobject* io, const fvMeshSubsetProxy& proxy)
 //- Get internal field and make it a zero-gradient volume field with subsetting
 template<class GeoField>
 tmp<GeoField>
-getZeroGradField(IOobject* io, const fvMeshSubsetProxy& proxy)
+getZeroGradField(const IOobject* io, const fvMeshSubsetProxy& proxy)
 {
     if (io)
     {

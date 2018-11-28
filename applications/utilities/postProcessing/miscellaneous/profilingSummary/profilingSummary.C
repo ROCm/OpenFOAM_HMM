@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
                 "uniform"
             );
 
-            IOobject* ioptr = objects.findObject(profilingFileName);
+            const IOobject* ioptr = objects.findObject(profilingFileName);
             if (ioptr)
             {
                 IOdictionary dict(*ioptr);
