@@ -37,21 +37,23 @@ template<class Container>
 Foam::wordList Foam::parLagrangianRedistributor::filterObjects
 (
     const IOobjectList& objects,
-    const wordHashSet& selectedFields
+    const wordRes& selectedFields
 )
 {
-    // Parallel synchronise
     wordList fieldNames =
     (
         selectedFields.empty()
-      ? objects.names(Container::typeName)
-      : objects.names(Container::typeName, selectedFields)
+      ? objects.names<Container>()
+      : objects.names<Container>(selectedFields)
     );
+
+    // Parallel synchronise
+    // - Combine names from all processors
 
     Pstream::combineGather(fieldNames, ListOps::uniqueEqOp<word>());
     Pstream::combineScatter(fieldNames);
 
-    // Ensure order is consistent
+    // Sort for consistent order on all processors
     Foam::sort(fieldNames);
 
     return fieldNames;
@@ -59,17 +61,17 @@ Foam::wordList Foam::parLagrangianRedistributor::filterObjects
 
 
 template<class Type>
-void Foam::parLagrangianRedistributor::redistributeLagrangianFields
+Foam::label Foam::parLagrangianRedistributor::redistributeFields
 (
     const mapDistributeBase& map,
     const word& cloudName,
     const IOobjectList& objects,
-    const wordHashSet& selectedFields
+    const wordRes& selectedFields
 ) const
 {
-    const word fieldClassName(IOField<Type>::typeName);
+    typedef IOField<Type> fieldType;
 
-    const wordList objectNames
+    const wordList fieldNames
     (
         filterObjects<IOField<Type>>
         (
@@ -78,14 +80,14 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFields
         )
     );
 
-    if (objectNames.size())
+    label nFields = 0;
+    for (const word& objectName : fieldNames)
     {
-        Info<< "    Redistributing lagrangian "
-            << fieldClassName << "s\n" << endl;
-    }
-
-    for (const word& objectName : objectNames)
-    {
+        if (!nFields)
+        {
+            Info<< "    Redistributing lagrangian "
+                << fieldType::typeName << "s\n" << endl;
+        }
         Info<< "        " <<  objectName << endl;
 
         // Read if present
@@ -126,24 +128,24 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFields
         }
     }
 
-    if (objectNames.size()) Info<< endl;
+    return nFields;
 }
 
 
 template<class Type>
-void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
+Foam::label Foam::parLagrangianRedistributor::redistributeFieldFields
 (
     const mapDistributeBase& map,
     const word& cloudName,
     const IOobjectList& objects,
-    const wordHashSet& selectedFields
+    const wordRes& selectedFields
 ) const
 {
-    const word fieldClassName(CompactIOField<Field<Type>, Type>::typeName);
+    typedef CompactIOField<Field<Type>, Type> fieldType;
 
-    wordList objectNames
+    wordList fieldNames
     (
-        filterObjects<CompactIOField<Field<Type>, Type>>
+        filterObjects<fieldType>
         (
             objects,
             selectedFields
@@ -160,19 +162,18 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
                 selectedFields
             )
         );
-        objectNames.append(ioFieldNames);
+        fieldNames.append(ioFieldNames);
     }
 
-
-    if (objectNames.size())
+    label nFields = 0;
+    for (const word& objectName : fieldNames)
     {
-        Info<< "    Redistributing lagrangian "
-            << fieldClassName << "s\n" << endl;
-    }
-
-    for (const word& objectName : objectNames)
-    {
-        Info<< "        " <<  objectName << endl;
+        if (!nFields++)
+        {
+            Info<< "    Redistributing lagrangian "
+                << fieldType::typeName << "s\n" << nl;
+        }
+        Info<< "        " <<  objectName << nl;
 
         // Read if present
         CompactIOField<Field<Type>, Type> field
@@ -212,20 +213,23 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
             ).write();
         }
     }
+
+    if (nFields) Info<< endl;
+    return nFields;
 }
 
 
 template<class Container>
-void Foam::parLagrangianRedistributor::readLagrangianFields
+Foam::label Foam::parLagrangianRedistributor::readFields
 (
     const passivePositionParticleCloud& cloud,
     const IOobjectList& objects,
-    const wordHashSet& selectedFields
+    const wordRes& selectedFields
 )
 {
     const word fieldClassName(Container::typeName);
 
-    const wordList objectNames
+    const wordList fieldNames
     (
         filterObjects<Container>
         (
@@ -234,15 +238,15 @@ void Foam::parLagrangianRedistributor::readLagrangianFields
         )
     );
 
-    if (objectNames.size())
+    label nFields = 0;
+    for (const word& objectName : fieldNames)
     {
-        Info<< "    Reading lagrangian "
-            << fieldClassName << "s\n" << endl;
-    }
-
-    for (const word& objectName : objectNames)
-    {
-        Info<< "        " <<  objectName << endl;
+        if (!nFields++)
+        {
+            Info<< "    Reading lagrangian "
+                << Container::typeName << "s\n" << nl;
+        }
+        Info<< "        " <<  objectName << nl;
 
         // Read if present
         Container* fieldPtr = new Container
@@ -260,33 +264,33 @@ void Foam::parLagrangianRedistributor::readLagrangianFields
 
         fieldPtr->store();
     }
+
+    return nFields;
 }
 
 
 template<class Container>
-void Foam::parLagrangianRedistributor::redistributeStoredLagrangianFields
+Foam::label Foam::parLagrangianRedistributor::redistributeStoredFields
 (
     const mapDistributeBase& map,
     passivePositionParticleCloud& cloud
 ) const
 {
-    const word fieldClassName(Container::typeName);
-
     HashTable<Container*> fields
     (
         cloud.lookupClass<Container>()
     );
 
-    if (fields.size())
-    {
-        Info<< "    Redistributing lagrangian "
-            << fieldClassName << "s\n" << endl;
-    }
-
+    label nFields = 0;
     forAllIters(fields, iter)
     {
-        Container& field = *(*iter);
+        Container& field = *(iter.object());
 
+        if (!nFields++)
+        {
+            Info<< "    Redistributing lagrangian "
+                << Container::typeName << "s\n" << endl;
+        }
         Info<< "        " <<  field.name() << endl;
 
         map.distribute(field);
@@ -309,6 +313,8 @@ void Foam::parLagrangianRedistributor::redistributeStoredLagrangianFields
             ).write();
         }
     }
+
+    return nFields;
 }
 
 

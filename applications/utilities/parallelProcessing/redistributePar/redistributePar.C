@@ -1687,7 +1687,7 @@ void reconstructMeshFields
 (
     const parFvFieldReconstructor& fvReconstructor,
     const IOobjectList& objects,
-    const wordHashSet& selectedFields
+    const wordRes& selectedFields
 )
 {
     // Dimensioned fields
@@ -1784,7 +1784,7 @@ void reconstructLagrangian
     const fvMesh& baseMesh,
     const fvMesh& mesh,
     const mapDistributePolyMesh& distMap,
-    const wordHashSet& selectedLagrangianFields
+    const wordRes& selectedLagrangianFields
 )
 {
     // Clouds (note: might not be present on all processors)
@@ -1832,49 +1832,49 @@ void reconstructLagrangian
                 cloud::prefix/cloudName
             );
 
-            lagrangianReconstructor.redistributeLagrangianFields<label>
+            lagrangianReconstructor.redistributeFields<label>
             (
                 lagrangianMap,
                 cloudName,
                 cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFieldFields<label>
+            lagrangianReconstructor.redistributeFieldFields<label>
             (
                 lagrangianMap,
                 cloudName,
                 cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFields<scalar>
+            lagrangianReconstructor.redistributeFields<scalar>
             (
                 lagrangianMap,
                 cloudName,
                 cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFieldFields<scalar>
+            lagrangianReconstructor.redistributeFieldFields<scalar>
             (
                 lagrangianMap,
                 cloudName,
                 cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFields<vector>
+            lagrangianReconstructor.redistributeFields<vector>
             (
                 lagrangianMap,
                 cloudName,
                 cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFieldFields<vector>
+            lagrangianReconstructor.redistributeFieldFields<vector>
             (
                 lagrangianMap,
                 cloudName,
                 cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFields
+            lagrangianReconstructor.redistributeFields
             <sphericalTensor>
             (
                 lagrangianMap,
@@ -1882,7 +1882,7 @@ void reconstructLagrangian
                 cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFieldFields
+            lagrangianReconstructor.redistributeFieldFields
             <sphericalTensor>
             (
                 lagrangianMap,
@@ -1890,14 +1890,14 @@ void reconstructLagrangian
                 cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFields<symmTensor>
+            lagrangianReconstructor.redistributeFields<symmTensor>
             (
                 lagrangianMap,
                 cloudName,
                 cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFieldFields
+            lagrangianReconstructor.redistributeFieldFields
             <symmTensor>
             (
                 lagrangianMap,
@@ -1905,14 +1905,14 @@ void reconstructLagrangian
                 cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFields<tensor>
+            lagrangianReconstructor.redistributeFields<tensor>
             (
                 lagrangianMap,
                 cloudName,
                 cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFieldFields<tensor>
+            lagrangianReconstructor.redistributeFieldFields<tensor>
             (
                 lagrangianMap,
                 cloudName,
@@ -1929,7 +1929,7 @@ void readLagrangian
 (
     const fvMesh& mesh,
     const wordList& cloudNames,
-    const wordHashSet& selectedLagrangianFields,
+    const wordRes& selectedLagrangianFields,
     PtrList<unmappedPassivePositionParticleCloud>& clouds
 )
 {
@@ -1963,21 +1963,21 @@ void readLagrangian
 
         //Pout<< "Found clould objects:" << cloudObjs.names() << endl;
 
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<label>>
         (
             clouds[i],
             cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<Field<label>>>
         (
             clouds[i],
             cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <CompactIOField<Field<label>, label>>
         (
             clouds[i],
@@ -1986,21 +1986,21 @@ void readLagrangian
         );
 
 
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<scalar>>
         (
             clouds[i],
             cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<Field<scalar>>>
         (
             clouds[i],
             cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <CompactIOField<Field<scalar>, scalar>>
         (
             clouds[i],
@@ -2009,21 +2009,21 @@ void readLagrangian
         );
 
 
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<vector>>
         (
             clouds[i],
             cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<Field<vector>>>
         (
             clouds[i],
             cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <CompactIOField<Field<vector>, vector>>
         (
             clouds[i],
@@ -2032,21 +2032,21 @@ void readLagrangian
         );
 
 
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<sphericalTensor>>
         (
             clouds[i],
             cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<Field<sphericalTensor>>>
         (
             clouds[i],
             cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <CompactIOField<Field<sphericalTensor>, sphericalTensor>>
         (
             clouds[i],
@@ -2055,21 +2055,21 @@ void readLagrangian
         );
 
 
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<symmTensor>>
         (
             clouds[i],
             cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<Field<symmTensor>>>
         (
             clouds[i],
             cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <CompactIOField<Field<symmTensor>, symmTensor>>
         (
             clouds[i],
@@ -2078,21 +2078,21 @@ void readLagrangian
         );
 
 
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<tensor>>
         (
             clouds[i],
             cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<Field<tensor>>>
         (
             clouds[i],
             cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <CompactIOField<Field<tensor>, tensor>>
         (
             clouds[i],
@@ -2136,19 +2136,19 @@ void redistributeLagrangian
                 distributor.redistributeLagrangianPositions(clouds[i]);
             const mapDistributeBase& lagrangianMap = *lagrangianMapPtr;
 
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<label>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<Field<label>>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <CompactIOField<Field<label>, label>>
             (
                 lagrangianMap,
@@ -2156,19 +2156,19 @@ void redistributeLagrangian
             );
 
 
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<scalar>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<Field<scalar>>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <CompactIOField<Field<scalar>, scalar>>
             (
                 lagrangianMap,
@@ -2176,19 +2176,19 @@ void redistributeLagrangian
             );
 
 
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<vector>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<Field<vector>>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <CompactIOField<Field<vector>, vector>>
             (
                 lagrangianMap,
@@ -2196,19 +2196,19 @@ void redistributeLagrangian
             );
 
 
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<sphericalTensor>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<Field<sphericalTensor>>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <CompactIOField<Field<sphericalTensor>, sphericalTensor>>
             (
                 lagrangianMap,
@@ -2216,19 +2216,19 @@ void redistributeLagrangian
             );
 
 
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<symmTensor>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<Field<symmTensor>>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <CompactIOField<Field<symmTensor>, symmTensor>>
             (
                 lagrangianMap,
@@ -2236,19 +2236,19 @@ void redistributeLagrangian
             );
 
 
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<tensor>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<Field<tensor>>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <CompactIOField<Field<tensor>, tensor>>
             (
                 lagrangianMap,
@@ -2323,8 +2323,8 @@ int main(int argc, char *argv[])
     }
 
 
-    const wordHashSet selectedFields(0);
-    const wordHashSet selectedLagrangianFields(0);
+    const wordRes selectedFields;
+    const wordRes selectedLagrangianFields;
 
 
     if (decompose)

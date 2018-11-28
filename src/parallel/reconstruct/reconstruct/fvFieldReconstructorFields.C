@@ -588,106 +588,218 @@ Foam::fvFieldReconstructor::reconstructFvSurfaceField
 
 
 template<class Type>
-void Foam::fvFieldReconstructor::reconstructFvVolumeInternalFields
+Foam::label Foam::fvFieldReconstructor::reconstructFvVolumeInternalFields
 (
     const IOobjectList& objects,
-    const wordHashSet& selectedFields
+    const UList<word>& fieldNames
 )
 {
-    const word& clsName = DimensionedField<Type, volMesh>::typeName;
+    typedef DimensionedField<Type, volMesh> fieldType;
 
-    const wordList fieldNames =
-    (
-        selectedFields.empty()
-      ? objects.sortedNames(clsName)
-      : objects.sortedNames(clsName, selectedFields)
-    );
-
-    if (fieldNames.size())
-    {
-        Info<< "    Reconstructing " << clsName << "s\n" << nl;
-    }
-
+    label nFields = 0;
     for (const word& fieldName : fieldNames)
     {
-        Info<< "        " << fieldName << endl;
+        const IOobject* io = objects.cfindObject<fieldType>(fieldName);
+        if (io)
+        {
+            if (!nFields++)
+            {
+                Info<< "    Reconstructing "
+                    << fieldType::typeName << "s\n" << nl;
+            }
+            Info<< "        " << fieldName << endl;
 
-        reconstructFvVolumeInternalField<Type>(*(objects[fieldName]))().write();
-
-        ++nReconstructed_;
+            reconstructFvVolumeInternalField<Type>(*io)().write();
+            ++nReconstructed_;
+        }
     }
 
-    if (fieldNames.size()) Info<< endl;
+    if (nFields) Info<< endl;
+    return nFields;
 }
 
 
 template<class Type>
-void Foam::fvFieldReconstructor::reconstructFvVolumeFields
+Foam::label Foam::fvFieldReconstructor::reconstructFvVolumeFields
 (
     const IOobjectList& objects,
-    const wordHashSet& selectedFields
+    const UList<word>& fieldNames
 )
 {
-    const word& clsName =
-        GeometricField<Type, fvPatchField, volMesh>::typeName;
+    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
-    const wordList fieldNames =
-    (
-        selectedFields.empty()
-      ? objects.sortedNames(clsName)
-      : objects.sortedNames(clsName, selectedFields)
-    );
-
-    if (fieldNames.size())
-    {
-        Info<< "    Reconstructing " << clsName << "s\n" << nl;
-    }
-
+    label nFields = 0;
     for (const word& fieldName : fieldNames)
     {
-        Info<< "        " << fieldName << endl;
+        const IOobject* io = objects.cfindObject<fieldType>(fieldName);
+        if (io)
+        {
+            if (!nFields++)
+            {
+                Info<< "    Reconstructing "
+                    << fieldType::typeName << "s\n" << nl;
+            }
+            Info<< "        " << fieldName << endl;
 
-        reconstructFvVolumeField<Type>(*(objects[fieldName]))().write();
-
-        ++nReconstructed_;
+            reconstructFvVolumeField<Type>(*io)().write();
+            ++nReconstructed_;
+        }
     }
 
-    if (fieldNames.size()) Info<< endl;
+    if (nFields) Info<< endl;
+    return nFields;
 }
 
 
 template<class Type>
-void Foam::fvFieldReconstructor::reconstructFvSurfaceFields
+Foam::label Foam::fvFieldReconstructor::reconstructFvSurfaceFields
+(
+    const IOobjectList& objects,
+    const UList<word>& fieldNames
+)
+{
+    typedef GeometricField<Type, fvsPatchField, surfaceMesh> fieldType;
+
+    label nFields = 0;
+    for (const word& fieldName : fieldNames)
+    {
+        const IOobject* io = objects.cfindObject<fieldType>(fieldName);
+        if (io)
+        {
+            if (!nFields++)
+            {
+                Info<< "    Reconstructing "
+                    << fieldType::typeName << "s\n" << nl;
+            }
+            Info<< "        " << fieldName << endl;
+
+            reconstructFvSurfaceField<Type>(*io)().write();
+            ++nReconstructed_;
+        }
+    }
+
+    if (nFields) Info<< endl;
+    return nFields;
+}
+
+
+template<class Type>
+Foam::label Foam::fvFieldReconstructor::reconstructFvVolumeInternalFields
+(
+    const IOobjectList& objects,
+    const wordRes& selectedFields
+)
+{
+    typedef DimensionedField<Type, volMesh> fieldType;
+
+    const wordList fieldNames =
+    (
+        selectedFields.empty()
+      ? objects.sortedNames<fieldType>()
+      : objects.sortedNames<fieldType>(selectedFields)
+    );
+
+    return reconstructFvVolumeInternalFields<Type>(objects, fieldNames);
+}
+
+
+template<class Type>
+Foam::label Foam::fvFieldReconstructor::reconstructFvVolumeFields
+(
+    const IOobjectList& objects,
+    const wordRes& selectedFields
+)
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+
+    const wordList fieldNames =
+    (
+        selectedFields.empty()
+      ? objects.sortedNames<fieldType>()
+      : objects.sortedNames<fieldType>(selectedFields)
+    );
+
+    return reconstructFvVolumeFields<Type>(objects, fieldNames);
+}
+
+
+template<class Type>
+Foam::label Foam::fvFieldReconstructor::reconstructFvSurfaceFields
+(
+    const IOobjectList& objects,
+    const wordRes& selectedFields
+)
+{
+    typedef GeometricField<Type, fvsPatchField, surfaceMesh> fieldType;
+
+    const wordList fieldNames =
+    (
+        selectedFields.empty()
+      ? objects.sortedNames<fieldType>()
+      : objects.sortedNames<fieldType>(selectedFields)
+    );
+
+    return reconstructFvSurfaceFields<Type>(objects, fieldNames);
+}
+
+
+template<class Type>
+Foam::label Foam::fvFieldReconstructor::reconstructFvVolumeInternalFields
 (
     const IOobjectList& objects,
     const wordHashSet& selectedFields
 )
 {
-    const word& clsName =
-        GeometricField<Type, fvsPatchField, surfaceMesh>::typeName;
+    typedef DimensionedField<Type, volMesh> fieldType;
 
     const wordList fieldNames =
     (
         selectedFields.empty()
-      ? objects.sortedNames(clsName)
-      : objects.sortedNames(clsName, selectedFields)
+      ? objects.sortedNames<fieldType>()
+      : objects.sortedNames<fieldType>(selectedFields)
     );
 
-    if (fieldNames.size())
-    {
-        Info<< "    Reconstructing " << clsName << "s\n" << nl;
-    }
+    return reconstructFvVolumeInternalFields<Type>(objects, fieldNames);
+}
 
-    for (const word& fieldName : fieldNames)
-    {
-        Info<< "        " << fieldName << endl;
 
-        reconstructFvSurfaceField<Type>(*(objects[fieldName]))().write();
+template<class Type>
+Foam::label Foam::fvFieldReconstructor::reconstructFvVolumeFields
+(
+    const IOobjectList& objects,
+    const wordHashSet& selectedFields
+)
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
-        ++nReconstructed_;
-    }
+    const wordList fieldNames =
+    (
+        selectedFields.empty()
+      ? objects.sortedNames<fieldType>()
+      : objects.sortedNames<fieldType>(selectedFields)
+    );
 
-    if (fieldNames.size()) Info<< endl;
+    return reconstructFvVolumeField<Type>(objects, fieldNames);
+}
+
+
+template<class Type>
+Foam::label Foam::fvFieldReconstructor::reconstructFvSurfaceFields
+(
+    const IOobjectList& objects,
+    const wordHashSet& selectedFields
+)
+{
+    typedef GeometricField<Type, fvsPatchField, surfaceMesh> fieldType;
+
+    const wordList fieldNames =
+    (
+        selectedFields.empty()
+      ? objects.sortedNames<fieldType>()
+      : objects.sortedNames<fieldType>(selectedFields)
+    );
+
+    return reconstructFvSurfaceFields<Type>(objects, fieldNames);
 }
 
 

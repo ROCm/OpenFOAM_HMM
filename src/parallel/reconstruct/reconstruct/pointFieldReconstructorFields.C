@@ -135,37 +135,75 @@ Foam::pointFieldReconstructor::reconstructField(const IOobject& fieldIoObject)
 }
 
 
-// Reconstruct and write all point fields
 template<class Type>
-void Foam::pointFieldReconstructor::reconstructFields
+Foam::label Foam::pointFieldReconstructor::reconstructFields
+(
+    const IOobjectList& objects,
+    const UList<word>& fieldNames
+)
+{
+    typedef GeometricField<Type, pointPatchField, pointMesh> fieldType;
+
+    label nFields = 0;
+    for (const word& fieldName : fieldNames)
+    {
+        const IOobject* io = objects.cfindObject<fieldType>(fieldName);
+        if (io)
+        {
+            if (!nFields++)
+            {
+                Info<< "    Reconstructing "
+                    << fieldType::typeName << "s\n" << nl;
+            }
+            Info<< "        " << fieldName << endl;
+
+            reconstructField<Type>(*io)().write();
+            ++nReconstructed_;
+        }
+    }
+
+    if (nFields) Info<< endl;
+    return nFields;
+}
+
+
+template<class Type>
+Foam::label Foam::pointFieldReconstructor::reconstructFields
+(
+    const IOobjectList& objects,
+    const wordRes& selectedFields
+)
+{
+    typedef GeometricField<Type, pointPatchField, pointMesh> fieldType;
+
+    const wordList fieldNames =
+    (
+        selectedFields.empty()
+      ? objects.sortedNames<fieldType>()
+      : objects.sortedNames<fieldType>(selectedFields)
+    );
+
+    return reconstructFields<Type>(objects, fieldNames);
+}
+
+
+template<class Type>
+Foam::label Foam::pointFieldReconstructor::reconstructFields
 (
     const IOobjectList& objects,
     const wordHashSet& selectedFields
 )
 {
-    const word& clsName =
-        GeometricField<Type, pointPatchField, pointMesh>::typeName;
+    typedef GeometricField<Type, pointPatchField, pointMesh> fieldType;
 
     const wordList fieldNames =
     (
         selectedFields.empty()
-      ? objects.sortedNames(clsName)
-      : objects.sortedNames(clsName, selectedFields)
+      ? objects.sortedNames<fieldType>()
+      : objects.sortedNames<fieldType>(selectedFields)
     );
 
-    if (fieldNames.size())
-    {
-        Info<< "    Reconstructing " << clsName << "s\n" << nl;
-    }
-
-    for (const word& fieldName : fieldNames)
-    {
-        Info<< "        " << fieldName << endl;
-
-        reconstructField<Type>(*(objects[fieldName]))().write();
-    }
-
-    if (fieldNames.size()) Info<< endl;
+    return reconstructFields<Type>(objects, fieldNames);
 }
 
 

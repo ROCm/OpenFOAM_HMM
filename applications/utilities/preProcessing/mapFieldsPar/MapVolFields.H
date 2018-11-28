@@ -121,7 +121,7 @@ template<class Type, class CombineOp>
 void MapVolFields
 (
     const IOobjectList& objects,
-    const wordHashSet& selectedFields,
+    const wordRes& selectedFields,
     const meshToMesh& interp,
     const CombineOp& cop
 )
@@ -135,8 +135,8 @@ void MapVolFields
     const wordList fieldNames =
     (
         selectedFields.empty()
-      ? objects.sortedNames(fieldType::typeName)
-      : objects.sortedNames(fieldType::typeName, selectedFields)
+      ? objects.sortedNames<fieldType>()
+      : objects.sortedNames<fieldType>(selectedFields)
     );
 
     for (const word& fieldName : fieldNames)

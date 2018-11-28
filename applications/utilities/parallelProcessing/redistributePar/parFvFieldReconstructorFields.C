@@ -408,33 +408,34 @@ Foam::parFvFieldReconstructor::reconstructFvSurfaceField
 
 
 template<class Type>
-void Foam::parFvFieldReconstructor::reconstructFvVolumeInternalFields
+Foam::label Foam::parFvFieldReconstructor::reconstructFvVolumeInternalFields
 (
     const IOobjectList& objects,
-    const wordHashSet& selectedFields
+    const wordRes& selectedFields
 ) const
 {
-    typedef DimensionedField<Type, volMesh> FieldType;
-    const word& clsName = FieldType::typeName;
+    typedef DimensionedField<Type, volMesh> fieldType;
 
     // Available fields, sorted order
     const wordList fieldNames =
     (
         selectedFields.empty()
-      ? objects.sortedNames(clsName)
-      : objects.sortedNames(clsName, selectedFields)
+      ? objects.sortedNames<fieldType>()
+      : objects.sortedNames<fieldType>(selectedFields)
     );
 
-    if (fieldNames.size())
-    {
-        Info<< "    Reconstructing " << clsName << "s\n" << endl;
-    }
-
+    label nFields = 0;
     for (const word& fieldName : fieldNames)
     {
-        Info<< "        " << fieldName << endl;
+        if (!nFields++)
+        {
+            Info<< "    Reconstructing "
+                << fieldType::typeName << "s\n" << nl;
+        }
 
-        tmp<FieldType> tfld
+        Info<< "        " << fieldName << nl;
+
+        tmp<fieldType> tfld
         (
             reconstructFvVolumeInternalField<Type>(*(objects[fieldName]))
         );
@@ -444,42 +445,43 @@ void Foam::parFvFieldReconstructor::reconstructFvVolumeInternalFields
         }
     }
 
-    if (fieldNames.size()) Info<< endl;
+    if (nFields) Info<< endl;
+    return nFields;
 }
 
 
 template<class Type>
-void Foam::parFvFieldReconstructor::reconstructFvVolumeFields
+Foam::label Foam::parFvFieldReconstructor::reconstructFvVolumeFields
 (
     const IOobjectList& objects,
-    const wordHashSet& selectedFields
+    const wordRes& selectedFields
 ) const
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> FieldType;
-    const word& clsName = FieldType::typeName;
+    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
     // Available fields, sorted order
     const wordList fieldNames =
     (
         selectedFields.empty()
-      ? objects.sortedNames(clsName)
-      : objects.sortedNames(clsName, selectedFields)
+      ? objects.sortedNames<fieldType>()
+      : objects.sortedNames<fieldType>(selectedFields)
     );
 
-    if (fieldNames.size())
-    {
-        Info<< "    Reconstructing " << clsName << "s\n" << endl;
-    }
-
+    label nFields = 0;
     for (const word& fieldName : fieldNames)
     {
         if ("cellDist" == fieldName)
         {
             continue;
         }
-        Info<< "        " << fieldName << endl;
+        if (!nFields++)
+        {
+            Info<< "    Reconstructing "
+                << fieldType::typeName << "s\n" << nl;
+        }
+        Info<< "        " << fieldName << nl;
 
-        tmp<FieldType> tfld
+        tmp<fieldType> tfld
         (
             reconstructFvVolumeField<Type>(*(objects[fieldName]))
         );
@@ -489,38 +491,39 @@ void Foam::parFvFieldReconstructor::reconstructFvVolumeFields
         }
     }
 
-    if (fieldNames.size()) Info<< endl;
+    if (nFields) Info<< endl;
+    return nFields;
 }
 
 
 template<class Type>
-void Foam::parFvFieldReconstructor::reconstructFvSurfaceFields
+Foam::label Foam::parFvFieldReconstructor::reconstructFvSurfaceFields
 (
     const IOobjectList& objects,
-    const wordHashSet& selectedFields
+    const wordRes& selectedFields
 ) const
 {
-    typedef GeometricField<Type, fvsPatchField, surfaceMesh> FieldType;
-    const word& clsName = FieldType::typeName;
+    typedef GeometricField<Type, fvsPatchField, surfaceMesh> fieldType;
 
     // Available fields, sorted order
     const wordList fieldNames =
     (
         selectedFields.empty()
-      ? objects.sortedNames(clsName)
-      : objects.sortedNames(clsName, selectedFields)
+      ? objects.sortedNames<fieldType>()
+      : objects.sortedNames<fieldType>(selectedFields)
     );
 
-    if (fieldNames.size())
-    {
-        Info<< "    Reconstructing " << clsName << "s\n" << endl;
-    }
-
+    label nFields = 0;
     for (const word& fieldName : fieldNames)
     {
-        Info<< "        " << fieldName << endl;
+        if (!nFields++)
+        {
+            Info<< "    Reconstructing "
+                << fieldType::typeName << "s\n" << nl;
+        }
+        Info<< "        " << fieldName << nl;
 
-        tmp<FieldType> tfld
+        tmp<fieldType> tfld
         (
             reconstructFvSurfaceField<Type>(*(objects[fieldName]))
         );
@@ -530,7 +533,8 @@ void Foam::parFvFieldReconstructor::reconstructFvSurfaceFields
         }
     }
 
-    if (fieldNames.size()) Info<< endl;
+    if (nFields) Info<< endl;
+    return nFields;
 }
 
 

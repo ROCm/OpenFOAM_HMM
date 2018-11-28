@@ -48,7 +48,7 @@ void mapConsistentMesh
     const word& AMIMapMethod,
     const word& procMapMethod,
     const bool subtract,
-    const wordHashSet& selectedFields,
+    const wordRes& selectedFields,
     const bool noLagrangian
 )
 {
@@ -95,7 +95,7 @@ void mapSubMesh
     const word& AMIMapMethod,
     const word& procMapMethod,
     const bool subtract,
-    const wordHashSet& selectedFields,
+    const wordRes& selectedFields,
     const bool noLagrangian
 )
 {
@@ -195,9 +195,9 @@ int main(int argc, char *argv[])
     argList::addOption
     (
         "fields",
-        "list",
-        "Specify a list of fields to be mapped. Eg, '(U T p)' - "
-        "regular expressions not currently supported"
+        "wordRes",
+        "Specify single or multiple fields to reconstruct (all by default)."
+        " Eg, 'T' or '(p T U \"alpha.*\")'"
     );
     argList::addBoolOption
     (
@@ -288,8 +288,8 @@ int main(int argc, char *argv[])
         Info<< "Subtracting mapped source field from target" << endl;
     }
 
-    wordHashSet selectedFields;
-    args.readIfPresent("fields", selectedFields);
+    wordRes selectedFields;
+    args.readListIfPresent<wordRe>("fields", selectedFields);
 
     const bool noLagrangian = args.found("noLagrangian");
 

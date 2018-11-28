@@ -23,38 +23,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "reconstructLagrangian.H"
+#include "lagrangianReconstructor.H"
 #include "labelIOList.H"
 #include "passiveParticleCloud.H"
 
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-void Foam::reconstructLagrangianPositions
+Foam::lagrangianReconstructor::lagrangianReconstructor
 (
-    const polyMesh& mesh,
-    const word& cloudName,
-    const PtrList<fvMesh>& meshes,
+    const fvMesh& mesh,
+    const PtrList<fvMesh>& procMeshes,
     const PtrList<labelIOList>& faceProcAddressing,
     const PtrList<labelIOList>& cellProcAddressing
 )
+:
+    mesh_(mesh),
+    procMeshes_(procMeshes),
+    faceProcAddressing_(faceProcAddressing),
+    cellProcAddressing_(cellProcAddressing)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::label Foam::lagrangianReconstructor::reconstructPositions
+(
+    const word& cloudName
+) const
 {
     passiveParticleCloud lagrangianPositions
     (
-        mesh,
+        mesh_,
         cloudName,
         IDLList<passiveParticle>()
     );
 
-    forAll(meshes, meshi)
+    forAll(procMeshes_, meshi)
     {
-        const labelList& cellMap = cellProcAddressing[meshi];
-        const labelList& faceMap = faceProcAddressing[meshi];
+        const labelList& cellMap = cellProcAddressing_[meshi];
+        const labelList& faceMap = faceProcAddressing_[meshi];
 
-        Cloud<passiveParticle> lpi(meshes[meshi], cloudName, false);
+        Cloud<passiveParticle> lpi(procMeshes_[meshi], cloudName, false);
 
-        forAllConstIter(Cloud<passiveParticle>, lpi, iter)
+        forAllConstIters(lpi, iter)
         {
-            const passiveParticle& ppi = iter();
+            const passiveParticle& ppi = *iter;
 
             const label mappedCell = cellMap[ppi.cell()];
 
@@ -66,11 +79,11 @@ void Foam::reconstructLagrangianPositions
             (
                 new passiveParticle
                 (
-                    mesh,
+                    mesh_,
                     ppi.coordinates(),
                     mappedCell,
                     mappedTetFace,
-                    ppi.procTetPt(mesh, mappedCell, mappedTetFace)
+                    ppi.procTetPt(mesh_, mappedCell, mappedTetFace)
                 )
             );
         }
@@ -87,6 +100,8 @@ void Foam::reconstructLagrangianPositions
             cloud::geometryType::POSITIONS
         ).write();
     }
+
+    return lagrangianPositions.size();
 }
 
 
