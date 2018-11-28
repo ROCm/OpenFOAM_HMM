@@ -27,6 +27,7 @@
 #     - false matches possible when the filter contains '.' (sed regex) etc.
 #     - a single composite filter can be passed in. This composite filter
 #       is assumed to be delimited by whitespace, colons or semi-colons.
+#     - will not filter out standard system paths (/usr/bin etc)
 #
 # Examples for cleaning the path:
 #
@@ -194,11 +195,22 @@ printDebug "input>$dirList<"
 # Apply filters via sed. Path and filter cannot contain '?'.
 for filter
 do
-    if [ -n "$filter" ]
-    then
-        printDebug "remove>$filter<"
-        dirList=$(echo "$dirList:" | sed -e "s?${filter}[^:]*:??g")
-    fi
+    case "$filter" in
+    ( / | /bin | /sbin | /lib | /lib64 | /opt \
+        | /usr | /usr/bin | /usr/sbin | /usr/lib | /usr/lib64 \
+        | /usr/local | /usr/local/bin | /usr/local/lib | /usr/local/lib64 )
+        # Do not filter out system directories
+        printDebug "skip>$filter<"
+        ;;
+
+    (*)
+        if [ -n "$filter" ]
+        then
+            printDebug "remove>$filter<"
+            dirList=$(echo "$dirList:" | sed -e "s?${filter}[^:]*:??g")
+        fi
+        ;;
+    esac
 done
 printDebug "intermediate>$dirList<"
 
