@@ -23,14 +23,14 @@ actions
         type    cellSet;
         action  new;
         source  boxToCell;
-        box     (-0.01001 0 -100 )(0.01001 0.00999 100);
+        box     (-0.01001 0 -100) (0.01001 0.00999 100);
     }
     {
         name    heaterCellSet;
         type    cellSet;
         action  add;
         source  boxToCell;
-        box     (-0.01001 -100 -0.01001)(0.01001 0.00999 0.01001);
+        box     (-0.01001 -100 -0.01001) (0.01001 0.00999 0.01001);
     }
     {
         name    heater;
@@ -46,7 +46,7 @@ actions
         type    cellSet;
         action  new;
         source  boxToCell;
-        box     (-100 0 -100 )(-0.01001 0.00999 100);
+        box     (-100 0 -100) (-0.01001 0.00999 100);
     }
     {
         name    leftSolid;
@@ -62,7 +62,7 @@ actions
         type    cellSet;
         action  new;
         source  boxToCell;
-        box     (0.01001 0 -100 )(100 0.00999 100);
+        box     (0.01001 0 -100) (100 0.00999 100);
     }
     {
         name    rightSolid;
@@ -78,7 +78,7 @@ actions
         type    cellSet;
         action  new;
         source  boxToCell;
-        box     (-100 0.00999 -100 )(100 100 100);
+        box     (-100 0.00999 -100) (100 100 100);
     }
     {
         name    topAir;

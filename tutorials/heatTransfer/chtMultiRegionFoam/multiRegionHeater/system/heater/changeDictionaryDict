@@ -19,6 +19,7 @@ boundary
     minY
     {
         type            patch;
+        inGroups        (coupleGroup);
     }
     minZ
     {

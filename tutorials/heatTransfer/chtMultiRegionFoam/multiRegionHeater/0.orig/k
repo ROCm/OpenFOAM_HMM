@@ -23,9 +23,8 @@ boundaryField
     ".*"
     {
         type            calculated;
-        value           uniform 0.1;
+        value           $internalField;
     }
 }
-
 
 // ************************************************************************* //
