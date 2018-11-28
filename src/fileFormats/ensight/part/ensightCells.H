@@ -125,7 +125,7 @@ public:
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- The index in a list.
         inline label index() const;
@@ -164,7 +164,7 @@ public:
         inline const labelUList& cellIds() const;
 
 
-      // Edit
+    // Edit
 
         //- Classify cell types and set the element lists.
         //  The optional indirect addressing can be used when classifying
@@ -186,7 +186,7 @@ public:
         void sort();
 
 
-    // Member operators
+    // Member Operators
 
         //- Return id from linear list of addressing.
         inline label operator[](const label i) const;

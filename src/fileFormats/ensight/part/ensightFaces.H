@@ -131,7 +131,7 @@ public:
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- The index in a list.
         inline label index() const;
@@ -173,7 +173,7 @@ public:
         inline const boolList& flipMap() const;
 
 
-      // Edit
+    // Edit
 
         //- Classify the face types, set element list.
         void classify(const faceList& faces);
@@ -203,7 +203,7 @@ public:
         void sort();
 
 
-    // Member operators
+    // Member Operators
 
         //- Return element from linear-list.
         inline label operator[](const label i) const;

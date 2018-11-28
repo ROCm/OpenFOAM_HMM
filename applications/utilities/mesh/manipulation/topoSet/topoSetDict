@@ -41,7 +41,7 @@ FoamFile
 // In OpenFOAM 1806 and earlier, it was compulsory to use a 'sourceInfo'
 // sub-dictionary to define the sources.
 // In OpenFOAM 1812 and later, this sub-directory is optional, unless
-// there would be a name class (Eg, 'name' appearing at both levels).
+// there would be a name clash (Eg, 'type' or 'name' appearing at both levels).
 // In most cases, the source definitions have been adjusted to avoid such
 // clashes.
 //
@@ -49,8 +49,8 @@ FoamFile
 
 actions
 (
-    // Example:pick up internal faces on outside of cellSet
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Example: pick up internal faces on outside of cellSet
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Load initial cellSet
     {
