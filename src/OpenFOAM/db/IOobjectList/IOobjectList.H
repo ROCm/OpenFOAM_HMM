@@ -208,9 +208,61 @@ public:
 
     // Lookup single item
 
-        //- Locate an object by name
+        //- Return const pointer to the object found by name
         //  \return IOobject ptr if found else nullptr
-        IOobject* findObject(const word& objName) const;
+        const IOobject* cfindObject(const word& objName) const;
+
+        //- Return const pointer to the object found by name that also
+        //- has headerClassName == Type::typeName
+        //  \return IOobject ptr if found and the correct type, else nullptr
+        //
+        //  \note If \a Type is \c void, no headerClassName check is used
+        //      (always true).
+        template<class Type>
+        const IOobject* cfindObject(const word& objName) const;
+
+        //- Return const pointer to the object found by name
+        //  \return IOobject ptr if found else nullptr
+        const IOobject* findObject(const word& objName) const;
+
+        //- Return const pointer to the object found by name that also
+        //- has headerClassName == Type::typeName
+        //  \return IOobject ptr if found and the correct type, else nullptr
+        //
+        //  \note If \a Type is \c void, no headerClassName check is used
+        //      (always true).
+        template<class Type>
+        const IOobject* findObject(const word& objName) const;
+
+        //- Return non-const pointer to the object found by name
+        //  \return IOobject ptr if found else nullptr
+        IOobject* findObject(const word& objName);
+
+        //- Return non-const pointer to the object found by name that also
+        //- has headerClassName == Type::typeName
+        //  \return IOobject ptr if found and the correct type, else nullptr
+        //
+        //  \note If \a Type is \c void, no headerClassName check is used
+        //      (always true).
+        template<class Type>
+        IOobject* findObject(const word& objName);
+
+        //- Return non-const pointer to the object found by name,
+        //- using a const-cast to have it behave like a mutable.
+        //  Exercise caution when using.
+        //  \return IOobject ptr if found else nullptr
+        IOobject* getObject(const word& objName) const;
+
+        //- Return non-const pointer to the object found by name that also
+        //- has headerClassName == Type::typeName,
+        //- using a const-cast to have it behave like a mutable.
+        //  Exercise caution when using.
+        //  \return IOobject ptr if found and the correct type, else nullptr
+        //
+        //  \note If \a Type is \c void, no headerClassName check is used
+        //      (always true).
+        template<class Type>
+        IOobject* getObject(const word& objName) const;
 
 
     // Lookup multiple items
@@ -586,7 +638,7 @@ public:
         //  \deprecated(2018-11) use findObject() for non-ambiguous resolution
         IOobject* lookup(const char* objName) const
         {
-            return findObject(objName);
+            return getObject(objName);
         }
 
         //- Deprecated(2018-11) Locate an object by name (const word&).
@@ -594,7 +646,7 @@ public:
         //  \deprecated(2018-11) use findObject() for non-ambiguous resolution
         IOobject* lookup(const word& objName) const
         {
-            return findObject(objName);
+            return getObject(objName);
         }
 };
 

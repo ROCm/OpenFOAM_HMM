@@ -52,7 +52,7 @@ void reportDetail(const IOobjectList& objects)
     for (const word& key : objects.sortedNames())
     {
         // Canonical method name (NOV-2018)
-        IOobject* io = objects.findObject(key);
+        const IOobject* io = objects.findObject(key);
 
         label count = 0;
 
@@ -79,6 +79,55 @@ void reportDetail(const IOobjectList& objects)
     }
 
     Info<<"====" << nl;
+}
+
+
+void printFound(const IOobject* ptr)
+{
+    Info<< (ptr ? "found" : "not found") << nl;
+}
+
+
+void findObjectTest(const IOobjectList& objs)
+{
+    Info<< "Test findObject()" << nl << nl;
+
+    const int oldDebug = IOobject::debug;
+    IOobject::debug = 1;
+
+    {
+        Info<< "cfindObject(U)" << nl;
+        const IOobject* io = objs.cfindObject("U");
+        printFound(io);
+    }
+
+    {
+        Info<< "getObject(U)" << nl;
+        IOobject* io = objs.getObject("U");
+        printFound(io);
+    }
+
+    {
+        Info<< "cfindObject<void>(U)" << nl;
+        const IOobject* io = objs.cfindObject<void>("U");
+        printFound(io);
+    }
+
+    {
+        Info<< "cfindObject<volScalarField>(U)" << nl;
+        const IOobject* io = objs.cfindObject<volScalarField>("U");
+        printFound(io);
+    }
+
+    {
+        Info<< "cfindObject<volVectorField>(U)" << nl;
+        const IOobject* io = objs.cfindObject<volVectorField>("U");
+        printFound(io);
+    }
+
+    Info<< nl;
+
+    IOobject::debug = oldDebug;
 }
 
 
@@ -218,6 +267,8 @@ int main(int argc, char *argv[])
         Info<< "Time: " << runTime.timeName() << nl;
 
         report(objects);
+
+        findObjectTest(objects);
 
         classes.filterKeys(subsetTypes);
         Info<<"only retain: " << flatOutput(subsetTypes) << nl;

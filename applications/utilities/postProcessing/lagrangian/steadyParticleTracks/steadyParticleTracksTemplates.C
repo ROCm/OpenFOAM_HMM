@@ -30,9 +30,7 @@ License
 template<class Type>
 bool Foam::fieldOk(const IOobjectList& cloudObjs, const word& name)
 {
-    IOobjectList objects(cloudObjs.lookupClass(IOField<Type>::typeName));
-
-    return (objects.findObject(name) != nullptr);
+    return cloudObjs.cfindObject<IOField<Type>>(name) != nullptr;
 }
 
 
@@ -43,9 +41,7 @@ Foam::tmp<Foam::Field<Type>> Foam::readParticleField
     const IOobjectList cloudObjs
 )
 {
-    IOobjectList objects(cloudObjs.lookupClass(IOField<Type>::typeName));
-
-    const IOobject* obj = objects.findObject(name);
+    const IOobject* obj = cloudObjs.cfindObject<IOField<Type>>(name);
     if (obj != nullptr)
     {
         IOField<Type> newField(*obj);
@@ -53,7 +49,8 @@ Foam::tmp<Foam::Field<Type>> Foam::readParticleField
     }
 
     FatalErrorInFunction
-        << "error: cloud field name " << name << " not found"
+        << "Error: cloud field name " << name
+        << " not found or the wrong type"
         << abort(FatalError);
 
     return Field<Type>::null();
@@ -68,21 +65,21 @@ void Foam::readFields
     const IOobjectList& cloudObjs
 )
 {
-    IOobjectList objects(cloudObjs.lookupClass(IOField<Type>::typeName));
-
-    forAll(fieldNames, j)
+    forAll(fieldNames, fieldi)
     {
-        const IOobject* obj = objects.findObject(fieldNames[j]);
+        const word& fieldName = fieldNames[fieldi];
+
+        const IOobject* obj = cloudObjs.cfindObject<IOField<Type>>(fieldName);
         if (obj != nullptr)
         {
-            Info<< "        reading field " << fieldNames[j] << endl;
+            Info<< "        reading field " << fieldName << endl;
             IOField<Type> newField(*obj);
-            values.set(j, new List<Type>(std::move(newField)));
+            values.set(fieldi, new List<Type>(std::move(newField)));
         }
         else
         {
             FatalErrorInFunction
-                << "Unable to read field " << fieldNames[j]
+                << "Unable to read field " << fieldName
                 << abort(FatalError);
         }
     }
@@ -158,7 +155,7 @@ void Foam::processFields
         DynamicList<word> fieldNames(objects.size());
         forAll(userFieldNames, i)
         {
-            IOobject* obj = objects.findObject(userFieldNames[i]);
+            const IOobject* obj = objects.findObject(userFieldNames[i]);
             if (obj != nullptr)
             {
                 fieldNames.append(obj->name());

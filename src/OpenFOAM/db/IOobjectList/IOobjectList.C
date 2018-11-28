@@ -239,7 +239,10 @@ bool Foam::IOobjectList::remove(const IOobject& io)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::IOobject* Foam::IOobjectList::findObject(const word& objName) const
+const Foam::IOobject* Foam::IOobjectList::cfindObject
+(
+    const word& objName
+) const
 {
     const_iterator iter = cfind(objName);
 
@@ -250,14 +253,35 @@ Foam::IOobject* Foam::IOobjectList::findObject(const word& objName) const
             InfoInFunction << "Found " << objName << endl;
         }
 
-        return const_cast<IOobject*>(*iter);
+        return iter.object();
     }
-
-    if (IOobject::debug)
+    else if (IOobject::debug)
     {
         InfoInFunction << "Could not find " << objName << endl;
     }
+
     return nullptr;
+}
+
+
+const Foam::IOobject* Foam::IOobjectList::findObject
+(
+    const word& objName
+) const
+{
+    return cfindObject(objName);
+}
+
+
+Foam::IOobject* Foam::IOobjectList::findObject(const word& objName)
+{
+    return const_cast<IOobject*>(cfindObject(objName));
+}
+
+
+Foam::IOobject* Foam::IOobjectList::getObject(const word& objName) const
+{
+    return const_cast<IOobject*>(cfindObject(objName));
 }
 
 

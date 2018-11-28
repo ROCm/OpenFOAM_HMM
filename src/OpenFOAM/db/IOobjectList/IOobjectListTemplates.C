@@ -268,6 +268,66 @@ Foam::IOobjectList Foam::IOobjectList::lookupClassTypeImpl
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+template<class Type>
+const Foam::IOobject* Foam::IOobjectList::cfindObject
+(
+    const word& objName
+) const
+{
+    const_iterator iter = cfind(objName);
+
+    if (iter.found())
+    {
+        const IOobject* io = iter.object();
+
+        if (io->isHeaderClassName<Type>())
+        {
+            if (IOobject::debug)
+            {
+                InfoInFunction << "Found " << objName << endl;
+            }
+
+            return io;
+        }
+        else if (IOobject::debug)
+        {
+            InfoInFunction
+                << "Found " << objName << " of different type" << endl;
+        }
+    }
+    else if (IOobject::debug)
+    {
+        InfoInFunction << "Could not find " << objName << endl;
+    }
+
+    return nullptr;
+}
+
+
+template<class Type>
+const Foam::IOobject* Foam::IOobjectList::findObject
+(
+    const word& objName
+) const
+{
+    return cfindObject<Type>(objName);
+}
+
+
+template<class Type>
+Foam::IOobject* Foam::IOobjectList::findObject(const word& objName)
+{
+    return const_cast<IOobject*>(cfindObject<Type>(objName));
+}
+
+
+template<class Type>
+Foam::IOobject* Foam::IOobjectList::getObject(const word& objName) const
+{
+    return const_cast<IOobject*>(cfindObject<Type>(objName));
+}
+
+
 template<class MatchPredicate>
 Foam::IOobjectList Foam::IOobjectList::lookup
 (

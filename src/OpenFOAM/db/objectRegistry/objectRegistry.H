@@ -349,7 +349,7 @@ public:
             const bool recursive = false
         ) const;
 
-        //- Find const pointer to the object of the given Type.
+        //- Return const pointer to the object of the given Type.
         //
         //  \param recursive search parent registries
         //
@@ -433,10 +433,10 @@ public:
         //- Rename
         virtual void rename(const word& newName);
 
-        //- Add an regIOobject to registry
+        //- Add a regIOobject to registry
         bool checkIn(regIOobject& io) const;
 
-        //- Remove an regIOobject from registry
+        //- Remove a regIOobject from registry
         bool checkOut(regIOobject& io) const;
 
 

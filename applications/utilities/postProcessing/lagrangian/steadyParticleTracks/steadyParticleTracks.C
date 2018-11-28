@@ -27,7 +27,6 @@ Application
 Group
     grpPostProcessingUtilitie
 
-
 Description
     Generates a VTK file of particle tracks for cases that were computed using
     a steady-state cloud
@@ -84,7 +83,7 @@ label validateFields
     {
         if (ok[i])
         {
-            nOk++;
+            ++nOk;
         }
         else
         {
