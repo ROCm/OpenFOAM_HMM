@@ -320,7 +320,7 @@ meshQualityControls
 // Advanced
 
 // Format to use for lines (e.g. leak path)
-setFormat nastran;
+setFormat ensight;
 
 
 // Write flags
