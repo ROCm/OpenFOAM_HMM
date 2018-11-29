@@ -42,11 +42,11 @@
 #     The suffix value should normally include "platforms/$WM_OPTIONS"
 #
 # Example
-#     . /path/change-sitedir.sh -prefix -platforms
+#     . /path/change-sitedir.sh -project -platforms
 #
 #   corresponds to the standard site location:
 #
-#     $WM_PROJECT_INST_DIR/site{/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS}
+#     $WM_PROJECT_DIR/site{/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS}
 #
 #------------------------------------------------------------------------------
 

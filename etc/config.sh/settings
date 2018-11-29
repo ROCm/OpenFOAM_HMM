@@ -148,7 +148,7 @@ if [ -n "$WM_PROJECT_SITE" ]
 then
     siteDir=$WM_PROJECT_SITE
 else
-    siteDir=$WM_PROJECT_INST_DIR/site
+    siteDir=$WM_PROJECT_DIR/site
 fi
 
 # Shared site (group) executables/libraries
@@ -173,7 +173,6 @@ if [ -d "$siteDir/$WM_PROJECT_VERSION/bin" ]    # Version-specific
 then
     _foamAddPath "$siteDir/$WM_PROJECT_VERSION/bin"
 fi
-unset siteDir
 
 _foamAddPath $FOAM_USER_APPBIN:$FOAM_SITE_APPBIN:$FOAM_APPBIN
 _foamAddLib  $FOAM_LIBBIN/dummy     # Dummy versions of external libraries last
@@ -321,7 +320,7 @@ esac
 
 # Cleanup
 # ~~~~~~~
-unset archDir
+unset archDir siteDir
 unset gcc_version gccDir
 unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
 unset clang_version clangDir

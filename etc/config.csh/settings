@@ -154,7 +154,7 @@ setenv FOAM_EXT_LIBBIN $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER$WM_PRE
 if ( $?WM_PROJECT_SITE ) then
     set siteDir=$WM_PROJECT_SITE
 else
-    set siteDir=$WM_PROJECT_INST_DIR/site
+    set siteDir=$WM_PROJECT_DIR/site
 endif
 
 # Shared site (group) executables/libraries
@@ -177,7 +177,6 @@ endif
 if ( -d "$siteDir/$WM_PROJECT_VERSION/bin" ) then   # Version-specific
     _foamAddPath "$siteDir/$WM_PROJECT_VERSION/bin"
 endif
-unset siteDir
 
 _foamAddPath ${FOAM_USER_APPBIN}:${FOAM_SITE_APPBIN}:${FOAM_APPBIN}
 _foamAddLib  $FOAM_LIBBIN/dummy     # Dummy versions of external libraries last
@@ -333,7 +332,7 @@ endsw
 
 # Cleanup
 # ~~~~~~~
-unset archDir
+unset archDir siteDir
 unset gcc_version gccDir
 unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
 unset clang_version clangDir

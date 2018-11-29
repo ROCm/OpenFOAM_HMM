@@ -115,9 +115,9 @@
         //    - ~/.OpenFOAM/
         //      <em>for version-independent files</em>
         //  -# group settings
-        //    - $WM_PROJECT_INST_DIR/site/\<VERSION\>
+        //    - $WM_PROJECT_DIR/site/\<VERSION\>
         //      <em>for version-specific files</em>
-        //    - $WM_PROJECT_INST_DIR/site/
+        //    - $WM_PROJECT_DIR/site/
         //      <em>for version-independent files</em>
         //  -# other (shipped) settings
         //    - $WM_PROJECT_DIR/etc/

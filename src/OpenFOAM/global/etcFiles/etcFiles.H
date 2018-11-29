@@ -71,7 +71,7 @@ fileNameList findEtcDirs
 //
 //  \note Treatment of empty or undefined variables
 //  - \b \$WM_PROJECT_VERSION : Use compile-time value of OPENFOAM
-//  - \b \$WM_PROJECT_SITE : Use $WM_PROJECT_INST_DIR/site
+//  - \b \$WM_PROJECT_SITE : Use $WM_PROJECT_DIR/site
 //
 //  \return The list of full paths of all the matching files or
 //      an empty list if the name cannot be found.

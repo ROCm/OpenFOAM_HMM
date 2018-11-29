@@ -66,14 +66,9 @@ SourceFiles
 //- when the directory corresponding to FOAM_RESOURCE_SITE_ENVNAME is empty.
 //  The fallback search appends "/site" to the directory.
 //
-//  Default: "WM_PROJECT_INST_DIR"
-//
-//  \note If packaging OpenFOAM into a single directory (eg, spack, EasyBuild),
-//      this should be changed to "WM_PROJECT_DIR" to avoid searching within
-//      the prefix (parent) directory.
-//
+//  Default: "WM_PROJECT_DIR"
 //  Used by foamEtcFiles() and stringOps::expand()
-#define FOAM_RESOURCE_SITE_FALLBACK_ENVNAME "WM_PROJECT_INST_DIR"
+#define FOAM_RESOURCE_SITE_FALLBACK_ENVNAME "WM_PROJECT_DIR"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

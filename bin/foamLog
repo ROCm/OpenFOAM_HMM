@@ -31,7 +31,7 @@
 #------------------------------------------------------------------------------
 Script=${0##*/}
 toolsDir=${0%/*}/tools
-siteDir=${WM_PROJECT_SITE:-${WM_PROJECT_INST_DIR:-<unknown>}/site}
+siteDir="${WM_PROJECT_SITE:-${WM_PROJECT_DIR:-<unknown>}/site}"
 userDir=$HOME/.OpenFOAM
 
 usage() {

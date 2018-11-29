@@ -68,7 +68,7 @@ static inline bool userResourceDir(Foam::fileName& queried)
 // Corresponds to foamEtcFile -mode=g
 // Looks for
 //   - $WM_PROJECT_SITE
-//   - $WM_PROJECT_INST_DIR/site
+//   - $WM_PROJECT_DIR/site
 static inline bool groupResourceDir(Foam::fileName& queried)
 {
     #ifdef FOAM_RESOURCE_SITE_ENVNAME
