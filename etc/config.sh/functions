@@ -159,9 +159,9 @@ then
     unset -f _foamEval 2>/dev/null
     _foamEval()
     {
-        while [ $# -gt 0 ]
+        for i
         do
-            case "$1" in
+            case "$i" in
             -*)
                 # Stray option (not meant for us here) -> get out
                 break
@@ -175,22 +175,21 @@ then
             *=*)
                 # name=value  -> export name=value
                 [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ] \
-                    && echo "export $1" 1>&2
-                eval "export $1"
+                    && echo "export $i" 1>&2
+                eval "export $i"
                 ;;
             *)
                 # Filename: source it
-                if [ -f "$1" ]
+                if [ -f "$i" ]
                 then
                     [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ] \
-                        && echo "Using: $1" 1>&2
-                    . "$1"
+                        && echo "Using: $i" 1>&2
+                    . "$i"
                 else
-                    _foamEtc -silent "$1"
+                    _foamEtc -silent "$i"
                 fi
                 ;;
             esac
-            shift
         done
     }
 
