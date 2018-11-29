@@ -73,18 +73,16 @@ void Foam::dynamicCode::checkSecurity
     if (!allowSystemOperations)
     {
         FatalIOErrorInFunction(dict)
-            << "Loading a shared library using case-supplied code is not"
-            << " enabled by default" << nl
-            << "because of security issues. If you trust the code you can"
-            << " enable this" << nl
-            << "facility be adding to the InfoSwitches setting in the system"
-            << " controlDict:" << nl << nl
+            << "Loading shared libraries using case-supplied code may have"
+            << " been disabled" << nl
+            << "by default for security reasons." << nl
+            << "If you trust the code, you may enable this by adding"
+            << nl << nl
             << "    allowSystemOperations 1" << nl << nl
-            << "The system controlDict is either" << nl << nl
-            << "    ~/.OpenFOAM/$WM_PROJECT_VERSION/controlDict" << nl << nl
-            << "or" << nl << nl
-            << "    $WM_PROJECT_DIR/etc/controlDict" << nl
-            << endl
+            << "to the InfoSwitches setting in the system controlDict." << nl
+            << "The system controlDict is any of" << nl << nl
+            << "    ~/.OpenFOAM/controlDict" << nl
+            << "    $WM_PROJECT_DIR/etc/controlDict" << nl << endl
             << exit(FatalIOError);
     }
 }

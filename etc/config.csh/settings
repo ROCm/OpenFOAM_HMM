@@ -138,9 +138,6 @@ endsw
 
 #------------------------------------------------------------------------------
 
-# [FOAM_JOB_DIR] - unset is equivalent to ~/.OpenFOAM/jobControl
-## setenv FOAM_JOB_DIR "$HOME/.OpenFOAM/jobControl"
-
 # wmake configuration
 setenv WM_DIR $WM_PROJECT_DIR/wmake
 setenv WM_LABEL_OPTION Int$WM_LABEL_SIZE
@@ -168,19 +165,6 @@ setenv FOAM_SITE_LIBBIN $siteDir/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
 setenv FOAM_USER_APPBIN $WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin
 setenv FOAM_USER_LIBBIN $WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
 
-# [FOAM_CODE_TEMPLATES] - dynamicCode templates
-# * fallback == "foamEtcFile -list codeTemplates/dynamicCode"
-# setenv FOAM_CODE_TEMPLATES $WM_PROJECT_DIR/etc/codeTemplates/dynamicCode
-
-# Convenience
-setenv FOAM_ETC $WM_PROJECT_DIR/etc
-setenv FOAM_APP $WM_PROJECT_DIR/applications
-setenv FOAM_SRC $WM_PROJECT_DIR/src
-setenv FOAM_TUTORIALS $WM_PROJECT_DIR/tutorials
-setenv FOAM_UTILITIES $WM_PROJECT_DIR/applications/utilities
-setenv FOAM_SOLVERS $WM_PROJECT_DIR/applications/solvers
-setenv FOAM_RUN $WM_PROJECT_USER_DIR/run
-
 # Add wmake to the path - not required for runtime-only environment
 if ( -d "${WM_DIR}" ) setenv PATH ${WM_DIR}:${PATH}
 # Add OpenFOAM scripts to the path
@@ -201,6 +185,19 @@ if ( $?FOAM_EXT_LIBBIN ) then       # External libraries (allowed to be unset)
     _foamAddLib $FOAM_EXT_LIBBIN
 endif
 _foamAddLib  ${FOAM_USER_LIBBIN}:${FOAM_SITE_LIBBIN}:${FOAM_LIBBIN}
+
+#------------------------------------------------------------------------------
+
+# Convenience
+# ~~~~~~~~~~~
+
+setenv FOAM_ETC "$WM_PROJECT_DIR/etc"
+setenv FOAM_APP "$WM_PROJECT_DIR/applications"
+setenv FOAM_SRC "$WM_PROJECT_DIR/src"
+setenv FOAM_TUTORIALS "$WM_PROJECT_DIR/tutorials"
+setenv FOAM_UTILITIES "$WM_PROJECT_DIR/applications/utilities"
+setenv FOAM_SOLVERS "$WM_PROJECT_DIR/applications/solvers"
+setenv FOAM_RUN "$WM_PROJECT_USER_DIR/run"
 
 #------------------------------------------------------------------------------
 

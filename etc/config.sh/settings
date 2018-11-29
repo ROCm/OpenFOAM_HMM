@@ -131,9 +131,6 @@ esac
 
 #------------------------------------------------------------------------------
 
-# [FOAM_JOB_DIR] - unset is equivalent to ~/.OpenFOAM/jobControl
-## export FOAM_JOB_DIR="$HOME/.OpenFOAM/jobControl"
-
 # wmake configuration
 export WM_DIR=$WM_PROJECT_DIR/wmake
 export WM_LABEL_OPTION=Int$WM_LABEL_SIZE
@@ -162,19 +159,6 @@ export FOAM_SITE_LIBBIN=$siteDir/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
 export FOAM_USER_APPBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin
 export FOAM_USER_LIBBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
 
-# [FOAM_CODE_TEMPLATES] - dynamicCode templates
-# * fallback == "foamEtcFile -list codeTemplates/dynamicCode"
-# export FOAM_CODE_TEMPLATES=$WM_PROJECT_DIR/etc/codeTemplates/dynamicCode
-
-# Convenience
-export FOAM_ETC=$WM_PROJECT_DIR/etc
-export FOAM_APP=$WM_PROJECT_DIR/applications
-export FOAM_SRC=$WM_PROJECT_DIR/src
-export FOAM_TUTORIALS=$WM_PROJECT_DIR/tutorials
-export FOAM_UTILITIES=$WM_PROJECT_DIR/applications/utilities
-export FOAM_SOLVERS=$WM_PROJECT_DIR/applications/solvers
-export FOAM_RUN=$WM_PROJECT_USER_DIR/run
-
 # Add wmake to the path - not required for runtime-only environment
 [ -d "$WM_DIR" ] && PATH=$WM_DIR:$PATH
 # Add OpenFOAM scripts to the path
@@ -198,6 +182,19 @@ then
     _foamAddLib $FOAM_EXT_LIBBIN
 fi
 _foamAddLib  $FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN
+
+#------------------------------------------------------------------------------
+
+# Convenience
+# ~~~~~~~~~~~
+
+export FOAM_ETC="$WM_PROJECT_DIR/etc"
+export FOAM_APP="$WM_PROJECT_DIR/applications"
+export FOAM_SRC="$WM_PROJECT_DIR/src"
+export FOAM_TUTORIALS="$WM_PROJECT_DIR/tutorials"
+export FOAM_UTILITIES="$WM_PROJECT_DIR/applications/utilities"
+export FOAM_SOLVERS="$WM_PROJECT_DIR/applications/solvers"
+export FOAM_RUN="$WM_PROJECT_USER_DIR/run"
 
 #------------------------------------------------------------------------------
 
