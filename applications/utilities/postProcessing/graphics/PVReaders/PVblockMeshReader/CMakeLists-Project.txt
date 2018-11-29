@@ -20,7 +20,7 @@ set(OPENFOAM_LIBRARIES
 
 # Set output library destination to plugin directory
 set(
-    LIBRARY_OUTPUT_PATH $ENV{PV_PLUGIN_PATH}
+    LIBRARY_OUTPUT_PATH $ENV{FOAM_PV_PLUGIN_LIBBIN}
     CACHE INTERNAL
     "Single output directory for building all libraries."
 )

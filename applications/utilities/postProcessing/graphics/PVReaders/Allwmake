@@ -2,7 +2,7 @@
 cd ${0%/*} || exit 1                            # Run from this directory
 export WM_CONTINUE_ON_ERROR=true                # Optional unit
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
-. $WM_PROJECT_DIR/wmake/scripts/cmakeFunctions  # The CMake functions
+. $WM_PROJECT_DIR/wmake/scripts/paraviewFunctions  # CMake and PV functions
 
 # -----------------------------------------------------------------------------
 
@@ -13,31 +13,19 @@ warnIncomplete()
     echo
 }
 
-# major version as per paraview include directory:
-# Eg, "PREFIX/include/paraview-5.0" -> "5.0"
-major="${ParaView_INCLUDE_DIR##*-}"
+if have_pvplugin_support
+then
+(
+    wmakeLibPv foamPv
+    wmakeLibPv vtkPVblockMesh
+    wmakeLibPv vtkPVFoam
 
-case "$major" in
-[45].[0-9]*)
-    if canBuildPlugin
+    if [ "$targetType" != objects ]
     then
-    (
-        wmakeLibPv foamPv
-        wmakeLibPv vtkPVblockMesh
-        wmakeLibPv vtkPVFoam
-
-        if [ "$targetType" != objects ]
-        then
-            cmakePv $PWD/PVblockMeshReader || warnIncomplete "BlockMesh"
-            cmakePv $PWD/PVFoamReader || warnIncomplete "OpenFOAM"
-        fi
-    )
+        cmakePv $PWD/PVblockMeshReader || warnIncomplete "BlockMesh"
+        cmakePv $PWD/PVFoamReader || warnIncomplete "OpenFOAM"
     fi
-    ;;
-*)
-    echo "==> skip build of ParaView plugins"
-    echo "    include directory was for paraview major version '${major:-none}'"
-    ;;
-esac
+)
+fi
 
 #------------------------------------------------------------------------------
