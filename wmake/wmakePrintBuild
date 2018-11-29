@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -35,7 +35,7 @@ options:
   -help
 
 Print the version used when building the project, in this order of precedence:
-  * the git head commit (prefixed with \$WM_PROJECT_VERSION)
+  * the git head commit
   * \$WM_PROJECT_DIR/.build
   * \$WM_PROJECT_VERSION
 
@@ -162,23 +162,13 @@ then
     # Specified a version - no error possible
     rc=0
 else
-    # Get the head SHA1 (first 12 chars) when building under git.
-    # If there are multiple values (eg, HEAD, origin/HEAD, ...)
-    # only take the first one, which is 'HEAD'
-    version=$(
-        git --git-dir=$WM_PROJECT_DIR/.git show-ref --head HEAD 2>/dev/null |\
-        sed -ne '1s@^\(.\{12\}\).*$@\1@p'
-    )
 
-    if [ -n "$version" ]
-    then
-        # Mark as success and prefix with WM_PROJECT_VERSION
-        rc=0
-        version="${WM_PROJECT_VERSION}-$version"
-    else
-        # Mark as failure
-        rc=1
-    fi
+    # Abbrev commit hash + data
+    # Date format (YYMMDD) for authoring of the commit
+    version="$(git --git-dir=$WM_PROJECT_DIR/.git log -1 --date='format:%y%m%d' --format='%h-%ad' 2>/dev/null)"
+
+    test -n "$version"
+    rc=$?
 fi
 
 
