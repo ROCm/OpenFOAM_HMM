@@ -33,6 +33,7 @@ License
 #include "shellSurfaces.H"
 #include "searchableSurfaces.H"
 #include "voxelMeshSearch.H"
+#include "IOmanip.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -388,9 +389,16 @@ Foam::snappyVoxelMeshDriver::snappyVoxelMeshDriver
 
     const scalar level0Len = meshRefiner_.meshCutter().level0EdgeLength();
 
-    Info<< "Cell size estimate :" << nl
-        << "    Maximum : " << level0Len << nl
-        << "    Minimum : " << level0Len/pow(2.0, maxLevel) << nl
+    const int oldWidth = Sout.width();
+
+    Info<< nl
+        << "Cell size estimate :" << nl
+        << "    Level "
+        << setw(2) << label(0) << setw(oldWidth)
+        << " : " << level0Len << nl
+        << "    Level "
+        << setw(2) << maxLevel << setw(oldWidth)
+        << " : " << level0Len/pow(2.0, maxLevel) << nl
         << endl;
 
 

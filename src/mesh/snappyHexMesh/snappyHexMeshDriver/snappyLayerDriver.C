@@ -4629,14 +4629,17 @@ void Foam::snappyLayerDriver::addLayers
     // Write mesh data
     // ~~~~~~~~~~~~~~~
 
-    writeLayerData
-    (
-        mesh,
-        patchIDs,
-        cellNLayers,
-        faceWantedThickness,
-        faceRealThickness
-    );
+    if (!dryRun_)
+    {
+        writeLayerData
+        (
+            mesh,
+            patchIDs,
+            cellNLayers,
+            faceWantedThickness,
+            faceRealThickness
+        );
+    }
 }
 
 
