@@ -132,39 +132,47 @@ esac
 #------------------------------------------------------------------------------
 
 # wmake configuration
-export WM_DIR=$WM_PROJECT_DIR/wmake
-export WM_LABEL_OPTION=Int$WM_LABEL_SIZE
-export WM_OPTIONS=$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_LABEL_OPTION$WM_COMPILE_OPTION
+export WM_DIR="$WM_PROJECT_DIR/wmake"
+export WM_LABEL_OPTION="Int$WM_LABEL_SIZE"
+export WM_OPTIONS="$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_LABEL_OPTION$WM_COMPILE_OPTION"
 
 # Base executables/libraries
-export FOAM_APPBIN=$WM_PROJECT_DIR/platforms/$WM_OPTIONS/bin
-export FOAM_LIBBIN=$WM_PROJECT_DIR/platforms/$WM_OPTIONS/lib
+export FOAM_APPBIN="$WM_PROJECT_DIR/platforms/$WM_OPTIONS/bin"
+export FOAM_LIBBIN="$WM_PROJECT_DIR/platforms/$WM_OPTIONS/lib"
 
 # External (ThirdParty) libraries
-export FOAM_EXT_LIBBIN=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_LABEL_OPTION/lib
+export FOAM_EXT_LIBBIN="$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_LABEL_OPTION/lib"
 
 # Site-specific (group) files
-if [ -n "$WM_PROJECT_SITE" ]
+
+# Default
+siteDir="$WM_PROJECT_DIR/site"
+
+# User override
+if [ -d "$WM_PROJECT_SITE" -a "$WM_PROJECT_SITE" != "$siteDir" ]
 then
-    siteDir=$WM_PROJECT_SITE
+    siteDir="$WM_PROJECT_SITE"
+    export WM_PROJECT_SITE
 else
-    siteDir=$WM_PROJECT_DIR/site
+    unset WM_PROJECT_SITE
 fi
 
 # Shared site (group) executables/libraries
-export FOAM_SITE_APPBIN=$siteDir/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin
-export FOAM_SITE_LIBBIN=$siteDir/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
+export FOAM_SITE_APPBIN="$siteDir/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin"
+export FOAM_SITE_LIBBIN="$siteDir/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib"
 
 # User executables/libraries
-export FOAM_USER_APPBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin
-export FOAM_USER_LIBBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
+export FOAM_USER_APPBIN="$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin"
+export FOAM_USER_LIBBIN="$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib"
 
-# Add wmake to the path - not required for runtime-only environment
-[ -d "$WM_DIR" ] && PATH=$WM_DIR:$PATH
-# Add OpenFOAM scripts to the path
-export PATH=$WM_PROJECT_DIR/bin:$PATH
 
-# Add site-specific scripts to path - only if they exist
+# Prepend wmake to the path - not required for runtime-only environment
+[ -d "$WM_DIR" ] && PATH="$WM_DIR:$PATH"
+
+# Prepend OpenFOAM scripts to the path
+export PATH="$WM_PROJECT_DIR/bin:$PATH"
+
+# Prepend site-specific scripts to path - only if they exist
 if [ -d "$siteDir/bin" ]                        # Generic
 then
     _foamAddPath "$siteDir/bin"
@@ -174,13 +182,21 @@ then
     _foamAddPath "$siteDir/$WM_PROJECT_VERSION/bin"
 fi
 
-_foamAddPath $FOAM_USER_APPBIN:$FOAM_SITE_APPBIN:$FOAM_APPBIN
-_foamAddLib  $FOAM_LIBBIN/dummy     # Dummy versions of external libraries last
-if [ -n "$FOAM_EXT_LIBBIN" ]        # External libraries (allowed to be unset)
+# OpenFOAM executables (user, group, standard)
+_foamAddPath "$FOAM_USER_APPBIN:$FOAM_SITE_APPBIN:$FOAM_APPBIN"
+
+# Dummy versions of external libraries. To be found last in LD_LIBRARY_PATH
+_foamAddLib  "$FOAM_LIBBIN/dummy"
+
+# External libraries (allowed to be unset)
+if [ -n "$FOAM_EXT_LIBBIN" ]
 then
     _foamAddLib $FOAM_EXT_LIBBIN
 fi
-_foamAddLib  $FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN
+
+# OpenFOAM libraries (user, group, standard)
+_foamAddLib  "$FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN"
+
 
 #------------------------------------------------------------------------------
 
@@ -232,7 +248,7 @@ unset GMP_ARCH_PATH MPFR_ARCH_PATH
 _foamEtc -config compiler
 
 # ThirdParty base for compilers
-archDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH
+archDir="$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH"
 
 case "$WM_COMPILER_TYPE-$WM_COMPILER" in
 ThirdParty-Gcc*)
