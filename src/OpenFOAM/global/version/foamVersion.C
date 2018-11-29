@@ -30,18 +30,31 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+bool Foam::foamVersion::patched()
+{
+    // Patch-level, when defined (non-zero) and not some @TOKEN@ rubbish
+    return
+    (
+        foamVersion::patch.size() && foamVersion::patch[0] != '@'
+     && (foamVersion::patch.size() > 1 || foamVersion::patch[0] != '0')
+    );
+}
+
+
 void Foam::foamVersion::printBuildInfo(const bool full)
 {
     // Can use #if OPENFOAM directly
 
-    Info<<"Using: OpenFOAM-" << foamVersion::version.c_str()
-        << " (see www.OpenFOAM.com)" << nl
-        << "Build: " << foamVersion::build.c_str()
-        // The same as using foamVersion::api
-        #if OPENFOAM
-        << " (OPENFOAM=" << OPENFOAM << ')'
-        #endif
-        << nl;
+    Info<< "Using: OpenFOAM-" << foamVersion::version.c_str()
+        << " (" << OPENFOAM << ") (see www.OpenFOAM.com)" << nl
+        << "Build: " << foamVersion::build.c_str();
+
+    if (foamVersion::patched())
+    {
+        // Patch-level, when defined
+        Info<< " (patch=" << foamVersion::patch.c_str() << ')';
+    }
+    Info<< nl;
 
     if (full)
     {

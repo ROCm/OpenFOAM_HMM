@@ -872,10 +872,15 @@ void Foam::argList::parse
         {
             IOobject::writeBanner(Info, true)
                 << "Build  : " << foamVersion::build.c_str()
-                #if OPENFOAM
-                << " (OPENFOAM=" << OPENFOAM << ')'
-                #endif
-                << nl
+                << " (OPENFOAM=" << OPENFOAM;
+
+            if (foamVersion::patched())
+            {
+                // Patch-level, when defined
+                Info<< " patch=" << foamVersion::patch.c_str();
+            }
+
+            Info<< ')' << nl
                 << "Arch   : " << foamVersion::buildArch << nl
                 << "Exec   : " << commandLine_.c_str() << nl
                 << "Date   : " << dateString.c_str() << nl

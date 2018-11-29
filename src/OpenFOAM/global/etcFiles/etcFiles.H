@@ -61,17 +61,16 @@ fileNameList findEtcDirs
 //  The search hierarchy corresponds to that of the foamEtcFile script,
 //  which allows for version-specific and version-independent files:
 //  -# \b user settings
-//    - ~/.OpenFOAM/$WM_PROJECT_VERSION
+//    - ~/.OpenFOAM/{PROJECT_API}
 //    - ~/.OpenFOAM/
 //  -# \b group settings
-//    - $WM_PROJECT_SITE/$WM_PROJECT_VERSION
+//    - $WM_PROJECT_SITE/{PROJECT_API}
 //    - $WM_PROJECT_SITE/
 //  -# \b other (shipped) settings
 //    - $WM_PROJECT_DIR/etc/
 //
-//  \note Treatment of empty or undefined variables
-//  - \b \$WM_PROJECT_VERSION : Use compile-time value of OPENFOAM
-//  - \b \$WM_PROJECT_SITE : Use $WM_PROJECT_DIR/site
+//  Where {PROJECT_API} is the value of the OPENFOAM define.
+//  - \b \$WM_PROJECT_SITE : If unset, use $WM_PROJECT_DIR/site
 //
 //  \return The list of full paths of all the matching files or
 //      an empty list if the name cannot be found.

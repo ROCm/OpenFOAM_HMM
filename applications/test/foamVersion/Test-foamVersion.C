@@ -31,6 +31,7 @@ Description
 
 #include <typeinfo>
 #include "foamVersion.H"
+#include "Switch.H"
 #include "IOstreams.H"
 
 using namespace Foam;
@@ -49,10 +50,13 @@ int main()
 
     Info
         << "\nVersion information (namespace)" << nl
+        << "patched?  = " << Switch(foamVersion::patched()) << nl
         << "api       " << foamVersion::api << nl
+        << "patch     " << foamVersion::patch << nl
         << "version   " << foamVersion::version << nl
         << "build     " << foamVersion::build << nl
         << "buildArch " << foamVersion::buildArch << nl;
+
     Info
         << "\nTypes" << nl
         << "version   " << typeid(foamVersion::version).name() << nl

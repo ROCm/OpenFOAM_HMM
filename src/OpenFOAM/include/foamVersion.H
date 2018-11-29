@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,8 +83,8 @@ namespace Foam
         //  The value is 0 if OPENFOAM was not defined.
         extern const int api;
 
-        //- OpenFOAM version (name or stringified number) as a std::string
-        extern const std::string version;
+        //- OpenFOAM patch number as a std::string
+        extern const std::string patch;
 
         //- OpenFOAM build information as a std::string
         extern const std::string build;
@@ -93,13 +93,19 @@ namespace Foam
         //- (machine endian, label/scalar sizes) as a std::string
         extern const std::string buildArch;
 
+        //- OpenFOAM version (name or stringified number) as a std::string
+        extern const std::string version;
+
+        //- Test if the patch string appeared to be in use,
+        //- which is when it is defined (non-zero).
+        bool patched();
 
         //- Print information about version, build, arch to Info
         //
         //  Eg,
         //  \code
-        //      Using: OpenFOAM-<VERSION> (see www.OpenFOAM.com)
-        //      Build: <BUILD> (OPENFOAM=<API_LEVEL>)
+        //      Using: OpenFOAM-<MAJOR> (see www.OpenFOAM.com)
+        //      Build: <BUILD>
         //      Arch:  "<ARCH_INFO>"
         //  \endcode
         //
@@ -112,8 +118,8 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Compatibility names (1806 and earlier).
-// Historically assumed to be called within the Foam namespace, so they are
-// defined without the Foam namespace qualifier.
+// Historically assumed to be called within the Foam namespace, they are
+// thus defined without the Foam namespace qualifier.
 //
 // - FOAMversion: c-string
 // - FOAMbuild:   c-string

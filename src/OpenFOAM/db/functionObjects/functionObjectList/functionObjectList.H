@@ -194,14 +194,15 @@ public:
         //- Foam::findEtcDirs("caseDicts/postProcessing")
         //
         //  -# \b user settings
-        //    - ~/.OpenFOAM/$WM_PROJECT_VERSION/"caseDicts/postProcessing"
+        //    - ~/.OpenFOAM/{PROJECT_API}/"caseDicts/postProcessing"
         //    - ~/.OpenFOAM/"caseDicts/postProcessing"
         //  -# \b group settings
-        //    - $WM_PROJECT_SITE/$WM_PROJECT_VERSION/"caseDicts/postProcessing"
+        //    - $WM_PROJECT_SITE/{PROJECT_API}/"caseDicts/postProcessing"
         //    - $WM_PROJECT_SITE/"caseDicts/postProcessing"
         //  -# \b other (shipped) settings
         //    - $WM_PROJECT_DIR/etc/"caseDicts/postProcessing"
         //
+        // Where {PROJECT_API} is the value of the OPENFOAM define.
         // See further notes in Foam::findEtcFiles()
         static void list();
 
