@@ -20,18 +20,20 @@ internalField   uniform 1e5;
 
 boundaryField
 {
-    Default_Boundary_Region
-    {
-        type            zeroGradient;
-    }
     inlet
     {
         type            zeroGradient;
     }
+
     outlet
     {
         type            fixedValue;
         value           $internalField;
+    }
+
+    "(?i).*walls"
+    {
+        type            zeroGradient;
     }
 }
 

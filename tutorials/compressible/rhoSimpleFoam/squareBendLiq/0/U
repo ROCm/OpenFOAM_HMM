@@ -20,21 +20,23 @@ internalField   uniform (0 0 0);
 
 boundaryField
 {
-    Default_Boundary_Region
-    {
-        type            noSlip;
-    }
     inlet
     {
         type            flowRateInletVelocity;
         massFlowRate    constant 5;
         rhoInlet        1000;    // Guess for rho
     }
+
     outlet
     {
         type            inletOutlet;
-        value           uniform (0 0 0);
-        inletValue      uniform (0 0 0);
+        inletValue      $internalField;
+        value           $internalField;
+    }
+
+    "(?i).*walls"
+    {
+        type            noSlip;
     }
 }
 

@@ -20,22 +20,24 @@ internalField   uniform 1;
 
 boundaryField
 {
-    Default_Boundary_Region
-    {
-        type            kqRWallFunction;
-        value           $internalField;
-    }
     inlet
     {
         type            turbulentIntensityKineticEnergyInlet;
         intensity       0.05;
         value           $internalField;
     }
+
     outlet
     {
         type            inletOutlet;
-        value           $internalField;
         inletValue      $internalField;
+        value           $internalField;
+    }
+
+    "(?i).*walls"
+    {
+        type            kqRWallFunction;
+        value           $internalField;
     }
 }
 

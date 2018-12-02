@@ -20,22 +20,24 @@ internalField   uniform 0;
 
 boundaryField
 {
-    Default_Boundary_Region
-    {
-        type            nutkWallFunction;
-        Cmu             0.09;
-        kappa           0.41;
-        E               9.8;
-        value           $internalField;
-    }
     inlet
     {
         type            calculated;
         value           $internalField;
     }
+
     outlet
     {
         type            calculated;
+        value           $internalField;
+    }
+
+    "(?i).*walls"
+    {
+        type            nutkWallFunction;
+        Cmu             0.09;
+        kappa           0.41;
+        E               9.8;
         value           $internalField;
     }
 }

@@ -22,10 +22,6 @@ boundaryField
 {
     #includeEtc "caseDicts/setConstraintTypes"
 
-    Default_Boundary_Region
-    {
-        type            zeroGradient;
-    }
     inlet
     {
         type            zeroGradient;
@@ -39,7 +35,7 @@ boundaryField
         value           $internalField;
     }
 
-    ".*"
+    "(?i).*walls"
     {
         type            zeroGradient;
     }

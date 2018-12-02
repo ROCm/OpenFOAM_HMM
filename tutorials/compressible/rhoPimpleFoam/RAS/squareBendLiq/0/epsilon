@@ -20,27 +20,27 @@ internalField   uniform 200;
 
 boundaryField
 {
-    Default_Boundary_Region
-    {
-        type            epsilonWallFunction;
-        Cmu             0.09;
-        kappa           0.41;
-        E               9.8;
-        value           uniform 200;
-    }
-
     inlet
     {
         type            turbulentMixingLengthDissipationRateInlet;
         mixingLength    0.005;
-        value           uniform 200;
+        value           $internalField;
     }
 
     outlet
     {
         type            inletOutlet;
-        inletValue      uniform 200;
-        value           uniform 200;
+        inletValue      $internalField;
+        value           $internalField;
+    }
+
+    "(?i).*walls"
+    {
+        type            epsilonWallFunction;
+        Cmu             0.09;
+        kappa           0.41;
+        E               9.8;
+        value           $internalField;
     }
 }
 

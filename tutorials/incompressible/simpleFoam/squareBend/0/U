@@ -22,20 +22,22 @@ boundaryField
 {
     #includeEtc "caseDicts/setConstraintTypes"
 
-    Default_Boundary_Region
-    {
-        type            noSlip;
-    }
     inlet
     {
         type  fixedValue;
         value uniform (10 0 0);
     }
+
     outlet
     {
         type            inletOutlet;
-        value           $internalField;
         inletValue      $internalField;
+        value           $internalField;
+    }
+
+    "(?i).*walls"
+    {
+        type            noSlip;
     }
 }
 

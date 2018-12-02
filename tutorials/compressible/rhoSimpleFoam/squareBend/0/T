@@ -33,7 +33,7 @@ boundaryField
         inletValue      $internalField;
     }
 
-    ".*"
+    "(?i).*walls"
     {
         type            zeroGradient;
     }
