@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -44,7 +44,7 @@ options:
   -help             print the usage
 
   Updates the header of application files and removes consecutive blank lines.
-  By default, writes current OpenFOAM version in the header.
+  By default, writes current OpenFOAM API number version in the header.
   An alternative version can be specified with the -version option.
 
 USAGE
@@ -74,8 +74,12 @@ do
     esac
 done
 
-# constant width for version - default to WM_PROJECT_VERSION
-version=$(printf %-36s ${version:-$WM_PROJECT_VERSION})
+# Constant width for version - default to WM_PROJECT_API
+
+: ${version:=$WM_PROJECT_API}
+: ${version:=$WM_PROJECT_VERSION}
+
+version=$(printf %-36s ${version:-OPENFOAM})
 
 [ $# -ge 1 ] || usage
 
