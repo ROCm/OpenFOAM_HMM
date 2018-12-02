@@ -146,19 +146,19 @@ public:
 
 
     //- Destructor
-    virtual ~externalCoupledMixedFvPatchField();
+    virtual ~externalCoupledMixedFvPatchField() = default;
 
 
     // Member functions
 
         //- Write header
-        virtual void writeHeader(Ostream&) const;
+        virtual void writeHeader(Ostream& os) const;
 
         //- Write data
-        virtual void writeData(Ostream&) const;
+        virtual void writeData(Ostream& os) const;
 
         //- Read data
-        virtual void readData(Istream&);
+        virtual void readData(Istream& is);
 };
 
 
