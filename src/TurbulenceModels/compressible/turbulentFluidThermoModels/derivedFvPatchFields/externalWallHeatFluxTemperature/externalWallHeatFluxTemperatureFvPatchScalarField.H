@@ -50,24 +50,24 @@ Description
     possible sources, as detailed in the class temperatureCoupledBase.
 
     The ambient temperature Ta is specified as a Foam::Function1 of time but
-    uniform is space.
+    uniform in space.
 
 Usage
     \table
-    Property     | Description                 | Required | Default value
-    mode         | 'power', 'flux' or 'coefficient' | yes |
-    Q            | Power [W]                   | for mode 'power'     |
-    q            | Heat flux [W/m^2]           | for mode 'flux'     |
-    h            | Heat transfer coefficient [W/m^2/K] | for mode 'coefficent' |
-    Ta           | Ambient temperature [K]     | for mode 'coefficient' |
-    thicknessLayers | Layer thicknesses [m] | no |
-    kappaLayers  | Layer thermal conductivities [W/m/K] | no |
-    relaxation   | Relaxation for the wall temperature | no | 1
-    emissivity   | Surface emissivity for radiative flux to ambient | no | 0
-    qr           | Name of the radiative field | no | none
-    qrRelaxation | Relaxation factor for radiative field | no | 1
-    kappaMethod  | Inherited from temperatureCoupledBase | inherited |
-    kappa        | Inherited from temperatureCoupledBase | inherited |
+    Property    | Description                              | Required | Default
+    mode        | 'power', 'flux' or 'coefficient'         | yes |
+    Q           | Power [W]                                | for mode 'power' |
+    q           | Heat flux [W/m^2]                        | for mode 'flux' |
+    h           | Heat transfer coefficient [W/m^2/K] | for mode 'coefficient' |
+    Ta          | Ambient temperature [K]             | for mode 'coefficient' |
+    thicknessLayers | Layer thicknesses [m]                | no  |
+    kappaLayers | Layer thermal conductivities [W/m/K]     | no  |
+    relaxation  | Relaxation for the wall temperature      | no  | 1
+    emissivity  | Surface emissivity for radiative flux to ambient | no | 0
+    qr          | Name of the radiative field              | no  | none
+    qrRelaxation | Relaxation factor for radiative field   | no  | 1
+    kappaMethod | Inherited from temperatureCoupledBase    | inherited |
+    kappa       | Inherited from temperatureCoupledBase    | inherited |
     \endtable
 
     Example of the boundary condition specification:
