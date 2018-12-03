@@ -286,7 +286,6 @@ Foam::faAreaMapper::faAreaMapper
 :
     mesh_(mesh),
     mpm_(mpm),
-    insertedFaces_(false),
     direct_(false),
     hasUnmapped_(false),
     sizeBeforeMapping_(mesh.nFaces()),
