@@ -121,4 +121,9 @@ Foam::radiation::opaqueSolid::Ru() const
 }
 
 
+Foam::label Foam::radiation::opaqueSolid::nBands() const
+{
+    return absorptionEmission_->nBands();
+}
+
 // ************************************************************************* //

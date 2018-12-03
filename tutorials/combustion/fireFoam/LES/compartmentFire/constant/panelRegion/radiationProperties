@@ -22,8 +22,6 @@ radiationModel  opaqueSolid;
 
 absorptionEmissionModel none;
 
-transmissivityModel none;
-
 scatterModel    none;
 
 sootModel none;

@@ -17,16 +17,16 @@ FoamFile
 
 ".*"
 {
-    mode            lookup;
+    type            lookup;
     emissivity      0.8;
-    absorptivity    0.0;
+    absorptivity    0.8;
 }
 
 inlet
 {
-     mode           lookup;
+    type            lookup;
     emissivity      0.9;
-    absorptivity    0.0;
+    absorptivity    0.9;
 }
 
 

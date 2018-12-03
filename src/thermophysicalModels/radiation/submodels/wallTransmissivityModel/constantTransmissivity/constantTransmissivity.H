@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,23 +22,23 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::radiation::noTransmissivity
+    Foam::radiation::constantTransmissivity
 
 Group
     grpRadiationTransmissivitySubModels
 
 Description
-    Dummy transmissivity model for 'none'
+    Constant radiation transmissivity coefficient
 
 SourceFiles
-    noTransmissivity.C
+    constantTransmissivity.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef radiation_noTransmissivity_H
-#define radiation_noTransmissivity_H
+#ifndef radiation_constantTransmissivity_H
+#define radiation_constantTransmissivity_H
 
-#include "transmissivityModel.H"
+#include "wallTransmissivityModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,36 +48,61 @@ namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class noTransmissivity Declaration
+                   Class constantTransmissivity Declaration
 \*---------------------------------------------------------------------------*/
 
-class noTransmissivity
+class constantTransmissivity
 :
-    public transmissivityModel
+    public wallTransmissivityModel
 {
+
+    // Private data
+
+        //- Coefficients dictionary
+        dictionary coeffsDict_;
+
+        //- Transmissivity coefficient
+        scalar tau_;
+
 
 public:
 
     //- Runtime type information
-    TypeName("none");
+    TypeName("constantTransmissivity");
 
 
     // Constructors
 
         //- Construct from components
-        noTransmissivity(const dictionary& dict, const fvMesh& mesh);
+        constantTransmissivity(const dictionary& dict, const polyPatch& pp);
 
 
     //- Destructor
-    virtual ~noTransmissivity();
+    virtual ~constantTransmissivity();
 
 
     // Member Functions
 
-        //- Return scatter coefficient
-        tmp<volScalarField> tauEff(const label bandI = 0) const;
+        //- Return transmissivity coefficient
+        tmp<scalarField> t
+        (
+            const label bandI = 0,
+            vectorField* incomingDirection = nullptr,
+            scalarField* T = nullptr
+        ) const;
 
-         //- Is Grey
+
+        //- Return tranmissivity on facw
+        scalar t
+        (
+            const label faceI,
+            const label bandI = 0,
+            const vector dir = Zero,
+            const scalar T = 0
+        ) const;
+
+
+        //- Is Grey
         inline bool isGrey() const
         {
             return true;

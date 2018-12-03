@@ -47,8 +47,7 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    TName_("T"),
-    solarLoad_(false)
+    TName_("T")
 {
     refValue() = 0.0;
     refGrad() = 0.0;
@@ -66,8 +65,7 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(ptf, p, iF, mapper),
-    TName_(ptf.TName_),
-    solarLoad_(ptf.solarLoad_)
+    TName_(ptf.TName_)
 {}
 
 
@@ -80,8 +78,7 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    TName_(dict.lookupOrDefault<word>("T", "T")),
-    solarLoad_(dict.lookupOrDefault("solarLoad", false))
+    TName_(dict.lookupOrDefault<word>("T", "T"))
 {
     if (dict.found("refValue"))
     {
@@ -111,8 +108,7 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(ptf),
-    TName_(ptf.TName_),
-    solarLoad_(ptf.solarLoad_)
+    TName_(ptf.TName_)
 {}
 
 
@@ -124,8 +120,7 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(ptf, iF),
-    TName_(ptf.TName_),
-    solarLoad_(ptf.solarLoad_)
+    TName_(ptf.TName_)
 {}
 
 
@@ -197,12 +192,23 @@ updateCoeffs()
         Ir += dom.IRay(rayI).qin().boundaryField()[patchi];
     }
 
-    if (solarLoad_)
+    if (dom.useSolarLoad())
     {
+        // Looking for primary heat flux single band
         Ir += patch().lookupPatchField<volScalarField,scalar>
         (
-            dom.externalRadHeatFieldName_
+            dom.primaryFluxName_ + "_0"
         );
+
+        word qSecName = dom.relfectedFluxName_ + "_0";
+
+        if (this->db().foundObject<volScalarField>(qSecName))
+        {
+             const volScalarField& qSec =
+                this->db().lookupObject<volScalarField>(qSecName);
+
+            Ir += qSec.boundaryField()[patch().index()];
+        }
     }
 
     forAll(Iw, faceI)
@@ -248,7 +254,6 @@ void Foam::radiation::greyDiffusiveRadiationMixedFvPatchScalarField::write
 {
     mixedFvPatchScalarField::write(os);
     os.writeEntryIfDifferent<word>("T", "T", TName_);
-    os.writeEntry("solarLoad", solarLoad_);
 }
 
 

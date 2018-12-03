@@ -37,6 +37,5 @@ greyMeanSolidAbsorptionEmissionCoeffs
 
 scatterModel    none;
 
-transmissivityModel none;
 
 // ************************************************************************* //

@@ -213,6 +213,25 @@ updateCoeffs()
         }
     }
 
+    if (dom.useSolarLoad())
+    {
+        // Looking for primary heat flux single band
+        Ir += patch().lookupPatchField<volScalarField,scalar>
+        (
+            dom.primaryFluxName_ + "_" + name(lambdaId - 1)
+        );
+
+        word qSecName = dom.relfectedFluxName_ + "_" + name(lambdaId - 1);
+
+        if (this->db().foundObject<volScalarField>(qSecName))
+        {
+             const volScalarField& qSec =
+                this->db().lookupObject<volScalarField>(qSecName);
+
+            Ir += qSec.boundaryField()[patch().index()];
+        }
+    }
+
     forAll(Iw, facei)
     {
         const vector& d = dom.IRay(rayId).d();

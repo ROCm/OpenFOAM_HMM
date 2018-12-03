@@ -292,4 +292,9 @@ Foam::radiation::P1::Ru() const
 }
 
 
+Foam::label Foam::radiation::P1::nBands() const
+{
+    return absorptionEmission_->nBands();
+}
+
 // ************************************************************************* //

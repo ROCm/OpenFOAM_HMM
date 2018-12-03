@@ -234,7 +234,7 @@ public:
         // Access
 
             //- const acess to direction
-            const vector direction() const
+            const vector& direction() const
             {
                 return direction_;
             }
@@ -245,14 +245,20 @@ public:
                 return direction_;
             }
 
-             //- Return direct solar irradiation
-            scalar directSolarRad()
+            //- Return direct solar irradiation
+            scalar& directSolarRad()
+            {
+                return directSolarRad_;
+            }
+
+            //- Return const access to direct solar irradiation
+            const scalar& directSolarRad() const
             {
                 return directSolarRad_;
             }
 
             //- Return diffuse solar irradiation
-            scalar diffuseSolarRad()
+            scalar& diffuseSolarRad()
             {
                 return diffuseSolarRad_;
             }

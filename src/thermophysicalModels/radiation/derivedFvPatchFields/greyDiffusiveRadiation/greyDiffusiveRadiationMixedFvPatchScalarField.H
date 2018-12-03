@@ -86,10 +86,6 @@ class greyDiffusiveRadiationMixedFvPatchScalarField
         //- Name of temperature field
         word TName_;
 
-        //- Activate solar load
-        bool solarLoad_;
-
-
 public:
 
     //- Runtime type information

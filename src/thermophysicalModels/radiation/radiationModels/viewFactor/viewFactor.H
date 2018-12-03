@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -126,6 +126,9 @@ protected:
         //- Solar load radiation model
         autoPtr<solarLoad> solarLoad_;
 
+        //-Number of bands
+        label nBands_;
+
 
     // Private Member Functions
 
@@ -189,6 +192,12 @@ public:
 
         //- Const access to total radiative heat flux field
         inline const volScalarField& qr() const;
+
+        //- Use useSolarLoad
+        inline bool useSolarLoad() const;
+
+        //- Number of bands
+        virtual label nBands() const;
 };
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -30,5 +30,14 @@ inline const Foam::volScalarField& Foam::radiation::viewFactor::qr() const
     return qr_;
 }
 
+inline bool Foam::radiation::viewFactor::useSolarLoad() const
+{
+    return useSolarLoad_;
+}
+
+inline label Foam::radiation::viewFactor::nBands() const
+{
+    return nBands_;
+}
 
 // ************************************************************************* //

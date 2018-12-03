@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::radiation::constantTransmissivity
+    Foam::radiation::constantAbsorption
 
 Group
     grpRadiationTransmissivitySubModels
@@ -31,14 +31,14 @@ Description
     Constant radiation transmissivity coefficient
 
 SourceFiles
-    constantTransmissivity.C
+    constantAbsorption.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef radiation_constantTransmissivity_H
-#define radiation_constantTransmissivity_H
+#ifndef radiation_constantAbsorption_H
+#define radiation_constantAbsorption_H
 
-#include "transmissivityModel.H"
+#include "wallAbsorptionEmissionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,12 +48,12 @@ namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class constantTransmissivity Declaration
+                   Class constantAbsorption Declaration
 \*---------------------------------------------------------------------------*/
 
-class constantTransmissivity
+class constantAbsorption
 :
-    public transmissivityModel
+    public wallAbsorptionEmissionModel
 {
 
     // Private data
@@ -61,30 +61,64 @@ class constantTransmissivity
         //- Coefficients dictionary
         dictionary coeffsDict_;
 
-        //- Transmissivity coefficient / []
-        scalar tau_;
+        //- Absorptivity coefficient
+        scalar a_;
+
+        //- Emissivity coefficient
+        scalar e_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("constantTransmissivity");
+    TypeName("constantAbsorption");
 
 
     // Constructors
 
         //- Construct from components
-        constantTransmissivity(const dictionary& dict, const fvMesh& mesh);
+        constantAbsorption(const dictionary& dict, const polyPatch& pp);
 
 
     //- Destructor
-    virtual ~constantTransmissivity();
+    virtual ~constantAbsorption();
 
 
     // Member Functions
 
-        //- Return scatter coefficient
-        tmp<volScalarField> tauEff(const label bandI = 0) const;
+        //- absorptivity coefficient
+        tmp<scalarField> a
+        (
+            const label bandI = 0,
+            vectorField* incomingDirection = nullptr,
+            scalarField* T = nullptr
+        ) const;
+
+        //- Return absorptivity on face
+        scalar a
+        (
+            const label faceI,
+            const label bandI = 0,
+            const vector dir = Zero,
+            const scalar T = 0
+        ) const;
+
+        //- Return emission coefficient
+        tmp<scalarField> e
+        (
+            const label bandI = 0,
+            vectorField* incomingDirection = nullptr,
+            scalarField* T = nullptr
+        ) const;
+
+        //- Return emission coefficient
+        scalar e
+        (
+            const label faceI,
+            const label bandI = 0,
+            const vector dir = Zero,
+            const scalar T = 0
+        ) const;
 
 
         //- Is Grey

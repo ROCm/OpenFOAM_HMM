@@ -3794,7 +3794,7 @@ void Foam::distributedTriSurfaceMesh::getRegion
     labelList triangleIndex(info.size());
     autoPtr<mapDistribute> mapPtr
     (
-        calcLocalQueries
+        localQueries
         (
             info,
             triangleIndex
@@ -3859,7 +3859,7 @@ void Foam::distributedTriSurfaceMesh::getNormal
     labelList triangleIndex(info.size());
     autoPtr<mapDistribute> mapPtr
     (
-        calcLocalQueries
+        localQueries
         (
             info,
             triangleIndex
@@ -4261,7 +4261,7 @@ void Foam::distributedTriSurfaceMesh::getField
         labelList triangleIndex(info.size());
         autoPtr<mapDistribute> mapPtr
         (
-            calcLocalQueries
+            localQueries
             (
                 info,
                 triangleIndex
@@ -4349,6 +4349,128 @@ Foam::triSurface Foam::distributedTriSurfaceMesh::overlappingSurface
     boolList includedFace;
     overlappingSurface(s, bbs, includedFace);
     return subsetMesh(s, includedFace, subPointMap, subFaceMap);
+}
+
+
+// Exchanges indices to the processor they come from.
+// - calculates exchange map
+// - uses map to calculate local triangle index
+Foam::autoPtr<Foam::mapDistribute>
+Foam::distributedTriSurfaceMesh::localQueries
+(
+    const List<pointIndexHit>& info,
+    labelList& triangleIndex
+) const
+{
+    triangleIndex.setSize(info.size());
+
+    const globalIndex& triIndexer = globalTris();
+
+
+    // Determine send map
+    // ~~~~~~~~~~~~~~~~~~
+
+    // Since determining which processor the query should go to is
+    // cheap we do a multi-pass algorithm to save some memory temporarily.
+
+    // 1. Count
+    labelList nSend(Pstream::nProcs(), 0);
+
+    forAll(info, i)
+    {
+        if (info[i].hit())
+        {
+            label proci = triIndexer.whichProcID(info[i].index());
+            nSend[proci]++;
+        }
+    }
+
+    // 2. Size sendMap
+    labelListList sendMap(Pstream::nProcs());
+    forAll(nSend, proci)
+    {
+        sendMap[proci].setSize(nSend[proci]);
+        nSend[proci] = 0;
+    }
+
+    // 3. Fill sendMap
+    forAll(info, i)
+    {
+        if (info[i].hit())
+        {
+            label proci = triIndexer.whichProcID(info[i].index());
+            triangleIndex[i] = triIndexer.toLocal(proci, info[i].index());
+            sendMap[proci][nSend[proci]++] = i;
+        }
+        else
+        {
+            triangleIndex[i] = -1;
+        }
+    }
+
+
+    // Send over how many i need to receive
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    labelListList sendSizes(Pstream::nProcs());
+    sendSizes[Pstream::myProcNo()].setSize(Pstream::nProcs());
+    forAll(sendMap, proci)
+    {
+        sendSizes[Pstream::myProcNo()][proci] = sendMap[proci].size();
+    }
+    Pstream::gatherList(sendSizes);
+    Pstream::scatterList(sendSizes);
+
+
+    // Determine receive map
+    // ~~~~~~~~~~~~~~~~~~~~~
+
+    labelListList constructMap(Pstream::nProcs());
+
+    // My local segments first
+    constructMap[Pstream::myProcNo()] = identity
+    (
+        sendMap[Pstream::myProcNo()].size()
+    );
+
+    label segmenti = constructMap[Pstream::myProcNo()].size();
+    forAll(constructMap, proci)
+    {
+        if (proci != Pstream::myProcNo())
+        {
+            // What i need to receive is what other processor is sending to me.
+            label nRecv = sendSizes[proci][Pstream::myProcNo()];
+            constructMap[proci].setSize(nRecv);
+
+            for (label i = 0; i < nRecv; i++)
+            {
+                constructMap[proci][i] = segmenti++;
+            }
+        }
+    }
+
+
+    // Pack into distribution map
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    autoPtr<mapDistribute> mapPtr
+    (
+        new mapDistribute
+        (
+            segmenti, // size after construction
+            std::move(sendMap),
+            std::move(constructMap)
+        )
+    );
+    const mapDistribute& map = mapPtr();
+
+
+    // Send over queries
+    // ~~~~~~~~~~~~~~~~~
+
+    map.distribute(triangleIndex);
+
+    return mapPtr;
 }
 
 

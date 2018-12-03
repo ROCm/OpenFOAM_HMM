@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "multiBandSolidTransmissivity.H"
+#include "multiBandAbsorption.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -32,12 +32,12 @@ namespace Foam
 {
     namespace radiation
     {
-        defineTypeNameAndDebug(multiBandSolidTransmissivity, 0);
+        defineTypeNameAndDebug(multiBandAbsorption, 0);
 
         addToRunTimeSelectionTable
         (
-            transmissivityModel,
-            multiBandSolidTransmissivity,
+            wallAbsorptionEmissionModel,
+            multiBandAbsorption,
             dictionary
         );
     }
@@ -46,51 +46,76 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::radiation::multiBandSolidTransmissivity::multiBandSolidTransmissivity
+Foam::radiation::multiBandAbsorption::multiBandAbsorption
 (
     const dictionary& dict,
-    const fvMesh& mesh
+    const polyPatch& pp
 )
 :
-    transmissivityModel(dict, mesh),
-    coeffsDict_(dict.subDict(typeName + "Coeffs")),
-    tauCoeffs_(),
+    wallAbsorptionEmissionModel(dict, pp),
+    coeffsDict_(dict),
+    aCoeffs_(),
+    eCoeffs_(),
     nBands_(0)
 {
-    coeffsDict_.readEntry("transmissivity", tauCoeffs_);
-    nBands_ = tauCoeffs_.size();
+    coeffsDict_.readEntry("absorptivity", aCoeffs_);
+    coeffsDict_.readEntry("emissivity", eCoeffs_);
+    nBands_ = aCoeffs_.size();
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::radiation::multiBandSolidTransmissivity::~multiBandSolidTransmissivity()
+Foam::radiation::multiBandAbsorption::~multiBandAbsorption()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField>
-Foam::radiation::multiBandSolidTransmissivity::tauEff(const label bandI) const
+Foam::tmp<Foam::scalarField>
+Foam::radiation::multiBandAbsorption::a
+(
+    const label bandI,
+    vectorField* incomingDirection,
+    scalarField* T
+) const
 {
-    tmp<volScalarField> tt
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "t",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            dimensionedScalar("t", dimless/dimLength, tauCoeffs_[bandI])
-        )
-    );
-
-    return tt;
+    return tmp<scalarField>(new scalarField(pp_.size(), aCoeffs_[bandI]));
 }
+
+Foam::scalar Foam::radiation::multiBandAbsorption::a
+(
+    const label faceI,
+    const label bandI,
+    const vector dir,
+    const scalar T
+) const
+{
+    return aCoeffs_[bandI];
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::radiation::multiBandAbsorption::e
+(
+    const label bandI,
+    vectorField* incomingDirection,
+    scalarField* T
+) const
+{
+    return tmp<scalarField>(new scalarField(pp_.size(), eCoeffs_[bandI]));
+}
+
+
+Foam::scalar Foam::radiation::multiBandAbsorption::e
+(
+    const label faceI,
+    const label bandI,
+    const vector dir,
+    const scalar T
+) const
+{
+    return eCoeffs_[bandI];
+}
+
 
 // ************************************************************************* //

@@ -50,7 +50,7 @@ SourceFiles
 #include "volFields.H"
 #include "fvMatricesFwd.H"
 #include "Switch.H"
-#include "transmissivityModel.H"
+#include "absorptionEmissionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,7 +64,7 @@ namespace radiation
 {
 
 // Forward declaration of classes
-class absorptionEmissionModel;
+//class absorptionEmissionModel;
 class scatterModel;
 class sootModel;
 
@@ -82,6 +82,13 @@ public:
 
         //- Static name external radiative fluxes
         static const word externalRadHeatFieldName_;
+
+        //- Static name for primary solar fluxes
+        static const word primaryFluxName_;
+
+        //- Static name for reflected solar fluxes
+        static const word relfectedFluxName_;
+
 
 protected:
 
@@ -124,7 +131,7 @@ protected:
             autoPtr<sootModel> soot_;
 
             //- Transmissivity model
-            autoPtr<transmissivityModel> transmissivity_;
+            //autoPtr<transmissivityModel> transmissivity_;
 
 
 private:
@@ -265,11 +272,10 @@ public:
                 volScalarField& T
             ) const;
 
+            virtual label nBands() const = 0;
+
             //- Access to absorptionEmission model
             const absorptionEmissionModel& absorptionEmission() const;
-
-            //- Access to transmissivity Model
-            const transmissivityModel& transmissivity() const;
 
             //- Access to soot Model
             const sootModel& soot() const;

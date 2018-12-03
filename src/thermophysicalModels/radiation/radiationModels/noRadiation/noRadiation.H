@@ -101,6 +101,12 @@ public:
 
             //- Source term component (constant)
             tmp<volScalarField::Internal> Ru() const;
+
+            //- Number of bands
+            label nBands() const
+            {
+                return 0;
+            }
 };
 
 

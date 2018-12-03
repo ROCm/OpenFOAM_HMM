@@ -11,12 +11,25 @@ radiationModels/viewFactor/viewFactor.C
 radiationModels/opaqueSolid/opaqueSolid.C
 radiationModels/solarLoad/solarLoad.C
 radiationModels/solarLoad/faceShading/faceShading.C
+radiationModels/solarLoad/faceReflecting/faceReflecting.C
 
 /* Scatter model */
 submodels/scatterModel/scatterModel/scatterModel.C
 submodels/scatterModel/scatterModel/scatterModelNew.C
 submodels/scatterModel/noScatter/noScatter.C
 submodels/scatterModel/constantScatter/constantScatter.C
+
+/* Wall sub-models */
+submodels/wallTransmissivityModel/wallTransmissivityModel/wallTransmissivityModel.C
+submodels/wallTransmissivityModel/wallTransmissivityModel/wallTransmissivityModelNew.C
+submodels/wallTransmissivityModel/constantTransmissivity/constantTransmissivity.C
+submodels/wallTransmissivityModel/multiBandTransmissivity/multiBandTransmissivity.C
+
+submodels/wallAbsorptionEmissionModel/wallAbsorptionEmissionModel/wallAbsorptionEmissionModel.C
+submodels/wallAbsorptionEmissionModel/wallAbsorptionEmissionModel/wallAbsorptionEmissionModelNew.C
+submodels/wallAbsorptionEmissionModel/multiBandAbsorption/multiBandAbsorption.C
+submodels/wallAbsorptionEmissionModel/constantAbsorption/constantAbsorption.C
+submodels/wallAbsorptionEmissionModel/solidAbsorption/solidAbsorption.C
 
 /* Absorption/Emission model */
 submodels/absorptionEmissionModel/absorptionEmissionModel/absorptionEmissionModel.C
@@ -31,18 +44,19 @@ submodels/absorptionEmissionModel/multiBandSolidAbsorptionEmission/multiBandSoli
 submodels/boundaryRadiationProperties/boundaryRadiationProperties.C
 submodels/boundaryRadiationProperties/boundaryRadiationPropertiesPatch.C
 
+/* Types of radiative walls */
+submodels/boundaryRadiationProperties/transparent/transparent.C
+submodels/boundaryRadiationProperties/lookup/lookup.C
+submodels/boundaryRadiationProperties/opaqueDiffusive/opaqueDiffusive.C
+submodels/boundaryRadiationProperties/opaqueReflective/opaqueReflective.C
+
 /* Soot model */
 submodels/sootModel/sootModel/sootModel.C
 submodels/sootModel/sootModel/sootModelNew.C
 submodels/sootModel/mixtureFractionSoot/mixtureFractionSoots.C
 submodels/sootModel/noSoot/noSoot.C
 
-/* Transmissivity model */
-submodels/transmissivityModel/transmissivityModel/transmissivityModel.C
-submodels/transmissivityModel/transmissivityModel/transmissivityModelNew.C
-submodels/transmissivityModel/noTransmissivity/noTransmissivity.C
-submodels/transmissivityModel/constantTransmissivity/constantTransmissivity.C
-submodels/transmissivityModel/multiBandSolidTransmissivity/multiBandSolidTransmissivity.C
+
 
 /* Solar calculator model */
 submodels/solarCalculator/solarCalculator.C

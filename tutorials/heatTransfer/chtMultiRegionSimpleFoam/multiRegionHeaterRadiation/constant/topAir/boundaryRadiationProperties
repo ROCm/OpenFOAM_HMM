@@ -17,13 +17,17 @@ FoamFile
 
 ".*"
 {
-    mode            lookup;
+    type            lookup;
     emissivity      1.0;
 }
 
 "topAir_to_.*"
 {
-    mode            solidRadiation;
+    type            opaqueDiffusive;
+    wallAbsorptionEmissionModel
+    {
+        type    solidAbsorption;
+    }
 }
 
 // ************************************************************************* //

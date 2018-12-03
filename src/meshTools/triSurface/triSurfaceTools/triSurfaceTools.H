@@ -479,10 +479,12 @@ public:
         //- Simple triangulation of (selected patches of) boundaryMesh. Needs
         //  polyMesh (or polyBoundaryMesh) since only at this level are the
         //  triangles on neighbouring patches connected.
+        //  Return faceMap from triI to faceI
         static triSurface triangulate
         (
             const polyBoundaryMesh& mBesh,
             const labelHashSet& includePatches,
+            labelList& faceMap,
             const bool verbose = false
         );
 
