@@ -2731,6 +2731,7 @@ void Foam::snappyRefineDriver::doRefine
     );
 
 
+    // Initial automatic gap-level refinement: gaps smaller than the cell size
     if
     (
         max(meshRefiner_.surfaces().maxGapLevel()) > 0
@@ -2763,6 +2764,8 @@ void Foam::snappyRefineDriver::doRefine
         100     // maxIter
     );
 
+    // Pass1 of automatic gap-level refinement: surface-intersected cells
+    // in narrow gaps. Done early so we can remove the inside
     gapOnlyRefine
     (
         refineParams,
@@ -2776,7 +2779,7 @@ void Foam::snappyRefineDriver::doRefine
         1       // nBufferLayers
     );
 
-    // Refine consistently across narrow gaps (a form of shell refinement)
+    // Pass2 of automatic gap-level refinement: all cells in gaps
     bigGapOnlyRefine
     (
         refineParams,

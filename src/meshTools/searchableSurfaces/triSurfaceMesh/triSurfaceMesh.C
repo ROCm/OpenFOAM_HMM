@@ -102,12 +102,15 @@ Foam::fileName Foam::triSurfaceMesh::checkFile
     fileName fName;
     if (dict.readIfPresent("file", fName, keyType::LITERAL))
     {
+        const fileName rawFName(fName);
+
         fName = relativeFilePath(io, fName, isGlobal);
 
         if (!exists(fName))
         {
             FatalErrorInFunction
-                << "Cannot find triSurfaceMesh at " << fName
+                << "Cannot find triSurfaceMesh " << rawFName
+                << " starting from " << io.objectPath()
                 << exit(FatalError);
         }
     }
