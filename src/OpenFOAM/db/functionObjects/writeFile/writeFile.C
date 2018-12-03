@@ -85,15 +85,18 @@ Foam::fileName Foam::functionObjects::writeFile::baseTimeDir() const
 Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::createFile
 (
     const word& name,
-    const scalar time
+    const scalar time0
 ) const
 {
     autoPtr<OFstream> osPtr;
 
     if (Pstream::master() && writeToFile_)
     {
-        const scalar userTime = fileObr_.time().timeToUserTime(time);
-        const word timeName = Time::timeName(userTime);
+        const scalar time = useUserTime_ ?
+            fileObr_.time().timeToUserTime(time0)
+          : time0;
+
+        const word timeName = Time::timeName(time);
 
         fileName outputDir(baseFileDir()/prefix_/timeName);
 
@@ -164,6 +167,7 @@ Foam::functionObjects::writeFile::writeFile
     writePrecision_(IOstream::defaultPrecision()),
     writeToFile_(true),
     writtenHeader_(false),
+    useUserTime_(true),
     startTime_(obr.time().startTime().value())
 {}
 
@@ -183,6 +187,7 @@ Foam::functionObjects::writeFile::writeFile
     writePrecision_(IOstream::defaultPrecision()),
     writeToFile_(true),
     writtenHeader_(false),
+    useUserTime_(true),
     startTime_(obr.time().startTime().value())
 {
     read(dict);
@@ -204,6 +209,9 @@ bool Foam::functionObjects::writeFile::read(const dictionary& dict)
     // Only write on master process
     writeToFile_ = dict.lookupOrDefault("writeToFile", true);
     writeToFile_ = writeToFile_ && Pstream::master();
+
+    // Use user time, e.g. CA deg in preference to seconds
+    useUserTime_ = dict.lookupOrDefault("useUserTime", true);
 
     return true;
 }
@@ -277,7 +285,10 @@ void Foam::functionObjects::writeFile::writeHeader
 
 void Foam::functionObjects::writeFile::writeTime(Ostream& os) const
 {
-    const scalar timeNow = fileObr_.time().timeOutputValue();
+    scalar timeNow = useUserTime_ ?
+        fileObr_.time().timeOutputValue()
+      : fileObr_.time().value();
+
     os  << setw(charWidth()) << Time::timeName(timeNow);
 }
 
