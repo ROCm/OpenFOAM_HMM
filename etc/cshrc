@@ -24,14 +24,16 @@
 #       - User or group values (first file found):
 #         -  ~/.OpenFOAM/$WM_PROJECT_VERSION/prefs.csh
 #         -  ~/.OpenFOAM/prefs.csh
-#         -  $WM_PROJECT_SITE/site/$WM_PROJECT_VERSION/prefs.csh
-#         -  $WM_PROJECT_SITE/site/prefs.csh
+#         -  $WM_PROJECT_SITE/$WM_PROJECT_VERSION/etc/prefs.csh
+#         -  $WM_PROJECT_SITE/etc/prefs.csh
 #
 # Environment
 #     FOAM_VERBOSE (set/unset)
 #         - add extra verbosity when sourcing files
 #     FOAM_CONFIG_NOUSER (set/unset)
 #         - suppress use of user/group configuration files
+#     WM_PROJECT_SITE (optional directory)
+#         - local site-specific directory, uses WM_PROJECT_DIR/site if unset
 #
 # Note
 #     Changes made to this cshrc file may be lost with the next upgrade.
@@ -104,17 +106,17 @@ setenv WM_MPLIB SYSTEMOPENMPI
 # = true | false
 #setenv FOAM_SETNAN false
 
-# [WM_OSTYPE] - Operating System Type:
-# = POSIX
-#setenv WM_OSTYPE POSIX
+# [FOAM_CODE_TEMPLATES] - dynamicCode templates
+# - unset: uses 'foamEtcFile -list codeTemplates/dynamicCode'
+##setenv FOAM_CODE_TEMPLATES "$WM_PROJECT_DIR/etc/codeTemplates/dynamicCode"
 
 # [FOAM_JOB_DIR] - location of jobControl
 #                - unset: equivalent to ~/.OpenFOAM/jobControl
 #setenv FOAM_JOB_DIR "$HOME/.OpenFOAM/jobControl"
 
-# [FOAM_CODE_TEMPLATES] - dynamicCode templates
-# - unset: uses 'foamEtcFile -list codeTemplates/dynamicCode'
-##setenv FOAM_CODE_TEMPLATES "$WM_PROJECT_DIR/etc/codeTemplates/dynamicCode"
+# [WM_OSTYPE] - Operating System Type
+# = POSIX
+#setenv WM_OSTYPE POSIX
 
 ################################################################################
 

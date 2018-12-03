@@ -310,7 +310,7 @@ case "$optMode" in (*u*) # (U)ser
 esac
 
 case "$optMode" in (*g*) # (G)roup == site
-    dirList="$dirList $groupDir/$projectVersion $groupDir"
+    dirList="$dirList $groupDir/$projectVersion/etc $groupDir/etc"
     ;;
 esac
 

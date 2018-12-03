@@ -67,13 +67,13 @@ static inline bool userResourceDir(Foam::fileName& queried)
 //
 // Corresponds to foamEtcFile -mode=g
 // Looks for
-//   - $WM_PROJECT_SITE
-//   - $WM_PROJECT_DIR/site
+//   - $WM_PROJECT_SITE/etc
+//   - $WM_PROJECT_DIR/site/etc
 static inline bool groupResourceDir(Foam::fileName& queried)
 {
     #ifdef FOAM_RESOURCE_SITE_ENVNAME
-    queried = Foam::getEnv(FOAM_RESOURCE_SITE_ENVNAME);
-    if (queried.size())
+    queried = Foam::getEnv(FOAM_RESOURCE_SITE_ENVNAME)/"etc";
+    if (queried.size() > 3)
     {
         return Foam::isDir(queried);
     }
@@ -85,8 +85,8 @@ static inline bool groupResourceDir(Foam::fileName& queried)
     // Fallback when WM_PROJECT_SITE is unset
 
     #ifdef FOAM_RESOURCE_SITE_FALLBACK_ENVNAME
-    queried = Foam::getEnv(FOAM_RESOURCE_SITE_FALLBACK_ENVNAME)/"site";
-    if (queried.size() > 4)
+    queried = Foam::getEnv(FOAM_RESOURCE_SITE_FALLBACK_ENVNAME)/"site/etc";
+    if (queried.size() > 8)
     {
         return Foam::isDir(queried);
     }
@@ -160,7 +160,7 @@ Foam::fileNameList searchEtc
         }
     }
 
-    // Group resource directories
+    // Group (site) resource directories
     if (groupResourceDir(dir))
     {
         candidate = dir/version/name;

@@ -1,9 +1,12 @@
 #!/bin/sh
-cd "${0%/*}" || exit 1                      # Run from this directory
-[ -d "${WM_DIR:?}" ] || exit 1              # Require WM_DIR
+cd "${0%/*}" || exit 1                  # Run from this directory
 
-# Compile tools for wmake
+if [ -z "$WM_DIR" ]                     # Require WM_DIR
+then
+    WM_DIR="$(\cd $(dirname $0)/.. && \pwd -L)"
+    export WM_DIR
+fi
 
-make
+make                                    # Compile tools for wmake
 
 #------------------------------------------------------------------------------

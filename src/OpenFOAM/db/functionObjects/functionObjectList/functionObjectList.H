@@ -197,8 +197,8 @@ public:
         //    - ~/.OpenFOAM/{PROJECT_API}/"caseDicts/postProcessing"
         //    - ~/.OpenFOAM/"caseDicts/postProcessing"
         //  -# \b group settings
-        //    - $WM_PROJECT_SITE/{PROJECT_API}/"caseDicts/postProcessing"
-        //    - $WM_PROJECT_SITE/"caseDicts/postProcessing"
+        //    - $WM_PROJECT_SITE/{PROJECT_API}/"etc/caseDicts/postProcessing"
+        //    - $WM_PROJECT_SITE/"etc/caseDicts/postProcessing"
         //  -# \b other (shipped) settings
         //    - $WM_PROJECT_DIR/etc/"caseDicts/postProcessing"
         //

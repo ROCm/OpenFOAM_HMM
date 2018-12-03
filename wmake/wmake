@@ -53,8 +53,8 @@
 #     wclean, wcleanPlatform, wcleanLnIncludeAll
 #
 #------------------------------------------------------------------------------
-Script=${0##*/}             # Use 'Script' for error messages in wmakeFunctions
-. ${0%/*}/scripts/wmakeFunctions        # Source wmake functions
+Script="${0##*/}"           # Use 'Script' for error messages in wmakeFunctions
+. "${0%/*}/scripts/wmakeFunctions"              # Source wmake functions
 
 usage() {
     exec 1>&2
@@ -248,9 +248,9 @@ then
     elif [ -f "$1" ]
     then
         dir="${1%/*}"
-        : ${dir:=.}
+        : "${dir:=.}"
     else
-        targetType=$1
+        targetType="$1"
     fi
 
     # Specified directory name:

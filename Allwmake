@@ -31,7 +31,7 @@ echo "========================================"
 echo
 
 # Compile tools for wmake
-"${WM_DIR:?}"/src/Allmake
+"${WM_DIR:-wmake}"/src/Allmake
 
 # Compile ThirdParty libraries and applications
 if [ -d "$WM_THIRD_PARTY_DIR" ]

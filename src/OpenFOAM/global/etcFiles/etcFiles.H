@@ -64,13 +64,13 @@ fileNameList findEtcDirs
 //    - ~/.OpenFOAM/{PROJECT_API}
 //    - ~/.OpenFOAM/
 //  -# \b group settings
-//    - $WM_PROJECT_SITE/{PROJECT_API}
-//    - $WM_PROJECT_SITE/
+//    - $WM_PROJECT_SITE/{PROJECT_API}/etc/
+//    - $WM_PROJECT_SITE/etc/
 //  -# \b other (shipped) settings
 //    - $WM_PROJECT_DIR/etc/
 //
 //  Where {PROJECT_API} is the value of the OPENFOAM define.
-//  - \b \$WM_PROJECT_SITE : If unset, use $WM_PROJECT_DIR/site
+//  - \b \$WM_PROJECT_SITE : If unset, uses $WM_PROJECT_DIR/site
 //
 //  \return The list of full paths of all the matching files or
 //      an empty list if the name cannot be found.

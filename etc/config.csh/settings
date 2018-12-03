@@ -18,7 +18,7 @@
 #
 #------------------------------------------------------------------------------
 setenv WM_ARCH `uname -s`                   # System name
-if (! $?WM_OSTYPE ) setenv WM_OSTYPE POSIX  # System type (POSIX is default)
+## if (! $?WM_OSTYPE ) setenv WM_OSTYPE POSIX  # System type (POSIX is default)
 
 # Default compiler = gcc/g++ and C++11
 setenv WM_CC "gcc"
@@ -171,7 +171,16 @@ setenv FOAM_USER_APPBIN "$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin"
 setenv FOAM_USER_LIBBIN "$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib"
 
 # Prepend wmake to the path - not required for runtime-only environment
-if ( -d "${WM_DIR}" ) setenv PATH "${WM_DIR}:${PATH}"
+set foundDir="${WM_PROJECT_DIR}/wmake"
+if ( $?WM_DIR ) then
+    if ( -d "${WM_DIR}" ) foundDir="${WM_DIR}"
+endif
+if ( -d "$foundDir" ) then
+    setenv PATH "${foundDir}:${PATH}"
+else
+    unsetenv WM_DIR
+endif
+
 
 # Prepend OpenFOAM scripts to the path
 setenv PATH "${WM_PROJECT_DIR}/bin:${PATH}"
@@ -346,7 +355,7 @@ endsw
 
 # Cleanup
 # ~~~~~~~
-unset archDir siteDir
+unset archDir siteDir foundDir
 unset gcc_version gccDir
 unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
 unset clang_version clangDir

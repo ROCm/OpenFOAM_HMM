@@ -15,14 +15,14 @@ cd ${0%/*} && wmakeCheckPwd "$WM_PROJECT_DIR/src" 2>/dev/null || {
 
 #------------------------------------------------------------------------------
 
-# Update OpenFOAM version strings if required
+# Trigger update of version strings as required
 wmakePrintBuild -check || wrmo OpenFOAM/global/global.o 2>/dev/null
 
 wmakeLnInclude -u OpenFOAM
-wmakeLnInclude -u OSspecific/${WM_OSTYPE:=POSIX}
+wmakeLnInclude -u OSspecific/"${WM_OSTYPE:-POSIX}"
 Pstream/Allwmake $targetType $*
 
-OSspecific/${WM_OSTYPE:=POSIX}/Allwmake $targetType $*
+OSspecific/"${WM_OSTYPE:-POSIX}"/Allwmake $targetType $*
 wmake $targetType OpenFOAM
 
 wmake $targetType fileFormats

@@ -17,6 +17,10 @@
 #     Print the version used when building the project
 #
 #------------------------------------------------------------------------------
+# Environment defaults
+: "${WM_DIR:-$WM_PROJECT_DIR/wmake}"
+
+#--------
 usage() {
     exec 1>&2
 
@@ -55,6 +59,7 @@ die()
     echo
     exit 1
 }
+
 
 #------------------------------------------------------------------------------
 # Parse arguments and options

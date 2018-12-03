@@ -27,8 +27,8 @@
 # Variables on success
 #     HAVE_PVPLUGIN_SUPPORT
 #     FOAM_PV_PLUGIN_LIBBIN
+#     PARAVIEW_API - the paraview major/minor numbers (eg 5.6)
 #     PARAVIEW_INC_DIR
-#     PARAVIEW_MAJMIN
 #
 # Note
 #     The OpenFOAM plugin must be the first in PV_PLUGIN_PATH and have
@@ -44,7 +44,7 @@
 no_paraview()
 {
     unset HAVE_PVPLUGIN_SUPPORT FOAM_PV_PLUGIN_LIBBIN
-    unset PARAVIEW_INC_DIR PARAVIEW_MAJMIN
+    unset PARAVIEW_API PARAVIEW_INC_DIR
     return 0
 }
 
@@ -56,7 +56,7 @@ echo_paraview()
     echo "root=$ParaView_DIR"
     echo "include=$PARAVIEW_INC_DIR"
     echo "plugin=$FOAM_PV_PLUGIN_LIBBIN"
-    echo "ver=$PARAVIEW_MAJMIN"
+    echo "api=$PARAVIEW_API"
 }
 
 
@@ -95,13 +95,13 @@ wmakeLibPv()
 # Test if a ParaView plugin can be built.
 # On success, return 0 and export variables
 # -> HAVE_PVPLUGIN_SUPPORT, FOAM_PV_PLUGIN_LIBBIN,
-#    PARAVIEW_INC_DIR, PARAVIEW_MAJMIN
+#    PARAVIEW_API, PARAVIEW_INC_DIR
 #
 # There are several prerequisites for building plugins
 #
 have_pvplugin_support()
 {
-    local header settings warn majmin installDir binDir includeDir targetDir
+    local header settings warn pv_api installDir binDir includeDir targetDir
     warn="==> skip paraview-plugin"
 
     # Trivial check
@@ -121,7 +121,7 @@ have_pvplugin_support()
 
     # Extract the paraview major+minor version from the directory name
     # From /path/paraview-5.6 -> 5.6
-    majmin=$(echo "${targetDir##*/}" | \
+    pv_api=$(echo "${targetDir##*/}" | \
         sed -n -e 's/^[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*/\1/p')
 
     [ -n "$targetDir" ] || {
@@ -130,7 +130,7 @@ have_pvplugin_support()
         return 1
     }
 
-    [ -n "$majmin" ] || {
+    [ -n "$pv_api" ] || {
         echo "$warn (could determine major.minor version)"
         return 1
     }
@@ -143,7 +143,7 @@ have_pvplugin_support()
         # ParaView_DIR defined. Look for include/
 
         header=$(findFirstFile \
-            "$ParaView_DIR/include/paraview-$majmin/$header" \
+            "$ParaView_DIR/include/paraview-$pv_api/$header" \
             "$ParaView_DIR/include/paraview/$header"
         )
 
@@ -164,11 +164,11 @@ have_pvplugin_support()
 
         header=$(findFirstFile \
             "$(paraview-config --include 2>/dev/null |sed -ne 's/^ *-I//p')/$header"\
-            "${includeDir:+$includeDir/paraview-$majmin/$header}" \
+            "${includeDir:+$includeDir/paraview-$pv_api/$header}" \
             "${includeDir:+$includeDir/paraview/$header}" \
-            /usr/local/include/"paraview-$majmin/$header" \
+            /usr/local/include/"paraview-$pv_api/$header" \
             /usr/local/include/paraview/"$header" \
-            /usr/include/"paraview-$majmin/$header" \
+            /usr/include/"paraview-$pv_api/$header" \
             /usr/include/paraview/"$header" \
             )
     fi
@@ -182,8 +182,8 @@ have_pvplugin_support()
 
     export HAVE_PVPLUGIN_SUPPORT=true
     export FOAM_PV_PLUGIN_LIBBIN="$targetDir"
+    export PARAVIEW_API="$pv_api"
     export PARAVIEW_INC_DIR="${header%/*}"      # Basename
-    export PARAVIEW_MAJMIN="$majmin"
 
     return 0 # success
 }

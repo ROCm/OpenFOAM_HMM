@@ -404,7 +404,7 @@ echo ""
 reportEnv '$FOAM_APPBIN'      '$PATH'  yes
 reportEnv '$FOAM_SITE_APPBIN' '$PATH'  no
 reportEnv '$FOAM_USER_APPBIN' '$PATH'  no
-reportEnv '$WM_DIR'           '$PATH'  yes
+reportEnv '$WM_DIR'           '$PATH'  often
 hline
 
 #------------------------------------------------------------------------------
