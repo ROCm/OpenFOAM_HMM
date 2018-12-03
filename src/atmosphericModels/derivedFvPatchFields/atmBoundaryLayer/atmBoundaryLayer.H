@@ -116,6 +116,8 @@ SourceFiles
 #define atmBoundaryLayer_H
 
 #include "fvPatchFields.H"
+#include "TimeFunction1.H"
+#include "PatchFunction1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -130,11 +132,17 @@ class atmBoundaryLayer
 {
     // Private data
 
+        //- Reference to the time database
+        const Time& time_;
+
+        //- Reference to the patch
+        const polyPatch& patch_;
+
         //- Flow direction
-        vector flowDir_;
+        TimeFunction1<vector> flowDir_;
 
         //- Direction of the z-coordinate
-        vector zDir_;
+        TimeFunction1<vector> zDir_;
 
         //- Von Karman constant
         const scalar kappa_;
@@ -143,36 +151,39 @@ class atmBoundaryLayer
         const scalar Cmu_;
 
         //- Reference velocity
-        const scalar Uref_;
+        TimeFunction1<scalar> Uref_;
 
         //- Reference height
-        const scalar Zref_;
+        TimeFunction1<scalar> Zref_;
 
         //- Surface roughness height
-        scalarField z0_;
+        autoPtr<PatchFunction1<scalar>> z0_;
 
         //- Minimum coordinate value in z direction
-        scalarField zGround_;
-
-        //- Friction velocity
-        scalarField Ustar_;
+        autoPtr<PatchFunction1<scalar>> zGround_;
 
 
 public:
 
     // Constructors
 
-        //- Construct null
-        atmBoundaryLayer();
+        //- Construct null from time
+        atmBoundaryLayer(const Time& time, const polyPatch& pp);
 
-        //- Construct from the coordinates field and dictionary
-        atmBoundaryLayer(const vectorField& p, const dictionary&);
+        //- Construct from the time database and dictionary
+        atmBoundaryLayer
+        (
+            const Time& time,
+            const polyPatch& pp,
+            const dictionary& dict
+        );
 
         //- Construct by mapping given atmBoundaryLayer onto a new patch
         atmBoundaryLayer
         (
-            const atmBoundaryLayer&,
-            const fvPatchFieldMapper&
+            const atmBoundaryLayer& abl,
+            const fvPatch& patch,
+            const fvPatchFieldMapper& mapper
         );
 
         //- Construct as copy
@@ -184,22 +195,13 @@ public:
         // Access
 
             //- Return flow direction
-            const vector& flowDir() const
-            {
-                return flowDir_;
-            }
+            vector flowDir() const;
 
             //- Return z-direction
-            const vector& zDir() const
-            {
-                return zDir_;
-            }
+            vector zDir() const;
 
             //- Return friction velocity
-            const scalarField& Ustar() const
-            {
-                return Ustar_;
-            }
+            tmp<scalarField> Ustar(const scalarField& z0) const;
 
 
         // Mapping functions

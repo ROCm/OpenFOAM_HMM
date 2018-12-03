@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,135 +32,183 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-atmBoundaryLayer::atmBoundaryLayer()
+atmBoundaryLayer::atmBoundaryLayer(const Time& time, const polyPatch& pp)
 :
-    flowDir_(Zero),
-    zDir_(Zero),
+    time_(time),
+    patch_(pp),
+    flowDir_(time, "flowDir"),
+    zDir_(time, "zDir"),
     kappa_(0.41),
     Cmu_(0.09),
-    Uref_(0),
-    Zref_(0),
-    z0_(0),
-    zGround_(0),
-    Ustar_(0)
+    Uref_(time, "Uref"),
+    Zref_(time, "Zref"),
+    z0_(),
+    zGround_()
 {}
-
-
-atmBoundaryLayer::atmBoundaryLayer(const vectorField& p, const dictionary& dict)
-:
-    flowDir_(dict.lookup("flowDir")),
-    zDir_(dict.lookup("zDir")),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
-    Uref_(dict.get<scalar>("Uref")),
-    Zref_(dict.get<scalar>("Zref")),
-    z0_("z0", dict, p.size()),
-    zGround_("zGround", dict, p.size()),
-    Ustar_(p.size())
-{
-    if (mag(flowDir_) < SMALL || mag(zDir_) < SMALL)
-    {
-        FatalErrorInFunction
-            << "magnitude of n or z must be greater than zero"
-            << abort(FatalError);
-    }
-
-    // Ensure direction vectors are normalized
-    flowDir_ /= mag(flowDir_);
-    zDir_ /= mag(zDir_);
-
-    Ustar_ = kappa_*Uref_/(log((Zref_ + z0_)/z0_));
-}
 
 
 atmBoundaryLayer::atmBoundaryLayer
 (
-    const atmBoundaryLayer& ptf,
-    const fvPatchFieldMapper& mapper
+    const Time& time,
+    const polyPatch& pp,
+    const dictionary& dict
 )
 :
-    flowDir_(ptf.flowDir_),
-    zDir_(ptf.zDir_),
-    kappa_(ptf.kappa_),
-    Cmu_(ptf.Cmu_),
-    Uref_(ptf.Uref_),
-    Zref_(ptf.Zref_),
-    z0_(ptf.z0_, mapper),
-    zGround_(ptf.zGround_, mapper),
-    Ustar_(ptf.Ustar_, mapper)
+    time_(time),
+    patch_(pp),
+    flowDir_(TimeFunction1<vector>(time, "flowDir", dict)),
+    zDir_(TimeFunction1<vector>(time, "zDir", dict)),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
+    Uref_(TimeFunction1<scalar>(time, "Uref", dict)),
+    Zref_(TimeFunction1<scalar>(time, "Zref", dict)),
+    z0_(PatchFunction1<scalar>::New(pp, "z0", dict)),
+    zGround_(PatchFunction1<scalar>::New(pp, "zGround", dict))
 {}
 
 
-atmBoundaryLayer::atmBoundaryLayer(const atmBoundaryLayer& blpvf)
+atmBoundaryLayer::atmBoundaryLayer
+(
+    const atmBoundaryLayer& abl,
+    const fvPatch& patch,
+    const fvPatchFieldMapper& mapper
+)
 :
-    flowDir_(blpvf.flowDir_),
-    zDir_(blpvf.zDir_),
-    kappa_(blpvf.kappa_),
-    Cmu_(blpvf.Cmu_),
-    Uref_(blpvf.Uref_),
-    Zref_(blpvf.Zref_),
-    z0_(blpvf.z0_),
-    zGround_(blpvf.zGround_),
-    Ustar_(blpvf.Ustar_)
+    time_(abl.time_),
+    patch_(patch.patch()),
+    flowDir_(abl.flowDir_),
+    zDir_(abl.zDir_),
+    kappa_(abl.kappa_),
+    Cmu_(abl.Cmu_),
+    Uref_(abl.Uref_),
+    Zref_(abl.Zref_),
+    z0_(abl.z0_.clone(patch_)),
+    zGround_(abl.zGround_.clone(patch_))
+{}
+
+
+atmBoundaryLayer::atmBoundaryLayer(const atmBoundaryLayer& abl)
+:
+    time_(abl.time_),
+    patch_(abl.patch_),
+    flowDir_(abl.flowDir_),
+    zDir_(abl.zDir_),
+    kappa_(abl.kappa_),
+    Cmu_(abl.Cmu_),
+    Uref_(abl.Uref_),
+    Zref_(abl.Zref_),
+    z0_(abl.z0_.clone(patch_)),
+    zGround_(abl.zGround_.clone(patch_))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void atmBoundaryLayer::autoMap(const fvPatchFieldMapper& m)
+vector atmBoundaryLayer::flowDir() const
 {
-    z0_.autoMap(m);
-    zGround_.autoMap(m);
-    Ustar_.autoMap(m);
+    const scalar t = time_.timeOutputValue();
+    vector dir(flowDir_.value(t));
+    const scalar magDir = mag(dir);
+
+    if (magDir < SMALL)
+    {
+        FatalErrorInFunction
+            << "magnitude of " << flowDir_.name()
+            << " vector must be greater than zero"
+            << abort(FatalError);
+    }
+
+    return dir/magDir;
+}
+
+
+vector atmBoundaryLayer::zDir() const
+{
+    const scalar t = time_.timeOutputValue();
+    vector dir(zDir_.value(t));
+    const scalar magDir = mag(dir);
+
+    if (magDir < SMALL)
+    {
+        FatalErrorInFunction
+            << "magnitude of " << zDir_.name()
+            << " vector must be greater than zero"
+            << abort(FatalError);
+    }
+
+    return dir/magDir;
+}
+
+
+tmp<scalarField> atmBoundaryLayer::Ustar(const scalarField& z0) const
+{
+    const scalar t = time_.timeOutputValue();
+    const scalar Uref = Uref_.value(t);
+    const scalar Zref = Zref_.value(t);
+
+    return kappa_*Uref/(log((Zref + z0)/z0));
+}
+
+
+void atmBoundaryLayer::autoMap(const fvPatchFieldMapper& mapper)
+{
+    z0_->autoMap(mapper);
+    zGround_->autoMap(mapper);
 }
 
 
 void atmBoundaryLayer::rmap
 (
-    const atmBoundaryLayer& blptf,
+    const atmBoundaryLayer& abl,
     const labelList& addr
 )
 {
-    z0_.rmap(blptf.z0_, addr);
-    zGround_.rmap(blptf.zGround_, addr);
-    Ustar_.rmap(blptf.Ustar_, addr);
+    z0_->rmap(abl.z0_(), addr);
+    zGround_->rmap(abl.zGround_(), addr);
 }
 
 
 tmp<vectorField> atmBoundaryLayer::U(const vectorField& p) const
 {
-    scalarField Un
-    (
-        (Ustar_/kappa_)
-       *log(((zDir_ & p) - zGround_ + z0_)/z0_)
-    );
+    const scalar t = time_.timeOutputValue();
+    const scalarField zGround(zGround_->value(t));
+    const scalarField z0(max(z0_->value(t), ROOTVSMALL));
 
-    return flowDir_*Un;
+    scalarField Un((Ustar(z0)/kappa_)*log(((zDir() & p) - zGround + z0)/z0));
+
+    return flowDir()*Un;
 }
 
 
 tmp<scalarField> atmBoundaryLayer::k(const vectorField& p) const
 {
-    return sqr(Ustar_)/sqrt(Cmu_);
+    const scalar t = time_.timeOutputValue();
+    const scalarField z0(max(z0_->value(t), ROOTVSMALL));
+
+    return sqr(Ustar(z0))/sqrt(Cmu_);
 }
 
 
 tmp<scalarField> atmBoundaryLayer::epsilon(const vectorField& p) const
 {
-    return pow3(Ustar_)/(kappa_*((zDir_ & p) - zGround_ + z0_));
+    const scalar t = time_.timeOutputValue();
+    const scalarField zGround(zGround_->value(t));
+    const scalarField z0(max(z0_->value(t), ROOTVSMALL));
+
+    return pow3(Ustar(z0))/(kappa_*((zDir() & p) - zGround + z0));
 }
 
 
 void atmBoundaryLayer::write(Ostream& os) const
 {
-    z0_.writeEntry("z0", os) ;
-    os.writeEntry("flowDir", flowDir_);
-    os.writeEntry("zDir", zDir_);
+    z0_->writeData(os) ;
+    flowDir_.writeData(os);
+    zDir_.writeData(os);
     os.writeEntry("kappa", kappa_);
     os.writeEntry("Cmu", Cmu_);
-    os.writeEntry("Uref", Uref_);
-    os.writeEntry("Zref", Zref_);
-    zGround_.writeEntry("zGround", os) ;
+    Uref_.writeData(os);
+    Zref_.writeData(os);
+    zGround_->writeData(os);
 }
 
 
