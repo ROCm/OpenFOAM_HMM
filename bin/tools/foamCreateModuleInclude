@@ -85,10 +85,10 @@ do
     --recursive-backend--)
         optBackend=true
         ;;
-    --output=*)
+    -output=*)
         moduleOutput="${1#*=}"
         ;;
-    --tmpdir=*)
+    -tmpdir=*)
         moduleTmpDir="${1#*=}"
         ;;
     -*)
