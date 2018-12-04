@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,9 +54,9 @@ Description
 
 Usage
     \table
-        Property     | Description                | Required     | Default value
-        regionType   | cellZone or all              | no | all
-        name         | Name of cellZone if required | no |
+        Property     | Description                          | Required | Default
+        regionType   | Selection type: all/cellSet/cellZone | no | all
+        name         | Name of cellSet/cellZone if required | no |
     \endtable
 
 See also
@@ -78,7 +78,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class fvMesh;
 
 namespace functionObjects
@@ -90,12 +90,16 @@ namespace functionObjects
 
 class volRegion
 {
-    // Private member data
+    // Private Member Data
 
-        const fvMesh& mesh_;
+        const fvMesh& volMesh_;
+
+        //- The cell ids, from cellSet
+        labelList cellIds_;
 
         // Cache integral properties of the region for writeFileHeader
         label nCells_;
+
         scalar V_;
 
 
@@ -106,8 +110,9 @@ public:
         //- Region type enumeration
         enum regionTypes
         {
-            vrtCellZone,    //!< cell zone
-            vrtAll          //!< all cells
+            vrtAll,             //!< All cells
+            vrtCellSet,         //!< A cellSet
+            vrtCellZone         //!< A cellZone
         };
 
         //- Region type names
@@ -116,15 +121,15 @@ public:
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Region type
         regionTypes regionType_;
 
-        //- Region name (patch, zone, etc.)
+        //- Region name (cellSet, cellZone, ...)
         word regionName_;
 
-        //- Region ID (patch ID, zone ID, etc.)
+        //- Region ID (zone ID, ...)
         label regionID_;
 
 
@@ -147,13 +152,13 @@ public:
 
 
     //- Destructor
-    virtual ~volRegion();
+    virtual ~volRegion() = default;
 
 
     // Public Member Functions
 
         //- Read from dictionary
-        bool read(const dictionary&);
+        bool read(const dictionary& dict);
 
         //- Return the region type
         inline const regionTypes& regionType() const;
@@ -161,7 +166,7 @@ public:
         //- Return the local list of cell IDs
         const labelList& cellIDs() const;
 
-        //- Return the number of cells in the region
+        //- Return the number of cells selected in the region
         label nCells() const;
 
         //- Return total volume of the region

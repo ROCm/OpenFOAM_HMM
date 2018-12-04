@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,7 @@ License
 
 #include "volRegion.H"
 #include "volMesh.H"
+#include "cellSet.H"
 #include "globalMeshData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -44,8 +45,9 @@ const Foam::Enum
 >
 Foam::functionObjects::volRegion::regionTypeNames_
 ({
-    { regionTypes::vrtCellZone, "cellZone" },
     { regionTypes::vrtAll, "all" },
+    { regionTypes::vrtCellSet, "cellSet" },
+    { regionTypes::vrtCellZone, "cellZone" },
 });
 
 
@@ -73,7 +75,7 @@ Foam::functionObjects::volRegion::volRegion
     const dictionary& dict
 )
 :
-    mesh_(mesh),
+    volMesh_(mesh),
     regionType_
     (
         regionTypeNames_.lookupOrDefault
@@ -83,7 +85,7 @@ Foam::functionObjects::volRegion::volRegion
             regionTypes::vrtAll
         )
     ),
-    regionName_(polyMesh::defaultRegion),
+    regionName_(volMesh_.name()),
     regionID_(-1)
 {
     read(dict);
@@ -94,12 +96,6 @@ Foam::functionObjects::volRegion::volRegion
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::volRegion::~volRegion()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::volRegion::read
@@ -107,19 +103,41 @@ bool Foam::functionObjects::volRegion::read
     const dictionary& dict
 )
 {
+    regionID_ = -1;
+    cellIds_.clear();
+
     switch (regionType_)
     {
+        case vrtCellSet:
+        {
+            dict.readEntry("name", regionName_);
+
+            cellIds_ = cellSet(volMesh_, regionName_).sortedToc();
+
+            if (nCells() == 0)
+            {
+                FatalIOErrorInFunction(dict)
+                    << regionTypeNames_[regionType_]
+                    << "(" << regionName_ << "):" << nl
+                    << "    Region has no cells"
+                    << exit(FatalIOError);
+            }
+
+            break;
+        }
+
         case vrtCellZone:
         {
             dict.readEntry("name", regionName_);
 
-            regionID_ = mesh_.cellZones().findZoneID(regionName_);
+            regionID_ = volMesh_.cellZones().findZoneID(regionName_);
 
             if (regionID_ < 0)
             {
                 FatalIOErrorInFunction(dict)
                     << "Unknown cell zone name: " << regionName_
-                    << ". Valid cell zones are: " << mesh_.cellZones().names()
+                    << ". Valid cell zones    : "
+                    << flatOutput(volMesh_.cellZones().names())
                     << exit(FatalIOError);
             }
 
@@ -137,6 +155,7 @@ bool Foam::functionObjects::volRegion::read
 
         case vrtAll:
         {
+            regionName_= volMesh_.name();
             break;
         }
 
@@ -144,7 +163,7 @@ bool Foam::functionObjects::volRegion::read
         {
             FatalIOErrorInFunction(dict)
                 << "Unknown region type. Valid region types are:"
-                << regionTypeNames_.sortedToc()
+                << flatOutput(regionTypeNames_.names()) << nl
                 << exit(FatalIOError);
         }
     }
@@ -155,14 +174,21 @@ bool Foam::functionObjects::volRegion::read
 
 const Foam::labelList& Foam::functionObjects::volRegion::cellIDs() const
 {
-    if (regionType_ == vrtAll)
+    switch (regionType_)
     {
-        return labelList::null();
+        case vrtCellSet:
+            return cellIds_;
+            break;
+
+        case vrtCellZone:
+            return volMesh_.cellZones()[regionID_];
+            break;
+
+        default:
+            break;
     }
-    else
-    {
-        return mesh_.cellZones()[regionID_];
-    }
+
+    return labelList::null();
 }
 
 
@@ -170,7 +196,7 @@ Foam::label Foam::functionObjects::volRegion::nCells() const
 {
     if (regionType_ == vrtAll)
     {
-        return mesh_.globalData().nTotalCells();
+        return volMesh_.globalData().nTotalCells();
     }
     else
     {
@@ -183,11 +209,17 @@ Foam::scalar Foam::functionObjects::volRegion::V() const
 {
     if (regionType_ == vrtAll)
     {
-        return gSum(mesh_.V());
+        return gSum(volMesh_.V());
     }
     else
     {
-        return gSum(scalarField(mesh_.V(), cellIDs()));
+        scalar vol = 0;
+        for (const label celli : cellIDs())
+        {
+            vol += volMesh_.V()[celli];
+        }
+
+        return returnReduce(vol, sumOp<scalar>());
     }
 }
 
