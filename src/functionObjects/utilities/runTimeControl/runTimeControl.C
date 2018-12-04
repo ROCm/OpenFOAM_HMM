@@ -250,6 +250,7 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
                 {
                     Info<< "    Stopping calculation" << nl
                         << "    Writing fields";
+
                     if (nWriteStep_ != 0)
                     {
                         Info<< " - final step" << nl;
@@ -259,7 +260,14 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
                         Info<< nl;
                     }
 
+                    Info<< endl;
+                    active_ = false;
+
+                    // Write any registered objects and set the end-time
                     time.writeAndEnd();
+
+                    // Trigger any function objects
+                    time.run();
                 }
                 break;
             }
