@@ -54,26 +54,6 @@ namespace functionObjects
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-Foam::fileName
-Foam::functionObjects::extractEulerianParticles::dictBaseFileDir() const
-{
-    fileName baseDir(".."); //  = mesh_.time().path();
-
-    if (Pstream::parRun())
-    {
-        // Put in undecomposed case (Note: gives problems for
-        // distributed data running)
-        baseDir = baseDir/".."/functionObject::outputPrefix;
-    }
-    else
-    {
-        baseDir = baseDir/functionObject::outputPrefix;
-    }
-
-    return baseDir;
-}
-
-
 void Foam::functionObjects::extractEulerianParticles::checkFaceZone()
 {
     DebugInFunction << endl;

@@ -184,9 +184,6 @@ protected:
 
     // Protected Member Functions
 
-        //- Return the base directory for dictionary output
-        virtual fileName dictBaseFileDir() const;
-
         //- Check that the faceZone is valid
         virtual void checkFaceZone();
 
