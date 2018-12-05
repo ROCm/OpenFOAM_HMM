@@ -94,8 +94,6 @@ bool Foam::vtk::writePointSet
 
     //-------------------------------------------------------------------------
 
-    const globalIndex pointIdOffset(mesh.nPoints());
-
     labelField pointLabels(set.sortedToc());
 
     label numberOfPoints = pointLabels.size();
@@ -206,6 +204,8 @@ bool Foam::vtk::writePointSet
 
     if (parallel)
     {
+        const globalIndex pointIdOffset(mesh.nPoints());
+
         vtk::writeListParallel(format.ref(), pointLabels, pointIdOffset);
     }
     else

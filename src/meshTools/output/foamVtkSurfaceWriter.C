@@ -148,10 +148,7 @@ void Foam::vtk::surfaceWriter::writePoints()
 }
 
 
-void Foam::vtk::surfaceWriter::writePolysLegacy
-(
-    const globalIndex& pointOffsets
-)
+void Foam::vtk::surfaceWriter::writePolysLegacy(const label pointOffset)
 {
     // Connectivity count without additional storage (done internally)
 
@@ -182,7 +179,7 @@ void Foam::vtk::surfaceWriter::writePolysLegacy
 
         auto iter = vertLabels.begin();
 
-        label off = pointOffsets.localStart();
+        label off = pointOffset;
 
         {
             for (const face& f : faces_)
@@ -217,10 +214,7 @@ void Foam::vtk::surfaceWriter::writePolysLegacy
 }
 
 
-void Foam::vtk::surfaceWriter::writePolys
-(
-    const globalIndex& pointOffsets
-)
+void Foam::vtk::surfaceWriter::writePolys(const label pointOffset)
 {
     if (format_)
     {
@@ -254,7 +248,7 @@ void Foam::vtk::surfaceWriter::writePolys
 
             auto iter = vertLabels.begin();
 
-            label off = pointOffsets.localStart();
+            label off = pointOffset;
 
             {
                 for (const face& f : faces_)
@@ -294,9 +288,6 @@ void Foam::vtk::surfaceWriter::writePolys
         labelList vertOffsets(nLocalFaces_);
         label nOffs = vertOffsets.size();
 
-        // global connectivity offsets
-        const globalIndex procOffset(nLocalVerts_);
-
         if (parallel_)
         {
             reduce(nOffs, sumOp<label>());
@@ -311,7 +302,12 @@ void Foam::vtk::surfaceWriter::writePolys
         }
 
 
-        label off = procOffset.localStart();
+        // processor-local connectivity offsets
+        label off =
+        (
+            parallel_ ? globalIndex(nLocalVerts_).localStart() : 0
+        );
+
 
         auto iter = vertOffsets.begin();
 
@@ -438,15 +434,18 @@ bool Foam::vtk::surfaceWriter::writeGeometry()
 
     writePoints();
 
-    const globalIndex globalPointOffset(nLocalPoints_);
+    const label pointOffset =
+    (
+        parallel_ ? globalIndex(nLocalPoints_).localStart() : 0
+    );
 
     if (legacy())
     {
-        writePolysLegacy(globalPointOffset);
+        writePolysLegacy(pointOffset);
     }
     else
     {
-        writePolys(globalPointOffset);
+        writePolys(pointOffset);
     }
 
     return true;

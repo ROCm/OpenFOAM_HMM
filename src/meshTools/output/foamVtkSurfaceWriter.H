@@ -56,10 +56,6 @@ SourceFiles
 
 namespace Foam
 {
-
-// Forward declarations
-class globalIndex;
-
 namespace vtk
 {
 
@@ -108,10 +104,12 @@ class surfaceWriter
         void writePoints();
 
         //- Write patch faces, legacy format
-        void writePolysLegacy(const globalIndex& pointOffsets);
+        //  \param pointOffset processor-local point offset
+        void writePolysLegacy(const label pointOffset);
 
         //- Write patch faces
-        void writePolys(const globalIndex& pointOffsets);
+        //  \param pointOffset processor-local point offset
+        void writePolys(const label pointOffset);
 
 
         //- No copy construct

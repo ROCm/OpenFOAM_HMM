@@ -148,10 +148,7 @@ void Foam::vtk::indirectPatchWriter::writePoints()
 }
 
 
-void Foam::vtk::indirectPatchWriter::writePolysLegacy
-(
-    const globalIndex& pointOffsets
-)
+void Foam::vtk::indirectPatchWriter::writePolysLegacy(const label pointOffset)
 {
     // Connectivity count without additional storage (done internally)
 
@@ -182,7 +179,7 @@ void Foam::vtk::indirectPatchWriter::writePolysLegacy
 
         auto iter = vertLabels.begin();
 
-        label off = pointOffsets.localStart();
+        label off = pointOffset;
 
         {
             for (const face& f : pp_.localFaces())
@@ -217,10 +214,7 @@ void Foam::vtk::indirectPatchWriter::writePolysLegacy
 }
 
 
-void Foam::vtk::indirectPatchWriter::writePolys
-(
-    const globalIndex& pointOffsets
-)
+void Foam::vtk::indirectPatchWriter::writePolys(const label pointOffset)
 {
     if (format_)
     {
@@ -254,7 +248,7 @@ void Foam::vtk::indirectPatchWriter::writePolys
 
             auto iter = vertLabels.begin();
 
-            label off = pointOffsets.localStart();
+            label off = pointOffset;
 
             {
                 for (const face& f : pp_.localFaces())
@@ -294,9 +288,6 @@ void Foam::vtk::indirectPatchWriter::writePolys
         labelList vertOffsets(nLocalFaces_);
         label nOffs = vertOffsets.size();
 
-        // global connectivity offsets
-        const globalIndex procOffset(nLocalVerts_);
-
         if (parallel_)
         {
             reduce(nOffs, sumOp<label>());
@@ -311,7 +302,11 @@ void Foam::vtk::indirectPatchWriter::writePolys
         }
 
 
-        label off = procOffset.localStart();
+        // processor-local connectivity offsets
+        label off =
+        (
+            parallel_ ? globalIndex(nLocalVerts_).localStart() : 0
+        );
 
         auto iter = vertOffsets.begin();
 
@@ -419,15 +414,18 @@ bool Foam::vtk::indirectPatchWriter::writeGeometry()
 
     writePoints();
 
-    const globalIndex globalPointOffset(nLocalPoints_);
+    const label pointOffset =
+    (
+        parallel_ ? globalIndex(nLocalPoints_).localStart() : 0
+    );
 
     if (legacy())
     {
-        writePolysLegacy(globalPointOffset);
+        writePolysLegacy(pointOffset);
     }
     else
     {
-        writePolys(globalPointOffset);
+        writePolys(pointOffset);
     }
 
     return true;

@@ -42,8 +42,6 @@ bool Foam::vtk::writeFaceSet
 {
     typedef IndirectList<face> FaceListType;
 
-    const globalIndex faceIdOffset(mesh.nFaces());
-
     indirectPrimitivePatch pp
     (
         FaceListType(mesh.faces(), labelList()),
@@ -69,7 +67,17 @@ bool Foam::vtk::writeFaceSet
         writer.beginCellData(1);
 
         labelField faceValues(faces.addressing());
-        faceValues += faceIdOffset.localStart();
+
+        // processor-local faceID offset
+        const label faceIdOffset =
+        (
+            writer.parallel() ? globalIndex(mesh.nFaces()).localStart() : 0
+        );
+
+        if (faceIdOffset)
+        {
+            faceValues += faceIdOffset;
+        }
 
         writer.write("faceID", faceValues);
 
