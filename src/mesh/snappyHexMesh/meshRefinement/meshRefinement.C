@@ -2285,8 +2285,7 @@ Foam::label Foam::meshRefinement::findRegions
                 if (Pstream::master())
                 {
                     outputDir =
-                        mesh.time().path()
-                      / (Pstream::parRun() ? ".." : "")
+                        mesh.time().globalPath()
                       / functionObject::outputPrefix
                       / mesh.pointsInstance();
                     outputDir.clean();

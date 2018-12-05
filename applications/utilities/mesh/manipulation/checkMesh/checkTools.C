@@ -284,8 +284,7 @@ void Foam::mergeAndWrite
 
     fileName outputDir
     (
-        set.time().path()
-      / (Pstream::parRun() ? ".." : "")
+        set.time().globalPath()
       / functionObject::outputPrefix
       / mesh.pointsInstance()
       / set.name()
@@ -378,8 +377,7 @@ void Foam::mergeAndWrite
 
     fileName outputDir
     (
-        set.time().path()
-      / (Pstream::parRun() ? ".." : "")
+        set.time().globalPath()
       / functionObject::outputPrefix
       / mesh.pointsInstance()
       / set.name()
@@ -478,8 +476,7 @@ void Foam::mergeAndWrite
         // postProcessing/<time>/p0.vtk
         fileName outputDir
         (
-            set.time().path()
-          / (Pstream::parRun() ? ".." : "")
+            set.time().globalPath()
           / functionObject::outputPrefix
           / mesh.pointsInstance()
           // set.name()
