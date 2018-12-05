@@ -49,6 +49,7 @@ SourceFiles
 #include "pointField.H"
 #include "symmTensor.H"
 
+// VTK includes
 #include <vtkCellArray.h>
 #include <vtkFloatArray.h>
 #include <vtkDoubleArray.h>
@@ -209,12 +210,35 @@ public:
 
 
     //- Remapping for some OpenFOAM data types (eg, symmTensor)
+    //  \param data[in,out] The data to be remapped in-place
     template<class Type>
     inline static void remapTuple(float data[]) {}
 
     //- Remapping for some OpenFOAM data types (eg, symmTensor)
+    //  \param data[in,out] The data to be remapped in-place
     template<class Type>
     inline static void remapTuple(double data[]) {}
+
+    //- Copy/transcribe OpenFOAM data types to VTK format
+    //  This allows a change of data type (float vs double) as well as
+    //  addressing any swapping issues (eg, symmTensor)
+    //
+    //  \param output[out] The output scratch space. Must be long enough
+    //     to hold the result.
+    //  \param val[in] The input data to copy/transcribe
+    template<class Type>
+    inline static void foamToVtkTuple(float output[], const Type& val);
+
+    //- Copy/transcribe OpenFOAM data types to VTK format
+    //  This allows a change of data type (float vs double) as well as
+    //  addressing any swapping issues (eg, symmTensor)
+    //
+    //  \param output[out] The output scratch space. Must be long enough
+    //     to hold the result.
+    //  \param val[in] The input data to copy/transcribe
+    template<class Type>
+    inline static void foamToVtkTuple(double output[], const Type& val);
+
 
     // Field Conversion Functions
 
@@ -225,7 +249,7 @@ public:
     (
         vtkFloatArray* array,
         const UList<Type>& input,
-        const label start = 0
+        vtkIdType start = 0         //!< The write offset into output array
     );
 
     //- Create named field initialized to zero
@@ -268,7 +292,6 @@ inline void Foam::vtk::Tools::remapTuple<Foam::symmTensor>(double data[])
     std::swap(data[1], data[3]);    // swap XY <-> YY
     std::swap(data[2], data[5]);    // swap XZ <-> ZZ
 }
-
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

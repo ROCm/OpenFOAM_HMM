@@ -49,23 +49,21 @@ vtkSmartPointer<vtkPoints> Foam::vtkPVFoam::foamVtuData::points
     const pointField& pts = mesh.points();
 
     // Additional cell centres
-    const labelList& addPoints = this->additionalIds();
+    const labelUList& addPoints = this->additionalIds();
 
     vtkpoints->SetNumberOfPoints(pts.size() + addPoints.size());
 
     // Normal points
-    label pointId = 0;
+    vtkIdType pointId = 0;
     for (const point& p : pts)
     {
-        vtkpoints->SetPoint(pointId, p.v_);
-        ++pointId;
+        vtkpoints->SetPoint(pointId++, p.v_);
     }
 
     // Cell centres
-    for (const label ptId : addPoints)
+    for (const label meshCelli : addPoints)
     {
-        vtkpoints->SetPoint(pointId, mesh.C()[ptId].v_);
-        ++pointId;
+        vtkpoints->SetPoint(pointId++, mesh.cellCentres()[meshCelli].v_);
     }
 
     return vtkpoints;
@@ -85,23 +83,21 @@ vtkSmartPointer<vtkPoints> Foam::vtkPVFoam::foamVtuData::points
     const pointField& pts = mesh.points();
 
     // Additional cell centres
-    const labelList& addPoints = this->additionalIds();
+    const labelUList& addPoints = this->additionalIds();
 
     vtkpoints->SetNumberOfPoints(pointMap.size() + addPoints.size());
 
     // Normal points
-    label pointId = 0;
-    for (const label ptId : pointMap)
+    vtkIdType pointId = 0;
+    for (const label meshPointi : pointMap)
     {
-        vtkpoints->SetPoint(pointId, pts[ptId].v_);
-        ++pointId;
+        vtkpoints->SetPoint(pointId++, pts[meshPointi].v_);
     }
 
     // Cell centres
-    for (const label ptId : addPoints)
+    for (const label meshCelli : addPoints)
     {
-        vtkpoints->SetPoint(pointId, mesh.C()[ptId].v_);
-        ++pointId;
+        vtkpoints->SetPoint(pointId++, mesh.cellCentres()[meshCelli].v_);
     }
 
     return vtkpoints;
