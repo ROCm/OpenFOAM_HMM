@@ -97,16 +97,10 @@ Foam::sampledSets::sampledSets
     interpolationScheme_(word::null),
     writeFormat_(word::null)
 {
-    const fileName relPath(functionObject::outputPrefix/name);
-
-    if (Pstream::parRun())
-    {
-        outputPath_ = mesh_.time().path()/".."/relPath;
-    }
-    else
-    {
-        outputPath_ = mesh_.time().path()/relPath;
-    }
+    outputPath_ =
+    (
+        mesh_.time().globalPath()/functionObject::outputPrefix/name
+    );
 
     if (mesh_.name() != fvMesh::defaultRegion)
     {
@@ -136,16 +130,10 @@ Foam::sampledSets::sampledSets
     interpolationScheme_(word::null),
     writeFormat_(word::null)
 {
-    const fileName relPath(functionObject::outputPrefix/name);
-
-    if (Pstream::parRun())
-    {
-        outputPath_ = mesh_.time().path()/".."/relPath;
-    }
-    else
-    {
-        outputPath_ = mesh_.time().path()/relPath;
-    }
+    outputPath_ =
+    (
+        mesh_.time().globalPath()/functionObject::outputPrefix/name
+    );
 
     if (mesh_.name() != fvMesh::defaultRegion)
     {

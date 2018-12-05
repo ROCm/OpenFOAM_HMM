@@ -46,18 +46,14 @@ void Foam::functionObjects::writeFile::initStream(Ostream& os) const
 
 Foam::fileName Foam::functionObjects::writeFile::baseFileDir() const
 {
-    fileName baseDir = fileObr_.time().path();
+    // Put in undecomposed case
+    // (Note: gives problems for distributed data running)
 
-    if (Pstream::parRun())
-    {
-        // Put in undecomposed case (Note: gives problems for
-        // distributed data running)
-        baseDir = baseDir/".."/functionObject::outputPrefix;
-    }
-    else
-    {
-        baseDir = baseDir/functionObject::outputPrefix;
-    }
+    fileName baseDir =
+    (
+        fileObr_.time().globalPath()
+      / functionObject::outputPrefix
+    );
 
     // Append mesh name if not default region
     if (isA<polyMesh>(fileObr_))
@@ -65,12 +61,11 @@ Foam::fileName Foam::functionObjects::writeFile::baseFileDir() const
         const polyMesh& mesh = refCast<const polyMesh>(fileObr_);
         if (mesh.name() != polyMesh::defaultRegion)
         {
-            baseDir = baseDir/mesh.name();
+            baseDir /= mesh.name();
         }
     }
 
-    // Remove any ".."
-    baseDir.clean();
+    baseDir.clean();  // Remove unneeded ".."
 
     return baseDir;
 }
