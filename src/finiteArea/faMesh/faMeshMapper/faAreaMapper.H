@@ -68,9 +68,6 @@ class faAreaMapper
         //- Reference to mapPolyMesh
         const mapPolyMesh& mpm_;
 
-        //- Are there any inserted (unmapped) faces
-        bool insertedFaces_;
-
         //- Is the mapping direct
         bool direct_;
 

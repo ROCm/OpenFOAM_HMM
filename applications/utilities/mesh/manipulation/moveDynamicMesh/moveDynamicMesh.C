@@ -116,6 +116,11 @@ void writeWeights
 
 void writeWeights(const polyMesh& mesh)
 {
+    const fileName outputDir
+    (
+        mesh.time().globalPath()/functionObject::outputPrefix/"checkAMI"
+    );
+
     for (const polyPatch& pp : mesh.boundaryMesh())
     {
         if (isA<cyclicAMIPolyPatch>(pp))
@@ -137,8 +142,8 @@ void writeWeights(const polyMesh& mesh)
                     mesh,
                     ami.tgtWeightsSum(),
                     cpp.neighbPatch(),
-                    functionObject::outputPrefix,
-                    "tgt",
+                    outputDir,
+                    "patch" + Foam::name(pp.index()) + "-tgt",
                     mesh.time()
                 );
                 writeWeights
@@ -146,8 +151,8 @@ void writeWeights(const polyMesh& mesh)
                     mesh,
                     ami.srcWeightsSum(),
                     cpp,
-                    functionObject::outputPrefix,
-                    "src",
+                    outputDir,
+                    "patch" + Foam::name(pp.index()) + "-src",
                     mesh.time()
                 );
             }
@@ -170,7 +175,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createNamedDynamicFvMesh.H"
 
-    const bool checkAMI  = args.found("checkAMI");
+    const bool checkAMI = args.found("checkAMI");
 
     if (checkAMI)
     {

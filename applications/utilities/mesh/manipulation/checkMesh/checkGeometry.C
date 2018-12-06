@@ -964,6 +964,13 @@ Foam::label Foam::checkGeometry
           : patchWriter()
         );
 
+        // Currently only do AMI checks
+
+        const fileName outputDir
+        (
+            mesh.time().globalPath()/functionObject::outputPrefix/"checkMesh"
+        );
+
         forAll(pbm, patchi)
         {
             if (isA<cyclicAMIPolyPatch>(pbm[patchi]))
@@ -1021,8 +1028,11 @@ Foam::label Foam::checkGeometry
                         {
                             wr.write
                             (
-                                functionObject::outputPrefix,
-                                "src_" + tmName,
+                                outputDir,
+                                (
+                                    "patch" + Foam::name(cpp.index())
+                                  + "-src_" + tmName
+                                ),
                                 meshedSurfRef
                                 (
                                     mergedPoints,
@@ -1054,8 +1064,11 @@ Foam::label Foam::checkGeometry
                             {
                                 wr.write
                                 (
-                                    functionObject::outputPrefix,
-                                    "src_" + tmName,
+                                    outputDir,
+                                    (
+                                        "patch" + Foam::name(cpp.index())
+                                      + "-src_" + tmName
+                                    ),
                                     meshedSurfRef
                                     (
                                         mergedPoints,
@@ -1109,8 +1122,11 @@ Foam::label Foam::checkGeometry
                         {
                             wr.write
                             (
-                                functionObject::outputPrefix,
-                                "tgt_" + tmName,
+                                outputDir,
+                                (
+                                    "patch" + Foam::name(cpp.index())
+                                  + "-tgt_" + tmName
+                                ),
                                 meshedSurfRef
                                 (
                                     mergedPoints,
@@ -1142,8 +1158,11 @@ Foam::label Foam::checkGeometry
                             {
                                 wr.write
                                 (
-                                    functionObject::outputPrefix,
-                                    "tgt_" + tmName,
+                                    outputDir,
+                                    (
+                                        "patch" + Foam::name(cpp.index())
+                                      + "-tgt_" + tmName
+                                    ),
                                     meshedSurfRef
                                     (
                                         mergedPoints,

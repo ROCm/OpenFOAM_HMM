@@ -28,11 +28,16 @@
 # Description
 #     Extract data for each time-step from a log file for graphing.
 #
+# Environment
+#     WM_PROJECT_API
+#     WM_PROJECT_DIR
+#     WM_PROJECT_SITE
+#
 #------------------------------------------------------------------------------
-Script=${0##*/}
-toolsDir=${0%/*}/tools
-siteDir="${WM_PROJECT_SITE:-${WM_PROJECT_DIR:-<unknown>}/site}"
-userDir=$HOME/.OpenFOAM
+Script="${0##*/}"
+toolsDir="${0%/*}/tools"
+groupDir="${WM_PROJECT_SITE:-${WM_PROJECT_DIR:-<unknown>}/site}"
+userDir="$HOME/.OpenFOAM"
 
 usage() {
     exec 1>&2
@@ -85,11 +90,11 @@ cat <<HELP
 
     The database ($Script.db) will taken from these locations:
         .
-        $userDir/$WM_PROJECT_VERSION
-        $userDir
-        $siteDir/$WM_PROJECT_VERSION
-        $siteDir
-        $WM_PROJECT_DIR/etc
+        $userDir/$WM_PROJECT_API/
+        $userDir/
+        $groupDir/$WM_PROJECT_API/etc/
+        $groupDir/etc/
+        $WM_PROJECT_DIR/etc/
         $toolsDir
 
     option -quiet : suppresses the default information and only prints the

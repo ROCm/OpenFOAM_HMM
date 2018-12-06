@@ -844,8 +844,7 @@ Foam::shortestPathSet::shortestPathSet
         if (Pstream::master())
         {
             outputDir =
-                mesh.time().path()
-              / (Pstream::parRun() ? ".." : "")
+                mesh.time().globalPath()
               / functionObject::outputPrefix
               / mesh.pointsInstance();
             outputDir.clean();

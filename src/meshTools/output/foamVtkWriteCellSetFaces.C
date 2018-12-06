@@ -42,8 +42,6 @@ bool Foam::vtk::writeCellSetFaces
 {
     typedef IndirectList<face> FaceListType;
 
-    const globalIndex cellIdOffset(mesh.nCells());
-
     indirectPrimitivePatch pp
     (
         FaceListType(mesh.faces(), labelList()),
@@ -88,22 +86,6 @@ bool Foam::vtk::writeCellSetFaces
     // Use these faces
     faces.resetAddressing(cellFaces.sortedToc());
 
-    // For each face, the corresponding cellID
-
-    labelList faceValues(faces.size());
-
-    // Cell ID
-    {
-        const labelList& faceIds = faces.addressing();
-
-        const label off = cellIdOffset.localStart();
-
-        forAll(faceValues, facei)
-        {
-            faceValues[facei] = cellFaces[faceIds[facei]] + off;
-        }
-    }
-
     //-------------------------------------------------------------------------
 
     indirectPatchWriter writer(pp, opts);
@@ -115,14 +97,31 @@ bool Foam::vtk::writeCellSetFaces
 
     //-------------------------------------------------------------------------
 
-    // CellData - cellID only
+    // CellData - faceID only
+
+    writer.beginCellData(1);
     {
-        writer.beginCellData(1);
+        // For each face, the corresponding cellID
+
+        labelList faceValues(faces.size());
+
+        const labelList& faceIds = faces.addressing();
+
+        // processor-local cellID offset
+        const label cellIdOffset =
+        (
+            writer.parallel() ? globalIndex(mesh.nCells()).localStart() : 0
+        );
+
+        forAll(faceValues, facei)
+        {
+            faceValues[facei] = cellFaces[faceIds[facei]] + cellIdOffset;
+        }
 
         writer.write("faceID", faceValues);
-
-        // End CellData/PointData is implicit
     }
+
+    // End CellData/PointData is implicit
 
     writer.close();
 

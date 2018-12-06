@@ -87,4 +87,34 @@ inline vtkSmartPointer<vtkCellArray> Foam::vtk::Tools::identityVertices
 };
 
 
+template<class Type>
+inline void Foam::vtk::Tools::foamToVtkTuple
+(
+    float output[],
+    const Type& val
+)
+{
+    for (direction cmpt=0; cmpt < pTraits<Type>::nComponents; ++cmpt)
+    {
+        output[cmpt] = component(val, cmpt);
+    }
+    remapTuple<Type>(output);
+}
+
+
+template<class Type>
+inline void Foam::vtk::Tools::foamToVtkTuple
+(
+    double output[],
+    const Type& val
+)
+{
+    for (direction cmpt=0; cmpt < pTraits<Type>::nComponents; ++cmpt)
+    {
+        output[cmpt] = component(val, cmpt);
+    }
+    remapTuple<Type>(output);
+}
+
+
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,32 +22,13 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    decomposePar
+    Test-decomposePar
 
 Group
     grpParallelUtilities
 
 Description
-    Automatically decomposes a mesh and fields of a case for parallel
-    execution of OpenFOAM.
-
-Usage
-    \b decomposePar [OPTION]
-
-    Options:
-      - \par -region \<regionName\>
-        Decompose named region. Does not check for existence of processor*.
-
-      - \par -allRegions
-        Decompose all regions in regionProperties. Does not check for
-        existence of processor*.
-
-      - \par -constant
-
-      - \par -time xxx:yyy
-        Override controlDict settings and decompose selected times. Does not
-        re-decompose the mesh i.e. does not handle moving mesh or changing
-        mesh cases.
+    Like decomposePar -dry-run, but with additional options
 
 \*---------------------------------------------------------------------------*/
 
@@ -65,7 +46,10 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "decompose a mesh and fields of a case for parallel execution"
+        "Special-purpose version of decomposePar with additional"
+        " -domain and -method options."
+        " The '-dry-run' and '-cellDist' are implicit.\n"
+        "NB: The -domain/-method overrides may not work very well with regions"
     );
 
     argList::noParallel();
@@ -79,33 +63,38 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "allRegions",
-        "operate on all regions in regionProperties"
+        "Operate on all regions in regionProperties"
     );
     argList::addBoolOption
     (
         "verbose",
-        "more information about decomposition"
+        "Additional verbosity"
     );
     argList::addOption
     (
         "domains",
         "N",
-        "override numberOfSubdomains"
+        "Override numberOfSubdomains"
     );
 
     argList::addOption
     (
         "method",
         "name",
-        "override method"
+        "Override decomposition method"
     );
+
+
+    // These are implicit so just ignore them
+    argList::ignoreOptionCompat({"dry-run", 0}, false);
+    argList::ignoreOptionCompat({"cellDist", 0}, false);
 
     // Include explicit constant options, have zero from time range
     timeSelector::addOptions(true, false);
 
     #include "setRootCase.H"
 
-    const bool region     = args.found("region");
+    const bool optRegion  = args.found("region");
     const bool allRegions = args.found("allRegions");
     const bool verbose    = args.found("verbose");
 

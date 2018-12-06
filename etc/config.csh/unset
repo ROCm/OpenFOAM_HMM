@@ -59,6 +59,7 @@ unsetenv WM_OPTIONS
 unsetenv WM_OSTYPE
 unsetenv WM_PRECISION_OPTION
 unsetenv WM_PROJECT
+unsetenv WM_PROJECT_API
 unsetenv WM_PROJECT_DIR
 unsetenv WM_PROJECT_INST_DIR
 unsetenv WM_PROJECT_SITE

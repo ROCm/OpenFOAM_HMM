@@ -85,10 +85,10 @@ do
     --recursive-backend--)
         optBackend=true
         ;;
-    --output=*)
+    -output=*)
         moduleOutput="${1#*=}"
         ;;
-    --tmpdir=*)
+    -tmpdir=*)
         moduleTmpDir="${1#*=}"
         ;;
     -*)
@@ -219,7 +219,7 @@ echo "Using openfoam: $WM_PROJECT_DIR" 1>&2
 echo "==> $moduleOutput" 1>&2
 
 # Remove some cruft
-unset FOAM_JOB_DIR FOAM_RUN FOAM_SETTINGS FOAM_INST_DIR
+unset FOAM_JOB_DIR FOAM_RUN FOAM_SETTINGS FOAM_INST_DIR WM_PROJECT_INST_DIR
 unset WM_PROJECT_USER_DIR WM_THIRD_PARTY_DIR
 unset SCOTCH_VERSION
 

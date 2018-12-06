@@ -172,7 +172,7 @@ void Foam::vtkPVFoam::convertMeshPatches()
             {
                 // Point movement on single patch is OK
 
-                const labelList& patchIds = vtpData.additionalIds();
+                const labelUList& patchIds = vtpData.additionalIds();
                 if (patchIds.size() == 1)
                 {
                     vtkgeom = vtpData.getCopy();

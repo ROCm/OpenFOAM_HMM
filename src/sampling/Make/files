@@ -29,6 +29,7 @@ surface/cutting/cuttingSurfaceBaseSelection.C
 surface/distanceSurface/distanceSurface.C
 surface/isoSurface/isoSurface.C
 surface/isoSurface/isoSurfaceCell.C
+surface/isoSurface/isoSurfaceTopo.C
 surface/thresholdCellFaces/thresholdCellFaces.C
 surface/triSurfaceMesh/discreteSurface.C
 
@@ -44,6 +45,7 @@ sampledSurface/sampledPatchInternalField/sampledPatchInternalField.C
 sampledSurface/sampledPlane/sampledPlane.C
 sampledSurface/isoSurface/sampledIsoSurface.C
 sampledSurface/isoSurface/sampledIsoSurfaceCell.C
+sampledSurface/isoSurface/sampledIsoSurfaceTopo.C
 sampledSurface/distanceSurface/sampledDistanceSurface.C
 sampledSurface/sampledCuttingPlane/sampledCuttingPlane.C
 sampledSurface/sampledCuttingSurface/sampledCuttingSurface.C

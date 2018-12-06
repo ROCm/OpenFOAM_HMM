@@ -82,6 +82,10 @@ protected:
         //- Flag to identify whether the header has been written
         bool writtenHeader_;
 
+        //- Flag to use the specified user time, e.g. CA deg instead
+        //- of seconds.  Default = true
+        bool useUserTime_;
+
         //- Start time value
         scalar startTime_;
 

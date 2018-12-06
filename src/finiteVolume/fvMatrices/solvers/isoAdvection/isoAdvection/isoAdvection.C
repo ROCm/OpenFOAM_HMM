@@ -968,15 +968,11 @@ void Foam::isoAdvection::writeIsoFaces
     if (!writeIsoFacesToFile_ || !mesh_.time().writeTime()) return;
 
     // Writing isofaces to obj file for inspection, e.g. in paraview
-    const fileName dirName
+    const fileName outputFile
     (
-        Pstream::parRun() ?
-            mesh_.time().path()/".."/"isoFaces"
-          : mesh_.time().path()/"isoFaces"
-    );
-    const word fName
-    (
-        word::printf("isoFaces_%012d", mesh_.time().timeIndex())
+        mesh_.time().globalPath()
+      / "isoFaces"
+      / word::printf("isoFaces_%012d.obj", mesh_.time().timeIndex())
     );
 
     if (Pstream::parRun())
@@ -988,8 +984,8 @@ void Foam::isoAdvection::writeIsoFaces
 
         if (Pstream::master())
         {
-            mkDir(dirName);
-            OBJstream os(dirName/fName + ".obj");
+            mkDir(outputFile.path());
+            OBJstream os(outputFile);
             Info<< nl << "isoAdvection: writing iso faces to file: "
                 << os.name() << nl << endl;
 
@@ -1015,8 +1011,8 @@ void Foam::isoAdvection::writeIsoFaces
     }
     else
     {
-        mkDir(dirName);
-        OBJstream os(dirName/fName + ".obj");
+        mkDir(outputFile.path());
+        OBJstream os(outputFile);
         Info<< nl << "isoAdvection: writing iso faces to file: "
             << os.name() << nl << endl;
 

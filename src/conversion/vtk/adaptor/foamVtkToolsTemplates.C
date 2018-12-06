@@ -50,12 +50,11 @@ Foam::vtk::Tools::Patch::points(const PatchType& p)
     auto vtkpoints = vtkSmartPointer<vtkPoints>::New();
 
     vtkpoints->SetNumberOfPoints(pts.size());
-    vtkIdType pointId = 0;
 
+    vtkIdType pointId = 0;
     for (const point& p : pts)
     {
-        vtkpoints->SetPoint(pointId, p.v_);
-        ++pointId;
+        vtkpoints->SetPoint(pointId++, p.v_);
     }
 
     return vtkpoints;
@@ -127,8 +126,7 @@ Foam::vtk::Tools::Patch::faceNormals(const PatchType& p)
     vtkIdType faceId = 0;
     for (const vector& n : norms)
     {
-        array->SetTuple(faceId, n.v_);
-        ++faceId;
+        array->SetTuple(faceId++, n.v_);
     }
 
     return array;
@@ -145,7 +143,7 @@ Foam::label Foam::vtk::Tools::transcribeFloatData
 (
     vtkFloatArray* array,
     const UList<Type>& input,
-    const label start
+    vtkIdType start
 )
 {
     const int nComp(pTraits<Type>::nComponents);
@@ -162,7 +160,7 @@ Foam::label Foam::vtk::Tools::transcribeFloatData
     }
 
     const vtkIdType maxSize = array->GetNumberOfTuples();
-    const vtkIdType endPos = vtkIdType(start) + vtkIdType(input.size());
+    const vtkIdType endPos = start + vtkIdType(input.size());
 
     if (!maxSize)
     {
@@ -174,7 +172,7 @@ Foam::label Foam::vtk::Tools::transcribeFloatData
         WarningInFunction
             << "vtk array '" << array->GetName()
             << "' copy with out-of-range [0," << long(maxSize) << ")"
-            << " starting at " << start
+            << " starting at " << long(start)
             << nl;
 
         return 0;
@@ -185,23 +183,18 @@ Foam::label Foam::vtk::Tools::transcribeFloatData
             << "vtk array '" << array->GetName()
             << "' copy ends out-of-range (" << long(maxSize) << ")"
             << " using sizing (start,size) = ("
-            << start << "," << input.size() << ")"
+            << long(start) << "," << input.size() << ")"
             << nl;
 
         return 0;
     }
 
-    float scratch[nComp];
-    forAll(input, idx)
-    {
-        const Type& t = input[idx];
-        for (direction d=0; d<nComp; ++d)
-        {
-            scratch[d] = component(t, d);
-        }
-        remapTuple<Type>(scratch);
+    float scratch[pTraits<Type>::nComponents];
 
-        array->SetTuple(start+idx, scratch);
+    for (const Type& val : input)
+    {
+        foamToVtkTuple(scratch, val);
+        array->SetTuple(start++, scratch);
     }
 
     return input.size();
@@ -219,7 +212,7 @@ Foam::vtk::Tools::zeroField
     auto data = vtkSmartPointer<vtkFloatArray>::New();
 
     data->SetName(name.c_str());
-    data->SetNumberOfComponents(int(pTraits<Type>::nComponents));
+    data->SetNumberOfComponents(static_cast<int>(pTraits<Type>::nComponents));
     data->SetNumberOfTuples(size);
 
     data->Fill(0);
@@ -239,7 +232,7 @@ Foam::vtk::Tools::convertFieldToVTK
     auto data = vtkSmartPointer<vtkFloatArray>::New();
 
     data->SetName(name.c_str());
-    data->SetNumberOfComponents(int(pTraits<Type>::nComponents));
+    data->SetNumberOfComponents(static_cast<int>(pTraits<Type>::nComponents));
     data->SetNumberOfTuples(fld.size());
 
     transcribeFloatData(data, fld);

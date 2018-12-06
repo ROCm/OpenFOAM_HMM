@@ -14,6 +14,7 @@ else()
 endif()
 
 include_directories(
+    ${LIB_SRC}/OpenFOAM/include
     ${LIB_SRC}/OpenFOAM/lnInclude
     ${LIB_SRC}/OSspecific/${WM_OSTYPE}/lnInclude
     ${LIB_SRC}/finiteVolume/lnInclude

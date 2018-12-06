@@ -389,16 +389,12 @@ void Foam::functionObjects::runTimePostPro::scene::saveImage
 
     const Time& runTime = obr_.time();
 
-    const fileName relPath
+    const fileName prefix
     (
-        functionObject::outputPrefix/name_/obr_.time().timeName()
-    );
-
-    fileName prefix
-    (
-        Pstream::parRun() ?
-            runTime.path()/".."/relPath
-          : runTime.path()/relPath
+        runTime.globalPath()
+      / functionObject::outputPrefix
+      / name_
+      / runTime.timeName()
     );
 
     mkDir(prefix);

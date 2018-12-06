@@ -119,18 +119,8 @@ Foam::fileNameList searchEtc
     bool (*accept)(const Foam::fileName&)
 )
 {
-    Foam::fileName version(Foam::getEnv("WM_PROJECT_VERSION"));
-
-    // Fallback when WM_PROJECT_VERSION is unset
-    if (version.empty())
-    {
-        #if OPENFOAM
-        version.assign(std::to_string(OPENFOAM));
-        #else
-        version.assign(foamVersion::version);
-        #endif
-    }
-
+    // Could use foamVersion::api, but this more direct.
+    const Foam::fileName version(std::to_string(OPENFOAM));
 
     Foam::fileNameList list;
     Foam::fileName dir, candidate;

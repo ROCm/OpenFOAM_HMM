@@ -58,7 +58,6 @@ namespace Foam
 {
 
 // Forward declarations
-class globalIndex;
 class volPointInterpolation;
 
 namespace vtk
@@ -96,13 +95,16 @@ class internalWriter
         void writePoints();
 
         //- Write cells (connectivity and type), legacy format
-        void writeCellsLegacy(const globalIndex& pointOffsets);
+        //  \param pointOffset processor-local point offset
+        void writeCellsLegacy(const label pointOffset);
 
         //- Write cells connectivity
-        void writeCellsConnectivity(const globalIndex& pointOffsets);
+        //  \param pointOffset processor-local point offset
+        void writeCellsConnectivity(const label pointOffset);
 
         //- Write cells face streams
-        void writeCellsFaces(const globalIndex& pointOffsets);
+        //  \param pointOffset processor-local point offset
+        void writeCellsFaces(const label pointOffset);
 
 
         //- No copy construct

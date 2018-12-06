@@ -123,10 +123,7 @@ void Foam::vtk::internalWriter::writePoints()
 }
 
 
-void Foam::vtk::internalWriter::writeCellsLegacy
-(
-    const globalIndex& pointOffsets
-)
+void Foam::vtk::internalWriter::writeCellsLegacy(const label pointOffset)
 {
     const List<uint8_t>& cellTypes = vtuCells_.cellTypes();
     const labelList& vertLabels = vtuCells_.vertLabels();
@@ -165,7 +162,7 @@ void Foam::vtk::internalWriter::writeCellsLegacy
                 vtk::vtuSizing::copyVertLabelsLegacy
                 (
                     vertLabels,
-                    pointOffsets.localStart()
+                    pointOffset
                 )
             );
         }
@@ -206,10 +203,7 @@ void Foam::vtk::internalWriter::writeCellsLegacy
 }
 
 
-void Foam::vtk::internalWriter::writeCellsConnectivity
-(
-    const globalIndex& pointOffsets
-)
+void Foam::vtk::internalWriter::writeCellsConnectivity(const label pointOffset)
 {
     //
     // 'connectivity'
@@ -239,7 +233,7 @@ void Foam::vtk::internalWriter::writeCellsConnectivity
                 vtk::vtuSizing::copyVertLabelsXml
                 (
                     vertLabels,
-                    pointOffsets.localStart()
+                    pointOffset
                 )
             );
         }
@@ -263,12 +257,6 @@ void Foam::vtk::internalWriter::writeCellsConnectivity
         const labelList& vertOffsets = vtuCells_.vertOffsets();
         label nOffs = vertOffsets.size();
 
-        // global connectivity offsets
-        const globalIndex procOffset
-        (
-            vertOffsets.empty() ? 0 : vertOffsets.last()
-        );
-
         if (parallel_)
         {
             reduce(nOffs, sumOp<label>());
@@ -285,6 +273,12 @@ void Foam::vtk::internalWriter::writeCellsConnectivity
 
         if (parallel_)
         {
+            // processor-local connectivity offsets
+            const globalIndex procOffset
+            (
+                vertOffsets.empty() ? 0 : vertOffsets.last()
+            );
+
             vtk::writeListParallel(format_.ref(), vertOffsets, procOffset);
         }
         else
@@ -347,10 +341,7 @@ void Foam::vtk::internalWriter::writeCellsConnectivity
 }
 
 
-void Foam::vtk::internalWriter::writeCellsFaces
-(
-    const globalIndex& pointOffsets
-)
+void Foam::vtk::internalWriter::writeCellsFaces(const label pointOffset)
 {
     label nFaceLabels = vtuCells_.faceLabels().size();
 
@@ -393,7 +384,7 @@ void Foam::vtk::internalWriter::writeCellsFaces
                 vtk::vtuSizing::copyFaceLabelsXml
                 (
                     faceLabels,
-                    pointOffsets.localStart()
+                    pointOffset
                 )
             );
         }
@@ -578,12 +569,15 @@ bool Foam::vtk::internalWriter::writeGeometry()
 
     writePoints();
 
-    // With addPointCellLabels for the point offsets
-    const globalIndex globalPointOffset(vtuCells_.nFieldPoints());
+    // Include addPointCellLabels for the point offsets
+    const label pointOffset =
+    (
+        parallel_ ? globalIndex(vtuCells_.nFieldPoints()).localStart() : 0
+    );
 
     if (legacy())
     {
-        writeCellsLegacy(globalPointOffset);
+        writeCellsLegacy(pointOffset);
         return true;
     }
 
@@ -592,8 +586,8 @@ bool Foam::vtk::internalWriter::writeGeometry()
         format().tag(vtk::fileTag::CELLS);
     }
 
-    writeCellsConnectivity(globalPointOffset);
-    writeCellsFaces(globalPointOffset);
+    writeCellsConnectivity(pointOffset);
+    writeCellsFaces(pointOffset);
 
     if (format_)
     {
