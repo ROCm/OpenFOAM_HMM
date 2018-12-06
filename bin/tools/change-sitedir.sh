@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -25,7 +25,7 @@
 #     . change-sitedir.sh PREFIX [SUFFIX]
 #
 #     Shortcuts (prefix)
-#         -prefix         "$WM_PROJECT_INST_DIR/site"
+#         -prefix         "$WM_PROJECT_DIR/../site"
 #         -project        "$WM_PROJECT_DIR/site"
 #         -none           remove from environment
 #
@@ -46,7 +46,7 @@
 #
 #   corresponds to the standard site location:
 #
-#     $WM_PROJECT_DIR/site{/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS}
+#     $WM_PROJECT_DIR/site{/$WM_PROJECT_API/platforms/$WM_OPTIONS}
 #
 #------------------------------------------------------------------------------
 
@@ -56,7 +56,7 @@ then
     suffix="$2"
 
     foamOldDirs="$FOAM_SITE_APPBIN $FOAM_SITE_LIBBIN \
-        $WM_PROJECT_SITE $WM_PROJECT_INST_DIR/site $WM_PROJECT_DIR/site"
+        $WM_PROJECT_SITE $WM_PROJECT_DIR/site"
     foamClean=$WM_PROJECT_DIR/bin/foamCleanPath
     if [ -x "$foamClean" ]
     then
@@ -66,12 +66,12 @@ then
     fi
 
     case "$suffix" in
-        -plat*) suffix="platforms/$WM_OPTIONS" ;;
+        -plat*)     suffix="platforms/$WM_OPTIONS" ;;
     esac
     case "$prefix" in
-        -prefix)  prefix="$WM_PROJECT_INST_DIR/site" ;;
-        -project) prefix="$WM_PROJECT_DIR/site" ;;
-        -none)    unset prefix ;;
+        -prefix)    prefix="${WM_PROJECT_DIR%/*}/site" ;;
+        -project)   prefix="$WM_PROJECT_DIR/site" ;;
+        -none)      unset prefix ;;
     esac
 
     if [ -n "$prefix" ]

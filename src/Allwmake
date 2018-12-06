@@ -16,7 +16,7 @@ cd ${0%/*} && wmakeCheckPwd "$WM_PROJECT_DIR/src" 2>/dev/null || {
 #------------------------------------------------------------------------------
 
 # Trigger update of version strings as required
-wmakePrintBuild -check || wrmo OpenFOAM/global/global.o 2>/dev/null
+wmakeBuildInfo -check || wrmo OpenFOAM/global/global.o 2>/dev/null
 
 wmakeLnInclude -u OpenFOAM
 wmakeLnInclude -u OSspecific/"${WM_OSTYPE:-POSIX}"

@@ -81,6 +81,7 @@ void Foam::dynamicCode::checkSecurity
             << "    allowSystemOperations 1" << nl << nl
             << "to the InfoSwitches setting in the system controlDict." << nl
             << "The system controlDict is any of" << nl << nl
+            << "    ~/.OpenFOAM/" << OPENFOAM << "/controlDict" << nl
             << "    ~/.OpenFOAM/controlDict" << nl
             << "    $WM_PROJECT_DIR/etc/controlDict" << nl << endl
             << exit(FatalIOError);

@@ -33,6 +33,13 @@ alias _foamAddLib  'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH}'
 # $2 = fallback libname ('lib' or 'lib64')
 alias _foamAddLibAuto 'eval `$WM_PROJECT_DIR/bin/tools/lib-dir -csh \!*`'
 
+# Echo values when FOAM_VERBOSE is on, no-op otherwise
+if ($?FOAM_VERBOSE && $?prompt) then
+    alias _foamEcho 'echo \!*'
+else
+    alias _foamEcho 'true'
+endif
+
 # Source an etc file, possibly with some verbosity
 if ($?FOAM_VERBOSE && $?prompt) then
     if ($?FOAM_CONFIG_NOUSER) then
