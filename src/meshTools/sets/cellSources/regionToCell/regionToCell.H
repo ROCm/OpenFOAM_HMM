@@ -28,6 +28,7 @@ Description
     A topoSetCellSource to select cells belonging to a topological connected
     region (that contains given points)
 
+Usage
     In dictionary input:
     \verbatim
         // optional name of cellSet delimiting search
@@ -41,7 +42,7 @@ Description
         insidePoints ((1 2 3));
     \endverbatim
 
-    \heading Dictionary parameters
+    Dictionary parameters:
     \table
         Property    | Description                           | Required | Default
         insidePoints | Points inside regions                | yes   |
@@ -68,7 +69,7 @@ namespace Foam
 class regionSplit;
 
 /*---------------------------------------------------------------------------*\
-                           Class regionToCell Declaration
+                        Class regionToCell Declaration
 \*---------------------------------------------------------------------------*/
 
 class regionToCell
@@ -151,7 +152,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

@@ -28,14 +28,14 @@ Description
     Mass tranfer Lee model. Simple model driven by field value difference as:
 
     \f[
-        mDot = C \rho \alpha (\T - T_{activate})/T_{activate}
+        \dot{m} = C \rho \alpha (T - T_{activate})/T_{activate}
     \f]
 
     where C is a model constant.
 
     if C > 0:
     \f[
-        mDot = C \rho \alpha*(\T - T_{activate})/T_{activate}
+        \dot{m} = C \rho \alpha (T - T_{activate})/T_{activate}
     \f]
         for \f[ T > T_{activate} \f]
 
@@ -46,12 +46,12 @@ Description
 
     if C < 0:
     \f[
-        mDot = -C \rho \alpha (T_{activate} - \T)/T_{activate}
+        \dot{m} = -C \rho \alpha (T_{activate} - T)/T_{activate}
     \f]
         for \f[ T < T_{activate} \f]
 
     and
-        \f[ mDot = 0.0 \f] for \f[ T > T_{activate} \f]
+        \f[ \dot{m} = 0.0 \f] for \f[ T > T_{activate} \f]
 
     Based on the reference:
     -# W. H. Lee. "A Pressure Iteration Scheme for Two-Phase Modeling".

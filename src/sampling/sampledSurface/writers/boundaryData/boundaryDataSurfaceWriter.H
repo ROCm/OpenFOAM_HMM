@@ -70,14 +70,14 @@ Description
     The \c rootdir normally corresponds to something like
     \c postProcessing/\<name\>
 
-    \subheading Geometry
+    where the geometry is written as:
     \verbatim
     rootdir
     `-- surfaceName
         `-- "points"
     \endverbatim
 
-    \subheading Fields
+    and field data:
     \verbatim
     rootdir
     `-- surfaceName
