@@ -16,7 +16,7 @@ const vector L(dict.get<vector>("L"));
 const Vector<label> N(dict.get<Vector<label>>("N"));
 
 // Wave number vs energy profile
-autoPtr<Function1<scalar>> Ek(Function1<scalar>::New("E", dict));
+autoPtr<Function1<scalar>> Ek(Function1<scalar>::New("Ek", dict));
 
 // Number of modes
 const label nModes = dict.get<label>("nModes");
