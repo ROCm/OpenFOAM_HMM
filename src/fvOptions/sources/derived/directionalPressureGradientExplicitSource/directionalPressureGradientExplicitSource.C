@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -431,7 +431,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::correct
     {
         label cellI = cells_[i];
 
-        const vector Ufnorm = UfCells[i]/mag(UfCells[i]);
+        const vector Ufnorm = UfCells[i]/(mag(UfCells[i]) + SMALL);
 
         const tensor D = rotationTensor(Ufnorm, flowDir_);
 
@@ -452,7 +452,6 @@ void Foam::fv::directionalPressureGradientExplicitSource::correct
             Info<< "UfCell:= " << UfCells[i] << "U : " << U[cellI] << endl;
         }
     }
-
     writeProps(gradP0_ + dGradP_);
 }
 
