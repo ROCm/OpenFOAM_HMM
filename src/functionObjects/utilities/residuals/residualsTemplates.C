@@ -41,6 +41,8 @@ void Foam::functionObjects::residuals::writeFileHeader
 
     if (foundObject<fieldType>(fieldName))
     {
+        writeTabbed(os, fieldName + "_solver");
+
         typename pTraits<Type>::labelType validComponents
         (
             mesh_.validComponents<Type>()
@@ -50,13 +52,16 @@ void Foam::functionObjects::residuals::writeFileHeader
         {
             if (component(validComponents, cmpt) != -1)
             {
-                writeTabbed
-                (
-                    os,
-                    fieldName + word(pTraits<Type>::componentNames[cmpt])
-                );
+                const word cmptName(pTraits<Type>::componentNames[cmpt]); 
+                const word fieldBase(fieldName + cmptName);
+
+                writeTabbed(os, fieldBase + "_initial");
+                writeTabbed(os, fieldBase + "_final");
+                writeTabbed(os, fieldBase + "_iters");
             }
         }
+
+        writeTabbed(os, fieldName + "_converged");
     }
 }
 
@@ -81,8 +86,10 @@ void Foam::functionObjects::residuals::initialiseField(const word& fieldName)
             {
                 if (component(validComponents, cmpt) != -1)
                 {
-                    const word resultName =
-                        fieldName + word(pTraits<Type>::componentNames[cmpt]);
+                    const word resultName
+                    (
+                        fieldName + word(pTraits<Type>::componentNames[cmpt])
+                    );
 
                     createField(resultName);
                 }
@@ -96,6 +103,7 @@ template<class Type>
 void Foam::functionObjects::residuals::writeResidual(const word& fieldName)
 {
     typedef GeometricField<Type, fvPatchField, volMesh> volFieldType;
+    typedef typename pTraits<Type>::labelType labelType;
 
     if (foundObject<volFieldType>(fieldName))
     {
@@ -108,28 +116,41 @@ void Foam::functionObjects::residuals::writeResidual(const word& fieldName)
                 solverDict.lookup(fieldName)
             );
 
-            const Type& residual = sp.first().initialResidual();
+            const SolverPerformance<Type>& sp0 = sp.first();
+            const word& solverName = sp0.solverName();
+            const Type& initialResidual = sp0.initialResidual();
+            const Type& finalResidual = sp0.finalResidual();
+            const labelType nIterations = sp0.nIterations();
+            const bool converged = sp0.converged();
 
-            typename pTraits<Type>::labelType validComponents
-            (
-                mesh_.validComponents<Type>()
-            );
+            const labelType validComponents(mesh_.validComponents<Type>());
+
+            file() << token::TAB << solverName;
 
             for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; ++cmpt)
             {
                 if (component(validComponents, cmpt) != -1)
                 {
-                    const scalar r = component(residual, cmpt);
+                    const scalar ri = component(initialResidual, cmpt);
+                    const scalar rf = component(finalResidual, cmpt);
+                    const label n = component(nIterations, cmpt);
 
-                    file() << token::TAB << r;
+                    file()
+                        << token::TAB << ri
+                        << token::TAB << rf
+                        << token::TAB << n;
 
-                    const word resultName =
-                        fieldName + word(pTraits<Type>::componentNames[cmpt]);
-                    setResult(resultName, r);
+                    const word cmptName(pTraits<Type>::componentNames[cmpt]); 
+                    const word resultName(fieldName + cmptName);
+                    setResult(resultName + "_initial", ri);
+                    setResult(resultName + "_final", rf);
+                    setResult(resultName + "_iters", n);
 
                     writeField(resultName);
                 }
             }
+
+            file() << token::TAB << converged;
         }
     }
 }
