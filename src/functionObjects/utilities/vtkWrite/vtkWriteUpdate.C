@@ -34,6 +34,7 @@ namespace Foam
     // A limited selection of actions
     const Enum<topoSetSource::setAction> actionNames
     ({
+        { topoSetSource::NEW, "use" },
         { topoSetSource::ADD, "add" },
         { topoSetSource::SUBTRACT, "subtract" },
         { topoSetSource::SUBSET, "subset" },
@@ -71,7 +72,7 @@ bool Foam::functionObjects::vtkWrite::updateSubset
 
         const dictionary& dict = dEntry.dict();
 
-        const auto action = actionNames.get("action", dict);
+        auto action = actionNames.get("action", dict);
 
         // Handle manually
         if (action == topoSetSource::INVERT)
@@ -90,7 +91,17 @@ bool Foam::functionObjects::vtkWrite::updateSubset
 
         switch (action)
         {
+            case topoSetSource::NEW:  // "use"
             case topoSetSource::ADD:
+                if (topoSetSource::NEW == action)
+                {
+                    // NEW (use) = CLEAR + ADD  (ie, only use this selection)
+                    cellsToSelect.reset();
+                    action = topoSetSource::ADD;
+                }
+                source->applyToSet(action, cellsToSelect);
+                break;
+
             case topoSetSource::SUBTRACT:
                 source->applyToSet(action, cellsToSelect);
                 break;

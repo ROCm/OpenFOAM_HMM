@@ -51,7 +51,7 @@ subset
     {
         dome
         {
-            action  add;
+            action  use;
             source  sphere;
             origin  (125 100 0);
             radius  100;

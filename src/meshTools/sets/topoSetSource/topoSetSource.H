@@ -82,7 +82,7 @@ public:
         enum setAction
         {
             ADD,                //!< Add elements to the set
-            SUBTRACT,           //!< Remove elements from the set
+            SUBTRACT,           //!< Subtract elements from the set
             SUBSET,             //!< Subset with elements in the set
             INVERT,             //!< Invert the elements in the set
             CLEAR,              //!< Clear the set, possibly creating it
