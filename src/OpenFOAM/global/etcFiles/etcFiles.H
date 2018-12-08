@@ -44,6 +44,14 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+//- The etc search directories in the normal search order.
+//
+//  \param test false to disable the default test for directory existence.
+//
+//  \return The list of directories
+fileNameList etcDirs(bool test=true);
+
+
 //- Search for directories from user/group/other directories.
 //  Uses search hierarchy as per findEtcFiles().
 //
@@ -51,8 +59,8 @@ namespace Foam
 //      an empty list if the name cannot be found.
 fileNameList findEtcDirs
 (
-    const fileName& name=fileName::null, //!< the file to search for
-    const bool findFirst=false  //!< stop when the first file has been found
+    const fileName& name,       //!< The directory to search for
+    const bool findFirst=false  //!< Stop after locating the first directory
 );
 
 
@@ -76,9 +84,9 @@ fileNameList findEtcDirs
 //      an empty list if the name cannot be found.
 fileNameList findEtcFiles
 (
-    const fileName& name,       //!< the file to search for
-    const bool mandatory=false, //!< abort if the file cannot be found
-    const bool findFirst=false  //!< stop when the first file has been found
+    const fileName& name,       //!< The file to search for
+    const bool mandatory=false, //!< Abort if the file cannot be found
+    const bool findFirst=false  //!< Stop after locating the first directory
 );
 
 
@@ -88,8 +96,8 @@ fileNameList findEtcFiles
 //      search hierarchy or an empty fileName if the name cannot be found.
 fileName findEtcFile
 (
-    const fileName& name,       //!< the file to search for
-    const bool mandatory=false  //!< abort if the file cannot be found
+    const fileName& name,       //!< The file to search for
+    const bool mandatory=false  //!< Abort if the file cannot be found
 );
 
 

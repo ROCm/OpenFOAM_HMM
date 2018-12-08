@@ -64,6 +64,11 @@ int main(int argc, char *argv[])
         "list",
         "List directories or files to be checked"
     );
+    argList::addBoolOption
+    (
+        "list-all",
+        "List all directories (including non-existence ones)"
+    );
     argList::addArgument("file...");
 
     argList::addNote
@@ -77,9 +82,15 @@ int main(int argc, char *argv[])
     // First handle no parameters
     if (args.size() == 1)
     {
-        if (args.found("list"))
+        if (args.found("list-all"))
         {
-            fileNameList results = findEtcDirs();
+            fileNameList results = etcDirs(false);
+            printList(results);
+            return 0;
+        }
+        else if (args.found("list"))
+        {
+            fileNameList results = etcDirs();
             printList(results);
             return 0;
         }

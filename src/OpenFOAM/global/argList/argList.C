@@ -871,8 +871,14 @@ void Foam::argList::parse
         if (Pstream::master() && bannerEnabled())
         {
             IOobject::writeBanner(Info, true)
-                << "Build  : " << foamVersion::build.c_str()
-                << " (OPENFOAM=" << OPENFOAM;
+                << "Build  : ";
+
+            if (foamVersion::build.size())
+            {
+                Info<< foamVersion::build.c_str() << ' ';
+            }
+
+            Info<< "OPENFOAM=" << foamVersion::api;
 
             if (foamVersion::patched())
             {
@@ -880,7 +886,7 @@ void Foam::argList::parse
                 Info<< " patch=" << foamVersion::patch.c_str();
             }
 
-            Info<< ')' << nl
+            Info<< nl
                 << "Arch   : " << foamVersion::buildArch << nl
                 << "Exec   : " << commandLine_.c_str() << nl
                 << "Date   : " << dateString.c_str() << nl
