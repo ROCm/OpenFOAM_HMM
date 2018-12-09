@@ -60,6 +60,13 @@ then
     (cd $WM_PROJECT_DIR/modules 2>/dev/null && wmake -all)
 fi
 
+# Count files in given directory. Ignore "Test-*" binaries.
+_foamCountDirEntries()
+{
+    (cd "$1" 2>/dev/null && find -mindepth 1 -maxdepth 1 -type f 2>/dev/null) |\
+        sed -e '\@/Test-@d' | wc -l
+}
+
 # Some summary information
 echo
 date "+%Y-%m-%d %H:%M:%S %z" 2>/dev/null || echo "date is unknown"
@@ -68,4 +75,11 @@ echo "  ${WM_PROJECT_DIR##*/}"
 echo "  $WM_COMPILER $WM_COMPILER_TYPE compiler"
 echo "  ${WM_OPTIONS}, with ${WM_MPLIB} ${FOAM_MPI}"
 echo
+echo "  api   = $(wmakeBuildInfo -show-api 2>/dev/null)"
+echo "  patch = $(wmakeBuildInfo -show-patch 2>/dev/null)"
+echo "  bin   = $(_foamCountDirEntries $FOAM_APPBIN) entries"
+echo "  lib   = $(_foamCountDirEntries $FOAM_LIBBIN) entries"
+echo
+echo "========================================"
+
 #------------------------------------------------------------------------------
