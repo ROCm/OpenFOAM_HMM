@@ -25,7 +25,7 @@ Typedef
     Foam::floatVector
 
 Description
-    A float version of vector
+    A Vector of values with float precision.
 
 SourceFiles
     floatVector.C

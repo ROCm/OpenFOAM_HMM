@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,44 +21,56 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::floatTensor
-
-Description
-    A Tensor of values with float precision
-
-SourceFiles
-    floatTensor.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef floatTensor_H
-#define floatTensor_H
+#include "doubleVector.H"
 
-#include "Tensor.H"
-#include "contiguous.H"
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-typedef Tensor<float> floatTensor;
-
-//- Data associated with floatTensor type are contiguous
-#if !defined(WM_SP)
 template<>
-inline bool contiguous<floatTensor>() {return true;}
-#endif
+const char* const Foam::doubleVector::vsType::typeName = "doubleVector";
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<>
+const char* const Foam::doubleVector::vsType::componentNames[] =
+{
+    "x", "y", "z"
+};
 
-} // End namespace Foam
+template<>
+const Foam::doubleVector Foam::doubleVector::vsType::zero
+(
+    doubleVector::uniform(0)
+);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<>
+const Foam::doubleVector Foam::doubleVector::vsType::one
+(
+    doubleVector::uniform(1)
+);
 
-#endif
+template<>
+const Foam::doubleVector Foam::doubleVector::vsType::max
+(
+    doubleVector::uniform(doubleScalarVGREAT)
+);
+
+template<>
+const Foam::doubleVector Foam::doubleVector::vsType::min
+(
+    doubleVector::uniform(-doubleScalarVGREAT)
+);
+
+template<>
+const Foam::doubleVector Foam::doubleVector::vsType::rootMax
+(
+    doubleVector::uniform(doubleScalarROOTVGREAT)
+);
+
+template<>
+const Foam::doubleVector Foam::doubleVector::vsType::rootMin
+(
+    doubleVector::uniform(-doubleScalarROOTVGREAT)
+);
+
 
 // ************************************************************************* //

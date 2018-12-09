@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,20 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
-    Foam::floatTensor
+    Foam::doubleVector
 
 Description
-    A Tensor of values with float precision
+    A Vector of values with double precision.
 
 SourceFiles
-    floatTensor.C
+    doubleVector.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef floatTensor_H
-#define floatTensor_H
+#ifndef doubleVector_H
+#define doubleVector_H
 
-#include "Tensor.H"
+#include "Vector.H"
 #include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -45,12 +45,12 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-typedef Tensor<float> floatTensor;
+typedef Vector<double> doubleVector;
 
-//- Data associated with floatTensor type are contiguous
-#if !defined(WM_SP)
+//- Data associated with doubleVector type are contiguous
+#if !defined(WM_DP)
 template<>
-inline bool contiguous<floatTensor>() {return true;}
+inline bool contiguous<doubleVector>() {return true;}
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -25,7 +25,7 @@ Typedef
     Foam::labelTensor
 
 Description
-    3D labelTensor obtained from generic Tensor
+    A Tensor of values using label (integer) representation.
 
 SourceFiles
     labelTensor.C
