@@ -1,3 +1,3 @@
 foamPvCore.C
 
-LIB = $(FOAM_LIBBIN)/libfoamPv-pv${ParaView_MAJOR}
+LIB = $(FOAM_LIBBIN)/libfoamPv-pv${PARAVIEW_API}

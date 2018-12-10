@@ -57,6 +57,7 @@ functions
     #includeFunc Q
     #include "surfaces"
     #include "forces"
+    #include "AMIWeights"
 }
 
 // ************************************************************************* //

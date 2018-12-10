@@ -34,6 +34,7 @@ namespace Foam
     // A limited selection of actions
     const Enum<topoSetSource::setAction> actionNames
     ({
+        { topoSetSource::NEW, "use" },  // Reuse NEW for "use" action name
         { topoSetSource::ADD, "add" },
         { topoSetSource::SUBTRACT, "subtract" },
         { topoSetSource::SUBSET, "subset" },
@@ -90,8 +91,15 @@ bool Foam::functionObjects::vtkWrite::updateSubset
 
         switch (action)
         {
+            case topoSetSource::NEW:  // "use"
             case topoSetSource::ADD:
             case topoSetSource::SUBTRACT:
+                if (topoSetSource::NEW == action)
+                {
+                    // "use": only use this selection (clear + ADD)
+                    // NEW is handled like ADD in applyToSet()
+                    cellsToSelect.reset();
+                }
                 source->applyToSet(action, cellsToSelect);
                 break;
 

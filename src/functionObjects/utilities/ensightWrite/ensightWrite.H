@@ -49,7 +49,7 @@ Description
         {
             box
             {
-                action  add;
+                action  use;
                 source  box;
                 box     (-0.1 -0.01 -0.1) (0.1 0.30 0.1);
             }
@@ -110,7 +110,7 @@ Description
 
 Note
     The region of interest is defined by the selection dictionary
-    as a set of actions (add,subtract,subset,invert).
+    as a set of actions (use,add,subtract,subset,invert).
     Omitting the selection dictionary is the same as specifying the
     conversion of all cells (in the selected regions).
     Omitting the patches entry is the same as specifying the conversion of all

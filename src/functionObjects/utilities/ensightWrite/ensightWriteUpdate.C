@@ -35,6 +35,7 @@ namespace Foam
     // A limited selection of actions
     const Enum<topoSetSource::setAction> actionNames
     ({
+        { topoSetSource::NEW, "use" },  // Reuse NEW for "use" action name
         { topoSetSource::ADD, "add" },
         { topoSetSource::SUBTRACT, "subtract" },
         { topoSetSource::SUBSET, "subset" },
@@ -92,8 +93,15 @@ bool Foam::functionObjects::ensightWrite::updateSubset
 
         switch (action)
         {
+            case topoSetSource::NEW:  // "use"
             case topoSetSource::ADD:
             case topoSetSource::SUBTRACT:
+                if (topoSetSource::NEW == action)
+                {
+                    // "use": only use this selection (clear + ADD)
+                    // NEW is handled like ADD in applyToSet()
+                    cellsToSelect.reset();
+                }
                 source->applyToSet(action, cellsToSelect);
                 break;
 
@@ -119,41 +127,6 @@ bool Foam::functionObjects::ensightWrite::updateSubset
 
     return true;
 }
-
-
-#if 0
-Foam::labelList Foam::functionObjects::ensightWrite::getSelectedPatches
-(
-    const polyBoundaryMesh& patches
-) const
-{
-    DynamicList<label> patchIDs(patches.size());
-
-    for (const polyPatch& pp : patches)
-    {
-        if (isType<emptyPolyPatch>(pp))
-        {
-            continue;
-        }
-        else if (isType<processorPolyPatch>(pp))
-        {
-            break; // No processor patches
-        }
-
-        if
-        (
-            selectPatches_.size()
-          ? selectPatches_.match(pp.name())
-          : true
-        )
-        {
-            patchIDs.append(pp.index());
-        }
-    }
-
-    return patchIDs.shrink();
-}
-#endif
 
 
 bool Foam::functionObjects::ensightWrite::update()

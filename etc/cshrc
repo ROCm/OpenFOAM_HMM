@@ -54,7 +54,7 @@ setenv WM_PROJECT_VERSION plus
 # If the directory naming does not match WM_PROJECT, need to change here
 set projectName="$WM_PROJECT"
 set projectDir=`lsof +p $$ |& \
-    sed -n -e 's@^[^/]*@@; s@\(/'"$projectName"'[^/]*\)/etc/cshrc[^/]*@\1@p'`
+    sed -ne 's@^[^/]*@@;\@/'"$projectName"'[^/]*/etc/cshrc@{s@/etc/cshrc.*@@p; q}'`
 
 # set projectDir="$HOME/OpenFOAM/OpenFOAM-$WM_PROJECT_VERSION"
 # set projectDir="/opt/OpenFOAM/OpenFOAM-$WM_PROJECT_VERSION"

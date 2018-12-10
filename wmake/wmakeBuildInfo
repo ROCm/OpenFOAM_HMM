@@ -30,6 +30,7 @@
 #
 # Environment
 #     - WM_PROJECT_DIR
+#     - WM_PROJECT_VERSION
 #     - WM_DIR              (unset defaults to WM_PROJECT_DIR/wmake)
 #
 # Note
@@ -179,6 +180,13 @@ declare -A metaInfo
 #
 getMakeInfo()
 {
+    if [ "${#makeInfo[*]}" -eq 4 ]
+    then
+        ##echo "use cached value for make info" 1>&2
+        return 0
+    fi
+    ##echo "get make info" 1>&2
+
     local api patch build branch
     makeInfo=()
 
@@ -193,8 +201,9 @@ getMakeInfo()
         patch="$(sed -ne 's@^patch *= *\([0-9][0-9]*\).*@\1@p' $metaInfoDir/build-info 2>/dev/null)"
     fi
 
-    # Build info from git
-    build="$(git --git-dir=$WM_PROJECT_DIR/.git log -1 --date='format:%y%m%d' --format='%h-%ad' 2>/dev/null)"
+    # Build info from git. Use short date format (YYYY-MM-DD) and sed instead
+    # of the newer --date='format:%y%m%d'
+    build="$(git --git-dir=$WM_PROJECT_DIR/.git log -1 --date=short --format='%h=%ad' 2>/dev/null|sed 's/-//g;s/=/-/')"
 
     # Branch info from git
     if [ -n "$build" ]
@@ -206,7 +215,6 @@ getMakeInfo()
     makeInfo[patch]="${patch:-0}"  # default is 0
     makeInfo[branch]="$branch"
     makeInfo[build]="$build"
-    makeInfo[cached]=true
 }
 
 
@@ -224,6 +232,13 @@ getMakeInfo()
 #
 getMetaInfo()
 {
+    if [ "${#metaInfo[*]}" -eq 4 ]
+    then
+        ##echo "use cached value for meta info" 1>&2
+        return 0
+    fi
+    ##echo "get meta info" 1>&2
+
     local api patch build branch
     metaInfo=()
 
@@ -242,7 +257,6 @@ getMetaInfo()
     metaInfo[patch]="${patch:-0}"  # default is 0
     metaInfo[branch]="$branch"
     metaInfo[build]="$build"
-    metaInfo[cached]=true
 }
 
 
@@ -257,14 +271,14 @@ getMetaInfo()
 #
 getApi()
 {
-    [ -n "${makeInfo[cached]}" ] || getMakeInfo
+    getMakeInfo
 
     # Local copy
     local api="${makeInfo[api]}"
 
     if [ -z "$api" ]
     then
-        [ -n "${metaInfo[cached]}" ] || getMetaInfo
+        getMetaInfo
         api="${metaInfo[api]}"
     fi
 
@@ -284,7 +298,7 @@ getApi()
 #
 getPatchLevel()
 {
-    [ -n "${metaInfo[cached]}" ] || getMetaInfo
+    getMetaInfo
 
     # Local copy
     local value="${metaInfo[patch]}"
@@ -301,10 +315,8 @@ getPatchLevel()
 # Report make info
 reportMakeInfo()
 {
-    local key
-
-    [ -n "${makeInfo[cached]}" ] || getMakeInfo
-    [ -n "${metaInfo[cached]}" ] || getMetaInfo
+    getMakeInfo
+    getMetaInfo
 
     local patch="${metaInfo[patch]}" # <- From meta-info only
     makeInfo[patch]="${patch:=0}"    # Extra safety
@@ -320,9 +332,7 @@ reportMakeInfo()
 # Report meta info
 reportMetaInfo()
 {
-    local key
-
-    [ -n "${metaInfo[cached]}" ] || getMetaInfo
+    getMetaInfo
 
     local patch="${metaInfo[patch]}" # <- From meta-info only
     metaInfo[patch]="${patch:=0}"    # Extra safety
@@ -343,14 +353,26 @@ checkDiff()
     local verbose="$1"
     local key diff
 
-    [ -n "${makeInfo[cached]}" ] || getMakeInfo
-    [ -n "${metaInfo[cached]}" ] || getMetaInfo
+    getMakeInfo
+    getMetaInfo
 
     for key in api patch branch build
     do
         if [ "${makeInfo[$key]}" != "${metaInfo[$key]}" ]
         then
-            diff="$diff $key"
+            case "$key" in
+            (branch | build)
+                # Only trigger when make info (branch, build) are non-empty
+                if [ -n "${makeInfo[$key]}" ]
+                then
+                    diff="$diff $key"
+                fi
+
+                ;;
+            (*)
+                diff="$diff $key"
+                ;;
+            esac
         fi
     done
 
@@ -365,7 +387,8 @@ checkDiff()
         done
     fi
 
-    test -z "$diff"
+    # No diffs, but never permit entirely empty values for build.
+    test -z "$diff" || test -z "${makeInfo[build]}${metaInfo[build]}"
 }
 
 
@@ -374,8 +397,8 @@ checkDiff()
 #
 performUpdate()
 {
-    [ -n "${makeInfo[cached]}" ] || getMakeInfo
-    [ -n "${metaInfo[cached]}" ] || getMetaInfo
+    getMakeInfo
+    getMetaInfo
 
     # Local copies of the make info
     local api="${makeInfo[api]}"
@@ -388,6 +411,9 @@ performUpdate()
     [ -n "$api" ] || api="${metaInfo[api]}"
     [ -n "$branch" ] || branch="${metaInfo[branch]}"
     [ -n "$build" ] || build="${metaInfo[build]}"
+
+    # Fallback to WM_PROJECT_VERSION alone
+    [ -n "$build" ] || build="${WM_PROJECT_VERSION:-unknown}"
 
     local outputFile
 
@@ -447,8 +473,8 @@ performFiltering()
         exit 2
     }
 
-    [ -n "${makeInfo[cached]}" ] || getMakeInfo
-    [ -n "${metaInfo[cached]}" ] || getMetaInfo
+    getMakeInfo
+    getMetaInfo
 
     # Local copies of the make info
     local api="${makeInfo[api]}"
@@ -479,7 +505,8 @@ performFiltering()
     if [ -z "$build" ]
     then
         build="${metaInfo[build]}"
-        build="nogit${build:+-$build}"
+        # Fallback to WM_PROJECT_VERSION
+        build="${build:-${WM_PROJECT_VERSION:-unknown}}"
     fi
 
     sed \

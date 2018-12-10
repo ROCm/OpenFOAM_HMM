@@ -22,7 +22,7 @@ vtkWrite
     {
         inletRegion
         {
-            action  add;
+            action  use;
             source  zone;
             zones   (leftFluid);
         }

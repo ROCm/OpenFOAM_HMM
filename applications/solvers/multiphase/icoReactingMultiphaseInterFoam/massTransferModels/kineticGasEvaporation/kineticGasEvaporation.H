@@ -25,38 +25,37 @@ Class
     Foam::meltingEvaporationModels::kineticGasEvaporation
 
 Description
-
     Considering the Hertz Knudsen formula, which gives the
     evaporation-condensation flux based on the kinetic theory for flat
     interface:
 
     \f[
-        Flux = C sqrt(M/(2 \pi \R T_{activate}))(\p - pSat)
+        Flux = C \sqrt{\frac{M}{2 \pi R T_{activate}}}(p - p_{sat})
     \f]
 
         where:
         \vartable
-            Flux    | mass flux rate [Kg/s/m2]
+            Flux    | mass flux rate [kg/s/m2]
             M       | molecular weight
             T_{activate} | saturation temperature
             C       | accomodation coefficient
             R       | universal gas constant
-            pSat    | saturation pressure
-            \p      | vapor partial pressure
+            p_{sat} | saturation pressure
+            p       | vapor partial pressure
         \endvartable
 
     The Clapeyron-Clausius equation relates the pressure to the temperature
     for the saturation condition:
 
     \f[
-        dp/dT = - L / (T*(nuv - nul))
+        \frac{dp}{dT} = - \frac{L}{T (\nu_v - \nu_l)}
     \f]
 
         where:
         \vartable
             L       | latent heat
-            nuv     | inverse of the vapor density
-            nul     | inverse of the liquid density
+            \nu_v   | inverse of the vapor density
+            \nu_l   | inverse of the liquid density
          \endvartable
 
 
@@ -64,10 +63,10 @@ Description
 
     \f[
         Flux =
-           2 C/(2 - C)
-           sqrt(M/(2 \pi \R T_{activate}))
+           2 \frac{C}{2 - C}
+           \sqrt{\frac{M}{2 \pi R T_{activate}}}
            L (\rho_{v}*\rho_{l}/(\rho_{l} - \rho_{v}))
-           (\T - T_{activate})/T_{activate}
+           (T - T_{activate})/T_{activate}
     \f]
 
     This assumes liquid and vapour are in equilibrium, then the accomodation
@@ -75,7 +74,7 @@ Description
     Hertz-Knudsen-Schrage.
 
     Based on the reference:
-    - Van P. Carey, “Liquid-Vapor Phase Change Phenomena”, ISBN 0-89116836,
+    - Van P. Carey, Liquid-Vapor Phase Change Phenomena, ISBN 0-89116836,
       1992, pp. 112-121.
 
 

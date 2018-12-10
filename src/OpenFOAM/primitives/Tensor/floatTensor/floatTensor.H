@@ -25,7 +25,7 @@ Typedef
     Foam::floatTensor
 
 Description
-    FloatTensor of scalars.
+    A Tensor of values with float precision
 
 SourceFiles
     floatTensor.C
@@ -48,9 +48,10 @@ namespace Foam
 typedef Tensor<float> floatTensor;
 
 //- Data associated with floatTensor type are contiguous
+#if !defined(WM_SP)
 template<>
 inline bool contiguous<floatTensor>() {return true;}
-
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

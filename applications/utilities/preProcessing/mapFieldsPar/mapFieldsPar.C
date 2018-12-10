@@ -288,8 +288,8 @@ int main(int argc, char *argv[])
         Info<< "Subtracting mapped source field from target" << endl;
     }
 
-    wordRes selectedFields;
-    args.readListIfPresent<wordRe>("fields", selectedFields);
+    // Non-mandatory
+    const wordRes selectedFields(args.getList<wordRe>("fields", false));
 
     const bool noLagrangian = args.found("noLagrangian");
 

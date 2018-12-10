@@ -95,6 +95,7 @@ static inline bool groupResourceDir(Foam::fileName& queried)
         is undefined (was this intentional?)
     #endif
 
+    queried.clear();
     return false;
 }
 
@@ -108,7 +109,13 @@ static inline bool groupResourceDir(Foam::fileName& queried)
 static inline bool projectResourceDir(Foam::fileName& queried)
 {
     queried = Foam::getEnv("WM_PROJECT_DIR")/"etc";
-    return (queried.size() > 3 && Foam::isDir(queried));
+    if (queried.size() > 3)
+    {
+        return Foam::isDir(queried);
+    }
+
+    queried.clear();
+    return false;
 }
 
 
@@ -119,8 +126,9 @@ Foam::fileNameList searchEtc
     bool (*accept)(const Foam::fileName&)
 )
 {
-    // Could use foamVersion::api, but this more direct.
-    const Foam::fileName version(std::to_string(OPENFOAM));
+    // Use foamVersion::api (instead of the OPENFOAM define) to ensure this
+    // stays properly synchronized with the build information
+    const Foam::fileName version(std::to_string(Foam::foamVersion::api));
 
     Foam::fileNameList list;
     Foam::fileName dir, candidate;
@@ -191,6 +199,42 @@ Foam::fileNameList searchEtc
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Foam::fileNameList Foam::etcDirs(bool test)
+{
+    // Use foamVersion::api (instead of the OPENFOAM define) to ensure this
+    // stays properly synchronized with the build information
+    const Foam::fileName version(std::to_string(Foam::foamVersion::api));
+
+    Foam::fileNameList list(5);
+    Foam::fileName dir;
+    label nDirs = 0;
+
+    // User resource directories
+    if (userResourceDir(dir) || (!test && dir.size()))
+    {
+        list[nDirs++] = dir/version;
+        list[nDirs++] = dir;
+    }
+
+    // Group (site) resource directories
+    if (groupResourceDir(dir) || (!test && dir.size()))
+    {
+        list[nDirs++] = dir/version;
+        list[nDirs++] = dir;
+    }
+
+    // Other (project) resource directory
+    if (projectResourceDir(dir) || (!test && dir.size()))
+    {
+        list[nDirs++] = dir;
+    }
+
+    list.resize(nDirs);
+
+    return list;
+}
+
 
 Foam::fileNameList Foam::findEtcDirs
 (

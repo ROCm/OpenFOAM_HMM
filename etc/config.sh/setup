@@ -41,7 +41,9 @@ unset WM_SHELL_FUNCTIONS
 #    It may also not be required at all, in which case a dummy "ThirdParty"
 #    directory inside of the OpenFOAM project directory.
 #
-# Note: only accept if the directory exists and contains a "Allwmake" file
+# Note: only accept if the directory exists and contains either
+#   a "Allwmake" file (source) or a "platforms" directory (runtime-only)
+
 export WM_THIRD_PARTY_DIR
 unset foundDir
 

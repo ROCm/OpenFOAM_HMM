@@ -77,15 +77,14 @@ endif
 while ( $#argv > 0 )
     switch ($argv[1])
     case ParaView*=*:
-        # name=value  -> setenv name value
-        eval "setenv $argv[1]:s/=/ /"
+        # name=value  -> set name=value
+        eval "set $argv[1]"
         breaksw
     endsw
     shift
 end
 
-if (! $?ParaView_VERSION ) set ParaView_VERSION=''
-
+if ($?ParaView_VERSION) then
 switch ("$ParaView_VERSION")
 case "":
     # empty - do nothing
@@ -209,8 +208,8 @@ default:
         setenv ParaView_DIR   # Defined but empty (used by foamPV alias)
     endif
     breaksw
-
 endsw
+endif
 
 unset cleaned archDir
 unset cmake cmake_version

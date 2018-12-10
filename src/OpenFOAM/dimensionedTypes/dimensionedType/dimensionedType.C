@@ -212,13 +212,14 @@ Foam::dimensioned<Type> Foam::dimensioned<Type>::lookupOrDefault
     const Type& defaultValue
 )
 {
-    return
-        dimensioned<Type>
-        (
-            name,
-            dims,
-            dict.lookupOrDefault<Type>(name, defaultValue)
-        );
+    if (dict.found(name))
+    {
+        return dimensioned<Type>(name, dims, dict);
+    }
+    else
+    {
+        return dimensioned<Type>(name, dims, defaultValue);
+    }
 }
 
 

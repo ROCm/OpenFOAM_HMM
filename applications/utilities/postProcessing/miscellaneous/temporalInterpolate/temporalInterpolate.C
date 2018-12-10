@@ -215,8 +215,8 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    wordRes selectedFields;
-    args.readListIfPresent<wordRe>("fields", selectedFields);
+    // Non-mandatory
+    const wordRes selectedFields(args.getList<wordRe>("fields", false));
 
     if (selectedFields.empty())
     {

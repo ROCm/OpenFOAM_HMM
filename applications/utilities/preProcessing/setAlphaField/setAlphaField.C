@@ -177,6 +177,11 @@ int main(int argc, char *argv[])
     isoCutCell icc(mesh, f);
     icc.volumeOfFluid(alpha1, f0);
 
+    if (dict.lookupOrDefault("invertAlpha", false))
+    {
+        alpha1 = 1 - alpha1;
+    }
+
     // Writing volScalarField alpha1
     ISstream::defaultPrecision(18);
     alpha1.write();

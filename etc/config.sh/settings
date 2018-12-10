@@ -146,7 +146,7 @@ export FOAM_LIBBIN="$WM_PROJECT_DIR/platforms/$WM_OPTIONS/lib"
 siteDir="$WM_PROJECT_DIR/site"
 
 # User override
-if [ -d "$WM_PROJECT_SITE" -a "$WM_PROJECT_SITE" != "$siteDir" ]
+if [ -d "$WM_PROJECT_SITE" ] && [ "$WM_PROJECT_SITE" != "$siteDir" ]
 then
     siteDir="$WM_PROJECT_SITE"
     export WM_PROJECT_SITE
@@ -287,7 +287,7 @@ GCC_NOT_FOUND
 
     # Add gmp/mpfr/mpc libraries to run-time environment.
     # Require that they exist, automatically find lib64/ or lib/.
-    _foamAddLibAuto $gmpDir   && \
+    _foamAddLibAuto $gmpDir  && \
         export GMP_ARCH_PATH=$gmpDir    # For non-system CGAL
 
     _foamAddLibAuto $mpfrDir && \
