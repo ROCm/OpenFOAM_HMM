@@ -371,12 +371,15 @@ public:
             const T& deflt
         ) const;
 
-        //- Read a List of values from the named option,
+        //- Get a List of values from the named option,
         //- treating a single entry like a list of size 1.
+        //  \param optName  the option name to read from
+        //  \param mandatory if the option is non-mandatory, the behaviour
+        //      is similar to readListIfPresent().
         template<class T>
-        inline List<T> getList(const word& optName) const;
+        inline List<T> getList(const word& optName, bool mandatory=true) const;
 
-        //- If named option is present, read a List of values
+        //- If named option is present, get a List of values
         //- treating a single entry like a list of size 1.
         //  \return true if the named option was found.
         template<class T>

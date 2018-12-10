@@ -322,14 +322,22 @@ inline Foam::List<T> Foam::argList::getList(const label index) const
 
 
 template<class T>
-inline Foam::List<T> Foam::argList::getList(const word& optName) const
+inline Foam::List<T> Foam::argList::getList
+(
+    const word& optName,
+    bool mandatory
+) const
 {
-    ITstream is(optName, options_[optName]);
-
     List<T> list;
-    readList(is, list);
 
-    checkITstream(is, optName);
+    if (mandatory || found(optName))
+    {
+        ITstream is(optName, options_[optName]);
+
+        readList(is, list);
+
+        checkITstream(is, optName);
+    }
 
     return list;
 }
@@ -345,6 +353,7 @@ inline bool Foam::argList::readListIfPresent
     if (found(optName))
     {
         ITstream is(optName, options_[optName]);
+
         readList(is, list);
 
         checkITstream(is, optName);
