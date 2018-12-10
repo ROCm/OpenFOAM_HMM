@@ -40,10 +40,6 @@ void Foam::fv::actuationDiskSource::addActuationDiskAxialInertialResistance
 {
     scalar a = 1.0 - Cp_/Ct_;
     vector uniDiskDir = diskDir_/mag(diskDir_);
-    tensor E(Zero);
-    E.xx() = uniDiskDir.x();
-    E.yy() = uniDiskDir.y();
-    E.zz() = uniDiskDir.z();
 
     vector upU = vector(VGREAT, VGREAT, VGREAT);
     scalar upRho = VGREAT;
