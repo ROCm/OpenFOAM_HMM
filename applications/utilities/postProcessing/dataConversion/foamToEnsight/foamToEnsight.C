@@ -61,7 +61,7 @@ Usage
       - \par -patches patch or patch list
         Specify particular patches to write.
 
-      - \par -faceZones patch or zone list
+      - \par -faceZones zone or zone list
         Specify faceZones to write, with wildcards
 
       - \par -cellZone zoneName

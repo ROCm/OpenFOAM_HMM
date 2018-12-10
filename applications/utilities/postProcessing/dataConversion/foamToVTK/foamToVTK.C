@@ -70,6 +70,10 @@ Usage
       - \par -pointSet \<name\>
         Restrict conversion to the faceSet or pointSet.
 
+      - \par -faceZones zone or zone list
+        Specify single faceZone or or multiple faceZones (name or regex)
+        to write
+
       - \par -nearCellValue
         Output cell value on patches instead of patch value itself
 
@@ -84,9 +88,6 @@ Usage
 
       - \par -no-point-data
         Suppress conversion of pointFields. No interpolated PointData.
-
-      - \par -noFaceZones
-        Suppress conversion of surface fields on faceZones
 
       - \par -poly-decomp
         Decompose polyhedral cells into tets/pyramids
@@ -308,6 +309,13 @@ int main(int argc, char *argv[])
         "Convert specified pointSet only",
         true  // mark as an advanced option
     );
+    argList::addOption
+    (
+        "faceZones",
+        "wordRes",
+        "Specify single or multiple faceZones to write\n"
+        "Eg, 'cells' or '( slice \"mfp-.*\" )'."
+    );
 
     argList::addOption
     (
@@ -397,12 +405,10 @@ int main(int argc, char *argv[])
         " Eg, 'outlet' or '( inlet \".*Wall\" )'",
         true  // mark as an advanced option
     );
-
-    argList::addBoolOption
+    argList::ignoreOptionCompat
     (
-        "noFaceZones",
-        "Suppress conversion of surface fields on faceZones",
-        true  // mark as an advanced option
+        {"noFaceZones", 1806},  // faceZones are only enabled on demand
+        false                   // bool option, no argument
     );
     argList::ignoreOptionCompat
     (
@@ -435,7 +441,6 @@ int main(int argc, char *argv[])
     const bool doFiniteArea  = args.found("finiteAreaFields");
     const bool doSurfaceFields = args.found("surfaceFields");
 
-    const bool doFaceZones   = !args.found("noFaceZones") && doInternal;
     const bool oneBoundary   = args.found("one-boundary") && doBoundary;
     const bool nearCellValue = args.found("nearCellValue") && doBoundary;
     const bool allRegions    = args.found("allRegions");
@@ -471,9 +476,13 @@ int main(int argc, char *argv[])
         }
     }
 
+    // Can be specified as empty (ie, no fields)
     wordRes selectedFields;
     const bool useFieldFilter =
         args.readListIfPresent<wordRe>("fields", selectedFields);
+
+    // Non-mandatory
+    const wordRes selectedFaceZones(args.getList<wordRe>("faceZones", false));
 
     #include "createTime.H"
 

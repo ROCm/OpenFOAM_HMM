@@ -149,7 +149,7 @@ Description
 
     // Write faceZones (POLYDATA file, one for each zone)
 
-    if (doFaceZones && !mesh.faceZones().empty())
+    if (!selectedFaceZones.empty() && !mesh.faceZones().empty())
     {
         if (nSurfaceScalarField == -1)
         {
@@ -187,6 +187,11 @@ Description
 
         for (const faceZone& fz : mesh.faceZones())
         {
+            if (!selectedFaceZones.match(fz.name()))
+            {
+                continue;
+            }
+
             indirectPrimitivePatch pp
             (
                 IndirectList<face>(mesh.faces(), fz),
