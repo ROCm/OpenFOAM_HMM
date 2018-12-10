@@ -18,5 +18,5 @@ LIB_LIBS = \
     -lconversion \
     -lgenericPatchFields \
     -llagrangian \
-    -L$(FOAM_LIBBIN) -lfoamPv-pv$(PARAVIEW_API) \
+    -L$(FOAM_LIBBIN) -lfoamPv-pv${PARAVIEW_API} \
     $(GLIBS)
