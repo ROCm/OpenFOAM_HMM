@@ -146,6 +146,11 @@ protected:
             return patchStart_;
         }
 
+        const labelList& patchIndex() const
+        {
+            return patchIndex_;
+        }
+
         const labelList& patchFaceLabels() const
         {
             return patchFaceLabels_;
