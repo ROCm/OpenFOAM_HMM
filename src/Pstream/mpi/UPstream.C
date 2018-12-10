@@ -187,6 +187,9 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
             Pout<< "UPstream::init : mpi-buffer-size " << bufSize << endl;
         }
 
+        // TBD: could add error handling here.
+        // Delete allocated and leave if we fail to attach the buffer?
+
         MPI_Buffer_attach(new char[bufSize], bufSize);
     }
     #endif
@@ -225,10 +228,19 @@ void Foam::UPstream::exit(int errnum)
 
     #ifndef SGIMPI
     {
-        int size;
-        char* buff;
-        MPI_Buffer_detach(&buff, &size);
-        delete[] buff;
+        // Some MPI notes suggest that the return code is MPI_SUCCESS when
+        // no buffer is attached.
+        // Be extra careful and require a non-zero size as well.
+
+        int bufSize = 0;
+        char* buf = nullptr;
+
+        flag = MPI_Buffer_detach(&buf, &bufSize);
+
+        if (MPI_SUCCESS == flag && bufSize)
+        {
+            delete[] buf;
+        }
     }
     #endif
 
