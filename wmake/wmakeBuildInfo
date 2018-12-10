@@ -201,8 +201,9 @@ getMakeInfo()
         patch="$(sed -ne 's@^patch *= *\([0-9][0-9]*\).*@\1@p' $metaInfoDir/build-info 2>/dev/null)"
     fi
 
-    # Build info from git
-    build="$(git --git-dir=$WM_PROJECT_DIR/.git log -1 --date='format:%y%m%d' --format='%h-%ad' 2>/dev/null)"
+    # Build info from git. Use short date format (YYYY-MM-DD) and sed instead
+    # of the newer --date='format:%y%m%d'
+    build="$(git --git-dir=$WM_PROJECT_DIR/.git log -1 --date=short --format='%h=%ad' 2>/dev/null|sed 's/-//g;s/=/-/')"
 
     # Branch info from git
     if [ -n "$build" ]
