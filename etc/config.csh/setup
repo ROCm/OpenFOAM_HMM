@@ -40,11 +40,14 @@ source "$WM_PROJECT_DIR/etc/config.csh/functions"
 #    It may also not be required at all, in which case a dummy "ThirdParty"
 #    directory inside of the OpenFOAM project directory.
 #
-# Note: only accept if the directory exists and contains a "Allwmake" file
+# Note: only accept if the directory exists and contains either
+#   a "Allwmake" file (source) or a "platforms" directory (runtime-only)
 
 setenv WM_THIRD_PARTY_DIR
 set foundDir=''
+
 _foamEcho "Locating ThirdParty directory"
+
 foreach foamDir (\
     "$WM_PROJECT_DIR/ThirdParty" \
     "$prefixDir/ThirdParty-$WM_PROJECT_VERSION" \
