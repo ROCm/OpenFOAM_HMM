@@ -129,7 +129,7 @@ process()
     if grep -F -q "SYNOPSIS" "$tmpFile" 2>/dev/null
     then
         cat "$tmpFile" | \
-            sed -e "${sedFilter:-p}" | "${gzipFilter:-cat}" \
+            sed -e "${sedFilter}" | "${gzipFilter:-cat}" \
             >| "$outFile${gzipFilter:+.gz}"
 
         echo "$outFile${gzipFilter:+.gz}" 1>&2
