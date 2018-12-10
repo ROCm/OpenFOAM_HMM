@@ -16,6 +16,9 @@
 # Description
 #     Quickly test the tutorials and write out the scheme/solver information
 #
+# Environment
+#     The entire OpenFOAM environment (WM_PROJECT_DIR, etc)
+#
 #------------------------------------------------------------------------------
 cd ${0%/*} || exit 1    # Run from this directory
 
@@ -128,24 +131,18 @@ EOF
 
 
 #
-# Location of the main controlDict
+# Location of the user or project controlDict
 #
-unset MAIN_CONTROL_DICT
-
-for i in \
-    $HOME/.$WM_PROJECT/$WM_PROJECT_VERSION \
-    $HOME/.$WM_PROJECT \
-    $WM_PROJECT_DIR/etc \
-    ;
-do
-    if [ -f "$i/controlDict" ]
+if MAIN_CONTROL_DICT="$($WM_PROJECT_DIR/bin/foamEtcFile -mode=uo controlDict)"
+then
+    if [ -e "${MAIN_CONTROL_DICT}.orig" ]
     then
-        MAIN_CONTROL_DICT="$i/controlDict"
-        break
+        die "File ${MAIN_CONTROL_DICT}.orig already exists" \
+            "Did Alltest fail in some way and then run again?"
     fi
-done
-
-[ -f "$MAIN_CONTROL_DICT" ] || usage "Main controlDict not found"
+else
+    die "No main (user or project) controlDict found"
+fi
 
 
 TUTORIALS_DIR=$ROOT
@@ -181,13 +178,6 @@ then
     echo "Removing old build directory: $buildDir" 1>&2
     rm -rf $buildDir
 fi
-
-if [ -e ${MAIN_CONTROL_DICT}.orig ]
-then
-    die "File ${MAIN_CONTROL_DICT}.orig already exists" \
-        "Did Alltest fail in some way and then run again?"
-fi
-
 
 unset gitbase
 

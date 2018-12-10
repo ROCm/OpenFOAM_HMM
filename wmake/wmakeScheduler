@@ -43,8 +43,10 @@
 #
 #     Sources the relevant cshrc/bashrc if not set.
 #
-#     WM_PROJECT_DIR, WM_PROJECT and WM_PROJECT_VERSION will have been set
-#     before calling this routine.
+# Environment
+#     - WM_PROJECT_DIR
+#     - WM_PROJECT
+#     - WM_PROJECT_API
 #
 #-------------------------------------------------------------------------------
 Script=${0##*/}
@@ -52,7 +54,7 @@ Script=${0##*/}
 # csh sets HOST, bash sets HOSTNAME
 : ${HOST:=$HOSTNAME}
 
-lockDir=$HOME/.$WM_PROJECT/.wmake
+lockDir="$HOME/.$WM_PROJECT/.wmake"
 
 # Fallback - 1 core on current host
 : ${WM_HOSTS:=$HOST:1}
@@ -86,15 +88,17 @@ case $SHELL in
     ;;
 esac
 
-# Check ~/.$WM_PROJECT/$WM_PROJECT_VERSION/
+# Same as foamEtcFile -mode=uo bashrc
+#
+# Check ~/.$WM_PROJECT/$WM_PROJECT_API/
 # Check ~/.$WM_PROJECT/
-# Check <installedProject>/etc/
+# Check projectDir/etc/
 if [ -n "$WM_PROJECT" ]
 then
     for i in \
-        $HOME/.$WM_PROJECT/$WM_PROJECT_VERSION \
-        $HOME/.$WM_PROJECT \
-        $WM_PROJECT_DIR/etc \
+        "$HOME/.$WM_PROJECT/$WM_PROJECT_API" \
+        "$HOME/.$WM_PROJECT" \
+        "$WM_PROJECT_DIR/etc" \
         ;
     do
         if [ -f "$i/$shellRc" ]
@@ -144,7 +148,6 @@ set -o pipefail
 #------------------------------------------------------------------------------
 colourPipe()
 {
-
     if tty -s <&1       #    [ "$1" ]
     then
     (

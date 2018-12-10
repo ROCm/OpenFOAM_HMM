@@ -29,6 +29,7 @@
 #     Driver script to run mpi jobs with the processes in a separate XTerm
 #     or to separate log files.
 #     Requires bash on all processors.
+#
 #------------------------------------------------------------------------------
 . $WM_PROJECT_DIR/bin/tools/RunFunctions    # Run functions
 
@@ -193,15 +194,17 @@ fi
 
 sourceFoam=false    # Fallback command
 
-# check ~/.$WM_PROJECT/$WM_PROJECT_VERSION/
+# Same as foamEtcFile -mode=uo bashrc
+#
+# check ~/.$WM_PROJECT/$WM_PROJECT_API/
 # check ~/.$WM_PROJECT/
 # check <installedProject>/etc/
 if [ -n "$WM_PROJECT" ]
 then
     for i in \
-        $HOME/.$WM_PROJECT/$WM_PROJECT_VERSION \
-        $HOME/.$WM_PROJECT \
-        $WM_PROJECT_DIR/etc \
+        "$HOME/.$WM_PROJECT/$WM_PROJECT_API" \
+        "$HOME/.$WM_PROJECT" \
+        "$WM_PROJECT_DIR/etc" \
         ;
     do
         if [ -f "$i/bashrc" ]
