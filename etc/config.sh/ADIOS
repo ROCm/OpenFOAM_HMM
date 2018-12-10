@@ -49,7 +49,7 @@ then
     # outside of ThirdParty and should be added to the path.
 
     ending="${ADIOS_ARCH_PATH##*-}"
-    if [ "$ending" != none -a "$ending" != system ]
+    if [ "$ending" != none ] && [ "$ending" != system ]
     then
         # PATH was already cleaned by etc/bashrc caller
         _foamAddPath $ADIOS_ARCH_PATH/bin

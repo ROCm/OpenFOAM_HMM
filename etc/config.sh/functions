@@ -105,7 +105,7 @@ then
         foamVar_end="${1##*-}"
 
         # Do not add (none) or a system directory
-        if [ -z "$foamVar_prefix" -o "$foamVar_end" = none -o "$foamVar_end" = system ]
+        if [ -z "$foamVar_prefix" ] || [ "$foamVar_end" = none ] || [ "$foamVar_end" = system ]
         then
             unset foamVar_prefix foamVar_end
             return 1
