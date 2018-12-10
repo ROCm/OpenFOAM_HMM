@@ -25,7 +25,7 @@ License
 
 #include "AMIWeights.H"
 #include "fvMesh.H"
-#include "vtkSurfaceWriter.H"
+#include "foamVtkSurfaceWriter.H"
 #include "PatchTools.H"
 #include "cyclicACMIPolyPatch.H"
 #include "addToRunTimeSelectionTable.H"
@@ -212,8 +212,6 @@ void Foam::functionObjects::AMIWeights::writeWeightField
     const word& side
 ) const
 {
-    vtkSurfaceWriter writer;
-
     // Collect geometry
     labelList pointToGlobal;
     labelList uniqueMeshPointLabels;
@@ -251,23 +249,13 @@ void Foam::functionObjects::AMIWeights::writeWeightField
         mergedWeights
     );
 
-    if (Pstream::master())
-    {
-        writer.write
-        (
-            baseTimeDir(),
-            cpp.name() + "_" + side,
-            meshedSurfRef(mergedPoints, mergedFaces),
-            "weightsSum",
-            mergedWeights,
-            false
-        );
-    }
+    const bool isACMI = isA<cyclicACMIPolyPatch>(cpp);
 
-    if (isA<cyclicACMIPolyPatch>(cpp))
+    scalarField mergedMask;
+    if (isACMI)
     {
         const cyclicACMIPolyPatch& pp = refCast<const cyclicACMIPolyPatch>(cpp);
-        scalarField mergedMask;
+
         globalFaces().gather
         (
             UPstream::worldComm,
@@ -279,18 +267,30 @@ void Foam::functionObjects::AMIWeights::writeWeightField
             pp.mask(),
             mergedMask
         );
+    }
 
-        if (Pstream::master())
+    if (Pstream::master())
+    {
+        instant inst(mesh_.time().value(), mesh_.time().timeName());
+
+        vtk::surfaceWriter writer
+        (
+            mergedPoints,
+            mergedFaces,
+            (baseTimeDir()/cpp.name() + "_" + side),
+            false // serial: master-only
+        );
+
+        writer.setTime(inst);
+        writer.writeTimeValue();
+        writer.writeGeometry();
+
+        writer.beginCellData(1 + (isACMI ? 1 : 0));
+        writer.write("weightsSum", mergedWeights);
+
+        if (isACMI)
         {
-            writer.write
-            (
-                baseTimeDir(),
-                cpp.name() + "_" + side,
-                meshedSurfRef(mergedPoints, mergedFaces),
-                "mask",
-                mergedMask,
-                false
-            );
+            writer.write("mask", mergedMask);
         }
     }
 }
