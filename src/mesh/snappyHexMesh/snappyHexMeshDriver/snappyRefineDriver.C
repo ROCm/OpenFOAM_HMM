@@ -2189,7 +2189,7 @@ Foam::label Foam::snappyRefineDriver::directionalSmooth
                         baseMesh,
                         nSumXEdges,
                         plusEqOp<label>(),
-                        0
+                        label(0)
                     );
 
                     forAll(pointLabels, i)
@@ -2224,14 +2224,14 @@ Foam::label Foam::snappyRefineDriver::directionalSmooth
                         baseMesh,
                         sumOther,
                         plusEqOp<scalar>(),
-                        scalar(0.0)
+                        scalar(0)
                     );
                     syncTools::syncPointList
                     (
                         baseMesh,
                         nSumOther,
                         plusEqOp<label>(),
-                        0
+                        label(0)
                     );
 
                     forAll(pointLabels, i)
