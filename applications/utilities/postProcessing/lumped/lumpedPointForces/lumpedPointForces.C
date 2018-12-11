@@ -81,8 +81,8 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Extract force/moment information from existing calculations based "
-        "on the lumpedPoints pressure zones."
+        "Extract force/moment information from existing calculations based"
+        " on the lumpedPoints pressure zones."
     );
 
     argList::addBoolOption

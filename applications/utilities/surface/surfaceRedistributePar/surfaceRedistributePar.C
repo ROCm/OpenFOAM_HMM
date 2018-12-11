@@ -104,9 +104,9 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Redistribute a triSurface. "
-        "The specified surface must be located in the constant/triSurface "
-        "directory"
+        "Redistribute a triSurface."
+        " The specified surface must be located in the constant/triSurface"
+        " directory"
     );
 
     argList::addArgument("triSurfaceMesh");

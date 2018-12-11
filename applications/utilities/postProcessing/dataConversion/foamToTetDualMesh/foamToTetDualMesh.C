@@ -28,7 +28,7 @@ Group
     grpPostProcessingUtilities
 
 Description
-    Converts polyMesh results to tetDualMesh.
+    Convert polyMesh results to tetDualMesh.
 
 \*---------------------------------------------------------------------------*/
 
@@ -140,6 +140,11 @@ void ReadAndMapFields
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Convert polyMesh results to tetDualMesh"
+    );
+
     #include "addOverwriteOption.H"
     #include "addTimeOptions.H"
 

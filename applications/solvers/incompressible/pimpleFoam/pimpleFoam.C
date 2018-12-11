@@ -79,6 +79,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for incompressible, turbulent flow"
+        " of Newtonian fluids on a moving mesh."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

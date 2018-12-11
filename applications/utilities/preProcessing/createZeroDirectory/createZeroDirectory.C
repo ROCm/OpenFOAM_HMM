@@ -208,6 +208,12 @@ void createFieldFiles
 // Main program:
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Create a 0/ directory with fields appropriate for the chosen"
+        " solver and turbulence model."
+    );
+
     argList::addOption
     (
         "templateDir",

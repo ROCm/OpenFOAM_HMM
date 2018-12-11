@@ -58,6 +58,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for laminar or turbulent flow"
+        " of weakly compressible fluids for low Mach number"
+        " aeroacoustic applications."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

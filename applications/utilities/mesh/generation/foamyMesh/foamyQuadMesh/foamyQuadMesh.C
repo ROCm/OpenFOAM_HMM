@@ -53,6 +53,11 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Conformal Voronoi 2D automatic mesh generator"
+    );
+
     argList::noParallel();
     argList::addOption("pointsFile", "filename");
 

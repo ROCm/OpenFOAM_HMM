@@ -41,6 +41,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Passive finiteArea scalar transport on a sphere"
+    );
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"

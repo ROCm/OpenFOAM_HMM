@@ -86,6 +86,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for compressible premixed/partially-premixed combustion with"
+        " turbulence modelling."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

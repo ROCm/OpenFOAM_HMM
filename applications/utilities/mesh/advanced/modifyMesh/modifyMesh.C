@@ -28,7 +28,7 @@ Group
     grpMeshAdvancedUtilities
 
 Description
-    Manipulates mesh elements.
+    Manipulate mesh elements.
 
     Actions are:
         (boundary)points:
@@ -336,6 +336,11 @@ label findCell(const primitiveMesh& mesh, const point& nearPoint)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Manipulate mesh elements.\n"
+        "For example, moving points, splitting/collapsing edges etc."
+    );
     #include "addOverwriteOption.H"
     #include "addDictOption.H"
 

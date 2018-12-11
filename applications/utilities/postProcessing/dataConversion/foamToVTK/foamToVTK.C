@@ -248,7 +248,10 @@ vtk::outputOptions getOutputOptions(const argList& args)
 
 int main(int argc, char *argv[])
 {
-    argList::addNote("OpenFOAM to VTK writer");
+    argList::addNote
+    (
+        "General OpenFOAM to VTK file writer"
+    );
     timeSelector::addOptions();
 
     // Infrequently needed, mark as advanced.

@@ -45,6 +45,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for trans-sonic/supersonic, turbulent flow"
+        " of a compressible gas.\n"
+        "With optional mesh motion and mesh topology changes."
+    );
+
     #include "postProcess.H"
 
     #include "setRootCase.H"

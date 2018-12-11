@@ -28,8 +28,8 @@ Group
     grpSurfaceUtilities
 
 Description
-    A surface analysis tool which sub-sets the triSurface
-    to choose only a part of interest. Based on subsetMesh.
+    A surface analysis tool that subsets the triSurface to choose a
+    region of interest. Based on subsetMesh.
 
 \*---------------------------------------------------------------------------*/
 
@@ -51,6 +51,12 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "A surface analysis tool that subsets the triSurface to choose a"
+        " region of interest."
+    );
+
     argList::noParallel();
     argList::addArgument("surfaceSubsetDict");
     argList::addArgument("surfaceFile");

@@ -39,6 +39,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Molecular dynamics solver for fluid dynamics."
+    );
+
     #define NO_CONTROL
     #include "postProcess.H"
 

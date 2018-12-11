@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Converts an AVL/FIRE polyhedral mesh to OPENFOAM
+    Convert AVL/FIRE polyhedral mesh to OpenFOAM format
 
 Usage
     \b fireToFoam [OPTION] firePolyMesh
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Convert AVL/FIRE polyhedral mesh to OPENFOAM format"
+        "Convert AVL/FIRE polyhedral mesh to OpenFOAM format"
     );
 
     argList::noParallel();

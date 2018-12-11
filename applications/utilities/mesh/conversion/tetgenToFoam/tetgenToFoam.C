@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Converts .ele and .node and .face files, written by tetgen.
+    Convert tetgen .ele and .node and .face files to an OpenFOAM mesh.
 
     Make sure to use add boundary attributes to the smesh file
     (5 fifth column in the element section)
@@ -101,6 +101,11 @@ label findFace(const primitiveMesh& mesh, const face& f)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Convert tetgen .ele and .node and .face files to an OpenFOAM mesh"
+    );
+
     argList::addArgument("file prefix");
     argList::addBoolOption
     (

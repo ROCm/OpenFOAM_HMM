@@ -51,6 +51,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for compressible, turbulent flow"
+        " with coal and limestone clouds, energy sources and combustion."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

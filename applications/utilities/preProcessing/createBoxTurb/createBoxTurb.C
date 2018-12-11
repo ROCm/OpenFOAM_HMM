@@ -25,7 +25,7 @@ Application
     createBoxTurb
 
 Description
-    Creates a box of isotropic turbulence based on a user-specified
+    Create a box of isotropic turbulence based on a user-specified
     energy spectrum.
 
     Based on the reference
@@ -67,6 +67,12 @@ Foam::vector randomUnitVector(Random& rndGen)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Create a box of isotropic turbulence based on a user-specified"
+        " energy spectrum."
+    );
+
     argList::addBoolOption
     (
         "createBlockMesh",

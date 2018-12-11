@@ -1462,7 +1462,10 @@ void extrudeGeometricProperties
 
 int main(int argc, char *argv[])
 {
-    argList::addNote("Create region mesh by extruding a faceZone or faceSet");
+    argList::addNote
+    (
+        "Create region mesh by extruding a faceZone or faceSet"
+    );
 
     #include "addRegionOption.H"
     #include "addOverwriteOption.H"

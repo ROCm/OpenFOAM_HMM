@@ -45,6 +45,10 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Conformal Voronoi automatic mesh generator"
+    );
     argList::addBoolOption
     (
         "checkGeometry",

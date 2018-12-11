@@ -44,6 +44,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Steady-state solver for incompressible, turbulent flow"
+        " of non-Newtonian fluids in a single rotating frame."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

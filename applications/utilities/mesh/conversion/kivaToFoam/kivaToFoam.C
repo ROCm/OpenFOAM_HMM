@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Converts a KIVA3v grid to OpenFOAM format.
+    Convert a KIVA3v grid to OpenFOAM.
 
 \*---------------------------------------------------------------------------*/
 
@@ -58,6 +58,10 @@ enum kivaVersions
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Convert a KIVA3v grid to OpenFOAM"
+    );
     argList::noParallel();
     argList::addOption
     (

@@ -47,6 +47,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Incompressible Navier-Stokes solver with inclusion of a wave height"
+        " field to enable single-phase free-surface approximations."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

@@ -54,6 +54,10 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Refine by splitting all three edges of triangle"
+    );
     argList::noParallel();
     argList::addArgument("surfaceFile");
     argList::addArgument("output surfaceFile");

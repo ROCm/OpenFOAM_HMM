@@ -58,6 +58,10 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Plot3d mesh (ascii/formatted format) converter"
+    );
     argList::noParallel();
     argList::addArgument("PLOT3D geom file");
     argList::addOption

@@ -28,7 +28,7 @@ Group
     grpSurfaceUtilities
 
 Description
-    Checks geometric and topological quality of a surface.
+    Check geometric and topological quality of a surface.
 
 Usage
     \b surfaceCheck [OPTION] surfaceFile
@@ -317,6 +317,11 @@ void writeEdgeSet
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Check geometric and topological quality of a surface"
+    );
+
     argList::noParallel();
     argList::addArgument("surfaceFile");
     argList::addBoolOption

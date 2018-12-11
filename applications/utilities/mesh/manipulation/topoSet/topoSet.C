@@ -28,7 +28,8 @@ Group
     grpMeshManipulationUtilities
 
 Description
-    Operates on cellSets/faceSets/pointSets through a dictionary.
+    Operates on cellSets/faceSets/pointSets through a dictionary,
+    normally system/topoSetDict
 
 \*---------------------------------------------------------------------------*/
 
@@ -199,7 +200,13 @@ polyMesh::readUpdateState meshReadUpdate(polyMesh& mesh)
 
 int main(int argc, char *argv[])
 {
-    timeSelector::addOptions(true, false);
+    argList::addNote
+    (
+        "Operates on cellSets/faceSets/pointSets through a dictionary,"
+        " normally system/topoSetDict"
+    );
+
+    timeSelector::addOptions(true, false);  // constant(true), zero(false)
     #include "addDictOption.H"
     #include "addRegionOption.H"
     argList::addBoolOption

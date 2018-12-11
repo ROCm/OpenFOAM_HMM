@@ -38,6 +38,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for electrostatics."
+    );
+
     #include "addCheckCaseOptions.H"
     #include "setRootCase.H"
 

@@ -40,12 +40,14 @@ Description
 
 int main(int argc, char *argv[])
 {
-    #include "setRootCase.H"
+    argList::addNote
+    (
+        "A solver utility for moving meshes for engine calculations"
+    );
 
+    #include "setRootCase.H"
     #include "createEngineTime.H"
     #include "createEngineMesh.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 

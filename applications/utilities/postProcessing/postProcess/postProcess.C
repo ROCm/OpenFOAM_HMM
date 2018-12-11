@@ -133,7 +133,14 @@ void executeFunctionObjects
 
 int main(int argc, char *argv[])
 {
-    Foam::timeSelector::addOptions();
+    argList::addNote
+    (
+        "Execute the set of functionObjects specified in the selected"
+        " dictionary or on the command-line for the"
+        " selected set of times on the selected set of fields"
+    );
+
+    timeSelector::addOptions();
     #include "addProfilingOption.H"
     #include "addRegionOption.H"
     #include "addFunctionObjectOptions.H"
@@ -150,7 +157,7 @@ int main(int argc, char *argv[])
     }
 
     #include "createTime.H"
-    Foam::instantList timeDirs = Foam::timeSelector::select0(runTime, args);
+    instantList timeDirs = timeSelector::select0(runTime, args);
     #include "createNamedMesh.H"
 
     // Initialize the set of selected fields from the command-line options

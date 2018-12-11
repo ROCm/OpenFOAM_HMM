@@ -97,6 +97,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Overset potential flow solver which solves for the velocity potential"
+    );
+
     argList::addOption
     (
         "pName",

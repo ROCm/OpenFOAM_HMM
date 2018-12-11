@@ -25,7 +25,7 @@ Application
     foamDictionary
 
 Description
-    Interrogates and manipulates dictionaries.
+    Interrogate and manipulate dictionaries.
 
 Usage
     \b foamDictionary [OPTION] dictionary
@@ -262,7 +262,10 @@ void removeDict(dictionary& dict, const dictionary& dictToRemove)
 
 int main(int argc, char *argv[])
 {
-    argList::addNote("Manipulates dictionaries");
+    argList::addNote
+    (
+        "Interrogate and manipulate dictionaries"
+    );
 
     argList::noBanner();
     argList::noJobInfo();

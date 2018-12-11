@@ -28,8 +28,7 @@ Group
     grpPostProcessingUtilitie
 
 Description
-    Translates OpenFOAM data to EnSight format.
-
+    Translate OpenFOAM data to EnSight format.
     An Ensight part is created for the internalMesh and for each patch.
 
 Usage
@@ -127,6 +126,11 @@ getZeroGradInternalField(IOobject& io, const fvMeshSubsetProxy& proxy)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Translate OpenFOAM data to Ensight format with a part for"
+        " the internalMesh and for each patch."
+    );
     timeSelector::addOptions();
     #include "addRegionOption.H"
 

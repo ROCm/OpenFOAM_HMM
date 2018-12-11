@@ -164,11 +164,16 @@ void writeWeights(const polyMesh& mesh)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Mesh motion and topological mesh changes utility"
+    );
+
     #include "addRegionOption.H"
     argList::addBoolOption
     (
         "checkAMI",
-        "Check AMI weights"
+        "Check AMI weights and write VTK files of the AMI patches"
     );
 
     #include "setRootCase.H"

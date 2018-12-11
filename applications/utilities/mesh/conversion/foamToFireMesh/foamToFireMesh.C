@@ -25,7 +25,7 @@ Application
     foamToFireMesh
 
 Description
-    Reads an OpenFOAM mesh and writes an AVL/FIRE fpma format
+    Write an OpenFOAM mesh in AVL/FIRE fpma format
 
 Usage
     \b foamToFireMesh [OPTION]
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Read OpenFOAM mesh and write an AVL/FIRE fpma format"
+        "Write an OpenFOAM mesh in AVL/FIRE fpma format"
     );
     argList::noParallel();
     timeSelector::addOptions();

@@ -25,7 +25,7 @@ Application
     simpleReactingParcelFoam
 
 Description
-    Steady state solver for compressible, turbulent flow with reacting,
+    Steady-state solver for compressible, turbulent flow with reacting,
     multiphase particle clouds and optional sources/constraints.
 
 \*---------------------------------------------------------------------------*/
@@ -54,6 +54,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Steady-state solver for compressible, turbulent flow"
+        " with reacting, multiphase particle clouds"
+        " and optional sources/constraints."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

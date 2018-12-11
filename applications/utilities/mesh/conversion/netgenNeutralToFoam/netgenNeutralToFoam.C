@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Converts neutral file format as written by Netgen v4.4.
+    Convert a neutral file format (Netgen v4.4) to OpenFOAM.
 
     Example:
 
@@ -92,6 +92,10 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Convert a neutral file format (Netgen v4.4) to OpenFOAM"
+    );
     argList::addArgument("Neutral file");
 
     #include "setRootCase.H"

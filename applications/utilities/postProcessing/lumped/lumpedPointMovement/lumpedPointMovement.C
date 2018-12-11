@@ -27,6 +27,7 @@ Application
 Description
     This utility can be used to produce VTK files to visualize the response
     points/rotations and the corresponding movement of the building surfaces.
+
     Uses the tabulated responses from the specified file.
     Optionally, it can also be used to a dummy responder for the
     externalFileCoupler logic, which makes it useful as a debugging facility
@@ -52,8 +53,8 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Visualize lumpedPoint movements or provide a slave responder "
-        "for diagnostic purposes."
+        "Visualize lumpedPoint movements or provide a slave responder"
+        " for diagnostic purposes."
     );
 
     argList::noParallel();

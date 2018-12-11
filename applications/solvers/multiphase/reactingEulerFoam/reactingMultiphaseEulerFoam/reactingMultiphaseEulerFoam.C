@@ -46,6 +46,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for a system of any number of compressible fluid phases with a"
+        " common pressure, but otherwise separate properties."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

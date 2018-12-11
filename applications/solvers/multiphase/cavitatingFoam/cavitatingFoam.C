@@ -28,8 +28,8 @@ Group
     grpMultiphaseSolvers
 
 Description
-    Transient cavitation code based on the homogeneous equilibrium model
-    from which the compressibility of the liquid/vapour "mixture" is obtained.
+    Transient cavitation solver based on the homogeneous equilibrium model
+    from which the compressibility of the liquid/vapour 'mixture' is obtained.
 
     Turbulence modelling is generic, i.e. laminar, RAS or LES may be selected.
 
@@ -45,6 +45,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient cavitation solver based on the homogeneous equilibrium"
+        " model from which the compressibility of the liquid/vapour 'mixture'"
+        " is obtained."
+    );
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

@@ -28,8 +28,8 @@ Group
     grpPostProcessingUtilities
 
 Description
-    List times using timeSelector.
-    The normal banner information is suppressed.
+    List times using the timeSelector, or use to remove selected time
+    directories.
 
 Usage
     \b foamListTimes [OPTION]
@@ -43,6 +43,10 @@ Usage
 
       - \par -verbose
         Report progress during removal
+
+Note
+    The OpenFOAM banner information is suppressed so that the output can be
+    piped into another command.
 
 \*---------------------------------------------------------------------------*/
 
@@ -58,9 +62,12 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::addNote("List times using timeSelector");
-
-    timeSelector::addOptions(true, true);
+    argList::addNote
+    (
+        "List times using the timeSelector,"
+        " or use to remove selected time directories"
+    );
+    timeSelector::addOptions(true, true);  // constant(true), zero(true)
     argList::noBanner();
     argList::noParallel();
     argList::noJobInfo();

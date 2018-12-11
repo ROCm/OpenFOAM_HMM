@@ -44,6 +44,11 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Mirrors a mesh around a given plane."
+    );
+
     #include "addOverwriteOption.H"
     #include "setRootCase.H"
     #include "createTime.H"

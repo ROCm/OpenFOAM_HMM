@@ -52,6 +52,12 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Clean surface by removing baffles, sliver faces,"
+        " collapsing small edges, etc."
+    );
+
     argList::noParallel();
     argList::addArgument("surfaceFile");
     argList::addArgument("min length");

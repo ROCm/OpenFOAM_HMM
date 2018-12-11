@@ -71,6 +71,11 @@ int mapVertex(::List<int>& collapse_map, int a, int mx)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Surface coarsening using 'bunnylod'"
+    );
+
     argList::noParallel();
     argList::addArgument("surfaceFile");
     argList::addArgument("reductionFactor");

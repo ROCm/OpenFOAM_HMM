@@ -43,6 +43,11 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Attach topologically detached mesh using prescribed mesh modifiers"
+    );
+
     #include "addOverwriteOption.H"
 
     argList::noParallel();

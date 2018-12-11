@@ -28,7 +28,7 @@ Group
     grpSurfaceUtilities
 
 Description
-    Smooths a surface using lambda/mu smoothing.
+    Smooth a surface using lambda/mu smoothing.
 
     To get laplacian smoothing, set lambda to the relaxation factor and mu to
     zero.
@@ -131,6 +131,13 @@ void getFixedPoints
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Smooth a surface using lambda/mu smoothing.\n"
+        "For laplacian smoothing, set lambda to the relaxation factor"
+        " and mu to zero."
+    );
+
     argList::noParallel();
     argList::validOptions.clear();
     argList::addArgument("surfaceFile");

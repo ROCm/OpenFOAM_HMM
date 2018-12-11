@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Converts an ANSYS input mesh file, exported from I-DEAS,
+    Convert an ANSYS input mesh file (exported from I-DEAS)
     to OpenFOAM format.
 
 \*---------------------------------------------------------------------------*/
@@ -298,6 +298,12 @@ label findFace(const polyMesh& mesh, const face& f)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Convert an ANSYS input mesh file (exported from I-DEAS)"
+        " to OpenFOAM format"
+    );
+
     argList::noParallel();
     argList::addArgument("ANSYS input file");
     argList::addOption

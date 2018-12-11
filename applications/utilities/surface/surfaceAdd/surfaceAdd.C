@@ -28,8 +28,8 @@ Group
     grpSurfaceUtilities
 
 Description
-    Add two surfaces. Does geometric merge on points. Does not check for
-    overlapping/intersecting triangles.
+    Add two surfaces. Does geometric merge on points.
+    Does not check for overlapping/intersecting triangles.
 
     Keeps patches separate by renumbering.
 
@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
     argList::addNote
     (
         "Add two surfaces via a geometric merge on points."
+        " Does not check for overlapping/intersecting triangles."
     );
 
     argList::noParallel();

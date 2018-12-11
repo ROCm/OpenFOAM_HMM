@@ -28,8 +28,8 @@ Group
     grpMultiphaseSolvers
 
 Description
-    Solver for a system of 2 compressible fluid phases with one phase
-    dispersed, e.g. gas bubbles in a liquid including heat-transfer.
+    Solver for a system of two compressible fluid phases with one dispersed
+    phase. Eg, gas bubbles in a liquid including heat-transfer.
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,6 +44,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for a system of two compressible fluid phases with one"
+        " dispersed phase.\n"
+        "Eg, gas bubbles in a liquid including heat-transfer."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

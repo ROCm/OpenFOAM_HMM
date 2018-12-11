@@ -48,6 +48,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for a system of many compressible fluid phases including"
+        " heat-transfer."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

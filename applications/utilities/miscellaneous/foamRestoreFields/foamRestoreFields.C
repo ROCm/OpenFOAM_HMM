@@ -188,9 +188,8 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Restore field names by removing the ending. The fields are "
-        "selected\n"
-        "automatically or can be specified as optional command arguments.\n"
+        "Restore field names by removing the ending. Fields are selected"
+        " automatically or can be specified as optional command arguments"
     );
 
     profiling::disable(); // Disable profiling (and its output)
@@ -225,7 +224,7 @@ int main(int argc, char *argv[])
     // Non-mandatory arguments
     argList::addArgument("fieldName ... fieldName");
 
-    timeSelector::addOptions(true, true);
+    timeSelector::addOptions(true, true);  // constant(true), zero(true)
     #include "setRootCaseNonMandatoryArgs.H"
 
     dryrun = args.found("dry-run");

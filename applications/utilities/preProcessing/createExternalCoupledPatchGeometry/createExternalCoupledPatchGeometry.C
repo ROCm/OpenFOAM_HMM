@@ -28,7 +28,7 @@ Group
     grpPreProcessingUtilities
 
 Description
-    Application to generate the patch geometry (points and faces) for use
+    Generate the patch geometry (points and faces) for use
     with the externalCoupled functionObject.
 
 Usage
@@ -68,6 +68,12 @@ See also
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Generate the patch geometry (points and faces) for use"
+        " with the externalCoupled functionObject."
+    );
+
     #include "addRegionOption.H"
     #include "addRegionsOption.H"
     argList::addArgument("patchGroup");

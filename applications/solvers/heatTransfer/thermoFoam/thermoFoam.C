@@ -45,6 +45,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for energy transport and thermodynamics on a frozen flow field"
+    );
+
     #define NO_CONTROL
     #include "postProcess.H"
 

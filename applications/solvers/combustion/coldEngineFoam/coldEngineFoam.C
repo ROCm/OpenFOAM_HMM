@@ -45,6 +45,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for cold-flow in internal combustion engines."
+    );
+
     #define CREATE_TIME createEngineTime.H
     #define CREATE_MESH createEngineMesh.H
     #include "postProcess.H"

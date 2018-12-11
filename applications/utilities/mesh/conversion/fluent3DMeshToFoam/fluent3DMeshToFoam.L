@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Converts a Fluent mesh to OpenFOAM format.
+    Convert a Fluent mesh to OpenFOAM format.
 
 \*---------------------------------------------------------------------------*/
 
@@ -773,6 +773,10 @@ endOfSection               {space}")"{space}
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Convert a Fluent mesh to OpenFOAM format"
+    );
     argList::noParallel();
     argList::addArgument("Fluent mesh file");
     argList::addOption

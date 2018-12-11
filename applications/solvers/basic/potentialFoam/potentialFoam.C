@@ -94,6 +94,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Potential flow solver which solves for the velocity potential"
+    );
+
     argList::addOption
     (
         "pName",

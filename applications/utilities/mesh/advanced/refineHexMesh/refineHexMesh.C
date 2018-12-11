@@ -28,7 +28,7 @@ Group
     grpMeshAdvancedUtilities
 
 Description
-    Refines a hex mesh by 2x2x2 cell splitting.
+    Refine a hex mesh by 2x2x2 cell splitting for the specified cellSet.
 
 \*---------------------------------------------------------------------------*/
 
@@ -56,6 +56,10 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Refine a hex mesh by 2x2x2 cell splitting for the specified cellSet"
+    );
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
     argList::addArgument("cellSet");

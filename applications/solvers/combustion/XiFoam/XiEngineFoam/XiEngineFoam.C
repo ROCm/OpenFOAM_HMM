@@ -65,6 +65,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for compressible premixed/partially-premixed combustion with"
+        " turbulence modelling in internal combustion engines."
+    );
+
     #define CREATE_TIME createEngineTime.H
     #define CREATE_MESH createEngineMesh.H
     #include "postProcess.H"

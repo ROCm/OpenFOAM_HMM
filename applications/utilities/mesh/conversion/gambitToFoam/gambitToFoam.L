@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Converts a GAMBIT mesh to OpenFOAM format.
+    Convert a GAMBIT mesh to OpenFOAM format.
 
 \*---------------------------------------------------------------------------*/
 
@@ -625,6 +625,11 @@ mtype                 {space}"MTYPE:"{space}
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Convert a GAMBIT mesh to OpenFOAM format"
+    );
+
     argList::noParallel();
     argList::addArgument("GAMBIT file");
     argList::addOption

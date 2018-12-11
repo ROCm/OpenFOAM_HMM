@@ -28,7 +28,7 @@ Group
     grpPostProcessingUtilities
 
 Description
-    Translates a STAR-CD SMAP data file into OpenFOAM field format.
+    Translate a STARCD SMAP data file into OpenFOAM field format.
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,6 +39,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Translate a STARCD SMAP data file into OpenFOAM field format"
+    );
+
     argList::noParallel();
     argList::addArgument("SMAP fileName");
 

@@ -27,7 +27,7 @@ Application
 Description
     Transient solver for the passive transport of a particle cloud.
 
-    Uses a pre- calculated velocity field to evolve the cloud.
+    Uses a pre-calculated velocity field to evolve the cloud.
 
 \*---------------------------------------------------------------------------*/
 
@@ -41,6 +41,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for the passive transport of a particle cloud"
+        " with optional mesh motion"
+        "Uses a pre-calculated velocity field to evolve the cloud."
+    );
     argList::addOption
     (
         "cloudName",

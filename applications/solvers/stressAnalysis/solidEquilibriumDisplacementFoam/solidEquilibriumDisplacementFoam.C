@@ -44,6 +44,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Steady-state segregated finite-volume solver of linear-elastic,"
+        " small-strain deformation of a solid body, with optional thermal"
+        " diffusion and thermal stresses"
+    );
+
     #define NO_CONTROL
     #include "postProcess.H"
 

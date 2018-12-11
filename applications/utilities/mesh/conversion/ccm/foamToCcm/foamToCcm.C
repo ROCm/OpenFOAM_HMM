@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
         "Translate OPENFOAM data to CCM format"
     );
 
-    Foam::timeSelector::addOptions();
+    timeSelector::addOptions();
     argList::noParallel();
     argList::addBoolOption
     (

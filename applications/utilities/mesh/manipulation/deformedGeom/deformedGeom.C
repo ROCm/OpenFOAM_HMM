@@ -44,6 +44,12 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Deforms a polyMesh using a displacement field U and a scaling factor"
+        " supplied as an argument"
+    );
+
     argList::addArgument("scaling factor");
 
     #include "setRootCase.H"

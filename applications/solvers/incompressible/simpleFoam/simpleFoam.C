@@ -28,7 +28,7 @@ Group
     grpIncompressibleSolvers
 
 Description
-    Steady-state solver for incompressible flows with turbulence modelling.
+    Steady-state solver for incompressible, turbulent flows.
 
     \heading Solver details
     The solver uses the SIMPLE algorithm to solve the continuity equation:
@@ -71,6 +71,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Steady-state solver for incompressible, turbulent flows."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

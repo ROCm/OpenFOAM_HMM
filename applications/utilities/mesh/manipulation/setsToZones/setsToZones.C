@@ -60,12 +60,12 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    timeSelector::addOptions(true, false);
     argList::addNote
     (
         "Add point/face/cell Zones from similarly named point/face/cell Sets"
     );
 
+    timeSelector::addOptions(true, false);  // constant(true), zero(false)
     argList::addBoolOption
     (
         "noFlipMap",

@@ -63,13 +63,12 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    timeSelector::addOptions(true, false);
     argList::addNote
     (
         "Collapses small edges to a point.\n"
         "Optionally collapse small faces to a point and thin faces to an edge."
     );
-
+    timeSelector::addOptions(true, false);  // constant(true), zero(false)
     argList::addBoolOption
     (
         "collapseFaces",

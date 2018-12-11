@@ -235,6 +235,11 @@ bool writeOptionalMeshObject
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Converts all IOobjects associated with a case into the format"
+        " specified in the controlDict"
+    );
     timeSelector::addOptions();
     argList::addBoolOption
     (

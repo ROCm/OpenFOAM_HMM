@@ -54,8 +54,8 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Calculates the inertia tensor and principal axes and moments "
-        "of the specified surface.\n"
+        "Calculates the inertia tensor and principal axes and moments"
+        " of the specified surface.\n"
         "Inertia can either be of the solid body or of a thin shell."
     );
 

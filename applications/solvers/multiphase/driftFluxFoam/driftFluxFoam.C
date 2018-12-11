@@ -28,11 +28,11 @@ Group
     grpMultiphaseSolvers
 
 Description
-    Solver for 2 incompressible fluids using the mixture approach with the
-    drift-flux approximation for relative motion of the phases.
+    Solver for two incompressible fluids using the mixture approach with
+    the drift-flux approximation for relative motion of the phases.
 
-    Used for simulating the settling of the dispersed phase and other similar
-    separation problems.
+    Used for simulating the settling of the dispersed phase and other
+    similar separation problems.
 
 \*---------------------------------------------------------------------------*/
 
@@ -52,6 +52,14 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for two incompressible fluids using the mixture approach with"
+        " the drift-flux approximation for relative motion of the phases.\n"
+        "Used for simulating the settling of the dispersed phase and other"
+        " similar separation problems."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

@@ -44,6 +44,11 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Flattens the front and back planes of a 2D cartesian mesh"
+    );
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createPolyMesh.H"
