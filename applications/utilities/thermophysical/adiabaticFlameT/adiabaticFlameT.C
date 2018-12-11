@@ -28,7 +28,7 @@ Group
     grpThermophysicalUtilities
 
 Description
-    Calculates the adiabatic flame temperature for a given fuel over a
+    Calculate adiabatic flame temperature for a given fuel over a
     range of unburnt temperatures and equivalence ratios.
 
 \*---------------------------------------------------------------------------*/
@@ -57,8 +57,8 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Calculates the adiabatic flame temperature for a given fuel\n"
-        "over a range of unburnt temperatures and equivalence ratios."
+        "Calculate the adiabatic flame temperature for a given fuel over a "
+        " range of unburnt temperatures and equivalence ratios."
     );
 
     argList::noParallel();

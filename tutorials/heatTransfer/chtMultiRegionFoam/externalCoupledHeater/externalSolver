@@ -170,4 +170,7 @@ log "done"
 # Remove the lock file too
 \rm -f $lockFile 2>/dev/null
 
+# For log collector:
+echo "End"
+
 #------------------------------------------------------------------------------

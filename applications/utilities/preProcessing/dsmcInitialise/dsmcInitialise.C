@@ -40,6 +40,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Initialise a case for dsmcFoam from the system/dsmcInitialise"
+        " dictionary"
+    );
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"

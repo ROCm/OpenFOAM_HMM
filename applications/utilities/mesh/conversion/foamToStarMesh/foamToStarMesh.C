@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Reads an OpenFOAM mesh and writes a STARCD/PROSTAR (v4) bnd/cel/vrt format.
+    Write an OpenFOAM mesh in STARCD/PROSTAR (v4) bnd/cel/vrt format.
 
 Usage
     \b foamToStarMesh [OPTION]
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Read OpenFOAM mesh and write a STARCD/PROSTAR (v4) bnd/cel/vrt format"
+        "Write an OpenFOAM mesh in STARCD/PROSTAR (v4) bnd/cel/vrt format"
     );
     argList::noParallel();
     timeSelector::addOptions();

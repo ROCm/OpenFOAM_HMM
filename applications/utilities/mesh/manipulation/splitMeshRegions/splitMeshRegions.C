@@ -34,7 +34,7 @@ Description
     cell-face-cell walking without crossing
     - boundary faces
     - additional faces from faceset (-blockedFaces faceSet).
-    - any face inbetween differing cellZones (-cellZones)
+    - any face between differing cellZones (-cellZones)
 
     Output is:
     - volScalarField with regions as different scalars (-detectOnly)

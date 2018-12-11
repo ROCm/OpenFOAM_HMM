@@ -335,6 +335,11 @@ label selectOutsideCells
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Select cells in relation to surface"
+    );
+
     argList::noParallel();
 
     #include "setRootCase.H"

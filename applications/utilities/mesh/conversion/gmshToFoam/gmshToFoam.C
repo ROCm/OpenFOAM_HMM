@@ -766,6 +766,11 @@ void readCells
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Convert a gmsh .msh file to OpenFOAM"
+    );
+
     argList::noParallel();
     argList::addArgument(".msh file");
     argList::addBoolOption

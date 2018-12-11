@@ -25,7 +25,7 @@ Application
     MPPICInterFoam
 
 Description
-    Solver for 2 incompressible, isothermal immiscible fluids using a VOF
+    Solver for two incompressible, isothermal immiscible fluids using a VOF
     (volume of fluid) phase-fraction based interface capturing approach.
     The momentum and other fluid properties are of the "mixture" and a single
     momentum equation is solved.
@@ -56,6 +56,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for two incompressible, isothermal immiscible fluids using"
+        " VOF phase-fraction based interface capturing.\n"
+        "Includes MRF and an MPPIC cloud."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

@@ -48,6 +48,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for the coupled transport of a"
+        " single kinematic particle cloud including the effect"
+        " of the volume fraction of particles on the continuous phase.\n"
+        "With optional mesh motion and mesh topology changes."
+    );
     argList::addOption
     (
         "cloudName",

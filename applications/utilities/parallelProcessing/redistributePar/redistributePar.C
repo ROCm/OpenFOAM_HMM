@@ -2261,6 +2261,13 @@ void redistributeLagrangian
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Redistribute decomposed mesh and fields according"
+        " to the decomposeParDict settings.\n"
+        "Optionally run in decompose/reconstruct mode"
+    );
+
     argList::noFunctionObjects();  // Never use function objects
 
     // enable -constant ... if someone really wants it

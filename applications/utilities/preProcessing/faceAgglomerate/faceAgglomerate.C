@@ -53,6 +53,12 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Agglomerate boundary faces using the pairPatchAgglomeration"
+        " algorithm. Writes a map of fine to coarse grid."
+    );
+
     #include "addRegionOption.H"
     #include "addDictOption.H"
     #include "setRootCase.H"

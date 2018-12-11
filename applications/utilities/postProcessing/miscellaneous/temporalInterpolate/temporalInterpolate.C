@@ -188,6 +188,11 @@ void fieldInterpolator::interpolate()
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Interpolate fields between time-steps. Eg, for animation."
+    );
+
     timeSelector::addOptions();
     #include "addRegionOption.H"
     argList::addOption

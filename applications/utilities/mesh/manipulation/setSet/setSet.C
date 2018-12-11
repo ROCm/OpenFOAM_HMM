@@ -28,7 +28,7 @@ Group
     grpMeshManipulationUtilities
 
 Description
-    Manipulate a cell/face/point/ set or zone interactively.
+    Manipulate a cell/face/point Set or Zone interactively.
 
 \*---------------------------------------------------------------------------*/
 
@@ -710,10 +710,17 @@ commandStatus parseAction(const word& actionName)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Manipulate a cell/face/point Set or Zone interactively."
+    );
+
     // Specific to topoSet/setSet: quite often we want to block upon writing
     // a set so we can immediately re-read it. So avoid use of threading
     // for set writing.
-    timeSelector::addOptions(true, false);
+
+    timeSelector::addOptions(true, false);  // constant(true), zero(false)
+
     #include "addRegionOption.H"
     argList::addBoolOption("noVTK", "Do not write VTK files");
     argList::addBoolOption("loop", "Execute batch commands for all timesteps");

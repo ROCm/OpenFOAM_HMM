@@ -28,8 +28,7 @@ Group
     grpMeshManipulationUtilities
 
 Description
-    Calculates the dual of a polyMesh. Adheres to all the feature and patch
-    edges.
+    Creates the dual of a polyMesh, adhering to all the feature and patch edges.
 
 Usage
     \b polyDualMesh featureAngle
@@ -47,8 +46,8 @@ Usage
         Normally only constructs a single face between two cells. This single
         face might be too distorted. splitAllFaces will create a single face for
         every original cell the face passes through. The mesh will thus have
-        multiple faces inbetween two cells! (so is not strictly upper-triangular
-        anymore - checkMesh will complain)
+        multiple faces in between two cells! (so is not strictly
+        upper-triangular anymore - checkMesh will complain)
 
       - \par -doNotPreserveFaceZones:
         By default all faceZones are preserved by marking all faces, edges and
@@ -360,6 +359,12 @@ void dumpFeatures
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Creates the dual of a polyMesh,"
+        " adhering to all the feature and patch edges."
+    );
+
     #include "addOverwriteOption.H"
     argList::noParallel();
 
@@ -367,7 +372,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "splitAllFaces",
-        "Have multiple faces inbetween cells"
+        "Have multiple faces in between cells"
     );
     argList::addBoolOption
     (
@@ -378,7 +383,7 @@ int main(int argc, char *argv[])
     (
         "doNotPreserveFaceZones",
         "Disable the default behaviour of preserving faceZones by having"
-        " multiple faces inbetween cells"
+        " multiple faces in between cells"
     );
 
     #include "setRootCase.H"

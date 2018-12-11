@@ -28,7 +28,7 @@ Group
     grpSurfaceUtilities
 
 Description
-    Converts CHEMKINIII thermodynamics and reaction data files into
+    Convert CHEMKINIII thermodynamics and reaction data files into
     OpenFOAM format.
 
 \*---------------------------------------------------------------------------*/
@@ -49,8 +49,8 @@ int main(int argc, char *argv[])
 
     argList::addNote
     (
-        "Converts CHEMKINIII thermodynamics and reaction data files into\n"
-        "OpenFOAM format."
+        "Convert CHEMKINIII thermodynamics and reaction data files into"
+        " OpenFOAM format."
     );
 
     argList::noParallel();

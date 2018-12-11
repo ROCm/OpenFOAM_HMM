@@ -40,6 +40,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solves the Black-Scholes equation to price commodities."
+    );
+
     #define NO_CONTROL
     #include "postProcess.H"
 

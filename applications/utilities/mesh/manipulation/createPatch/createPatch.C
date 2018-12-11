@@ -28,12 +28,12 @@ Group
     grpMeshManipulationUtilities
 
 Description
-    Utility to create patches out of selected boundary faces. Faces come either
+    Create patches out of selected boundary faces, which are either
     from existing patches or from a faceSet.
 
     More specifically it:
-    - creates new patches (from selected boundary faces). Synchronise faces
-      on coupled patches.
+    - creates new patches (from selected boundary faces).
+      Synchronise faces on coupled patches.
     - synchronises points on coupled boundaries
     - remove patches with 0 faces in them
 
@@ -510,6 +510,12 @@ void syncPoints
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Create patches out of selected boundary faces, which are either"
+        " from existing patches or from a faceSet"
+    );
+
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
     #include "addDictOption.H"

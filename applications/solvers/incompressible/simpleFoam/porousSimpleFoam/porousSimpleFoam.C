@@ -45,6 +45,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Steady-state solver for incompressible, turbulent flow with"
+        "implicit/explicit porosity treatment\n"
+        "With MRF support."
+    );
+
     #define CREATE_FIELDS_2 createPorousZones.H
     #include "postProcess.H"
 

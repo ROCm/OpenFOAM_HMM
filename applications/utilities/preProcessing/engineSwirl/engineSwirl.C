@@ -28,7 +28,7 @@ Group
     grpPreProcessingUtilities
 
 Description
-    Generates a swirling flow for engine calulations.
+    Generate a swirl flow for engine calculations.
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,6 +39,10 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Generate a swirl flow for engine calculations"
+    );
 
     #include "setRootCase.H"
     #include "createTime.H"

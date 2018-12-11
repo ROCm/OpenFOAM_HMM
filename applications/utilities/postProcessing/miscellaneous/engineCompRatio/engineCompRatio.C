@@ -28,7 +28,7 @@ Group
     grpPostProcessingUtilities
 
 Description
-    Calculate the geometric compression ratio.
+    Calculate the engine geometric compression ratio.
 
     Note: if you have valves and/or extra volumes it will not work,
           since it calculates the volume at BDC and TCD.
@@ -43,6 +43,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Calculate the engine geometric compression ratio"
+    );
+
     #include "setRootCase.H"
     #include "createEngineTime.H"
     #include "createEngineMesh.H"

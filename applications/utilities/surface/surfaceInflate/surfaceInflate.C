@@ -563,7 +563,10 @@ void lloydsSmoothing
 
 int main(int argc, char *argv[])
 {
-    argList::addNote("Inflates surface according to point normals.");
+    argList::addNote
+    (
+        "Inflates surface according to point normals."
+    );
 
     argList::noParallel();
     argList::addNote

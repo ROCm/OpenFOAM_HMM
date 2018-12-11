@@ -28,7 +28,7 @@ Group
     grpMultiphaseSolvers
 
 Description
-    Solver for a system of 2 compressible fluid phases with a common pressure,
+    Solver for a system of two compressible fluid phases with a common pressure,
     but otherwise separate properties. The type of phase model is run time
     selectable and can optionally represent multiple species and in-phase
     reactions. The phase system is also run time selectable and can optionally
@@ -75,6 +75,12 @@ namespace Foam
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for a system of two compressible fluid phases with a"
+        " common pressure, but otherwise separate properties."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

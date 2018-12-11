@@ -261,6 +261,11 @@ void changeFrontBackPatches
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Extrude mesh from existing patch."
+    );
+
     #include "addRegionOption.H"
     #include "setRootCase.H"
     #include "createTimeExtruded.H"

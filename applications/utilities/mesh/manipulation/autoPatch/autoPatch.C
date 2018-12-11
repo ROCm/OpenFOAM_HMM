@@ -73,6 +73,11 @@ void collectFeatureEdges(const boundaryMesh& bMesh, labelList& markedEdges)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Divides external faces into patches based on feature angle"
+    );
+
     #include "addOverwriteOption.H"
 
     argList::noParallel();

@@ -59,6 +59,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for buoyant, turbulent flow"
+        " of incompressible fluids.\n"
+        "Uses the Boussinesq approximation."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

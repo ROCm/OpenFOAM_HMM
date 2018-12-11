@@ -28,14 +28,14 @@ Group
     grpMeshManipulationUtilities
 
 Description
-    Selects a section of mesh based on a cellSet.
+    Create a mesh subset for a particular region of interest based on a
+    cellSet or cellZone.
 
-    The utility sub-sets the mesh to choose only a part of interest. Check
-    the setSet/cellSet/topoSet utilities to see how to select cells based on
+    See setSet/topoSet utilities on how to define select cells based on
     various shapes.
 
-    The mesh will subset all points, faces and cells needed to make a sub-mesh
-    but will not preserve attached boundary types.
+    Will subset all points, faces and cells needed to make a sub-mesh,
+    but not preserve attached boundary types.
 
 \*---------------------------------------------------------------------------*/
 
@@ -372,8 +372,10 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Select a mesh subset based on a cellSet or on cellZone(s) specified "
-        "as the first command argument."
+        "Create a mesh subset for a particular region of interest based on a"
+        " cellSet or cellZone(s) specified as the first command argument.\n"
+        "See setSet/topoSet utilities on how to select cells based on"
+        " various shapes."
     );
 
     #include "addOverwriteOption.H"
@@ -465,7 +467,7 @@ int main(int argc, char *argv[])
     else if (args.found("patch"))
     {
         exposedPatchIDs.first() =
-            getExposedPatchId(mesh, args["patch"]);
+            getExposedPatchId(mesh, args.opt<word>("patch"));
     }
     else
     {

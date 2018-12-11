@@ -58,6 +58,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for magnetohydrodynamics (MHD):"
+        " incompressible, laminar flow of a conducting fluid"
+        " under the influence of a magnetic field."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

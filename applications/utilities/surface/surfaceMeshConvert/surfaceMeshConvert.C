@@ -28,7 +28,7 @@ Group
     grpSurfaceUtilities
 
 Description
-    Converts between surface formats with optional scaling or
+    Convert between surface formats with optional scaling or
     transformations (rotate/translate) on a coordinateSystem.
 
 Usage
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "convert between surface formats, using MeshSurface library components"
+        "Convert between surface formats, using MeshSurface library components"
     );
 
     argList::noParallel();

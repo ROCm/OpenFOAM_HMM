@@ -73,8 +73,13 @@ void interpolateFields
 
 int main(int argc, char *argv[])
 {
-    // constant, not false
-    timeSelector::addOptions(true, false);
+    argList::addNote
+    (
+        "Map fields to a mesh with all internal faces removed"
+        " (singleCellFvMesh) which gets written to region 'singleCell'"
+    );
+
+    timeSelector::addOptions(true, false);  // constant(true), zero(false)
 
     #include "setRootCase.H"
     #include "createTime.H"

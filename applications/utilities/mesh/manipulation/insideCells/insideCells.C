@@ -28,7 +28,8 @@ Group
     grpMeshManipulationUtilities
 
 Description
-    Picks up cells with cell centre 'inside' of surface.
+    Create a cellSet for cells with their centres 'inside' the defined
+    surface.
     Requires surface to be closed and singly connected.
 
 \*---------------------------------------------------------------------------*/
@@ -50,8 +51,8 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Create a cellSet for cells with their centres inside the defined "
-        "surface.\n"
+        "Create a cellSet for cells with their centres 'inside' the defined"
+        " surface.\n"
         "Surface must be closed and singly connected."
     );
 

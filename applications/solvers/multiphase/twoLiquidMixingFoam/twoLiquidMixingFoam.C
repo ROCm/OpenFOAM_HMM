@@ -28,7 +28,7 @@ Group
     grpMultiphaseSolvers
 
 Description
-    Solver for mixing 2 incompressible fluids.
+    Solver for mixing two incompressible fluids.
 
     Turbulence modelling is generic, i.e. laminar, RAS or LES may be selected.
 
@@ -45,6 +45,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for mixing two incompressible fluids"
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

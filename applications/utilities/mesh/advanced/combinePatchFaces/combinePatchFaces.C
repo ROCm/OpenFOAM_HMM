@@ -28,7 +28,7 @@ Group
     grpMeshAdvancedUtilities
 
 Description
-    Checks for multiple patch faces on same cell and combines them.
+    Checks for multiple patch faces on the same cell and combines them.
     Multiple patch faces can result from e.g. removal of refined
     neighbouring cells, leaving 4 exposed faces with same owner.
 
@@ -343,6 +343,11 @@ label mergeEdges(const scalar minCos, polyMesh& mesh)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Checks for multiple patch faces on the same cell and combines them."
+    );
+
     #include "addOverwriteOption.H"
 
     argList::addArgument("featureAngle [0..180]");

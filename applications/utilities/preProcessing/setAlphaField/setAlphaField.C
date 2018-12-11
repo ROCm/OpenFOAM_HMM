@@ -75,6 +75,12 @@ shapeSelector::shapeTypeNames
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Uses isoCutCell to create a volume fraction field from a"
+        " cylinder, sphere or a plane."
+    );
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"

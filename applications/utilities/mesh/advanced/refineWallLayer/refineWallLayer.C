@@ -28,7 +28,7 @@ Group
     grpMeshAdvancedUtilities
 
 Description
-    Utility to refine cells next to patches.
+    Refine cells next to specified patches.
 
     Arguments:
         1: List of patch name regular expressions
@@ -61,6 +61,12 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Refine cells next to specified patches.\n"
+        "The list of patches may contain regular expressions.\n"
+    );
+
     #include "addOverwriteOption.H"
     argList::addArgument("patches");
     argList::addArgument("edgeFraction");

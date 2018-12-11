@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Converts a STARCD/PROSTAR (v4) mesh into OpenFOAM format.
+    Convert a STARCD/PROSTAR (v4) mesh into OpenFOAM format.
 
 Usage
     \b star4ToFoam [OPTION] prostarMesh

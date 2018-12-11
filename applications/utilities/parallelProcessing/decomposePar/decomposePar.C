@@ -289,8 +289,8 @@ int main(int argc, char *argv[])
         "Only decompose geometry if the number of domains has changed"
     );
 
-    // Include explicit constant options, have zero from time range
-    timeSelector::addOptions(true, false);
+    // Allow explicit -constant, have zero from time range
+    timeSelector::addOptions(true, false);  // constant(true), zero(false)
 
     #include "setRootCase.H"
 

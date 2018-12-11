@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Reads an OpenFOAM mesh and writes the boundaries in a surface format.
+    Extract boundaries from an OpenFOAM mesh and write in a surface format
 
 Usage
     \b foamToSurface [OPTION]
@@ -56,6 +56,10 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Extract boundaries from an OpenFOAM mesh and write in a surface format"
+    );
     argList::noParallel();
     argList::addArgument("outputFile.ext");
     timeSelector::addOptions();

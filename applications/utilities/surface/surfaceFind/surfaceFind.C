@@ -29,6 +29,7 @@ Group
 
 Description
     Finds nearest face and vertex.
+    Uses a zero origin unless otherwise specified.
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,6 +45,12 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Find nearest face and vertex."
+        " Uses a zero origin unless otherwise specified"
+    );
+
     argList::noParallel();
     argList::addArgument("surfaceFile");
     argList::addOption("x", "X", "The point x-coordinate (if non-zero)");

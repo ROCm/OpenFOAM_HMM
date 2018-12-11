@@ -44,6 +44,13 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Strips any baffle parts of a surface.\n"
+        "A baffle region is one which is reached by walking from an open edge,"
+        " and stopping when a multiply connected edge is reached."
+    );
+
     argList::noParallel();
     argList::validOptions.clear();
     argList::addArgument("input surface file");

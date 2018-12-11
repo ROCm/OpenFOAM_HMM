@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Converts a CFX 4 mesh to OpenFOAM format.
+    Convert a CFX 4 mesh to OpenFOAM format.
 
 \*---------------------------------------------------------------------------*/
 
@@ -48,6 +48,11 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Convert a CFX 4 mesh to OpenFOAM format"
+    );
+
     argList::noParallel();
     argList::addArgument("CFX geom file");
     argList::addOption

@@ -28,8 +28,8 @@ Group
     grpPostProcessingUtilitie
 
 Description
-    Generates a VTK file of particle tracks for cases that were computed using
-    a steady-state cloud
+    Generate a legacy VTK file of particle tracks for cases that were
+    computed using a steady-state cloud
 
     Note:
     - Case must be re-constructed (if running in parallel) before use
@@ -115,6 +115,12 @@ void writeVTK(OFstream& os, const scalar& value)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Generate a legacy VTK file of particle tracks for cases that were"
+        " computed using a steady-state cloud"
+    );
+
     argList::noParallel();
     timeSelector::addOptions();
     #include "addRegionOption.H"

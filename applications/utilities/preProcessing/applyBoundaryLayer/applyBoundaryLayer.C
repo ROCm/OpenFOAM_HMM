@@ -273,8 +273,8 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Apply a simplified boundary-layer model to the velocity and\n"
-        "turbulence fields based on the 1/7th power-law."
+        "Apply a simplified boundary-layer model to the velocity and"
+        " turbulence fields based on the 1/7th power-law."
     );
 
     #include "addRegionOption.H"

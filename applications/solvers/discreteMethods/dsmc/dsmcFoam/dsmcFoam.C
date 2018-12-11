@@ -28,8 +28,8 @@ Group
     grpDiscreteMethodsSolvers
 
 Description
-    Direct simulation Monte Carlo (DSMC) solver for, transient, multi-species
-    flows.
+    Direct simulation Monte Carlo (DSMC) solver
+    for transient, multi-species flows.
 
 \*---------------------------------------------------------------------------*/
 
@@ -40,6 +40,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Direct simulation Monte Carlo (DSMC) solver"
+        " for transient, multi-species flows."
+    );
+
     #define NO_CONTROL
     #include "postProcess.H"
 

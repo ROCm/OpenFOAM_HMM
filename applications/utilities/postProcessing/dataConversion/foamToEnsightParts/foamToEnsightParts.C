@@ -28,8 +28,8 @@ Group
     grpPostProcessingUtilities
 
 Description
-    Translates OpenFOAM data to Ensight format.
-    An Ensight part is created for each cellZone and patch.
+    Translate OpenFOAM data to Ensight format with an Ensight part
+    for each cellZone and patch.
 
 Usage
     \b foamToEnsightParts [OPTION]
@@ -111,10 +111,16 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Translate OpenFOAM data to Ensight format with an Ensight part"
+        " for each cellZone and patch."
+    );
+
     // Enable -constant
     // Probably don't need -withZero though, since the fields are vetted
     // afterwards anyhow
-    timeSelector::addOptions(true, false);
+    timeSelector::addOptions(true, false); // constant(true), zero(false)
     #include "addRegionOption.H"
 
     argList::noParallel();

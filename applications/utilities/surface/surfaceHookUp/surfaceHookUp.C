@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
     argList::addNote
     (
         "Hook surfaces to other surfaces by moving and retriangulating their"
-        "boundary edges to match other surface boundary edges"
+        " boundary edges to match other surface boundary edges"
     );
     argList::noParallel();
     argList::addArgument("hookTolerance");

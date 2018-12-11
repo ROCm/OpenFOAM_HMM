@@ -52,6 +52,10 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Add patches (regions) to a surface with a user-selectable method"
+    );
     argList::noParallel();
     #include "addDictOption.H"
 

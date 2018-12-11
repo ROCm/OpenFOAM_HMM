@@ -28,7 +28,7 @@ Group
     grpPreProcessingUtilities
 
 Description
-    Set values on a selected set of cells/patchfaces through a dictionary.
+    Set values on a selected set of cells/patch-faces via a dictionary.
 
 \*---------------------------------------------------------------------------*/
 
@@ -396,6 +396,11 @@ public:
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Set values on a selected set of cells/patch-faces via a dictionary"
+    );
+
     #include "addDictOption.H"
     #include "addRegionOption.H"
     #include "setRootCase.H"

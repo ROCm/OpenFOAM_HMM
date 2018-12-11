@@ -648,6 +648,10 @@ label findPatch(const List<labelHashSet>& dofGroups, const face& f)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Convert I-Deas unv format to OpenFOAM"
+    );
     argList::noParallel();
     argList::addArgument(".unv file");
     argList::addBoolOption

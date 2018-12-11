@@ -28,7 +28,7 @@ Group
     grpMeshAdvancedUtilities
 
 Description
-    Utility to refine cells near to a surface.
+    Refine cells near to a surface.
 
 \*---------------------------------------------------------------------------*/
 
@@ -623,6 +623,10 @@ void classifyCells
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Refine cells near to a surface"
+    );
     argList::noParallel();
 
     #include "setRootCase.H"

@@ -81,6 +81,11 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Checks validity of a mesh"
+    );
+
     timeSelector::addOptions();
     #include "addRegionOption.H"
     argList::addBoolOption
@@ -112,7 +117,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "meshQuality",
-        "Read user-defined mesh quality criterions from system/meshQualityDict"
+        "Read user-defined mesh quality criteria from system/meshQualityDict"
     );
     argList::addOption
     (

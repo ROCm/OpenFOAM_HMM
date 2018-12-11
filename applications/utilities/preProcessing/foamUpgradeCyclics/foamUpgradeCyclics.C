@@ -393,6 +393,11 @@ void rewriteFields
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Tool to upgrade mesh and fields for split cyclics"
+    );
+
     timeSelector::addOptions();
 
     argList::addOptionCompat("dry-run", {"test", 1806});

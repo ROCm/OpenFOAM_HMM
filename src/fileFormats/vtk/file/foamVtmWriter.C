@@ -314,20 +314,13 @@ void Foam::vtk::vtmWriter::dump(Ostream& os) const
 
 Foam::vtk::vtmWriter::vtmWriter()
 :
-    vtmWriter(true, false)
+    vtmWriter(true)
 {}
 
 
 Foam::vtk::vtmWriter::vtmWriter(bool autoName)
 :
-    vtmWriter(autoName, false)
-{}
-
-
-Foam::vtk::vtmWriter::vtmWriter(bool autoName, bool autoCollapse)
-:
     autoName_(autoName),
-    autoCollapse_(autoCollapse),
     hasTime_(false),
     entries_(),
     blocks_(),

@@ -54,6 +54,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for compressible turbulent flow.\n"
+        "With optional mesh motion and mesh topology changes."
+    );
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"

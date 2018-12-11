@@ -69,11 +69,11 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Collect profiling information from processor directories and\n"
-        "summarize the time spent and number of calls as (max avg min) values."
+        "Collect profiling information from processor directories and"
+        " summarize time spent and number of calls as (max avg min) values."
     );
 
-    timeSelector::addOptions(true, true);
+    timeSelector::addOptions(true, true);  // constant(true), zero(true)
     argList::noParallel();
     argList::noFunctionObjects();  // Never use function objects
 

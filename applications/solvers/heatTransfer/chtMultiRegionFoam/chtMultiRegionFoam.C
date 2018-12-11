@@ -54,6 +54,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for buoyant, turbulent fluid flow and solid heat"
+        " conduction with conjugate heat transfer"
+        " between solid and fluid regions."
+    );
+
     #define NO_CONTROL
     #define CREATE_MESH createMeshesPostProcess.H
     #include "postProcess.H"

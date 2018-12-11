@@ -28,7 +28,7 @@ Group
     grpMeshManipulationUtilities
 
 Description
-    Corrects orientation of faceZone.
+    Corrects teh orientation of faceZone.
 
     - correct in parallel - excludes coupled faceZones from walk
     - correct for non-manifold faceZones - restarts walk
@@ -49,6 +49,10 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Corrects the orientation of faceZone"
+    );
     #include "addRegionOption.H"
     argList::addArgument("faceZone");
     argList::addArgument("outsidePoint");

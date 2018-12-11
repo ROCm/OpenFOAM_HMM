@@ -51,6 +51,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for compressible, turbulent flow"
+        " with reacting, multiphase particle clouds"
+        " and surface film modelling."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

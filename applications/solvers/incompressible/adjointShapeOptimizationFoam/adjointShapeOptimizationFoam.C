@@ -72,6 +72,13 @@ void zeroCells
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Steady-state solver for incompressible, turbulent flow"
+        " of non-Newtonian fluids with duct shape optimisation"
+        " by applying 'blockage' in regions causing pressure loss"
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

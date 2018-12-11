@@ -40,7 +40,7 @@ static inline void printManFooter()
         << "Online documentation "
         << "https://www.openfoam.com/documentation/" << nl
         << ".SH COPYRIGHT" << nl
-        << "Copyright 2018 OpenCFD Ltd." << nl;
+        << "Copyright \\(co 2018 OpenCFD Ltd." << nl;
 }
 
 
@@ -162,12 +162,11 @@ void Foam::argList::printMan() const
 {
     // .TH "<APPLICATION>" 1 "OpenFOAM-<version>" "source" "category"
 
-    Info
-        << ".TH" << token::SPACE
-        // All uppercase and quoted
+    Info<< ".TH" << token::SPACE
+        // All uppercase (returns a Foam::string) and thus also quoted
         << stringOps::upper(executable_) << token::SPACE
-        << "\"1\"" << token::SPACE
-        << token::DQUOTE << "OpenFOAM-v" << OPENFOAM << token::DQUOTE
+        << 1 << token::SPACE
+        << token::DQUOTE << "OpenFOAM-v" << foamVersion::api << token::DQUOTE
         << token::SPACE
         << token::DQUOTE << "www.openfoam.com" << token::DQUOTE
         << token::SPACE
@@ -177,8 +176,7 @@ void Foam::argList::printMan() const
 
     // .SH NAME
     // <application> \- part of OpenFOAM (The Open Source CFD Toolbox).
-    Info
-        << ".SH \"NAME\"" << nl
+    Info<< ".SH \"NAME\"" << nl
         << executable_
         << " \\- part of \\fBOpenFOAM\\fR (The Open Source CFD Toolbox)."
         << nl;
@@ -187,8 +185,7 @@ void Foam::argList::printMan() const
     // .SH SYNOPSIS
     // .B command [OPTIONS] ...
 
-    Info
-        << ".SH \"SYNOPSIS\"" << nl
+    Info<< ".SH \"SYNOPSIS\"" << nl
         << "\\fB" << executable_ << "\\fR [\\fIOPTIONS\\fR]";
 
     if (validArgs.size())
@@ -217,10 +214,9 @@ void Foam::argList::printMan() const
 
     // .SH DESCRIPTION
     {
-        Info
-            << ".SH \"DESCRIPTION\"" << nl;
+        Info<< ".SH \"DESCRIPTION\"" << nl;
 
-        Info<< ".nf" << nl;
+        Info<< ".nf" << nl; // No fill lines
 
         if (notes.empty())
         {
@@ -228,7 +224,6 @@ void Foam::argList::printMan() const
         }
         else
         {
-            Info<< nl;
             for (const std::string& note : notes)
             {
                 if (note.empty())
@@ -241,13 +236,12 @@ void Foam::argList::printMan() const
                 }
             }
         }
-        Info<< ".fi" << nl;
+        Info<< ".fi" << nl; // Fill lines
     }
 
 
     // .SH "OPTIONS"
-    Info
-        << ".SH \"OPTIONS\"" << nl;
+    Info<< ".SH \"OPTIONS\"" << nl;
 
     for (const word& optName : validOptions.sortedToc())
     {
@@ -266,9 +260,8 @@ void Foam::argList::printMan() const
     printManOption("help-full", "Display full help and exit");
 
 
-    // .SH "ADVANCED OPTIONS"
-    Info
-        << ".SH \"ADVANCED OPTIONS\"" << nl;
+    // .SS "ADVANCED OPTIONS"
+    Info<< ".SS \"ADVANCED OPTIONS\"" << nl;
 
     for (const word& optName : validOptions.sortedToc())
     {
@@ -402,9 +395,8 @@ void Foam::argList::printManCompat() const
     }
 
 
-    // .SH "COMPATIBILITY OPTIONS"
-    Info
-        << ".SH \"COMPATIBILITY OPTIONS\"" << nl;
+    // .SS "COMPATIBILITY OPTIONS"
+    Info<< ".SS \"COMPATIBILITY OPTIONS\"" << nl;
 
     for (const word& k : argList::validOptionsCompat.sortedToc())
     {

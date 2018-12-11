@@ -46,6 +46,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for compressible, turbulent engine flow"
+        " with a spray particle cloud."
+    );
+
     #define CREATE_TIME createEngineTime.H
     #define CREATE_MESH createEngineMesh.H
     #include "postProcess.H"

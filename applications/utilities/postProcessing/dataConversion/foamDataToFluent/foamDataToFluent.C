@@ -28,7 +28,7 @@ Group
     grpPostProcessingUtilities
 
 Description
-    Translates OpenFOAM data to Fluent format.
+    Translate OpenFOAM data to Fluent format.
 
 \*---------------------------------------------------------------------------*/
 
@@ -41,8 +41,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Translate OpenFOAM data to Fluent format"
+    );
     argList::noParallel();
-    timeSelector::addOptions(false);   // no constant
+    timeSelector::addOptions(false);   // constant(false), zero(false)
 
     #include "setRootCase.H"
     #include "createTime.H"

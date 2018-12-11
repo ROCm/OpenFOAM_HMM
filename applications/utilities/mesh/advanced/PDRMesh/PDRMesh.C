@@ -614,6 +614,10 @@ label findPatch(const polyBoundaryMesh& patches, const word& patchName)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Mesh and field preparation utility for PDR type simulations."
+    );
     #include "addOverwriteOption.H"
 
     argList::noFunctionObjects();  // Never use function objects

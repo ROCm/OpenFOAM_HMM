@@ -44,6 +44,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for the passive transport"
+        " of a single kinematic particle cloud"
+    );
     argList::addOption
     (
         "cloud",

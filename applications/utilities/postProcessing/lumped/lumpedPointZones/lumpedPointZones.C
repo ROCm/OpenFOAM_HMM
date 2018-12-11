@@ -25,7 +25,7 @@ Application
     lumpedPointZones
 
 Description
-    Produces a VTK PolyData file \c lumpedPointZones.vtp in which the
+    Produce a VTK PolyData file \c lumpedPointZones.vtp in which the
     segmentation of the pressure integration zones can be visualized
     for diagnostic purposes. Does not use external coupling.
 
@@ -46,8 +46,8 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Create lumpedPointZones.vtp to verify the segmentation of "
-        "pressure integration zones used by lumpedPoint BC."
+        "Create lumpedPointZones.vtp to verify the segmentation of"
+        " pressure integration zones used by lumpedPoint BC."
     );
 
     argList::noParallel();    // The VTP writer is not yet in parallel

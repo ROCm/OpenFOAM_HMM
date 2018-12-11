@@ -60,6 +60,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Overset Laplace equation solver for a scalar quantity."
+    );
+
     #include "setRootCase.H"
 
     #include "createTime.H"

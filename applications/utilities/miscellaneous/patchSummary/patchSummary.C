@@ -28,7 +28,7 @@ Group
     grpMiscUtilities
 
 Description
-    Writes fields and boundary condition info for each patch at each requested
+    Write field and boundary condition info for each patch at each requested
     time instance.
 
     Default action is to write a single entry for patches/patchGroups with the
@@ -48,6 +48,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Write field and boundary condition info for each patch"
+        " at each requested time instance"
+    );
+
     timeSelector::addOptions();
 
     #include "addRegionOption.H"

@@ -28,9 +28,9 @@ Group
     grpThermophysicalUtilities
 
 Description
-    Calculates the equilibrium flame temperature for a given fuel and
+    Calculate the equilibrium flame temperature for a given fuel and
     pressure for a range of unburnt gas temperatures and equivalence
-    ratios; includes the effects of dissociation on O2, H2O and CO2.
+    ratios. Includes the effects of dissociation on O2, H2O and CO2.
 
 \*---------------------------------------------------------------------------*/
 
@@ -59,9 +59,10 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Calculates the equilibrium flame temperature for a given fuel\n"
-        "and pressure for a range of unburnt gas temperatures and equivalence\n"
-        "ratios; includes the effects of dissociation on O2, H2O and CO2."
+        "Calculate the equilibrium flame temperature for a given fuel and"
+        " pressure for a range of unburnt gas temperatures and equivalence"
+        " ratios.\n"
+        "Includes the effects of dissociation on O2, H2O and CO2."
     );
 
     argList::noParallel();

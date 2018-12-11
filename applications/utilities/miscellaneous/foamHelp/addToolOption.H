@@ -1,12 +1,12 @@
 argList::addArgument("tool");
 
-argList::notes.append("Valid <tool> options include:");
+argList::addNote("Valid <tool> options include:");
 for (const word& tool : helpType::dictionaryConstructorTablePtr_->sortedToc())
 {
-    argList::notes.append("    " + tool);
+    argList::addNote("    " + tool);
 }
 
-argList::notes.append
+argList::addNote
 (
     "\nNOTE the <tool> must actually appear *before* any options"
 );

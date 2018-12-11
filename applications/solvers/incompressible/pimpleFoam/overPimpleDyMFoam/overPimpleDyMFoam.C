@@ -28,7 +28,7 @@ Group
     grpIncompressibleSolvers grpMovingMeshSolvers
 
 Description
-    Transient solver for incompressible, flow of Newtonian fluids
+    Transient solver for incompressible flow of Newtonian fluids
     on a moving mesh using the PIMPLE (merged PISO-SIMPLE) algorithm.
 
     Turbulence modelling is generic, i.e. laminar, RAS or LES may be selected.
@@ -54,6 +54,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for incompressible, turbulent flow"
+        " on a moving mesh."
+    );
+
     #include "postProcess.H"
 
     #include "setRootCase.H"

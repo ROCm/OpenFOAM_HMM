@@ -49,6 +49,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for compressible, turbulent flow"
+        " with a spray particle cloud.\n"
+        "With optional mesh motion and mesh topology changes.\n"
+    );
+
     #include "postProcess.H"
 
     #include "setRootCase.H"

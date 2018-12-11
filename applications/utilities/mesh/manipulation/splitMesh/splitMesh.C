@@ -113,6 +113,11 @@ void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Splits mesh by making internal faces external at defined faceSet"
+    );
+
     argList::noParallel();
     argList::noFunctionObjects();  // Never use function objects
 

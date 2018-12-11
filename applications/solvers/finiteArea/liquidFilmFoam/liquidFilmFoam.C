@@ -47,6 +47,12 @@ Author
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for incompressible, laminar flow"
+        " of Newtonian fluids in liquid film formulation."
+    );
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"

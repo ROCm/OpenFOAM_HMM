@@ -176,9 +176,6 @@ class vtmWriter
         //- Auto-generate names from 'file' entry?
         bool autoName_;
 
-        //- Collapse empty blocks and combine block/dataset etc.
-        bool autoCollapse_;
-
         //- Has a TimeValue for FieldData?
         bool hasTime_;
 
@@ -213,9 +210,6 @@ public:
 
         //- Construct with specified behaviour for autoName
         explicit vtmWriter(bool autoName);
-
-        //- Construct with specified behaviour for autoName, autoCollapse
-        vtmWriter(bool autoName, bool autoCollapse);
 
 
     //- Destructor

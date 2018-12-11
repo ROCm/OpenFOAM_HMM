@@ -28,7 +28,7 @@ Group
     grpThermophysicalUtilities
 
 Description
-    Calculates the adiabatic flame temperature for a given mixture
+    Calculate adiabatic flame temperature for a given mixture
     at a given temperature.
 
 \*---------------------------------------------------------------------------*/
@@ -57,8 +57,8 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Calculates the adiabatic flame temperature for a given mixture\n"
-        "at a given temperature."
+        "Calculate adiabatic flame temperature for a given mixture"
+        " at a given temperature"
     );
 
     argList::noParallel();

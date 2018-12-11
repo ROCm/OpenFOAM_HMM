@@ -39,6 +39,10 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Initialises fields for a molecular dynamics (MD) simulation"
+    );
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"

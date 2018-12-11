@@ -27,7 +27,7 @@ Application
     makeFaMesh
 
 Description
-    A mesh generator for finite area mesh.
+    A mesh generator for finiteArea mesh.
 
 Author
     Zeljko Tukovic, FAMENA
@@ -69,6 +69,11 @@ public:
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "A mesh generator for finiteArea mesh"
+    );
+
     #include "addRegionOption.H"
     argList::noParallel();
 

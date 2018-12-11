@@ -28,7 +28,7 @@ Group
     grpMultiphaseSolvers
 
 Description
-    Solver for n incompressible, non-isothermal immiscible fluids with
+    Solver for N incompressible, non-isothermal immiscible fluids with
     phase-change.  Uses a VOF (volume of fluid) phase-fraction based interface
     capturing approach.
 
@@ -55,6 +55,15 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for N incompressible, non-isothermal immiscible fluids with"
+        " phase-change,"
+        " using VOF phase-fraction based interface capturing.\n"
+        "With optional mesh motion and mesh topology changes including"
+        " adaptive re-meshing."
+    );
+
     #include "postProcess.H"
 
     #include "setRootCase.H"

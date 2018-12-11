@@ -390,6 +390,12 @@ bool merge
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Utility to change dictionary entries"
+        " (such as the patch type for fields and polyMesh/boundary files)."
+    );
+
     #include "addDictOption.H"
     argList::addOption
     (

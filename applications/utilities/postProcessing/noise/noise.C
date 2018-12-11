@@ -28,7 +28,7 @@ Group
     grpPostProcessingUtilities
 
 Description
-    Utility to perform noise analysis of pressure data.
+    Perform noise analysis of pressure data.
 
     The utility provides a light wrapper around the run-time selectable
     noise model.  Current options include:
@@ -102,6 +102,11 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Perform noise analysis of pressure data"
+    );
+
     argList::noCheckProcessorDirectories();
 
     #include "addDictOption.H"
