@@ -94,7 +94,7 @@ Foam::tmp<Foam::edgeScalarField> Foam::faNVDscheme<Type,NVDweight>::weights
 
     forAll(weights, edge)
     {
-        vector d = vector::zero;
+        vector d(Zero);
 
         if (edgeFlux_[edge] > 0)
         {
@@ -178,7 +178,7 @@ Foam::tmp<Foam::edgeScalarField> Foam::faNVDscheme<Type,NVDweight>::weights
 
             forAll(pWeights, edgeI)
             {
-                vector d = vector::zero;
+                vector d(Zero);
 
                 if (pEdgeFlux[edgeI] > 0)
                 {

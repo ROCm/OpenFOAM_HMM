@@ -73,7 +73,7 @@ void Foam::cellCentreSet::genSamples()
     }
 
     labelList samplingFaces(selectedCells.size(), -1);
-    labelList samplingSegments(selectedCells.size(), 0);
+    labelList samplingSegments(selectedCells.size(), Zero);
     scalarList samplingCurveDist(selectedCells.size());
 
     forAll(selectedCells, i)

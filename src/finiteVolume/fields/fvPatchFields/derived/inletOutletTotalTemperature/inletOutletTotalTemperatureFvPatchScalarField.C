@@ -42,7 +42,7 @@ inletOutletTotalTemperatureFvPatchScalarField
     UName_("U"),
     psiName_("psi"),
     gamma_(0.0),
-    T0_(p.size(), 0.0)
+    T0_(p.size(), Zero)
 {
     this->refValue() = Zero;
     this->refGrad() = Zero;

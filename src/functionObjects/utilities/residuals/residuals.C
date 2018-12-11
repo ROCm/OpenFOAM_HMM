@@ -101,7 +101,7 @@ void Foam::functionObjects::residuals::createField(const word& fieldName)
                     IOobject::NO_READ,
                     IOobject::NO_WRITE
                 ),
-                Field<scalar>(mesh_.nCells(), scalar(0))
+                Field<scalar>(mesh_.nCells(), Zero)
             );
 
         fieldPtr->store();

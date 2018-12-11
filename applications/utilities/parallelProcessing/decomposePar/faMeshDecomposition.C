@@ -180,7 +180,7 @@ Foam::faMeshDecomposition::faMeshDecomposition
     faceToProc_(nFaces()),
     procFaceLabels_(nProcs_),
     procMeshEdgesMap_(nProcs_),
-    procNInternalEdges_(nProcs_, 0),
+    procNInternalEdges_(nProcs_, Zero),
     procPatchEdgeLabels_(nProcs_),
     procPatchPointAddressing_(nProcs_),
     procPatchEdgeAddressing_(nProcs_),
@@ -991,7 +991,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
 
     // Memory management
     {
-        labelList pointsUsage(nPoints(), 0);
+        labelList pointsUsage(nPoints(), Zero);
 
         // Globally shared points are the ones used by more than 2 processors
         // Size the list approximately and gather the points

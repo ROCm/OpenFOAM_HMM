@@ -847,7 +847,7 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
         }
 
         // Reference pressure, 0 by default
-        pRef_ = dict.lookupOrDefault<scalar>("pRef", 0.0);
+        pRef_ = dict.lookupOrDefault<scalar>("pRef", 0);
     }
 
     coordSys_.clear();

@@ -133,7 +133,7 @@ void Foam::radiation::viewFactor::initialise()
     {
         Fmatrix_.reset
         (
-            new scalarSquareMatrix(totalNCoarseFaces_, 0.0)
+            new scalarSquareMatrix(totalNCoarseFaces_, Zero)
         );
 
         if (debug)
@@ -184,7 +184,7 @@ void Foam::radiation::viewFactor::initialise()
         {
             CLU_.reset
             (
-                new scalarSquareMatrix(totalNCoarseFaces_, 0.0)
+                new scalarSquareMatrix(totalNCoarseFaces_, Zero)
             );
 
             pivotIndices_.setSize(CLU_().m());
@@ -386,9 +386,9 @@ void Foam::radiation::viewFactor::calculate()
         solarLoad_->calculate();
     }
 
-    scalarField compactCoarseT4(map_->constructSize(), 0.0);
-    scalarField compactCoarseE(map_->constructSize(), 0.0);
-    scalarField compactCoarseHo(map_->constructSize(), 0.0);
+    scalarField compactCoarseT4(map_->constructSize(), Zero);
+    scalarField compactCoarseE(map_->constructSize(), Zero);
+    scalarField compactCoarseHo(map_->constructSize(), Zero);
 
     globalIndex globalNumbering(nLocalCoarseFaces_);
 
@@ -426,9 +426,9 @@ void Foam::radiation::viewFactor::calculate()
         const polyPatch& pp = coarseMesh_.boundaryMesh()[patchID];
         const labelList& coarsePatchFace = coarseMesh_.patchFaceMap()[patchID];
 
-        scalarList T4ave(pp.size(), 0.0);
-        scalarList Eave(pp.size(), 0.0);
-        scalarList Hoiave(pp.size(), 0.0);
+        scalarList T4ave(pp.size(), Zero);
+        scalarList Eave(pp.size(), Zero);
+        scalarList Hoiave(pp.size(), Zero);
 
         if (pp.size() > 0)
         {
@@ -487,9 +487,9 @@ void Foam::radiation::viewFactor::calculate()
     map_->distribute(compactGlobalIds);
 
     // Create global size vectors
-    scalarField T4(totalNCoarseFaces_, 0.0);
-    scalarField E(totalNCoarseFaces_, 0.0);
-    scalarField qrExt(totalNCoarseFaces_, 0.0);
+    scalarField T4(totalNCoarseFaces_, Zero);
+    scalarField E(totalNCoarseFaces_, Zero);
+    scalarField qrExt(totalNCoarseFaces_, Zero);
 
     // Fill lists from compact to global indexes.
     forAll(compactCoarseT4, i)
@@ -508,14 +508,14 @@ void Foam::radiation::viewFactor::calculate()
     Pstream::listCombineScatter(qrExt);
 
     // Net radiation
-    scalarField q(totalNCoarseFaces_, 0.0);
+    scalarField q(totalNCoarseFaces_, Zero);
 
     if (Pstream::master())
     {
         // Variable emissivity
         if (!constEmissivity_)
         {
-            scalarSquareMatrix C(totalNCoarseFaces_, 0.0);
+            scalarSquareMatrix C(totalNCoarseFaces_, Zero);
 
             for (label i=0; i<totalNCoarseFaces_; i++)
             {

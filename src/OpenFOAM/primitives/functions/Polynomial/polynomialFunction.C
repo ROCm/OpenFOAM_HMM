@@ -83,7 +83,7 @@ Foam::polynomialFunction Foam::polynomialFunction::cloneIntegralMinus1
 
 Foam::polynomialFunction::polynomialFunction(const label order)
 :
-    scalarList(order, 0.0),
+    scalarList(order, Zero),
     logActive_(false),
     logCoeff_(0.0)
 {

@@ -341,7 +341,7 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::ngbPolyPatchPointNormals() const
 
     const labelListList& pntEdges = pointEdges();
 
-    tmp<vectorField> tpN(new vectorField(pntEdges.size(), vector::zero));
+    tmp<vectorField> tpN(new vectorField(pntEdges.size(), Zero));
     vectorField& pN = tpN.ref();
 
     const vectorField faceNormals(ngbPolyPatchFaceNormals());

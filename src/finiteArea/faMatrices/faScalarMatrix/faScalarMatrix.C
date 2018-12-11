@@ -98,7 +98,7 @@ Foam::solverPerformance Foam::faMatrix<Foam::scalar>::solve
 template<>
 Foam::tmp<Foam::scalarField> Foam::faMatrix<Foam::scalar>::residual() const
 {
-    scalarField boundaryDiag(psi_.size(), 0.0);
+    scalarField boundaryDiag(psi_.size(), Zero);
     addBoundaryDiag(boundaryDiag, 0);
 
     tmp<scalarField> tres

@@ -239,7 +239,7 @@ void Foam::displacementInterpolationMotionSolver::calcInterpolation()
         // ~~~~~~~~~~~~~~~
 
         // Count all the points inbetween rangeI and rangeI+1
-        labelList nRangePoints(rangeToCoord.size(), 0);
+        labelList nRangePoints(rangeToCoord.size(), Zero);
 
         forAll(meshCoords, pointi)
         {

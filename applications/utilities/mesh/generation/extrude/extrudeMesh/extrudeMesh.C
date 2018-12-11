@@ -911,7 +911,7 @@ int main(int argc, char *argv[])
 
         List<pointEdgeCollapse> allPointInfo;
         const globalIndex globalPoints(mesh.nPoints());
-        labelList pointPriority(mesh.nPoints(), 0);
+        labelList pointPriority(mesh.nPoints(), Zero);
 
         collapser.consistentCollapse
         (

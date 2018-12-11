@@ -84,9 +84,9 @@ Foam::cellShape Foam::degenerateMatcher::match(const faceList& faces)
     return match
     (
         faces,
-        labelList(faces.size(), 0),    // cell 0 is owner of all faces
-        0,                             // cell 0
-        identity(faces.size())         // cell 0 consists of all faces
+        labelList(faces.size(), Zero),  // cell 0 is owner of all faces
+        0,                              // cell 0
+        identity(faces.size())          // cell 0 consists of all faces
     );
 }
 

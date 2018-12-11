@@ -721,8 +721,8 @@ bool Foam::functionObjects::fluxSummary::surfaceModeWrite()
 
         const boolList& flips = faceFlip_[surfi];
 
-        scalar phiPos = scalar(0);
-        scalar phiNeg = scalar(0);
+        scalar phiPos(0);
+        scalar phiNeg(0);
 
         tmp<scalarField> tphis = phi & s.Sf();
         const scalarField& phis = tphis();
@@ -1047,9 +1047,9 @@ bool Foam::functionObjects::fluxSummary::write()
         const labelList& facePatchID = facePatchID_[zonei];
         const boolList&  faceFlips = faceFlip_[zonei];
 
-        scalar phiPos = scalar(0);
-        scalar phiNeg = scalar(0);
-        scalar phif = scalar(0);
+        scalar phiPos(0);
+        scalar phiNeg(0);
+        scalar phif(0);
 
         forAll(faceID, i)
         {

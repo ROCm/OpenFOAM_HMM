@@ -111,7 +111,7 @@ Foam::labelList Foam::globalIndexAndTransform::decodeTransformIndex
     const label transformIndex
 ) const
 {
-    labelList permutation(transforms_.size(), 0);
+    labelList permutation(transforms_.size(), Zero);
 
     label t = transformIndex;
     forAll(permutation, i)
@@ -415,7 +415,7 @@ Foam::labelList Foam::globalIndexAndTransform::transformIndicesForPatches
     const labelHashSet& patchis
 ) const
 {
-    labelList permutation(transforms_.size(), 0);
+    labelList permutation(transforms_.size(), Zero);
 
     labelList selectedTransformIs(0);
 

@@ -77,7 +77,7 @@ Foam::plenumPressureFvPatchScalarField::plenumPressureFvPatchScalarField
     hasRho_(false),
     inletAreaRatio_(dict.get<scalar>("inletAreaRatio")),
     inletDischargeCoefficient_(dict.get<scalar>("inletDischargeCoefficient")),
-    timeScale_(dict.lookupOrDefault<scalar>("timeScale", 0.0)),
+    timeScale_(dict.lookupOrDefault<scalar>("timeScale", 0)),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     UName_(dict.lookupOrDefault<word>("U", "U"))
 {

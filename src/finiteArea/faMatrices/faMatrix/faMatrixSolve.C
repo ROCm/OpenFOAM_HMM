@@ -179,7 +179,7 @@ Foam::tmp<Foam::Field<Type>> Foam::faMatrix<Type>::residual() const
     {
         scalarField psiCmpt(psi_.internalField().component(cmpt));
 
-        scalarField boundaryDiagCmpt(psi_.size(), 0.0);
+        scalarField boundaryDiagCmpt(psi_.size(), Zero);
         addBoundaryDiag(boundaryDiagCmpt, cmpt);
 
         FieldField<Field, scalar> bouCoeffsCmpt

@@ -784,7 +784,7 @@ void Foam::cellCellStencils::inverseDistance::markDonors
 //    // so we'll need to compact
 //
 //    // 4a: count per originating processor the number of regions
-//    labelList nOriginating(Pstream::nProcs(), 0);
+//    labelList nOriginating(Pstream::nProcs(), Zero);
 //    {
 //        labelHashSet haveRegion(mesh.nCells()/8);
 //
@@ -1055,7 +1055,7 @@ void Foam::cellCellStencils::inverseDistance::findHoles
     //  1 : borders blockage so is not ok (but can be overridden by real
     //      patch)
     //  2 : has real patch in it so is reachable
-    labelList regionType(nRegions, 0);
+    labelList regionType(nRegions, Zero);
 
 
     // See if any regions borders blockage. Note: isBlockedFace is already
@@ -1326,7 +1326,7 @@ void Foam::cellCellStencils::inverseDistance::walkFront
 
 
     // Current interpolation fraction
-    scalarField fraction(mesh_.nFaces(), 0.0);
+    scalarField fraction(mesh_.nFaces(), Zero);
 
     forAll(isFront, faceI)
     {
@@ -1658,7 +1658,7 @@ Foam::cellCellStencils::inverseDistance::inverseDistance
 :
     cellCellStencil(mesh),
     dict_(dict),
-    smallVec_(vector::zero),
+    smallVec_(Zero),
     cellTypes_(labelList(mesh.nCells(), CALCULATED)),
     interpolationCells_(0),
     cellInterpolationMap_(),
@@ -1746,7 +1746,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
     const labelIOList& zoneID = this->zoneID();
 
     label nZones = gMax(zoneID)+1;
-    labelList nCellsPerZone(nZones, 0);
+    labelList nCellsPerZone(nZones, Zero);
     forAll(zoneID, cellI)
     {
         nCellsPerZone[zoneID[cellI]]++;
@@ -2073,7 +2073,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
 
 
     // Add buffer interpolation layer(s) around holes
-    scalarField allWeight(mesh_.nCells(), 0.0);
+    scalarField allWeight(mesh_.nCells(), Zero);
     walkFront(layerRelax, allStencil, allCellTypes, allWeight);
 
     if (debug)
@@ -2201,7 +2201,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
 
         // Dump max weight
         {
-            scalarField maxMagWeight(mesh_.nCells(), 0.0);
+            scalarField maxMagWeight(mesh_.nCells(), Zero);
             forAll(cellStencil_, celli)
             {
                 const scalarList& wghts = cellInterpolationWeights_[celli];

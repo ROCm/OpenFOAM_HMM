@@ -51,9 +51,9 @@ Foam::isoCutCell::isoCutCell(const fvMesh& mesh, scalarField& f)
     isoCutFaceAreas_(10),
     isoFaceEdges_(10),
     isoFacePoints_(10),
-    isoFaceCentre_(vector::zero),
-    isoFaceArea_(vector::zero),
-    subCellCentre_(vector::zero),
+    isoFaceCentre_(Zero),
+    isoFaceArea_(Zero),
+    subCellCentre_(Zero),
     subCellVolume_(-10),
     VOF_(-10),
     fullySubFaces_(10),
@@ -190,8 +190,8 @@ void Foam::isoCutCell::calcSubCellCentreAndVolume()
 void Foam::isoCutCell::calcIsoFaceCentreAndArea()
 {
     // Initial guess of face centre from edge points
-    point fCentre = vector::zero;
-    label nEdgePoints = 0;
+    point fCentre(Zero);
+    label nEdgePoints(0);
     forAll(isoFaceEdges_, ei)
     {
         DynamicList<point>& edgePoints = isoFaceEdges_[ei];
@@ -211,9 +211,9 @@ void Foam::isoCutCell::calcIsoFaceCentreAndArea()
         DebugPout << "Warning: nEdgePoints = 0 for cell " << cellI_ << endl;
     }
 
-    vector sumN = vector::zero;
-    scalar sumA = 0;
-    vector sumAc = vector::zero;
+    vector sumN(Zero);
+    scalar sumA(0);
+    vector sumAc(Zero);
 
     forAll(isoFaceEdges_, ei)
     {

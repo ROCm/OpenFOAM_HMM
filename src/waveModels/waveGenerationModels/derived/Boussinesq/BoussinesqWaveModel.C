@@ -76,7 +76,7 @@ Foam::vector Foam::waveModels::Boussinesq::Deta
     const scalar X0
 ) const
 {
-    vector deta(vector::zero);
+    vector deta(Zero);
 
     scalar C = sqrt(mag(g_)*(H + h));
     scalar ts = 3.5*h/sqrt(H/h);

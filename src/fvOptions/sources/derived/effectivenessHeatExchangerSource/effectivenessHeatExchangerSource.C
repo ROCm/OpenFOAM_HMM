@@ -256,7 +256,7 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
 
     const scalarField TCells(T, cells_);
     scalar Tref = 0;
-    scalarField deltaTCells(cells_.size(), 0);
+    scalarField deltaTCells(cells_.size(), Zero);
     if (Qt > 0)
     {
         Tref = gMax(TCells);

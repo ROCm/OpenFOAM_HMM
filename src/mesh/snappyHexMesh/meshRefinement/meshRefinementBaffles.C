@@ -730,7 +730,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createZoneBaffles
         labelList neiPatch(mesh_.nFaces(), -1);
         labelList faceZoneID(mesh_.nFaces(), -1);
 
-        labelList nBaffles(zoneIDs.size(), 0);
+        labelList nBaffles(zoneIDs.size(), Zero);
 
         forAll(zoneIDs, j)
         {
@@ -893,7 +893,7 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::freeStandingBaffles
     // All duplicate faces on edge of the patch are to be merged.
     // So we count for all edges of duplicate faces how many duplicate
     // faces use them.
-    labelList nBafflesPerEdge(mesh_.nEdges(), 0);
+    labelList nBafflesPerEdge(mesh_.nEdges(), Zero);
 
 
     // This algorithm is quite tricky. We don't want to use edgeFaces and
@@ -2270,7 +2270,7 @@ void Foam::meshRefinement::getIntersections
     posOrientation = false;
 
     // Statistics: number of faces per faceZone
-    labelList nSurfFaces(surfaces_.surfZones().size(), 0);
+    labelList nSurfFaces(surfaces_.surfZones().size(), Zero);
 
     // Collect segments
     // ~~~~~~~~~~~~~~~~
@@ -2678,7 +2678,7 @@ void Foam::meshRefinement::zonify
 
         label nUnvisited = 0;
         label nBackgroundCells = 0;
-        labelList nZoneCells(nZones, 0);
+        labelList nZoneCells(nZones, Zero);
         forAll(cellToZone, cellI)
         {
             label zoneI = cellToZone[cellI];
@@ -4161,7 +4161,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::removeLimitShells
     );
 
 
-    labelList cellRegion(mesh_.nCells(), 0);
+    labelList cellRegion(mesh_.nCells(), Zero);
     // Find any cells inside a limit shell with minLevel -1
     labelList levelShell;
     limitShells_.findLevel

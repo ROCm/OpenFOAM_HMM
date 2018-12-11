@@ -108,7 +108,7 @@ Foam::labelList Foam::springRenumber::renumber
         //    << endl;
 
         // Sum force per cell.
-        scalarField sumForce(cellCells.size(), 0.0);
+        scalarField sumForce(cellCells.size(), Zero);
         forAll(cellCells, oldCelli)
         {
             const labelList& cCells = cellCells[oldCelli];

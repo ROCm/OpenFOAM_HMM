@@ -42,7 +42,7 @@ namespace Foam
 Foam::fvMotionSolverEngineMesh::fvMotionSolverEngineMesh(const IOobject& io)
 :
     engineMesh(io),
-    pistonLayers_("pistonLayers", dimLength, 0.0),
+    pistonLayers_("pistonLayers", dimLength, Zero),
     motionSolver_
     (
         *this,

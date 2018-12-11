@@ -387,7 +387,7 @@ void Foam::lumpedPointMovement::setMapping
     labelList faceToZoneID(mesh.nFaces() - firstFace, -1);
 
     // Number of faces per zone
-    labelList nFaces(thresholds().size(), 0);
+    labelList nFaces(thresholds().size(), Zero);
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 

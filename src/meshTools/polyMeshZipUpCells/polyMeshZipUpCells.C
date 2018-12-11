@@ -84,7 +84,7 @@ bool Foam::polyMeshZipUpCells(polyMesh& mesh)
 
             // Find the edges used only once in the cell
 
-            labelList edgeUsage(cellEdges.size(), 0);
+            labelList edgeUsage(cellEdges.size(), Zero);
 
             forAll(curFaces, facei)
             {
@@ -177,7 +177,7 @@ bool Foam::polyMeshZipUpCells(polyMesh& mesh)
             // points marked twice are internal to edge; those marked more than
             // twice are corners
 
-            labelList pointUsage(cellPoints.size(), 0);
+            labelList pointUsage(cellPoints.size(), Zero);
 
             forAll(singleEdges, edgeI)
             {
@@ -737,8 +737,8 @@ bool Foam::polyMeshZipUpCells(polyMesh& mesh)
         // (edge, point) addressing.
 
         // Collect the patch sizes
-        labelList patchSizes(bMesh.size(), 0);
-        labelList patchStarts(bMesh.size(), 0);
+        labelList patchSizes(bMesh.size(), Zero);
+        labelList patchStarts(bMesh.size(), Zero);
 
         forAll(bMesh, patchi)
         {

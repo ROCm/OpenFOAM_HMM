@@ -61,7 +61,7 @@ void testMapDistribute()
     // Send all ones to processor indicated by .first()
 
     // Count how many to send
-    labelList nSend(Pstream::nProcs(), 0);
+    labelList nSend(Pstream::nProcs(), Zero);
     forAll(complexData, i)
     {
         label procI = complexData[i].first();

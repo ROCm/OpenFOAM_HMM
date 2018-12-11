@@ -758,7 +758,7 @@ Foam::isoSurface::interpolate
 
     // Pass1: unweighted average of merged point values
     {
-        labelList nValues(values.size(), 0);
+        labelList nValues(values.size(), Zero);
 
         forAll(unmergedValues, i)
         {

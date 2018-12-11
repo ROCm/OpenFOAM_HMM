@@ -145,7 +145,7 @@ Foam::labelList Foam::cellCellStencil::count
     const labelUList& lst
 )
 {
-    labelList count(size, 0);
+    labelList count(size, Zero);
     forAll(lst, i)
     {
         count[lst[i]]++;

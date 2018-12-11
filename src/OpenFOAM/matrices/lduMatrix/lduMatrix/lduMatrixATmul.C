@@ -295,7 +295,7 @@ Foam::tmp<Foam::scalarField > Foam::lduMatrix::H1() const
 {
     tmp<scalarField > tH1
     (
-        new scalarField(lduAddr().size(), 0.0)
+        new scalarField(lduAddr().size(), Zero)
     );
 
     if (lowerPtr_ || upperPtr_)

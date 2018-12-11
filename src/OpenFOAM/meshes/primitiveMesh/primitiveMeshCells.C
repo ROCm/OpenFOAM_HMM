@@ -50,7 +50,7 @@ void Foam::primitiveMesh::calcCells
 
     // 1. Count number of faces per cell
 
-    labelList ncf(nCells, 0);
+    labelList ncf(nCells, Zero);
 
     forAll(own, facei)
     {

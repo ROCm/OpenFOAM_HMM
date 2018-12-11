@@ -316,7 +316,7 @@ Type Foam::Function1Types::TableBase<Type>::integrate
 template<class Type>
 Foam::tmp<Foam::scalarField> Foam::Function1Types::TableBase<Type>::x() const
 {
-    tmp<scalarField> tfld(new scalarField(table_.size(), 0.0));
+    tmp<scalarField> tfld(new scalarField(table_.size(), Zero));
     scalarField& fld = tfld.ref();
 
     forAll(table_, i)

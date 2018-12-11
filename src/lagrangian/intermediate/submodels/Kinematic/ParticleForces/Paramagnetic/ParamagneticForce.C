@@ -104,7 +104,7 @@ Foam::forceSuSp Foam::ParamagneticForce<CloudType>::calcNonCoupled
     const scalar muc
 ) const
 {
-    forceSuSp value(Zero, 0.0);
+    forceSuSp value(Zero);
 
     const interpolation<vector>& HdotGradHInterp = *HdotGradHInterpPtr_;
 

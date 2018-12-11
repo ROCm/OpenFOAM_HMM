@@ -237,7 +237,7 @@ void Foam::edgeInterpolation::makeLPN() const
 
     forAll(owner, edgeI)
     {
-        vector curSkewCorrVec = vector::zero;
+        vector curSkewCorrVec(Zero);
 
         if (skew())
         {
@@ -315,7 +315,7 @@ void Foam::edgeInterpolation::makeWeights() const
 
     forAll(owner, edgeI)
     {
-        vector curSkewCorrVec = vector::zero;
+        vector curSkewCorrVec(Zero);
 
         if (skew())
         {
@@ -417,7 +417,7 @@ void Foam::edgeInterpolation::makeDeltaCoeffs() const
 
 
         // Calc PN arc length
-        vector curSkewCorrVec = vector::zero;
+        vector curSkewCorrVec(Zero);
 
         if (skew())
         {

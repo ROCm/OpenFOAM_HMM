@@ -153,7 +153,7 @@ void Foam::snappySnapDriver::smoothAndConstrain
         //   nearest feature point.
 
         vectorField dispSum(pp.nPoints(), Zero);
-        labelList dispCount(pp.nPoints(), 0);
+        labelList dispCount(pp.nPoints(), Zero);
 
         const labelListList& pointEdges = pp.pointEdges();
         const edgeList& edges = pp.edges();

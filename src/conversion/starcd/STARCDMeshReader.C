@@ -621,8 +621,8 @@ void Foam::fileFormats::STARCDMeshReader::readBoundary
     word patchType;
 
     labelList mapToFoamPatchId(1000, label(-1));
-    labelList nPatchFaces(1000, label(0));
-    labelList origRegion(1000, label(0));
+    labelList nPatchFaces(1000, Zero);
+    labelList origRegion(1000, Zero);
     patchTypes_.setSize(1000);
 
     //

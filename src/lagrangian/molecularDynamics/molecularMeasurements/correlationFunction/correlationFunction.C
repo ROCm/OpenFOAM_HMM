@@ -140,7 +140,7 @@ void Foam::correlationFunction<Type>::calculateCorrelationFunction
             << abort(FatalError);
     }
 
-    List<scalar> cFSums(nBuffers(),0.0);
+    List<scalar> cFSums(nBuffers(), Zero);
 
     forAll(tZeroBuffers_, tZB)
     {

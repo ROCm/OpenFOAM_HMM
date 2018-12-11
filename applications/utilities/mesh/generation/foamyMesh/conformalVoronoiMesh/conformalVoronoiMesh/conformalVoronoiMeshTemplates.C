@@ -83,7 +83,7 @@ bool Foam::conformalVoronoiMesh::distributeBackground(const Triangulation& mesh)
 
         meshSearch cellSearch(bMesh, polyMesh::FACE_PLANES);
 
-        labelList cellVertices(bMesh.nCells(), label(0));
+        labelList cellVertices(bMesh.nCells(), Zero);
 
         for
         (

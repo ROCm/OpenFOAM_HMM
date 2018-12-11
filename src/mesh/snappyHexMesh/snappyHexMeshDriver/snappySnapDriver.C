@@ -234,7 +234,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothInternalDisplacement
 
 
     // Calculate average of connected cells
-    labelList nCells(mesh.nPoints(), 0);
+    labelList nCells(mesh.nPoints(), Zero);
     pointField sumLocation(mesh.nPoints(), Zero);
 
     forAll(isMovingPoint, pointi)
@@ -356,7 +356,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothPatchDisplacement
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     vectorField avgBoundary(pointFaces.size(), Zero);
-    labelList nBoundary(pointFaces.size(), 0);
+    labelList nBoundary(pointFaces.size(), Zero);
 
     forAll(pointFaces, patchPointi)
     {
@@ -404,7 +404,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothPatchDisplacement
     labelList nInternal;
     {
         vectorField globalSum(mesh.nPoints(), Zero);
-        labelList globalNum(mesh.nPoints(), 0);
+        labelList globalNum(mesh.nPoints(), Zero);
 
         // Note: no use of pointFaces
         const faceList& faces = mesh.faces();
@@ -987,7 +987,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::avgCellCentres
         new pointField(pointFaces.size(), Zero)
     );
     pointField& avgBoundary = tavgBoundary.ref();
-    labelList nBoundary(pointFaces.size(), 0);
+    labelList nBoundary(pointFaces.size(), Zero);
 
     forAll(pointFaces, pointi)
     {

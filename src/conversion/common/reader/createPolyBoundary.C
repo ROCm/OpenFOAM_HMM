@@ -320,7 +320,7 @@ void Foam::meshReader::createPolyBoundary()
 
     // check the mesh for face mismatch
     // (faces addressed once or more than twice)
-    labelList markupFaces(meshFaces_.size(), 0);
+    labelList markupFaces(meshFaces_.size(), Zero);
 
     forAll(cellPolys_, celli)
     {

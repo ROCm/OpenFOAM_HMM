@@ -1063,7 +1063,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
         // Check for cells with one internal face only
 
-        labelList nInternalFaces(pMesh.nCells(), label(0));
+        labelList nInternalFaces(pMesh.nCells(), Zero);
 
         for (label fI = 0; fI < pMesh.nInternalFaces(); fI++)
         {

@@ -43,7 +43,7 @@ tractionDisplacementFvPatchVectorField
 :
     fixedGradientFvPatchVectorField(p, iF),
     traction_(p.size(), Zero),
-    pressure_(p.size(), 0.0)
+    pressure_(p.size(), Zero)
 {
     fvPatchVectorField::operator=(patchInternalField());
     gradient() = Zero;

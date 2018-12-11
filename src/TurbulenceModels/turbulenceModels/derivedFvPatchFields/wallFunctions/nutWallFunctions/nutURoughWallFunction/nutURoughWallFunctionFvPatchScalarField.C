@@ -59,7 +59,7 @@ tmp<scalarField> nutURoughWallFunctionFvPatchScalarField::calcNut() const
     tmp<scalarField> tyPlus = calcYPlus(magUp);
     scalarField& yPlus = tyPlus.ref();
 
-    tmp<scalarField> tnutw(new scalarField(patch().size(), 0.0));
+    tmp<scalarField> tnutw(new scalarField(patch().size(), Zero));
     scalarField& nutw = tnutw.ref();
 
     forAll(yPlus, facei)
@@ -94,7 +94,7 @@ tmp<scalarField> nutURoughWallFunctionFvPatchScalarField::calcYPlus
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
-    tmp<scalarField> tyPlus(new scalarField(patch().size(), 0.0));
+    tmp<scalarField> tyPlus(new scalarField(patch().size(), Zero));
     scalarField& yPlus = tyPlus.ref();
 
     if (roughnessHeight_ > 0.0)

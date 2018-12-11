@@ -61,7 +61,7 @@ void Foam::cellCellStencils::leastSquares::stencilWeights
     scalar W = 0;
 
     // Sum of weighted distance vectors
-    vector dw = vector::zero;
+    vector dw(Zero);
 
     RectangularMatrix<scalar> A(nD, 3);
 

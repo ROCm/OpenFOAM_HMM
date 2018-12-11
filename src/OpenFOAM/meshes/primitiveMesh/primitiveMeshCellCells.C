@@ -58,7 +58,7 @@ void Foam::primitiveMesh::calcCellCells() const
     {
         // 1. Count number of internal faces per cell
 
-        labelList ncc(nCells(), 0);
+        labelList ncc(nCells(), Zero);
 
         const labelList& own = faceOwner();
         const labelList& nei = faceNeighbour();

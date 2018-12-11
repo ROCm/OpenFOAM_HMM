@@ -197,8 +197,8 @@ void Foam::blockFaces::projectFace::project
 
 
     // Calculate initial normalised edge lengths (= u,v coordinates)
-    scalarField lambdaI(points.size(), 0.0);
-    scalarField lambdaJ(points.size(), 0.0);
+    scalarField lambdaI(points.size(), Zero);
+    scalarField lambdaJ(points.size(), Zero);
     calcLambdas(n, points, lambdaI, lambdaJ);
 
 
@@ -251,7 +251,7 @@ void Foam::blockFaces::projectFace::project
 
 
         // Predict along i
-        vectorField residual(points.size(), vector::zero);
+        vectorField residual(points.size(), Zero);
 
         // Work arrays for interpolation
         labelList indices;
@@ -279,7 +279,7 @@ void Foam::blockFaces::projectFace::project
 
                 interpolator.valueWeights(lambdaI[ij], indices, weights);
 
-                point predicted = vector::zero;
+                point predicted(Zero);
                 forAll(indices, indexi)
                 {
                     label ptIndex = index(n, labelPair(indices[indexi], j));
@@ -331,7 +331,7 @@ void Foam::blockFaces::projectFace::project
 
                 interpolator.valueWeights(lambdaJ[ij], indices, weights);
 
-                point predicted = vector::zero;
+                point predicted(Zero);
                 forAll(indices, indexi)
                 {
                     label ptIndex = index(n, labelPair(i, indices[indexi]));

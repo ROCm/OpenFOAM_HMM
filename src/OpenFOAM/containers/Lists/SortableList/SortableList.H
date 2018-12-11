@@ -71,7 +71,11 @@ public:
         //  The indices remain empty until the list is sorted
         inline explicit SortableList(const label size);
 
-        //- Construct given size and initial value. Sort later on
+        //- Construct zero-initialized with given size, sort later.
+        //  The indices remain empty until the list is sorted
+        inline SortableList(const label size, const zero);
+
+        //- Construct given size and initial value, sorting later.
         //  The indices remain empty until the list is sorted
         inline SortableList(const label size, const T& val);
 

@@ -115,7 +115,7 @@ Foam::functionObjects::setFlow::setFlow
     mode_(modeType::FUNCTION),
     reverseTime_(VGREAT),
     scalePtr_(nullptr),
-    origin_(vector::zero),
+    origin_(Zero),
     R_(tensor::I),
     omegaPtr_(nullptr),
     velocityPtr_(nullptr)

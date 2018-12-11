@@ -558,7 +558,7 @@ void Foam::combineFaces::setRefinement
     }
 
     // Running count of number of faces using a point
-    labelList nPointFaces(mesh_.nPoints(), 0);
+    labelList nPointFaces(mesh_.nPoints(), Zero);
 
     const labelListList& pointFaces = mesh_.pointFaces();
 

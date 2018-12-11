@@ -112,10 +112,10 @@ bool Foam::eddy::setScales
 Foam::eddy::eddy()
 :
     patchFaceI_(-1),
-    position0_(vector::zero),
+    position0_(Zero),
     x_(0),
-    sigma_(vector::zero),
-    alpha_(vector::zero),
+    sigma_(Zero),
+    alpha_(Zero),
     Rpg_(tensor::I),
     c1_(-1),
     dir1_(0)
@@ -135,8 +135,8 @@ Foam::eddy::eddy
     patchFaceI_(patchFaceI),
     position0_(position0),
     x_(x),
-    sigma_(vector::zero),
-    alpha_(vector::zero),
+    sigma_(Zero),
+    alpha_(Zero),
     Rpg_(tensor::I),
     c1_(-1),
     dir1_(0)

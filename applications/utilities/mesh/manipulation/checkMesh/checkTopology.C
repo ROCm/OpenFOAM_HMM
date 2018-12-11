@@ -319,7 +319,7 @@ Foam::label Foam::checkTopology
 
     if (allTopology)
     {
-        labelList nInternalFaces(mesh.nCells(), 0);
+        labelList nInternalFaces(mesh.nCells(), Zero);
 
         for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
         {

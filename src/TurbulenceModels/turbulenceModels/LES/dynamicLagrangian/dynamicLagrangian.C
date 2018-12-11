@@ -121,7 +121,7 @@ dynamicLagrangian<BasicTurbulenceModel>::dynamicLagrangian
     filterPtr_(LESfilter::New(U.mesh(), this->coeffDict())),
     filter_(filterPtr_()),
 
-    flm0_("flm0", flm_.dimensions(), 0.0),
+    flm0_("flm0", flm_.dimensions(), Zero),
     fmm0_("fmm0", fmm_.dimensions(), VSMALL)
 {
     if (type == typeName)

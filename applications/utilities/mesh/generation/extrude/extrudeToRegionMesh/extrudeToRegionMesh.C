@@ -2053,11 +2053,11 @@ int main(int argc, char *argv[])
     // Count how many patches on special edges of extrudePatch are necessary
     // - zoneXXX_sides
     // - zoneXXX_zoneYYY
-    labelList zoneSidePatch(zoneNames.size(), 0);
+    labelList zoneSidePatch(zoneNames.size(), Zero);
     // Patch to use for minZone
-    labelList zoneZonePatch_min(zoneNames.size()*zoneNames.size(), 0);
+    labelList zoneZonePatch_min(zoneNames.size()*zoneNames.size(), Zero);
     // Patch to use for maxZone
-    labelList zoneZonePatch_max(zoneNames.size()*zoneNames.size(), 0);
+    labelList zoneZonePatch_max(zoneNames.size()*zoneNames.size(), Zero);
 
     countExtrudePatches
     (

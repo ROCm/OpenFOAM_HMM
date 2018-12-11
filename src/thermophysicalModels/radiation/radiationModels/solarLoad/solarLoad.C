@@ -395,8 +395,8 @@ void Foam::radiation::solarLoad::calculateQdiff
     List<scalar> localCoarsePartialArea(nLocalVFCoarseFaces);
     List<vector> localCoarseNorm(nLocalVFCoarseFaces);
 
-    scalarField compactCoarseRave(map_->constructSize(), 0.0);
-    scalarField compactCoarsePartialArea(map_->constructSize(), 0.0);
+    scalarField compactCoarseRave(map_->constructSize(), Zero);
+    scalarField compactCoarsePartialArea(map_->constructSize(), Zero);
     vectorList compactCoarseNorm(map_->constructSize(), Zero);
 
     const boundaryRadiationProperties& boundaryRadiation =
@@ -423,7 +423,7 @@ void Foam::radiation::solarLoad::calculateQdiff
             coarseToFine_[i] = invertOneToMany(nAgglom, agglom);
         }
 
-        scalarField r(pp.size(), 0.0);
+        scalarField r(pp.size(), Zero);
         for (label bandI = 0; bandI < nBands_; bandI++)
         {
             const tmp<scalarField> tr =
@@ -432,8 +432,8 @@ void Foam::radiation::solarLoad::calculateQdiff
             r += tr();
         }
 
-        scalarList Rave(cpp.size(), 0.0);
-        scalarList area(cpp.size(), 0.0);
+        scalarList Rave(cpp.size(), Zero);
+        scalarList area(cpp.size(), Zero);
 
         const scalarField& sf = mesh_.magSf().boundaryField()[patchID];
 
@@ -497,7 +497,7 @@ void Foam::radiation::solarLoad::calculateQdiff
 
 
     // Calculate coarse hitFaces and Sun direct hit heat fluxes
-    scalarList localqDiffusive(nLocalVFCoarseFaces, 0.0);
+    scalarList localqDiffusive(nLocalVFCoarseFaces, Zero);
 
     label locaFaceI = 0;
     forAll(includePatches_, i)
@@ -509,7 +509,7 @@ void Foam::radiation::solarLoad::calculateQdiff
         const labelList& coarsePatchFace = coarseMesh_->patchFaceMap()[patchID];
         const scalarField& sf = mesh_.magSf().boundaryField()[patchID];
 
-        scalarField a(ppf.size(), 0.0);
+        scalarField a(ppf.size(), Zero);
         for (label bandI = 0; bandI < nBands_; bandI++)
         {
             const tmp<scalarField> ta =
@@ -943,7 +943,7 @@ void Foam::radiation::solarLoad::calculate()
     if (facesChanged)
     {
         // Reset Ru and qr
-        Ru_ = dimensionedScalar("Ru", dimMass/dimLength/pow3(dimTime), 0.0);
+        Ru_ = dimensionedScalar("Ru", dimMass/dimLength/pow3(dimTime), Zero);
         qrBf = 0.0;
 
         // Add direct hit radiation

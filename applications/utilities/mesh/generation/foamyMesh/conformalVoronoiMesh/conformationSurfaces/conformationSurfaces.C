@@ -613,7 +613,7 @@ Foam::Field<bool> Foam::conformationSurfaces::inside
     const pointField& samplePts
 ) const
 {
-    return wellInside(samplePts, scalarField(samplePts.size(), 0.0));
+    return wellInside(samplePts, scalarField(samplePts.size(), Zero));
 }
 
 
@@ -622,7 +622,7 @@ bool Foam::conformationSurfaces::inside
     const point& samplePt
 ) const
 {
-    return wellInside(pointField(1, samplePt), scalarField(1, 0))[0];
+    return wellInside(pointField(1, samplePt), scalarField(1, Zero))[0];
 }
 
 
@@ -631,7 +631,7 @@ Foam::Field<bool> Foam::conformationSurfaces::outside
     const pointField& samplePts
 ) const
 {
-    return wellOutside(samplePts, scalarField(samplePts.size(), 0.0));
+    return wellOutside(samplePts, scalarField(samplePts.size(), Zero));
 }
 
 
@@ -640,7 +640,7 @@ bool Foam::conformationSurfaces::outside
     const point& samplePt
 ) const
 {
-    return wellOutside(pointField(1, samplePt), scalarField(1, 0))[0];
+    return wellOutside(pointField(1, samplePt), scalarField(1, Zero))[0];
     //return !inside(samplePt);
 }
 

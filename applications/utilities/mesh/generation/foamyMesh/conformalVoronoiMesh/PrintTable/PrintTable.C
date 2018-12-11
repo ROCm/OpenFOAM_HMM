@@ -77,7 +77,7 @@ void Foam::PrintTable<KeyType, DataType>::print
         label largestKeyLength = 6;
         label largestDataLength = 0;
 
-        List<label> largestProcSize(Pstream::nProcs(), 0);
+        labelList largestProcSize(Pstream::nProcs(), Zero);
 
         forAll(procData, proci)
         {

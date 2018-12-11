@@ -261,15 +261,15 @@ void filmPyrolysisRadiativeCoupledMixedFvPatchScalarField::updateCoeffs()
 
     scalarField myKDelta(K*patch().deltaCoeffs());
 
-    scalarList Tfilm(patch().size(), 0.0);
-    scalarList htcwfilm(patch().size(), 0.0);
-    scalarList filmDelta(patch().size(), 0.0);
+    scalarList Tfilm(patch().size(), Zero);
+    scalarList htcwfilm(patch().size(), Zero);
+    scalarList filmDelta(patch().size(), Zero);
 
     const pyrolysisModelType& pyrolysis = pyrModel();
     const filmModelType& film = filmModel();
 
     // Obtain Rad heat (qr)
-    scalarField qr(patch().size(), 0.0);
+    scalarField qr(patch().size(), Zero);
 
     label coupledPatchi = -1;
     if (pyrolysisRegionName_ == mesh.name())

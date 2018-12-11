@@ -154,9 +154,9 @@ Foam::refinementSurfaces::refinementSurfaces
     surfZones_.setSize(surfI);
     regionOffset_.setSize(surfI);
 
-    labelList globalMinLevel(surfI, 0);
-    labelList globalMaxLevel(surfI, 0);
-    labelList globalLevelIncr(surfI, 0);
+    labelList globalMinLevel(surfI, Zero);
+    labelList globalMaxLevel(surfI, Zero);
+    labelList globalLevelIncr(surfI, Zero);
 
     FixedList<label, 3> nullGapLevel;
     nullGapLevel[0] = 0;
@@ -507,7 +507,7 @@ Foam::refinementSurfaces::refinementSurfaces
 // {
 //     const geometricSurfacePatchList& regions = s.patches();
 //
-//     labelList nTris(regions.size(), 0);
+//     labelList nTris(regions.size(), Zero);
 //
 //     forAll(s, triI)
 //     {
@@ -559,7 +559,7 @@ Foam::refinementSurfaces::refinementSurfaces
 
 Foam::labelList Foam::refinementSurfaces::maxGapLevel() const
 {
-    labelList surfaceMax(surfaces_.size(), 0);
+    labelList surfaceMax(surfaces_.size(), Zero);
 
     forAll(surfaces_, surfI)
     {
@@ -596,7 +596,7 @@ void Foam::refinementSurfaces::setMinLevelFields(const shellSurfaces& shells)
             scalarField radiusSqr;
             geom.boundingSpheres(ctrs, radiusSqr);
 
-            labelList minLevelField(ctrs.size(), 0);
+            labelList minLevelField(ctrs.size(), Zero);
             {
                 // Get the element index in a roundabout way. Problem is e.g.
                 // distributed surface where local indices differ from global

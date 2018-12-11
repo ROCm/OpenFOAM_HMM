@@ -266,7 +266,7 @@ void VoFPatchTransfer::correct
             getModelProperty<scalarField>
             (
                 "patchTransferredMasses",
-                scalarField(patchTransferredMasses_.size(), 0)
+                scalarField(patchTransferredMasses_.size(), Zero)
             )
         );
 
@@ -302,7 +302,7 @@ void VoFPatchTransfer::patchTransferredMassTotals
         getModelProperty<scalarField>
         (
             "patchTransferredMasses",
-            scalarField(patchTransferredMasses_.size(), 0)
+            scalarField(patchTransferredMasses_.size(), Zero)
         )
     );
 

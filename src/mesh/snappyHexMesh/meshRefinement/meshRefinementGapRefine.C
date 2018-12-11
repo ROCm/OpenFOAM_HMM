@@ -1535,7 +1535,7 @@ Foam::label Foam::meshRefinement::markSmallFeatureRefinement
         shells_.findHigherGapLevel
         (
             ctrs,
-            labelList(ctrs.size(), 0),
+            labelList(ctrs.size(), Zero),
             shellGapInfo,
             shellGapMode
         );

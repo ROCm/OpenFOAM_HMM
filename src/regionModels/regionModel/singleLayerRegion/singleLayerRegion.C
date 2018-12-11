@@ -117,7 +117,7 @@ void Foam::regionModels::singleLayerRegion::initialise()
             << abort(FatalError);
     }
 
-    scalarField passiveMagSf(magSf.size(), 0.0);
+    scalarField passiveMagSf(magSf.size(), Zero);
     passivePatchIDs_.setSize(intCoupledPatchIDs_.size(), -1);
     forAll(intCoupledPatchIDs_, i)
     {

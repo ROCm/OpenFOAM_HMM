@@ -590,7 +590,7 @@ void Foam::fvMatrix<Type>::relax(const scalar alpha)
     scalarField D0(D);
 
     // Calculate the sum-mag off-diagonal from the interior faces
-    scalarField sumOff(D.size(), 0.0);
+    scalarField sumOff(D.size(), Zero);
     sumMagOffDiag(sumOff);
 
     // Handle the boundary contributions to the diagonal
@@ -839,7 +839,7 @@ Foam::fvMatrix<Type>::H() const
     {
         scalarField psiCmpt(psi_.primitiveField().component(cmpt));
 
-        scalarField boundaryDiagCmpt(psi_.size(), 0.0);
+        scalarField boundaryDiagCmpt(psi_.size(), Zero);
         addBoundaryDiag(boundaryDiagCmpt, cmpt);
         boundaryDiagCmpt.negate();
         addCmptAvBoundaryDiag(boundaryDiagCmpt);

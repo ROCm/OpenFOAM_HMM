@@ -95,7 +95,7 @@ void Foam::Cloud<ParticleType>::writeCloudUniformProperties() const
         )
     );
 
-    labelList np(Pstream::nProcs(), 0);
+    labelList np(Pstream::nProcs(), Zero);
     np[Pstream::myProcNo()] = ParticleType::particleCount_;
 
     Pstream::listCombineGather(np, maxEqOp<label>());

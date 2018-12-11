@@ -44,7 +44,7 @@ Foam::smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
     psiName_("thermo:psi"),
     muName_("thermo:mu"),
     accommodationCoeff_(1.0),
-    Twall_(p.size(), 0.0),
+    Twall_(p.size(), Zero),
     gamma_(1.4)
 {
     refValue() = 0.0;

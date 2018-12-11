@@ -239,7 +239,7 @@ void Foam::functionObjects::regionSizeDistribution::writeGraphs
     if (Pstream::master())
     {
         // Calculate per-bin average
-        scalarField binSum(nBins_, 0.0);
+        scalarField binSum(nBins_, Zero);
         forAll(sortedField, i)
         {
             binSum[indices[i]] += sortedField[i];
@@ -248,7 +248,7 @@ void Foam::functionObjects::regionSizeDistribution::writeGraphs
         scalarField binAvg(divide(binSum, binCount));
 
         // Per bin deviation
-        scalarField binSqrSum(nBins_, 0.0);
+        scalarField binSqrSum(nBins_, Zero);
         forAll(sortedField, i)
         {
             binSqrSum[indices[i]] += Foam::sqr(sortedField[i]);
@@ -694,7 +694,7 @@ bool Foam::functionObjects::regionSizeDistribution::write()
             )
         );
 
-        vectorField centroids(sortedVols.size(), vector::zero);
+        vectorField centroids(sortedVols.size(), Zero);
 
         // Check if downstream bins are calculated
         if (isoPlanes_)
@@ -748,7 +748,7 @@ bool Foam::functionObjects::regionSizeDistribution::write()
                 }
             }
 
-            scalarField binDownCount(nDownstreamBins_, 0.0);
+            scalarField binDownCount(nDownstreamBins_, Zero);
             forAll(distToPlane, i)
             {
                 if (downstreamIndices[i] != -1)
@@ -815,7 +815,7 @@ bool Foam::functionObjects::regionSizeDistribution::write()
         }
 
         // Calculate the counts per diameter bin
-        scalarField binCount(nBins_, 0.0);
+        scalarField binCount(nBins_, Zero);
         forAll(sortedDiameters, i)
         {
             binCount[indices[i]] += 1.0;

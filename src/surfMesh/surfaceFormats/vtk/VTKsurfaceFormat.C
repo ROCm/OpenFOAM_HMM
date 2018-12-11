@@ -129,7 +129,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
     const faceList& faces = reader.faces();
 
     // Assume all faces in zone0 unless a region field is present
-    labelList zones(faces.size(), 0);
+    labelList zones(faces.size(), Zero);
 
     for (auto fieldName : { "region", "STLSolidLabeling" })
     {
@@ -202,7 +202,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
         zones.clear();
 
         // Count
-        labelList zoneSizes(nZones, 0);
+        labelList zoneSizes(nZones, Zero);
         for (const label zonei : dynZones)
         {
             zoneSizes[zonei]++;
@@ -224,7 +224,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
         }
 
         // Count
-        labelList zoneSizes(nZones, 0);
+        labelList zoneSizes(nZones, Zero);
         for (const label zonei : zones)
         {
             zoneSizes[zonei]++;

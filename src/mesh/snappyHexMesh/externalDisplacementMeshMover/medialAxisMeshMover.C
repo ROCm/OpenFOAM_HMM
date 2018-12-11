@@ -1131,7 +1131,7 @@ void Foam::medialAxisMeshMover::findIsolatedRegions
     // Count number of mesh edges using a point
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    labelList isolatedPoint(pp.nPoints(),0);
+    labelList isolatedPoint(pp.nPoints(), Zero);
 
     forAll(edges, edgeI)
     {
@@ -1765,7 +1765,7 @@ bool Foam::medialAxisMeshMover::move
     scalarField zeroMinThickness;
     if (minThicknessName == "none")
     {
-        zeroMinThickness = scalarField(pp.nPoints(), 0.0);
+        zeroMinThickness = scalarField(pp.nPoints(), Zero);
     }
     const scalarField& minThickness =
     (

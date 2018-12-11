@@ -40,7 +40,7 @@ alphaFixedPressureFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    p_(p.size(), 0.0)
+    p_(p.size(), Zero)
 {}
 
 

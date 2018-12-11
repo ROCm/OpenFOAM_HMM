@@ -242,7 +242,7 @@ Foam::commSchedule::commSchedule
 
     // Sort schedule_ by processor
 
-    labelList nProcScheduled(nProcs, 0);
+    labelList nProcScheduled(nProcs, Zero);
 
     // Count
     forAll(schedule_, i)

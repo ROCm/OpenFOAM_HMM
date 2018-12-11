@@ -40,7 +40,7 @@ prghPressureFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF),
     rhoName_("rho"),
-    p_(p.size(), 0.0)
+    p_(p.size(), Zero)
 {}
 
 

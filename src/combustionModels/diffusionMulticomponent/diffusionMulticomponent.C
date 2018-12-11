@@ -158,7 +158,7 @@ diffusionMulticomponent
     YfStream_(reactions_.size(), 1.0),
     sigma_(reactions_.size(), 0.02),
     oxidantRes_(this->coeffs().lookup("oxidantRes")),
-    ftCorr_(reactions_.size(), 0.0),
+    ftCorr_(reactions_.size(), Zero),
     alpha_(1),
     laminarIgn_(false)
 {

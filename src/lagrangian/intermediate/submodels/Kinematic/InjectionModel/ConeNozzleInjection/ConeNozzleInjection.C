@@ -136,7 +136,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     innerDiameter_(this->coeffDict().getScalar("innerDiameter")),
     duration_(this->coeffDict().getScalar("duration")),
     positionVsTime_(owner.db().time(), "position"),
-    position_(vector::zero),
+    position_(Zero),
     injectorCell_(-1),
     tetFacei_(-1),
     tetPti_(-1),

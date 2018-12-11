@@ -134,8 +134,8 @@ Foam::tmp<Foam::scalarField> Foam::waveModel::waterLevel() const
     const scalarField alphac(alphap.patchInternalField());
 
     const scalarField& magSf = alphap.patch().magSf();
-    scalarList paddleMagSf(nPaddle_, 0.0);
-    scalarList paddleWettedMagSf(nPaddle_, 0.0);
+    scalarList paddleMagSf(nPaddle_, Zero);
+    scalarList paddleWettedMagSf(nPaddle_, Zero);
 
     forAll(alphac, facei)
     {
@@ -277,8 +277,8 @@ Foam::waveModel::waveModel
     initialDepth_(0),
     currTimeIndex_(-1),
     activeAbsorption_(false),
-    U_(patch.size(), vector::zero),
-    alpha_(patch.size(), 0)
+    U_(patch.size(), Zero),
+    alpha_(patch.size(), Zero)
 {
     if (readFields)
     {
@@ -359,7 +359,7 @@ void Foam::waveModel::correct(const scalar t)
         alpha_ = 0;
 
         // Update the calculated water level field
-        scalarField calculatedLevel(nPaddle_, 0);
+        scalarField calculatedLevel(nPaddle_, Zero);
 
         if (patch_.size())
         {

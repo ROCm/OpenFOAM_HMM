@@ -253,7 +253,7 @@ void Foam::GAMGSolver::agglomerateInterfaceCoefficients
             coarseInterfaceBouCoeffs.set
             (
                 inti,
-                new scalarField(nPatchFaces[inti], 0.0)
+                new scalarField(nPatchFaces[inti], Zero)
             );
             agglomeration_.restrictField
             (
@@ -265,7 +265,7 @@ void Foam::GAMGSolver::agglomerateInterfaceCoefficients
             coarseInterfaceIntCoeffs.set
             (
                 inti,
-                new scalarField(nPatchFaces[inti], 0.0)
+                new scalarField(nPatchFaces[inti], Zero)
             );
             agglomeration_.restrictField
             (

@@ -416,7 +416,7 @@ bool Foam::autoDensity::fillBox
 
             pointField linePoints(nLine, Zero);
 
-            scalarField lineSizes(nLine, 0.0);
+            scalarField lineSizes(nLine, Zero);
 
             for (label i = 0; i < surfRes_; i++)
             {

@@ -110,7 +110,7 @@ Foam::tmp<Foam::scalarField> Foam::snappyLayerDriver::avgPointData
     const scalarField& pointFld
 )
 {
-    tmp<scalarField> tfaceFld(new scalarField(pp.size(), 0.0));
+    tmp<scalarField> tfaceFld(new scalarField(pp.size(), Zero));
     scalarField& faceFld = tfaceFld.ref();
 
     forAll(pp.localFaces(), facei)
@@ -2376,7 +2376,7 @@ void Foam::snappyLayerDriver::setupLayerInfoTruncation
     else
     {
         // Determine max point layers per face.
-        labelList maxLevel(pp.size(), 0);
+        labelList maxLevel(pp.size(), Zero);
 
         forAll(pp.localFaces(), patchFacei)
         {
@@ -3120,7 +3120,7 @@ bool Foam::snappyLayerDriver::writeLayerData
                 );
 
                 // Convert patchReal to relative thickness
-                scalarField pfld(patchReal.size(), 0.0);
+                scalarField pfld(patchReal.size(), Zero);
                 forAll(patchReal, i)
                 {
                     if (patchWanted[i] > VSMALL)
@@ -3366,7 +3366,7 @@ void Foam::snappyLayerDriver::addLayers
             // avoid truncation in syncPatchDisplacement because of
             // minThickness.
             vectorField patchDisp(pp().nPoints(), vector(GREAT, GREAT, GREAT));
-            labelList patchNLayers(pp().nPoints(), 0);
+            labelList patchNLayers(pp().nPoints(), Zero);
             label nIdealTotAddedCells = 0;
             List<extrudeMode> extrudeStatus(pp().nPoints(), EXTRUDE);
             // Get number of layers per point from number of layers per patch
@@ -3387,7 +3387,7 @@ void Foam::snappyLayerDriver::addLayers
             syncPatchDisplacement
             (
                 *pp,
-                scalarField(patchDisp.size(), 0.0), //minThickness,
+                scalarField(patchDisp.size(), Zero), //minThickness,
                 patchDisp,
                 patchNLayers,
                 extrudeStatus
@@ -3618,7 +3618,7 @@ void Foam::snappyLayerDriver::addLayers
 
     // Number of layers for all pp.localPoints. Note: only valid if
     // extrudeStatus = EXTRUDE.
-    labelList patchNLayers(pp().nPoints(), 0);
+    labelList patchNLayers(pp().nPoints(), Zero);
 
     // Ideal number of cells added
     label nIdealTotAddedCells = 0;
@@ -3782,7 +3782,7 @@ void Foam::snappyLayerDriver::addLayers
     // Per face actual overall layer thickness
     scalarField faceRealThickness;
     // Per face wanted overall layer thickness
-    scalarField faceWantedThickness(mesh.nFaces(), 0.0);
+    scalarField faceWantedThickness(mesh.nFaces(), Zero);
     {
         UIndirectList<scalar>(faceWantedThickness, pp->addressing()) =
             avgPointData(*pp, thickness);
@@ -4470,8 +4470,8 @@ void Foam::snappyLayerDriver::addLayers
 
             // Make sure to keep the max since on two patches only one has
             // layers.
-            scalarField newFaceRealThickness(mesh.nFaces(), 0.0);
-            scalarField newFaceWantedThickness(mesh.nFaces(), 0.0);
+            scalarField newFaceRealThickness(mesh.nFaces(), Zero);
+            scalarField newFaceWantedThickness(mesh.nFaces(), Zero);
             forAll(newFaceRealThickness, facei)
             {
                 label oldFacei = faceMap[facei];

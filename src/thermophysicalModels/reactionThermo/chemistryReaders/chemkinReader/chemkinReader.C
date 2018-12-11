@@ -423,7 +423,7 @@ void Foam::chemkinReader::addReaction
 {
     checkCoeffs(ArrheniusCoeffs, "Arrhenius", 3);
 
-    scalarList nAtoms(elementNames_.size(), 0.0);
+    scalarList nAtoms(elementNames_.size(), Zero);
 
     forAll(lhs, i)
     {

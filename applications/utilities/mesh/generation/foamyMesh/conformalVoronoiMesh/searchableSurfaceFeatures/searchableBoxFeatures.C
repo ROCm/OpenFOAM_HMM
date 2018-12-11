@@ -113,7 +113,7 @@ Foam::searchableBoxFeatures::features() const
             surfacePoints[treeBoundBox::edges[eI].end()]
           - surfacePoints[treeBoundBox::edges[eI].start()];
 
-        normalDirections[eI] = labelList(2, label(0));
+        normalDirections[eI] = labelList(2, Zero);
         for (label j = 0; j < 2; ++j)
         {
             const vector cross =

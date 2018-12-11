@@ -227,10 +227,10 @@ bool Foam::tetMatcher::isA(const faceList& faces)
     return matchShape
     (
         true,
-        faces,                      // all faces in mesh
-        labelList(faces.size(), 0), // cell 0 is owner of all faces
-        0,                          // cell label
-        identity(faces.size())      // faces of cell 0
+        faces,                          // all faces in mesh
+        labelList(faces.size(), Zero),  // cell 0 is owner of all faces
+        0,                              // cell label
+        identity(faces.size())          // faces of cell 0
     );
 }
 

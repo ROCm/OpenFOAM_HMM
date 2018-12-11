@@ -1285,7 +1285,7 @@ void Foam::ccm::reader::removeUnwanted()
     // Remove all faces where the owner corresponds to a removed cell
     // Adjust the nInternalFaces and patch sizes accordingly
     label adjustInternal = 0;
-    labelList adjustPatchSize(patchSizes_.size(), 0);
+    labelList adjustPatchSize(patchSizes_.size(), Zero);
 
     label newFaceI = 0;
     label oldFaceI = nFaces_ - 1;
@@ -1515,8 +1515,8 @@ void Foam::ccm::reader::cleanupInterfaces()
 
     // The patch sizes (and the start) will definitely change
     const labelList origPatchStarts(patchStartList(nInternalFaces_));
-    labelList adjustPatchSize(patchSizes_.size(), 0);
-    labelList bafflePatchCount(patchSizes_.size(), 0);
+    labelList adjustPatchSize(patchSizes_.size(), Zero);
+    labelList bafflePatchCount(patchSizes_.size(), Zero);
 
     // The new dimensions after merging the domain interfaces:
     nInternalFaces_ += domInterfaces_.size();
@@ -2018,7 +2018,7 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
     Info<< "interface merge faces:" << endl;
 
     nMergedTotal = 0;
-    labelList adjustPatchSize(patchSizes_.size(), 0);
+    labelList adjustPatchSize(patchSizes_.size(), Zero);
     forAll(interfacesToMerge, mergeI)
     {
         const label patch0 = interfacePatches[interfacesToMerge[mergeI]][0];

@@ -1234,7 +1234,7 @@ void Foam::globalMeshData::calcPointBoundaryFaces
 
     // 1. Count
 
-    labelList nPointFaces(coupledPatch().nPoints(), 0);
+    labelList nPointFaces(coupledPatch().nPoints(), Zero);
 
     forAll(bMesh, patchi)
     {

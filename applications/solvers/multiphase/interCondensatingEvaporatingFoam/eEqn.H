@@ -4,7 +4,7 @@
 
     kappaEff = thermo->kappa() + rho*cp*turbulence->nut()/Prt;
 
-    pDivU = dimensionedScalar("pDivU", p.dimensions()/dimTime, 0.0);
+    pDivU = dimensionedScalar("pDivU", p.dimensions()/dimTime, Zero);
 
     if (thermo->pDivU())
     {

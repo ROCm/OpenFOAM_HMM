@@ -42,7 +42,7 @@ Foam::prghTotalPressureFvPatchScalarField::prghTotalPressureFvPatchScalarField
     UName_("U"),
     phiName_("phi"),
     rhoName_("rho"),
-    p0_(p.size(), 0.0)
+    p0_(p.size(), Zero)
 {}
 
 

@@ -219,7 +219,7 @@ Foam::cellList Foam::extrudedMesh::extrudedCells
     }
 
     // Current face count per cell.
-    labelList nCellFaces(eCells.size(), 0);
+    labelList nCellFaces(eCells.size(), Zero);
 
 
     label facei = 0;

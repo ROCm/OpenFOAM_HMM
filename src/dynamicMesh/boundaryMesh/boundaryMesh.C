@@ -1725,7 +1725,7 @@ void Foam::boundaryMesh::changeFaces
 
     // Count number of faces for each patch
 
-    labelList nFaces(patches_.size(), 0);
+    labelList nFaces(patches_.size(), Zero);
 
     forAll(patchIDs, facei)
     {

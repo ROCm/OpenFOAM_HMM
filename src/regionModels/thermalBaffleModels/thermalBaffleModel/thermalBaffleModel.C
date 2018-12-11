@@ -183,7 +183,7 @@ thermalBaffleModel::thermalBaffleModel(const fvMesh& mesh)
 :
     regionModel1D(mesh, "thermalBaffle"),
     thickness_(),
-    delta_("delta", dimLength, 0.0),
+    delta_("delta", dimLength, Zero),
     oneD_(false),
     constantThickness_(true)
 {}
@@ -199,7 +199,7 @@ thermalBaffleModel::thermalBaffleModel
 :
     regionModel1D(mesh, "thermalBaffle", modelType, dict, true),
     thickness_(),
-    delta_("delta", dimLength, 0.0),
+    delta_("delta", dimLength, Zero),
     oneD_(false),
     constantThickness_(dict.lookupOrDefault("constantThickness", true))
 {
@@ -215,7 +215,7 @@ thermalBaffleModel::thermalBaffleModel
 :
     regionModel1D(mesh, "thermalBaffle", modelType),
     thickness_(),
-    delta_("delta", dimLength, 0.0),
+    delta_("delta", dimLength, Zero),
     oneD_(false),
     constantThickness_(lookupOrDefault("constantThickness", true))
 {

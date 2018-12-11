@@ -229,7 +229,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Mass transfer due to phase change
-    scalarField dMassPC(YLiquid_.size(), 0.0);
+    scalarField dMassPC(YLiquid_.size(), Zero);
 
     // Molar flux of species emitted from the particle (kmol/m^2/s)
     scalar Ne = 0.0;
@@ -238,7 +238,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     scalar NCpW = 0.0;
 
     // Surface concentrations of emitted species
-    scalarField Cs(composition.carrier().species().size(), 0.0);
+    scalarField Cs(composition.carrier().species().size(), Zero);
 
     // Calc mass and enthalpy transfer due to phase change
     this->calcPhaseChange
@@ -268,7 +268,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     // ~~~~~~~~~~~~~~~~
 
     // Mass transfer due to devolatilisation
-    scalarField dMassDV(YGas_.size(), 0.0);
+    scalarField dMassDV(YGas_.size(), Zero);
 
     // Calc mass and enthalpy transfer due to devolatilisation
     calcDevolatilisation
@@ -297,10 +297,10 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     // ~~~~~~~~~~~~~~~~~
 
     // Change in carrier phase composition due to surface reactions
-    scalarField dMassSRGas(YGas_.size(), 0.0);
-    scalarField dMassSRLiquid(YLiquid_.size(), 0.0);
-    scalarField dMassSRSolid(YSolid_.size(), 0.0);
-    scalarField dMassSRCarrier(composition.carrier().species().size(), 0.0);
+    scalarField dMassSRGas(YGas_.size(), Zero);
+    scalarField dMassSRLiquid(YLiquid_.size(), Zero);
+    scalarField dMassSRSolid(YSolid_.size(), Zero);
+    scalarField dMassSRCarrier(composition.carrier().species().size(), Zero);
 
     // Calc mass and enthalpy transfer due to surface reactions
     calcSurfaceReactions

@@ -68,7 +68,7 @@ Foam::forceSuSp Foam::GravityForce<CloudType>::calcNonCoupled
     const scalar muc
 ) const
 {
-    forceSuSp value(Zero, 0.0);
+    forceSuSp value(Zero);
 
     value.Su() = mass*g_*(1.0 - td.rhoc()/p.rho());
 

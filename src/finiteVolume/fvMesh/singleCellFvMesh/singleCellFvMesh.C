@@ -43,7 +43,7 @@ void Foam::singleCellFvMesh::agglomerateMesh
     const polyBoundaryMesh& oldPatches = mesh.boundaryMesh();
 
     // Check agglomeration within patch face range and continuous
-    labelList nAgglom(oldPatches.size(), 0);
+    labelList nAgglom(oldPatches.size(), Zero);
 
     forAll(oldPatches, patchi)
     {

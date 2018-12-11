@@ -85,7 +85,7 @@ Foam::nutUBlendedWallFunctionFvPatchScalarField::calcUTau
     Up -= n*(n & Up);
     const scalarField magUp(mag(Up));
 
-    tmp<scalarField> tuTaup(new scalarField(patch().size(), 0.0));
+    tmp<scalarField> tuTaup(new scalarField(patch().size(), Zero));
     scalarField& uTaup = tuTaup.ref();
 
     const scalarField& nutw = *this;

@@ -577,7 +577,7 @@ int main(int argc, char *argv[])
     }
 
     // Add faces to faceZones
-    labelList nFaces(mesh.faceZones().size(), 0);
+    labelList nFaces(mesh.faceZones().size(), Zero);
     forAll(faceToZoneID, facei)
     {
         label zoneID = faceToZoneID[facei];

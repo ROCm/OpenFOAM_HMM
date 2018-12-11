@@ -192,7 +192,7 @@ updateCoeffs()
     */
 
     // Calculate Ir into the wall on the same lambdaId
-    scalarField Ir(patch().size(), 0.0);
+    scalarField Ir(patch().size(), Zero);
     forAll(Iw, facei)
     {
         for (label rayi=0; rayi < dom.nRay(); rayi++)

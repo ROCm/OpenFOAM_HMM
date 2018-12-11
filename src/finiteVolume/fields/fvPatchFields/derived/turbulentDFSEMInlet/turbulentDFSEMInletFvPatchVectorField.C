@@ -584,7 +584,7 @@ Foam::vector Foam::turbulentDFSEMInletFvPatchVectorField::uDashEddy
     const point& patchFaceCf
 ) const
 {
-    vector uDash(vector::zero);
+    vector uDash(Zero);
 
     forAll(eddies, k)
     {
@@ -740,17 +740,17 @@ turbulentDFSEMInletFvPatchVectorField
     L_(),
     interpolateU_(false),
     U_(),
-    UMean_(vector::zero),
+    UMean_(Zero),
 
     patchArea_(-1),
     triFace_(),
     triToFace_(),
     triCumulativeMagSf_(),
-    sumTriMagSf_(Pstream::nProcs() + 1, 0.0),
+    sumTriMagSf_(Pstream::nProcs() + 1, Zero),
 
     eddies_(0),
     nCellPerEddy_(5),
-    patchNormal_(vector::zero),
+    patchNormal_(Zero),
     v0_(0),
     rndGen_(Pstream::myProcNo()),
     sigmax_(size(), 0),
@@ -831,20 +831,20 @@ turbulentDFSEMInletFvPatchVectorField
     L_(interpolateOrRead<scalar>("L", dict, interpolateL_)),
     interpolateU_(false),
     U_(interpolateOrRead<vector>("U", dict, interpolateU_)),
-    UMean_(vector::zero),
+    UMean_(Zero),
 
     patchArea_(-1),
     triFace_(),
     triToFace_(),
     triCumulativeMagSf_(),
-    sumTriMagSf_(Pstream::nProcs() + 1, 0.0),
+    sumTriMagSf_(Pstream::nProcs() + 1, Zero),
 
     eddies_(),
     nCellPerEddy_(dict.lookupOrDefault<label>("nCellPerEddy", 5)),
-    patchNormal_(vector::zero),
+    patchNormal_(Zero),
     v0_(0),
     rndGen_(0, -1),
-    sigmax_(size(), 0),
+    sigmax_(size(), Zero),
     maxSigmaX_(0),
     nEddy_(0),
     curTimeIndex_(-1),

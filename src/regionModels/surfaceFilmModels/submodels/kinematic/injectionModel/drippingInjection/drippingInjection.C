@@ -98,7 +98,7 @@ void drippingInjection::correct
     const scalarField& delta = film.delta();
     const scalarField& rho = film.rho();
 
-    scalarField massDrip(film.regionMesh().nCells(), 0.0);
+    scalarField massDrip(film.regionMesh().nCells(), Zero);
 
     forAll(gNorm, i)
     {

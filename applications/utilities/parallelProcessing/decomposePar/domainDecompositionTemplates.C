@@ -115,7 +115,7 @@ void Foam::domainDecomposition::processInterCyclics
             {
                 label nIntfcs = interPatchFaces[proci].size();
                 subPatchIDs[proci].setSize(nIntfcs, labelList(1, patchi));
-                subPatchStarts[proci].setSize(nIntfcs, labelList(1, label(0)));
+                subPatchStarts[proci].setSize(nIntfcs, labelList(1, Zero));
             }
         }
     }

@@ -58,7 +58,7 @@ transferModelList::transferModelList
         "transferModelList",
         "transferModelList"
     ),
-    massTransferred_(film.intCoupledPatchIDs().size(), 0.0)
+    massTransferred_(film.intCoupledPatchIDs().size(), Zero)
 {
     const wordList activeModels
     (
@@ -177,7 +177,7 @@ void transferModelList::info(Ostream& os)
         }
     }
 
-    scalarField mass0(massTransferred_.size(), 0);
+    scalarField mass0(massTransferred_.size(), Zero);
     this->getBaseProperty("massTransferred", mass0);
 
     scalarField mass(massTransferred_);

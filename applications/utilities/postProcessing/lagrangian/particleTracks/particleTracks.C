@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 
 
     // Calculate starting ids for particles on each processor
-    List<label> startIds(numIds.size(), 0);
+    labelList startIds(numIds.size(), Zero);
     for (label i = 0; i < numIds.size()-1; i++)
     {
         startIds[i+1] += startIds[i] + numIds[i];

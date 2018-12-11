@@ -41,7 +41,7 @@ void Foam::lduAddressing::calcLosort() const
     // Scan the neighbour list to find out how many times the cell
     // appears as a neighbour of the face. Done this way to avoid guessing
     // and resizing list
-    labelList nNbrOfFace(size(), 0);
+    labelList nNbrOfFace(size(), Zero);
 
     const labelUList& nbr = upperAddr();
 
@@ -136,7 +136,7 @@ void Foam::lduAddressing::calcLosortStart() const
             << abort(FatalError);
     }
 
-    losortStartPtr_ = new labelList(size() + 1, 0);
+    losortStartPtr_ = new labelList(size() + 1, Zero);
 
     labelList& lsrtStart = *losortStartPtr_;
 
@@ -259,7 +259,7 @@ Foam::Tuple2<Foam::label, Foam::scalar> Foam::lduAddressing::band() const
     const labelUList& owner = lowerAddr();
     const labelUList& neighbour = upperAddr();
 
-    labelList cellBandwidth(size(), 0);
+    labelList cellBandwidth(size(), Zero);
 
     forAll(neighbour, facei)
     {

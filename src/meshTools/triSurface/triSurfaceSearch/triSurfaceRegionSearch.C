@@ -92,7 +92,7 @@ Foam::triSurfaceRegionSearch::treeByRegion() const
             regionsAddressing[regionI] = labelList(regionSizes[regionI], -1);
         }
 
-        labelList nFacesInRegions(nRegions, 0);
+        labelList nFacesInRegions(nRegions, Zero);
 
         forAll(surface(), fI)
         {

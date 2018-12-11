@@ -219,13 +219,13 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
 
     scalarField KDelta(kappa(Tp)*patch().deltaCoeffs());
 
-    scalarField qr(Tp.size(), 0.0);
+    scalarField qr(Tp.size(), Zero);
     if (qrName_ != "none")
     {
         qr = patch().lookupPatchField<volScalarField, scalar>(qrName_);
     }
 
-    scalarField qrNbr(Tp.size(), 0.0);
+    scalarField qrNbr(Tp.size(), Zero);
     if (qrNbrName_ != "none")
     {
         qrNbr = nbrPatch.lookupPatchField<volScalarField, scalar>(qrNbrName_);
@@ -260,7 +260,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
             }
             else
             {
-                mCpDtNbr.setSize(Tp.size(), 0.0);
+                mCpDtNbr.setSize(Tp.size(), Zero);
             }
         }
 
@@ -285,7 +285,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
             else
             {
                 // Issue warning?
-                mCpDt.setSize(Tp.size(), 0.0);
+                mCpDt.setSize(Tp.size(), Zero);
             }
         }
 

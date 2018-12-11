@@ -151,7 +151,7 @@ Foam::oversetGAMGInterface::oversetGAMGInterface
         // Accumulate the coarse level stencil
 
         // Number of fine cells contributing to the coarse cell
-        labelList nFineCells(nCoarseCells, 0);
+        labelList nFineCells(nCoarseCells, Zero);
 
         stencil_.setSize(nCoarseCells);
         cellInterpolationWeights_.setSize(nCoarseCells);

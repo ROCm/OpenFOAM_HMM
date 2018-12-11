@@ -85,7 +85,7 @@ Foam::forceSuSp Foam::SphereDragForce<CloudType>::calcCoupled
     const scalar muc
 ) const
 {
-    forceSuSp value(Zero, 0.0);
+    forceSuSp value(Zero);
 
     value.Sp() = mass*0.75*muc*CdRe(Re)/(p.rho()*sqr(p.d()));
 

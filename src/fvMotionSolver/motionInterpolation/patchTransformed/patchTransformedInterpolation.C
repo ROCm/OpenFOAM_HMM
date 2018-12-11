@@ -124,9 +124,9 @@ void Foam::patchTransformedInterpolation::interpolate
     pointDisplacement.correctBoundaryConditions();
 
     vectorField pointRotation(nPoints, Zero);
-    scalarField pointExpansion(nPoints, scalar(0));
+    scalarField pointExpansion(nPoints, Zero);
 
-    labelList pointDisplacementNSum(nPoints, 0);
+    labelList pointDisplacementNSum(nPoints, Zero);
     vectorField pointDisplacementSum(nPoints, Zero);
 
     forAll(patches_, patchI)

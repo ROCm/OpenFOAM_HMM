@@ -94,7 +94,7 @@ void transferModel::correct
     scalarField& energyToTransfer
 )
 {
-    scalarField massToTransfer0(massToTransfer.size(), scalar(0));
+    scalarField massToTransfer0(massToTransfer.size(), Zero);
     correct(availableMass, massToTransfer0);
     massToTransfer += massToTransfer0;
     energyToTransfer += massToTransfer0*film().hs();

@@ -404,7 +404,7 @@ void testPointSync(const polyMesh& mesh, Random& rndGen)
     // Test masterPoints
 
     {
-        labelList nMasters(mesh.nPoints(), 0);
+        labelList nMasters(mesh.nPoints(), Zero);
 
         bitSet isMasterPoint(syncTools::getMasterPoints(mesh));
 
@@ -480,7 +480,7 @@ void testEdgeSync(const polyMesh& mesh, Random& rndGen)
     // Test masterEdges
 
     {
-        labelList nMasters(edges.size(), 0);
+        labelList nMasters(edges.size(), Zero);
 
         bitSet isMasterEdge(syncTools::getMasterEdges(mesh));
 
@@ -549,7 +549,7 @@ void testFaceSync(const polyMesh& mesh, Random& rndGen)
     // Test masterFaces
 
     {
-        labelList nMasters(mesh.nFaces(), 0);
+        labelList nMasters(mesh.nFaces(), Zero);
 
         bitSet isMasterFace(syncTools::getMasterFaces(mesh));
 

@@ -187,7 +187,7 @@ void Foam::mixerFvMesh::calcMovingMasks() const
     }
 
     // Set the point mask
-    movingPointsMaskPtr_ = new scalarField(points().size(), 0);
+    movingPointsMaskPtr_ = new scalarField(points().size(), Zero);
     scalarField& movingPointsMask = *movingPointsMaskPtr_;
 
     const cellList& c = cells();

@@ -189,8 +189,8 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
     );
 
     // Swap to obtain full local values of neighbour internal field
-    tmp<scalarField> nbrIntFld(new scalarField(nbrField.size(), 0.0));
-    tmp<scalarField> nbrKDelta(new scalarField(nbrField.size(), 0.0));
+    tmp<scalarField> nbrIntFld(new scalarField(nbrField.size(), Zero));
+    tmp<scalarField> nbrKDelta(new scalarField(nbrField.size(), Zero));
 
     if (contactRes_ == 0.0)
     {

@@ -97,7 +97,7 @@ void Foam::CentredFitSnGradData<Polynomial>::calcFit
     scalar scale = 1;
 
     // Matrix of the polynomial components
-    scalarRectangularMatrix B(C.size(), this->minSize(), scalar(0));
+    scalarRectangularMatrix B(C.size(), this->minSize(), Zero);
 
     forAll(C, ip)
     {

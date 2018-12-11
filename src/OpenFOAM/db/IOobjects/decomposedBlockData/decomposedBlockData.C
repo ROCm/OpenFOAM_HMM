@@ -796,7 +796,7 @@ Foam::label Foam::decomposedBlockData::calcNumProcs
     (
         reinterpret_cast<const char*>(&nSendProcs),
         List<int>(nProcs, sizeof(nSendProcs)),
-        List<int>(nProcs, 0),
+        List<int>(nProcs, Zero),
         reinterpret_cast<char*>(&n),
         sizeof(n),
         comm

@@ -134,8 +134,8 @@ nutkRoughWallFunctionFvPatchScalarField::nutkRoughWallFunctionFvPatchScalarField
 )
 :
     nutkWallFunctionFvPatchScalarField(p, iF),
-    Ks_(p.size(), 0.0),
-    Cs_(p.size(), 0.0)
+    Ks_(p.size(), Zero),
+    Cs_(p.size(), Zero)
 {}
 
 

@@ -263,7 +263,7 @@ int main(int argc, char *argv[])
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        labelList(mesh.nCells(), 0)
+        labelList(mesh.nCells(), Zero)
     );
 
     if (readLevel)

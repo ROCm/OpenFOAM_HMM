@@ -49,7 +49,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::nonOrthogonality() const
 
     scalarField& result = tresult.ref();
 
-    scalarField sumArea(mesh_.nCells(), 0.0);
+    scalarField sumArea(mesh_.nCells(), Zero);
 
     const vectorField& centres = mesh_.cellCentres();
     const vectorField& areas = mesh_.faceAreas();
@@ -110,7 +110,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::skewness() const
     );
     scalarField& result = tresult.ref();
 
-    scalarField sumArea(mesh_.nCells(), 0.0);
+    scalarField sumArea(mesh_.nCells(), Zero);
 
     const vectorField& cellCtrs = mesh_.cellCentres();
     const vectorField& faceCtrs = mesh_.faceCentres();

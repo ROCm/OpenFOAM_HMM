@@ -781,7 +781,7 @@ Foam::label Foam::shellSurfaces::maxLevel() const
 
 Foam::labelList Foam::shellSurfaces::maxGapLevel() const
 {
-    labelList surfaceMax(extendedGapLevel_.size(), 0);
+    labelList surfaceMax(extendedGapLevel_.size(), Zero);
 
     forAll(extendedGapLevel_, shelli)
     {

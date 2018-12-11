@@ -110,14 +110,15 @@ Foam::tmp<Foam::scalarField> Foam::levelSetFraction
     const bool above
 )
 {
-    tmp<scalarField> tResult(new scalarField(patch.size(), 0));
+    tmp<scalarField> tResult(new scalarField(patch.size(), Zero));
     scalarField& result = tResult.ref();
 
     forAll(result, fI)
     {
         const face& f = patch.patch().localFaces()[fI];
 
-        vector a = vector::zero, r = vector::zero;
+        vector a(Zero);
+        vector r(Zero);
 
         for (label eI = 0; eI < f.size(); ++eI)
         {

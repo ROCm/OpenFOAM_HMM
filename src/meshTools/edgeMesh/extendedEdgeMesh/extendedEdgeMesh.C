@@ -1864,7 +1864,7 @@ bool Foam::extendedEdgeMesh::mergePointsAndSort
     }
 
     // Re-classify merged points
-    labelList nPoints(nNewPoints, 0);
+    labelList nPoints(nNewPoints, Zero);
     forAll(oldToMerged, oldPointI)
     {
         nPoints[oldToMerged[oldPointI]]++;

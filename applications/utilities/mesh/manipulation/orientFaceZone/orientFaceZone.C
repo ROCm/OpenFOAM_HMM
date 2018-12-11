@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
     }
     {
         // Number of (master)faces per edge
-        labelList nMasterFaces(patch.nEdges(), 0);
+        labelList nMasterFaces(patch.nEdges(), Zero);
 
         forAll(faceLabels, facei)
         {

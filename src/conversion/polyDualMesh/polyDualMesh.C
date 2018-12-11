@@ -593,7 +593,7 @@ void Foam::polyDualMesh::dualPatch
     // 1 : done e.start()
     // 2 : done e.end()
     // 3 : done both
-    labelList doneEdgeSide(meshEdges.size(), 0);
+    labelList doneEdgeSide(meshEdges.size(), Zero);
 
     bitSet donePoint(patch.nPoints(), false);
 
@@ -1283,7 +1283,7 @@ void Foam::polyDualMesh::calcDual
 
 
     // Create patches
-    labelList patchSizes(patches.size(), 0);
+    labelList patchSizes(patches.size(), Zero);
 
     forAll(dualRegion, facei)
     {
@@ -1293,7 +1293,7 @@ void Foam::polyDualMesh::calcDual
         }
     }
 
-    labelList patchStarts(patches.size(), 0);
+    labelList patchStarts(patches.size(), Zero);
 
     label facei = nInternalFaces;
 

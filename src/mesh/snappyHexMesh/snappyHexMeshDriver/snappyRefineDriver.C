@@ -1993,7 +1993,7 @@ Foam::label Foam::snappyRefineDriver::directionalSmooth
                 geometry[surfi].bounds().min() 
               & userDirection;
 
-            scalarField normalizedPosition(pointLabels.size(), 0);
+            scalarField normalizedPosition(pointLabels.size(), Zero);
             forAll(pointLabels, i)
             {
                 label pointi = pointLabels[i];
@@ -2165,9 +2165,9 @@ Foam::label Foam::snappyRefineDriver::directionalSmooth
 
                     pointField unsmoothedPoints(baseMeshPoints);
 
-                    scalarField sumOther(baseMesh.nPoints(), 0.0);
-                    labelList nSumOther(baseMesh.nPoints(), 0);
-                    labelList nSumXEdges(baseMesh.nPoints(), 0);
+                    scalarField sumOther(baseMesh.nPoints(), Zero);
+                    labelList nSumOther(baseMesh.nPoints(), Zero);
+                    labelList nSumXEdges(baseMesh.nPoints(), Zero);
                     forAll(edges, edgei)
                     {
                         const edge& e = edges[edgei];

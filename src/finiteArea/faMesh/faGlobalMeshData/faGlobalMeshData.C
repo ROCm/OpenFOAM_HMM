@@ -75,7 +75,7 @@ void Foam::faGlobalMeshData::updateMesh()
 
     labelHashSet sharedPointLabels;
 
-    labelField globalList(polyMeshNGlobalPoints, 0);
+    labelField globalList(polyMeshNGlobalPoints, Zero);
 
     forAll(mesh_.boundary(), patchI)
     {

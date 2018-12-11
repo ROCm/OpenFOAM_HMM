@@ -113,7 +113,7 @@ void Foam::reactionRateFlameAreaModels::relaxation::correct
 
     const volScalarField omegaInf(correlation_.omega0Sigma(sigmaTotal));
 
-    dimensionedScalar sigma0("sigma0", sigma.dimensions(), 0.0);
+    dimensionedScalar sigma0("sigma0", sigma.dimensions(), Zero);
 
     const volScalarField tau(C_*mag(sigmaTotal));
 

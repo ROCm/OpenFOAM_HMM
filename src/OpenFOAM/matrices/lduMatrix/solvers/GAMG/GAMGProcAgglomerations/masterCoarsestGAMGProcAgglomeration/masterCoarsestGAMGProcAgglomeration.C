@@ -95,7 +95,7 @@ bool Foam::masterCoarsestGAMGProcAgglomeration::agglomerate()
             if (nProcs > 1)
             {
                 // Processor restriction map: per processor the coarse processor
-                labelList procAgglomMap(nProcs, 0);
+                labelList procAgglomMap(nProcs, Zero);
 
                 // Master processor
                 labelList masterProcs;

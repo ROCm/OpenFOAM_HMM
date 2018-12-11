@@ -71,7 +71,7 @@ tmp<scalarField> nutUTabulatedWallFunctionFvPatchScalarField::calcUPlus
     const scalarField& Rey
 ) const
 {
-    tmp<scalarField> tuPlus(new scalarField(patch().size(), 0.0));
+    tmp<scalarField> tuPlus(new scalarField(patch().size(), Zero));
     scalarField& uPlus = tuPlus.ref();
 
     forAll(uPlus, facei)

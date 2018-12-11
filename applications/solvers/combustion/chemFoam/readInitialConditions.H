@@ -29,8 +29,8 @@
         );
     }
 
-    scalarList Y0(nSpecie, 0.0);
-    scalarList X0(nSpecie, 0.0);
+    scalarList Y0(nSpecie, Zero);
+    scalarList X0(nSpecie, Zero);
 
     dictionary fractions(initialConditions.subDict("fractions"));
     if (fractionBasis == "mole")

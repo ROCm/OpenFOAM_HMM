@@ -152,7 +152,7 @@ Foam::labelList Foam::bandCompression
 )
 {
     // Count number of neighbours
-    labelList numNbrs(offsets.size()-1, 0);
+    labelList numNbrs(offsets.size()-1, Zero);
     forAll(numNbrs, celli)
     {
         label start = offsets[celli];

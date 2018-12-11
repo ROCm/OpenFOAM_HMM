@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
             Info<< "\n    Generating " << nTracks << " tracks" << endl;
 
             // Determine length of each track
-            labelList trackLengths(nTracks, 0);
+            labelList trackLengths(nTracks, Zero);
             forAll(particleToTrack, i)
             {
                 const label trackI = particleToTrack[i];
@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
 
                 const scalarField& age = tage();
 
-                List<label> trackSamples(nTracks, 0);
+                labelList trackSamples(nTracks, Zero);
 
                 forAll(particleToTrack, i)
                 {

@@ -257,7 +257,7 @@ void Foam::directAMI<SourcePatch, TargetPatch>::calculate
 
     // list to keep track of whether src face can be mapped
     // 1 = mapped, 0 = untested, -1 = cannot map
-    labelList mapFlag(srcAddr.size(), 0);
+    labelList mapFlag(srcAddr.size(), Zero);
 
     label nTested = 0;
     DynamicList<label> nonOverlapFaces;

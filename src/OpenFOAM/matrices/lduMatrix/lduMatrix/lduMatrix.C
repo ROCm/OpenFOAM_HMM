@@ -178,7 +178,7 @@ Foam::scalarField& Foam::lduMatrix::lower()
         }
         else
         {
-            lowerPtr_ = new scalarField(lduAddr().lowerAddr().size(), 0.0);
+            lowerPtr_ = new scalarField(lduAddr().lowerAddr().size(), Zero);
         }
     }
 
@@ -190,7 +190,7 @@ Foam::scalarField& Foam::lduMatrix::diag()
 {
     if (!diagPtr_)
     {
-        diagPtr_ = new scalarField(lduAddr().size(), 0.0);
+        diagPtr_ = new scalarField(lduAddr().size(), Zero);
     }
 
     return *diagPtr_;
@@ -207,7 +207,7 @@ Foam::scalarField& Foam::lduMatrix::upper()
         }
         else
         {
-            upperPtr_ = new scalarField(lduAddr().lowerAddr().size(), 0.0);
+            upperPtr_ = new scalarField(lduAddr().lowerAddr().size(), Zero);
         }
     }
 
@@ -225,7 +225,7 @@ Foam::scalarField& Foam::lduMatrix::lower(const label nCoeffs)
         }
         else
         {
-            lowerPtr_ = new scalarField(nCoeffs, 0.0);
+            lowerPtr_ = new scalarField(nCoeffs, Zero);
         }
     }
 
@@ -237,7 +237,7 @@ Foam::scalarField& Foam::lduMatrix::diag(const label size)
 {
     if (!diagPtr_)
     {
-        diagPtr_ = new scalarField(size, 0.0);
+        diagPtr_ = new scalarField(size, Zero);
     }
 
     return *diagPtr_;
@@ -254,7 +254,7 @@ Foam::scalarField& Foam::lduMatrix::upper(const label nCoeffs)
         }
         else
         {
-            upperPtr_ = new scalarField(nCoeffs, 0.0);
+            upperPtr_ = new scalarField(nCoeffs, Zero);
         }
     }
 

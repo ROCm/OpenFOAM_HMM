@@ -1102,7 +1102,7 @@ Foam::intersectedSurface::intersectedSurface
     DynamicList<labelledTri> newTris(eSurf.edges().size()/2);
 
     // Start in newTris for decomposed face.
-    labelList startTrii(surf.size(), 0);
+    labelList startTrii(surf.size(), Zero);
 
     forAll(surf, facei)
     {

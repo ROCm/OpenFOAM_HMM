@@ -48,7 +48,7 @@ void SLTSDdtScheme<Type>::relaxedDiag
 {
     const labelUList& owner = mesh().owner();
     const labelUList& neighbour = mesh().neighbour();
-    scalarField diag(rD.size(), 0.0);
+    scalarField diag(rD.size(), Zero);
 
     forAll(owner, facei)
     {

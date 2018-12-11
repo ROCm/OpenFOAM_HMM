@@ -275,9 +275,9 @@ void Foam::Pstream::exchange
             List<char*> charRecvBufs(sendBufs.size());
 
             labelList nRecv(sendBufs.size());
-            labelList startRecv(sendBufs.size(), 0);
+            labelList startRecv(sendBufs.size(), Zero);
             labelList nSend(sendBufs.size());
-            labelList startSend(sendBufs.size(), 0);
+            labelList startSend(sendBufs.size(), Zero);
 
             for (label iter = 0; iter < nIter; iter++)
             {

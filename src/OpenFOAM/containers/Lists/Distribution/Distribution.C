@@ -119,7 +119,7 @@ Foam::label Foam::Distribution<Type>::index
         // Underflow of this List, storage increase and remapping
         // required
 
-        List<scalar> newCmptDistribution(2*cmptDistribution.size(), 0.0);
+        List<scalar> newCmptDistribution(2*cmptDistribution.size(), Zero);
 
         label sOld = cmptDistribution.size();
 

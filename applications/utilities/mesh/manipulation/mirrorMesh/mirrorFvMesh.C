@@ -271,7 +271,7 @@ Foam::mirrorFvMesh::mirrorFvMesh
     }
 
     // Mirror boundary faces patch by patch
-    labelList newPatchSizes(boundary().size(), 0);
+    labelList newPatchSizes(boundary().size(), Zero);
     labelList newPatchStarts(boundary().size(), -1);
 
     forAll(boundaryMesh(), patchi)

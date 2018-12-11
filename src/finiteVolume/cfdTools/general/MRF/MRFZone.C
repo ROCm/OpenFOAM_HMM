@@ -50,7 +50,7 @@ void Foam::MRFZone::setMRFFaces()
     //  0:not in zone
     //  1:moving with frame
     //  2:other
-    labelList faceType(mesh_.nFaces(), 0);
+    labelList faceType(mesh_.nFaces(), Zero);
 
     // Determine faces in cell zone
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -140,8 +140,8 @@ void Foam::MRFZone::setMRFFaces()
     }
     internalFaces_.setSize(nInternal);
 
-    labelList nIncludedFaces(patches.size(), 0);
-    labelList nExcludedFaces(patches.size(), 0);
+    labelList nIncludedFaces(patches.size(), Zero);
+    labelList nExcludedFaces(patches.size(), Zero);
 
     forAll(patches, patchi)
     {

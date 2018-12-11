@@ -2322,7 +2322,7 @@ Foam::label Foam::meshRefinement::findRegions
                     }
                     reduce(nSegments, maxOp<label>());
 
-                    labelList nElemsPerSegment(nSegments, 0);
+                    labelList nElemsPerSegment(nSegments, Zero);
                     for (label segmenti : leakPath.segments())
                     {
                         nElemsPerSegment[segmenti]++;
@@ -2915,7 +2915,7 @@ const
     {
         const labelList& cellLevel = meshCutter_.cellLevel();
 
-        labelList nCells(gMax(cellLevel)+1, 0);
+        labelList nCells(gMax(cellLevel)+1, Zero);
 
         forAll(cellLevel, celli)
         {

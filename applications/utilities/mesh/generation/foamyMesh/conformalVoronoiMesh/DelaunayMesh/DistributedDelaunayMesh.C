@@ -44,7 +44,7 @@ Foam::DistributedDelaunayMesh<Triangulation>::buildMap
     // ~~~~~~~~~~~~~~~~~~
 
     // 1. Count
-    labelList nSend(Pstream::nProcs(), 0);
+    labelList nSend(Pstream::nProcs(), Zero);
 
     forAll(toProc, i)
     {

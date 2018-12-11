@@ -73,7 +73,7 @@ void Foam::CellZoneInjection<CloudType>::setPositions
             polyMeshTetDecomposition::cellTetIndices(mesh, celli);
 
         // Construct cell tet volume fractions
-        scalarList cTetVFrac(cellTetIs.size(), 0.0);
+        scalarList cTetVFrac(cellTetIs.size(), Zero);
         for (label tetI = 1; tetI < cellTetIs.size() - 1; tetI++)
         {
             cTetVFrac[tetI] =

@@ -58,7 +58,7 @@ tmp<scalarField> nutkWallFunctionFvPatchScalarField::calcNut() const
 
     const scalar Cmu25 = pow025(Cmu_);
 
-    tmp<scalarField> tnutw(new scalarField(patch().size(), 0.0));
+    tmp<scalarField> tnutw(new scalarField(patch().size(), Zero));
     scalarField& nutw = tnutw.ref();
 
     forAll(nutw, facei)

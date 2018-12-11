@@ -1147,7 +1147,7 @@ bool Foam::primitiveMesh::checkCellsZipUp
 
         const edgeList cellEdges = c[celli].edges(f);
 
-        labelList edgeUsage(cellEdges.size(), 0);
+        labelList edgeUsage(cellEdges.size(), Zero);
 
         forAll(curFaces, facei)
         {

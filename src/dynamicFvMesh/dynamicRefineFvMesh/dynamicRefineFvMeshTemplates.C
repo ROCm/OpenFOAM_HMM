@@ -37,7 +37,7 @@ void Foam::dynamicRefineFvMesh::mapNewInternalFaces
     typedef GeometricField<T, fvsPatchField, surfaceMesh> GeoField;
 
     //- Make flat field for ease of looping
-    Field<T> tsFld(this->nFaces(), pTraits<T>::zero);
+    Field<T> tsFld(this->nFaces(), Zero);
     SubField<T>(tsFld, this->nInternalFaces()) = sFld.internalField();
 
     const typename GeoField::Boundary& bFld = sFld.boundaryField();
@@ -64,7 +64,7 @@ void Foam::dynamicRefineFvMesh::mapNewInternalFaces
         {
             // Loop over all owner/neighbour cell faces
             // and find already mapped ones (master-faces):
-            T tmpValue = pTraits<T>::zero;
+            T tmpValue(pTraits<T>::zero);
             label counter = 0;
 
             const cell& ownFaces = cells[owner[facei]];

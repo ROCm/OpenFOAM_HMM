@@ -615,9 +615,9 @@ void surfaceNoise::calculate()
             label f1 = floor(fUpper_/deltaf/scalar(fftWriteInterval_));
             label nFreq = f1 - f0;
 
-            scalarField PrmsfAve(nFreq, 0);
-            scalarField PSDfAve(nFreq, 0);
-            scalarField fOut(nFreq, 0);
+            scalarField PrmsfAve(nFreq, Zero);
+            scalarField PSDfAve(nFreq, Zero);
+            scalarField fOut(nFreq, Zero);
 
             if (nFreq == 0)
             {
@@ -746,8 +746,8 @@ void surfaceNoise::calculate()
         {
             fileName outDir(outDirBase/"oneThirdOctave");
 
-            scalarField PSDfAve(surfPSD13f.size(), 0);
-            scalarField Prms13f2Ave(surfPSD13f.size(), 0);
+            scalarField PSDfAve(surfPSD13f.size(), Zero);
+            scalarField Prms13f2Ave(surfPSD13f.size(), Zero);
 
             forAll(surfPSD13f, i)
             {

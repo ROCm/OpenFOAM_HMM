@@ -37,8 +37,8 @@ Foam::wallHeatTransferFvPatchScalarField::wallHeatTransferFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    Tinf_(p.size(), 0.0),
-    alphaWall_(p.size(), 0.0)
+    Tinf_(p.size(), Zero),
+    alphaWall_(p.size(), Zero)
 {
     refValue() = 0.0;
     refGrad() = 0.0;

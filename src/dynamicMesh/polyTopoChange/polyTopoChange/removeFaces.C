@@ -689,7 +689,7 @@ Foam::label Foam::removeFaces::compatibleRemoves
     // - master is lowest numbered in any region
     // - regions have more than 1 cell
     {
-        labelList nCells(regionMaster.size(), 0);
+        labelList nCells(regionMaster.size(), Zero);
 
         forAll(cellRegion, celli)
         {

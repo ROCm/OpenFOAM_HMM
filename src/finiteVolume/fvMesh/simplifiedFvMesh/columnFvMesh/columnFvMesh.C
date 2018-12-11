@@ -211,7 +211,7 @@ void Foam::simplifiedMeshes::columnFvMeshInfo::initialise(const Time& runTime)
         scalar dxi = 0;
         scalar dyi = 0;
         scalar dzi = 0;
-        point origin(point::zero);
+        point origin(Zero);
 
         if (pointsIO.typeHeaderOk<vectorIOField>(true))
         {

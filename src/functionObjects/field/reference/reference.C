@@ -74,7 +74,7 @@ Foam::functionObjects::reference::reference
 :
     fieldExpression(name, runTime, dict),
     localDict_(dict),
-    position_(point::zero),
+    position_(Zero),
     positionIsSet_(false),
     celli_(-1),
     interpolationScheme_("cell"),

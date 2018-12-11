@@ -44,7 +44,7 @@ fixedMultiPhaseHeatFluxFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    q_(p.size(), 0.0),
+    q_(p.size(), Zero),
     relax_(1.0)
 {}
 
@@ -131,9 +131,9 @@ void Foam::fixedMultiPhaseHeatFluxFvPatchScalarField::updateCoeffs()
 
     const scalarField& Tp = *this;
 
-    scalarField A(Tp.size(), scalar(0));
-    scalarField B(Tp.size(), scalar(0));
-    scalarField Q(Tp.size(), scalar(0));
+    scalarField A(Tp.size(), Zero);
+    scalarField B(Tp.size(), Zero);
+    scalarField Q(Tp.size(), Zero);
 
     forAll(fluid.phases(), phasei)
     {

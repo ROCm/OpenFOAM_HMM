@@ -1149,7 +1149,7 @@ label findCorrespondingRegion
 )
 {
     // Per region the number of cells in zoneI
-    labelList cellsInZone(nCellRegions, 0);
+    labelList cellsInZone(nCellRegions, Zero);
 
     forAll(cellRegion, celli)
     {
@@ -1267,7 +1267,7 @@ void matchRegions
     getZoneID(mesh, cellZones, zoneID, neiZoneID);
 
     // Sizes per cellzone
-    labelList zoneSizes(cellZones.size(), 0);
+    labelList zoneSizes(cellZones.size(), Zero);
     {
         List<wordList> zoneNames(Pstream::nProcs());
         zoneNames[Pstream::myProcNo()] = cellZones.names();
@@ -1753,7 +1753,7 @@ int main(int argc, char *argv[])
     // Sizes per region
     // ~~~~~~~~~~~~~~~~
 
-    labelList regionSizes(nCellRegions, 0);
+    labelList regionSizes(nCellRegions, Zero);
 
     forAll(cellRegion, celli)
     {

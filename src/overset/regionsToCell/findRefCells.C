@@ -92,7 +92,7 @@ void Foam::setRefCells
 
 
     // (per region!) does region have reference cell?
-    labelList hasRef(regionNeedReference.size(), 0);
+    labelList hasRef(regionNeedReference.size(), Zero);
 
 
     const labelList refValues(dict.lookup(refValueName));
@@ -158,7 +158,7 @@ void Foam::setRefCells
                 << exit(FatalIOError);
         }
 
-        labelList hasRef(refPoints.size(), 0);
+        labelList hasRef(refPoints.size(), Zero);
 
         forAll(refPoints, i)
         {

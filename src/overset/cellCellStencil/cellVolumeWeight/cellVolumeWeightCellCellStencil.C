@@ -270,7 +270,7 @@ void Foam::cellCellStencils::cellVolumeWeight::findHoles
     //  1 : borders blockage so is not ok (but can be overridden by real
     //      patch)
     //  2 : has real patch in it so is reachable
-    labelList regionType(cellRegion.nRegions(), 0);
+    labelList regionType(cellRegion.nRegions(), Zero);
 
 
     // See if any regions borders blockage. Note: isBlockedFace is already
@@ -745,7 +745,7 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
     const labelIOList& zoneID = this->zoneID();
 
     label nZones = gMax(zoneID)+1;
-    labelList nCellsPerZone(nZones, 0);
+    labelList nCellsPerZone(nZones, Zero);
     forAll(zoneID, cellI)
     {
         nCellsPerZone[zoneID[cellI]]++;
@@ -983,7 +983,7 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
 
 
     // Add buffer interpolation layer around holes
-    scalarField allWeight(mesh_.nCells(), 0.0);
+    scalarField allWeight(mesh_.nCells(), Zero);
     walkFront(layerRelax, allCellTypes, allWeight);
 
 

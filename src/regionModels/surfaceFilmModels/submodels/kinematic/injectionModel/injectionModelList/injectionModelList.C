@@ -58,7 +58,7 @@ injectionModelList::injectionModelList
         "injectionModelList",
         "injectionModelList"
     ),
-    massInjected_(film.intCoupledPatchIDs().size(), 0.0)
+    massInjected_(film.intCoupledPatchIDs().size(), Zero)
 {
     const wordList activeModels(dict.lookup("injectionModels"));
 
@@ -149,7 +149,7 @@ void injectionModelList::info(Ostream& os)
         }
     }
 
-    scalarField mass0(massInjected_.size(), 0);
+    scalarField mass0(massInjected_.size(), Zero);
     this->getBaseProperty("massInjected", mass0);
 
     scalarField mass(massInjected_);

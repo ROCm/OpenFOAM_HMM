@@ -83,14 +83,14 @@ void Foam::pointPatchMapper::calcAddressing() const
             if (ppm[i] >= 0)
             {
                 addr[i] = labelList(1, ppm[i]);
-                w[i] = scalarList(1, 1.0);
+                w[i] = scalarList(1, scalar(1));
             }
             else
             {
                 // Inserted point.
                 ///// Map from point0 (arbitrary choice)
-                //addr[i] = labelList(1, label(0));
-                //w[i] = scalarList(1, 1.0);
+                //addr[i] = labelList(1, Zero);
+                //w[i] = scalarList(1, scalar(1));
                 hasUnmapped_ = true;
             }
         }

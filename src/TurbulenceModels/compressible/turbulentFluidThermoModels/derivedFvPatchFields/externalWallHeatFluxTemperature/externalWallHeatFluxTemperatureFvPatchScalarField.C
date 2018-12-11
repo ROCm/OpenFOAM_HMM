@@ -350,7 +350,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
 
     const scalarField& Tp(*this);
 
-    scalarField qr(Tp.size(), 0);
+    scalarField qr(Tp.size(), Zero);
     if (qrName_ != "none")
     {
         qr =

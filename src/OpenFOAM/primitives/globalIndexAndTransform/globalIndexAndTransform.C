@@ -306,7 +306,7 @@ void Foam::globalIndexAndTransform::determineTransformPermutations()
 
 
     // Encode index for 0 sign
-    labelList permutationIndices(nIndependentTransforms(), 0);
+    labelList permutationIndices(nIndependentTransforms(), Zero);
     nullTransformIndex_ = encodeTransformIndex(permutationIndices);
 }
 

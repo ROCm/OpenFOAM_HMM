@@ -492,10 +492,10 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
     ),
 
     tolerance_(0.001),
-    error_(mesh_.nCells(), 0.0),
-    errorIntegral_(mesh_.nCells(), 0.0),
-    oldError_(mesh_.nCells(), 0.0),
-    oldErrorIntegral_(mesh_.nCells(), 0.0),
+    error_(mesh_.nCells(), Zero),
+    errorIntegral_(mesh_.nCells(), Zero),
+    oldError_(mesh_.nCells(), Zero),
+    oldErrorIntegral_(mesh_.nCells(), Zero),
     P_(dict.lookupOrDefault<scalar>("P", 3)),
     I_(dict.lookupOrDefault<scalar>("I", 0.0)),
     D_(dict.lookupOrDefault<scalar>("D", 0.25))

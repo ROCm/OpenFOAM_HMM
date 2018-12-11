@@ -1437,7 +1437,7 @@ void Foam::fvMeshDistribute::sendMesh
     {
         const pointZoneMesh& pointZones = mesh.pointZones();
 
-        labelList rowSizes(pointZoneNames.size(), 0);
+        labelList rowSizes(pointZoneNames.size(), Zero);
 
         forAll(pointZoneNames, nameI)
         {
@@ -1467,7 +1467,7 @@ void Foam::fvMeshDistribute::sendMesh
     {
         const faceZoneMesh& faceZones = mesh.faceZones();
 
-        labelList rowSizes(faceZoneNames.size(), 0);
+        labelList rowSizes(faceZoneNames.size(), Zero);
 
         forAll(faceZoneNames, nameI)
         {
@@ -1499,7 +1499,7 @@ void Foam::fvMeshDistribute::sendMesh
     {
         const cellZoneMesh& cellZones = mesh.cellZones();
 
-        labelList rowSizes(cellZoneNames.size(), 0);
+        labelList rowSizes(cellZoneNames.size(), Zero);
 
         forAll(cellZoneNames, nameI)
         {
@@ -1693,7 +1693,7 @@ Foam::labelList Foam::fvMeshDistribute::countCells
     const labelList& distribution
 )
 {
-    labelList nCells(Pstream::nProcs(), 0);
+    labelList nCells(Pstream::nProcs(), Zero);
     forAll(distribution, celli)
     {
         label newProc = distribution[celli];

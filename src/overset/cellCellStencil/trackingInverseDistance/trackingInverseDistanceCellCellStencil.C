@@ -451,7 +451,7 @@ Foam::cellCellStencils::trackingInverseDistance::trackingInverseDistance
         const labelIOList& zoneID = this->zoneID();
         label nZones = gMax(zoneID)+1;
 
-        labelList nCellsPerZone(nZones, 0);
+        labelList nCellsPerZone(nZones, Zero);
         forAll(zoneID, celli)
         {
             nCellsPerZone[zoneID[celli]]++;
@@ -758,7 +758,7 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
     DebugInfo<< FUNCTION_NAME << " : Flood-filled holes" << endl;
 
     // Add buffer interpolation layer(s) around holes
-    scalarField allWeight(mesh_.nCells(), 0.0);
+    scalarField allWeight(mesh_.nCells(), Zero);
     walkFront(layerRelax, allStencil, allCellTypes, allWeight);
     DebugInfo<< FUNCTION_NAME << " : Implemented layer relaxation" << endl;
 

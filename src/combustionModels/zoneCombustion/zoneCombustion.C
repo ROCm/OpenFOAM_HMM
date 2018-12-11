@@ -36,7 +36,7 @@ Foam::combustionModels::zoneCombustion<ReactionThermo>::filter
 {
     fvScalarMatrix& R = tR.ref();
     scalarField& Su = R.source();
-    scalarField filteredField(Su.size(), 0);
+    scalarField filteredField(Su.size(), Zero);
 
     forAll(zoneNames_, zonei)
     {
@@ -80,7 +80,7 @@ Foam::combustionModels::zoneCombustion<ReactionThermo>::filter
 ) const
 {
     scalarField& S = tS.ref();
-    scalarField filteredField(S.size(), 0);
+    scalarField filteredField(S.size(), Zero);
 
     forAll(zoneNames_, zonei)
     {

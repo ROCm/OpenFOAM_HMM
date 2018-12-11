@@ -136,10 +136,10 @@ Foam::tmp<Foam::Field<Type>> Foam::levelSetAverage
     {
         const face& f = patch.patch().localFaces()[fI];
 
-        vector a = vector::zero;
+        vector a(Zero);
         sumType r = Zero;
 
-        for(label eI = 0; eI < f.size(); ++ eI)
+        for (label eI = 0; eI < f.size(); ++eI)
         {
             const edge e = f.faceEdge(eI);
 

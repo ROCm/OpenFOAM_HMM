@@ -80,7 +80,7 @@ void Foam::momentOfInertia::massPropertiesSolid
     const scalar r120 = 1.0/120.0;
 
     // order:  1, x, y, z, x^2, y^2, z^2, xy, yz, zx
-    scalarField integrals(10, 0.0);
+    scalarField integrals(10, Zero);
 
     forAll(triFaces, i)
     {

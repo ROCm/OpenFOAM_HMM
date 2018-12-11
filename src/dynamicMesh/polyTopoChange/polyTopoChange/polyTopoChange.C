@@ -456,7 +456,7 @@ void Foam::polyTopoChange::makeCells
     cellFaceOffsets.setSize(cellMap_.size() + 1);
 
     // Faces per cell
-    labelList nNbrs(cellMap_.size(), 0);
+    labelList nNbrs(cellMap_.size(), Zero);
 
     // 1. Count faces per cell
 
@@ -539,7 +539,7 @@ void Foam::polyTopoChange::makeCellCells
 ) const
 {
     // Neighbours per cell
-    labelList nNbrs(cellMap_.size(), 0);
+    labelList nNbrs(cellMap_.size(), Zero);
 
     // 1. Count neighbours (through internal faces) per cell
 
@@ -1543,7 +1543,7 @@ void Foam::polyTopoChange::resetZones
 
         // Count points per zone
 
-        labelList nPoints(pointZones.size(), 0);
+        labelList nPoints(pointZones.size(), Zero);
 
         forAllConstIters(pointZone_, iter)
         {
@@ -1629,7 +1629,7 @@ void Foam::polyTopoChange::resetZones
     {
         const faceZoneMesh& faceZones = mesh.faceZones();
 
-        labelList nFaces(faceZones.size(), 0);
+        labelList nFaces(faceZones.size(), Zero);
 
         forAllConstIters(faceZone_, iter)
         {
@@ -1744,7 +1744,7 @@ void Foam::polyTopoChange::resetZones
     {
         const cellZoneMesh& cellZones = mesh.cellZones();
 
-        labelList nCells(cellZones.size(), 0);
+        labelList nCells(cellZones.size(), Zero);
 
         forAll(cellZone_, celli)
         {
@@ -1885,7 +1885,7 @@ void Foam::polyTopoChange::reorderCoupledFaces
     labelList oldToNew(identity(faces_.size()));
 
     // Rotation on new faces.
-    labelList rotation(faces_.size(), 0);
+    labelList rotation(faces_.size(), Zero);
 
     PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
@@ -1925,7 +1925,7 @@ void Foam::polyTopoChange::reorderCoupledFaces
         if (syncParallel || !isA<processorPolyPatch>(boundary[patchi]))
         {
             labelList patchFaceMap(patchSizes[patchi], -1);
-            labelList patchFaceRotation(patchSizes[patchi], 0);
+            labelList patchFaceRotation(patchSizes[patchi], Zero);
 
             const bool changed = boundary[patchi].order
             (

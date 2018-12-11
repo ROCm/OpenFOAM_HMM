@@ -99,7 +99,7 @@ Foam::labelList Foam::removeCells::getExposedFaces
     const labelList& faceNeighbour = mesh_.faceNeighbour();
 
     // Count cells using face.
-    labelList nCellsUsingFace(mesh_.nFaces(), 0);
+    labelList nCellsUsingFace(mesh_.nFaces(), Zero);
 
     for (label facei = 0; facei < mesh_.nInternalFaces(); ++facei)
     {
@@ -264,7 +264,7 @@ void Foam::removeCells::setRefinement
 
     // Count starting number of faces using each point.
     // Update whenever removing a face.
-    labelList nFacesUsingPoint(mesh_.nPoints(), 0);
+    labelList nFacesUsingPoint(mesh_.nPoints(), Zero);
 
     for (const face& f : faces)
     {

@@ -936,7 +936,7 @@ int main(int argc, char *argv[])
 
     labelListList cellFaces(nCells);
 
-    labelList nFacesInCell(nCells, 0);
+    labelList nFacesInCell(nCells, Zero);
 
     forAll(cellFaces, celli)
     {

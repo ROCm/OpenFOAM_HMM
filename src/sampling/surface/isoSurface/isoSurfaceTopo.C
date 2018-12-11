@@ -998,7 +998,7 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
     DynamicList<label> cellLabels(5*nCutCells);
 
 
-    labelList startTri(mesh_.nCells()+1, 0);
+    labelList startTri(mesh_.nCells()+1, Zero);
 
     for (label celli = 0; celli < mesh_.nCells(); ++celli)
     {

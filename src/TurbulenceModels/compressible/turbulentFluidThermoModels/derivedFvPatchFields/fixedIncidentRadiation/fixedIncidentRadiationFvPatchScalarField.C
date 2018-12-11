@@ -45,7 +45,7 @@ fixedIncidentRadiationFvPatchScalarField
 :
     fixedGradientFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), "undefined", "undefined", "undefined-K"),
-    qrIncident_(p.size(), 0.0)
+    qrIncident_(p.size(), Zero)
 {}
 
 

@@ -374,28 +374,16 @@ void Foam::DSMCCloud<ParcelType>::collisions()
 template<class ParcelType>
 void Foam::DSMCCloud<ParcelType>::resetFields()
 {
-    q_ = dimensionedScalar("zero",  dimensionSet(1, 0, -3, 0, 0), 0.0);
+    q_ = dimensionedScalar("0", dimensionSet(1, 0, -3, 0, 0), Zero);
+    fD_ = dimensionedVector("0", dimensionSet(1, -1, -2, 0, 0), Zero);
 
-    fD_ = dimensionedVector
-    (
-        "zero",
-        dimensionSet(1, -1, -2, 0, 0),
-        Zero
-    );
-
-    rhoN_ = dimensionedScalar("zero",  dimensionSet(0, -3, 0, 0, 0), VSMALL);
-    rhoM_ =  dimensionedScalar("zero",  dimensionSet(1, -3, 0, 0, 0), VSMALL);
-    dsmcRhoN_ = dimensionedScalar("zero",  dimensionSet(0, -3, 0, 0, 0), 0.0);
-    linearKE_ = dimensionedScalar("zero",  dimensionSet(1, -1, -2, 0, 0), 0.0);
-    internalE_ = dimensionedScalar("zero",  dimensionSet(1, -1, -2, 0, 0), 0.0);
-    iDof_ = dimensionedScalar("zero",  dimensionSet(0, -3, 0, 0, 0), VSMALL);
-
-    momentum_ = dimensionedVector
-    (
-        "zero",
-        dimensionSet(1, -2, -1, 0, 0),
-        Zero
-    );
+    rhoN_ = dimensionedScalar("0", dimensionSet(0, -3, 0, 0, 0), VSMALL);
+    rhoM_ =  dimensionedScalar("0", dimensionSet(1, -3, 0, 0, 0), VSMALL);
+    dsmcRhoN_ = dimensionedScalar("0", dimensionSet(0, -3, 0, 0, 0), Zero);
+    linearKE_ = dimensionedScalar("0", dimensionSet(1, -1, -2, 0, 0), Zero);
+    internalE_ = dimensionedScalar("0", dimensionSet(1, -1, -2, 0, 0), Zero);
+    iDof_ = dimensionedScalar("0", dimensionSet(0, -3, 0, 0, 0), VSMALL);
+    momentum_ = dimensionedVector("0", dimensionSet(1, -2, -1, 0, 0), Zero);
 }
 
 
@@ -783,7 +771,7 @@ Foam::DSMCCloud<ParcelType>::DSMCCloud
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("zero", dimensionSet(0, -3, 0, 0, 0), VSMALL)
+        dimensionedScalar("0", dimensionSet(0, -3, 0, 0, 0), VSMALL)
     ),
     rhoM_
     (
@@ -796,7 +784,7 @@ Foam::DSMCCloud<ParcelType>::DSMCCloud
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("zero", dimensionSet(1, -3, 0, 0, 0), VSMALL)
+        dimensionedScalar("0", dimensionSet(1, -3, 0, 0, 0), VSMALL)
     ),
     dsmcRhoN_
     (
@@ -848,7 +836,7 @@ Foam::DSMCCloud<ParcelType>::DSMCCloud
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("zero", dimensionSet(0, -3, 0, 0, 0), VSMALL)
+        dimensionedScalar("0", dimensionSet(0, -3, 0, 0, 0), VSMALL)
     ),
     momentum_
     (

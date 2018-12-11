@@ -2671,7 +2671,7 @@ int main(int argc, char *argv[])
                         << endl;
 
                     label nDestProcs = 1;
-                    labelList finalDecomp = labelList(mesh.nCells(), 0);
+                    labelList finalDecomp = labelList(mesh.nCells(), Zero);
 
                     redistributeAndWrite
                     (

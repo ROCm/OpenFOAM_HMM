@@ -1138,7 +1138,7 @@ void Foam::cellCuts::calcCellLoops(const labelList& cutCells)
 
     // Per cell the number of faces with valid cuts. Is used as quick
     // rejection to see if cell can be cut.
-    labelList nCutFaces(mesh().nCells(), 0);
+    labelList nCutFaces(mesh().nCells(), Zero);
 
     forAll(allFaceCuts, facei)
     {

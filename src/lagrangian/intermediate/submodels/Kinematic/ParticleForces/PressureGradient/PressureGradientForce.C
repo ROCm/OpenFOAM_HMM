@@ -126,7 +126,7 @@ Foam::forceSuSp Foam::PressureGradientForce<CloudType>::calcCoupled
     const scalar muc
 ) const
 {
-    forceSuSp value(Zero, 0.0);
+    forceSuSp value(Zero);
 
     vector DUcDt =
         DUcDtInterp().interpolate(p.coordinates(), p.currentTetIndices());

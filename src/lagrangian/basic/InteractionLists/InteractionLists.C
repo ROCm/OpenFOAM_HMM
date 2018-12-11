@@ -665,7 +665,7 @@ void Foam::InteractionLists<ParticleType>::findExtendedProcBbsInRange
 
     forAll(allExtendedProcBbs, proci)
     {
-        List<label> permutationIndices(nTrans, 0);
+        labelList permutationIndices(nTrans, Zero);
 
         if (nTrans == 0 && proci != Pstream::myProcNo())
         {
@@ -845,7 +845,7 @@ void Foam::InteractionLists<ParticleType>::buildMap
     // ~~~~~~~~~~~~~~~~~~
 
     // 1. Count
-    labelList nSend(Pstream::nProcs(), 0);
+    labelList nSend(Pstream::nProcs(), Zero);
 
     forAll(toProc, i)
     {

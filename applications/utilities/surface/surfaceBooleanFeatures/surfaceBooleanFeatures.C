@@ -1242,7 +1242,7 @@ autoPtr<extendedFeatureEdgeMesh> createEdgeMesh
     label nFeatEds = inter.cutEdges().size();
 
     DynamicList<vector> normals(2*nFeatEds);
-    vectorField edgeDirections(nFeatEds, vector::zero);
+    vectorField edgeDirections(nFeatEds, Zero);
     DynamicList<extendedFeatureEdgeMesh::sideVolumeType> normalVolumeTypes
     (
         2*nFeatEds

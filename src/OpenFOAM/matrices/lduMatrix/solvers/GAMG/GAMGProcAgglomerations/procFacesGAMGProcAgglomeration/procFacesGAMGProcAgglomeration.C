@@ -150,7 +150,7 @@ Foam::procFacesGAMGProcAgglomeration::processorAgglomeration
     label singleCellMeshComm = UPstream::allocateCommunicator
     (
         mesh.comm(),
-        labelList(1, label(0))            // only processor 0
+        labelList(1, Zero)   // only processor 0
     );
 
     scalarField faceWeights;

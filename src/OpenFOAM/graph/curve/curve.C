@@ -35,7 +35,7 @@ Foam::curve::curve
     const label l
 )
 :
-    scalarField(l, 0.0),
+    scalarField(l, Zero),
     name_(name),
     style_(style)
 {}

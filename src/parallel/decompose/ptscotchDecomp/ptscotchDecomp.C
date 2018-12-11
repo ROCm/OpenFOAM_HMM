@@ -320,7 +320,7 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 //
 //    // Number of cells to send to the next processor
 //    // (is same as number of cells next processor has to receive)
-//    List<label> nSendCells(Pstream::nProcs(), 0);
+//    List<label> nSendCells(Pstream::nProcs(), Zero);
 //
 //    for (label proci = nSendCells.size()-1; proci >=1; proci--)
 //    {

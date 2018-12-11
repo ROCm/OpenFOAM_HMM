@@ -193,8 +193,8 @@ bool Foam::functionObjects::histogram::write()
         x += delta;
     }
 
-    scalarField dataNormalized(nBins_, 0);
-    labelField dataCount(nBins_, 0);
+    scalarField dataNormalized(nBins_, Zero);
+    labelField dataCount(nBins_, Zero);
     const scalarField& V = mesh_.V();
 
     forAll(field, celli)

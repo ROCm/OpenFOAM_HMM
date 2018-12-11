@@ -74,7 +74,7 @@ void Foam::porosityModels::powerLaw::calcForce
     vectorField& force
 ) const
 {
-    scalarField Udiag(U.size(), 0.0);
+    scalarField Udiag(U.size(), Zero);
     const scalarField& V = mesh_.V();
 
     apply(Udiag, V, rho, U);

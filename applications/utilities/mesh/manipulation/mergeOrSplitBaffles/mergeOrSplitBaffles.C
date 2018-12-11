@@ -550,7 +550,7 @@ int main(int argc, char *argv[])
         // Dump duplicated points (if any)
         const labelList& pointMap = map().pointMap();
 
-        labelList nDupPerPoint(map().nOldPoints(), 0);
+        labelList nDupPerPoint(map().nOldPoints(), Zero);
 
         pointSet dupPoints(mesh, "duplicatedPoints", 100);
 

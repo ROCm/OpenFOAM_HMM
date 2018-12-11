@@ -94,7 +94,7 @@ nutkAtmRoughWallFunctionFvPatchScalarField
 )
 :
     nutkWallFunctionFvPatchScalarField(p, iF),
-    z0_(p.size(), 0.0)
+    z0_(p.size(), Zero)
 {}
 
 

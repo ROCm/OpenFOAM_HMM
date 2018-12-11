@@ -255,7 +255,7 @@ bool Foam::functionObjects::pressure::read(const dictionary& dict)
     dict.readEntry("calcTotal", calcTotal_);
     if (calcTotal_)
     {
-        pRef_ = dict.lookupOrDefault<scalar>("pRef", 0.0);
+        pRef_ = dict.lookupOrDefault<scalar>("pRef", 0);
     }
 
     dict.readEntry("calcCoeff", calcCoeff_);

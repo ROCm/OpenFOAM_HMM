@@ -67,7 +67,7 @@ void Foam::swirlFanVelocityFvPatchField::calcFanJump()
 
         tanDir /= (mag(tanDir) + SMALL);
 
-        scalarField magTangU(patch().size(), 0.0);
+        scalarField magTangU(patch().size(), Zero);
 
         if (useRealRadius_)
         {
@@ -149,12 +149,12 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
           : Zero
         )
     ),
-    rpm_(dict.lookupOrDefault<scalar>("rpm", 0.0)),
-    rEff_(dict.lookupOrDefault<scalar>("rEff", 0.0)),
-    fanEff_(dict.lookupOrDefault<scalar>("fanEff", 1.0)),
+    rpm_(dict.lookupOrDefault<scalar>("rpm", 0)),
+    rEff_(dict.lookupOrDefault<scalar>("rEff", 0)),
+    fanEff_(dict.lookupOrDefault<scalar>("fanEff", 1)),
     useRealRadius_(dict.lookupOrDefault("useRealRadius", false)),
-    rInner_(dict.lookupOrDefault<scalar>("rInner", 0.0)),
-    rOuter_(dict.lookupOrDefault<scalar>("rOuter", 0.0))
+    rInner_(dict.lookupOrDefault<scalar>("rInner", 0)),
+    rOuter_(dict.lookupOrDefault<scalar>("rOuter", 0))
 {}
 
 

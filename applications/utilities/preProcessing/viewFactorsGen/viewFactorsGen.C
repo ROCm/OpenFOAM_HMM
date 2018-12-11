@@ -485,7 +485,7 @@ int main(int argc, char *argv[])
     #include "shootRays.H"
 
     // Calculate number of visible faces from local index
-    labelList nVisibleFaceFaces(nCoarseFaces, 0);
+    labelList nVisibleFaceFaces(nCoarseFaces, Zero);
 
     forAll(rayStartFace, i)
     {
@@ -628,7 +628,7 @@ int main(int argc, char *argv[])
         0.0
     );
 
-    scalarList patchArea(totalPatches, 0.0);
+    scalarList patchArea(totalPatches, Zero);
 
     if (Pstream::master())
     {

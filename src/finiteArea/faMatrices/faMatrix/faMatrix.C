@@ -185,7 +185,7 @@ Foam::faMatrix<Type>::faMatrix
     lduMatrix(psi.mesh()),
     psi_(psi),
     dimensions_(ds),
-    source_(psi.size(), pTraits<Type>::zero),
+    source_(psi.size(), Zero),
     internalCoeffs_(psi.mesh().boundary().size()),
     boundaryCoeffs_(psi.mesh().boundary().size()),
     faceFluxCorrectionPtr_(nullptr)
@@ -203,7 +203,7 @@ Foam::faMatrix<Type>::faMatrix
             new Field<Type>
             (
                 psi.mesh().boundary()[patchI].size(),
-                pTraits<Type>::zero
+                Zero
             )
         );
 
@@ -213,7 +213,7 @@ Foam::faMatrix<Type>::faMatrix
             new Field<Type>
             (
                 psi.mesh().boundary()[patchI].size(),
-                pTraits<Type>::zero
+                Zero
             )
         );
     }
@@ -283,7 +283,7 @@ Foam::faMatrix<Type>::faMatrix
             new Field<Type>
             (
                 psi.mesh().boundary()[patchI].size(),
-                pTraits<Type>::zero
+                Zero
             )
         );
 
@@ -293,7 +293,7 @@ Foam::faMatrix<Type>::faMatrix
             new Field<Type>
             (
                 psi.mesh().boundary()[patchI].size(),
-                pTraits<Type>::zero
+                Zero
             )
         );
     }
@@ -454,7 +454,7 @@ void Foam::faMatrix<Type>::relax(const scalar alpha)
     scalarField D0(D);
 
     // Calculate the sum-mag off-diagonal from the interior faces
-    scalarField sumOff(D.size(), 0.0);
+    scalarField sumOff(D.size(), Zero);
     sumMagOffDiag(sumOff);
 
     // Handle the boundary contributions to the diagonal
@@ -606,7 +606,7 @@ Foam::faMatrix<Type>::H() const
     {
         scalarField psiCmpt(psi_.primitiveField().component(cmpt));
 
-        scalarField boundaryDiagCmpt(psi_.size(), 0.0);
+        scalarField boundaryDiagCmpt(psi_.size(), Zero);
         addBoundaryDiag(boundaryDiagCmpt, cmpt);
         boundaryDiagCmpt.negate();
         addCmptAvBoundaryDiag(boundaryDiagCmpt);

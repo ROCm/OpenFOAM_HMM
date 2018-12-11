@@ -48,7 +48,7 @@ void Foam::MULES::correct
 
     const fvMesh& mesh = psi.mesh();
 
-    scalarField psiIf(psi.size(), 0);
+    scalarField psiIf(psi.size(), Zero);
     fvc::surfaceIntegrate(psiIf, phiCorr);
 
     if (mesh.moving())
@@ -202,8 +202,8 @@ void Foam::MULES::limiterCorr
     scalarField psiMaxn(psiIf.size(), psiMin);
     scalarField psiMinn(psiIf.size(), psiMax);
 
-    scalarField sumPhip(psiIf.size(), 0.0);
-    scalarField mSumPhim(psiIf.size(), 0.0);
+    scalarField sumPhip(psiIf.size(), Zero);
+    scalarField mSumPhim(psiIf.size(), Zero);
 
     forAll(phiCorrIf, facei)
     {

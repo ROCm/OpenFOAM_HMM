@@ -34,7 +34,7 @@ License
 template<class CloudType>
 void Foam::PatchCollisionDensity<CloudType>::write()
 {
-    const scalarField z(this->owner().mesh().nCells(), 0);
+    const scalarField z(this->owner().mesh().nCells(), Zero);
 
     volScalarField
     (

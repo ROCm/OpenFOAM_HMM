@@ -25,7 +25,7 @@ Class
     Foam::geometricZeroField
 
 Description
-    A class representing the concept of a GeometricField of 1 used to avoid
+    A class representing the concept of a GeometricField of 0 used to avoid
     unnecessary manipulations for objects which are known to be zero at
     compile-time.
 
@@ -56,6 +56,14 @@ class geometricZeroField
 {
 
 public:
+
+    // Public typedefs
+
+        typedef zeroField Internal;
+        typedef zeroField Patch;
+        typedef zeroFieldField Boundary;
+        typedef zero cmptType;
+
 
     // Constructors
 

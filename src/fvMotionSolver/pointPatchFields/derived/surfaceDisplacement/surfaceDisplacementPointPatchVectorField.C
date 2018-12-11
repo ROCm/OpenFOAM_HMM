@@ -167,7 +167,7 @@ void Foam::surfaceDisplacementPointPatchVectorField::calcProjection
         }
 
         // Knock out any wedge component
-        scalarField offset(start.size(), 0.0);
+        scalarField offset(start.size(), Zero);
         if (wedgePlane_ >= 0 && wedgePlane_ <= vector::nComponents)
         {
             forAll(offset, i)

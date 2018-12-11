@@ -108,7 +108,7 @@ Foam::label Foam::polyMeshFilter::filterFacesLoop(const label nOriginalBadFaces)
     label nOuterIterations = 0;
 
     // Maintain the number of times a point has been part of a bad face
-    labelList pointErrorCount(mesh_.nPoints(), 0);
+    labelList pointErrorCount(mesh_.nPoints(), Zero);
 
     bitSet newErrorPoint(mesh_.nPoints());
     edgeCollapser::checkMeshQuality
@@ -1011,7 +1011,7 @@ Foam::label Foam::polyMeshFilter::filterEdges
     minEdgeLen_.resize(mesh_.nEdges(), minLen());
     faceFilterFactor_.resize(0);
 
-    labelList pointErrorCount(mesh_.nPoints(), 0);
+    labelList pointErrorCount(mesh_.nPoints(), Zero);
 
     // Main loop
     // ~~~~~~~~~

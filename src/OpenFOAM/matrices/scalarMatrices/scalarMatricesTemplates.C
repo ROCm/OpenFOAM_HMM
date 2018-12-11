@@ -249,7 +249,7 @@ void Foam::multiply
             << abort(FatalError);
     }
 
-    ans = Matrix<Form, Type>(A.m(), B.n(), scalar(0));
+    ans = Matrix<Form, Type>(A.m(), B.n(), Zero);
 
     for (label i=0; i<A.m(); i++)
     {

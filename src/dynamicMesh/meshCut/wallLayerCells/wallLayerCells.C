@@ -170,7 +170,7 @@ Foam::wallLayerCells::wallLayerCells
             {
                 const face& f = mesh.faces()[facei];
 
-                point mid(0.0, 0.0, 0.0);
+                point mid(Zero);
 
                 forAll(f, fp)
                 {

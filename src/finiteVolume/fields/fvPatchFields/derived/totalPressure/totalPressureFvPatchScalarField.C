@@ -44,7 +44,7 @@ Foam::totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
     rhoName_("rho"),
     psiName_("none"),
     gamma_(0.0),
-    p0_(p.size(), 0.0)
+    p0_(p.size(), Zero)
 {}
 
 

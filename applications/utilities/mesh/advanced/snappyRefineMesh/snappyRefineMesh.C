@@ -752,7 +752,7 @@ int main(int argc, char *argv[])
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
-        labelList(mesh.nCells(), 0)
+        labelList(mesh.nCells(), Zero)
     );
 
     label maxLevel = max(refLevel);

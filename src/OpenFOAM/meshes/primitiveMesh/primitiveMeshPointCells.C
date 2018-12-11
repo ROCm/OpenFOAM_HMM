@@ -61,7 +61,7 @@ void Foam::primitiveMesh::calcPointCells() const
 
         // Count number of cells per point
 
-        labelList npc(nPoints(), 0);
+        labelList npc(nPoints(), Zero);
 
         forAll(cf, celli)
         {

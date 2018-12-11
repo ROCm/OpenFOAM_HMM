@@ -80,7 +80,7 @@ Foam::tmp<Foam::scalarField> Foam::GAMGInterface::agglomerateCoeffs
     const scalarField& fineCoeffs
 ) const
 {
-    tmp<scalarField> tcoarseCoeffs(new scalarField(size(), 0.0));
+    tmp<scalarField> tcoarseCoeffs(new scalarField(size(), Zero));
     scalarField& coarseCoeffs = tcoarseCoeffs.ref();
 
     if (fineCoeffs.size() != faceRestrictAddressing_.size())

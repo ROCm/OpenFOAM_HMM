@@ -55,7 +55,7 @@ Foam::label Foam::polyMeshTetDecomposition::findSharedBasePoint
 
     const point& oCc = pC[oCI];
 
-    List<scalar> tetQualities(2, 0.0);
+    List<scalar> tetQualities(2, Zero);
 
     forAll(f, faceBasePtI)
     {

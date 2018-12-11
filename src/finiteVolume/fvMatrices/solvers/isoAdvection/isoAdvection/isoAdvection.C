@@ -413,14 +413,14 @@ void Foam::isoAdvection::normaliseAndSmooth
 
     vectorField& cellNIn = cellN.primitiveFieldRef();
     cellNIn /= (mag(cellNIn) + SMALL);
-    vectorField vertexN(mesh_.nPoints(), vector::zero);
+    vectorField vertexN(mesh_.nPoints(), Zero);
     vertexN = volPointInterpolation::New(mesh_).interpolate(cellN);
     vertexN /= (mag(vertexN) + SMALL);
     // Interpolate vertex normals back to cells
     forAll(cellNIn, celli)
     {
         const labelList& cp = cellPoints[celli];
-        vector cellNi = vector::zero;
+        vector cellNi(Zero);
         const point& cellCentre = cellCentres[celli];
         forAll(cp, pointI)
         {

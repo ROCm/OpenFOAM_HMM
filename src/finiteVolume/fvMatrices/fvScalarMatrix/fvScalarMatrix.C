@@ -194,7 +194,7 @@ Foam::solverPerformance Foam::fvMatrix<Foam::scalar>::solveSegregated
 template<>
 Foam::tmp<Foam::scalarField> Foam::fvMatrix<Foam::scalar>::residual() const
 {
-    scalarField boundaryDiag(psi_.size(), 0.0);
+    scalarField boundaryDiag(psi_.size(), Zero);
     addBoundaryDiag(boundaryDiag, 0);
 
     tmp<scalarField> tres

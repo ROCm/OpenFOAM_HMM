@@ -49,7 +49,7 @@ patchInjection::patchInjection
 )
 :
     injectionModel(type(), film, dict),
-    deltaStable_(coeffDict_.lookupOrDefault<scalar>("deltaStable", 0.0))
+    deltaStable_(coeffDict_.lookupOrDefault<scalar>("deltaStable", 0))
 {
     const polyBoundaryMesh& pbm = film.regionMesh().boundaryMesh();
     patchIDs_.setSize
@@ -180,7 +180,7 @@ void patchInjection::patchInjectedMassTotals(scalarField& patchMasses) const
         getModelProperty<scalarField>
         (
             "patchInjectedMasses",
-            scalarField(patchInjectedMasses_.size(), 0)
+            scalarField(patchInjectedMasses_.size(), Zero)
         )
     );
 

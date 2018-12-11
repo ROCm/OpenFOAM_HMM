@@ -40,11 +40,7 @@ Foam::tmp<Foam::Field<Type>> Foam::volSurfaceMapping::mapToSurface
 
     tmp<Field<Type>> tresult
     (
-        new Field<Type>
-        (
-            faceLabels.size(),
-            pTraits<Type>::zero
-        )
+        new Field<Type>(faceLabels.size(), Zero)
     );
     Field<Type>& result = tresult.ref();
 

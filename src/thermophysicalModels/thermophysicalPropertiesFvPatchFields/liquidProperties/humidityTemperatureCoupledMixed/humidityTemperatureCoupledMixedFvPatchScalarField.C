@@ -140,17 +140,17 @@ humidityTemperatureCoupledMixedFvPatchScalarField
     specieName_("none"),
     liquid_(nullptr),
     liquidDict_(nullptr),
-    mass_(patch().size(), 0.0),
+    mass_(patch().size(), Zero),
     Tvap_(0.0),
-    myKDelta_(patch().size(), 0.0),
-    dmHfg_(patch().size(), 0.0),
-    mpCpTp_(patch().size(), 0.0),
+    myKDelta_(patch().size(), Zero),
+    dmHfg_(patch().size(), Zero),
+    mpCpTp_(patch().size(), Zero),
     Mcomp_(0.0),
     L_(0.0),
     fluid_(false),
-    cp_(patch().size(), 0.0),
-    thickness_(patch().size(), 0.0),
-    rho_(patch().size(), 0.0)
+    cp_(patch().size(), Zero),
+    thickness_(patch().size(), Zero),
+    rho_(patch().size(), Zero)
 {
     this->refValue() = 0.0;
     this->refGrad() = 0.0;
@@ -215,17 +215,17 @@ humidityTemperatureCoupledMixedFvPatchScalarField
     specieName_(dict.lookupOrDefault<word>("specie", "none")),
     liquid_(nullptr),
     liquidDict_(),
-    mass_(patch().size(), 0.0),
+    mass_(patch().size(), Zero),
     Tvap_(0.0),
-    myKDelta_(patch().size(), 0.0),
-    dmHfg_(patch().size(), 0.0),
-    mpCpTp_(patch().size(), 0.0),
+    myKDelta_(patch().size(), Zero),
+    dmHfg_(patch().size(), Zero),
+    mpCpTp_(patch().size(), Zero),
     Mcomp_(0.0),
     L_(0.0),
     fluid_(false),
-    cp_(patch().size(), 0.0),
-    thickness_(patch().size(), 0.0),
-    rho_(patch().size(), 0.0)
+    cp_(patch().size(), Zero),
+    thickness_(patch().size(), Zero),
+    rho_(patch().size(), Zero)
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))
     {
@@ -459,22 +459,22 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
 
     myKDelta_ = K*patch().deltaCoeffs();
 
-    scalarField dm(patch().size(), 0.0);
+    scalarField dm(patch().size(), Zero);
 
     // Fluid Side
     if (fluid_)
     {
-        scalarField Yvp(patch().size(), 0.0);
+        scalarField Yvp(patch().size(), Zero);
         const scalar dt = mesh.time().deltaTValue();
 
         const scalarField myDelta(patch().deltaCoeffs());
 
         if (mode_ != mtConstantMass)
         {
-            scalarField cp(patch().size(), 0.0);
-            scalarField hfg(patch().size(), 0.0);
+            scalarField cp(patch().size(), Zero);
+            scalarField hfg(patch().size(), Zero);
             scalarField htc(patch().size(), GREAT);
-            scalarField liquidRho(patch().size(), 0.0);
+            scalarField liquidRho(patch().size(), Zero);
 
             fixedGradientFvPatchField<scalar>& Yp =
                 const_cast<fixedGradientFvPatchField<scalar>&>
@@ -648,8 +648,8 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
         }
     }
 
-    scalarField mpCpTpNbr(patch().size(), 0.0);
-    scalarField dmHfgNbr(patch().size(), 0.0);
+    scalarField mpCpTpNbr(patch().size(), Zero);
+    scalarField dmHfgNbr(patch().size(), Zero);
 
     if (!fluid_)
     {
@@ -661,13 +661,13 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
     }
 
     // Obtain Rad heat (qr)
-    scalarField qr(Tp.size(), 0.0);
+    scalarField qr(Tp.size(), Zero);
     if (qrName_ != "none")
     {
         qr = patch().lookupPatchField<volScalarField, scalar>(qrName_);
     }
 
-    scalarField qrNbr(Tp.size(), 0.0);
+    scalarField qrNbr(Tp.size(), Zero);
     if (qrNbrName_ != "none")
     {
         qrNbr = nbrPatch.lookupPatchField<volScalarField, scalar>(qrNbrName_);

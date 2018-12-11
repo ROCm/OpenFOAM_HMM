@@ -156,7 +156,7 @@ void Foam::decompositionConstraints::singleProcessorFaceSets::add
         const faceSet fz(mesh, setNameAndProcs_[setI].first());
 
         // Check that it does not overlap with existing specifiedProcessorFaces
-        labelList nMatch(specifiedProcessorFaces.size(), 0);
+        labelList nMatch(specifiedProcessorFaces.size(), Zero);
         forAllConstIter(faceSet, fz, iter)
         {
             label seti = faceToSet[iter.key()];

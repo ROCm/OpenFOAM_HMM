@@ -145,8 +145,8 @@ void Foam::epsilonWallFunctionFvPatchScalarField::createAveragingWeights()
         cornerWeights_[patchi] = 1.0/wf.patchInternalField();
     }
 
-    G_.setSize(internalField().size(), 0.0);
-    epsilon_.setSize(internalField().size(), 0.0);
+    G_.setSize(internalField().size(), Zero);
+    epsilon_.setSize(internalField().size(), Zero);
 
     initialised_ = true;
 }

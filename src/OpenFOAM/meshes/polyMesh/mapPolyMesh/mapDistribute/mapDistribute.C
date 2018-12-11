@@ -311,7 +311,7 @@ Foam::mapDistribute::mapDistribute
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Count per transformIndex
     label nTrafo = globalTransforms.transformPermutations().size();
-    labelList nPerTransform(nTrafo, 0);
+    labelList nPerTransform(nTrafo, Zero);
     forAll(transformedElements, i)
     {
         labelPair elem = transformedElements[i];
@@ -420,7 +420,7 @@ Foam::mapDistribute::mapDistribute
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Count per transformIndex
     label nTrafo = globalTransforms.transformPermutations().size();
-    labelList nPerTransform(nTrafo, 0);
+    labelList nPerTransform(nTrafo, Zero);
     forAll(transformedElements, celli)
     {
         const labelPairList& elems = transformedElements[celli];

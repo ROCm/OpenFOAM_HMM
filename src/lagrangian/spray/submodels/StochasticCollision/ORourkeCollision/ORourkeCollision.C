@@ -40,7 +40,7 @@ void Foam::ORourkeCollision<CloudType>::collide
 )
 {
     // Create the occupancy list for the cells
-    labelList occupancy(this->owner().mesh().nCells(), 0);
+    labelList occupancy(this->owner().mesh().nCells(), Zero);
     forAllIter(typename CloudType, this->owner(), iter)
     {
         occupancy[iter().cell()]++;

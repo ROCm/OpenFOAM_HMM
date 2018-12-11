@@ -132,7 +132,7 @@ Foam::labelList Foam::lduPrimitiveMesh::upperTriOrder
     const labelUList& upper
 )
 {
-    labelList nNbrs(nCells, 0);
+    labelList nNbrs(nCells, Zero);
 
     // Count number of upper neighbours
     forAll(lower, facei)
@@ -377,7 +377,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
 
 
     label nOtherInterfaces = 0;
-    labelList nCoupledFaces(nMeshes, 0);
+    labelList nCoupledFaces(nMeshes, Zero);
 
     for (label procMeshI = 0; procMeshI < nMeshes; procMeshI++)
     {

@@ -87,7 +87,7 @@ Foam::forceSuSp Foam::SRFForce<CloudType>::calcNonCoupled
     const scalar muc
 ) const
 {
-    forceSuSp value(Zero, 0.0);
+    forceSuSp value(Zero);
 
     const typename SRF::SRFModel& srf = *srfPtr_;
 

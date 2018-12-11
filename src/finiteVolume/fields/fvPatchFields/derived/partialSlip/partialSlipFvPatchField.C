@@ -65,7 +65,7 @@ Foam::partialSlipFvPatchField<Type>::partialSlipFvPatchField
 )
 :
     transformFvPatchField<Type>(p, iF),
-    refValue_(p.size(), pTraits<Type>::zero),
+    refValue_(p.size(), Zero),
     valueFraction_("valueFraction", dict, p.size())
 {
     this->patchType() = dict.lookupOrDefault<word>("patchType", word::null);

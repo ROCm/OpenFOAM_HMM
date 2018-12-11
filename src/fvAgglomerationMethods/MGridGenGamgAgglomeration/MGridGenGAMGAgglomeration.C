@@ -192,7 +192,7 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
     );
 
     // Create the boundary area cell field
-    scalarField* magSbPtr(new scalarField(fvMesh_.nCells(), 0));
+    scalarField* magSbPtr(new scalarField(fvMesh_.nCells(), Zero));
 
     {
         scalarField& magSb = *magSbPtr;

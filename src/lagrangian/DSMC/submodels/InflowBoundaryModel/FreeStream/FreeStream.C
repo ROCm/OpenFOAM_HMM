@@ -241,7 +241,7 @@ void Foam::FreeStream<CloudType>::inflow()
             );
 
             // Cumulative triangle area fractions
-            List<scalar> cTriAFracs(faceTets.size(), 0.0);
+            List<scalar> cTriAFracs(faceTets.size(), Zero);
 
             scalar previousCummulativeSum = 0.0;
 

@@ -45,7 +45,7 @@ Foam::maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
     muName_("thermo:mu"),
     tauMCName_("tauMC"),
     accommodationCoeff_(1.0),
-    Uwall_(p.size(), vector(0.0, 0.0, 0.0)),
+    Uwall_(p.size(), Zero),
     thermalCreep_(true),
     curvature_(true)
 {}

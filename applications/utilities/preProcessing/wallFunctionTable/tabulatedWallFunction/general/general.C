@@ -57,7 +57,7 @@ Foam::tabulatedWallFunctions::general::interpolationTypeNames_
 
 void Foam::tabulatedWallFunctions::general::invertTable()
 {
-    scalarList Rey(uPlus_.size(), 0.0);
+    scalarList Rey(uPlus_.size(), Zero);
 
     // Calculate Reynolds number
     forAll(uPlus_, i)

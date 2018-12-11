@@ -42,7 +42,7 @@ Foam::totalTemperatureFvPatchScalarField::totalTemperatureFvPatchScalarField
     phiName_("phi"),
     psiName_("thermo:psi"),
     gamma_(0.0),
-    T0_(p.size(), 0.0)
+    T0_(p.size(), Zero)
 {}
 
 

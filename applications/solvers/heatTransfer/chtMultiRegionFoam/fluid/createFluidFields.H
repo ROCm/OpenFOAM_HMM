@@ -248,7 +248,7 @@ forAll(fluidRegions, i)
                 IOobject::AUTO_WRITE
             ),
             fluidRegions[i],
-            dimensionedScalar("Qdot", dimEnergy/dimVolume/dimTime, 0.0)
+            dimensionedScalar(dimEnergy/dimVolume/dimTime, Zero)
         )
     );
 

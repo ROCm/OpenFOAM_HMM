@@ -136,7 +136,7 @@ Foam::forceSuSp Foam::LiftForce<CloudType>::calcCoupled
     const scalar muc
 ) const
 {
-    forceSuSp value(Zero, 0.0);
+    forceSuSp value(Zero);
 
     vector curlUc =
         curlUcInterp().interpolate(p.coordinates(), p.currentTetIndices());

@@ -244,7 +244,7 @@ void Foam::domainDecomposition::decomposeMesh()
         label nInterfaces = interPatchFaces[proci].size();
 
         subPatchIDs[proci].setSize(nInterfaces, labelList(1, label(-1)));
-        subPatchStarts[proci].setSize(nInterfaces, labelList(1, label(0)));
+        subPatchStarts[proci].setSize(nInterfaces, labelList(1, Zero));
     }
 
 

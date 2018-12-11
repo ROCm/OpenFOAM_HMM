@@ -139,7 +139,7 @@ bool Foam::AveragingMethod<Type>::write(const bool valid) const
     const pointMesh pointMesh_(mesh_);
 
     // point volumes
-    Field<scalar> pointVolume(mesh_.nPoints(), 0);
+    Field<scalar> pointVolume(mesh_.nPoints(), Zero);
 
     // output fields
     GeometricField<Type, fvPatchField, volMesh> cellValue

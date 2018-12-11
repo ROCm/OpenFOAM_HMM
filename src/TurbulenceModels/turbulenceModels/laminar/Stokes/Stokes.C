@@ -112,7 +112,7 @@ Stokes<BasicTurbulenceModel>::nut
 {
     return tmp<scalarField>
     (
-        new scalarField(this->mesh_.boundary()[patchi].size(), 0.0)
+        new scalarField(this->mesh_.boundary()[patchi].size(), Zero)
     );
 }
 

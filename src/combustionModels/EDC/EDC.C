@@ -94,7 +94,7 @@ void Foam::combustionModels::EDC<ReactionThermo>::correct()
         tmp<volScalarField> trho(this->rho());
         const volScalarField& rho = trho();
 
-        scalarField tauStar(epsilon.size(), 0);
+        scalarField tauStar(epsilon.size(), Zero);
 
         if (version_ == EDCversions::v2016)
         {

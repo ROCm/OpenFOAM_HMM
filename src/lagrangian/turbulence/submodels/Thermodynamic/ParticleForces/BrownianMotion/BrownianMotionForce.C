@@ -165,7 +165,7 @@ Foam::forceSuSp Foam::BrownianMotionForce<CloudType>::calcCoupled
     const scalar muc
 ) const
 {
-    forceSuSp value(Zero, 0.0);
+    forceSuSp value(Zero);
 
     const scalar dp = p.d();
     const scalar Tc = td.Tc();

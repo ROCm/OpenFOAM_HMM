@@ -80,7 +80,7 @@ labelList countBins
 {
     scalar dist = nBins/(max - min);
 
-    labelList binCount(nBins, 0);
+    labelList binCount(nBins, Zero);
 
     forAll(vals, i)
     {
@@ -444,7 +444,7 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~
 
     {
-        labelList regionSize(surf.patches().size(), 0);
+        labelList regionSize(surf.patches().size(), Zero);
 
         forAll(surf, facei)
         {
@@ -541,7 +541,7 @@ int main(int argc, char *argv[])
                         faces
                     ),
                     "illegal",
-                    scalarField(subSurf.size(), 0.0),
+                    scalarField(subSurf.size(), Zero),
                     false               // face based data
                 );
             }
@@ -580,7 +580,7 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~~~
 
     {
-        scalarField triQ(surf.size(), 0);
+        scalarField triQ(surf.size(), Zero);
         forAll(surf, facei)
         {
             const labelledTri& f = surf[facei];

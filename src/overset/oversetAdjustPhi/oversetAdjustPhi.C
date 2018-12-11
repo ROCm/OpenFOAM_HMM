@@ -49,8 +49,8 @@ bool Foam::oversetAdjustPhi
 
     // Pass1: accumulate all fluxes, calculate correction factor
 
-    scalarField massIn(nZones, 0.0);
-    scalarField adjustableMassOut(nZones, 0.0);
+    scalarField massIn(nZones, Zero);
+    scalarField adjustableMassOut(nZones, Zero);
 
     surfaceScalarField::Boundary& bphi =
         phi.boundaryFieldRef();

@@ -1939,7 +1939,7 @@ Foam::hexRef8::hexRef8(const polyMesh& mesh, const bool readHistory)
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE
         ),
-        labelList(mesh_.nCells(), 0)
+        labelList(mesh_.nCells(), Zero)
     ),
     pointLevel_
     (
@@ -1952,7 +1952,7 @@ Foam::hexRef8::hexRef8(const polyMesh& mesh, const bool readHistory)
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE
         ),
-        labelList(mesh_.nPoints(), 0)
+        labelList(mesh_.nPoints(), Zero)
     ),
     level0Edge_
     (
@@ -2553,7 +2553,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
 
         // Determine per point the max cell level. (done as count, not
         // as cell level purely for ease)
-        labelList maxPointCount(mesh_.nPoints(), 0);
+        labelList maxPointCount(mesh_.nPoints(), Zero);
 
         forAll(maxPointCount, pointi)
         {
@@ -3624,7 +3624,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
     labelListList cellAnchorPoints(mesh_.nCells());
 
     {
-        labelList nAnchorPoints(mesh_.nCells(), 0);
+        labelList nAnchorPoints(mesh_.nCells(), Zero);
 
         forAll(cellMidPoint, celli)
         {
@@ -4882,7 +4882,7 @@ void Foam::hexRef8::checkRefinementLevels
     if (maxPointDiff != -1)
     {
         // Determine per point the max cell level.
-        labelList maxPointLevel(mesh_.nPoints(), 0);
+        labelList maxPointLevel(mesh_.nPoints(), Zero);
 
         forAll(maxPointLevel, pointi)
         {
@@ -5091,7 +5091,7 @@ Foam::labelList Foam::hexRef8::getSplitPoints() const
     // -2 certainly not split point
     // >= label of master cell
     labelList splitMaster(mesh_.nPoints(), -1);
-    labelList splitMasterLevel(mesh_.nPoints(), 0);
+    labelList splitMasterLevel(mesh_.nPoints(), Zero);
 
     // Unmark all with not 8 cells
     //const labelListList& pointCells = mesh_.pointCells();

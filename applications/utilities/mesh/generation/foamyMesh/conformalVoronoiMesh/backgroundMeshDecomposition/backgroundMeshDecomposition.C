@@ -51,7 +51,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::backgroundMeshDecomposition::buildMap
     // ~~~~~~~~~~~~~~~~~~
 
     // 1. Count
-    labelList nSend(Pstream::nProcs(), 0);
+    labelList nSend(Pstream::nProcs(), Zero);
 
     forAll(toProc, i)
     {
@@ -337,7 +337,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                 (
                     cellsToRemove,
                     exposedFaces,
-                    labelList(exposedFaces.size(), 0),  // patchID dummy
+                    labelList(exposedFaces.size(), Zero),  // patchID dummy
                     meshMod
                 );
 
@@ -793,8 +793,8 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
     meshCutter_
     (
         mesh_,
-        labelList(mesh_.nCells(), 0),
-        labelList(mesh_.nPoints(), 0)
+        labelList(mesh_.nCells(), Zero),
+        labelList(mesh_.nPoints(), Zero)
     ),
     boundaryFacesPtr_(),
     bFTreePtr_(),

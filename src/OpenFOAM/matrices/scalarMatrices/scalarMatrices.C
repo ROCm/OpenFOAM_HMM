@@ -221,7 +221,7 @@ void Foam::multiply
             << abort(FatalError);
     }
 
-    ans = scalarRectangularMatrix(A.m(), C.n(), scalar(0));
+    ans = scalarRectangularMatrix(A.m(), C.n(), Zero);
 
     for (label i=0; i<A.m(); i++)
     {
@@ -265,7 +265,7 @@ void Foam::multiply
             << abort(FatalError);
     }
 
-    ans = scalarRectangularMatrix(A.m(), C.n(), scalar(0));
+    ans = scalarRectangularMatrix(A.m(), C.n(), Zero);
 
     for (label i=0; i<A.m(); i++)
     {

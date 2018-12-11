@@ -161,7 +161,7 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
     scalar scale = 1;
 
     // Matrix of the polynomial components
-    scalarRectangularMatrix B(C.size(), minSize_, scalar(0));
+    scalarRectangularMatrix B(C.size(), minSize_, Zero);
 
     forAll(C, ip)
     {

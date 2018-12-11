@@ -108,9 +108,9 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
 
     labelList regionOffset(surfi);
 
-    labelList globalMinLevel(surfi, 0);
-    labelList globalMaxLevel(surfi, 0);
-    labelList globalLevelIncr(surfi, 0);
+    labelList globalMinLevel(surfi, Zero);
+    labelList globalMaxLevel(surfi, Zero);
+    labelList globalLevelIncr(surfi, Zero);
     PtrList<dictionary> globalPatchInfo(surfi);
     List<Map<label>> regionMinLevel(surfi);
     List<Map<label>> regionMaxLevel(surfi);
@@ -263,8 +263,8 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
     }
 
     // Rework surface specific information into information per global region
-    labelList minLevel(nRegions, 0);
-    labelList maxLevel(nRegions, 0);
+    labelList minLevel(nRegions, Zero);
+    labelList maxLevel(nRegions, Zero);
     labelList gapLevel(nRegions, -1);
     PtrList<dictionary> patchInfo(nRegions);
 

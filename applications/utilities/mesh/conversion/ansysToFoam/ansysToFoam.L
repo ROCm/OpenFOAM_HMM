@@ -542,7 +542,7 @@ int main(int argc, char *argv[])
     // Now split the boundary faces into external and internal faces. All
     // faces go into faceZones and external faces go into patches.
     List<faceList> patchFaces(slPatchCells.size());
-    labelList patchNFaces(slPatchCells.size(), 0);
+    labelList patchNFaces(slPatchCells.size(), Zero);
     forAll(boundary, patchi)
     {
         const faceList& bFaces = boundary[patchi];

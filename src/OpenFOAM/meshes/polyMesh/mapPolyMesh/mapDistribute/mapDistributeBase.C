@@ -289,7 +289,7 @@ void Foam::mapDistributeBase::calcCompactAddressing
     compactMap.setSize(Pstream::nProcs());
 
     // Count all (non-local) elements needed. Just for presizing map.
-    labelList nNonLocal(Pstream::nProcs(), 0);
+    labelList nNonLocal(Pstream::nProcs(), Zero);
 
     forAll(elements, i)
     {
@@ -338,7 +338,7 @@ void Foam::mapDistributeBase::calcCompactAddressing
     compactMap.setSize(Pstream::nProcs());
 
     // Count all (non-local) elements needed. Just for presizing map.
-    labelList nNonLocal(Pstream::nProcs(), 0);
+    labelList nNonLocal(Pstream::nProcs(), Zero);
 
     forAll(cellCells, cellI)
     {
@@ -616,8 +616,8 @@ Foam::mapDistributeBase::mapDistributeBase
     }
 
     // Per processor the number of samples we have to send/receive.
-    labelList nSend(Pstream::nProcs(), 0);
-    labelList nRecv(Pstream::nProcs(), 0);
+    labelList nSend(Pstream::nProcs(), Zero);
+    labelList nRecv(Pstream::nProcs(), Zero);
 
     forAll(sendProcs, sampleI)
     {

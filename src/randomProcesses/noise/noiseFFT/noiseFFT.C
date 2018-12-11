@@ -322,7 +322,7 @@ Foam::graph Foam::noiseFFT::meanPf(const windowModel& window) const
     const label N = window.nSamples();
     const label nWindow = window.nWindow();
 
-    scalarField meanPf(N/2 + 1, 0.0);
+    scalarField meanPf(N/2 + 1, Zero);
 
     for (label windowI = 0; windowI < nWindow; ++windowI)
     {
@@ -354,7 +354,7 @@ Foam::graph Foam::noiseFFT::RMSmeanPf(const windowModel& window) const
     const label N = window.nSamples();
     const label nWindow = window.nWindow();
 
-    scalarField RMSMeanPf(N/2 + 1, 0.0);
+    scalarField RMSMeanPf(N/2 + 1, Zero);
     for (label windowI = 0; windowI < nWindow; ++windowI)
     {
         RMSMeanPf += sqr(Pf(window.apply<scalar>(*this, windowI)));
@@ -385,7 +385,7 @@ Foam::graph Foam::noiseFFT::PSDf(const windowModel& window) const
     const label N = window.nSamples();
     const label nWindow = window.nWindow();
 
-    scalarField psd(N/2 + 1, 0.0);
+    scalarField psd(N/2 + 1, Zero);
 
     for (label windowI = 0; windowI < nWindow; ++windowI)
     {
@@ -465,8 +465,8 @@ Foam::graph Foam::noiseFFT::octaves
     const scalarField& f = g.x();
     const scalarField& data = g.y();
 
-    scalarField octData(freqBandIDs.size() - 1, 0.0);
-    scalarField fm(freqBandIDs.size() -1, 0.0);
+    scalarField octData(freqBandIDs.size() - 1, Zero);
+    scalarField fm(freqBandIDs.size() -1, Zero);
 
     for (label bandI = 0; bandI < freqBandIDs.size() - 1; ++bandI)
     {

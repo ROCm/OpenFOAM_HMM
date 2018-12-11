@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
             false
         ),
         mesh,
-        dimensionedVector(vector::zero)
+        dimensionedVector(Zero)
     );
 
     fld.boundaryFieldRef()[0] == function1().value(x0);

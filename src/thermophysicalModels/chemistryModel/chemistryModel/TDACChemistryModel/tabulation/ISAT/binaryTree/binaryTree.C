@@ -662,7 +662,7 @@ void Foam::binaryTree<CompType, ThermoType>::balance()
 
     //2) compute the mean composition
     label n = x->phi().size();
-    scalarField mean(n, 0.0);
+    scalarField mean(n, Zero);
     while (x != nullptr)
     {
         const scalarField& phij = x->phi();
@@ -673,7 +673,7 @@ void Foam::binaryTree<CompType, ThermoType>::balance()
     mean /= size_;
 
     //3) compute the variance for each space direction
-    List<scalar> variance(n, 0.0);
+    List<scalar> variance(n, Zero);
     forAll(chemPoints, j)
     {
         const scalarField& phij = chemPoints[j]->phi();
@@ -699,7 +699,7 @@ void Foam::binaryTree<CompType, ThermoType>::balance()
     // in this direction if these extreme points were not deleted in the
     // cleaning that come before the balance function they are still important
     // and the tree should therefore take them into account
-    SortableList<scalar> phiMaxDir(chemPoints.size(), 0.0);
+    SortableList<scalar> phiMaxDir(chemPoints.size(), Zero);
     forAll(chemPoints, j)
     {
         phiMaxDir[j] = chemPoints[j]->phi()[maxDir];

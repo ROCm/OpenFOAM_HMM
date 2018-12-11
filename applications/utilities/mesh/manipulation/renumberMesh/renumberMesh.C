@@ -130,8 +130,8 @@ void getBand
     scalar& sumSqrIntersect     // scalar to avoid overflow
 )
 {
-    labelList cellBandwidth(nCells, 0);
-    scalarField nIntersect(nCells, 0.0);
+    labelList cellBandwidth(nCells, Zero);
+    scalarField nIntersect(nCells, Zero);
 
     forAll(neighbour, facei)
     {

@@ -76,7 +76,7 @@ void Foam::edgeSurface::calcPointEdges()
 {
     pointEdges_.setSize(points_.size());
 
-    labelList pointNEdges(points_.size(), 0);
+    labelList pointNEdges(points_.size(), Zero);
 
     forAll(edges_, edgeI)
     {

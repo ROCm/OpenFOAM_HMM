@@ -177,8 +177,8 @@ void Foam::faceMapper::calcAddressing() const
             if (addr[facei].empty())
             {
                 // Mapped from a dummy face
-                addr[facei] = labelList(1, label(0));
-                w[facei] = scalarList(1, 1.0);
+                addr[facei] = labelList(1, Zero);
+                w[facei] = scalarList(1, scalar(1));
 
                 insertedFaces[nInsertedFaces] = facei;
                 nInsertedFaces++;

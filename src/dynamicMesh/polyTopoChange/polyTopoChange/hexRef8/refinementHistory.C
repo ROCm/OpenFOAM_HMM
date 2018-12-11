@@ -1028,7 +1028,7 @@ Foam::autoPtr<Foam::refinementHistory> Foam::refinementHistory::clone
     if (active_)
     {
         // Mark selected cells with '1'
-        labelList decomposition(visibleCells_.size(), 0);
+        labelList decomposition(visibleCells_.size(), Zero);
         forAll(cellMap, i)
         {
             decomposition[cellMap[i]] = 1;
@@ -1039,7 +1039,7 @@ Foam::autoPtr<Foam::refinementHistory> Foam::refinementHistory::clone
         labelList splitCellProc(splitCells_.size(), -1);
         // Per splitCell entry the number of live cells that move to that
         // processor
-        labelList splitCellNum(splitCells_.size(), 0);
+        labelList splitCellNum(splitCells_.size(), Zero);
 
         forAll(visibleCells_, cellI)
         {
@@ -1283,7 +1283,7 @@ void Foam::refinementHistory::distribute(const mapDistributePolyMesh& map)
     // Per splitCell entry the processor it moves to
     labelList splitCellProc(splitCells_.size(), -1);
     // Per splitCell entry the number of live cells that move to that processor
-    labelList splitCellNum(splitCells_.size(), 0);
+    labelList splitCellNum(splitCells_.size(), Zero);
 
     forAll(visibleCells_, celli)
     {

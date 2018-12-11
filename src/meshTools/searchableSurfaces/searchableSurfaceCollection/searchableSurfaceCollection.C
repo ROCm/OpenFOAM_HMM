@@ -121,7 +121,7 @@ void Foam::searchableSurfaceCollection::sortHits
 ) const
 {
     // Count hits per surface.
-    labelList nHits(subGeom_.size(), 0);
+    labelList nHits(subGeom_.size(), Zero);
 
     forAll(info, pointi)
     {

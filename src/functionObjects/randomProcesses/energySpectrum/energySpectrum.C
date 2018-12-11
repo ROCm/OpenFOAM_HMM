@@ -87,7 +87,7 @@ void Foam::functionObjects::energySpectrum::calcAndWriteSpectrum
     }
 
     Log << "Computing energy spectrum" << endl;
-    scalarField E(nMax, 0);
+    scalarField E(nMax, Zero);
     const scalarField Ec(0.5*magSqr(Uf));
     forAll(C, celli)
     {

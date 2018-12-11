@@ -121,7 +121,7 @@ Foam::forceSuSp Foam::InterfaceForce<CloudType>::calcNonCoupled
     const scalar muc
 ) const
 {
-    forceSuSp value(vector::zero, 0.0);
+    forceSuSp value(Zero);
 
     const interpolation<vector>& interp = gradInterForceInterpPtr_();
 

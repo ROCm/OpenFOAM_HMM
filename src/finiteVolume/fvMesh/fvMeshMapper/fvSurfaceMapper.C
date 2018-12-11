@@ -94,8 +94,8 @@ void Foam::fvSurfaceMapper::calcAddressing() const
         {
             if (max(addr[facei]) >= oldNInternal)
             {
-                addr[facei] = labelList(1, label(0));
-                w[facei] = scalarList(1, 1.0);
+                addr[facei] = labelList(1, Zero);
+                w[facei] = scalarList(1, scalar(1));
             }
         }
     }

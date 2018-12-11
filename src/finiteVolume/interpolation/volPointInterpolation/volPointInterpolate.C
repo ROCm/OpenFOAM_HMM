@@ -187,7 +187,7 @@ void Foam::volPointInterpolation::interpolateDimensionedInternalField
     // then saves on space.
 
     // Multiply volField by weighting factor matrix to create pointField
-    scalarField sumW(points.size(), 0.0);
+    scalarField sumW(points.size(), Zero);
     forAll(pointCells, pointi)
     {
         const labelList& ppc = pointCells[pointi];

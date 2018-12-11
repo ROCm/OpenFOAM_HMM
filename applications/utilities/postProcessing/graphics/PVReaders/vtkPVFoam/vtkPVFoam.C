@@ -819,7 +819,7 @@ void Foam::vtkPVFoam::renderPatchNames
         // Find the total number of zones
         // Each zone will take the patch name
         // Number of zones per patch ... zero zones should be skipped
-        labelList nZones(pbMesh.size(), 0);
+        labelList nZones(pbMesh.size(), Zero);
 
         // Per global zone number the average face centre position
         List<DynamicList<point>> zoneCentre(pbMesh.size());
@@ -862,7 +862,7 @@ void Foam::vtkPVFoam::renderPatchNames
 
             nZones[patchi] = pZones.nZones();
 
-            labelList zoneNFaces(pZones.nZones(), 0);
+            labelList zoneNFaces(pZones.nZones(), Zero);
 
             // Create storage for additional zone centres
             forAll(zoneNFaces, zonei)

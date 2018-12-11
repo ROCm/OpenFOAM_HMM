@@ -47,7 +47,7 @@ Foam::patchInjectionBase::patchInjectionBase
     triFace_(),
     triToFace_(),
     triCumulativeMagSf_(),
-    sumTriMagSf_(Pstream::nProcs() + 1, 0.0)
+    sumTriMagSf_(Pstream::nProcs() + 1, Zero)
 {
     if (patchId_ < 0)
     {
@@ -222,7 +222,7 @@ void Foam::patchInjectionBase::setPositionAndCell
                     polyMeshTetDecomposition::cellTetIndices(mesh, cellOwner);
 
                 // Construct cell tet volume fractions
-                scalarList cTetVFrac(cellTetIs.size(), 0.0);
+                scalarList cTetVFrac(cellTetIs.size(), Zero);
                 for (label teti=1; teti<cellTetIs.size()-1; teti++)
                 {
                     cTetVFrac[teti] =

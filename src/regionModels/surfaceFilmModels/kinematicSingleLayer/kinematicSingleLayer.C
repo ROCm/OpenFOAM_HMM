@@ -794,7 +794,7 @@ kinematicSingleLayer::kinematicSingleLayer
 
     filmThermo_(filmThermoModel::New(*this, coeffs_)),
 
-    availableMass_(regionMesh().nCells(), 0.0),
+    availableMass_(regionMesh().nCells(), Zero),
 
     injection_(*this, coeffs_),
 

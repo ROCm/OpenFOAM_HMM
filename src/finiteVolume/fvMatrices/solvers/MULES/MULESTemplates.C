@@ -238,10 +238,10 @@ void Foam::MULES::limiter
     scalarField psiMaxn(psiIf.size(), psiMin);
     scalarField psiMinn(psiIf.size(), psiMax);
 
-    scalarField sumPhiBD(psiIf.size(), 0.0);
+    scalarField sumPhiBD(psiIf.size(), Zero);
 
-    scalarField sumPhip(psiIf.size(), 0.0);
-    scalarField mSumPhim(psiIf.size(), 0.0);
+    scalarField sumPhip(psiIf.size(), Zero);
+    scalarField mSumPhim(psiIf.size(), Zero);
 
     forAll(phiCorrIf, facei)
     {

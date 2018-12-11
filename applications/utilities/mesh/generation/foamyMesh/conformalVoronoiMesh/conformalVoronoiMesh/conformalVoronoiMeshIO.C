@@ -210,7 +210,7 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
 //
 //        // From all Delaunay vertices to cell (positive index)
 //        // or patch face (negative index)
-//        labelList vertexToDualAddressing(number_of_vertices(), 0);
+//        labelList vertexToDualAddressing(number_of_vertices(), Zero);
 //
 //        forAll(cellToDelaunayVertex, celli)
 //        {
@@ -525,7 +525,7 @@ void Foam::conformalVoronoiMesh::reorderPoints
     Info<< incrIndent << indent << "Reordering points into internal/external"
         << endl;
 
-    labelList oldToNew(points.size(), label(0));
+    labelList oldToNew(points.size(), Zero);
 
     // Find points that are internal
     for (label fI = nInternalFaces; fI < faces.size(); ++fI)
@@ -611,7 +611,7 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
     const fvMesh& sortMesh = sortMeshPtr();
 
     // Rotation on new faces.
-    labelList rotation(faces.size(), label(0));
+    labelList rotation(faces.size(), Zero);
     labelList faceMap(faces.size(), label(-1));
 
     PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
@@ -660,7 +660,7 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
                 patchDicts[patchi].get<label>("startFace");
 
             labelList patchFaceMap(nPatchFaces, label(-1));
-            labelList patchFaceRotation(nPatchFaces, label(0));
+            labelList patchFaceRotation(nPatchFaces, Zero);
 
             bool changed = refCast<const processorPolyPatch>(pp).order
             (

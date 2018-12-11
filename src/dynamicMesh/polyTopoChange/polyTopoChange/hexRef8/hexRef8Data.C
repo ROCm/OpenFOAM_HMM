@@ -261,7 +261,10 @@ void Foam::hexRef8Data::sync(const IOobject& io)
         IOobject rio(io);
         rio.rename("cellLevel");
         rio.readOpt() = IOobject::NO_READ;
-        cellLevelPtr_.reset(new labelIOList(rio, labelList(mesh.nCells(), 0)));
+        cellLevelPtr_.reset
+        (
+            new labelIOList(rio, labelList(mesh.nCells(), Zero))
+        );
     }
 
     bool hasPointLevel = returnReduce(pointLevelPtr_.valid(), orOp<bool>());
@@ -272,7 +275,7 @@ void Foam::hexRef8Data::sync(const IOobject& io)
         rio.readOpt() = IOobject::NO_READ;
         pointLevelPtr_.reset
         (
-            new labelIOList(rio, labelList(mesh.nPoints(), 0))
+            new labelIOList(rio, labelList(mesh.nPoints(), Zero))
         );
     }
 

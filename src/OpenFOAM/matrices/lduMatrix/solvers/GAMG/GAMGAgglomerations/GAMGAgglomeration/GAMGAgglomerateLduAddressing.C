@@ -70,7 +70,7 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
     label maxNnbrs = 10;
 
     // Number of faces for each coarse-cell
-    labelList cCellnFaces(nCoarseCells, 0);
+    labelList cCellnFaces(nCoarseCells, Zero);
 
     // Setup initial packed storage for coarse-cell faces
     labelList cCellFaces(maxNnbrs*nCoarseCells);
@@ -260,7 +260,11 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
     // Get reference to fine-level interfaces
     const lduInterfacePtrsList& fineInterfaces = interfaceLevel(fineLevelIndex);
 
-    nPatchFaces_.set(fineLevelIndex, new labelList(fineInterfaces.size(), 0));
+    nPatchFaces_.set
+    (
+        fineLevelIndex,
+        new labelList(fineInterfaces.size(), Zero)
+    );
     labelList& nPatchFaces = nPatchFaces_[fineLevelIndex];
 
     patchFaceRestrictAddressing_.set

@@ -238,8 +238,8 @@ void Foam::multiDirRefinement::refineHex8
     hexRef8 hexRefiner
     (
         mesh,
-        labelList(mesh.nCells(), 0),    // cellLevel
-        labelList(mesh.nPoints(), 0),   // pointLevel
+        labelList(mesh.nCells(), Zero),    // cellLevel
+        labelList(mesh.nPoints(), Zero),   // pointLevel
         refinementHistory
         (
             IOobject
@@ -342,7 +342,7 @@ void Foam::multiDirRefinement::refineHex8
     {
         addedCells_[consistentCells[i]].setSize(8);
     }
-    labelList nAddedCells(addedCells_.size(), 0);
+    labelList nAddedCells(addedCells_.size(), Zero);
 
     const labelList& cellMap = morphMap.cellMap();
 

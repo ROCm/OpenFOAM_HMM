@@ -1112,7 +1112,7 @@ void Foam::addPatchCellLayer::setRefinement
         // ~~~~~~~~~~~~~~~~~~~~~
 
         {
-            labelList n(mesh_.nPoints(), 0);
+            labelList n(mesh_.nPoints(), Zero);
             labelUIndList(n, meshPoints) = nPointLayers;
             syncTools::syncPointList(mesh_, n, maxEqOp<label>(), label(0));
 
@@ -1136,7 +1136,7 @@ void Foam::addPatchCellLayer::setRefinement
 
             // Check that nPointLayers equals the max layers of connected faces
             // (or 0). Anything else makes no sense.
-            labelList nFromFace(mesh_.nPoints(), 0);
+            labelList nFromFace(mesh_.nPoints(), Zero);
             forAll(nFaceLayers, i)
             {
                 const face& f = pp[i];
