@@ -1,19 +1,18 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  plus.master.develop                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
-    version         2.0;
+    version         2;
     format          ascii;
     class           dictionary;
     location        "system";
     object          controlDict;
 }
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 application     reactingFoam;
 
@@ -23,7 +22,7 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         6000;
+endTime         3000;
 
 deltaT          1;
 
