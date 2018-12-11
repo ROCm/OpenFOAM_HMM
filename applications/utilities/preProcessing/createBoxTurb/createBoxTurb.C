@@ -88,6 +88,7 @@ int main(int argc, char *argv[])
     {
         // Create a box block mesh with cyclic patches
         #include "createBlockMesh.H"
+        Info<< "\nEnd\n" << endl;
         return 0;
     }
 
@@ -182,7 +183,6 @@ int main(int argc, char *argv[])
     runTime.printExecutionTime(Info);
 
     Info<< "End\n" << endl;
-
     return 0;
 }
 
