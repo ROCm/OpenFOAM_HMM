@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     interDyMFoam;
+application     subsetMesh;
 
 startFrom       startTime;
 

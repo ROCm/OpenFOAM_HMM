@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     potentialFoam;
+application     refineMesh;
 
 startFrom       latestTime;
 
