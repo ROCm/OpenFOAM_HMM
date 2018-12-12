@@ -89,13 +89,14 @@ deleteControlDictPtr deleteControlDictPtr_;
 } // End namespace debug
 } // End namespace Foam
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Foam::dictionary& Foam::debug::controlDict()
 {
     if (!controlDictPtr_)
     {
-        string controlDictString(getEnv("FOAM_CONTROLDICT"));
+        string controlDictString(Foam::getEnv("FOAM_CONTROLDICT"));
         if (!controlDictString.empty())
         {
             // Read from environment
