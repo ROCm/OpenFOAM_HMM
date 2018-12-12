@@ -273,7 +273,7 @@ public:
 
         //- List of element ids/order of the original surface,
         //- when hasFaceIds is true.
-        const labelList& originalIds() const
+        virtual const labelList& originalIds() const
         {
             return Foam::emptyLabelList;
         }
