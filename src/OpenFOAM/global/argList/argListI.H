@@ -257,6 +257,18 @@ inline T Foam::argList::opt(const word& optName) const
 
 
 template<class T>
+inline T Foam::argList::opt(const word& optName, const T& deflt) const
+{
+    if (found(optName))
+    {
+        return opt<T>(optName);
+    }
+
+    return deflt;
+}
+
+
+template<class T>
 inline bool Foam::argList::readIfPresent
 (
     const word& optName,

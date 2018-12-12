@@ -59,10 +59,11 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::addArgument("surfaceFile");
-    argList::addArgument("min length");
-    argList::addArgument("min quality");
-    argList::addArgument("output surfaceFile");
+    argList::addArgument("input", "The input surface file");
+    argList::addArgument("length", "The min length");
+    argList::addArgument("quality", "The min quality");
+    argList::addArgument("output", "The output surface file");
+
     argList::addBoolOption
     (
         "noClean",

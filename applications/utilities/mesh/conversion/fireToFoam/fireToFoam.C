@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::addArgument("firePolyMesh");
+    argList::addArgument("firePolyMesh", "The input FIRE mesh");
     argList::addBoolOption
     (
         "ascii",

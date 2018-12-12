@@ -123,9 +123,9 @@ int main(int argc, char *argv[])
 
     #include "addOverwriteOption.H"
 
-    argList::addArgument("faceSet");
-    argList::addArgument("masterPatch");
-    argList::addArgument("slavePatch");
+    argList::addArgument("faceSet", "The faces used for splitting");
+    argList::addArgument("master", "The master patch name");
+    argList::addArgument("slave", "The slave patch name");
 
     #include "setRootCase.H"
     #include "createTime.H"

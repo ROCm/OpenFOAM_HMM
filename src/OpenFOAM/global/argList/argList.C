@@ -55,6 +55,8 @@ Foam::SLList<Foam::string>    Foam::argList::validArgs;
 Foam::HashSet<Foam::string>   Foam::argList::advancedOptions;
 Foam::HashTable<Foam::string> Foam::argList::validOptions;
 Foam::HashTable<Foam::string> Foam::argList::validParOptions;
+Foam::HashTable<Foam::string, Foam::label, Foam::Hash<Foam::label>>
+    Foam::argList::argUsage;
 Foam::HashTable<Foam::string> Foam::argList::optionUsage;
 Foam::HashTable<std::pair<Foam::word,int>> Foam::argList::validOptionsCompat;
 Foam::HashTable<std::pair<bool,int>> Foam::argList::ignoreOptionsCompat;
@@ -68,32 +70,44 @@ Foam::argList::initValidTables::initValidTables()
 {
     argList::addOption
     (
-        "case", "dir",
+        "case",
+        "dir",
         "Specify case directory to use (instead of the cwd)"
     );
     argList::addBoolOption("parallel", "Run in parallel");
     validParOptions.set("parallel", "");
     argList::addOption
     (
-        "roots", "(dir1 .. dirN)",
+        "roots",
+        "(dir1 .. dirN)",
         "Slave root directories for distributed running",
         true  // advanced option
     );
-    validParOptions.set("roots", "(dir1 .. dirN)");
+    validParOptions.set
+    (
+        "roots",
+        "(dir1 .. dirN)"
+    );
 
     argList::addOption
     (
-        "decomposeParDict", "file",
+        "decomposeParDict",
+        "file",
         "Use specified file for decomposePar dictionary"
     );
     argList::addOption
     (
-        "hostRoots", "(((host1 dir1) .. (hostN dirN))",
+        "hostRoots",
+        "(((host1 dir1) .. (hostN dirN))",
         "slave root directories (per host) for distributed running. "
         "The host specification can use a regex.",
         true  // advanced option
     );
-    validParOptions.set("hostRoots", "((host1 dir1) .. (hostN dirN))");
+    validParOptions.set
+    (
+        "hostRoots",
+        "((host1 dir1) .. (hostN dirN))"
+    );
 
     argList::addBoolOption
     (
@@ -103,7 +117,8 @@ Foam::argList::initValidTables::initValidTables()
 
     argList::addOption
     (
-        "fileHandler", "handler",
+        "fileHandler",
+        "handler",
         "Override the file handler type",
         true  // advanced option
     );
@@ -229,9 +244,26 @@ void Foam::argList::checkITstream(const ITstream& is, const word& optName)
 }
 
 
-void Foam::argList::addArgument(const string& argName)
+void Foam::argList::addArgument
+(
+    const string& argName,
+    const string& usage
+)
 {
     validArgs.append(argName);
+
+    // The first program argument starts at 1 - obtain index after the append
+
+    const label index = validArgs.size();
+
+    if (usage.empty())
+    {
+        argUsage.erase(index);
+    }
+    else
+    {
+        argUsage.set(index, usage);
+    }
 }
 
 

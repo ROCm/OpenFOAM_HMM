@@ -28,7 +28,7 @@ Group
     grpMeshManipulationUtilities
 
 Description
-    Corrects teh orientation of faceZone.
+    Corrects the orientation of faceZone.
 
     - correct in parallel - excludes coupled faceZones from walk
     - correct for non-manifold faceZones - restarts walk
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     );
     #include "addRegionOption.H"
     argList::addArgument("faceZone");
-    argList::addArgument("outsidePoint");
+    argList::addArgument("point", "A point outside of the mesh");
 
     #include "setRootCase.H"
     #include "createTime.H"

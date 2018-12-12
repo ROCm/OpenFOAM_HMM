@@ -145,8 +145,16 @@ int main(int argc, char *argv[])
     );
 
     // The arguments are non-mandatory when using dictionary mode
-    argList::addArgument("masterPatch");
-    argList::addArgument("slavePatch");
+    argList::addArgument
+    (
+        "master",
+        "The master patch name (non-dictionary mode)"
+    );
+    argList::addArgument
+    (
+        "slave",
+        "The slave patch name (non-dictionary mode)"
+    );
 
     #include "setRootCaseNonMandatoryArgs.H"
 

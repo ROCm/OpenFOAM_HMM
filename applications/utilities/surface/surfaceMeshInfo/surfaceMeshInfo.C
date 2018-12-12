@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
     argList::noBanner();
     argList::noParallel();
-    argList::addArgument("surfaceFile");
+    argList::addArgument("surface", "The input surface file");
 
     argList::addOption
     (

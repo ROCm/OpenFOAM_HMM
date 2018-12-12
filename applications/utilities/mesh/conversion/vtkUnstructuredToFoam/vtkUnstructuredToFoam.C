@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::addArgument(".vtk ascii file");
+    argList::addArgument("vtk-file", "The input legacy ascii vtk file");
 
     #include "setRootCase.H"
     #include "createTime.H"

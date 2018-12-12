@@ -61,7 +61,8 @@ int main(int argc, char *argv[])
         "Extract boundaries from an OpenFOAM mesh and write in a surface format"
     );
     argList::noParallel();
-    argList::addArgument("outputFile.ext");
+    argList::addArgument("output", "The output surface file");
+
     timeSelector::addOptions();
 
     argList::addOption

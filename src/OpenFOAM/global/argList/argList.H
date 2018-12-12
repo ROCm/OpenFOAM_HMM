@@ -212,16 +212,19 @@ public:
         //  Stored as (option = bool, version)
         static HashTable<std::pair<bool,int>> ignoreOptionsCompat;
 
-        //- Short usage information for validOptions
+        //- Short description for program arguments
+        static HashTable<string, label, Hash<label>> argUsage;
+
+        //- Short description for validOptions
         static HashTable<string> optionUsage;
 
-        //- Additional notes for usage
+        //- General usage notes
         static SLList<string> notes;
 
-        //- Min offset for displaying usage (default: 20)
+        //- Min indentation when displaying usage (default: 20)
         static std::string::size_type usageMin;
 
-        //- Max screen width for displaying usage (default: 80)
+        //- Max screen width when displaying usage (default: 80)
         static std::string::size_type usageMax;
 
         //- Standard name for the post-processing option
@@ -341,10 +344,15 @@ public:
         //- Return an input stream from the named option
         inline ITstream lookup(const word& optName) const;
 
-        //- Read a value from the named option
+        //- Get a value from the named option
         //  The default template parameter is string (ie, no conversion).
         template<class T=string>
         inline T opt(const word& optName) const;
+
+        //- Get a value from the named option if present, or return default.
+        //  Identical to lookupOrDefault().
+        template<class T>
+        inline T opt(const word& optName, const T& deflt) const;
 
         //- Read a value from the named option if present.
         //  \return true if the named option was found.
@@ -362,8 +370,7 @@ public:
             const T& deflt
         ) const;
 
-        //- Read a value from the named option if present.
-        //  Return supplied default otherwise.
+        //- Get a value from the named option if present, or return default.
         template<class T>
         inline T lookupOrDefault
         (
@@ -389,7 +396,11 @@ public:
     // Edit
 
         //- Append a (mandatory) argument to validArgs
-        static void addArgument(const string& argName);
+        static void addArgument
+        (
+            const string& argName,
+            const string& usage = ""
+        );
 
         //- Add a bool option to validOptions with usage information
         static void addBoolOption

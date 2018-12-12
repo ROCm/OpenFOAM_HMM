@@ -597,9 +597,9 @@ int main(int argc, char *argv[])
         "Switch on additional debug information"
     );
 
-    argList::addArgument("inputFile");
-    argList::addArgument("distance");
-    argList::addArgument("safety factor [1..]");
+    argList::addArgument("input", "The input surface file");
+    argList::addArgument("distance", "The inflate distance");
+    argList::addArgument("factor", "The extend safety factor [1,10]");
 
     argList::noFunctionObjects();  // Never use function objects
 

@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
         " boundary edges to match other surface boundary edges"
     );
     argList::noParallel();
-    argList::addArgument("hookTolerance");
+    argList::addArgument("hookTolerance", "The point merge tolerance");
 
     #include "addDictOption.H"
 

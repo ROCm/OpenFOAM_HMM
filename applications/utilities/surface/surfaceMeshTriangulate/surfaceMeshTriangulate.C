@@ -66,7 +66,8 @@ int main(int argc, char *argv[])
     );
     timeSelector::addOptions();
 
-    argList::addArgument("output file");
+    argList::addArgument("output", "The output surface file");
+
     #include "addRegionOption.H"
     argList::addBoolOption
     (

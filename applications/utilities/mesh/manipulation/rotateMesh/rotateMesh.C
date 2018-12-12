@@ -72,13 +72,13 @@ int main(int argc, char *argv[])
     argList::addNote
     (
         "Rotate mesh points and vector/tensor fields\n"
-        "Rotation from the <n1> vector to the <n2> vector"
+        "Rotation from the <from> vector to the <to> vector"
     );
 
     timeSelector::addOptions();
 
-    argList::addArgument("n1");
-    argList::addArgument("n2");
+    argList::addArgument("from", "The vector to rotate from");
+    argList::addArgument("to",   "The vector to rotate to");
 
     #include "setRootCase.H"
     #include "createTime.H"

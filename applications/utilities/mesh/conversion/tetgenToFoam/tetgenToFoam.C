@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
         "Convert tetgen .ele and .node and .face files to an OpenFOAM mesh"
     );
 
-    argList::addArgument("file prefix");
+    argList::addArgument("prefix", "The prefix for the input tetgen files");
     argList::addBoolOption
     (
         "noFaceFile",

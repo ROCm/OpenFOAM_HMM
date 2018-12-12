@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::addArgument("ccmMesh");
+    argList::addArgument("ccm-file", "The input .ccm or .ccmg file");
     argList::addBoolOption
     (
         "ascii",

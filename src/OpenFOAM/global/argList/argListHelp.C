@@ -240,6 +240,35 @@ void Foam::argList::printMan() const
     }
 
 
+    // Arguments output
+    if (validArgs.size())
+    {
+        // .SH "ARGUMENTS"
+        Info<< ".SH \"ARGUMENTS\"" << nl;
+
+        label argIndex = 0;
+        for (const std::string& argName : validArgs)
+        {
+            ++argIndex;
+
+            Info<< ".TP\n\\fI" << argName.c_str() << "\\fR";
+            Info<< nl;
+
+            // Arg has usage information?
+
+            const auto usageIter = argList::argUsage.cfind(argIndex);
+            if (usageIter.found())
+            {
+                stringOps::writeWrapped(Info, *usageIter, usageMax, 0, true);
+            }
+            else
+            {
+                Info<< nl;
+            }
+        }
+    }
+
+
     // .SH "OPTIONS"
     Info<< ".SH \"OPTIONS\"" << nl;
 
@@ -319,6 +348,34 @@ void Foam::argList::printUsage(bool full) const
         }
     }
     Info<< nl;
+
+    // Arguments output
+    // Currently only if there is also usage information, but may wish to
+    // change this to remind developers to add some description.
+    if (validArgs.size() && argUsage.size())
+    {
+        Info<< "Arguments:\n";
+
+        label argIndex = 0;
+        for (const std::string& argName : validArgs)
+        {
+            ++argIndex;
+
+            Info<< "  <" << argName.c_str() << '>';
+
+            const auto usageIter = argList::argUsage.cfind(argIndex);
+            if (usageIter.found())
+            {
+                const label len = argName.size() + 4;
+
+                printOptionUsage(len, usageIter());
+            }
+            else
+            {
+                Info<< nl;
+            }
+        }
+    }
 
     Info<< "Options:\n";
 

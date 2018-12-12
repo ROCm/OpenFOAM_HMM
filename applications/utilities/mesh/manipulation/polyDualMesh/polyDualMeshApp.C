@@ -368,7 +368,12 @@ int main(int argc, char *argv[])
     #include "addOverwriteOption.H"
     argList::noParallel();
 
-    argList::addArgument("featureAngle [0-180]");
+    argList::addArgument
+    (
+        "featureAngle",
+        "in degrees [0-180]"
+    );
+
     argList::addBoolOption
     (
         "splitAllFaces",

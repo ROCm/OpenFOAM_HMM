@@ -56,9 +56,9 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::addArgument("surfaceFile");
-    argList::addArgument("surfaceFile");
-    argList::addArgument("output surfaceFile");
+    argList::addArgument("surface1", "The input surface file 1");
+    argList::addArgument("surface2", "The input surface file 2");
+    argList::addArgument("output", "The output surface file");
 
     argList::addOption
     (

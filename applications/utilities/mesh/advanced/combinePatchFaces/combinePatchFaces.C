@@ -350,7 +350,11 @@ int main(int argc, char *argv[])
 
     #include "addOverwriteOption.H"
 
-    argList::addArgument("featureAngle [0..180]");
+    argList::addArgument
+    (
+        "featureAngle",
+        "in degrees [0-180]"
+    );
     argList::addOption
     (
         "concaveAngle",
@@ -360,7 +364,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "meshQuality",
-        "Read user-defined mesh quality criterions from system/meshQualityDict"
+        "Read user-defined mesh quality criteria from system/meshQualityDict"
     );
 
     argList::noFunctionObjects();  // Never use function objects
@@ -411,7 +415,7 @@ int main(int argc, char *argv[])
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE
                 )
-           )
+            )
         );
     }
 

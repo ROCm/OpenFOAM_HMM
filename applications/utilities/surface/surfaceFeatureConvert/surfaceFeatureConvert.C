@@ -49,8 +49,8 @@ int main(int argc, char *argv[])
         "Convert between edgeMesh formats"
     );
     argList::noParallel();
-    argList::addArgument("inputFile");
-    argList::addArgument("outputFile");
+    argList::addArgument("input", "The input edge file");
+    argList::addArgument("output", "The output edge file");
     argList::addOption
     (
         "scale",

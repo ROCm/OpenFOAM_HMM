@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::addArgument("outputFile");
+    argList::addArgument("output", "The output surface file");
 
     argList::addBoolOption
     (

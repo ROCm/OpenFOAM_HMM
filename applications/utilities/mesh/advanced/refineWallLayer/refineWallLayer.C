@@ -31,7 +31,7 @@ Description
     Refine cells next to specified patches.
 
     Arguments:
-        1: List of patch name regular expressions
+        1: List of patch names or regular expressions
         2: The size of the refined cells as a fraction of the edge-length.
 
     Examples:
@@ -63,13 +63,21 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Refine cells next to specified patches.\n"
-        "The list of patches may contain regular expressions.\n"
+        "Refine cells next to specified patches."
     );
 
     #include "addOverwriteOption.H"
-    argList::addArgument("patches");
-    argList::addArgument("edgeFraction");
+    argList::addArgument
+    (
+        "patches",
+        "The list of patch names or regex - Eg, '(top \"Wall.\")'"
+    );
+    argList::addArgument
+    (
+        "edgeFraction",
+        "The size of the refined cells as a fraction of the edge-length"
+        " on a (0,1) interval"
+    );
 
     argList::addOption
     (

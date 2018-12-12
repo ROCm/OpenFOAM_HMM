@@ -60,7 +60,8 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::addArgument("surfaceFile");
+    argList::addArgument("input", "The input surface file");
+
     argList::addBoolOption
     (
         "shellProperties",
