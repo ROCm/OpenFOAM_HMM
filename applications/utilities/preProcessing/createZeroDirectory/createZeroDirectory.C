@@ -240,12 +240,13 @@ int main(int argc, char *argv[])
 
     fileName baseDir
     (
-        "${WM_PROJECT_DIR}/etc/caseDicts/createZeroDirectoryTemplates"
+        args.opt<fileName>
+        (
+            "templateDir",
+            // Default is from PROJECT/etc directory
+            "<etc:o>/caseDicts/createZeroDirectoryTemplates"
+        )
     );
-    if (args.found("templateDir"))
-    {
-        baseDir = args["templateDir"];
-    }
 
     baseDir.expand();
     baseDir.toAbsolute();

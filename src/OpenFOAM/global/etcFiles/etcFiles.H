@@ -60,25 +60,38 @@ fileNameList etcDirs(bool test=true);
 fileNameList findEtcDirs
 (
     const fileName& name,       //!< The directory to search for
-    const bool findFirst=false  //!< Stop after locating the first directory
+    const bool findFirst=false, //!< Stop after locating the first directory
+    unsigned short location=0777 //!< User/group/other location
 );
 
 
+//- Search for a single directory using findEtcDirs().
+//
+//  \return The full path name of the first directory found in the
+//      search hierarchy or an empty fileName if the name cannot be found.
+fileName findEtcDir
+(
+    const fileName& name,       //!< The directory to search for
+    unsigned short location=0777 //!< User/group/other location
+);
+
 //- Search for files from user/group/other directories.
 //
-//  The search hierarchy corresponds to that of the foamEtcFile script,
-//  which allows for version-specific and version-independent files:
-//  -# \b user settings
+//  The search hierarchy corresponds to that of the \c foamEtcFile script,
+//  which allows for version-specific and version-independent files.
+//
+//  -# \b user settings (\c location=0700)
 //    - ~/.OpenFOAM/{PROJECT_API}
 //    - ~/.OpenFOAM/
-//  -# \b group settings
+//  -# \b group settings (\c location=0070)
 //    - $WM_PROJECT_SITE/{PROJECT_API}/etc/
 //    - $WM_PROJECT_SITE/etc/
-//  -# \b other (shipped) settings
+//  -# \b other (shipped) settings (\c location=0007)
 //    - $WM_PROJECT_DIR/etc/
 //
-//  Where {PROJECT_API} is the value of the OPENFOAM define.
-//  - \b \$WM_PROJECT_SITE : If unset, uses $WM_PROJECT_DIR/site
+//  Where {PROJECT_API} corresponds to the foamVersion::api value.
+//
+//  \note When \c \$WM_PROJECT_SITE is unset, uses \c $WM_PROJECT_DIR/site
 //
 //  \return The list of full paths of all the matching files or
 //      an empty list if the name cannot be found.
@@ -86,7 +99,8 @@ fileNameList findEtcFiles
 (
     const fileName& name,       //!< The file to search for
     const bool mandatory=false, //!< Abort if the file cannot be found
-    const bool findFirst=false  //!< Stop after locating the first directory
+    const bool findFirst=false, //!< Stop after locating the first directory
+    unsigned short location=0777 //!< User/group/other location
 );
 
 
@@ -97,7 +111,8 @@ fileNameList findEtcFiles
 fileName findEtcFile
 (
     const fileName& name,       //!< The file to search for
-    const bool mandatory=false  //!< Abort if the file cannot be found
+    const bool mandatory=false, //!< Abort if the file cannot be found
+    unsigned short location=0777 //!< User/group/other location
 );
 
 

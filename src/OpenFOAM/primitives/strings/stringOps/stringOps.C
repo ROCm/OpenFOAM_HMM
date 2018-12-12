@@ -37,10 +37,33 @@ License
 namespace Foam
 {
 
+// Return the file location mode (string) as a numerical value.
+//
+// - u : location mask 0700
+// - g : location mask 0070
+// - o : location mask 0007
+//
+static inline unsigned short modeToLocation
+(
+    const std::string& mode,
+    std::size_t pos = 0
+)
+{
+    unsigned short where(0);
+
+    if (std::string::npos != mode.find('u', pos)) { where |= 0700; } // User
+    if (std::string::npos != mode.find('g', pos)) { where |= 0070; } // Group
+    if (std::string::npos != mode.find('o', pos)) { where |= 0007; } // Other
+
+    return where;
+}
+
+
 // Expand a leading <tag>/
 // Convenient for frequently used directories
 //
-//   <etc>/        => user/group/other OpenFOAM directory
+//   <etc>/        => user/group/other etc - findEtcFile()
+//   <etc(:[ugo]+)?>/ => user/group/other etc - findEtcFile()
 //   <case>/       => FOAM_CASE directory
 //   <constant>/   => FOAM_CASE/constant directory
 //   <system>/     => FOAM_CASE/system directory
@@ -52,7 +75,7 @@ static void expandLeadingTag(std::string& s, const char b, const char e)
     }
 
     auto delim = s.find(e);
-    if (delim == std::string::npos)
+    if (std::string::npos == delim)
     {
         return;  // Error: no closing delim - ignore expansion
     }
@@ -73,6 +96,7 @@ static void expandLeadingTag(std::string& s, const char b, const char e)
     }
 
     const std::string tag(s, 1, delim-2);
+    const auto tagLen = tag.length();
 
     // Note that file is also allowed to be an empty string.
 
@@ -87,6 +111,12 @@ static void expandLeadingTag(std::string& s, const char b, const char e)
     else if (tag == "constant" || tag == "system")
     {
         s = fileName(Foam::getEnv("FOAM_CASE"))/tag/file;
+    }
+    else if (tagLen >= 4 && tag.compare(0, 4, "etc:") == 0)
+    {
+        // <etc:ugo> type of tag - convert "ugo" to numeric
+
+        s = findEtcFile(file, false, modeToLocation(tag, 4));
     }
 }
 

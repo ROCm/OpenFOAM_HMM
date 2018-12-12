@@ -102,6 +102,13 @@ int main(int argc, char *argv[])
           :
             {
                 "~OpenFOAM/controlDict",    "<etc>/controlDict",
+                "<etc:ugo>/controlDict",
+                "<etc:u>/controlDict",
+                "<etc:ug>/controlDict",
+                "<etc:go>/controlDict",
+                "<etc:o>/controlDict",
+                "<etc:JUNK>/controlDict",   // rubbish input
+                "<etc:>/controlDict",       // rubbish input
                 "$FOAM_CASE/xyz",           "<case>/xyz",
                 "$FOAM_CASE/constant/xyz",  "<constant>/xyz",
                 "$FOAM_CASE/system/xyz",    "<system>/xyz",

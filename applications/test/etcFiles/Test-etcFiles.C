@@ -102,6 +102,12 @@ int main(int argc, char *argv[])
         }
     }
 
+
+    // This should and will fail:
+    //// Info<<"find bad file:" << nl
+    ////     << findEtcFile("##BadName##", true) << "FAIL" << endl;
+
+
     const bool listAll = (args.found("all") || args.found("list"));
 
     int error = 0;
