@@ -318,8 +318,9 @@ void Foam::argList::printUsage(bool full) const
             Info<< ']';
         }
     }
+    Info<< nl;
 
-    Info<< "\noptions:\n";
+    Info<< "Options:\n";
 
     for (const word& optName : validOptions.sortedToc())
     {
