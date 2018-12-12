@@ -130,7 +130,6 @@ int main(int argc, char *argv[])
     }
 
 
-
     labelIOList pointPriority
     (
         IOobject

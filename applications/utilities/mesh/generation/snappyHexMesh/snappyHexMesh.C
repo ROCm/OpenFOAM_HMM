@@ -823,7 +823,7 @@ int main(int argc, char *argv[])
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE
                 ),
-                args.lookupOrDefault<fileName>("decomposeParDict", "")
+                args.opt<fileName>("decomposeParDict", "")
             )
         );
 
@@ -1700,7 +1700,7 @@ int main(int argc, char *argv[])
 
         fileName outFileName
         (
-            args.lookupOrDefault<fileName>
+            args.opt<fileName>
             (
                 "outFile",
                 "constant/triSurface/simplifiedSurface.stl"

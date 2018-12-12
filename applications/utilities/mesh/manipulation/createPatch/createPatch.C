@@ -531,7 +531,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
 
     const word meshRegionName =
-        args.lookupOrDefault<word>("region", polyMesh::defaultRegion);
+        args.opt<word>("region", polyMesh::defaultRegion);
 
     const bool overwrite = args.found("overwrite");
 

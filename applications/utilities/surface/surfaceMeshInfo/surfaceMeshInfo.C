@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
     // use UnsortedMeshedSurface, not MeshedSurface to maintain ordering
     UnsortedMeshedSurface<face> surf(importName);
 
-    const scalar scaling = args.lookupOrDefault<scalar>("scale", -1);
+    const scalar scaling = args.opt<scalar>("scale", -1);
     if (scaling > 0)
     {
         DetailInfo << " -scale " << scaling << nl;

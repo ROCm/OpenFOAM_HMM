@@ -61,8 +61,7 @@ scalar getMergeDistance
     const boundBox& bb
 )
 {
-    scalar mergeTol = defaultMergeTol;
-    args.readIfPresent("mergeTol", mergeTol);
+    const scalar mergeTol = args.opt<scalar>("mergeTol", defaultMergeTol);
 
     scalar writeTol =
         Foam::pow(scalar(10), -scalar(IOstream::defaultPrecision()));
@@ -519,8 +518,8 @@ int main(int argc, char *argv[])
         printMeshData(mesh);
 
         // Allow override of decomposeParDict location
-        fileName decompDictFile;
-        args.readIfPresent("decomposeParDict", decompDictFile);
+        const fileName decompDictFile =
+            args.opt<fileName>("decomposeParDict", "");
 
         labelList decomp = decompositionModel::New
         (

@@ -103,18 +103,10 @@ int main(int argc, char *argv[])
     fileName addCase = args[2];
 
     const word masterRegion =
-        args.lookupOrDefault<word>
-        (
-            "masterRegion",
-            polyMesh::defaultRegion
-        );
+        args.opt<word>("masterRegion", polyMesh::defaultRegion);
 
     const word addRegion =
-        args.lookupOrDefault<word>
-        (
-            "addRegion",
-            polyMesh::defaultRegion
-        );
+        args.opt<word>("addRegion", polyMesh::defaultRegion);
 
     // Since we don't use argList processor directory detection, add it to
     // the casename ourselves so it triggers the logic inside TimePath.

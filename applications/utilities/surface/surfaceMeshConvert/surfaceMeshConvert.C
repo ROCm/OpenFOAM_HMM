@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
                 IOobject::NO_WRITE,
                 false
             ),
-            args.lookupOrDefault<fileName>("dict", "")
+            args.opt<fileName>("dict", "")
         );
 
         if (!ioCsys.typeHeaderOk<coordinateSystems>(false))

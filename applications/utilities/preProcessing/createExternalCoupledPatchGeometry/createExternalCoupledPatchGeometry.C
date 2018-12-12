@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
 
     wordList regionNames(1, fvMesh::defaultRegion);
-    if (!args.readIfPresent("region", regionNames[0]))
+    if (!args.readIfPresent("region", regionNames.first()))
     {
         args.readIfPresent("regions", regionNames);
     }

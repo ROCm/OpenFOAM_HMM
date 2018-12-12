@@ -136,8 +136,9 @@ int main(int argc, char *argv[])
     const bool allTopology = args.found("allTopology");
     const bool meshQuality = args.found("meshQuality");
 
-    word surfaceFormat;
-    const bool writeSets = args.readIfPresent("writeSets", surfaceFormat);
+    const word surfaceFormat = args.opt<word>("writeSets", "");
+    const bool writeSets = surfaceFormat.size();
+
     wordHashSet selectedFields;
     bool writeFields = args.readIfPresent
     (

@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
     }
 
     // By default, no scaling
-    const scalar scaleFactor = args.lookupOrDefault<scalar>("scale", 1);
+    const scalar scaleFactor = args.opt<scalar>("scale", 1);
 
     // Default to binary output, unless otherwise specified
     const IOstream::streamFormat format =

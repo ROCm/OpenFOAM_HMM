@@ -564,8 +564,7 @@ int main(int argc, char *argv[])
     else
     {
         regionNames.resize(1);
-        regionNames.first() =
-            args.lookupOrDefault<word>("region", fvMesh::defaultRegion);
+        regionNames.first() = args.opt<word>("region", fvMesh::defaultRegion);
     }
 
 
@@ -627,7 +626,7 @@ int main(int argc, char *argv[])
     // Directory management
 
     // Sub-directory for output
-    const word vtkDirName = args.lookupOrDefault<word>("name", "VTK");
+    const word vtkDirName = args.opt<word>("name", "VTK");
 
     const fileName outputDir(runTime.globalPath()/vtkDirName);
 

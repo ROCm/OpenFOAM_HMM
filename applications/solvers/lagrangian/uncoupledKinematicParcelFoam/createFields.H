@@ -51,7 +51,7 @@ autoPtr<compressible::turbulenceModel> turbulence
 
 const word kinematicCloudName
 (
-    args.lookupOrDefault<word>("cloud", "kinematicCloud")
+    args.opt<word>("cloud", "kinematicCloud")
 );
 
 Info<< "Constructing kinematicCloud " << kinematicCloudName << endl;

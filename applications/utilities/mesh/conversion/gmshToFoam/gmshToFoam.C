@@ -784,16 +784,11 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    Foam::word regionName;
+    word regionName = polyMesh::defaultRegion;
 
     if (args.readIfPresent("region", regionName))
     {
-        Foam::Info
-            << "Creating polyMesh for region " << regionName << endl;
-    }
-    else
-    {
-        regionName = Foam::polyMesh::defaultRegion;
+        Info<< "Creating polyMesh for region " << regionName << endl;
     }
 
     const bool keepOrientation = args.found("keepOrientation");

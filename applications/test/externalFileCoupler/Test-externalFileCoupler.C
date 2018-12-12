@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    const label maxCount = args.lookupOrDefault<label>("max", 1000);
+    const label maxCount = args.opt<label>("max", 1000);
 
     externalFileCoupler coupler;
 

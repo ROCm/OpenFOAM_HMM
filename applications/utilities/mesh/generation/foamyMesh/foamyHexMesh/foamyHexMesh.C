@@ -70,8 +70,8 @@ int main(int argc, char *argv[])
     const bool conformationOnly = args.found("conformationOnly");
 
     // Allow override of decomposeParDict location
-    fileName decompDictFile;
-    args.readIfPresent("decomposeParDict", decompDictFile);
+    const fileName decompDictFile =
+        args.opt<fileName>("decomposeParDict", "");
 
     IOdictionary foamyHexMeshDict
     (

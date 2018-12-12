@@ -119,8 +119,10 @@ volScalarField alphac
     dimensionedScalar(dimless, Zero)
 );
 
-word kinematicCloudName("kinematicCloud");
-args.readIfPresent("cloud", kinematicCloudName);
+const word kinematicCloudName
+(
+    args.opt<word>("cloud", "kinematicCloud")
+);
 
 Info<< "Constructing kinematicCloud " << kinematicCloudName << endl;
 basicKinematicTypeCloud kinematicCloud

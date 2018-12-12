@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    const scalar scaleFactor = args.lookupOrDefault<scalar>("scale", -1);
+    const scalar scaleFactor = args.opt<scalar>("scale", -1);
 
     Info<< "Input surface   :" << inFileName << nl
         << "Scaling factor  :" << scaleFactor << nl

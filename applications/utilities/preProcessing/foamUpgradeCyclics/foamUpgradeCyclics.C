@@ -431,11 +431,9 @@ int main(int argc, char *argv[])
     }
     const bool enableEntries = args.found("enableFunctionEntries");
 
+    const word regionName = args.opt<word>("region", polyMesh::defaultRegion);
 
-    Foam::word regionName = polyMesh::defaultRegion;
-    args.readIfPresent("region", regionName);
-
-    fileName regionPrefix = "";
+    fileName regionPrefix;
     if (regionName != polyMesh::defaultRegion)
     {
         regionPrefix = regionName;

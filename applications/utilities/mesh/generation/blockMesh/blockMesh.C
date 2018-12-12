@@ -139,11 +139,11 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    word regionName;
+    word regionName = polyMesh::defaultRegion;
     word regionPath;
 
     // Check if the region is specified otherwise mesh the default region
-    if (args.readIfPresent("region", regionName, polyMesh::defaultRegion))
+    if (args.readIfPresent("region", regionName))
     {
         Info<< nl << "Generating mesh for region " << regionName << endl;
         regionPath = regionName;
