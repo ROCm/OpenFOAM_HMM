@@ -1539,11 +1539,7 @@ void Foam::argList::displayDoc(bool source) const
     CStringList command(stringOps::splitSpace(docBrowser));
 
     Info
-        << "OpenFOAM"
-        #if OPENFOAM
-        << ' ' << OPENFOAM
-        #endif
-        << " documentation:" << nl
+        << "OpenFOAM " << foamVersion::api << " documentation:" << nl
         << "    " << command << nl << endl;
 
     Foam::system(command, true);
