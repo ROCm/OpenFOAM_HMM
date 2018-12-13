@@ -19,7 +19,7 @@ numberOfSubdomains  8;
 
 method          simple;
 
-simpleCoeffs
+coeffs
 {
     n           (2 2 2);
 }

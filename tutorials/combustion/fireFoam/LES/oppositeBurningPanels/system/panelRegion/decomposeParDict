@@ -23,19 +23,15 @@ structuredCoeffs
     method      hierarchical;
     patches     (region0_to_panelRegion_fRight_zone region0_to_panelRegion_fLeft_zone);
 
-    hierarchicalCoeffs
+    coeffs
     {
-         n               (2 3 1);
-         delta           0.001;
-         order           xyz;
+        n       (2 3 1);
     }
 }
 
 coeffs
 {
     n           (1 2 3);
-    //delta       0.001; // default=0.001
-    //order       xyz;   // default=xzy
     dataFile    "cellDecomposition";
 }
 

@@ -19,10 +19,9 @@ numberOfSubdomains 4;
 
 method          simple;
 
-simpleCoeffs
+coeffs
 {
-    n               ( 4 1 1 );
-    order           xyz;
+    n           (4 1 1);
 }
 
 // ************************************************************************* //

@@ -21,9 +21,6 @@ method          simple;
 coeffs
 {
     n           (1 1 6);
-    //delta       0.001; // default=0.001
-    //order       xyz;   // default=xzy
-    dataFile    "";
 }
 
 // ************************************************************************* //
