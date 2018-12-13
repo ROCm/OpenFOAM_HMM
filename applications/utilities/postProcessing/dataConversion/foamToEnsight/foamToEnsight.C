@@ -132,6 +132,11 @@ int main(int argc, char *argv[])
         " the internalMesh and for each patch."
     );
     timeSelector::addOptions();
+
+    // Less frequently used - reduce some clutter
+    argList::setAdvanced("decomposeParDict");
+    argList::setAdvanced("noFunctionObjects");
+
     #include "addRegionOption.H"
 
     argList::addBoolOption
