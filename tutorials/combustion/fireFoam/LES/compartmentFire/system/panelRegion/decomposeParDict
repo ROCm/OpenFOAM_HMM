@@ -25,8 +25,7 @@ structuredCoeffs
 
     simpleCoeffs
     {
-         n           (5 1 4);
-         delta       0.001;
+        n       (2 1 4);
     }
 }
 
