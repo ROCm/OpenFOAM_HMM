@@ -201,9 +201,21 @@ Foam::fileName::fileName(std::initializer_list<word> list)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::fileName::Type Foam::fileName::type(const bool followLink) const
+Foam::fileName::Type Foam::fileName::type
+(
+    bool followLink,
+    bool checkGzip
+) const
 {
-    return ::Foam::type(*this, followLink);
+    Type t = ::Foam::type(*this, followLink);
+
+    if (checkGzip && (Type::UNDEFINED == t) && size())
+    {
+        // Also check for gzip file?
+        t = ::Foam::type(*this + ".gz", followLink);
+    }
+
+    return t;
 }
 
 
