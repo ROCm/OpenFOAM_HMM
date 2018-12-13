@@ -1,4 +1,6 @@
-#include "listOptions.H"
+// Construct from (int argc, char* argv[]),
+// - use argList::argsMandatory() to decide on checking command arguments.
+// - check validity of the options
 
 Foam::argList args(argc, argv);
 if (!args.checkRootCase())
@@ -6,4 +8,10 @@ if (!args.checkRootCase())
     Foam::FatalError.exit();
 }
 
-#include "listOutput.H"
+// User can also perform checks on otherwise optional arguments.
+// Eg,
+//
+//  if (!args.check(true, false))
+//  {
+//      Foam::FatalError.exit();
+//  }

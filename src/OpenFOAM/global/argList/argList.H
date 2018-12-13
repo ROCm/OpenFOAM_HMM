@@ -122,7 +122,7 @@ class argList
 {
     // Private data
 
-        //- Track enabled/disabled mandatory arguments
+        //- Track if command arguments are mandatory/optional
         static bool argsMandatory_;
 
         //- Track enabled/disabled checking of processor directories state
@@ -242,11 +242,15 @@ public:
 
         //- Construct from argc and argv
         //- checking the arguments and options as requested.
+        //
+        //  By default, the argument check respects the value of
+        //  argsMandatory() to decide if the arguments should be checked
+        //  (when they are mandatory) or not (when they are optional)
         argList
         (
             int& argc,
             char**& argv,
-            bool checkArgs = true,
+            bool checkArgs = argList::argsMandatory(),
             bool checkOpts = true,
             bool initialise = true
         );
@@ -463,8 +467,11 @@ public:
         //- Remove option from validOptions and from optionUsage
         static void removeOption(const word& optName);
 
-        //- Flag command arguments as being non-mandatory
-        static void nonMandatoryArgs();
+        //- Flag command arguments as being optional (non-mandatory)
+        static void noMandatoryArgs();
+
+        //- Command arguments type (optional/mandatory).
+        static bool argsMandatory();
 
         //- Disable emitting the banner information.
         //  Adjusts the Foam::infoDetailLevel flag.
@@ -527,8 +534,17 @@ public:
 
     // Check
 
-        //- Check argument list
-        bool check(bool checkArgs=true, bool checkOpts=true) const;
+        //- Check the parsed command-line for mandatory arguments and
+        //- that all the options are correct.
+        //
+        //  By default, the argument check respects the value of
+        //  argsMandatory() to decide if the arguments should be checked
+        //  (when they are mandatory) or not (when they are optional)
+        bool check
+        (
+            bool checkArgs = argList::argsMandatory(),
+            bool checkOpts = true
+        ) const;
 
         //- Check root path and case path
         bool checkRootCase() const;

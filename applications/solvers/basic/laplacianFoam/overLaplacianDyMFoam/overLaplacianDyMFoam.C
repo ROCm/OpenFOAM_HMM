@@ -65,8 +65,7 @@ int main(int argc, char *argv[])
         "Overset Laplace equation solver for a scalar quantity."
     );
 
-    #include "setRootCase.H"
-
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createNamedDynamicFvMesh.H"
 

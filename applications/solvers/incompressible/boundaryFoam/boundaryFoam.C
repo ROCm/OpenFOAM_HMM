@@ -58,8 +58,7 @@ int main(int argc, char *argv[])
     argList::noParallel();
     #include "addCheckCaseOptions.H"
 
-    #include "setRootCase.H"
-
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFields.H"

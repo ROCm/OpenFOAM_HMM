@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
         "Passive scalar transport finiteArea equation solver."
     );
 
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFaMesh.H"

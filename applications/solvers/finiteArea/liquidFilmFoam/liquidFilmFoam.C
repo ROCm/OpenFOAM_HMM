@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
         " of Newtonian fluids in liquid film formulation."
     );
 
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFaMesh.H"

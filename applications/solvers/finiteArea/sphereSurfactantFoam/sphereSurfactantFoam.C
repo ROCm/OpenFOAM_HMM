@@ -46,10 +46,9 @@ int main(int argc, char *argv[])
         "Passive finiteArea scalar transport on a sphere"
     );
 
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
-
     #include "createFaMesh.H"
     #include "createFaFields.H"
     #include "createVolFields.H"

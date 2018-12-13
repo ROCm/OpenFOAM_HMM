@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
         "Execute functionObjects"
     );
 
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createNamedDynamicFvMesh.H"
 

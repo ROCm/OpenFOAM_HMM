@@ -68,9 +68,9 @@ int main(int argc, char *argv[])
     argList::addArgument("label");
     argList::addArgument("...");
     argList::addArgument("label");
-    argList::nonMandatoryArgs();
+    argList::noMandatoryArgs();
 
-    argList args(argc, argv, false, true);
+    argList args(argc, argv);
 
     Info<< "command-line ("
         << args.options().size() << " options, "

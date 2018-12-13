@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     #define CREATE_MESH createEngineMesh.H
     #include "postProcess.H"
 
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createEngineTime.H"
     #include "createEngineMesh.H"
     #include "createControl.H"

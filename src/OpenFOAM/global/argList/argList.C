@@ -373,9 +373,15 @@ void Foam::argList::removeOption(const word& optName)
 }
 
 
-void Foam::argList::nonMandatoryArgs()
+void Foam::argList::noMandatoryArgs()
 {
     argsMandatory_ = false;
+}
+
+
+bool Foam::argList::argsMandatory()
+{
+    return argsMandatory_;
 }
 
 
