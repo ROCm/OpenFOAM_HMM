@@ -224,7 +224,7 @@ namespace stringOps
     //  -# leading tag expansion for commonly used directories
     //    - <b> \<etc\>/ </b>
     //          : user/group/other OpenFOAM etc directory
-    //    - <b> \<etc:</b><em>[ugo]+</em>)<b>\>/ </b>
+    //    - <b> \<etc:</b><em>[ugoa]+</em>)<b>\>/ </b>
     //          : user/group/other etc with specified location mode
     //    - <b> \<case\>/ </b>
     //          : The \c $FOAM_CASE directory
@@ -263,7 +263,7 @@ namespace stringOps
     //      "~OpenFOAM" expansion
     //
     //  \sa
-    //  Foam::findEtcFile
+    //  Foam::findEtcEntry(), Foam::findEtcEntries(),
     string expand
     (
         const string& original,
@@ -280,7 +280,7 @@ namespace stringOps
     //  -# leading tag expansion for commonly used directories
     //    - <b> \<etc\>/ </b>
     //          : user/group/other OpenFOAM etc directory
-    //    - <b> \<etc:</b><em>[ugo]+</em>)<b>\>/ </b>
+    //    - <b> \<etc:</b><em>[ugoa]+</em>)<b>\>/ </b>
     //          : user/group/other etc with specified location mode
     //    - <b> \<case\>/ </b>
     //          : The \c $FOAM_CASE directory
@@ -312,7 +312,7 @@ namespace stringOps
     //      "~OpenFOAM" expansion
     //
     //  \sa
-    //  Foam::findEtcFile
+    //  Foam::findEtcEntry(), Foam::findEtcEntries(),
     void inplaceExpand
     (
         std::string& s,

@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
     argList::addOption
     (
         "templateDir",
-        "file",
+        "dir",
         "Read case set-up templates from specified location"
     );
 
@@ -238,25 +238,34 @@ int main(int argc, char *argv[])
         )
     );
 
+    // Template directory: default is from PROJECT/etc directory
+    //
+    // Can use
+    // - foamEtcDir("caseDicts/createZeroDirectory", 0007);
+    // - expand "<etc:o>/caseDicts/createZeroDirectory"
+    // - expand "${WM_PROJECT_DIR}/etc/caseDicts/createZeroDirectory"
+    //
+    // Use "${WM_PROJECT_DIR}/" version for nicer error message
+
     fileName baseDir
     (
         args.opt<fileName>
         (
             "templateDir",
-            // Default is from PROJECT/etc directory
-            "<etc:o>/caseDicts/createZeroDirectoryTemplates"
+            "${WM_PROJECT_DIR}/etc/caseDicts/createZeroDirectoryTemplates"
         )
     );
 
     baseDir.expand();
     baseDir.toAbsolute();
 
-    if (!isDir(baseDir))
+    if (!Foam::isDir(baseDir))
     {
         FatalErrorInFunction
-            << "templateDir " << baseDir
-            << " should point to the folder containing the "
-            << "case set-up templates" << exit(FatalError);
+            << "templateDir " << baseDir << nl
+            << "Does not point to a folder containing case set-up templates"
+            << nl
+            << exit(FatalError);
     }
 
     // Keep variable substitutions - delay until after creation of controlDict

@@ -42,7 +42,6 @@ namespace
 // - u : location mask 0700
 // - g : location mask 0070
 // - o : location mask 0007
-//
 static inline std::string locationToString(unsigned short location)
 {
     std::string mode;
@@ -53,6 +52,27 @@ static inline std::string locationToString(unsigned short location)
     if (mode.empty()) { mode = "???"; }
 
     return mode;
+}
+
+
+// Error handling when a mandatory entry is not found
+static inline void errorMandatoryNotFound
+(
+    const std::string& name,
+    unsigned short location
+)
+{
+    // Abort when mandatory entry was not found.
+    // Use a direct exit, since this could occur before anything is
+    // setup at all.
+
+    std::cerr
+        << "--> FOAM FATAL ERROR :\n    "
+        "Could not find mandatory etc entry (mode="
+        << locationToString(location) << ")\n    '"
+        << name << "'\n"
+        << std::endl;
+    ::exit(1);
 }
 
 
@@ -141,91 +161,32 @@ static inline bool projectResourceDir(Foam::fileName& queried)
 }
 
 
-Foam::fileNameList searchEtc
+// Check if the named file/directory matches the type required.
+//
+// - typeRequired (UNDEFINED)        => accept either FILE or DIRECTORY
+// - typeRequired (FILE | DIRECTORY) => accept only that type
+static inline bool accept
 (
     const Foam::fileName& name,
-    unsigned short location,
-    const bool findFirst,
-    bool (*accept)(const Foam::fileName&)
+    const Foam::fileName::Type typeRequired
 )
 {
-    // Use foamVersion::api (instead of the OPENFOAM define) to ensure this
-    // stays properly synchronized with the build information
-    const Foam::fileName version(std::to_string(Foam::foamVersion::api));
+    // followLink(true), checkGzip(true)
+    // -> returns (UNDEFINED | FILE | DIRECTORY), no need to check for (LINK)
+    const auto t = name.type(true, true);
 
-    Foam::fileNameList list;
-    Foam::fileName queried, candidate;
-
-    if (!(location & 0777))
-    {
-        // Warn about bad location (mode) ... or make it FATAL?
-        std::cerr
-            << "--> FOAM Error :\n    "
-            "No user/group/other location specified for 'etc' file"
-            " or directory\n    '"
-            << name.c_str() << "'\n\n" << std::endl;
-    }
-
-
-    // User resource directories
-    if ((location & 0700) && userResourceDir(queried))
-    {
-        candidate = queried/version/name;
-        if (accept(candidate))
-        {
-            list.append(std::move(candidate));
-            if (findFirst)
-            {
-                return list;
-            }
-        }
-
-        candidate = queried/name;
-        if (accept(candidate))
-        {
-            list.append(std::move(candidate));
-            if (findFirst)
-            {
-                return list;
-            }
-        }
-    }
-
-    // Group (site) resource directories
-    if ((location & 0070) && groupResourceDir(queried))
-    {
-        candidate = queried/version/name;
-        if (accept(candidate))
-        {
-            list.append(std::move(candidate));
-            if (findFirst)
-            {
-                return list;
-            }
-        }
-
-        candidate = queried/name;
-        if (accept(candidate))
-        {
-            list.append(std::move(candidate));
-            if (findFirst)
-            {
-                return list;
-            }
-        }
-    }
-
-    // Other (project) resource directory
-    if ((location & 0007) && projectResourceDir(queried))
-    {
-        candidate = queried/name;
-        if (accept(candidate))
-        {
-            list.append(std::move(candidate));
-        }
-    }
-
-    return list;
+    return
+    (
+        // Found something?
+        Foam::fileName::Type::UNDEFINED != t
+    &&
+        (
+            // Any particular type required?
+            Foam::fileName::Type::UNDEFINED == typeRequired
+          ? (Foam::fileName::Type::UNDEFINED != t)
+          : (typeRequired == t)
+        )
+    );
 }
 
 } // End anonymous namespace
@@ -269,21 +230,115 @@ Foam::fileNameList Foam::etcDirs(bool test)
 }
 
 
+Foam::fileNameList Foam::findEtcEntries
+(
+    const Foam::fileName& name,
+    unsigned short location,
+    const Foam::fileName::Type typeRequired,
+    const bool findFirst
+)
+{
+    // Debug Tracing
+    // std::cerr
+    //     << "search ("<< locationToString(location) << "): "
+    //     << name.c_str() << '\n';
+
+    if (!(location & 0777))
+    {
+        // Warn about bad location (mode) ... or make it FATAL?
+        std::cerr
+            << "--> FOAM Error :\n    "
+            "No user/group/other location specified for 'etc' file"
+            " or directory\n    '"
+            << name.c_str() << "'\n\n" << std::endl;
+    }
+
+    // Use foamVersion::api (instead of the OPENFOAM define) to ensure this
+    // stays properly synchronized with the build information
+    const Foam::fileName version(std::to_string(Foam::foamVersion::api));
+
+    Foam::fileNameList list;
+    Foam::fileName queried, candidate;
+
+    if (fileName::Type::FILE == typeRequired && name.empty())
+    {
+        // FILE must have a name to be found!
+        return list;
+    }
+
+
+    // User resource directories
+    if ((location & 0700) && userResourceDir(queried))
+    {
+        candidate = queried/version/name;
+        if (accept(candidate, typeRequired))
+        {
+            list.append(std::move(candidate));
+            if (findFirst)
+            {
+                return list;
+            }
+        }
+
+        candidate = queried/name;
+        if (accept(candidate, typeRequired))
+        {
+            list.append(std::move(candidate));
+            if (findFirst)
+            {
+                return list;
+            }
+        }
+    }
+
+
+    // Group (site) resource directories
+    if ((location & 0070) && groupResourceDir(queried))
+    {
+        candidate = queried/version/name;
+        if (accept(candidate, typeRequired))
+        {
+            list.append(std::move(candidate));
+            if (findFirst)
+            {
+                return list;
+            }
+        }
+
+        candidate = queried/name;
+        if (accept(candidate, typeRequired))
+        {
+            list.append(std::move(candidate));
+            if (findFirst)
+            {
+                return list;
+            }
+        }
+    }
+
+
+    // Other (project) resource directory
+    if ((location & 0007) && projectResourceDir(queried))
+    {
+        candidate = queried/name;
+        if (accept(candidate, typeRequired))
+        {
+            list.append(std::move(candidate));
+        }
+    }
+
+    return list;
+}
+
+
 Foam::fileNameList Foam::findEtcDirs
 (
     const fileName& name,
-    const bool findFirst,
-    unsigned short location
+    unsigned short location,
+    const bool findFirst
 )
 {
-    return
-        searchEtc
-        (
-            name,
-            location,
-            findFirst,
-            [](const fileName& f){ return Foam::isDir(f); }
-        );
+    return findEtcEntries(name, location, fileName::Type::DIRECTORY, findFirst);
 }
 
 
@@ -291,50 +346,34 @@ Foam::fileNameList Foam::findEtcFiles
 (
     const fileName& name,
     const bool mandatory,
-    const bool findFirst,
-    unsigned short location
+    unsigned short location,
+    const bool findFirst
 )
 {
-    fileNameList list;
-
-    if (name.size())
-    {
-        // A file must have a name!
-        list = searchEtc
-        (
-            name,
-            location,
-            findFirst,
-            [](const fileName& f){ return Foam::isFile(f); }
-        );
-    }
+    // Note: findEtcEntries checks name.size() for FILE
+    fileNameList list
+    (
+        findEtcEntries(name, location, fileName::Type::FILE, findFirst)
+    );
 
     if (mandatory && list.empty())
     {
-        // Abort if file is mandatory but not found.
-        // Use a direct exit, since this could occur before anything is
-        // setup at all.
-
-        std::cerr
-            << "--> FOAM FATAL ERROR :\n    "
-            "Could not find mandatory etc file (mode="
-            << locationToString(location) << ")\n    '"
-            << name.c_str() << "'\n"
-            << std::endl;
-        ::exit(1);
+        errorMandatoryNotFound(name, location);
     }
 
     return list;
 }
 
 
-Foam::fileName Foam::findEtcDir
+Foam::fileName Foam::findEtcEntry
 (
     const fileName& name,
-    unsigned short location
+    unsigned short location,
+    const Foam::fileName::Type typeRequired
 )
 {
-    fileNameList list(findEtcDirs(name, true, location));
+    // With findFirst(true)
+    fileNameList list(findEtcEntries(name, location, typeRequired, true));
 
     fileName found;
 
@@ -347,6 +386,16 @@ Foam::fileName Foam::findEtcDir
 }
 
 
+Foam::fileName Foam::findEtcDir
+(
+    const fileName& name,
+    unsigned short location
+)
+{
+    return findEtcEntry(name, location, fileName::Type::DIRECTORY);
+}
+
+
 Foam::fileName Foam::findEtcFile
 (
     const fileName& name,
@@ -354,13 +403,11 @@ Foam::fileName Foam::findEtcFile
     unsigned short location
 )
 {
-    fileNameList list(findEtcFiles(name, mandatory, true, location));
+    fileName found(findEtcEntry(name, location, fileName::Type::FILE));
 
-    fileName found;
-
-    if (list.size())
+    if (mandatory && found.empty())
     {
-        found = std::move(list.first());
+        errorMandatoryNotFound(name, location);
     }
 
     return found;

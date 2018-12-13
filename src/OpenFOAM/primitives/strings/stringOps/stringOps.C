@@ -42,6 +42,7 @@ namespace Foam
 // - u : location mask 0700
 // - g : location mask 0070
 // - o : location mask 0007
+// - a : location mask 0777
 //
 static inline unsigned short modeToLocation
 (
@@ -54,6 +55,7 @@ static inline unsigned short modeToLocation
     if (std::string::npos != mode.find('u', pos)) { where |= 0700; } // User
     if (std::string::npos != mode.find('g', pos)) { where |= 0070; } // Group
     if (std::string::npos != mode.find('o', pos)) { where |= 0007; } // Other
+    if (std::string::npos != mode.find('a', pos)) { where |= 0777; } // All
 
     return where;
 }
@@ -62,8 +64,8 @@ static inline unsigned short modeToLocation
 // Expand a leading <tag>/
 // Convenient for frequently used directories
 //
-//   <etc>/        => user/group/other etc - findEtcFile()
-//   <etc(:[ugo]+)?>/ => user/group/other etc - findEtcFile()
+//   <etc>/        => user/group/other etc - findEtcEntry()
+//   <etc(:[ugoa]+)?>/ => user/group/other etc - findEtcEntry()
 //   <case>/       => FOAM_CASE directory
 //   <constant>/   => FOAM_CASE/constant directory
 //   <system>/     => FOAM_CASE/system directory
@@ -102,7 +104,7 @@ static void expandLeadingTag(std::string& s, const char b, const char e)
 
     if (tag == "etc")
     {
-        s = findEtcFile(file);
+        s = findEtcEntry(file);
     }
     else if (tag == "case")
     {
@@ -114,9 +116,9 @@ static void expandLeadingTag(std::string& s, const char b, const char e)
     }
     else if (tagLen >= 4 && tag.compare(0, 4, "etc:") == 0)
     {
-        // <etc:ugo> type of tag - convert "ugo" to numeric
+        // <etc:[ugoa]+> type of tag - convert "ugo" to numeric
 
-        s = findEtcFile(file, false, modeToLocation(tag, 4));
+        s = findEtcEntry(file, modeToLocation(tag,4));
     }
 }
 

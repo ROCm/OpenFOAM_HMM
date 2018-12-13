@@ -52,30 +52,7 @@ namespace Foam
 fileNameList etcDirs(bool test=true);
 
 
-//- Search for directories from user/group/other directories.
-//  Uses search hierarchy as per findEtcFiles().
-//
-//  \return The list of full paths of all the matching directories or
-//      an empty list if the name cannot be found.
-fileNameList findEtcDirs
-(
-    const fileName& name,       //!< The directory to search for
-    const bool findFirst=false, //!< Stop after locating the first directory
-    unsigned short location=0777 //!< User/group/other location
-);
-
-
-//- Search for a single directory using findEtcDirs().
-//
-//  \return The full path name of the first directory found in the
-//      search hierarchy or an empty fileName if the name cannot be found.
-fileName findEtcDir
-(
-    const fileName& name,       //!< The directory to search for
-    unsigned short location=0777 //!< User/group/other location
-);
-
-//- Search for files from user/group/other directories.
+//- Search for files or directories from user/group/other etc locations.
 //
 //  The search hierarchy corresponds to that of the \c foamEtcFile script,
 //  which allows for version-specific and version-independent files.
@@ -90,29 +67,120 @@ fileName findEtcDir
 //    - $WM_PROJECT_DIR/etc/
 //
 //  Where {PROJECT_API} corresponds to the foamVersion::api value.
+//  When \c \$WM_PROJECT_SITE is unset, uses \c $WM_PROJECT_DIR/site
 //
-//  \note When \c \$WM_PROJECT_SITE is unset, uses \c $WM_PROJECT_DIR/site
+//  \param name The entry to search for. For a FILE search,
+//      this should be non-empty. For a DIRECTORY search or a general
+//      (UNDEFINED) search, this can be an empty string.
+//  \param location The search locations as a numerical mode.
+//      The default (0777) searches user/group/other locations.
+//  \param typeRequired restricts the search to the specified type.
+//      The default (UNDEFINED) accepts FILE or DIRECTORY entries.
+//  \param findFirst Optionally stop after locating the first entry.
+//
+//  \return The list of full paths of all the matching files or directories
+//      or an empty list if the name cannot be resolved.
+fileNameList findEtcEntries
+(
+    const fileName& name,
+    unsigned short location=0777,
+    const fileName::Type typeRequired = fileName::Type::UNDEFINED,
+    const bool findFirst=false
+);
+
+
+//- Search for directories from user/group/other etc locations.
+//  The search hierarchy corresponds to that of the \c foamEtcFile script,
+//  which allows for version-specific and version-independent files.
+//
+//  This function corresponds to using Foam::findEtcEntries()
+//  with (DIRECTORY) for the type required.
+//
+//  \param name The directory to search for. This can be an empty string.
+//  \param location The search locations as a numerical mode.
+//      The default (0777) searches user/group/other locations.
+//  \param findFirst Optionally stop after locating the first entry.
+//
+//  \return The list of full paths of all the matching directories or
+//      an empty list if the name cannot be found.
+fileNameList findEtcDirs
+(
+    const fileName& name,
+    unsigned short location=0777,
+    const bool findFirst=false
+);
+
+//- Search for files from user/group/other etc locations.
+//  The search hierarchy corresponds to that of the \c foamEtcFile script,
+//  which allows for version-specific and version-independent files.
+//
+//  This function corresponds to using Foam::findEtcEntries()
+//  with (FILE) for the type required, but has an additional
+//  check for mandatory files.
+//
+//  \param name The file to search for. If this is an empty string,
+//      nothing will be matched.
+//  \param mandatory Abort if the mandatory file cannot be found.
+//  \param location The search locations as a numerical mode.
+//      The default (0777) searches user/group/other locations.
+//  \param findFirst Optionally stop after locating the first entry.
 //
 //  \return The list of full paths of all the matching files or
 //      an empty list if the name cannot be found.
 fileNameList findEtcFiles
 (
-    const fileName& name,       //!< The file to search for
-    const bool mandatory=false, //!< Abort if the file cannot be found
-    const bool findFirst=false, //!< Stop after locating the first directory
-    unsigned short location=0777 //!< User/group/other location
+    const fileName& name,
+    const bool mandatory=false,
+    unsigned short location=0777,
+    const bool findFirst=false
 );
 
 
-//- Search for a single file using findEtcFiles().
+//- Search for a single FILE or DIRECTORY within the etc directories
+//
+//  \param name The entry to search for. For a FILE search,
+//      this should be non-empty. For a DIRECTORY search or a general
+//      (UNDEFINED) search, this can be an empty string.
+//  \param location The search locations as a numerical mode.
+//      The default (0777) searches user/group/other locations.
+//  \param typeRequired restricts the search to the specified type.
+//      The default (UNDEFINED) accepts FILE or DIRECTORY entries.
+//
+//  \return The full path name of the first entry found in the
+//      search hierarchy or an empty fileName if the name cannot be found.
+//
+//  \sa Foam::findEtcEntries()
+fileName findEtcEntry
+(
+    const fileName& name,
+    unsigned short location=0777,
+    const fileName::Type typeRequired = fileName::Type::UNDEFINED
+);
+
+
+//- Search for a single FILE within the etc directories
+//
+//  \return The full path name of the first directory found in the
+//      search hierarchy or an empty fileName if the name cannot be found.
+//
+//  \sa Foam::findEtcEntries(), Foam::findEtcDirs()
+fileName findEtcDir
+(
+    const fileName& name,           //!< The directory to search for
+    unsigned short location=0777    //!< User/group/other location
+);
+
+//- Search for a single FILE within the etc directories
 //
 //  \return The full path name of the first file found in the
 //      search hierarchy or an empty fileName if the name cannot be found.
+//
+//  \sa Foam::findEtcEntries(), Foam::findEtcFiles()
 fileName findEtcFile
 (
-    const fileName& name,       //!< The file to search for
-    const bool mandatory=false, //!< Abort if the file cannot be found
-    unsigned short location=0777 //!< User/group/other location
+    const fileName& name,           //!< The file to search for
+    const bool mandatory=false,     //!< Abort if the file cannot be found
+    unsigned short location=0777    //!< User/group/other location
 );
 
 
