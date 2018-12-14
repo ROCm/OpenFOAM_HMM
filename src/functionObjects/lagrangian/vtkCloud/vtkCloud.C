@@ -318,20 +318,14 @@ bool Foam::functionObjects::vtkCloud::writeCloud
     //     }
     // }
 
+    // Shorten file name to be case-local and use "<case>" shortcut
+    // to make the content relocatable
     dictionary propsDict;
-
-    // Use case-local filename and "<case>" shortcut for readable output
-    // and for possibly relocation of files
-
-    fileName fName(file.relative(time_.globalPath()));
-    if (fName.isAbsolute())
-    {
-        propsDict.add("file", fName);
-    }
-    else
-    {
-        propsDict.add("file", "<case>"/fName);
-    }
+    propsDict.add
+    (
+        "file",
+        file.relative(time_.globalPath(), true)
+    );
     propsDict.add("fields", written);
 
     setObjectProperty(name(), cloudName, propsDict);
