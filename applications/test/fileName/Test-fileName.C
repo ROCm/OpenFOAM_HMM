@@ -204,11 +204,10 @@ unsigned testRelative(std::initializer_list<Pair<std::string>> tests)
         const std::string& dir    = test.first();
         const std::string& parent = test.second();
 
-        fileName relative = fileName(dir).relative(parent);
-
         Info<< "directory: " << dir << nl
             << "parent   : " << parent << nl
-            << "relative = " << relative << nl
+            << "relative = " << fileName(dir).relative(parent) << nl
+            << "case-rel = " << fileName(dir).relative(parent, true) << nl
             << endl;
     }
 
@@ -537,12 +536,17 @@ int main(int argc, char *argv[])
         nFail += testRelative
         (
             {
+                { "",  "" },
+                { "",  "/" },
+                { "",  "/some" },
+
                 { "/some/dir/subdir/name",  "" },
                 { "/some/dir/subdir/name",  "/" },
                 { "/some/dir/subdir/name",  "/some" },
                 { "/some/dir/subdir/name",  "/some/" },
                 { "/some/dir/subdir/name",  "/some/dir" },
                 { "/some/dir/subdir/name",  "/some/dir/" },
+                { "/some/dir/subdir/name",  "/some/dir/subdir" },
                 { "/some/dir/subdir/name",  "/some/dir/subdir/name" },
                 { "/some/dir/subdir/name",  "/some/dir/subdir/name/" },
                 { "/some/dir/subdir/name",  "/some/other" },
@@ -554,6 +558,7 @@ int main(int argc, char *argv[])
                 { "/some/dir/subdir/a",  "/some/" },
                 { "/some/dir/subdir/a",  "/some/dir" },
                 { "/some/dir/subdir/a",  "/some/dir/" },
+                { "/some/dir/subdir/a",  "/some/dir/subdir" },
                 { "/some/dir/subdir/a",  "/some/dir/subdir/a" },
                 { "/some/dir/subdir/a",  "/some/dir/subdir/a/" },
                 { "/some/dir/subdir/a",  "/some/other" },
@@ -565,6 +570,7 @@ int main(int argc, char *argv[])
                 { "/some/dir/subdir/a/",  "/some/" },
                 { "/some/dir/subdir/a/",  "/some/dir" },
                 { "/some/dir/subdir/a/",  "/some/dir/" },
+                { "/some/dir/subdir/a/",  "/some/dir/subdir/" },
                 { "/some/dir/subdir/a/",  "/some/dir/subdir/a" },
                 { "/some/dir/subdir/a/",  "/some/dir/subdir/a/" },
                 { "/some/dir/subdir/a/",  "/some/other" },

@@ -364,19 +364,37 @@ std::string Foam::fileName::nameLessExt(const std::string& str)
 }
 
 
-Foam::fileName Foam::fileName::relative(const fileName& parent) const
+Foam::fileName Foam::fileName::relative
+(
+    const fileName& parent,
+    const bool caseRelative
+) const
 {
     const auto top = parent.size();
     const fileName& f = *this;
 
-    // Everything after "parent/xxx" -> "xxx"
+    // Everything after "parent/xxx/yyy" -> "xxx/yyy"
+    //
+    // case-relative:
+    //     "parent/xxx/yyy" -> "<case>/xxx/yyy"
     if
     (
-        top && (f.size() > (top+1)) && (*this)[top] == '/'
+        top && (f.size() > (top+1)) && f[top] == '/'
      && f.startsWith(parent)
     )
     {
-        return f.substr(top+1);
+        if (caseRelative)
+        {
+            return "<case>"/f.substr(top+1);
+        }
+        else
+        {
+            return f.substr(top+1);
+        }
+    }
+    else if (caseRelative && f.size() && !f.isAbsolute())
+    {
+        return "<case>"/f;
     }
 
     return f;

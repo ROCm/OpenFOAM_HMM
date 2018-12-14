@@ -290,8 +290,18 @@ public:
         //- Remove leading path, returning true if string changed.
         inline bool removePath();
 
-        //- Return name after stripping off the parent directory
-        fileName relative(const fileName& parent) const;
+        //- Return a relative name by stripping off the parent directory
+        //- where possible.
+        //
+        //  \param parent the parent directory
+        //  \param caseRelative replace the parent with \<case\> for later
+        //      use with expand(), or prefix \<case\> if the file name was
+        //      not an absolute location
+        fileName relative
+        (
+            const fileName& parent,
+            const bool caseRelative = false
+        ) const;
 
         //- Return file name without extension (part before last .)
         inline fileName lessExt() const;
