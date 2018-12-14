@@ -36,6 +36,14 @@ Description
     \verbatim
     acousticDampingSourceCoeffs
     {
+        timeStart        0.004;
+        duration         1000.0;
+        selectionMode    all;
+        origin           (-1.25 0 0);
+        radius1          1.2;
+        radius2          1.65;
+        frequency        3000;
+        URef             UMean;
     }
     \endverbatim
 
