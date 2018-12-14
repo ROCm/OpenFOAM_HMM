@@ -1,0 +1,117 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1806                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+postPro1
+{
+    type            runTimePostProcessing;
+    libs            ("librunTimePostProcessing.so");
+    writeControl    writeTime;
+    output
+    {
+        name        image;
+        width       800;
+        height      600;
+    }
+    camera
+    {
+        // If camera is moving, optionally provide start and end times
+        // startPosition    0.2;
+        // endPosition      0.75;
+
+        // Total number of frames to generate
+        nFrameTotal     1;
+
+        // Parallel projection flag
+        parallelProjection  yes;
+
+        clipBox         (-0.2 -0.2 0)(1.65 0.2 1.25); // optional
+
+        position        (-2.28 1.28 2.24);
+        focalPoint      (0.003 0.008 0.024);
+        up              (0.26 0.930 -0.266);
+        zoom    1.25;
+    }
+
+    // Default colours
+    // - If select to colourBy colour, these values are used unless
+    // they are locally overridden
+    colours
+    {
+        background      (0.317647 0.341176 0.431373);
+        background2     ${background};
+        text            (0 0 0);
+        edge            (1 0 0);
+        surface         (0.5 0.5 0.5);
+        line            (1 0 0);
+    }
+
+    lines
+    {
+    }
+
+
+    _plane
+    {
+        type            functionObjectSurface;
+        functionObject  cuttingPlane;
+        colourMap       blueWhiteRed;
+        representation  glyph;
+        maxGlyphLength  0.1;
+        visible         yes;
+        featureEdges    no;
+        colourBy        field;
+        field           U;
+        range           (0 10);
+        opacity         1;
+        scalarBar
+        {
+            visible     no;
+        }
+    }
+
+
+    surfaces
+    {
+        plane0
+        {
+            ${_plane};
+            functionObject  plane0;
+        }
+        plane1
+        {
+            ${_plane};
+            functionObject  plane1;
+        }
+        plane2
+        {
+            ${_plane};
+            functionObject  plane2;
+        }
+        plane3
+        {
+            ${_plane};
+            functionObject  plane3;
+        }
+    }
+
+    // Text data
+    text
+    {
+        text1
+        {
+            string          "elipsekkLOmega";
+            position        (0.1 0.05);
+            size            24;
+            bold            no;
+            visible         yes;
+        }
+    }
+}
+
+
+// ************************************************************************* //
