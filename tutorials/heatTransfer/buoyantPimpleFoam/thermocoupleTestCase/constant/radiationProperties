@@ -23,8 +23,8 @@ fvDOMCoeffs
 {
     nPhi        3;
     nTheta      5;
-    convergence 1e-3;
     maxIter     10;
+    tolerance   1e-3;
 }
 
 // Number of flow iterations per radiation iteration

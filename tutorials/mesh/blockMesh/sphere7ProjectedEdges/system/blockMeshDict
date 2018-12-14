@@ -21,14 +21,14 @@ geometry
     sphere
     {
         type   sphere;
-        centre (0 0 0);
+        origin (0 0 0);
         radius 1;
     }
 
     innerSphere
     {
         type   sphere;
-        centre (0 0 0);
+        origin (0 0 0);
         radius 0.5;
     }
 }
