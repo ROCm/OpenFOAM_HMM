@@ -124,4 +124,31 @@ cmakeVersionedInstall()
 }
 
 
+# wmake with tracking of external dependency as per cmakeVersioned
+# - use sentinel file(s) to handle paraview/vtk version changes
+#
+# 1 - depend
+# 2 - sourceDir
+# 3... wmake arguments
+#
+wmakeVersioned()
+{
+    local depend="$1"
+    local sourceDir="$2"
+    shift 2
+    local objectsDir sentinel
+
+    # Where generated files are stored
+    objectsDir=$(findObjectDir "$sourceDir") || exit 1 # Fatal
+
+    # Version changed
+    sentinel=$(sameDependency "$depend" "$sourceDir") || \
+        rm -rf "$objectsDir" > /dev/null 2>&1
+
+    mkdir -p "$objectsDir" \
+    && wmake "$@" \
+    && echo "$depend" >| "${sentinel:-/dev/null}"
+}
+
+
 #------------------------------------------------------------------------------
