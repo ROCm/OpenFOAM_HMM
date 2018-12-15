@@ -27,8 +27,8 @@ License
 #include "surfaceReader.H"
 #include "surfaceWriter.H"
 #include "noiseFFT.H"
+#include "argList.H"
 #include "graph.H"
-#include "stringOps.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -465,8 +465,7 @@ void surfaceNoise::calculate()
 
         if (!fName.isAbsolute())
         {
-            // ie, globalPath() / name
-            fName = stringOps::expand("<case>")/fName;
+            fName = argList::envGlobalPath()/fName;
         }
 
         initialise(fName);

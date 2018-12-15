@@ -272,6 +272,18 @@ public:
 
     // Member Functions
 
+    // Environment
+
+        //- Global case (directory) from environment variable
+        //
+        //  Returns the contents of the \c FOAM_CASE variable,
+        //  which has previously been set by argList or by Time.
+        //
+        //  This will normally be identical to the value of globalPath(),
+        //  but obtained via the environment.
+        static fileName envGlobalPath();
+
+
     // Low-level
 
         //- Scan for -help, -doc options etc prior to checking the validity

@@ -25,7 +25,7 @@ License
 
 #include "pointNoise.H"
 #include "noiseFFT.H"
-#include "stringOps.H"
+#include "argList.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -244,8 +244,7 @@ void pointNoise::calculate()
 
         if (!fName.isAbsolute())
         {
-            // ie, globalPath() / name
-            fName = stringOps::expand("<case>")/fName;
+            fName = argList::envGlobalPath()/fName;
         }
 
         Function1Types::CSV<scalar> data("pressure", dict_, fName);
