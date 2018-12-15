@@ -7,10 +7,22 @@ runApplication blockMesh
 #runApplication -s 1 topoSet -dict system/topoSetDictRefine
 #runApplication -s 1 refineMesh -overwrite -dict system/refineMeshDict
 runApplication -s 1 topoSet -dict system/topoSetDictRefine
-runApplication -s 1 refineMesh -overwrite -dict system/refineMeshDict
+runApplication -s 1 refineMesh -overwrite -dict system/refineMeshDict.2
 
 runApplication -s 2 topoSet -dict system/topoSetDictRefine
-runApplication -s 2 refineMesh -overwrite -dict system/refineMeshDict
+runApplication -s 2 refineMesh -overwrite -dict system/refineMeshDict.2
+
+runApplication -s 0 topoSet -dict system/topoSetDictRefine.2
+runApplication -s 0 refineMesh -overwrite -dict system/refineMeshDict.2
+
+runApplication -s 6 topoSet -dict system/topoSetDictRefine.2
+runApplication -s 6 refineMesh -overwrite -dict system/refineMeshDict.2
+
+runApplication -s 7 topoSet -dict system/topoSetDictRefine.3
+runApplication -s 7 refineMesh -overwrite -dict system/refineMeshDict.2
+
+runApplication -s 8 topoSet -dict system/topoSetDictRefine.4
+runApplication -s 8 refineMesh -overwrite -dict system/refineMeshDict.2
 
 # Select cellSets
 runApplication -s 3 topoSet -dict system/topoSetDictHull

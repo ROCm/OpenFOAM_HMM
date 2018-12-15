@@ -60,7 +60,7 @@ actions
         source  boxToCell;
         boxes
         (
-            (0.05 -0.082 -0.1)(0.52 0.052 0.1) //hullBox
+            (0.06 -0.082 -0.1)(0.52 0.052 0.1) //hullBox
         );
     }
 

@@ -24,7 +24,7 @@ solvers
 
         tolerance       1e-06;
         relTol          0;
-        maxIter         100;
+        maxIter         300;
     }
 
     "alpha.water.*"
@@ -83,7 +83,7 @@ solvers
 
 PIMPLE
 {
-    momentumPredictor   no;//yes;
+    momentumPredictor   yes;
     nOuterCorrectors    2;
     nCorrectors         2;
     nNonOrthogonalCorrectors 0;

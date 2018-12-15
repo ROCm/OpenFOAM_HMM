@@ -10,29 +10,28 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      topoSetDict;
+    location    "system";
+    object      refineMeshDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-actions
-(
-    {
-        name    refineSet;       // all around bgr
-        type    cellSet;
-        action  new;
-        source  zoneToCell;
-        zone    background;
-    }
-    {
-        name    refineSet;
-        type    cellSet;
-        action  subset;
-        source  boxToCell;
-        boxes
-        (
-            (-0.2 -0.2 -0.2)(0.05 0.2 0.2) //hullBox
-        );
-    }
-);
+set             refineSet;
+
+coordinateSystem global;
+
+globalCoeffs
+{
+    tan1            (1 0 0);
+    tan2            (0 1 0);
+}
+
+directions      ( tan1 tan2 normal);
+
+useHexTopology  no;
+
+geometricCut    yes;
+
+writeMesh       no;
+
 
 // ************************************************************************* //

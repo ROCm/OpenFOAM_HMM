@@ -28,11 +28,11 @@ motionSolver        rigidBodyMotion;
     solver
     {
         type Newmark;
-        gamma   0.1;    // Velocity integration coefficient
-        beta    0.1;    // Position integration coefficient
+        //gamma   0.1;    // Velocity integration coefficient
+        //beta    0.1;    // Position integration coefficient
     }
 
-    accelerationRelaxation 1.0;
+    accelerationRelaxation 0.9;
 
     //- prescribedRotation requires some sub-iterations to converge faster
     //  to desired value.
