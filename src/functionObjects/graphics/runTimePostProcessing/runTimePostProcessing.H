@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,15 +119,11 @@ private:
         PtrList<runTimePostPro::text> text_;
 
 
-        // Private Member Functions
+    // Private Member Functions
 
-            //- Helper function to read scene objects
-            template<class Type>
-            void readObjects
-            (
-                const dictionary& dict,
-                PtrList<Type>& objects
-            ) const;
+        //- Helper function to read scene objects
+        template<class Type>
+        void readObjects(const dictionary& dict, PtrList<Type>& objects) const;
 
 
 public:
@@ -143,12 +139,12 @@ public:
         (
             const word& name,
             const Time& runTime,
-            const dictionary&dict
+            const dictionary& dict
         );
 
 
     //- Destructor
-    virtual ~runTimePostProcessing();
+    virtual ~runTimePostProcessing() = default;
 
 
     // Member Functions
@@ -158,8 +154,8 @@ public:
             return mesh_;
         }
 
-        //- Read the field min/max data
-        virtual bool read(const dictionary&);
+        //- Read the post-processing controls
+        virtual bool read(const dictionary& dict);
 
         //- Execute, currently does nothing
         virtual bool execute();

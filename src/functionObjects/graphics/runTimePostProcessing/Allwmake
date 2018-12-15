@@ -6,9 +6,9 @@ cd ${0%/*} || exit 1                            # Run from this directory
 
 echo "======================================================================"
 echo "${PWD##*/} : $PWD"
-echo
 
 unset depend
+
 if [ -d "$VTK_DIR" ]
 then
     depend="VTK_DIR=$VTK_DIR"
@@ -17,25 +17,36 @@ then
     depend="ParaView_DIR=$ParaView_DIR"
 fi
 
-if [ -n "$depend" ]
+# Or force use of dummy only
+# unset depend
+
+if [ "$targetType" = objects ]
 then
-    if [ "$targetType" != objects ]
+    depend=ignore
+elif [ -n "$depend" ]
+then
+    if command -v cmake > /dev/null 2>&1
     then
-        if command -v cmake > /dev/null 2>&1
-        then
-            cmakeVersioned "$depend" $PWD || {
-                echo
-                echo "    WARNING: incomplete build of VTK-based post-processing"
-                echo
-            }
-        else
-            echo "WARNING: skipped - needs cmake"
-        fi
+        cmakeVersioned "$depend" $PWD || {
+            echo
+            echo "    WARNING: incomplete build of VTK-based post-processing"
+            echo
+            depend="dummy"
+        }
+    else
+        echo "==> skip runTimePostProcessing (needs cmake)"
+        depend="dummy"
     fi
 else
-    echo "WARNING: skipped - needs a VTK or a ParaView installation"
-    echo "    - For ParaView  : export the 'ParaView_DIR' variable"
-    echo "    - For VTK       : export the 'VTK_DIR'      variable"
+    echo "WARNING: skip runTimePostProcessing (no VTK or ParaView)"
+    echo "    - ParaView  : export the 'ParaView_DIR' variable"
+    echo "    - VTK       : export the 'VTK_DIR'      variable"
+fi
+
+if [ "${depend:-dummy}" = dummy ]
+then
+    echo "==> dummy runTimePostProcessing"
+    wmakeVersioned "vtk=dummy" $PWD dummy
 fi
 
 echo "======================================================================"
