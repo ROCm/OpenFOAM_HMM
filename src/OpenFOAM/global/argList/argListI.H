@@ -87,6 +87,16 @@ inline Foam::fileName Foam::argList::globalPath() const
 }
 
 
+inline Foam::fileName Foam::argList::relativePath
+(
+    const fileName& input,
+    const bool caseTag
+) const
+{
+    return input.relative(globalPath(), caseTag);
+}
+
+
 inline bool Foam::argList::distributed() const
 {
     return parRunControl_.distributed();

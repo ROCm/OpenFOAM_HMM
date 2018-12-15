@@ -786,7 +786,7 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
         propsDict.add
         (
             "file",
-            scalarVtkFile.relative(time_.globalPath(), true)
+            time_.relativePath(scalarVtkFile, true)
         );
         setProperty(fieldName, propsDict);
     }
@@ -798,7 +798,7 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
         propsDict.add
         (
             "file",
-            vectorVtkFile.relative(time_.globalPath(), true)
+            time_.relativePath(vectorVtkFile, true)
         );
         setProperty(fieldName, propsDict);
     }

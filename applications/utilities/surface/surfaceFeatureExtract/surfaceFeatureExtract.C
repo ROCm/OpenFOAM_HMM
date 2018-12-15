@@ -693,8 +693,7 @@ int main(int argc, char *argv[])
                 vtkWriter->writeGeometry();
 
                 Info<< "Writing VTK to "
-                    << ((vtkOutputDir/outputName).ext(vtkWriter->ext()))
-                    .relative(runTime.globalPath()) << nl;
+                    << runTime.relativePath(vtkWriter->output()) << nl;
             }
         }
         else

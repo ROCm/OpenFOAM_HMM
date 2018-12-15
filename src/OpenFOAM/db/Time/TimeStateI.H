@@ -25,7 +25,6 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
 inline Foam::scalar Foam::TimeState::timeOutputValue() const
 {
     return timeToUserTime(value());

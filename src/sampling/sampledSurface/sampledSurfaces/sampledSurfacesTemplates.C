@@ -95,14 +95,13 @@ void Foam::sampledSurfaces::writeSurface
         Pstream::scatter(sampleFile);
         if (sampleFile.size())
         {
-            // Shorten file name to be case-local and use "<case>" shortcut
-            // to make the content relocatable
+            // Case-local file name with "<case>" to make relocatable
 
             dictionary propsDict;
             propsDict.add
             (
                 "file",
-                sampleFile.relative(time_.globalPath(), true)
+                time_.relativePath(sampleFile, true)
             );
             setProperty(fieldName, propsDict);
         }
@@ -123,14 +122,13 @@ void Foam::sampledSurfaces::writeSurface
                 s.interpolate()
             );
 
-            // Case-local filename and "<case>" shortcut for readable output
-            // and for possibly relocation of files
+            // Case-local file name with "<case>" to make relocatable
 
             dictionary propsDict;
             propsDict.add
             (
                 "file",
-                fName.relative(time_.globalPath(), true)
+                time_.relativePath(fName, true)
             );
             setProperty(fieldName, propsDict);
         }
