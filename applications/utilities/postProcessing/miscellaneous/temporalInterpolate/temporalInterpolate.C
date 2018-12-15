@@ -234,16 +234,13 @@ int main(int argc, char *argv[])
     }
 
 
-    int divisions = 1;
-    args.readIfPresent("divisions", divisions);
+    const int divisions = args.opt<int>("divisions", 1);
     Info<< "Using " << divisions << " per time interval" << nl << endl;
 
 
-    const word interpolationType = args.lookupOrDefault<word>
-    (
-        "interpolationType",
-        "linear"
-    );
+    const word interpolationType =
+        args.opt<word>("interpolationType", "linear");
+
     Info<< "Using interpolation " << interpolationType << nl << endl;
 
 

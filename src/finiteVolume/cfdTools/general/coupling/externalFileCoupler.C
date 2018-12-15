@@ -40,10 +40,11 @@ namespace Foam
 Foam::word Foam::externalFileCoupler::lockName = "OpenFOAM";
 
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
 namespace Foam
 {
 
-// file-scope
 // Read file contents and return a stop control as follows:
 // - contains "done" (should actually be status=done, but we are generous) :
 //   The master (OpenFOAM) has signalled that it is done. Report as <endTime>
@@ -85,6 +86,7 @@ static enum Time::stopAtControls getStopAction(const std::string& filename)
 }
 
 } // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

@@ -84,8 +84,7 @@ int main(int argc, char *argv[])
     instantList times = timeSelector::selectIfPresent(runTime, args);
 
     // Allow override of decomposeParDict location
-    fileName decompDictFile;
-    args.readIfPresent("decomposeParDict", decompDictFile);
+    const fileName decompDictFile = args.opt<fileName>("decomposeParDict", "");
 
     wordList regionNames;
     wordList regionDirs;

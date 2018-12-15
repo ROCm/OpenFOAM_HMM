@@ -77,9 +77,9 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::addArgument("surfaceFile");
-    argList::addArgument("reductionFactor");
-    argList::addArgument("output surfaceFile");
+    argList::addArgument("input", "The input surface file");
+    argList::addArgument("factor", "The reduction factor [0,1)");
+    argList::addArgument("output", "The output surface file");
     argList::addOption
     (
         "scale",
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    const scalar scaleFactor = args.lookupOrDefault<scalar>("scale", -1);
+    const scalar scaleFactor = args.opt<scalar>("scale", -1);
 
     Info<< "Input surface   :" << inFileName << nl
         << "Scaling factor  :" << scaleFactor << nl

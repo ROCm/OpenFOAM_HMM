@@ -60,7 +60,8 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::addArgument("surfaceFile");
+    argList::addArgument("input", "The input surface file");
+
     argList::addBoolOption
     (
         "shellProperties",
@@ -85,7 +86,7 @@ int main(int argc, char *argv[])
     argList args(argc, argv);
 
     const fileName surfFileName = args[1];
-    const scalar density = args.lookupOrDefault<scalar>("density", 1);
+    const scalar density = args.opt<scalar>("density", 1);
 
     vector refPt = Zero;
     bool calcAroundRefPt = args.readIfPresent("referencePoint", refPt);

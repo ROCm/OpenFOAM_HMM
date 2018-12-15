@@ -132,6 +132,11 @@ int main(int argc, char *argv[])
         " the internalMesh and for each patch."
     );
     timeSelector::addOptions();
+
+    // Less frequently used - reduce some clutter
+    argList::setAdvanced("decomposeParDict");
+    argList::setAdvanced("noFunctionObjects");
+
     #include "addRegionOption.H"
 
     argList::addBoolOption
@@ -237,7 +242,7 @@ int main(int argc, char *argv[])
     ensightCase::options caseOpts(format);
 
     caseOpts.nodeValues(args.found("nodeValues"));
-    caseOpts.width(args.lookupOrDefault<label>("width", 8));
+    caseOpts.width(args.opt<label>("width", 8));
     caseOpts.overwrite(true); // remove existing output directory
 
     // Can also have separate directory for lagrangian
@@ -247,7 +252,7 @@ int main(int argc, char *argv[])
     // Define sub-directory name to use for EnSight data.
     // The path to the ensight directory is at case level only
     // - For parallel cases, data only written from master
-    fileName outputDir = args.lookupOrDefault<word>("name", "EnSight");
+    fileName outputDir = args.opt<word>("name", "EnSight");
     if (!outputDir.isAbsolute())
     {
         outputDir = args.globalPath()/outputDir;

@@ -56,9 +56,9 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::addArgument("surfaceFile");
-    argList::addArgument("surfaceFile");
-    argList::addArgument("output surfaceFile");
+    argList::addArgument("surface1", "The input surface file 1");
+    argList::addArgument("surface2", "The input surface file 2");
+    argList::addArgument("output", "The output surface file");
 
     argList::addOption
     (
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
     const bool addPoint     = args.found("points");
     const bool mergeRegions = args.found("mergeRegions");
 
-    const scalar scaleFactor = args.lookupOrDefault<scalar>("scale", -1);
+    const scalar scaleFactor = args.opt<scalar>("scale", -1);
 
     if (addPoint)
     {

@@ -205,7 +205,7 @@ do
     -config)
         optConfig=true
         ;;
-    -mode=[ugo]*)
+    -mode=[ugoa]*)
         optMode="${1#*=}"
         ;;
     -m | -mode)
@@ -213,7 +213,7 @@ do
         shift
         # Sanity check. Handles missing argument too.
         case "$optMode" in
-        ([ugo]*)
+        ([ugoa]*)
             ;;
         (*)
             die "invalid mode '$optMode'"
@@ -290,17 +290,17 @@ fi
 
 # Define the various places to be searched:
 unset dirList
-case "$optMode" in (*u*) # (U)ser
+case "$optMode" in (*[au]*) # (A)ll or (U)ser
     dirList="$dirList $userDir/$projectApi $userDir"
     ;;
 esac
 
-case "$optMode" in (*g*) # (G)roup == site
+case "$optMode" in (*[ag]*) # (A)ll or (G)roup == site
     dirList="$dirList $groupDir/$projectApi/etc $groupDir/etc"
     ;;
 esac
 
-case "$optMode" in (*o*) # (O)ther == shipped
+case "$optMode" in (*[ao]*) # (A)ll or (O)ther == shipped
     dirList="$dirList $projectDir/etc"
     ;;
 esac

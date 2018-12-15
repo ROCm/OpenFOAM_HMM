@@ -1,3 +1,9 @@
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Declare some "standard" list options
+
+#ifndef setRootCaseListOptions_H
+#define setRootCaseListOptions_H
+
 argList::addBoolOption
 (
     "listSwitches",
@@ -58,3 +64,10 @@ argList::addBoolOption
     true // advanced
 );
 #endif
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //

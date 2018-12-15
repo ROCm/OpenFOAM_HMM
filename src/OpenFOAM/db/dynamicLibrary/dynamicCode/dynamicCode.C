@@ -31,6 +31,7 @@ License
 #include "OSspecific.H"
 #include "etcFiles.H"
 #include "dictionary.H"
+#include "foamVersion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -81,7 +82,7 @@ void Foam::dynamicCode::checkSecurity
             << "    allowSystemOperations 1" << nl << nl
             << "to the InfoSwitches setting in the system controlDict." << nl
             << "The system controlDict is any of" << nl << nl
-            << "    ~/.OpenFOAM/" << OPENFOAM << "/controlDict" << nl
+            << "    ~/.OpenFOAM/" << foamVersion::api << "/controlDict" << nl
             << "    ~/.OpenFOAM/controlDict" << nl
             << "    $WM_PROJECT_DIR/etc/controlDict" << nl << endl
             << exit(FatalIOError);

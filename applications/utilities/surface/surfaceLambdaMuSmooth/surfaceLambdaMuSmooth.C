@@ -140,11 +140,12 @@ int main(int argc, char *argv[])
 
     argList::noParallel();
     argList::validOptions.clear();
-    argList::addArgument("surfaceFile");
-    argList::addArgument("lambda (0..1)");
-    argList::addArgument("mu (0..1)");
-    argList::addArgument("iterations");
-    argList::addArgument("output surfaceFile");
+    argList::addArgument("input", "The input surface file");
+    argList::addArgument("lambda", "On the interval [0,1]");
+    argList::addArgument("mu", "On the interval [0,1]");
+    argList::addArgument("iterations", "The number of iterations to perform");
+    argList::addArgument("output", "The output surface file");
+
     argList::addOption
     (
         "featureFile",

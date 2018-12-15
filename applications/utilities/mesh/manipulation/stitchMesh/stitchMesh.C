@@ -144,11 +144,20 @@ int main(int argc, char *argv[])
         "Dictionary file with tolerances"
     );
 
-    // The arguments are non-mandatory when using dictionary mode
-    argList::addArgument("masterPatch");
-    argList::addArgument("slavePatch");
+    // The arguments are optional (non-mandatory) when using dictionary mode
+    argList::noMandatoryArgs();
+    argList::addArgument
+    (
+        "master",
+        "The master patch name (non-dictionary mode)"
+    );
+    argList::addArgument
+    (
+        "slave",
+        "The slave patch name (non-dictionary mode)"
+    );
 
-    #include "setRootCaseNonMandatoryArgs.H"
+    #include "setRootCase.H"
 
     // We now handle checking args and general sanity etc.
     const bool useCommandArgs = (args.size() > 1);

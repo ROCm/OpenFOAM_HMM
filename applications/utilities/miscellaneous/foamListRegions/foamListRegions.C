@@ -60,10 +60,11 @@ int main(int argc, char *argv[])
     argList::noFunctionObjects();  // Never use function objects
     // No profiling since there is no time loop
 
-    // Non-mandatory arguments
+    // Arguments are optional (non-mandatory)
+    argList::noMandatoryArgs();
     argList::addArgument("regionType ... regionType");
 
-    #include "setRootCaseNonMandatoryArgs.H"
+    #include "setRootCase.H"
 
     // As per "createTime.H", but quieter.
     Time runTime(Time::controlDictName, args);

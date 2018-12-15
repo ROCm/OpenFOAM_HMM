@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
         "With optional mesh motion and mesh topology changes."
     );
 
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
     #include "createDyMControls.H"

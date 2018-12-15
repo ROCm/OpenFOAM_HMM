@@ -323,7 +323,8 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::addArgument("surfaceFile");
+    argList::addArgument("input", "The input surface file");
+
     argList::addBoolOption
     (
         "checkSelfIntersection",
@@ -365,9 +366,9 @@ int main(int argc, char *argv[])
     const fileName surfFileName = args[1];
     const bool checkSelfIntersect = args.found("checkSelfIntersection");
     const bool splitNonManifold = args.found("splitNonManifold");
-    const label outputThreshold = args.lookupOrDefault("outputThreshold", 10);
-    word surfaceFormat;
-    const bool writeSets = args.readIfPresent("writeSets", surfaceFormat);
+    const label outputThreshold = args.opt<label>("outputThreshold", 10);
+    const word surfaceFormat = args.opt<word>("writeSets", "");
+    const bool writeSets = !surfaceFormat.empty();
 
     autoPtr<surfaceWriter> surfWriter;
     word edgeFormat;

@@ -23,10 +23,9 @@ structuredCoeffs
     method      simple;
     patches     (region0_to_panelRegion_wallPanel region0_to_panelRegion_internalWallPanel_top region0_to_panelRegion_internalWallPanel_bottom);
 
-    simpleCoeffs
+    coeffs
     {
-         n           (5 1 4);
-         delta       0.001;
+        n       (2 1 4);
     }
 }
 

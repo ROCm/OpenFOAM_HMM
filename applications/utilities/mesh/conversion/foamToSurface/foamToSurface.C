@@ -61,7 +61,8 @@ int main(int argc, char *argv[])
         "Extract boundaries from an OpenFOAM mesh and write in a surface format"
     );
     argList::noParallel();
-    argList::addArgument("outputFile.ext");
+    argList::addArgument("output", "The output surface file");
+
     timeSelector::addOptions();
 
     argList::addOption
@@ -80,8 +81,7 @@ int main(int argc, char *argv[])
 
     fileName exportName = args[1];
 
-    scalar scaleFactor = 0;
-    args.readIfPresent<scalar>("scale", scaleFactor);
+    const scalar scaleFactor = args.opt<scalar>("scale", 0);
     const bool doTriangulate = args.found("tri");
 
     fileName exportBase = exportName.lessExt();

@@ -8,4 +8,6 @@ runApplication blockMesh
 
 runApplication snappyHexMesh -overwrite
 
+echo "End"
+
 #------------------------------------------------------------------------------

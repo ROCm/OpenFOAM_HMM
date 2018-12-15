@@ -526,7 +526,11 @@ int main(int argc, char *argv[])
     );
     #include "addOverwriteOption.H"
     argList::noParallel();
-    argList::addArgument("edgeAngle [0..360]");
+    argList::addArgument
+    (
+        "edgeAngle",
+        "in degrees [0-360]"
+    );
 
     argList::addOption
     (
@@ -562,7 +566,7 @@ int main(int argc, char *argv[])
     const bool geometry  = args.found("geometry");
     const bool overwrite = args.found("overwrite");
 
-    const scalar edgeTol = args.lookupOrDefault<scalar>("tol", 0.2);
+    const scalar edgeTol = args.opt<scalar>("tol", 0.2);
 
     Info<< "Trying to split cells with internal angles > feature angle\n" << nl
         << "featureAngle      : " << featureAngle << nl

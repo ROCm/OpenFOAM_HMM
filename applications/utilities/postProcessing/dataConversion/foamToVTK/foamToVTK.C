@@ -254,7 +254,8 @@ int main(int argc, char *argv[])
     );
     timeSelector::addOptions();
 
-    // Infrequently needed, mark as advanced.
+    // Less frequently used - reduce some clutter
+    argList::setAdvanced("decomposeParDict");
     argList::setAdvanced("noFunctionObjects");
 
     argList::addBoolOption
@@ -373,8 +374,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "one-boundary",  // allPatches
-        "Combine all patches into a single file",
-        true  // mark as an advanced option
+        "Combine all patches into a single file"
     );
     argList::addOptionCompat("one-boundary", {"allPatches", 1806});
 
@@ -564,8 +564,7 @@ int main(int argc, char *argv[])
     else
     {
         regionNames.resize(1);
-        regionNames.first() =
-            args.lookupOrDefault<word>("region", fvMesh::defaultRegion);
+        regionNames.first() = args.opt<word>("region", fvMesh::defaultRegion);
     }
 
 
@@ -627,7 +626,7 @@ int main(int argc, char *argv[])
     // Directory management
 
     // Sub-directory for output
-    const word vtkDirName = args.lookupOrDefault<word>("name", "VTK");
+    const word vtkDirName = args.opt<word>("name", "VTK");
 
     const fileName outputDir(runTime.globalPath()/vtkDirName);
 

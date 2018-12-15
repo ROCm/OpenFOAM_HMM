@@ -114,8 +114,7 @@ scalar getMergeDistance
     const boundBox& bb
 )
 {
-    scalar mergeTol = defaultMergeTol;
-    args.readIfPresent("mergeTol", mergeTol);
+    const scalar mergeTol = args.opt<scalar>("mergeTol", defaultMergeTol);
 
     const scalar writeTol =
         Foam::pow(scalar(10), -scalar(IOstream::defaultPrecision()));
@@ -136,7 +135,7 @@ scalar getMergeDistance
             << exit(FatalError);
     }
 
-    scalar mergeDist = mergeTol * bb.mag();
+    const scalar mergeDist = mergeTol * bb.mag();
 
     Info<< "Overall meshes bounding box : " << bb << nl
         << "Relative tolerance          : " << mergeTol << nl
@@ -2497,8 +2496,7 @@ int main(int argc, char *argv[])
 
 
     // Allow override of decomposeParDict location
-    fileName decompDictFile;
-    args.readIfPresent("decomposeParDict", decompDictFile);
+    const fileName decompDictFile = args.opt<fileName>("decomposeParDict", "");
 
     // Get all region names
     wordList regionNames;
@@ -2512,8 +2510,7 @@ int main(int argc, char *argv[])
     else
     {
         regionNames.resize(1);
-        regionNames.first() =
-            args.lookupOrDefault<word>("region", fvMesh::defaultRegion);
+        regionNames.first() = args.opt<word>("region", fvMesh::defaultRegion);
     }
 
 

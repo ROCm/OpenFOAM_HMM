@@ -66,7 +66,7 @@ int readNumProcs
                     IOobject::NO_WRITE,
                     false // do not register
                 ),
-                args.lookupOrDefault<fileName>(optionName, "")
+                args.opt<fileName>(optionName, "")
             )
         )
     );

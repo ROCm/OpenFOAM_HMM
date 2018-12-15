@@ -1509,14 +1509,18 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Generates the extendedFeatureEdgeMesh for the interface between"
+        "Generates the extendedFeatureEdgeMesh for the interface created by"
         " a boolean operation on two surfaces."
     );
 
     argList::noParallel();
-    argList::addArgument("action");
-    argList::addArgument("surfaceFile1");
-    argList::addArgument("surfaceFile2");
+    argList::addArgument
+    (
+        "action",
+        "One of (intersection | union | difference)"
+    );
+    argList::addArgument("surface1", "The input surface file 1");
+    argList::addArgument("surface2", "The input surface file 2");
 
     argList::addOption
     (
@@ -1560,12 +1564,6 @@ int main(int argc, char *argv[])
         " 'mixed' (keep all)"
     );
 
-    argList::addNote
-    (
-        "Valid actions: \"intersection\", \"union\", \"difference\""
-    );
-
-
     #include "setRootCase.H"
     #include "createTime.H"
 
@@ -1595,7 +1593,7 @@ int main(int argc, char *argv[])
 
 
     // Scale factor for both surfaces:
-    const scalar scaleFactor = args.lookupOrDefault<scalar>("scale", -1);
+    const scalar scaleFactor = args.opt<scalar>("scale", -1);
 
     const word surf1Name(args[2]);
     Info<< "Reading surface " << surf1Name << endl;

@@ -50,9 +50,10 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::addArgument("surfaceFile");
-    argList::addArgument("visiblePoint");
-    argList::addArgument("output surfaceFile");
+    argList::addArgument("input", "The input surface file");
+    argList::addArgument("point", "The visible 'outside' point");
+    argList::addArgument("output", "The output surface file");
+
     argList::addBoolOption
     (
         "inside",
@@ -92,7 +93,7 @@ int main(int argc, char *argv[])
         Info<< "outside" << endl;
     }
 
-    const scalar scaling = args.lookupOrDefault<scalar>("scale", -1);
+    const scalar scaling = args.opt<scalar>("scale", -1);
     if (scaling > 0)
     {
         Info<< "Input scaling: " << scaling << nl;

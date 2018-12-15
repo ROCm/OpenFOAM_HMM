@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
     //
     ensightCase::options caseOpts(format);
 
-    caseOpts.width(args.lookupOrDefault<label>("width", 8));
+    caseOpts.width(args.opt<label>("width", 8));
     caseOpts.overwrite(false); // leave existing output directory
 
     // Can also have separate directory for lagrangian
@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
     // Define sub-directory name to use for EnSight data.
     // The path to the ensight directory is at case level only
     // - For parallel cases, data only written from master
-    fileName ensightDir = args.lookupOrDefault<word>("name", "Ensight");
+    fileName ensightDir = args.opt<word>("name", "Ensight");
     if (!ensightDir.isAbsolute())
     {
         ensightDir = args.globalPath()/ensightDir;

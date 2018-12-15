@@ -221,11 +221,13 @@ int main(int argc, char *argv[])
         "Additional verbosity"
     );
 
-    // Non-mandatory arguments
+    // Arguments are optional (non-mandatory)
+    argList::noMandatoryArgs();
     argList::addArgument("fieldName ... fieldName");
 
     timeSelector::addOptions(true, true);  // constant(true), zero(true)
-    #include "setRootCaseNonMandatoryArgs.H"
+
+    #include "setRootCase.H"
 
     dryrun = args.found("dry-run");
     verbose = args.found("verbose");

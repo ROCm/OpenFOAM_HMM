@@ -783,7 +783,11 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
     for (const word& fieldName : scalarNames_)
     {
         dictionary propsDict;
-        propsDict.add("file", scalarVtkFile);
+        propsDict.add
+        (
+            "file",
+            scalarVtkFile.relative(time_.globalPath(), true)
+        );
         setProperty(fieldName, propsDict);
     }
 
@@ -791,7 +795,11 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
     for (const word& fieldName : vectorNames_)
     {
         dictionary propsDict;
-        propsDict.add("file", vectorVtkFile);
+        propsDict.add
+        (
+            "file",
+            vectorVtkFile.relative(time_.globalPath(), true)
+        );
         setProperty(fieldName, propsDict);
     }
 

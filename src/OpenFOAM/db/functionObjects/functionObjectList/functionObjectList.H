@@ -203,7 +203,7 @@ public:
         //    - $WM_PROJECT_DIR/etc/"caseDicts/postProcessing"
         //
         // Where {PROJECT_API} is the value of the OPENFOAM define.
-        // See further notes in Foam::findEtcFiles()
+        // See further notes in Foam::findEtcEntries()
         static void list();
 
         //- Find a functionObject dictionary file in the case

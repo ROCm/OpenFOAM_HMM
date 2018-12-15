@@ -122,7 +122,7 @@ class argList
 {
     // Private data
 
-        //- Track enabled/disabled mandatory arguments
+        //- Track if command arguments are mandatory/optional
         static bool argsMandatory_;
 
         //- Track enabled/disabled checking of processor directories state
@@ -212,16 +212,19 @@ public:
         //  Stored as (option = bool, version)
         static HashTable<std::pair<bool,int>> ignoreOptionsCompat;
 
-        //- Short usage information for validOptions
+        //- Short description for program arguments
+        static HashTable<string, label, Hash<label>> argUsage;
+
+        //- Short description for validOptions
         static HashTable<string> optionUsage;
 
-        //- Additional notes for usage
+        //- General usage notes
         static SLList<string> notes;
 
-        //- Min offset for displaying usage (default: 20)
+        //- Min indentation when displaying usage (default: 20)
         static std::string::size_type usageMin;
 
-        //- Max screen width for displaying usage (default: 80)
+        //- Max screen width when displaying usage (default: 80)
         static std::string::size_type usageMax;
 
         //- Standard name for the post-processing option
@@ -239,11 +242,15 @@ public:
 
         //- Construct from argc and argv
         //- checking the arguments and options as requested.
+        //
+        //  By default, the argument check respects the value of
+        //  argsMandatory() to decide if the arguments should be checked
+        //  (when they are mandatory) or not (when they are optional)
         argList
         (
             int& argc,
             char**& argv,
-            bool checkArgs = true,
+            bool checkArgs = argList::argsMandatory(),
             bool checkOpts = true,
             bool initialise = true
         );
@@ -341,10 +348,15 @@ public:
         //- Return an input stream from the named option
         inline ITstream lookup(const word& optName) const;
 
-        //- Read a value from the named option
+        //- Get a value from the named option
         //  The default template parameter is string (ie, no conversion).
         template<class T=string>
         inline T opt(const word& optName) const;
+
+        //- Get a value from the named option if present, or return default.
+        //  Identical to lookupOrDefault().
+        template<class T>
+        inline T opt(const word& optName, const T& deflt) const;
 
         //- Read a value from the named option if present.
         //  \return true if the named option was found.
@@ -362,8 +374,7 @@ public:
             const T& deflt
         ) const;
 
-        //- Read a value from the named option if present.
-        //  Return supplied default otherwise.
+        //- Get a value from the named option if present, or return default.
         template<class T>
         inline T lookupOrDefault
         (
@@ -389,7 +400,11 @@ public:
     // Edit
 
         //- Append a (mandatory) argument to validArgs
-        static void addArgument(const string& argName);
+        static void addArgument
+        (
+            const string& argName,
+            const string& usage = ""
+        );
 
         //- Add a bool option to validOptions with usage information
         static void addBoolOption
@@ -452,8 +467,11 @@ public:
         //- Remove option from validOptions and from optionUsage
         static void removeOption(const word& optName);
 
-        //- Flag command arguments as being non-mandatory
-        static void nonMandatoryArgs();
+        //- Flag command arguments as being optional (non-mandatory)
+        static void noMandatoryArgs();
+
+        //- Command arguments type (optional/mandatory).
+        static bool argsMandatory();
 
         //- Disable emitting the banner information.
         //  Adjusts the Foam::infoDetailLevel flag.
@@ -516,8 +534,17 @@ public:
 
     // Check
 
-        //- Check argument list
-        bool check(bool checkArgs=true, bool checkOpts=true) const;
+        //- Check the parsed command-line for mandatory arguments and
+        //- that all the options are correct.
+        //
+        //  By default, the argument check respects the value of
+        //  argsMandatory() to decide if the arguments should be checked
+        //  (when they are mandatory) or not (when they are optional)
+        bool check
+        (
+            bool checkArgs = argList::argsMandatory(),
+            bool checkOpts = true
+        ) const;
 
         //- Check root path and case path
         bool checkRootCase() const;

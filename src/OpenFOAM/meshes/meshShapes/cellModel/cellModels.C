@@ -58,7 +58,7 @@ void Foam::cellModel::constructModels()
             << exit(FatalError);
     }
 
-    IFstream is(findEtcFile("cellModels", true));
+    IFstream is(findEtcFile("cellModels", true));  // Mandatory file
 
     PtrList<cellModel> newPtrs(is);
     models_.swap(newPtrs);

@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
         " supplied as an argument"
     );
 
-    argList::addArgument("scaling factor");
+    argList::addArgument("factor", "The deformation scaling factor");
 
     #include "setRootCase.H"
 

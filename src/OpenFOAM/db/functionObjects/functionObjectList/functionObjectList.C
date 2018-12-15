@@ -385,8 +385,7 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
 
     dictionary& functionsDict = controlDict.subDict("functions");
 
-    word region;
-    args.readIfPresent("region", region);
+    const word regionName = args.opt<word>("region", "");
 
     bool modifiedControlDict = false;
 
@@ -417,7 +416,7 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
             args["func"],
             functionsDict,
             requiredFields,
-            region
+            regionName
         );
     }
 
@@ -434,7 +433,7 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
                 funcName,
                 functionsDict,
                 requiredFields,
-                region
+                regionName
             );
         }
     }

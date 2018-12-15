@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::addArgument("PROSTAR prefix");
+    argList::addArgument("prefix", "The prefix for the input PROSTAR files");
     argList::addBoolOption
     (
         "ascii",
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
         prefix,
         runTime,
         // Default rescale from [mm] to [m]
-        args.lookupOrDefault<scalar>("scale", 0.001),
+        args.opt<scalar>("scale", 0.001),
         args.found("solids")
     );
 

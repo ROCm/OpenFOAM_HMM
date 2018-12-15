@@ -77,8 +77,7 @@ int main(int argc, char *argv[])
         " turbulence modelling."
     );
 
-    #include "setRootCase.H"
-
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
 

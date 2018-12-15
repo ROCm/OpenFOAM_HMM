@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::noFunctionObjects();  // Never use function objects
 
-    argList::addArgument("feature angle[0-180]");
+    argList::addArgument("featureAngle", "in degrees [0-180]");
 
     #include "setRootCase.H"
     #include "createTime.H"

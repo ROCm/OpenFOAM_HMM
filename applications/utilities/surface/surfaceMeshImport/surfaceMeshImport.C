@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::addArgument("inputFile");
+    argList::addArgument("surface", "The input surface file");
 
     argList::addBoolOption
     (
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 
 
     const fileName importName = args[1];
-    const word exportName = args.lookupOrDefault<word>("name", "default");
+    const word exportName = args.opt<word>("name", "default");
 
     // check that reading is supported
     if (!MeshedSurface<face>::canRead(importName, true))
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
                 IOobject::NO_WRITE,
                 false
             ),
-            args.lookupOrDefault<fileName>("dict", "")
+            args.opt<fileName>("dict", "")
         );
 
         if (!ioCsys.typeHeaderOk<coordinateSystems>(false))

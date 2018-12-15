@@ -57,8 +57,10 @@ volScalarField mu
     laminarTransport.nu()*rhoInfValue
 );
 
-word kinematicCloudName("kinematicCloud");
-args.readIfPresent("cloud", kinematicCloudName);
+const word kinematicCloudName
+(
+    args.opt<word>("cloud", "kinematicCloud")
+);
 
 Info<< "Constructing kinematicCloud " << kinematicCloudName << endl;
 basicKinematicCollidingCloud kinematicCloud

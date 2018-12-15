@@ -80,8 +80,8 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::addArgument("inputFile");
-    argList::addArgument("outputFile");
+    argList::addArgument("input", "The input surface file");
+    argList::addArgument("output", "The output surface file");
 
     argList::addBoolOption
     (
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
                 IOobject::NO_WRITE,
                 false
             ),
-            args.lookupOrDefault<fileName>("dict", "")
+            args.opt<fileName>("dict", "")
         );
 
         if (!ioCsys.typeHeaderOk<coordinateSystems>(false))

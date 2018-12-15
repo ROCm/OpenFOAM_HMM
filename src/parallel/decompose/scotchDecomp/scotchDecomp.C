@@ -127,13 +127,13 @@ License
 #include "Time.H"
 #include "OFstream.H"
 
-extern "C"
-{
+// Probably not needed, but in case we pickup a ptscotch.h ...
+#define MPICH_SKIP_MPICXX
+#define OMPI_SKIP_MPICXX
+
 #include "scotch.h"
-}
 
-
-// Hack: scotch generates floating point errors so need to switch of error
+// Hack: scotch generates floating point errors so need to switch off error
 //       trapping!
 #ifdef __GLIBC__
     #ifndef _GNU_SOURCE
@@ -141,6 +141,13 @@ extern "C"
     #endif
     #include <fenv.h>
 #endif
+
+// Provide a clear error message if we have a size mismatch
+static_assert
+(
+    sizeof(Foam::label) == sizeof(SCOTCH_Num),
+    "sizeof(Foam::label) == sizeof(SCOTCH_Num), check your scotch headers"
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

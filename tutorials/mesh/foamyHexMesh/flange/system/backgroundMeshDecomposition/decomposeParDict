@@ -22,8 +22,6 @@ method          hierarchical;
 coeffs
 {
     n           (2 2 2);
-    //delta       0.001; // default=0.001
-    //order       xyz;   // default=xzy
 }
 
 distributed     no;

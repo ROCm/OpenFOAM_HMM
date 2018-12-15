@@ -31,7 +31,7 @@ geometry
     igloo
     {
         type    sphere;
-        centre  (3 3 0);
+        origin  (3 3 0);
         radius  4;
     }
 

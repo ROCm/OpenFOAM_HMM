@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv, false, true);
 
-    const scalar currTime = args.lookupOrDefault<scalar>("time", GREAT);
+    const scalar currTime = args.opt<scalar>("time", GREAT);
 
     Info<< "Using currTime = " << currTime << nl
         << "when loading " << (args.size()-1) << " files" << nl << nl;

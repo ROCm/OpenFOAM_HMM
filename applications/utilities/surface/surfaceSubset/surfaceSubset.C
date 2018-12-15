@@ -58,9 +58,9 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::addArgument("surfaceSubsetDict");
-    argList::addArgument("surfaceFile");
-    argList::addArgument("output surfaceFile");
+    argList::addArgument("dict", "The surfaceSubsetDict");
+    argList::addArgument("input", "The input surface file");
+    argList::addArgument("output", "The output surface file");
     argList args(argc, argv);
 
     Info<< "Reading dictionary " << args[1] << " ..." << endl;

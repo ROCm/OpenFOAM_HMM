@@ -39,7 +39,7 @@ geometry
     refineHole
     {
         type    sphere;
-        centre  (0 0 -0.012);
+        origin  (0 0 -0.012);
         radius  0.003;
     }
 }

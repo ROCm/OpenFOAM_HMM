@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::addArgument("firePolyMesh");
+    argList::addArgument("firePolyMesh", "The input FIRE mesh");
     argList::addBoolOption
     (
         "ascii",
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
     (
         args[1],
         // Default no scaling
-        args.lookupOrDefault<scalar>("scale", 1)
+        args.opt<scalar>("scale", 1)
     );
 
 

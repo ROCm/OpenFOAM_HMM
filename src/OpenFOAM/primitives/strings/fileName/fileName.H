@@ -80,13 +80,13 @@ class fileName
 
 public:
 
-    //- Enumerations to handle file types and modes.
+    //- Enumerations to handle directory entry types.
     enum Type
     {
-        UNDEFINED,  //!< Undefined file type.
-        FILE,       //!< A file
-        DIRECTORY,  //!< A directory
-        LINK        //!< A symlink
+        UNDEFINED = 0,  //!< Undefined type
+        FILE = 1,       //!< A file
+        DIRECTORY = 2,  //!< A directory
+        LINK = 4        //!< A symlink
     };
 
 
@@ -201,9 +201,13 @@ public:
 
     // Interrogation
 
-        //- Return the file type: FILE, DIRECTORY, LINK or UNDEFINED.
-        //  LINK is only returned if followLink=false
-        Type type(const bool followLink = true) const;
+        //- Return the directory entry type:
+        //- UNDEFINED, FILE, DIRECTORY (or LINK).
+        //
+        //  \param followLink when false it will return LINK for a symlink
+        //     rather than following it.
+        //  \param checkGzip add an additional test for a gzip FILE
+        Type type(bool followLink=true, bool checkGzip=false) const;
 
         //- Return true if string starts with a '/'
         inline static bool isAbsolute(const std::string& str);
@@ -286,8 +290,18 @@ public:
         //- Remove leading path, returning true if string changed.
         inline bool removePath();
 
-        //- Return name after stripping off the parent directory
-        fileName relative(const fileName& parent) const;
+        //- Return a relative name by stripping off the parent directory
+        //- where possible.
+        //
+        //  \param parent the parent directory
+        //  \param caseRelative replace the parent with \<case\> for later
+        //      use with expand(), or prefix \<case\> if the file name was
+        //      not an absolute location
+        fileName relative
+        (
+            const fileName& parent,
+            const bool caseRelative = false
+        ) const;
 
         //- Return file name without extension (part before last .)
         inline fileName lessExt() const;
