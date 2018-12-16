@@ -65,11 +65,11 @@ template<class PatchType>
 vtkSmartPointer<vtkCellArray>
 Foam::vtk::Tools::Patch::faces(const PatchType& p)
 {
-    // Faces as polygons
-    const faceList& fcs = p.localFaces();
+    // List of faces or triFaces
+    const auto& fcs = p.localFaces();
 
     label nAlloc = fcs.size();
-    for (const face& f : fcs)
+    for (const auto& f : fcs)
     {
         nAlloc += f.size();
     }
@@ -81,7 +81,7 @@ Foam::vtk::Tools::Patch::faces(const PatchType& p)
     // Cell connectivity for polygons
     // [size, verts..., size, verts... ]
     auto iter = list.begin();
-    for (const face& f : fcs)
+    for (const auto& f : fcs)
     {
         *(iter++) = f.size();
 
@@ -118,15 +118,24 @@ Foam::vtk::Tools::Patch::faceNormals(const PatchType& p)
     array->SetNumberOfTuples(p.size());
 
     // Unit normals for patch faces.
-    // If not already cached, could be more memory efficient to loop over
-    // the individual faces instead.
-
-    const vectorField& norms = p.faceNormals();
+    // Cached values if available or loop over faces (avoid triggering cache)
 
     vtkIdType faceId = 0;
-    for (const vector& n : norms)
+
+    if (p.hasFaceNormals())
     {
-        array->SetTuple(faceId++, n.v_);
+        for (const vector& n : p.faceNormals())
+        {
+            array->SetTuple(faceId++, n.v_);
+        }
+    }
+    else
+    {
+        for (const auto& f : p)
+        {
+            const vector n(f.unitNormal(p.points()));
+            array->SetTuple(faceId++, n.v_);
+        }
     }
 
     return array;
