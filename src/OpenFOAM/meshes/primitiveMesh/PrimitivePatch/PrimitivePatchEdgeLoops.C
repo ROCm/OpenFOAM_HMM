@@ -50,8 +50,7 @@ calcEdgeLoops() const
 
     if (edgeLoopsPtr_)
     {
-        // it is considered an error to attempt to recalculate
-        // if already allocated
+        // An error to recalculate if already allocated
         FatalErrorInFunction
             << "edge loops already calculated"
             << abort(FatalError);

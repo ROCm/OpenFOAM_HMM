@@ -46,10 +46,9 @@ calcBdryPoints() const
 
     if (boundaryPointsPtr_)
     {
-        // it is considered an error to attempt to recalculate
-        // if already allocated
+        // Error to recalculate if already allocated
         FatalErrorInFunction
-            << "edge types already calculated"
+            << "boundaryPoints already calculated"
             << abort(FatalError);
     }
 

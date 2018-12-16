@@ -498,17 +498,8 @@ whichPoint
     const label gp
 ) const
 {
-    Map<label>::const_iterator fnd = meshPointMap().find(gp);
-
-    if (fnd != meshPointMap().end())
-    {
-        return fnd();
-    }
-    else
-    {
-        // Not found
-        return -1;
-    }
+    // The point found, or -1 if not found
+    return meshPointMap().lookup(gp, -1);
 }
 
 
