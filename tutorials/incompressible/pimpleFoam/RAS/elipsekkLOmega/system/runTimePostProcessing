@@ -131,9 +131,13 @@ postPro1
         text1
         {
             string      "ellipse kkLOmega";
-            position    (0.6 0.05);
+            position    (0.5 0.15);
+            halign      centre;
             size        18;
+            opacity     0.4;
             bold        yes;
+            italic      yes;
+            shadow      yes;
             visible     yes;
         }
     }

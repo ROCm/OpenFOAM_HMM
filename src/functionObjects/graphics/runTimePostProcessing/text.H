@@ -34,7 +34,11 @@ Description
         string      "text to display";
         position    (0.1 0.05);
         size        18;
+        // halign      left;  // (left | centre | right)
         bold        yes;
+        // Optional entry
+
+        shadow      false;
         visible     yes;
 
         // Optionally override default colour
@@ -48,13 +52,22 @@ Description
     Dictionary controls
     \table
         Property    | Description                          | Required | Default
-        visible     | Display the text                     | yes |
         string      | Text to display                      | yes |
         position    | The (x y) viewport position          | yes |
         size        | The font size in points              | yes |
+        halign      | Text justification (left/centre/ right) | no | left
         bold        | Use bold font                        | yes |
+        italic      | Use italic font                      | no  | false
+        shadow      | Add text shadow                      | no  | false
         colour      | Override default text colour         | no  |
         timeStamp   | Append solution timeName to string   | no  | false
+    \endtable
+
+    Inherited controls
+    \table
+        Property    | Description                          | Required | Default
+        visible     | Display the object                   | yes |
+        opacity     | Object opacity                       | no  | 1.0
     \endtable
 
 SourceFiles
@@ -88,6 +101,22 @@ class text
 :
     public geometryBase
 {
+public:
+
+    // Public enumerations
+
+        //- Horizontal alignment type
+        enum halignType
+        {
+            LEFT   = 0,   //!< Left-justified text - default ("left")
+            CENTER = 1,   //!< Centred text ("center", "centre")
+            RIGHT  = 2    //!< Right-justified text  ("right")
+        };
+
+        //- Horizontal alignment names (includes "center" and "centre")
+        static const Enum<halignType> halignTypeNames;
+
+
 protected:
 
     // Protected Data
@@ -104,8 +133,17 @@ protected:
         //- Colour
         autoPtr<Function1<vector>> colour_;
 
+        //- Horizontal alignment
+        halignType halign_;
+
         //- Bold flag
         bool bold_;
+
+        //- Italic flag
+        bool italic_;
+
+        //- Shadow flag
+        bool shadow_;
 
         //- Time stamp flag
         bool timeStamp_;

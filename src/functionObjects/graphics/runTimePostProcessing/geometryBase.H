@@ -25,7 +25,15 @@ Class
     Foam::functionObjects::runTimePostPro::geometryBase
 
 Description
-    Base class for surface handling
+    Base class for surface, text handling
+
+    Dictionary controls
+    \table
+        Property    | Description                          | Required | Default
+        visible     | Display the object                   | yes |
+        renderMode  | Shading (flat/gouraud/phong)         | no  | gouraud
+        opacity     | Object opacity                       | no  | 1.0
+    \endtable
 
 SourceFiles
     geometryBase.C

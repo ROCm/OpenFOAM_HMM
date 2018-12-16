@@ -34,6 +34,21 @@ License
 #include "vtkTextActor.h"
 #include "vtkTextProperty.h"
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+const Foam::Enum
+<
+    Foam::functionObjects::runTimePostPro::text::halignType
+>
+Foam::functionObjects::runTimePostPro::text::halignTypeNames
+({
+    { halignType::LEFT, "left" },
+    { halignType::CENTER, "center" },
+    { halignType::CENTER, "centre" },
+    { halignType::RIGHT, "right" },
+});
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjects::runTimePostPro::text::text
@@ -48,7 +63,13 @@ Foam::functionObjects::runTimePostPro::text::text
     position_(),
     size_(dict.get<scalar>("size")),
     colour_(nullptr),
+    halign_
+    (
+        halignTypeNames.lookupOrDefault("halign", dict, halignType::LEFT)
+    ),
     bold_(dict.get<bool>("bold")),
+    italic_(dict.lookupOrDefault("italic", false)),
+    shadow_(dict.lookupOrDefault("shadow", false)),
     timeStamp_(dict.lookupOrDefault("timeStamp", false))
 {
     dict.readEntry("position", position_);
@@ -86,21 +107,28 @@ void Foam::functionObjects::runTimePostPro::text::addGeometryToScene
     auto actor = vtkSmartPointer<vtkTextActor>::New();
 
     // Concatenate string with timeStamp if true
-    string textAndTime = string_;
+    string str = string_;
     if (timeStamp_)
     {
-        textAndTime =
-            textAndTime + " " + geometryBase::parent_.mesh().time().timeName();
+        str += " " + geometryBase::parent_.mesh().time().timeName();
     }
-    actor->SetInput(textAndTime.c_str());
-    actor->GetTextProperty()->SetFontFamilyToArial();
-    actor->GetTextProperty()->SetFontSize(size_);
-    actor->GetTextProperty()->SetJustificationToLeft();
-    actor->GetTextProperty()->SetVerticalJustificationToBottom();
-    actor->GetTextProperty()->SetBold(bold_);
+    actor->SetInput(str.c_str());
+
+    vtkTextProperty* prop = actor->GetTextProperty();
+
+    prop->SetFontFamilyToArial();
+    prop->SetFontSize(size_);
+    prop->SetJustification(int(halign_));
+    prop->SetVerticalJustificationToBottom();
+    prop->SetBold(bold_);
+    prop->SetItalic(italic_);
+    prop->SetShadow(shadow_);
 
     const vector colour = colour_->value(position);
-    actor->GetTextProperty()->SetColor(colour[0], colour[1], colour[2]);
+
+    prop->SetColor(colour[0], colour[1], colour[2]);
+    prop->SetOpacity(opacity(position));
+
     actor->GetPositionCoordinate()->SetCoordinateSystemToNormalizedViewport();
     actor->GetPositionCoordinate()->SetValue
     (
