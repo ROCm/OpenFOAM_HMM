@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,9 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::pathline
+    Foam::functionObjects::runTimePostPro::pathline
 
 Description
+    Visualisation of line data (eg, streamlines)
 
 SourceFiles
     pathline.C
@@ -40,6 +41,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Forward declarations
 class vtkActor;
 class vtkPolyData;
 class vtkPolyDataMapper;
@@ -74,17 +76,6 @@ public:
         static const Enum<representationType> representationTypeNames;
 
 
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        pathline(const pathline&) = delete;
-
-        //- No copy assignment
-        void operator=(const pathline&) = delete;
-
-
 protected:
 
     // Protected data
@@ -109,6 +100,12 @@ protected:
             vtkPolyData* data
         ) const;
 
+        //- No copy construct
+        pathline(const pathline&) = delete;
+
+        //- No copy assignment
+        void operator=(const pathline&) = delete;
+
 
 public:
 
@@ -126,7 +123,7 @@ public:
             (
                 const runTimePostProcessing& parent,
                 const dictionary& dict,
-                const HashPtrTable<Function1<vector>, word>& colours
+                const HashPtrTable<Function1<vector>>& colours
             ),
             (parent, dict, colours)
         );
@@ -139,7 +136,7 @@ public:
         (
             const runTimePostProcessing& parent,
             const dictionary& dict,
-            const HashPtrTable<Function1<vector>, word>& colours
+            const HashPtrTable<Function1<vector>>& colours
         );
 
 
@@ -150,7 +147,7 @@ public:
         (
             const runTimePostProcessing& parent,
             const dictionary& dict,
-            const HashPtrTable<Function1<vector>, word>& colours,
+            const HashPtrTable<Function1<vector>>& colours,
             const word& pathlineName
         );
 

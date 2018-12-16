@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +43,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Forward declarations
 class vtkRenderer;
 class vtkActor;
 
@@ -51,6 +52,7 @@ namespace Foam
 namespace functionObjects
 {
 
+// Forward declarations
 class runTimePostProcessing;
 
 namespace runTimePostPro
@@ -78,17 +80,6 @@ public:
         static const Enum<renderModeType> renderModeTypeNames;
 
 
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        geometryBase(const geometryBase&) = delete;
-
-        //- No copy assignment
-        void operator=(const geometryBase&) = delete;
-
-
 protected:
 
     // Protected data
@@ -109,13 +100,19 @@ protected:
         autoPtr<Function1<scalar>> opacity_;
 
         //- Reference to the colours
-        const HashPtrTable<Function1<vector>, word>& colours_;
+        const HashPtrTable<Function1<vector>>& colours_;
 
 
     // Protected functions
 
         //- Initialise actor
         void initialiseActor(vtkActor* actor) const;
+
+        //- No copy construct
+        geometryBase(const geometryBase&) = delete;
+
+        //- No copy assignment
+        void operator=(const geometryBase&) = delete;
 
 
 public:
@@ -127,7 +124,7 @@ public:
         (
             const runTimePostProcessing& parent_,
             const dictionary& dict,
-            const HashPtrTable<Function1<vector>, word>& colours
+            const HashPtrTable<Function1<vector>>& colours
         );
 
 
@@ -137,23 +134,25 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Return the reference to the parent function object
-            const runTimePostProcessing& parent() const;
+        //- Return the reference to the parent function object
+        const runTimePostProcessing& parent() const;
 
-            //- Return the name
-            const word& name() const;
+        //- Return the name
+        const word& name() const;
 
-            //- Return the visible flag
-            bool visible() const;
+        //- Return the visible flag
+        bool visible() const;
 
-            //- Return the opacity
-            scalar opacity(const scalar position) const;
+        //- Return the opacity
+        scalar opacity(const scalar position) const;
 
-            //- Return reference to the colours
-            const HashPtrTable<Function1<vector>, word>& colours() const;
+        //- Return reference to the colours
+        const HashPtrTable<Function1<vector>>& colours() const;
 
+
+    // Scene interaction
 
         //- Add geometry to scene
         virtual void addGeometryToScene

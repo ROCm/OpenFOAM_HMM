@@ -38,7 +38,6 @@ License
 #include "vtkRenderWindow.h"
 #include "vtkWindowToImageFilter.h"
 
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::functionObjects::runTimePostPro::scene::readCamera

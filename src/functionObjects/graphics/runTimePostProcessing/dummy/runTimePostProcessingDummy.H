@@ -22,14 +22,14 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjects::runTimePostPro::runTimePostProcessingDummy
+    Foam::functionObjects::runTimePostProcessingDummy
 
 Group
     grpGraphicsFunctionObjects
 
 Description
-    Dummy implementation of runTimePostProcessing to report when
-    the real version is unavailable.
+    Dummy implementation of Foam::functionObjects::runTimePostProcessing
+    to report when the real version is unavailable.
 
 SourceFiles
     runTimePostProcessingDummy.C

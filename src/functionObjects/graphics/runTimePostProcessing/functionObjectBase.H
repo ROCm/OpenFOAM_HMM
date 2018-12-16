@@ -109,12 +109,12 @@ protected:
         //  \note does not change the stateFunctionObject
         bool removeFile(const word& keyword, const word& subDictName);
 
-
         //- No copy construct
         functionObjectBase(const functionObjectBase&) = delete;
 
         //- No copy assignment
         void operator=(const functionObjectBase&) = delete;
+
 
 public:
 
@@ -129,7 +129,7 @@ public:
         (
             const stateFunctionObject& state,
             const dictionary& dict,
-            const HashPtrTable<Function1<vector>, word>& colours
+            const HashPtrTable<Function1<vector>>& colours
         );
 
 

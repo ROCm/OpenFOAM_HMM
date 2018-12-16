@@ -15,6 +15,8 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+libs            ("libOpenFOAM.so" "libfieldFunctionObjects.so");
+
 application     pimpleFoam;
 
 startFrom       latestTime;
@@ -49,10 +51,10 @@ adjustTimeStep  yes;
 
 maxCo           0.2;
 
-
 functions
 {
     #include "sampling"
+    #include "streamLines"
     #include "runTimePostProcessing"
 }
 

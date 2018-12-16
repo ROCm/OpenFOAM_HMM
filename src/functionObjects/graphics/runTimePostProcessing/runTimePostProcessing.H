@@ -21,8 +21,15 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Namespace
+    Foam::functionObjects::runTimePostPro
+
+Description
+    Classes and objects used in the implementation of
+    Foam::functionObjects::runTimePostProcessing
+
 Class
-    Foam::functionObjects::runTimePostPro::runTimePostProcessing
+    Foam::functionObjects::runTimePostProcessing
 
 Group
     grpGraphicsFunctionObjects
@@ -34,9 +41,9 @@ Description
     which provide a broad set of functionality for scene composition and
     manipulation.
 
-    Images are generated using a combination of function object output, and
-    additional data e.gg triangulated surfaces and text.  Current capabilities
-    include support for:
+    Images are generated using a combination of function object output
+    and additional data - eg, surfaces and text.
+    Current capabilities include support for:
     - Camera
     - Objects
     - Points
@@ -45,6 +52,8 @@ Description
     - Scalar bars
     - Annotations
     - Selection of colour maps
+    .
+
     Scene configuration is performed using standard OpenFOAM dictionaries, using
     the main headings of: output=, camera, colours, points, lines,
     surfaces and text.
@@ -65,6 +74,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Forward declarations
 class vtkRenderer;
 class vtkRenderWindow;
 
@@ -74,10 +84,11 @@ namespace functionObjects
 {
 namespace runTimePostPro
 {
-    class pointData;
-    class pathline;
-    class surface;
-    class text;
+// Forward declarations
+class pointData;
+class pathline;
+class surface;
+class text;
 }
 
 /*---------------------------------------------------------------------------*\

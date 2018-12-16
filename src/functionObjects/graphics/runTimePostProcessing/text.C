@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ Foam::functionObjects::runTimePostPro::text::text
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<Function1<vector>, word>& colours
+    const HashPtrTable<Function1<vector>>& colours
 )
 :
     geometryBase(parent, dict, colours),
@@ -55,7 +55,7 @@ Foam::functionObjects::runTimePostPro::text::text
 
     if (dict.found("colour"))
     {
-        colour_.reset(Function1<vector>::New("colour", dict).ptr());
+        colour_.reset(Function1<vector>::New("colour", dict));
     }
     else
     {

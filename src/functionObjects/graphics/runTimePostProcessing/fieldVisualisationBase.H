@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjects::fieldVisualisationBase
+    Foam::functionObjects::runTimePostPro::fieldVisualisationBase
 
 Description
     Base class for scene objects
@@ -42,25 +42,28 @@ SourceFiles
 #include "HashPtrTable.H"
 #include "Function1.H"
 
+// VTK includes
 #include "vtkSmartPointer.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Forward declarations
 class vtkActor;
 class vtkLookupTable;
+class vtkMapper;
 class vtkPolyData;
 class vtkPolyDataMapper;
 class vtkRenderer;
-
-
-class vtkMapper;
 
 namespace Foam
 {
 namespace functionObjects
 {
-
+// Forward declarations
 class runTimePostProcessing;
+
+namespace runTimePostPro
+{
 
 /*---------------------------------------------------------------------------*\
                    Class fieldVisualisationBase Declaration
@@ -91,20 +94,9 @@ public:
         static const Enum<colourMapType> colourMapTypeNames;
 
 
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        fieldVisualisationBase(const fieldVisualisationBase&) = delete;
-
-        //- No copy assignment
-        void operator=(const fieldVisualisationBase&) = delete;
-
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         struct scalarBar
         {
@@ -118,7 +110,7 @@ protected:
         };
 
         //- Colours
-        const HashPtrTable<Function1<vector>, word>& colours_;
+        const HashPtrTable<Function1<vector>>& colours_;
 
         //- Field name
         word fieldName_;
@@ -171,6 +163,12 @@ protected:
             vtkRenderer* renderer
         ) const;
 
+        //- No copy construct
+        fieldVisualisationBase(const fieldVisualisationBase&) = delete;
+
+        //- No copy assignment
+        void operator=(const fieldVisualisationBase&) = delete;
+
 
 public:
 
@@ -180,7 +178,7 @@ public:
         fieldVisualisationBase
         (
             const dictionary& dict,
-            const HashPtrTable<Function1<vector>, word>& colours
+            const HashPtrTable<Function1<vector>>& colours
         );
 
 
@@ -190,18 +188,19 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Return the colours
-            const HashPtrTable<Function1<vector>, word>& colours() const;
+        //- Return the colours
+        const HashPtrTable<Function1<vector>>& colours() const;
 
-            //- Return the field name
-            const word& fieldName() const;
+        //- Return the field name
+        const word& fieldName() const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace runTimePostPro
 } // End namespace functionObjects
 } // End namespace Foam
 

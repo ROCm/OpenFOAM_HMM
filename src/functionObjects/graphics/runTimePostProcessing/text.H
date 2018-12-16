@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,8 @@ Class
     Foam::functionObjects::runTimePostPro::text
 
 Description
+    Define text element for runTimePostProcessing
+
     Example of text object specification:
     \verbatim
     text1
@@ -39,9 +41,21 @@ Description
         // colour    (0 1 1);
 
         // Optional entry
-        timeStamp   yes; //Append solution time to string
+        timeStamp   yes; // Append solution time to string
     }
     \endverbatim
+
+    Dictionary controls
+    \table
+        Property    | Description                          | Required | Default
+        visible     | Display the text                     | yes |
+        string      | Text to display                      | yes |
+        position    | The (x y) viewport position          | yes |
+        size        | The font size in points              | yes |
+        bold        | Use bold font                        | yes |
+        colour      | Override default text colour         | no  |
+        timeStamp   | Append solution timeName to string   | no  | false
+    \endtable
 
 SourceFiles
     text.C
@@ -56,6 +70,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Forward declarations
 class vtkRenderer;
 
 namespace Foam
@@ -73,20 +88,9 @@ class text
 :
     public geometryBase
 {
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        text(const text&) = delete;
-
-        //- No copy assignment
-        void operator=(const text&) = delete;
-
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Text
         string string_;
@@ -107,6 +111,15 @@ protected:
         bool timeStamp_;
 
 
+    // Protected Member Functions
+
+        //- No copy construct
+        text(const text&) = delete;
+
+        //- No copy assignment
+        void operator=(const text&) = delete;
+
+
 public:
 
     // Constructors
@@ -116,7 +129,7 @@ public:
         (
             const runTimePostProcessing& parent,
             const dictionary& dict,
-            const HashPtrTable<Function1<vector>, word>& colours
+            const HashPtrTable<Function1<vector>>& colours
         );
 
 
