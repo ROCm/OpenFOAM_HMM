@@ -184,7 +184,10 @@ Foam::functionObject::unavailableFunctionObject::unavailableFunctionObject
 {}
 
 
-void Foam::functionObject::unavailableFunctionObject::carp(std::string message)
+void Foam::functionObject::unavailableFunctionObject::carp
+(
+    std::string message
+) const
 {
     FatalError
         << "####" << nl

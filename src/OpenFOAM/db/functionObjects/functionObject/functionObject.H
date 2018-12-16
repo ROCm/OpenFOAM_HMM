@@ -272,7 +272,7 @@ protected:
 
     //- Report it is unavailable, emitting a FatalError for try/catch
     //- in the caller
-    void carp(std::string message = "");
+    void carp(std::string message = "") const;
 
 
 public:
