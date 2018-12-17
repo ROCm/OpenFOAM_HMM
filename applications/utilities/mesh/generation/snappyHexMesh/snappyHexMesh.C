@@ -684,6 +684,7 @@ int main(int argc, char *argv[])
 
     #include "addRegionOption.H"
     #include "addOverwriteOption.H"
+    #include "addProfilingOption.H"
     argList::addBoolOption
     (
         "checkGeometry",
@@ -707,8 +708,7 @@ int main(int argc, char *argv[])
         "file",
         "Name of the file to save the simplified surface to"
     );
-    #include "addProfilingOption.H"
-    #include "addDictOption.H"
+    argList::addOption("dict", "file", "Use alternative snappyHexMeshDict");
 
     argList::noFunctionObjects();  // Never use function objects
 

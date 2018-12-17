@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
         "Add patches (regions) to a surface with a user-selectable method"
     );
     argList::noParallel();
-    #include "addDictOption.H"
+    argList::addOption("dict", "file", "Use alternative surfacePatchDict");
 
     #include "setRootCase.H"
     #include "createTime.H"

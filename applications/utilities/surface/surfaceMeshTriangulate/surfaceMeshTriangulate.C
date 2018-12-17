@@ -28,16 +28,15 @@ Group
     grpSurfaceUtilities
 
 Description
-    Extracts surface from a polyMesh. Depending on output surface format
-    triangulates faces.
+    Extract patch or faceZone surfaces from a polyMesh.
+    Depending on output surface format triangulates faces.
 
-    Region numbers on faces cannot be guaranteed to be the same as the patch
-    indices.
+    Region numbers on faces no guaranteed to be the same as the patch indices.
 
-    Optionally only triangulates named patches.
+    Optionally only extracts named patches.
 
-    If run in parallel the processor patches get filtered out by default and
-    the mesh gets merged (based on topology).
+    If run in parallel, processor patches get filtered out by default and
+    the mesh is merged (based on topology).
 
 \*---------------------------------------------------------------------------*/
 
@@ -62,7 +61,9 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Extract surface from a polyMesh"
+        "Extract patch or faceZone surfaces from a polyMesh."
+        " The name is historical, it only triangulates faces"
+        " when the output format requires it."
     );
     timeSelector::addOptions();
 
@@ -77,14 +78,16 @@ int main(int argc, char *argv[])
     argList::addOption
     (
         "patches",
-        "(patch0 .. patchN)",
-        "Only triangulate selected patches (wildcards supported)"
+        "wordRes"
+        "Specify single patch or multiple patches to extract.\n"
+        "Eg, 'top' or '( front \".*back\" )'"
     );
     argList::addOption
     (
         "faceZones",
-        "(fz0 .. fzN)",
-        "Triangulate selected faceZones (wildcards supported)"
+        "wordRes",
+        "Specify single or multiple faceZones to extract\n"
+        "Eg, 'cells' or '( slice \"mfp-.*\" )'"
     );
 
     #include "setRootCase.H"
@@ -99,8 +102,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    Info<< "Extracting surface from boundaryMesh ..."
-        << endl << endl;
+    Info<< "Extracting surface from boundaryMesh ..." << nl << nl;
 
     const bool includeProcPatches =
        !(
@@ -134,7 +136,6 @@ int main(int argc, char *argv[])
         if (timeDirs.size() == 1)
         {
             outFileName = userOutFileName;
-            Info<< nl;
         }
         else
         {
@@ -144,21 +145,19 @@ int main(int argc, char *argv[])
                 Info<<"  ... no mesh change." << nl;
                 continue;
             }
-            else
-            {
-                Info<< nl;
-            }
 
             // The filename based on the original, but with additional
             // time information. The extension was previously checked that
             // it exists
-            std::string::size_type dot = userOutFileName.rfind('.');
+            const auto dot = userOutFileName.rfind('.');
 
             outFileName =
                 userOutFileName.substr(0, dot) + "_"
               + Foam::name(runTime.value()) + "."
               + userOutFileName.ext();
         }
+
+        Info<< nl;
 
         // Create local surface from:
         // - explicitly named patches only (-patches (at your option)
@@ -170,37 +169,39 @@ int main(int argc, char *argv[])
         // Construct table of patches to include.
         const polyBoundaryMesh& bMesh = mesh.boundaryMesh();
 
-        labelHashSet includePatches(bMesh.size());
+        labelList includePatches;
 
         if (args.found("patches"))
         {
-            includePatches = bMesh.patchSet(args.getList<wordRe>("patches"));
+            includePatches =
+                bMesh.patchSet(args.getList<wordRe>("patches")).sortedToc();
+        }
+        else if (includeProcPatches)
+        {
+            includePatches = identity(bMesh.size());
         }
         else
         {
-            forAll(bMesh, patchi)
-            {
-                const polyPatch& patch = bMesh[patchi];
-
-                if (includeProcPatches || !isA<processorPolyPatch>(patch))
-                {
-                    includePatches.insert(patchi);
-                }
-            }
+            includePatches = identity(bMesh.nNonProcessor());
         }
 
 
+        labelList includeFaceZones;
+
         const faceZoneMesh& fzm = mesh.faceZones();
-        labelHashSet includeFaceZones(fzm.size());
 
         if (args.found("faceZones"))
         {
-            wordReList zoneNames(args.getList<wordRe>("faceZones"));
             const wordList allZoneNames(fzm.names());
+
+            const wordRes zoneNames(args.getList<wordRe>("faceZones"));
+
+            labelHashSet hashed(2*fzm.size());
+
             for (const wordRe& zoneName : zoneNames)
             {
                 labelList zoneIDs = findStrings(zoneName, allZoneNames);
-                includeFaceZones.insert(zoneIDs);
+                hashed.insert(zoneIDs);
 
                 if (zoneIDs.empty())
                 {
@@ -209,15 +210,13 @@ int main(int argc, char *argv[])
                         << zoneName << endl;
                 }
             }
-            Info<< "Additionally triangulating faceZones "
-                <<  UIndirectList<word>
-                    (
-                        allZoneNames,
-                        includeFaceZones.sortedToc()
-                    )
+
+            includeFaceZones = hashed.sortedToc();
+
+            Info<< "Additionally extracting faceZones "
+                << UIndirectList<word>(allZoneNames, includeFaceZones)
                 << endl;
         }
-
 
 
         // From (name of) patch to compact 'zone' index
@@ -252,18 +251,14 @@ int main(int argc, char *argv[])
 
 
             // Allocate compact numbering for all patches/faceZones
-            forAllConstIter(HashTable<label>, patchSize, iter)
+            forAllConstIters(patchSize, iter)
             {
-                label sz = compactZoneID.size();
-                compactZoneID.insert(iter.key(), sz);
+                compactZoneID.insert(iter.key(), compactZoneID.size());
             }
 
-            forAllConstIter(HashTable<label>, zoneSize, iter)
+            forAllConstIters(zoneSize, iter)
             {
-                label sz = compactZoneID.size();
-                //Info<< "For faceZone " << iter.key() << " allocating zoneID "
-                //    << sz << endl;
-                compactZoneID.insert(iter.key(), sz);
+                compactZoneID.insert(iter.key(), compactZoneID.size());
             }
 
 
@@ -273,7 +268,7 @@ int main(int argc, char *argv[])
             // Rework HashTable into labelList just for speed of conversion
             labelList patchToCompactZone(bMesh.size(), -1);
             labelList faceZoneToCompactZone(bMesh.size(), -1);
-            forAllConstIter(HashTable<label>, compactZoneID, iter)
+            forAllConstIters(compactZoneID, iter)
             {
                 label patchi = bMesh.findPatchID(iter.key());
                 if (patchi != -1)
@@ -348,10 +343,10 @@ int main(int argc, char *argv[])
         forAll(gatheredFaces[Pstream::myProcNo()], i)
         {
             inplaceRenumber
-           (
+            (
                 pointToGlobal,
                 gatheredFaces[Pstream::myProcNo()][i]
-           );
+            );
         }
         Pstream::gatherList(gatheredFaces);
 

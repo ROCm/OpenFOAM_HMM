@@ -83,7 +83,7 @@ void Foam::functionObjects::runTimePostPro::surface::setRepresentation
         }
         case rtWireframe:
         {
-            // note: colour is set using general SetColour, not setEdgeColor
+            // note: colour is set using general SetColor, not SetEdgeColor
             actor->GetProperty()->SetRepresentationToWireframe();
             break;
         }
@@ -143,7 +143,7 @@ Foam::functionObjects::runTimePostPro::surface::surface
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<Function1<vector>, word>& colours
+    const HashPtrTable<Function1<vector>>& colours
 )
 :
     geometryBase(parent, dict, colours),
@@ -163,10 +163,7 @@ Foam::functionObjects::runTimePostPro::surface::surface
 
     if (dict.found("surfaceColour"))
     {
-        surfaceColour_.reset
-        (
-            Function1<vector>::New("surfaceColour", dict).ptr()
-        );
+        surfaceColour_.reset(Function1<vector>::New("surfaceColour", dict));
     }
     else
     {
@@ -175,7 +172,7 @@ Foam::functionObjects::runTimePostPro::surface::surface
 
     if (dict.found("edgeColour"))
     {
-        edgeColour_.reset(Function1<vector>::New("edgeColour", dict).ptr());
+        edgeColour_.reset(Function1<vector>::New("edgeColour", dict));
     }
     else
     {
@@ -200,7 +197,7 @@ Foam::functionObjects::runTimePostPro::surface::New
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<Function1<vector>, word>& colours,
+    const HashPtrTable<Function1<vector>>& colours,
     const word& surfaceType
 )
 {

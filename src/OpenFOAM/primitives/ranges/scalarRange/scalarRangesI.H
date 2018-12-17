@@ -31,9 +31,15 @@ inline Foam::scalarRanges::scalarRanges()
 {}
 
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+inline Foam::scalarRanges::scalarRanges(const std::string& str, bool verbose)
+:
+    List<scalarRange>(scalarRanges::parse(str, verbose))
+{}
 
-inline bool Foam::scalarRanges::operator()(const scalar& value) const
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline bool Foam::scalarRanges::match(const scalar& value) const
 {
     for (const scalarRange& range : *this)
     {
@@ -44,6 +50,14 @@ inline bool Foam::scalarRanges::operator()(const scalar& value) const
     }
 
     return false;
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline bool Foam::scalarRanges::operator()(const scalar& value) const
+{
+    return match(value);
 }
 
 

@@ -207,7 +207,9 @@ int main(int argc, char *argv[])
     );
 
     timeSelector::addOptions(true, false);  // constant(true), zero(false)
-    #include "addDictOption.H"
+
+    argList::addOption("dict", "file", "Use alternative topoSetDict");
+
     #include "addRegionOption.H"
     argList::addBoolOption
     (

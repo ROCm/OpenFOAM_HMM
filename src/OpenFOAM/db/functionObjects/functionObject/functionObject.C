@@ -40,6 +40,7 @@ bool Foam::functionObject::postProcess(false);
 
 Foam::word Foam::functionObject::outputPrefix("postProcessing");
 
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 Foam::word Foam::functionObject::scopedName(const word& name) const
@@ -68,10 +69,9 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
 {
     const word functionType(dict.get<word>("type"));
 
-    if (debug)
-    {
-        Info<< "Selecting function " << functionType << endl;
-    }
+    DebugInfo
+        << "Selecting function " << functionType << endl;
+
 
     // Load any additional libraries
     {
@@ -120,12 +120,6 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
 
     return autoPtr<functionObject>(cstrIter()(name, runTime, dict));
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObject::~functionObject()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -177,6 +171,50 @@ void Foam::functionObject::updateMesh(const mapPolyMesh&)
 
 void Foam::functionObject::movePoints(const polyMesh&)
 {}
+
+
+// * * * * * * * * * * * * unavailableFunctionObject * * * * * * * * * * * * //
+
+Foam::functionObject::unavailableFunctionObject::unavailableFunctionObject
+(
+    const word& name
+)
+:
+    functionObject(name)
+{}
+
+
+void Foam::functionObject::unavailableFunctionObject::carp
+(
+    std::string message
+) const
+{
+    FatalError
+        << "####" << nl
+        << "    " << type() << " not available" << nl
+        << "####" << nl;
+
+    if (message.size())
+    {
+        FatalError
+            << message.c_str() << nl;
+    }
+
+    FatalError
+        << exit(FatalError);
+}
+
+
+bool Foam::functionObject::unavailableFunctionObject::execute()
+{
+    return true;
+}
+
+
+bool Foam::functionObject::unavailableFunctionObject::write()
+{
+    return true;
+}
 
 
 // ************************************************************************* //

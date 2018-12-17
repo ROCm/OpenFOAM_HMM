@@ -96,7 +96,7 @@ namespace Foam
         //- OpenFOAM version (name or stringified number) as a std::string
         extern const std::string version;
 
-        //- Test if the patch string appeared to be in use,
+        //- Test if the patch string appears to be in use,
         //- which is when it is defined (non-zero).
         bool patched();
 

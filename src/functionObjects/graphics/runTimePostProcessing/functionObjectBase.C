@@ -79,7 +79,7 @@ Foam::functionObjects::runTimePostPro::functionObjectBase::functionObjectBase
 (
     const stateFunctionObject& state,
     const dictionary& dict,
-    const HashPtrTable<Function1<vector>, word>& colours
+    const HashPtrTable<Function1<vector>>& colours
 )
 :
     fieldVisualisationBase(dict, colours),

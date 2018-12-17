@@ -56,20 +56,9 @@ class functionObjectCloud
     public pointData,
     public functionObjectBase
 {
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        functionObjectCloud(const functionObjectCloud&) = delete;
-
-        //- No copy assignment
-        void operator=(const functionObjectCloud&) = delete;
-
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Name of functionObjectCloud
         word cloudName_;
@@ -82,6 +71,16 @@ protected:
 
         //- Actor
         vtkSmartPointer<vtkActor> actor_;
+
+
+    // Protected Member Functions
+
+        //- No copy construct
+        functionObjectCloud(const functionObjectCloud&) = delete;
+
+        //- No copy assignment
+        void operator=(const functionObjectCloud&) = delete;
+
 
 public:
 
@@ -96,7 +95,7 @@ public:
         (
             const runTimePostProcessing& parent,
             const dictionary& dict,
-            const HashPtrTable<Function1<vector>, word>& colours
+            const HashPtrTable<Function1<vector>>& colours
         );
 
 

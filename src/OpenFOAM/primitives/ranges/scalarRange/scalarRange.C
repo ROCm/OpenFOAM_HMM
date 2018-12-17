@@ -37,6 +37,14 @@ bool Foam::scalarRange::parse(const std::string& str, scalarRange& range)
 
     if (colon == std::string::npos)
     {
+        // No colon
+
+        if (str == "none")
+        {
+            // "none" is an empty (inverse) range
+            return true;
+        }
+
         // "VALUE"
         scalar val;
         if (readScalar(str, val))
@@ -119,11 +127,11 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const scalarRange& range)
             break;
 
         case scalarRange::GE_LE:
-            os << range.min_ << ":" << range.max_;
+            os << range.min_ << ':' << range.max_;
             break;
 
         default:
-            os << "false";
+            os << "none";
             break;
     }
 

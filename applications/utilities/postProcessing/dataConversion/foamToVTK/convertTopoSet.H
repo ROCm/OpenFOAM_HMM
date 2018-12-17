@@ -42,7 +42,7 @@ if (faceSetName.size())
     );
 
     Info<< "    faceSet   : "
-        << outputName.relative(runTime.globalPath()) << nl;
+        << runTime.relativePath(outputName) << nl;
 
     vtk::writeFaceSet
     (
@@ -70,7 +70,7 @@ if (pointSetName.size())
     );
 
     Info<< "    pointSet  : "
-        << outputName.relative(runTime.globalPath()) << nl;
+        << runTime.relativePath(outputName) << nl;
 
     vtk::writePointSet
     (

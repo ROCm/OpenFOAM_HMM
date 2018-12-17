@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,7 @@ Class
     Foam::functionObjects::runTimePostPro::surface
 
 Description
+    Visualisation of surface data
 
 SourceFiles
     surface.C
@@ -37,11 +38,11 @@ SourceFiles
 #include "geometryBase.H"
 #include "Enum.H"
 #include "runTimeSelectionTables.H"
-
 #include "vtkSmartPointer.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Forward declarations
 class vtkActor;
 class vtkRenderer;
 class vtkPolyData;
@@ -75,17 +76,6 @@ public:
         };
 
         static const Enum<representationType> representationTypeNames;
-
-
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        surface(const surface&) = delete;
-
-        //- No copy assignment
-        void operator=(const surface&) = delete;
 
 
 protected:
@@ -126,6 +116,12 @@ protected:
             vtkPolyData* data
         ) const;
 
+        //- No copy construct
+        surface(const surface&) = delete;
+
+        //- No copy assignment
+        void operator=(const surface&) = delete;
+
 
 public:
 
@@ -143,7 +139,7 @@ public:
             (
                 const runTimePostProcessing& parent,
                 const dictionary& dict,
-                const HashPtrTable<Function1<vector>, word>& colours
+                const HashPtrTable<Function1<vector>>& colours
             ),
             (parent, dict, colours)
         );
@@ -156,7 +152,7 @@ public:
         (
             const runTimePostProcessing& parent,
             const dictionary& dict,
-            const HashPtrTable<Function1<vector>, word>& colours
+            const HashPtrTable<Function1<vector>>& colours
         );
 
 
@@ -167,7 +163,7 @@ public:
         (
             const runTimePostProcessing& parent,
             const dictionary& dict,
-            const HashPtrTable<Function1<vector>, word>& colours,
+            const HashPtrTable<Function1<vector>>& colours,
             const word& surfaceName
         );
 

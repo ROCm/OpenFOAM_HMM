@@ -127,7 +127,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class Time;
 class polyMesh;
 class mapPolyMesh;
@@ -144,15 +144,6 @@ class functionObject
         const word name_;
 
 
-    // Private Member Functions
-
-        //- No copy construct
-        functionObject(const functionObject&) = delete;
-
-        //- No copy assignment
-        void operator=(const functionObject&) = delete;
-
-
 protected:
 
     // Protected Member Functions
@@ -162,6 +153,9 @@ protected:
 
 
 public:
+
+    // Forward declarations
+    class unavailableFunctionObject;
 
     //- Runtime type information
     virtual const word& type() const = 0;
@@ -209,13 +203,13 @@ public:
         static autoPtr<functionObject> New
         (
             const word& name,
-            const Time&,
-            const dictionary&
+            const Time& runTime,
+            const dictionary& dict
         );
 
 
     //- Destructor
-    virtual ~functionObject();
+    virtual ~functionObject() = default;
 
 
     // Member Functions
@@ -243,7 +237,7 @@ public:
         virtual bool write() = 0;
 
         //- Called when Time::run() determines that the time-loop exits.
-        //  By default it simply calls execute().
+        //  The base implementation is a no-op.
         virtual bool end();
 
         //- Called at the end of Time::adjustDeltaT() if adjustTime is true
@@ -259,6 +253,37 @@ public:
         //- Update for changes of mesh
         //  The base implementation is a no-op.
         virtual void movePoints(const polyMesh& mesh);
+};
+
+
+/*---------------------------------------------------------------------------*\
+          Class functionObject::unavailableFunctionObject Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Abstract functionObject to report when a real version is unavailable.
+class functionObject::unavailableFunctionObject
+:
+    public functionObject
+{
+protected:
+
+    //- Construct with name
+    unavailableFunctionObject(const word& name);
+
+    //- Report it is unavailable, emitting a FatalError for try/catch
+    //- in the caller
+    void carp(std::string message = "") const;
+
+
+public:
+
+    // Member Functions
+
+        //- No nothing
+        virtual bool execute();
+
+        //- No nothing
+        virtual bool write();
 };
 
 

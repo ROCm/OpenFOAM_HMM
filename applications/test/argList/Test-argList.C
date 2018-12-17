@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,11 +38,13 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noBanner();
-    argList::noParallel();
+    argList::noCheckProcessorDirectories(); // parallel OK, but without checks
+
     // argList::noFunctionObjects();
     argList::addOption("label",  "value", "Test parsing of label");
     argList::addOption("scalar", "value", "Test parsing of scalar");
     argList::addOption("string", "value", "Test string lookup");
+    argList::addOption("relative", "PATH", "Test relativePath");
 
     // These are actually lies (never had -parseLabel, -parseScalar etc),
     // but good for testing...
@@ -70,20 +72,27 @@ int main(int argc, char *argv[])
     argList::addArgument("label");
     argList::noMandatoryArgs();
 
-    argList args(argc, argv);
+    #include "setRootCase.H"
 
-    Info<< "command-line ("
+    Pout<< "command-line ("
         << args.options().size() << " options, "
         << args.args().size() << " args)" << nl
         << "    " << args.commandLine().c_str() << nl << nl;
 
-    Info<< "rootPath:   " << args.rootPath() << nl
+    Pout<< "rootPath:   " << args.rootPath() << nl
         << "globalCase: " << args.globalCaseName() << nl
         << "globalPath: " << args.globalPath() << nl
         << nl;
 
-    Info<<"have: "
-        <<args.count({"label", "scalar"}) << " options" << nl;
+    if (args.found("relative"))
+    {
+        Pout<< "input path: " << args["relative"] << nl
+            << "relative  : " << args.relativePath(args["relative"], true) << nl
+            << nl;
+    }
+
+    Info<< "have: "
+        << args.count({"label", "scalar"}) << " options" << nl;
 
     label ival;
     scalar sval;

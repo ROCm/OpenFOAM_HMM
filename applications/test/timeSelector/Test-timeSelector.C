@@ -27,7 +27,7 @@ Description
 
 #include "argList.H"
 #include "IOstreams.H"
-#include "TimePaths.H"
+#include "Time.H"
 #include "timeSelector.H"
 
 using namespace Foam;
@@ -58,13 +58,31 @@ bool print(const instantList& instants)
 
 int main(int argc, char *argv[])
 {
-    argList::addNote("Test timeSelector");
+    argList::addNote("Test timeSelector and TimePaths");
 
     timeSelector::addOptions(true, true);
     argList::noLibs();
     argList::noFunctionObjects();
 
+    argList::addOption("relative", "PATH", "Test relativePath");
+
     #include "setRootCase.H"
+    #include "createTime.H"
+
+    Pout<< "Time" << nl
+        << "rootPath:   " << runTime.rootPath() << nl
+        << "path:       " << runTime.path() << nl
+        << "globalCase: " << runTime.globalCaseName() << nl
+        << "globalPath: " << runTime.globalPath() << nl
+        << nl;
+
+    if (args.found("relative"))
+    {
+        Pout<< "input path: " << args["relative"] << nl
+            << "relative  : " << runTime.relativePath(args["relative"], true)
+            << nl
+            << nl;
+    }
 
     autoPtr<TimePaths> timePaths;
 

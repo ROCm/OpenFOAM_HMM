@@ -32,6 +32,9 @@ Description
 Note
     This class is still subject to larger changes (2018-11) as it matures.
 
+SeeAlso
+    Foam::scalarRange, Foam::scalarRanges
+
 SourceFiles
     scalarPredicates.C
     scalarPredicatesI.H
@@ -233,7 +236,10 @@ public:
         using List<unary>::List;
 
         //- Construct from an initializer list of (opName opValue) tuples
-        explicit scalars(std::initializer_list<std::pair<word, scalar>> entries);
+        explicit scalars
+        (
+            std::initializer_list<std::pair<word, scalar>> entries
+        );
 
         //- Copy construct from a list of (opName opValue) tuples
         explicit scalars(const UList<Tuple2<word, scalar>>& entries);

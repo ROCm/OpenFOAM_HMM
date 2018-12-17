@@ -380,7 +380,7 @@ bool Foam::functionObjects::vtkWrite::write()
             );
 
             Info<< "    Internal  : "
-                << internalWriter->output().relative(time_.globalPath())
+                << time_.relativePath(internalWriter->output())
                 << endl;
 
             // No sub-block for internal
@@ -432,7 +432,7 @@ bool Foam::functionObjects::vtkWrite::write()
             );
 
             Info<< "    Boundaries: "
-                << writer->output().relative(time_.globalPath()) << nl;
+                << time_.relativePath(writer->output()) << nl;
 
 
             writer->writeTimeValue(timeValue);
@@ -497,7 +497,7 @@ bool Foam::functionObjects::vtkWrite::write()
                 );
 
                 Info<< "    Boundary  : "
-                    << writer->output().relative(time_.globalPath()) << nl;
+                    << time_.relativePath(writer->output()) << nl;
 
                 writer->writeTimeValue(timeValue);
                 writer->writeGeometry();

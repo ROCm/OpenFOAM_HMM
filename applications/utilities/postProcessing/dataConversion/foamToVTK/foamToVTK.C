@@ -650,7 +650,7 @@ int main(int argc, char *argv[])
             if (args.found("overwrite") && isDir(regionDir))
             {
                 Info<< "Removing old directory "
-                    << regionDir.relative(runTime.globalPath())
+                    << runTime.relativePath(regionDir)
                     << nl << endl;
                 rmDir(regionDir);
             }

@@ -113,7 +113,7 @@ Description
         );
 
         Info<< "    Internal  : "
-            << internalWriter->output().relative(runTime.globalPath()) << nl;
+            << runTime.relativePath(internalWriter->output()) << nl;
 
         internalWriter->writeTimeValue(mesh.time().value());
         internalWriter->writeGeometry();
@@ -163,7 +163,7 @@ Description
         );
 
         Info<< "    Boundaries: "
-            << writer->output().relative(runTime.globalPath()) << nl;
+            << runTime.relativePath(writer->output()) << nl;
 
         writer->writeTimeValue(timeValue);
         writer->writeGeometry();
@@ -229,7 +229,7 @@ Description
             );
 
             Info<< "    Boundary  : "
-                << writer->output().relative(runTime.globalPath()) << nl;
+                << runTime.relativePath(writer->output()) << nl;
 
             writer->writeTimeValue(timeValue);
             writer->writeGeometry();

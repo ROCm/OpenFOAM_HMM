@@ -25,6 +25,7 @@ License
 
 #include "dynamicCode.H"
 #include "dynamicCodeContext.H"
+#include "argList.H"
 #include "stringOps.H"
 #include "Fstream.H"
 #include "IOstreams.H"
@@ -64,10 +65,10 @@ void Foam::dynamicCode::checkSecurity
     if (isAdministrator())
     {
         FatalIOErrorInFunction(dict)
-            << "This code should not be executed by someone with administrator"
-            << " rights due to security reasons." << nl
-            << "(it writes a shared library which then gets loaded "
-            << "using dlopen)"
+            << "This code should not be executed by someone"
+            << " with administrator rights for security reasons." << nl
+            << "It generates a shared library which is loaded using dlopen"
+            << nl << endl
             << exit(FatalIOError);
     }
 
@@ -292,8 +293,8 @@ bool Foam::dynamicCode::writeDigest(const std::string& sha1) const
 
 Foam::dynamicCode::dynamicCode(const word& codeName, const word& codeDirName)
 :
-    codeRoot_(stringOps::expand("<case>")/topDirName),
-    libSubDir_(stringOps::expand("platforms/$WM_OPTIONS/lib")),
+    codeRoot_(argList::envGlobalPath()/topDirName),
+    libSubDir_(stringOps::expand("platforms/${WM_OPTIONS}/lib")),
     codeName_(codeName),
     codeDirName_(codeDirName)
 {

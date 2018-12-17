@@ -54,7 +54,7 @@ Foam::fileName Foam::boundaryDataSurfaceWriter::writeTemplate
     const faceList&    faces = surf.faces();
 
     // Dummy time to use as an objectRegistry
-    const fileName caseDir(getEnv("FOAM_CASE"));
+    const fileName caseDir(argList::envGlobalPath());
 
     Time dummyTime
     (

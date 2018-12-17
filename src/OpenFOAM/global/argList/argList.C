@@ -463,6 +463,14 @@ bool Foam::argList::postProcess(int argc, char *argv[])
 }
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::fileName Foam::argList::envGlobalPath()
+{
+    return Foam::getEnv("FOAM_CASE");
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::word Foam::argList::optionCompat(const word& optName)

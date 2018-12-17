@@ -274,8 +274,7 @@ int main(int argc, char *argv[])
     );
     argList::noParallel();
     argList::addArgument("hookTolerance", "The point merge tolerance");
-
-    #include "addDictOption.H"
+    argList::addOption("dict", "file", "Use alternative surfaceHookUpDict");
 
     #include "setRootCase.H"
     #include "createTime.H"

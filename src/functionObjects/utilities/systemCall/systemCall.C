@@ -114,8 +114,16 @@ bool Foam::functionObjects::systemCall::read(const dictionary& dict)
     if (executeCalls_.empty() && endCalls_.empty() && writeCalls_.empty())
     {
         WarningInFunction
-            << "no executeCalls, endCalls or writeCalls defined."
+            << "No executeCalls, endCalls or writeCalls defined."
             << endl;
+    }
+    else if (isAdministrator())
+    {
+        FatalErrorInFunction
+            << "System calls should not be executed by someone"
+            << " with administrator rights for security reasons." << nl
+            << nl << endl
+            << exit(FatalError);
     }
     else if (!dynamicCode::allowSystemOperations)
     {

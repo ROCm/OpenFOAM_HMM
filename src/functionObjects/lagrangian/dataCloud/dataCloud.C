@@ -238,7 +238,7 @@ bool Foam::functionObjects::dataCloud::write()
         if (writeCloud(outputName, cloudName))
         {
             Log << "    cloud  : "
-                << outputName.relative(time_.globalPath()) << endl;
+                << time_.relativePath(outputName) << endl;
         }
     }
 

@@ -133,28 +133,6 @@ Foam::TimePaths::TimePaths
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::fileName Foam::TimePaths::caseSystem() const
-{
-    if (processorCase_)
-    {
-        return ".."/system();
-    }
-
-    return system();
-}
-
-
-Foam::fileName Foam::TimePaths::caseConstant() const
-{
-    if (processorCase_)
-    {
-        return ".."/constant();
-    }
-
-    return constant();
-}
-
-
 Foam::instantList Foam::TimePaths::findTimes
 (
     const fileName& directory,

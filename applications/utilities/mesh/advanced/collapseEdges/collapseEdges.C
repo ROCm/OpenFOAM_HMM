@@ -82,7 +82,8 @@ int main(int argc, char *argv[])
         "Collapse faces that are in the supplied face set"
     );
 
-    #include "addDictOption.H"
+    argList::addOption("dict", "file", "Use alternative collapseDict");
+
     #include "addOverwriteOption.H"
 
     argList::noFunctionObjects();  // Never use function objects

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,6 +70,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Forward declarations
 class vtkActor;
 class vtkRenderer;
 class vtkRenderWindow;
@@ -123,7 +124,7 @@ protected:
     // Protected data
 
         //- Colours
-        HashPtrTable<Function1<vector>, word> colours_;
+        HashPtrTable<Function1<vector>> colours_;
 
 
         // Camera settings
@@ -197,26 +198,27 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Return the colours
-            const HashPtrTable<Function1<vector>, word>& colours() const;
+        //- Return the colours
+        const HashPtrTable<Function1<vector>>& colours() const;
 
-            //- Return the current frame index
-            label frameIndex() const;
+        //- Return the current frame index
+        label frameIndex() const;
 
-            //- Return the current position (in range 0-1)
-            scalar position() const;
+        //- Return the current position (in range 0-1)
+        scalar position() const;
 
-            void read(const dictionary& dict);
 
-            void initialise(vtkRenderer* renderer, const word& outputName);
+        void read(const dictionary& dict);
 
-            //- Main control loop
-            bool loop(vtkRenderer* renderer);
+        void initialise(vtkRenderer* renderer, const word& outputName);
 
-            //- Save image to file
-            void saveImage(vtkRenderWindow* renderWindow) const;
+        //- Main control loop
+        bool loop(vtkRenderer* renderer);
+
+        //- Save image to file
+        void saveImage(vtkRenderWindow* renderWindow) const;
 };
 
 

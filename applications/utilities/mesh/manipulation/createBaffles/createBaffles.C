@@ -441,9 +441,8 @@ int main(int argc, char *argv[])
         "Does not duplicate points."
     );
 
-    #include "addDictOption.H"
+    argList::addOption("dict", "file", "Use alternative createBafflesDict");
     #include "addOverwriteOption.H"
-    #include "addDictOption.H"
     #include "addRegionOption.H"
 
     argList::noFunctionObjects();  // Never use function objects

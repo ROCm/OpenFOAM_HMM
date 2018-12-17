@@ -367,7 +367,7 @@ std::string Foam::fileName::nameLessExt(const std::string& str)
 Foam::fileName Foam::fileName::relative
 (
     const fileName& parent,
-    const bool caseRelative
+    const bool caseTag
 ) const
 {
     const auto top = parent.size();
@@ -383,7 +383,7 @@ Foam::fileName Foam::fileName::relative
      && f.startsWith(parent)
     )
     {
-        if (caseRelative)
+        if (caseTag)
         {
             return "<case>"/f.substr(top+1);
         }
@@ -392,7 +392,7 @@ Foam::fileName Foam::fileName::relative
             return f.substr(top+1);
         }
     }
-    else if (caseRelative && f.size() && !f.isAbsolute())
+    else if (caseTag && f.size() && !f.isAbsolute())
     {
         return "<case>"/f;
     }

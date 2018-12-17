@@ -294,13 +294,13 @@ public:
         //- where possible.
         //
         //  \param parent the parent directory
-        //  \param caseRelative replace the parent with \<case\> for later
+        //  \param caseTag replace the parent with \<case\> for later
         //      use with expand(), or prefix \<case\> if the file name was
         //      not an absolute location
         fileName relative
         (
             const fileName& parent,
-            const bool caseRelative = false
+            const bool caseTag = false
         ) const;
 
         //- Return file name without extension (part before last .)

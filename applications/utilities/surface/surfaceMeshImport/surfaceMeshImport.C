@@ -49,7 +49,7 @@ Usage
         Specify a scaling factor when writing files.
 
       - \par -dict \<dictionary\>
-        Specify an alternative dictionary for constant/coordinateSystems.
+        Use alternative dictionary for constant/coordinateSystems.
 
       - \par -from \<coordinateSystem\>
         Specify a coordinate system when reading files.
@@ -107,7 +107,8 @@ int main(int argc, char *argv[])
         "factor",
         "Geometry scaling factor on output - default is 1"
     );
-    #include "addDictOption.H"
+    argList::addOption("dict", "file", "Use alternative coordinateSystems");
+
     argList::addOption
     (
         "from",

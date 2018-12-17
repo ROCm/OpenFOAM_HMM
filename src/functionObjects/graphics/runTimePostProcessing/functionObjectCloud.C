@@ -35,9 +35,11 @@ License
 #include "vtkSmartPointer.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataMapper.h"
-#include "vtkXMLPolyDataReader.h"
-#include "vtkPolyDataReader.h"
 #include "vtkProperty.h"
+
+// VTK Readers
+#include "vtkPolyDataReader.h"
+#include "vtkXMLPolyDataReader.h"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -60,7 +62,7 @@ Foam::functionObjects::runTimePostPro::functionObjectCloud::functionObjectCloud
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<Function1<vector>, word>& colours
+    const HashPtrTable<Function1<vector>>& colours
 )
 :
     pointData(parent, dict, colours),
@@ -101,7 +103,6 @@ addGeometryToScene
     // containing all fields.
 
     inputFileName_ = getFileName("file", cloudName_);
-    inputFileName_.expand();
 
     if (inputFileName_.empty())
     {
@@ -112,6 +113,7 @@ addGeometryToScene
             << endl;
         return;
     }
+
 
     vtkSmartPointer<vtkPolyData> dataset;
 
@@ -128,8 +130,16 @@ addGeometryToScene
         // Invalid name - ignore.
         // Don't support VTK legacy format at all - it is too wasteful
         // and cumbersome.
+
+        WarningInFunction
+            << "Could not read "<< inputFileName_ << nl
+            << "Only VTK (.vtp) files are supported"
+            << ". Cloud will not be processed"
+            << endl;
+
         inputFileName_.clear();
     }
+
 
     if (dataset)
     {

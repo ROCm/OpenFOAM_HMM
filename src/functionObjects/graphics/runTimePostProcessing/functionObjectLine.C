@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,11 +30,15 @@ License
 
 // VTK includes
 #include "vtkActor.h"
+#include "vtkPolyData.h"
+#include "vtkPolyDataMapper.h"
+#include "vtkProperty.h"
 #include "vtkRenderer.h"
 #include "vtkSmartPointer.h"
-#include "vtkPolyDataMapper.h"
+
+// VTK Readers
 #include "vtkPolyDataReader.h"
-#include "vtkProperty.h"
+#include "vtkXMLPolyDataReader.h"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -51,13 +55,51 @@ namespace runTimePostPro
 }
 
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace
+{
+
+static vtkSmartPointer<vtkPolyData> getPolyDataFile(const Foam::fileName& fName)
+{
+    // Not extremely elegant...
+    vtkSmartPointer<vtkPolyData> dataset;
+
+    if (fName.ext() == "vtk")
+    {
+        auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
+
+        reader->SetFileName(fName.c_str());
+        reader->Update();
+        dataset = reader->GetOutput();
+
+        return dataset;
+    }
+
+    if (fName.ext() == "vtp")
+    {
+        auto reader = vtkSmartPointer<vtkXMLPolyDataReader>::New();
+
+        reader->SetFileName(fName.c_str());
+        reader->Update();
+        dataset = reader->GetOutput();
+
+        return dataset;
+    }
+
+    return dataset;
+}
+
+} // End anonymous namespace
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjects::runTimePostPro::functionObjectLine::functionObjectLine
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<Function1<vector>, word>& colours
+    const HashPtrTable<Function1<vector>>& colours
 )
 :
     pathline(parent, dict, colours),
@@ -99,21 +141,28 @@ addGeometryToScene
         return;
     }
 
-    if (fName.hasExt("vtk"))
+
+    auto polyData = getPolyDataFile(fName);
+
+    if (!polyData || polyData->GetNumberOfPoints() == 0)
     {
-        auto lines = vtkSmartPointer<vtkPolyDataReader>::New();
-        lines->SetFileName(fName.c_str());
-        lines->Update();
-
-        auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-        setField(position, fieldName_, mapper, renderer, lines->GetOutput());
-
-        actor_->SetMapper(mapper);
-
-        addLines(position, actor_, lines->GetOutput());
-
-        renderer->AddActor(actor_);
+        WarningInFunction
+            << "Could not read "<< fName << nl
+            << "Only VTK (.vtp, .vtk) files are supported"
+            << endl;
+        return;
     }
+
+
+    auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+
+    setField(position, fieldName_, mapper, renderer, polyData);
+
+    actor_->SetMapper(mapper);
+
+    addLines(position, actor_, polyData);
+
+    renderer->AddActor(actor_);
 }
 
 
@@ -125,6 +174,7 @@ void Foam::functionObjects::runTimePostPro::functionObjectLine::updateActors
     actor_->GetProperty()->SetLineWidth(2);
     actor_->GetProperty()->SetOpacity(opacity(position));
 }
+
 
 bool Foam::functionObjects::runTimePostPro::functionObjectLine::clear()
 {

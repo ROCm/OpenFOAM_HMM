@@ -107,7 +107,8 @@ int main(int argc, char *argv[])
         "factor",
         "Geometry scaling factor on output - default is 1"
     );
-    #include "addDictOption.H"
+    argList::addOption("dict", "file", "Use alternative coordinateSystems");
+
     argList::addOption
     (
         "from",

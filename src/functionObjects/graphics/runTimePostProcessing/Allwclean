@@ -2,10 +2,12 @@
 cd ${0%/*} || exit 1                            # Run from this directory
 . $WM_PROJECT_DIR/wmake/scripts/wmakeFunctions  # Source wmake functions
 
-# Cleanup library
+# This cleanup handles both cmake runTimePostProcessing and the dummy version
+
+# Cleanup library files with .so version endings
 rm -f $FOAM_LIBBIN/librunTimePostProcessing* 2>/dev/null
 
 # Cleanup generated files - remove entire top-level
-removeObjectDir $PWD
+removeObjectDir "$PWD"
 
 #------------------------------------------------------------------------------

@@ -25,7 +25,7 @@ License
 
 #include "noiseModel.H"
 #include "functionObject.H"
-#include "stringOps.H"
+#include "argList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -143,7 +143,7 @@ Foam::fileName Foam::noiseModel::baseFileDir(const label dataseti) const
 {
     return
     (
-        stringOps::expand("<case>")    // ie, globalPath()
+        argList::envGlobalPath()
       / functionObject::outputPrefix
       / "noise"
       / outputPrefix_

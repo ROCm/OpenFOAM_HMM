@@ -108,86 +108,64 @@ public:
 
     // Member Functions
 
+        //- True if case running with parallel distributed directories
+        //- (ie. not NFS mounted)
+        inline bool distributed() const;
+
         //- Return true if this is a processor case
-        bool processorCase() const
-        {
-            return processorCase_;
-        }
+        inline bool processorCase() const;
 
         //- Return root path
-        const fileName& rootPath() const
-        {
-            return rootPath_;
-        }
+        inline const fileName& rootPath() const;
 
         //- Return global case name
-        const fileName& globalCaseName() const
-        {
-            return globalCaseName_;
-        }
+        inline const fileName& globalCaseName() const;
 
         //- Return case name
-        const fileName& caseName() const
-        {
-            return case_;
-        }
+        inline const fileName& caseName() const;
 
-        //- Return case name
-        fileName& caseName()
-        {
-            return case_;
-        }
+        //- The case name for modification (use with caution)
+        inline fileName& caseName();
 
-        //- Return system name
-        const word& system() const
-        {
-            return system_;
-        }
+        //- Return path for the case
+        inline fileName path() const;
 
-        //- Return the system name for the case, which is
-        //- \c ../system() for parallel runs.
-        fileName caseSystem() const;
+        //- Return global path for the case
+        inline fileName globalPath() const;
+
+        //- Return the input relative to the globalPath by stripping off
+        //- a leading value of the globalPath
+        //
+        //  \param input the directory or filename to make case-relative
+        //  \param caseTag replace globalPath with \<case\> for later
+        //      use with expand(), or prefix \<case\> if the file name was
+        //      not an absolute location
+        inline fileName relativePath
+        (
+            const fileName& input,
+            const bool caseTag = false
+        ) const;
+
 
         //- Return constant name
-        const word& constant() const
-        {
-            return constant_;
-        }
+        inline const word& constant() const;
 
-        //- Is case running with parallel distributed directories
-        //  (i.e. not NFS mounted)
-        bool distributed() const
-        {
-            return distributed_;
-        }
+        //- Return system name
+        inline const word& system() const;
 
         //- Return the constant name for the case, which is
         //- \c ../constant() for parallel runs.
-        fileName caseConstant() const;
+        inline fileName caseConstant() const;
 
-        //- Return path for the case
-        fileName path() const
-        {
-            return rootPath()/caseName();
-        }
-
-        //- Return global path for the case
-        fileName globalPath() const
-        {
-            return rootPath()/globalCaseName();
-        }
-
-        //- Return system path
-        fileName systemPath() const
-        {
-            return path()/system();
-        }
+        //- Return the system name for the case, which is
+        //- \c ../system() for parallel runs.
+        inline fileName caseSystem() const;
 
         //- Return constant path
-        fileName constantPath() const
-        {
-            return path()/constant();
-        }
+        inline fileName constantPath() const;
+
+        //- Return system path
+        inline fileName systemPath() const;
 
 
     // Searching
@@ -220,6 +198,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "TimePathsI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

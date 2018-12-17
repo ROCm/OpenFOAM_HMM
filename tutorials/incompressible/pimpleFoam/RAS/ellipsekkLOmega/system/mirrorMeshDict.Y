@@ -10,50 +10,18 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
-    object      controlDict;
+    object      mirrorMeshDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     pimpleFoam;
+planeType       pointAndNormal;
 
-startFrom       latestTime;
-
-startTime       0;
-
-stopAt          endTime;
-
-endTime         1;
-
-deltaT          0.001;
-
-writeControl    adjustableRunTime;
-
-writeInterval   0.01;
-
-purgeWrite      0;
-
-writeFormat     binary;
-
-writePrecision  6;
-
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable true;
-
-adjustTimeStep  yes;
-
-maxCo           0.2;
-
-
-functions
+pointAndNormalDict
 {
-//     #include "sampling"
-//     #include "runTimePostProcessing"
+    point   (0 0 0);
+    normal  (0 -1 0);
 }
+
+planeTolerance  1e-6;
 
 // ************************************************************************* //

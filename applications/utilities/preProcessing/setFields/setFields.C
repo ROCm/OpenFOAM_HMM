@@ -401,7 +401,8 @@ int main(int argc, char *argv[])
         "Set values on a selected set of cells/patch-faces via a dictionary"
     );
 
-    #include "addDictOption.H"
+    argList::addOption("dict", "file", "Use alternative setFieldsDict");
+
     #include "addRegionOption.H"
     #include "setRootCase.H"
     #include "createTime.H"

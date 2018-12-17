@@ -56,8 +56,7 @@ calcLocalPointOrder() const
 
     if (localPointOrderPtr_)
     {
-        // it is considered an error to attempt to recalculate
-        // if already allocated
+        // An error to recalculate if already allocated
         FatalErrorInFunction
             << "local point order already calculated"
             << abort(FatalError);

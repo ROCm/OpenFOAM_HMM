@@ -25,6 +25,7 @@ License
 
 #include "boundaryDataSurfaceWriter.H"
 #include "makeSurfaceWriterMethods.H"
+#include "argList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -62,7 +63,7 @@ Foam::fileName Foam::boundaryDataSurfaceWriter::write
     const pointField& points = surf.points();
 
     // Dummy time to use as an objectRegistry
-    const fileName caseDir(getEnv("FOAM_CASE"));
+    const fileName caseDir(argList::envGlobalPath());
 
     Time dummyTime
     (

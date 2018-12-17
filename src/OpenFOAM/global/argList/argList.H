@@ -272,6 +272,18 @@ public:
 
     // Member Functions
 
+    // Environment
+
+        //- Global case (directory) from environment variable
+        //
+        //  Returns the contents of the \c FOAM_CASE variable,
+        //  which has previously been set by argList or by Time.
+        //
+        //  This will normally be identical to the value of globalPath(),
+        //  but obtained via the environment.
+        static fileName envGlobalPath();
+
+
     // Low-level
 
         //- Scan for -help, -doc options etc prior to checking the validity
@@ -303,6 +315,19 @@ public:
         //- Return the full path to the global case
         //  \note This is guaranteed to be an absolute path
         inline fileName globalPath() const;
+
+        //- Return the input relative to the globalPath by stripping off
+        //- a leading value of the globalPath
+        //
+        //  \param input the directory or filename to make case-relative
+        //  \param caseTag replace globalPath with \<case\> for later
+        //      use with expand(), or prefix \<case\> if the file name was
+        //      not an absolute location
+        inline fileName relativePath
+        (
+            const fileName& input,
+            const bool caseTag = false
+        ) const;
 
         //- Return distributed flag
         //- (i.e. are rootPaths different on different machines)

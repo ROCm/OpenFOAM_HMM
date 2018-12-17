@@ -152,20 +152,26 @@ inline Foam::scalar Foam::scalarRange::value() const
 }
 
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-inline bool Foam::scalarRange::operator()(const scalar& value) const
+inline bool Foam::scalarRange::match(const scalar& value) const
 {
     switch (type_)
     {
         case EQ:    return equal(value, min_);
-        case GE:    return value >= min_;
-        case GT:    return value > min_;
-        case LE:    return value <= max_;
-        case LT:    return value < max_;
-        case GE_LE: return value >= min_ && value <= max_;
+        case GE:    return (value >= min_);
+        case GT:    return (value > min_);
+        case LE:    return (value <= max_);
+        case LT:    return (value < max_);
+        case GE_LE: return (value >= min_ && value <= max_);
         default:    return false;
     }
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline bool Foam::scalarRange::operator()(const scalar& value) const
+{
+    return match(value);
 }
 
 

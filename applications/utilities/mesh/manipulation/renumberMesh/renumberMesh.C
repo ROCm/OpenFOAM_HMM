@@ -617,7 +617,8 @@ int main(int argc, char *argv[])
     #include "addRegionOption.H"
     #include "addOverwriteOption.H"
     #include "addTimeOptions.H"
-    #include "addDictOption.H"
+
+    argList::addOption("dict", "file", "Use alternative renumberMeshDict");
 
     argList::addBoolOption
     (

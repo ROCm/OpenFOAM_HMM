@@ -51,8 +51,7 @@ calcPointEdges() const
 
     if (pointEdgesPtr_)
     {
-        // it is considered an error to attempt to recalculate
-        // if already allocated
+        // An error to recalculate if already allocated
         FatalErrorInFunction
             << "pointEdges already calculated"
             << abort(FatalError);
@@ -89,8 +88,7 @@ calcPointFaces() const
 
     if (pointFacesPtr_)
     {
-        // it is considered an error to attempt to recalculate
-        // if already allocated
+        // An error to recalculate if already allocated
         FatalErrorInFunction
             << "pointFaces already calculated"
             << abort(FatalError);
