@@ -51,9 +51,6 @@ class mirrorFvMesh
 {
     // Private data
 
-        //- Mirror dictionary
-        IOdictionary mirrorMeshDict_;
-
         //- Mirrored mesh
         autoPtr<fvMesh> mirrorMeshPtr_;
 
@@ -77,8 +74,11 @@ public:
 
     // Constructors
 
-        //- Construct from IOobject
-        mirrorFvMesh(const IOobject& io);
+        //- Construct from IOobject, using system mirrorMeshDict
+        explicit mirrorFvMesh(const IOobject& io);
+
+        //- Construct from IOobject and specified mirrorMeshDict
+        mirrorFvMesh(const IOobject& io, const IOdictionary& mirrorDict);
 
 
     //- Destructor

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      mirrorMeshDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -20,10 +19,9 @@ planeType       pointAndNormal;
 pointAndNormalDict
 {
     point   (0 0 0);
-    normal  (0 -1 0);
+    normal  (0 0 -1);
 }
 
-planeTolerance  1e-06;
-
+planeTolerance  1e-6;
 
 // ************************************************************************* //

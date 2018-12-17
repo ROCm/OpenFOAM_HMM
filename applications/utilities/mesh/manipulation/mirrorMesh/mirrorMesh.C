@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,11 +49,24 @@ int main(int argc, char *argv[])
         "Mirrors a mesh around a given plane."
     );
 
+    #include "addDictOption.H"
+    // Adjust the help text
+    argList::addUsage("dict", "Specify alternative mirrorMeshDict");
+    argList::setAdvanced("decomposeParDict");
+
     #include "addOverwriteOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
 
     const bool overwrite = args.found("overwrite");
+
+    const word dictName("mirrorMeshDict");
+
+    #include "setSystemRunTimeDictionaryIO.H"
+
+    Info<< "Reading " << dictName << "\n" << endl;
+
+    const IOdictionary mirrorDict(dictIO);
 
     mirrorFvMesh mesh
     (
@@ -62,7 +75,8 @@ int main(int argc, char *argv[])
             mirrorFvMesh::defaultRegion,
             runTime.constant(),
             runTime
-        )
+        ),
+        mirrorDict
     );
 
     hexRef8Data refData

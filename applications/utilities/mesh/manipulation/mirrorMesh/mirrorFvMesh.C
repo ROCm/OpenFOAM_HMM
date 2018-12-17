@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,24 +31,37 @@ License
 
 Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
 :
-    fvMesh(io),
-    mirrorMeshDict_
+    mirrorFvMesh
     (
-        IOobject
+        io,
+        IOdictionary
         (
-            "mirrorMeshDict",
-            time().system(),
-            *this,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
+            IOobject
+            (
+                "mirrorMeshDict",
+                io.time().system(),
+                io.time(),
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE
+            )
         )
     )
+{}
+
+
+Foam::mirrorFvMesh::mirrorFvMesh
+(
+    const IOobject& io,
+    const IOdictionary& mirrorDict
+)
+:
+    fvMesh(io)
 {
-    plane mirrorPlane(mirrorMeshDict_);
+    plane mirrorPlane(mirrorDict);
 
     const scalar planeTolerance
     (
-        mirrorMeshDict_.get<scalar>("planeTolerance")
+        mirrorDict.get<scalar>("planeTolerance")
     );
 
     const pointField& oldPoints = points();
@@ -56,6 +69,9 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     const cellList& oldCells = cells();
     const label nOldInternalFaces = nInternalFaces();
     const polyPatchList& oldPatches = boundaryMesh();
+
+    Info<< "Mirroring mesh at origin:" << mirrorPlane.origin()
+        << " normal:" << mirrorPlane.normal() << nl;
 
     // Mirror the points
     Info<< "Mirroring points. Old points: " << oldPoints.size();
@@ -66,15 +82,15 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     labelList mirrorPointLookup(oldPoints.size(), -1);
 
     // Grab the old points
-    forAll(oldPoints, pointi)
+    for (const point& pt : oldPoints)
     {
-        newPoints[nNewPoints] = oldPoints[pointi];
-        nNewPoints++;
+        newPoints[nNewPoints] = pt;
+        ++nNewPoints;
     }
 
     forAll(oldPoints, pointi)
     {
-        scalar alpha =
+        const scalar alpha =
             mirrorPlane.normalIntersect
             (
                 oldPoints[pointi],
@@ -119,7 +135,6 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     {
         pointMap[mirrorPointLookup[oldPointi]] = oldPointi;
     }
-
 
 
     Info<< "Mirroring faces. Old faces: " << oldFaces.size();
@@ -325,7 +340,7 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     Info<< "Mirroring patches. Old patches: " << boundary().size()
         << " New patches: " << boundary().size() << endl;
 
-    Info<< "Mirroring cells.  Old cells: " << oldCells.size()
+    Info<< "Mirroring cells. Old cells: " << oldCells.size()
         << " New cells: " << 2*oldCells.size() << endl;
 
     cellList newCells(2*oldCells.size());
