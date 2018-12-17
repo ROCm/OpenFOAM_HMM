@@ -73,11 +73,11 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
                 deltap*pow4(constant::mathematical::pi)*sqr(dm_*rpm_)/1800.0
             );
 
-            this->jump_ = max(pdFan, scalar(0));
+            this->jump_ = pdFan;
         }
         else
         {
-            this->jump_ = max(this->jumpTable_->value(Un), scalar(0));
+            this->jump_ = this->jumpTable_->value(Un);
         }
     }
 }
