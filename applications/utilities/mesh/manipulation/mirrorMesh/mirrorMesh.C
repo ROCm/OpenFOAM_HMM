@@ -49,9 +49,7 @@ int main(int argc, char *argv[])
         "Mirrors a mesh around a given plane."
     );
 
-    #include "addDictOption.H"
-    // Adjust the help text
-    argList::addUsage("dict", "Specify alternative mirrorMeshDict");
+    argList::addOption("dict", "file", "Use alternative mirrorMeshDict");
     argList::setAdvanced("decomposeParDict");
 
     #include "addOverwriteOption.H"

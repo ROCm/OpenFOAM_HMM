@@ -109,7 +109,8 @@ int main(int argc, char *argv[])
 
     argList::noCheckProcessorDirectories();
 
-    #include "addDictOption.H"
+    argList::addOption("dict", "file", "Use alternative noiseDict");
+
     #include "setRootCase.H"
     #include "createTime.H"
 

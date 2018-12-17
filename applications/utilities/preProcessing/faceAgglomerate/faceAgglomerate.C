@@ -59,8 +59,9 @@ int main(int argc, char *argv[])
         " algorithm. Writes a map of fine to coarse grid."
     );
 
+    argList::addOption("dict", "file", "Use alternative viewFactorsDict");
     #include "addRegionOption.H"
-    #include "addDictOption.H"
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"

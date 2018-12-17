@@ -115,7 +115,8 @@ int main(int argc, char *argv[])
 
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
-    #include "addDictOption.H"
+
+    argList::addOption("dict", "file", "Use alternative stitchMeshDict");
 
     argList::addBoolOption
     (

@@ -342,7 +342,7 @@ int main(int argc, char *argv[])
         "For example, moving points, splitting/collapsing edges etc."
     );
     #include "addOverwriteOption.H"
-    #include "addDictOption.H"
+    argList::addOption("dict", "file", "Use alternative modifyMeshDict");
 
     argList::noFunctionObjects();  // Never use function objects
 

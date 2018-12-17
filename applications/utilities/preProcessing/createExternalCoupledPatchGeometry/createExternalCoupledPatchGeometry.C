@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     (
         "commsDir",
         "dir",
-        "Specify alternate communications directory (default is 'comms')"
+        "Specify communications directory (default is 'comms')"
     );
     #include "setRootCase.H"
     #include "createTime.H"

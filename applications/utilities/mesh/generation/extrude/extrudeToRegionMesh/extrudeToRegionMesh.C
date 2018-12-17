@@ -1469,7 +1469,12 @@ int main(int argc, char *argv[])
 
     #include "addRegionOption.H"
     #include "addOverwriteOption.H"
-    #include "addDictOption.H"
+
+    argList::addOption
+    (
+        "dict", "file", "Use alternative extrudeToRegionMeshDict"
+    );
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"
