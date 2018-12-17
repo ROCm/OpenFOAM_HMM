@@ -25,6 +25,12 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+inline Foam::scalarRanges::scalarRanges()
+:
+    List<scalarRange>()
+{}
+
+
 inline Foam::scalarRanges::scalarRanges(const std::string& str, bool verbose)
 :
     List<scalarRange>(scalarRanges::parse(str, verbose))

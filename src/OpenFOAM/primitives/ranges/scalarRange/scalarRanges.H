@@ -61,6 +61,9 @@ public:
         //- Inherit constructors from List of scalarRange
         using List<scalarRange>::List;
 
+        //- Construct null
+        inline scalarRanges();
+
         //- Construct by parsing string for scalar ranges
         //  The individual items are space, comma or semicolon delimited.
         //  Optionally report when any range failed to parse
