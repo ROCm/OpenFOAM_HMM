@@ -52,6 +52,7 @@ maxCo           0.2;
 functions
 {
     #include "cuttingPlane"
+    #include "vtkWrite"
 }
 
 // ************************************************************************* //
