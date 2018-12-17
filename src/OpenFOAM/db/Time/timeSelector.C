@@ -142,7 +142,7 @@ void Foam::timeSelector::addOptions
     (
         "time",
         "ranges",
-        "Comma-separated time ranges - eg, ':10,20,40:70,1000:'"
+        "List of ranges. Eg, ':10,20 40:70 1000:', 'none', etc"
     );
 }
 

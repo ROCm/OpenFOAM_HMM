@@ -20,7 +20,7 @@ runApplication topoSet
 runApplication createPatch -overwrite
 
 runApplication surfaceMeshTriangulate \
-    -patches hole ppGeometry.vtp -constant -time ''
+    -patches hole ppGeometry.vtp -constant -time none
 
 echo "End"
 
