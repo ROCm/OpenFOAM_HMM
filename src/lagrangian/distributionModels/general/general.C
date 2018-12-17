@@ -151,6 +151,7 @@ Foam::distributionModels::general::general(const general& p)
 :
     distributionModel(p),
     xy_(p.xy_),
+    meanValue_(p.meanValue_),
     integral_(p.integral_)
 {}
 

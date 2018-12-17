@@ -183,48 +183,39 @@ bool Foam::functionObjects::wallShearStress::execute()
     volVectorField& wallShearStress =
         mesh_.lookupObjectRef<volVectorField>(type());
 
-    bool ok = false;
-
-    // compressible
-    if (!ok)
+    // Compressible
     {
         typedef compressible::turbulenceModel turbType;
 
         const turbType* modelPtr =
             findObject<turbType>(turbulenceModel::propertiesName);
 
-        ok = modelPtr;
-
-        if (ok)
+        if (modelPtr)
         {
             calcShearStress(modelPtr->devRhoReff(), wallShearStress);
+            return true;
         }
     }
 
-    // incompressible
-    if (!ok)
+    // Incompressible
     {
         typedef incompressible::turbulenceModel turbType;
 
         const turbType* modelPtr =
             findObject<turbType>(turbulenceModel::propertiesName);
 
-        ok = modelPtr;
-
-        if (ok)
+        if (modelPtr)
         {
             calcShearStress(modelPtr->devReff(), wallShearStress);
+            return true;
         }
     }
 
-    if (!ok)
-    {
-        FatalErrorInFunction
-            << "Unable to find turbulence model in the "
-            << "database" << exit(FatalError);
-    }
+    FatalErrorInFunction
+        << "Unable to find turbulence model in the "
+        << "database" << exit(FatalError);
 
-    return ok;
+    return false;
 }
 
 

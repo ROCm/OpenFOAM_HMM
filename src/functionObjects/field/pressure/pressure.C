@@ -228,13 +228,6 @@ Foam::functionObjects::pressure::pressure
     rhoInfInitialised_(false)
 {
     read(dict);
-
-    dimensionSet pDims(dimPressure);
-
-    if (calcCoeff_)
-    {
-        pDims /= dimPressure;
-    }
 }
 
 

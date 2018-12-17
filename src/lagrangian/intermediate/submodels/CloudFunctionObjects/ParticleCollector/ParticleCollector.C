@@ -626,6 +626,7 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     nSector_(pc.nSector_),
     radius_(pc.radius_),
     coordSys_(pc.coordSys_),
+    area_(pc.area_),
     normal_(pc.normal_),
     negateParcelsOppositeNormal_(pc.negateParcelsOppositeNormal_),
     surfaceFormat_(pc.surfaceFormat_),

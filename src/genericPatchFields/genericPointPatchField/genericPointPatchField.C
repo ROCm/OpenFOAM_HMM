@@ -308,12 +308,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
     actualTypeName_(ptf.actualTypeName_),
     dict_(ptf.dict_)
 {
-    forAllConstIter
-    (
-        HashPtrTable<scalarField>,
-        ptf.scalarFields_,
-        iter
-    )
+    forAllConstIters(ptf.scalarFields_, iter)
     {
         scalarFields_.insert
         (
@@ -322,12 +317,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
         );
     }
 
-    forAllConstIter
-    (
-        HashPtrTable<vectorField>,
-        ptf.vectorFields_,
-        iter
-    )
+    forAllConstIters(ptf.vectorFields_, iter)
     {
         vectorFields_.insert
         (
@@ -336,12 +326,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
         );
     }
 
-    forAllConstIter
-    (
-        HashPtrTable<sphericalTensorField>,
-        ptf.sphericalTensorFields_,
-        iter
-    )
+    forAllConstIters(ptf.sphericalTensorFields_, iter)
     {
         sphericalTensorFields_.insert
         (
@@ -350,12 +335,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
         );
     }
 
-    forAllConstIter
-    (
-        HashPtrTable<symmTensorField>,
-        ptf.symmTensorFields_,
-        iter
-    )
+    forAllConstIters(ptf.symmTensorFields_, iter)
     {
         symmTensorFields_.insert
         (
@@ -364,12 +344,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
         );
     }
 
-    forAllConstIter
-    (
-        HashPtrTable<tensorField>,
-        ptf.tensorFields_,
-        iter
-    )
+    forAllConstIters(ptf.tensorFields_, iter)
     {
         tensorFields_.insert
         (
@@ -406,52 +381,27 @@ void Foam::genericPointPatchField<Type>::autoMap
     const pointPatchFieldMapper& m
 )
 {
-    forAllIter
-    (
-        HashPtrTable<scalarField>,
-        scalarFields_,
-        iter
-    )
+    forAllIters(scalarFields_, iter)
     {
         iter()->autoMap(m);
     }
 
-    forAllIter
-    (
-        HashPtrTable<vectorField>,
-        vectorFields_,
-        iter
-    )
+    forAllIters(vectorFields_, iter)
     {
         iter()->autoMap(m);
     }
 
-    forAllIter
-    (
-        HashPtrTable<sphericalTensorField>,
-        sphericalTensorFields_,
-        iter
-    )
+    forAllIters(sphericalTensorFields_, iter)
     {
         iter()->autoMap(m);
     }
 
-    forAllIter
-    (
-        HashPtrTable<symmTensorField>,
-        symmTensorFields_,
-        iter
-    )
+    forAllIters(symmTensorFields_, iter)
     {
         iter()->autoMap(m);
     }
 
-    forAllIter
-    (
-        HashPtrTable<tensorField>,
-        tensorFields_,
-        iter
-    )
+    forAllIters(tensorFields_, iter)
     {
         iter()->autoMap(m);
     }
@@ -468,76 +418,51 @@ void Foam::genericPointPatchField<Type>::rmap
     const genericPointPatchField<Type>& dptf =
         refCast<const genericPointPatchField<Type>>(ptf);
 
-    forAllIter
-    (
-        HashPtrTable<scalarField>,
-        scalarFields_,
-        iter
-    )
+    forAllIters(scalarFields_, iter)
     {
         HashPtrTable<scalarField>::const_iterator dptfIter =
             dptf.scalarFields_.find(iter.key());
 
-        if (dptfIter != scalarFields_.end())
+        if (dptfIter.found())
         {
             iter()->rmap(*dptfIter(), addr);
         }
     }
 
-    forAllIter
-    (
-        HashPtrTable<vectorField>,
-        vectorFields_,
-        iter
-    )
+    forAllIters(vectorFields_, iter)
     {
         HashPtrTable<vectorField>::const_iterator dptfIter =
             dptf.vectorFields_.find(iter.key());
 
-        if (dptfIter != vectorFields_.end())
+        if (dptfIter.found())
         {
             iter()->rmap(*dptfIter(), addr);
         }
     }
 
-    forAllIter
-    (
-        HashPtrTable<sphericalTensorField>,
-        sphericalTensorFields_,
-        iter
-    )
+    forAllIters(sphericalTensorFields_, iter)
     {
         HashPtrTable<sphericalTensorField>::const_iterator dptfIter =
             dptf.sphericalTensorFields_.find(iter.key());
 
-        if (dptfIter != sphericalTensorFields_.end())
+        if (dptfIter.found())
         {
             iter()->rmap(*dptfIter(), addr);
         }
     }
 
-    forAllIter
-    (
-        HashPtrTable<symmTensorField>,
-        symmTensorFields_,
-        iter
-    )
+    forAllIters(symmTensorFields_, iter)
     {
         HashPtrTable<symmTensorField>::const_iterator dptfIter =
             dptf.symmTensorFields_.find(iter.key());
 
-        if (dptfIter != symmTensorFields_.end())
+        if (dptfIter.found())
         {
             iter()->rmap(*dptfIter(), addr);
         }
     }
 
-    forAllIter
-    (
-        HashPtrTable<tensorField>,
-        tensorFields_,
-        iter
-    )
+    forAllIters(tensorFields_, iter)
     {
         HashPtrTable<tensorField>::const_iterator dptfIter =
             dptf.tensorFields_.find(iter.key());
@@ -578,28 +503,23 @@ void Foam::genericPointPatchField<Type>::write(Ostream& os) const
             {
                 if (scalarFields_.found(key))
                 {
-                    scalarFields_.find(key)()
-                        ->writeEntry(key, os);
+                    scalarFields_.find(key)()->writeEntry(key, os);
                 }
                 else if (vectorFields_.found(key))
                 {
-                    vectorFields_.find(key)()
-                        ->writeEntry(key, os);
+                    vectorFields_.find(key)()->writeEntry(key, os);
                 }
                 else if (sphericalTensorFields_.found(key))
                 {
-                    sphericalTensorFields_.find(key)()
-                        ->writeEntry(key, os);
+                    sphericalTensorFields_.find(key)()->writeEntry(key, os);
                 }
                 else if (symmTensorFields_.found(key))
                 {
-                    symmTensorFields_.find(key)()
-                        ->writeEntry(key, os);
+                    symmTensorFields_.find(key)()->writeEntry(key, os);
                 }
                 else if (tensorFields_.found(key))
                 {
-                    tensorFields_.find(key)()
-                        ->writeEntry(key, os);
+                    tensorFields_.find(key)()->writeEntry(key, os);
                 }
             }
             else
