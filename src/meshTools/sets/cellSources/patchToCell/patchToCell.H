@@ -30,8 +30,8 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                           | Required | Default
-        patches     | The face zone names or regexs         | possibly |
-        patch       | The face zone name or regex           | possibly |
+        patches     | The patch names or regexs             | possibly |
+        patch       | The patch name or regex               | possibly |
     \endtable
 
 Note
