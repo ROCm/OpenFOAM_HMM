@@ -1,5 +1,7 @@
 AMIWeights/AMIWeights.C
 
+columnAverage/columnAverage.C
+
 fieldAverage/fieldAverage.C
 fieldAverage/fieldAverageItem/fieldAverageItem.C
 fieldAverage/fieldAverageItem/fieldAverageItemIO.C
