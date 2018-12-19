@@ -60,7 +60,7 @@ wmRefresh()
 {
     local projectDir="$WM_PROJECT_DIR"
     local foamSettings="$FOAM_SETTINGS"
-    wmUnset
+    . "$projectDir/etc/config.sh/unset"  2>/dev/null
     . "$projectDir/etc/bashrc" "$foamSettings"
 }
 
@@ -70,20 +70,19 @@ wmRefresh()
 unset -f foamVersion 2>/dev/null
 foamVersion()
 {
-    if [ "$#" -gt 0 ]
+    if [ "$#" -gt 0 ] && [ -d "$WM_PROJECT_DIR" ]
     then
-        local dir="${WM_PROJECT_DIR%/*}"    # Parent directory
+        local prefixDir="${WM_PROJECT_DIR%/*}"  # Parent directory
         local ver="$1"
         shift
 
-        if [ -f "$dir/OpenFOAM-$ver/etc/bashrc" ]
+        if [ -f "$prefixDir/OpenFOAM-$ver/etc/bashrc" ]
         then
-            wmUnset
-            . "$dir/OpenFOAM-$ver/etc/bashrc"
-            foam
-            echo "Changed to OpenFOAM-$WM_PROJECT_VERSION" 1>&2
+            . "$WM_PROJECT_DIR/etc/config.sh/unset"   2>/dev/null
+            . "$prefixDir/OpenFOAM-$ver/etc/bashrc"
+            echo "Using OpenFOAM-$WM_PROJECT_VERSION" 1>&2
         else
-            echo "No OpenFOAM-$ver available in $dir" 1>&2
+            echo "No OpenFOAM-$ver available in $prefixDir" 1>&2
             echo "Using OpenFOAM-$WM_PROJECT_VERSION" 1>&2
             return 1
         fi

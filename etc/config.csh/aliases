@@ -60,10 +60,11 @@ alias uutil 'cd $WM_PROJECT_USER_DIR/applications/utilities'
 alias wmRefresh 'set projectDir=$WM_PROJECT_DIR; set foamSettings=$FOAM_SETTINGS; wmUnset; source $projectDir/etc/cshrc $foamSettings'
 
 
-# Change OpenFOAM version
-# ~~~~~~~~~~~~~~~~~~~~~~~
+# Query the current OpenFOAM version
+# or change to another version (if installed in a parallel directory)
+# - can be fragile
 alias foamVersion \
-    'if ( "\!*" != "" ) source ${WM_PROJECT_DIR:h}/OpenFOAM-\!*/etc/cshrc; foam; echo OpenFOAM-$WM_PROJECT_VERSION'
+    'if ( "\!*" != "" ) source ${WM_PROJECT_DIR:h}/OpenFOAM-\!*/etc/cshrc; echo OpenFOAM-$WM_PROJECT_VERSION'
 
 
 # Change ParaView version
