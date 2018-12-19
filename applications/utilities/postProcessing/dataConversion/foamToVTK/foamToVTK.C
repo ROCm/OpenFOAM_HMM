@@ -171,7 +171,7 @@ labelList getSelectedPatches
         {
             continue;
         }
-        else if (Pstream::parRun() && isType<processorPolyPatch>(pp))
+        else if (Pstream::parRun() && bool(isA<processorPolyPatch>(pp)))
         {
             break; // No processor patches for parallel output
         }

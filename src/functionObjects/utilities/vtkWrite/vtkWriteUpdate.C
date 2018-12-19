@@ -140,7 +140,7 @@ Foam::labelList Foam::functionObjects::vtkWrite::getSelectedPatches
         {
             continue;
         }
-        else if (isType<processorPolyPatch>(pp))
+        else if (isA<processorPolyPatch>(pp))
         {
             break; // No processor patches
         }
