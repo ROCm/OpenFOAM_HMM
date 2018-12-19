@@ -380,26 +380,33 @@ int main(int argc, char *argv[])
 
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
-    argList::addArgument("setOrZoneName");
+    argList::addArgument
+    (
+        "cell-selection",
+        "The cellSet name, but with the -zone option this is interpreted"
+        " to be a cellZone selection by name(s) or regex.\n"
+        "Eg 'mixer' or '( mixer \"moving.*\" )'"
+    );
+
     argList::addOption
     (
         "patch",
         "name",
-        "Add exposed internal faces to specified patch "
-        "instead of \"oldInternalFaces\""
+        "Add exposed internal faces to specified patch"
+        " instead of \"oldInternalFaces\""
     );
     argList::addOption
     (
         "patches",
         "wordRes",
-        "Add exposed internal faces to closest of specified patches "
-        "instead of \"oldInternalFaces\""
+        "Add exposed internal faces to closest of specified patches"
+        " instead of \"oldInternalFaces\""
     );
     argList::addBoolOption
     (
         "zone",
-        "Subset with cellZone(s) instead of cellSet. "
-        "The command argument may be a list of words or regexs"
+        "Subset with cellZone(s) instead of cellSet."
+        " The command argument may be a list of words or regexs"
     );
     argList::addOption
     (
