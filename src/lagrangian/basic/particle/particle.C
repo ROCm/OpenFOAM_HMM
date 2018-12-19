@@ -478,7 +478,10 @@ void Foam::particle::locate
         static const label maxNWarnings = 100;
         if (nWarnings < maxNWarnings)
         {
-            WarningInFunction << boundaryMsg << endl;
+            WarningInFunction << boundaryMsg.c_str()
+                << " when tracking from centre " << mesh_.cellCentres()[celli_]
+                << " of cell " << celli_ << " to position " << position
+                << endl;
             ++nWarnings;
         }
         if (nWarnings == maxNWarnings)
@@ -538,7 +541,7 @@ Foam::particle::particle
         nullptr,
         celli,
         false,
-        "Particle initialised with a location outside of the mesh."
+        "Particle initialised with a location outside of the mesh"
     );
 }
 
@@ -571,7 +574,7 @@ Foam::particle::particle
             nullptr,
             celli,
             false,
-            "Particle initialised with a location outside of the mesh."
+            "Particle initialised with a location outside of the mesh"
         );
     }
 }
@@ -1099,7 +1102,7 @@ void Foam::particle::autoMap
         nullptr,
         mapper.reverseCellMap()[celli_],
         true,
-        "Particle mapped to a location outside of the mesh."
+        "Particle mapped to a location outside of the mesh"
     );
 }
 
@@ -1112,7 +1115,7 @@ void Foam::particle::relocate(const point& position)
         nullptr,
         celli_,
         true,
-        "Particle mapped to a location outside of the mesh."
+        "Particle mapped to a location outside of the mesh"
     );
 }
 
